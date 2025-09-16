@@ -29,6 +29,69 @@ p {
   font-size: 1.2rem;
 }
 
+/* --- Landing Page Layout --- */
+.landing {
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-size: cover;
+  background-position: center;
+  text-align: center;
+}
+
+.brand-logo {
+  max-width: 250px;
+  margin-bottom: 2rem;
+}
+
+/* Buttons shared */
+.buttons {
+  display: flex;
+  gap: 1.5rem;
+}
+.btn {
+  padding: 0.75rem 1.5rem;
+  text-decoration: none;
+  font-weight: bold;
+  transition: 0.3s;
+}
+.main-btn {
+  transform: scale(1.1);
+}
+
+/* --- Fleur de Vie --- */
+.fleurdevie .landing {
+  background-image: url('../FleurDeVie/bg.jpg');
+}
+.fleurdevie .btn {
+  background: #c97a8d;
+  color: white;
+  border-radius: 25px;
+}
+.fleurdevie .btn:hover {
+  background: #a85c70;
+}
+
+/* --- Sérac --- */
+.serac .landing {
+  background-image: url('../Serac/bg.jpg');
+}
+.serac .btn {
+  background: transparent;
+  color: white;
+  border: 2px solid white;
+  border-radius: 6px;
+}
+.serac .btn:hover {
+  background: white;
+  color: black;
+}
+
+
+
 .buttons .btn {
   display: inline-block;
   padding: 0.75rem 1.5rem;
