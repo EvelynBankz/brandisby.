@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Fleur De Vie — Brandisby</title>
+  <link rel="stylesheet" href="../styles/style.css">
+  <style>
+    :root{ --brand: #112e1f; --accent1:#F5E6CC; --accent2:#FFD6BA; --accent3:#C9E4FF }
+    .brand-hero h1{ color:var(--brand) }
+    .brand-card img{ border:4px solid rgba(17,46,31,0.06) }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="brand"><a href="/">Brandisby</a></div>
+      <nav class="main-nav" id="mainNav">
+        <a href="/">Home</a>
+        <a href="/FleurDeVie/">Store</a>
+        <a href="/Serac/">Serac</a>
+      </nav>
+      <button id="navToggle" class="nav-toggle" aria-label="Toggle menu">☰</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero brand-hero">
+      <div class="container hero-inner">
+        <h1>Fleur De Vie</h1>
+        <p class="sub">Soft, feminine, timeless — shop the Fleur De Vie collection.</p>
+      </div>
+    </section>
+
+    <section class="container">
+      <h2>Featured Products</h2>
+      <div class="product-grid" id="fleurGrid" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1rem; margin-top:1rem;">
+        <!-- Sample product cards (static for now) -->
+        <article class="product-card" style="padding:1rem; border:1px solid #eee; border-radius:8px;">
+          <img src="../assets/product-sample-1.jpg" alt="Product" style="width:100%; height:160px; object-fit:cover; border-radius:6px; margin-bottom:0.5rem;">
+          <strong>Fleur Tee — Blush</strong>
+          <p>N6,500</p>
+          <a class="btn btn-primary" href="#">View</a>
+        </article>
+        <article class="product-card" style="padding:1rem; border:1px solid #eee; border-radius:8px;">
+          <img src="../assets/product-sample-2.jpg" alt="Product" style="width:100%; height:160px; object-fit:cover; border-radius:6px; margin-bottom:0.5rem;">
+          <strong>Bloom Hoodie — Cream</strong>
+          <p>N9,800</p>
+          <a class="btn btn-primary" href="#">View</a>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <script src="../scripts/script.js"></script>
+</body>
+</html>
