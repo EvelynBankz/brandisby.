@@ -1,139 +1,117 @@
-html {
-  scroll-behavior: smooth;
-}
+html { scroll-behavior: smooth; }
 
-/* Brandisby Colors */
 :root {
   --brown: #5a3c30;
   --dark: #1b1513;
   --white: #ffffff;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
   font-family: Arial, sans-serif;
-  background-color: var(--white);
-  color: var(--dark);
   text-align: center;
-  padding: 2rem;
+  color: var(--white);
+  margin: 0;
+  padding: 0;
 }
 
-h1 {
-  color: var(--brown);
-  margin-bottom: 1rem;
+/* Header */
+.brand-header {
+  position: absolute;
+  top: 20px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2rem;
+  z-index: 2;
 }
 
-p {
-  margin-bottom: 2rem;
+.brand-header .brand-logo {
+  max-width: 180px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+}
+
+.brand-header .socials a {
+  color: white;
+  margin-left: 1rem;
   font-size: 1.2rem;
+  transition: 0.3s;
 }
 
-/* --- Landing Page Layout --- */
+.brand-header .socials a:hover {
+  color: #c97a8d; /* FleurDeVie accent; change for Serac if needed */
+}
+
+/* Landing page */
 .landing {
   height: 100vh;
-  width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
   position: relative;
+  z-index: 1;
   overflow: hidden;
 }
 
-.brand-logo {
-  max-width: 250px;
-  margin-bottom: 2rem;
-  position: relative;
-  z-index: 1;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
-}
-
-/* Buttons shared */
-.buttons {
-  display: flex;
-  gap: 1.5rem;
-  position: relative;
-  z-index: 1;
-}
-
-.buttons .btn {
-  display: inline-block;
-  padding: 0.75rem 1.5rem;
-  margin: 0.5rem;
-  text-decoration: none;
-  border-radius: 5px;
-  font-weight: bold;
-  transition: 0.3s;
-}
-
-.btn {
-  background-color: var(--brown);
-  color: var(--white);
-}
-
-.btn.secondary {
-  background-color: var(--dark);
-  color: var(--white);
-}
-
-.main-btn {
-  transform: scale(1.1);
-}
-
-@media (max-width: 600px) {
-  body {
-    padding: 1rem;
-  }
-}
-
-/* --- Fleur de Vie Landing --- */
-body.fleurdevie .landing {
-  background: url('../assets/fleur-bg.jpg') center/cover no-repeat;
-}
-body.fleurdevie .landing::before {
+.landing::before {
   content: "";
   position: absolute;
   inset: 0;
   background: inherit;
-  filter: blur(8px) brightness(0.7);
-  transform: scale(1.1);
-  z-index: 0;
-}
-body.fleurdevie .btn {
-  background: #c97a8d;
-  color: white;
-  border-radius: 25px;
-}
-body.fleurdevie .btn:hover {
-  background: #a85c70;
-}
-
-/* --- Sérac Landing --- */
-body.serac .landing {
-  background: url('../assets/serac-bg.jpg') center/cover no-repeat;
-}
-body.serac .landing::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: inherit;
+  background-size: cover;
+  background-position: center;
   filter: blur(8px) brightness(0.6);
   transform: scale(1.1);
   z-index: 0;
 }
+
+.landing h1 {
+  font-size: 3rem;
+  margin-bottom: 2rem;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+}
+
+.buttons {
+  display: flex;
+  gap: 1.5rem;
+  z-index: 1;
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  text-decoration: none;
+  font-weight: bold;
+  border-radius: 25px;
+  transition: 0.3s;
+}
+
+/* FleurDeVie Buttons */
+body.fleurdevie .btn {
+  background-color: #c97a8d;
+  color: white;
+}
+body.fleurdevie .btn:hover {
+  background-color: #a85c70;
+}
+
+/* Serac Buttons */
 body.serac .btn {
-  background: transparent;
+  background-color: transparent;
   color: white;
   border: 2px solid white;
-  border-radius: 6px;
 }
 body.serac .btn:hover {
-  background: white;
+  background-color: white;
   color: black;
+}
+
+.main-btn { transform: scale(1.1); }
+
+@media (max-width: 600px) {
+  .landing h1 { font-size: 2rem; }
+  .buttons { flex-direction: column; }
 }
