@@ -1,3 +1,7 @@
+html {
+  scroll-behavior: smooth;
+}
+
 /* Brandisby Colors */
 :root {
   --brown: #5a3c30;
