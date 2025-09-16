@@ -1,59 +1,58 @@
-html { scroll-behavior: smooth; }
-
-:root {
-  --brown: #5a3c30;
-  --dark: #1b1513;
-  --white: #ffffff;
+/* --- General Reset --- */
+html {
+  scroll-behavior: smooth;
 }
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
 body {
+  margin: 0;
   font-family: Arial, sans-serif;
   text-align: center;
-  margin: 0;
-  padding: 0;
-  color: var(--white);
+  color: #fff;
 }
 
-/* Header */
+/* --- Top Header --- */
 .brand-header {
-  position: absolute;
-  top: 20px;
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 2rem;
-  z-index: 2;
+  padding: 1rem 2rem;
+  z-index: 10;
+  background: rgba(0,0,0,0.3); /* semi-transparent */
 }
 
-.brand-header .brand-logo {
-  max-width: 180px;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+.brand-header .logo-home {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.brand-header .logo-home img {
+  height: 50px;
 }
 
 .brand-header .socials a {
-  color: white;
+  color: #fff;
   margin-left: 1rem;
   font-size: 1.2rem;
   transition: 0.3s;
 }
 
 .brand-header .socials a:hover {
-  color: #c97a8d;
+  color: #c97a8d; /* FleurDeVie hover color example */
 }
 
-/* Landing page */
+/* --- Landing Section --- */
 .landing {
+  position: relative;
   height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
-  position: relative;
-  z-index: 1;
   overflow: hidden;
 }
 
@@ -61,106 +60,77 @@ body {
   content: "";
   position: absolute;
   inset: 0;
-  background: inherit;
   background-size: cover;
   background-position: center;
-  filter: blur(8px) brightness(0.6);
-  transform: scale(1.1);
+  filter: blur(6px) brightness(0.6);
+  transform: scale(1.05);
   z-index: 0;
 }
 
-/* Landing Page Brand Name */
+/* Brand Name */
 .landing h1 {
-  font-size: 4rem;  /* Big and visible */
-  margin-bottom: 3rem;
-  text-shadow: 0 3px 8px rgba(0,0,0,0.6);
-}
-
-/* Landing Page Buttons */
-.buttons .btn {
-  font-size: 1.5rem;   /* Big buttons */
-  padding: 1rem 2rem;
-  border-radius: 30px;
-}
-
-.btn {
-  padding: 0.75rem 1.5rem;
-  text-decoration: none;
+  font-size: 4rem;
   font-weight: bold;
-  border-radius: 25px;
-  transition: 0.3s;
-}
-
-/* FleurDeVie Buttons */
-body.fleurdevie .btn {
-  background-color: #c97a8d;
-  color: white;
-}
-body.fleurdevie .btn:hover {
-  background-color: #a85c70;
-}
-
-/* Serac Buttons */
-body.serac .btn {
-  background-color: transparent;
-  color: white;
-  border: 2px solid white;
-}
-body.serac .btn:hover {
-  background-color: white;
-  color: black;
-}
-
-.main-btn { transform: scale(1.1); }
-
-@media (max-width: 600px) {
-  .landing h1 { font-size: 2rem; }
-  .buttons { flex-direction: column; }
-}
-
-/* Content Sections (About/Shop/Contact) */
-.content-section {
-  padding: 80px 20px;
-  text-align: center;
-  background-color: #ffffff;
-  color: #1b1513;
-}
-
-.content-section:nth-child(even) {
-  background-color: #f5f5f5;
-}
-
-/* Landing Page Brand Name */
-.landing h1 {
-  font-size: 4rem;           /* Big brand name */
   margin-bottom: 2rem;
-  text-shadow: 0 3px 8px rgba(0,0,0,0.6);
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 3px 8px rgba(0,0,0,0.5);
 }
 
-/* Brand Logo Between Name and Links */
+/* Brand Logo */
 .landing .brand-logo-landing {
-  max-width: 200px;
-  margin: 2rem 0;           /* Space between name and links */
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+  max-width: 180px;
+  margin: 2rem 0;
+  z-index: 1;
+  position: relative;
+  filter: drop-shadow(0 3px 6px rgba(0,0,0,0.5));
 }
 
-/* Landing Page Links (hoverable, spread evenly) */
+/* Landing Links (About, Shop, Contact) */
 .landing .landing-links {
   display: flex;
-  justify-content: space-evenly; /* Even spacing */
-  align-items: center;
-  width: 60%;                    /* Spread across width */
+  justify-content: space-evenly;
+  width: 60%;
+  z-index: 1;
   margin-top: 2rem;
 }
 
 .landing .landing-links a {
   text-decoration: none;
-  font-size: 1.8rem;             /* Big and visible */
+  font-size: 1.8rem;
   font-weight: bold;
-  color: white;
+  color: #fff;
   transition: 0.3s;
 }
 
 .landing .landing-links a:hover {
-  color: #c97a8d;                 /* Hover color (FleurDeVie style) */
+  color: #c97a8d;
+  cursor: pointer;
+}
+
+/* Bottom Tagline */
+.landing .tagline {
+  position: absolute;
+  bottom: 30px;
+  font-style: italic;
+  font-size: 1.5rem;
+  z-index: 1;
+  width: 100%;
+  text-align: center;
+}
+
+/* --- Responsive --- */
+@media(max-width: 768px) {
+  .landing h1 {
+    font-size: 3rem;
+  }
+  .landing .landing-links {
+    width: 80%;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .brand-header {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
 }
