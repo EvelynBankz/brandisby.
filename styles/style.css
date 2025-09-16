@@ -18,18 +18,18 @@ html, body {
   top: 0;
   left: 0;
   width: 100%;
-  height: 70px;
+  height: 80px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 1.5rem;
+  padding: 0 2rem;
   z-index: 10;
-  background: rgba(0,0,0,0.2); /* subtle transparent */
+  background: rgba(0,0,0,0.2);
 }
 
 /* Top-left static logo placeholder */
 .brand-header .logo-static {
-  height: 70px;
+  height: 120px; /* x2 size */
   width: auto;
   transition: all 0.3s ease;
 }
@@ -39,8 +39,8 @@ html, body {
   flex: 1;
   text-align: center;
   font-weight: bold;
-  font-size: 2rem;
-  color: inherit; /* customized per brand */
+  font-size: 2.5rem;
+  color: inherit; /* per brand */
   white-space: nowrap;
   z-index: 5;
 }
@@ -48,14 +48,15 @@ html, body {
 /* Socials top-right */
 .brand-header .socials {
   display: flex;
-  gap: 1rem;
+  gap: 1.5rem;
 }
 .brand-header .socials a {
-  font-size: 1.5rem;
+  font-size: 1.8rem;
+  margin-left: 10px;
   transition: 0.3s;
+  color: inherit;
 }
 .brand-header .socials a:hover {
-  cursor: pointer;
   transform: scale(1.2);
 }
 
@@ -77,27 +78,27 @@ html, body {
   inset: 0;
   background-size: cover;
   background-position: center;
-  filter: blur(12px) brightness(0.55); /* luxurious blur */
+  filter: blur(6px) brightness(0.55); /* subtle blur */
   transform: scale(1.05);
   z-index: 0;
 }
 
 /* --- Centered landing page logo --- */
 .brand-logo-landing {
-  max-width: 450px;  /* very big for desktop */
-  width: 80%;
+  max-width: 600px;  /* much bigger for desktop */
+  width: 90%;
   height: auto;
   margin: 2rem 0;
   position: relative;
   z-index: 1;
-  filter: drop-shadow(0 6px 10px rgba(0,0,0,0.6));
+  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.6));
 }
 
 /* --- Landing Links --- */
 .landing-links {
   display: flex;
-  justify-content: space-evenly;
-  width: 60%;
+  justify-content: space-around;
+  width: 80%;
   margin-top: 2rem;
   z-index: 1;
   flex-wrap: wrap;
@@ -105,9 +106,9 @@ html, body {
 
 .landing-links a {
   text-decoration: none;
-  font-size: 2rem;
+  font-size: 2.5rem;
   font-weight: bold;
-  color: inherit; /* per brand */
+  color: inherit;
   transition: 0.3s;
   margin: 1rem;
   text-transform: uppercase;
@@ -120,7 +121,7 @@ html, body {
 .tagline {
   position: absolute;
   bottom: 30px;
-  font-size: 2rem;
+  font-size: 2.2rem;
   font-style: italic;
   text-align: center;
   z-index: 1;
@@ -150,7 +151,7 @@ body.fleurdevie .socials a:nth-child(3) { color: var(--accent1); } /* Email */
 
 /* Serac */
 body.serac {
-  --main-color: #141517;
+  --main-color: #ffffff;
   --accent1: #4B4E54;
   --accent2: #B66E41;
   --accent3: #F5F5F3;
@@ -171,26 +172,26 @@ body.serac .socials a:nth-child(3) { color: var(--accent3); } /* Email */
 /* --- Responsive --- */
 @media(max-width: 1024px) {
   .brand-header {
-    height: 60px;
-    padding: 0 1rem;
+    height: 70px;
+    padding: 0 1.5rem;
   }
   .brand-header .logo-static {
-    height: 60px;
+    height: 100px;
   }
   .brand-header .brand-name-header {
-    font-size: 1.8rem;
+    font-size: 2rem;
   }
   .brand-logo-landing {
-    max-width: 350px;
+    max-width: 450px;
   }
   .landing-links {
-    width: 80%;
+    width: 90%;
   }
   .landing-links a {
-    font-size: 1.8rem;
+    font-size: 2rem;
   }
   .tagline {
-    font-size: 1.8rem;
+    font-size: 2rem;
   }
 }
 
@@ -202,23 +203,25 @@ body.serac .socials a:nth-child(3) { color: var(--accent3); } /* Email */
     padding: 0.5rem 1rem;
   }
   .brand-header .logo-static {
-    height: 50px;
+    height: 80px;
   }
   .brand-header .brand-name-header {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
   }
   .brand-logo-landing {
-    max-width: 250px;
+    max-width: 350px;
   }
   .landing-links {
-    width: 90%;
+    width: 100%;
+    justify-content: space-evenly; /* evenly spaced on mobile */
     flex-direction: column;
+    align-items: center;
   }
   .landing-links a {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
     margin: 0.5rem 0;
   }
   .tagline {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
   }
 }
