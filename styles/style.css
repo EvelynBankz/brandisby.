@@ -69,16 +69,18 @@ body {
   z-index: 0;
 }
 
+/* Landing Page Brand Name */
 .landing h1 {
-  font-size: 3rem;
-  margin-bottom: 2rem;
-  text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+  font-size: 4rem;  /* Big and visible */
+  margin-bottom: 3rem;
+  text-shadow: 0 3px 8px rgba(0,0,0,0.6);
 }
 
-.buttons {
-  display: flex;
-  gap: 1.5rem;
-  z-index: 1;
+/* Landing Page Buttons */
+.buttons .btn {
+  font-size: 1.5rem;   /* Big buttons */
+  padding: 1rem 2rem;
+  border-radius: 30px;
 }
 
 .btn {
