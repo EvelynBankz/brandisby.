@@ -183,3 +183,14 @@ p {
   filter: blur(8px);
   z-index: -1;
 }
+
+.content-section {
+  padding: 80px 20px;
+  text-align: center;
+  background-color: #ffffff;
+  color: #1b1513;
+}
+
+.content-section:nth-child(even) {
+  background-color: #f5f5f5;
+}
