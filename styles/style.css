@@ -2,13 +2,13 @@
 html, body {
   margin: 0;
   padding: 0;
+  scroll-behavior: smooth;
+  width: 100%;
   font-family: Arial, sans-serif;
-  color: #fff;
-  text-align: center;
   overflow-x: hidden;
 }
 
-/* --- Import Luxurious Fonts --- */
+/* --- Fonts --- */
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap'); /* FleurDeVie */
 @import url('https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&display=swap'); /* Serac Gothic */
 
@@ -18,48 +18,51 @@ html, body {
   top: 0;
   left: 0;
   width: 100%;
+  height: 70px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
+  padding: 0 1.5rem;
   z-index: 10;
-  background: rgba(0,0,0,0.3); /* semi-transparent for luxury feel */
+  background: rgba(0,0,0,0.2); /* subtle transparent */
 }
 
+/* Top-left static logo placeholder */
 .brand-header .logo-static {
-  height: 60px;
+  height: 70px;
+  width: auto;
   transition: all 0.3s ease;
 }
 
+/* Brand name in header */
 .brand-header .brand-name-header {
   flex: 1;
-  font-size: 2rem;
-  font-weight: bold;
   text-align: center;
-  color: #fff;
-  z-index: 5;
+  font-weight: bold;
+  font-size: 2rem;
+  color: inherit; /* customized per brand */
   white-space: nowrap;
+  z-index: 5;
 }
 
+/* Socials top-right */
 .brand-header .socials {
   display: flex;
   gap: 1rem;
 }
-
 .brand-header .socials a {
-  color: #fff;
-  font-size: 1.3rem;
+  font-size: 1.5rem;
   transition: 0.3s;
 }
 .brand-header .socials a:hover {
   cursor: pointer;
-  color: #c97a8d; /* hover color for FleurDeVie, will override for Serac */
+  transform: scale(1.2);
 }
 
 /* --- Landing Section --- */
 .landing {
   position: relative;
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -74,18 +77,20 @@ html, body {
   inset: 0;
   background-size: cover;
   background-position: center;
-  filter: blur(12px) brightness(0.55); /* more blur for luxury effect */
+  filter: blur(12px) brightness(0.55); /* luxurious blur */
   transform: scale(1.05);
   z-index: 0;
 }
 
-/* --- Centered Brand Logo --- */
+/* --- Centered landing page logo --- */
 .brand-logo-landing {
-  max-width: 250px;
+  max-width: 450px;  /* very big for desktop */
+  width: 80%;
+  height: auto;
   margin: 2rem 0;
   position: relative;
   z-index: 1;
-  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.6));
+  filter: drop-shadow(0 6px 10px rgba(0,0,0,0.6));
 }
 
 /* --- Landing Links --- */
@@ -102,39 +107,90 @@ html, body {
   text-decoration: none;
   font-size: 2rem;
   font-weight: bold;
-  color: #fff;
+  color: inherit; /* per brand */
   transition: 0.3s;
   margin: 1rem;
+  text-transform: uppercase;
 }
-
 .landing-links a:hover {
-  color: #c97a8d;
-  cursor: pointer;
+  transform: scale(1.1);
 }
 
-/* --- Tagline at Bottom --- */
+/* --- Tagline --- */
 .tagline {
   position: absolute;
   bottom: 30px;
+  font-size: 2rem;
   font-style: italic;
-  font-size: 1.8rem;
-  width: 100%;
   text-align: center;
   z-index: 1;
 }
 
+/* === Brand Specific Styling === */
+
+/* FleurDeVie */
+body.fleurdevie {
+  --main-color: #112e1f;
+  --accent1: #F5E6CC;
+  --accent2: #FFD6BA;
+  --accent3: #C9E4FF;
+}
+body.fleurdevie .brand-header .brand-name-header,
+body.fleurdevie .tagline,
+body.fleurdevie .landing-links a {
+  color: var(--main-color);
+  font-family: 'Playfair Display', serif;
+}
+body.fleurdevie .landing::before {
+  background-image: url('../FleurDeVie/bg.jpg');
+}
+body.fleurdevie .socials a:nth-child(1) { color: var(--accent3); } /* Instagram */
+body.fleurdevie .socials a:nth-child(2) { color: var(--accent2); } /* TikTok */
+body.fleurdevie .socials a:nth-child(3) { color: var(--accent1); } /* Email */
+
+/* Serac */
+body.serac {
+  --main-color: #141517;
+  --accent1: #4B4E54;
+  --accent2: #B66E41;
+  --accent3: #F5F5F3;
+}
+body.serac .brand-header .brand-name-header,
+body.serac .tagline,
+body.serac .landing-links a {
+  color: var(--main-color);
+  font-family: 'UnifrakturCook', cursive;
+}
+body.serac .landing::before {
+  background-image: url('../Serac/bg.jpg');
+}
+body.serac .socials a:nth-child(1) { color: var(--accent1); } /* Instagram */
+body.serac .socials a:nth-child(2) { color: var(--accent2); } /* TikTok */
+body.serac .socials a:nth-child(3) { color: var(--accent3); } /* Email */
+
 /* --- Responsive --- */
 @media(max-width: 1024px) {
+  .brand-header {
+    height: 60px;
+    padding: 0 1rem;
+  }
   .brand-header .logo-static {
-    height: 50px;
+    height: 60px;
   }
   .brand-header .brand-name-header {
     font-size: 1.8rem;
   }
+  .brand-logo-landing {
+    max-width: 350px;
+  }
   .landing-links {
     width: 80%;
-    flex-direction: column;
-    gap: 1rem;
+  }
+  .landing-links a {
+    font-size: 1.8rem;
+  }
+  .tagline {
+    font-size: 1.8rem;
   }
 }
 
@@ -142,11 +198,27 @@ html, body {
   .brand-header {
     flex-direction: column;
     gap: 0.5rem;
+    height: auto;
+    padding: 0.5rem 1rem;
+  }
+  .brand-header .logo-static {
+    height: 50px;
   }
   .brand-header .brand-name-header {
     font-size: 1.5rem;
   }
   .brand-logo-landing {
-    max-width: 180px;
+    max-width: 250px;
+  }
+  .landing-links {
+    width: 90%;
+    flex-direction: column;
+  }
+  .landing-links a {
+    font-size: 1.5rem;
+    margin: 0.5rem 0;
+  }
+  .tagline {
+    font-size: 1.5rem;
   }
 }
