@@ -1,0 +1,4 @@
+[
+  {"id":"fdv-001","name":"Fleur Tee — Blush","price":6500,"stock":12,"category":"tee","images":["/assets/product-sample-1.jpg"],"description":"Soft cotton tee with floral print."},
+  {"id":"fdv-002","name":"Bloom Hoodie — Cream","price":9800,"stock":6,"category":"hoodie","images":["/assets/product-sample-2.jpg"],"description":"Cozy midweight hoodie."}
+]
