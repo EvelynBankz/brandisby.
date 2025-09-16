@@ -41,10 +41,10 @@ p {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-size: cover;
-  background-position: center;
+  background: url("../assets/bg-hero.jpg") center/cover no-repeat; /* Added background */
   text-align: center;
 }
+
 
 .brand-logo {
   max-width: 250px;
@@ -179,13 +179,26 @@ p {
   z-index: 1;
 }
 
-.hero::before {
+.hero {
+  height: 100vh;
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  color: #fff;
+}
+
+.hero::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: url("../assets/bg-hero.jpg") center/cover no-repeat;
-  filter: blur(8px);
-  z-index: -1;
+  background: rgba(0, 0, 0, 0.45); /* dark overlay */
+  backdrop-filter: blur(3px); /* subtle blur */
+  z-index: 0;
 }
 
 .content-section {
@@ -203,4 +216,14 @@ p {
   width: 180px;
   margin-bottom: 30px;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+}
+
+/* Fleur De Vie background */
+body.fleurdevie .hero {
+  background-image: url("../assets/fleurdevie-bg.jpg");
+}
+
+/* Serac background */
+body.serac .hero {
+  background-image: url("../assets/serac-bg.jpg");
 }
