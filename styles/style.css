@@ -174,3 +174,12 @@ p {
   position: relative;
   z-index: 1;
 }
+
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("../assets/bg-hero.jpg") center/cover no-repeat;
+  filter: blur(8px);
+  z-index: -1;
+}
