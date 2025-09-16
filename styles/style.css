@@ -116,3 +116,61 @@ p {
     padding: 1rem;
   }
 }
+
+ /* === Background Images for Brand Landing Pages === */
+
+/* Fleur de Vie */
+.fleurdevie .landing {
+  position: relative;
+  background-image: url('../assets/fleur-bg.jpg');
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+}
+.fleurdevie .landing::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: inherit;
+  background-size: cover;
+  background-position: center;
+  filter: blur(8px) brightness(0.7);
+  transform: scale(1.1);
+  z-index: 0;
+}
+.fleurdevie .brand-logo,
+.fleurdevie .buttons {
+  position: relative;
+  z-index: 1;
+}
+
+/* Sérac */
+.serac .landing {
+  position: relative;
+  background-image: url('../assets/serac-bg.jpg');
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+}
+.serac .landing::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: inherit;
+  background-size: cover;
+  background-position: center;
+  filter: blur(8px) brightness(0.6);
+  transform: scale(1.1);
+  z-index: 0;
+}
+.serac .brand-logo,
+.serac .buttons {
+  position: relative;
+  z-index: 1;
+}
