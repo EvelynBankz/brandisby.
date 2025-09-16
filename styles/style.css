@@ -198,3 +198,9 @@ p {
 .content-section:nth-child(even) {
   background-color: #f5f5f5;
 }
+
+.brand-logo {
+  width: 180px;
+  margin-bottom: 30px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+}
