@@ -1,12 +1,10 @@
-/* --- General Reset --- */
-html {
-  scroll-behavior: smooth;
-}
-body {
+/* === Reset and Global Styles === */
+html, body {
   margin: 0;
+  padding: 0;
   font-family: Arial, sans-serif;
-  text-align: center;
   color: #fff;
+  text-align: center;
 }
 
 /* --- Top Header --- */
@@ -20,13 +18,7 @@ body {
   align-items: center;
   padding: 1rem 2rem;
   z-index: 10;
-  background: rgba(0,0,0,0.3); /* semi-transparent */
-}
-
-.brand-header .logo-home {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+  background: rgba(0,0,0,0.3); /* semi-transparent background */
 }
 
 .brand-header .logo-home img {
@@ -36,12 +28,12 @@ body {
 .brand-header .socials a {
   color: #fff;
   margin-left: 1rem;
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   transition: 0.3s;
 }
-
 .brand-header .socials a:hover {
-  color: #c97a8d; /* FleurDeVie hover color example */
+  color: #c97a8d; /* hover color for FleurDeVie */
+  cursor: pointer;
 }
 
 /* --- Landing Section --- */
@@ -67,7 +59,7 @@ body {
   z-index: 0;
 }
 
-/* Brand Name */
+/* --- Brand Name --- */
 .landing h1 {
   font-size: 4rem;
   font-weight: bold;
@@ -77,25 +69,25 @@ body {
   text-shadow: 0 3px 8px rgba(0,0,0,0.5);
 }
 
-/* Brand Logo */
-.landing .brand-logo-landing {
+/* --- Brand Logo --- */
+.brand-logo-landing {
   max-width: 180px;
   margin: 2rem 0;
-  z-index: 1;
   position: relative;
+  z-index: 1;
   filter: drop-shadow(0 3px 6px rgba(0,0,0,0.5));
 }
 
-/* Landing Links (About, Shop, Contact) */
-.landing .landing-links {
+/* --- Landing Links --- */
+.landing-links {
   display: flex;
   justify-content: space-evenly;
   width: 60%;
-  z-index: 1;
   margin-top: 2rem;
+  z-index: 1;
 }
 
-.landing .landing-links a {
+.landing-links a {
   text-decoration: none;
   font-size: 1.8rem;
   font-weight: bold;
@@ -103,20 +95,20 @@ body {
   transition: 0.3s;
 }
 
-.landing .landing-links a:hover {
+.landing-links a:hover {
   color: #c97a8d;
   cursor: pointer;
 }
 
-/* Bottom Tagline */
-.landing .tagline {
+/* --- Tagline at Bottom --- */
+.tagline {
   position: absolute;
   bottom: 30px;
   font-style: italic;
   font-size: 1.5rem;
-  z-index: 1;
   width: 100%;
   text-align: center;
+  z-index: 1;
 }
 
 /* --- Responsive --- */
@@ -124,7 +116,7 @@ body {
   .landing h1 {
     font-size: 3rem;
   }
-  .landing .landing-links {
+  .landing-links {
     width: 80%;
     flex-direction: column;
     gap: 1rem;
