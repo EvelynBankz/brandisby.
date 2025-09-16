@@ -11,9 +11,9 @@ html { scroll-behavior: smooth; }
 body {
   font-family: Arial, sans-serif;
   text-align: center;
-  color: var(--white);
   margin: 0;
   padding: 0;
+  color: var(--white);
 }
 
 /* Header */
@@ -41,7 +41,7 @@ body {
 }
 
 .brand-header .socials a:hover {
-  color: #c97a8d; /* FleurDeVie accent; change for Serac if needed */
+  color: #c97a8d;
 }
 
 /* Landing page */
@@ -114,4 +114,16 @@ body.serac .btn:hover {
 @media (max-width: 600px) {
   .landing h1 { font-size: 2rem; }
   .buttons { flex-direction: column; }
+}
+
+/* Content Sections (About/Shop/Contact) */
+.content-section {
+  padding: 80px 20px;
+  text-align: center;
+  background-color: #ffffff;
+  color: #1b1513;
+}
+
+.content-section:nth-child(even) {
+  background-color: #f5f5f5;
 }
