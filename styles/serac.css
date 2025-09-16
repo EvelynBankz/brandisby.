@@ -1,0 +1,89 @@
+:root {
+  --serac-dark: #141517;
+  --serac-gray: #4B4E54;
+  --serac-accent: #B66E41;
+  --serac-light: #F5F5F3;
+  --white: #fff;
+}
+
+body {
+  margin: 0;
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  background-color: var(--serac-dark);
+  color: var(--serac-light);
+  text-align: center;
+}
+
+/* Banner */
+.banner {
+  position: relative;
+  height: 70vh;
+  background: url('../assets/serac-banner.jpg') center/cover no-repeat;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.banner .overlay {
+  background-color: rgba(20, 21, 23, 0.6);
+  padding: 2rem;
+  border-radius: 10px;
+}
+
+.banner .logo {
+  max-width: 200px;
+  margin-bottom: 1rem;
+}
+
+.banner .tagline {
+  font-size: 2rem;
+  color: var(--serac-accent);
+  font-weight: bold;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* Featured Products */
+.featured {
+  padding: 3rem 1rem;
+  background-color: var(--serac-gray);
+}
+
+.featured h2 {
+  font-size: 1.8rem;
+  margin-bottom: 2rem;
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.product-card {
+  background: var(--serac-dark);
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  padding: 1rem;
+  transition: transform 0.2s ease-in-out;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+}
+
+.product-card img {
+  width: 100%;
+  border-radius: 10px;
+}
+
+.product-card h3 {
+  margin: 0.8rem 0 0.4rem;
+  font-size: 1.2rem;
+  color: var(--serac-accent);
+}
+
+.product-card p {
+  font-size: 1rem;
+  color: var(--serac-light);
+}
