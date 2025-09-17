@@ -3,35 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FleurDeVie</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Fleur De Vie</title>
+  <link rel="stylesheet" href="../styles/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="h-screen bg-cover bg-center" style="background-image: url('bg.jpg');">
+<body class="fleurdevie">
 
-  <!-- Header -->
-  <header class="flex items-center justify-between px-6 py-4 bg-black bg-opacity-50 text-white">
-    <!-- Logo -->
-    <img src="logo.png" alt="FleurDeVie Logo" class="h-10 w-auto">
-
-    <!-- Brand Name -->
-    <h1 class="text-xl font-bold tracking-wide text-center absolute left-1/2 transform -translate-x-1/2">
-      FleurDeVie
-    </h1>
-
-    <!-- Navigation -->
-    <nav class="flex space-x-6 text-sm underline">
-      <a href="about.html">About</a>
-      <a href="shop.html">Shop</a>
-      <a href="contact.html">Contact Us</a>
-    </nav>
+  <!-- Top Header -->
+  <header class="brand-header">
+    <img src="logo-static.png" alt="Static Logo" class="logo-static">
+    <div class="brand-name-header">Fleur De Vie</div>
+    <div class="socials">
+      <a href="https://www.instagram.com/fleurdevie_com/" target="_blank"><i class="fab fa-instagram"></i></a>
+      <a href="https://www.tiktok.com/@fleurdevie.com" target="_blank"><i class="fab fa-tiktok"></i></a>
+      <a href="mailto:yourstruly.fleurdevie@gmail.com"><i class="fas fa-envelope"></i></a>
+    </div>
   </header>
 
-  <!-- Tagline -->
-  <main class="flex flex-col items-center justify-center h-[80%] text-center text-white">
-    <h2 class="text-2xl md:text-3xl font-semibold drop-shadow-lg">
-      Bloom with Grace, Live with Beauty
-    </h2>
-  </main>
+  <!-- Landing Section -->
+  <div class="landing">
+    <img src="logo.png" alt="Fleur De Vie Logo" class="brand-logo-landing">
+
+    <nav class="landing-links small-links">
+      <a href="about.html">ABOUT US</a>
+      <a href="shop.html">SHOP</a>
+      <a href="contact.html">CONTACT US</a>
+    </nav>
+
+    <div class="tagline">“Yours Truly”</div>
+  </div>
 
 </body>
 </html>
