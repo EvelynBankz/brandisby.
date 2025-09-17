@@ -220,3 +220,8 @@ body {
   .brand-site-title { font-size: 18px; }
   .big-link { font-size: clamp(18px, 12vw, 34px); }
 }
+
+/* Remove underline from social icons */
+.top-actions .social-link {
+  text-decoration: none !important;
+}
