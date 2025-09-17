@@ -5,27 +5,40 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fleur De Vie</title>
   <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
 </head>
 <body class="fleurdevie">
-  <!-- Background -->
   <div class="background"></div>
 
-  <!-- Top left nav -->
-  <header class="top-actions">
-    <nav class="nav-links">
-      <a href="index.html" class="home-link">Home</a>
-    </nav>
-    <div class="socials">
-      <a href="#" class="social-link">IG</a>
-      <a href="#" class="social-link">FB</a>
-      <a href="#" class="social-link">TW</a>
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-left">
+      <img src="logo.png" alt="Fleur De Vie Logo" class="brand-logo">
+    </div>
+
+    <h1 class="brand-name">Fleur De Vie</h1>
+
+    <div class="header-right">
+      <nav class="desktop-nav">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="mailto:info@fleurdevie.com" class="social-link">Email</a>
+        <a href="#" class="social-link">TikTok</a>
+        <a href="#" class="social-link">Instagram</a>
+      </nav>
+
+      <!-- Mobile menu -->
+      <div class="menu-toggle">&#9776;</div>
+      <nav class="mobile-nav">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="mailto:info@fleurdevie.com" class="social-link">Email</a>
+        <a href="#" class="social-link">TikTok</a>
+        <a href="#" class="social-link">Instagram</a>
+      </nav>
     </div>
   </header>
 
-  <!-- Center brand content -->
+  <!-- Main links -->
   <main class="brand-content">
-    <img src="logo.png" alt="Fleur De Vie Logo" class="brand-logo">
-    <h1 class="brand-site-title">Fleur De Vie</h1>
     <nav class="big-links">
       <a href="about.html" class="big-link">About Us</a>
       <a href="shop.html" class="big-link">Shop</a>
@@ -35,8 +48,16 @@
 
   <!-- Footer -->
   <footer class="site-footer">
-    <p class="tagline">Life in Full Bloom</p>
-    <p>© 2025 Fleur De Vie</p>
+    <p class="tagline">Yours Truly</p>
   </footer>
+
+  <script>
+    // Mobile menu toggle
+    const toggle = document.querySelector('.menu-toggle');
+    const mobileNav = document.querySelector('.mobile-nav');
+    toggle.addEventListener('click', () => {
+      mobileNav.classList.toggle('open');
+    });
+  </script>
 </body>
 </html>
