@@ -17,10 +17,18 @@
 
     <div class="brand-site-title">Fleur De Vie</div>
 
-    <nav class="socials">
-      <a href="https://www.instagram.com/fleurdevie_com/" target="_blank" rel="noreferrer"><i class="fab fa-instagram"></i></a>
-      <a href="https://www.tiktok.com/@fleurdevie.com" target="_blank" rel="noreferrer"><i class="fab fa-tiktok"></i></a>
-      <a href="mailto:yourstruly.fleurdevie@gmail.com"><i class="fas fa-envelope"></i></a>
+    <!-- Mobile hamburger toggle -->
+    <button class="menu-toggle" aria-label="Menu"><i class="fas fa-bars"></i></button>
+
+    <nav class="top-actions">
+      <a class="nav-link" href="about.html">ABOUT US</a>
+      <a class="nav-link" href="shop.html">SHOP</a>
+      <a class="nav-link" href="contact.html">CONTACT US</a>
+
+      <!-- Socials -->
+      <a href="https://www.instagram.com/fleurdevie_com/" target="_blank" class="social-link"><i class="fab fa-instagram"></i></a>
+      <a href="https://www.tiktok.com/@fleurdevie.com" target="_blank" class="social-link"><i class="fab fa-tiktok"></i></a>
+      <a href="mailto:yourstruly.fleurdevie@gmail.com" class="social-link"><i class="fas fa-envelope"></i></a>
     </nav>
   </header>
 
@@ -31,10 +39,18 @@
         <a class="big-link" href="shop.html">SHOP</a>
         <a class="big-link" href="contact.html">CONTACT US</a>
       </nav>
-
-      <div class="tagline">“Yours Truly”</div>
     </div>
   </main>
+
+  <footer class="site-footer">
+    <div class="tagline">“Yours Truly”</div>
+  </footer>
+
+  <script>
+    const toggle = document.querySelector('.menu-toggle');
+    const menu = document.querySelector('.top-actions');
+    toggle.addEventListener('click', () => menu.classList.toggle('active'));
+  </script>
 
 </body>
 </html>
