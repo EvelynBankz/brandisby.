@@ -2,6 +2,7 @@
 
 /* === Fonts === */
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&display=swap'); /* Gothic for Sérac */
 
 /* === Reset === */
 * { box-sizing: border-box; }
@@ -20,7 +21,7 @@ body { font-family: 'Montserrat', sans-serif; color:#fff; background:#111; -webk
 .brand-header {
   position: fixed;
   top:0; left:0; right:0;
-  height:72px;
+  height:80px;
   display:flex;
   align-items:center;
   justify-content:space-between;
@@ -30,8 +31,8 @@ body { font-family: 'Montserrat', sans-serif; color:#fff; background:#111; -webk
   backdrop-filter: blur(2px);
 }
 
-.logo { height:48px; width:auto; display:block; }
-.logo-small { height:36px; }
+.logo { height:72px; width:auto; display:block; } /* enlarged logo */
+.logo-small { height:50px; }
 
 /* title centered on top */
 .brand-site-title {
@@ -40,23 +41,18 @@ body { font-family: 'Montserrat', sans-serif; color:#fff; background:#111; -webk
   transform: translateX(-50%);
   font-family: 'Playfair Display', serif;
   letter-spacing:4px;
-  font-size:22px;
-  color:var(--header-color, rgba(255,255,255,0.95));
+  font-size: clamp(28px, 4.4vw, 46px);
+  font-weight: 700;
+  text-shadow: 0 3px 8px rgba(0,0,0,0.45);
+  color: var(--header-color, rgba(255,255,255,0.95));
+  z-index: 6;
+  white-space: nowrap;
 }
 
 /* socials (right) */
 .socials { display:flex; gap:14px; align-items:center; z-index:70; }
 .socials a { color: rgba(255,255,255,0.9); font-size:18px; text-decoration:none; }
 .socials a:hover { transform:translateY(-2px); }
-
-/* header right area for Brandisby home */
-.top-actions { display:flex; gap:12px; align-items:center; }
-
-/* Buttons */
-.btn { display:inline-block; padding:10px 18px; border-radius:6px; text-decoration:none; font-weight:600; }
-.btn-primary { background:var(--brandisby-main); color: white; border: 1px solid rgba(0,0,0,0.15); }
-.btn-outline { background:transparent; color:var(--white); border:1px solid rgba(255,255,255,0.12); }
-.btn-ghost { background: transparent; color: rgba(255,255,255,0.9); border:none; }
 
 /* === HERO base === */
 .hero {
@@ -65,12 +61,11 @@ body { font-family: 'Montserrat', sans-serif; color:#fff; background:#111; -webk
   align-items:center;
   justify-content:center;
   position:relative;
-  padding-top:72px; /* header space */
+  padding-top:80px; /* header space */
   background-size:cover;
   background-position:center;
 }
 
-/* dark overlay sits above bg but under content */
 .hero::after {
   content: "";
   position:absolute;
@@ -79,7 +74,6 @@ body { font-family: 'Montserrat', sans-serif; color:#fff; background:#111; -webk
   z-index:0;
 }
 
-/* center wrapper for hero content */
 .hero-inner {
   position:relative;
   z-index:2;
@@ -94,53 +88,18 @@ body { font-family: 'Montserrat', sans-serif; color:#fff; background:#111; -webk
   text-align:center;
 }
 
-/* Brandisby home hero */
-.hero--brandisby {
-  background-image: url('assets/brandisby-bg.jpg');
-  background-size:cover;
-  background-position:center;
-}
-
-.hero-title {
-  font-family: 'Playfair Display', serif;
-  font-weight:700;
-  font-size: clamp(28px, 4.4vw, 48px);
-  margin:0;
-  color:var(--white);
-  letter-spacing:0.6px;
-}
-
-.hero-sub {
-  max-width:900px;
-  color: rgba(255,255,255,0.85);
-  font-size: clamp(14px, 2.2vw, 20px);
-  margin:0;
-}
-
-/* Store links tiles row on homepage */
-.store-links { display:flex; gap:18px; margin-top:18px; }
-.store-tile {
-  display:flex; gap:12px; align-items:center;
-  text-decoration:none; color:rgba(255,255,255,0.95);
-  background: rgba(255,255,255,0.03);
-  padding:8px 12px; border-radius:8px;
-}
-.store-tile img { height:36px; width:auto; display:block; }
-.store-tile span { font-weight:600; letter-spacing:1px; }
-
-/* === Landing links / large words for brand pages === */
+/* === Landing links === */
 .landing-links {
   width:100%;
   display:flex;
   gap:20px;
-  justify-content:space-between;
+  justify-content:space-evenly;
   align-items:center;
   padding: 0 8%;
   box-sizing:border-box;
   flex-wrap:nowrap;
 }
 
-/* The huge words like EAT DRINK VISIT (ABOUT US SHOP CONTACT US) */
 .big-link {
   flex:1;
   display:flex;
@@ -150,27 +109,19 @@ body { font-family: 'Montserrat', sans-serif; color:#fff; background:#111; -webk
   color: rgba(255,255,255,0.92);
   font-family: 'Playfair Display', serif;
   text-transform:uppercase;
-  font-weight:700;
-  letter-spacing:6px;
-  position:relative;
-  padding:22px 10px 40px;
-  font-size: clamp(44px, 9.5vw, 140px); /* scales: desktop large, mobile smaller */
-  line-height:0.95;
+  font-weight:300; /* thin */
+  letter-spacing:3px;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-decoration-color: rgba(255,255,255,0.9);
+  padding: 6px 8px;
+  text-align: center;
+  font-size: clamp(28px, 4.8vw, 64px);
+  line-height: 1;
+  white-space: nowrap;
 }
 
-/* thin underline below each word */
-.big-link::after {
-  content:"";
-  position:absolute;
-  left:50%;
-  transform:translateX(-50%);
-  bottom:12px;
-  width:60%;
-  height:2px;
-  background: rgba(255,255,255,0.18);
-}
-
-/* address line under hero */
+/* address line (optional, you can remove) */
 .address-line {
   margin-top:30px;
   color: rgba(255,255,255,0.55);
@@ -178,118 +129,65 @@ body { font-family: 'Montserrat', sans-serif; color:#fff; background:#111; -webk
   letter-spacing:1px;
 }
 
-/* === Brand specific overrides (backgrounds + colors) === */
-
-/* FleurDeVie */
+/* === Brand specific backgrounds === */
 body.fleurdevie { --main-color: #112e1f; }
 .fleurdevie-hero {
   background-image: url('../FleurDeVie/bg.jpg');
-  background-size:cover;
-  background-position:center;
 }
 body.fleurdevie .brand-site-title { color: var(--main-color); }
 
-/* Serac */
 body.serac { --main-color: #141517; }
 .serac-hero {
   background-image: url('../Serac/bg.jpg');
-  background-size:cover;
-  background-position:center;
 }
 body.serac .brand-site-title { color: var(--main-color); }
 
-/* smaller screens: stack the three words vertically */
-@media (max-width: 900px) {
-  .landing-links {
-    flex-direction:column;
-    gap:18px;
-    align-items:center;
-    padding: 0 12%;
-  }
-  .big-link { font-size: clamp(36px, 12vw, 84px); letter-spacing:4px; padding-bottom:22px; }
-}
+/* === Tagline (commented out) === */
 
-/* very small phones */
-@media (max-width: 420px) {
-  .brand-site-title { font-size:18px; }
-  .brand-header { height:64px; padding: 8px 12px; }
-  .logo { height:42px; }
-  .big-link { font-size: clamp(28px, 14vw, 64px); }
-}
-
-/* ---------- Brand title (centered & more visible) ---------- */
-.brand-site-title{
+/*
+.tagline {
   position: absolute;
+  bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 6;
-  white-space: nowrap;
-  font-family: 'Playfair Display', serif;
-  font-weight: 700;
-  /* responsive size (adjusts per screen) */
-  font-size: clamp(28px, 4.4vw, 46px);
-  text-shadow: 0 3px 8px rgba(0,0,0,0.45);
-  color: var(--main-color, #ffffff); /* body.fleurdevie and body.serac may set --main-color */
-}
-
-/* ---------- Landing links (smaller, underlined, evenly spread) ---------- */
-.landing-links{
-  display: flex;
-  justify-content: space-evenly;
-  align-items: center;
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 2rem;
-  box-sizing: border-box;
-  gap: 1.5rem;
-  z-index: 5;
-  flex-wrap: nowrap; /* try keep on one row on larger screens */
-}
-
-/* controlled size for the link words so they won't overflow the frame */
-.big-link{
-  font-family: 'Playfair Display', serif;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 3px;
-  text-decoration: underline;
-  text-decoration-thickness: 2px;
-  text-decoration-color: rgba(255,255,255,0.9);
-  color: inherit;
-  padding: 6px 8px;
   text-align: center;
-  /* smaller and responsive than before to prevent overflow */
-  font-size: clamp(28px, 4.8vw, 64px);
-  line-height: 1;
-  white-space: nowrap;
-}
-
-/* Tagline (replace address) */
-.tagline{
-  margin-top: 22px;
-  color: rgba(255,255,255,0.92);
-  font-style: italic;
-  font-size: clamp(15px, 2.0vw, 20px);
+  font-size: 12px;
+  letter-spacing: 1px;
+  opacity: 0.85;
   z-index: 5;
+  padding: 0 12px;
+}
+*/
+
+/* FleurDeVie tagline style (luxurious serif italic) */
+/*
+body.fleurdevie .tagline {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.92);
+}
+*/
+
+/* Sérac tagline style (gothic) */
+/*
+body.serac .tagline {
+  font-family: 'UnifrakturCook', cursive;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 2px;
+}
+*/
+
+/* === Responsive === */
+@media (max-width: 900px) {
+  .landing-links { flex-direction:column; gap:18px; padding: 0 12%; }
+  .big-link { font-size: clamp(22px, 7.5vw, 42px); white-space: normal; }
+  .brand-site-title { font-size: clamp(20px, 6vw, 34px); }
 }
 
-/* ---------- Responsive adjustments: stack links on narrow viewports ---------- */
-@media (max-width: 900px) {
-  .brand-site-title{
-    font-size: clamp(20px, 6.0vw, 34px);
-  }
-
-  .landing-links{
-    flex-direction: column;
-    gap: 18px;
-    padding: 0 1.25rem;
-  }
-
-  .big-link{
-    font-size: clamp(22px, 7.5vw, 42px);
-    white-space: normal; /* allow wrapping if necessary */
-  }
-
-  .tagline{ margin-top: 18px; }
+@media (max-width: 420px) {
+  .brand-header { height:64px; padding: 8px 12px; }
+  .logo { height:52px; }
+  .brand-site-title { font-size:18px; }
+  .big-link { font-size: clamp(18px, 12vw, 34px); }
 }
