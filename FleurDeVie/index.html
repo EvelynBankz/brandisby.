@@ -1,37 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Fleur De Vie</title>
+
+  <!-- shared stylesheet (relative from /FleurDeVie to /styles) -->
   <link rel="stylesheet" href="../styles/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="fleurdevie">
 
-  <!-- Top Header -->
   <header class="brand-header">
-    <img src="logo-static.png" alt="Static Logo" class="logo-static">
-    <div class="brand-name-header">Fleur De Vie</div>
-    <div class="socials">
-      <a href="https://www.instagram.com/fleurdevie_com/" target="_blank"><i class="fab fa-instagram"></i></a>
-      <a href="https://www.tiktok.com/@fleurdevie.com" target="_blank"><i class="fab fa-tiktok"></i></a>
-      <a href="mailto:yourstruly.fleurdevie@gmail.com"><i class="fas fa-envelope"></i></a>
+    <div class="logo-wrap">
+      <img src="logo.png" alt="Fleur De Vie" class="logo">
     </div>
+
+    <!-- Centered, more visible brand title -->
+    <div class="brand-site-title">Fleur De Vie</div>
+
+    <nav class="socials">
+      <a href="https://www.instagram.com/fleurdevie_com/" target="_blank" rel="noreferrer"><i class="fab fa-instagram"></i></a>
+      <a href="https://www.tiktok.com/@fleurdevie.com" target="_blank" rel="noreferrer"><i class="fab fa-tiktok"></i></a>
+      <a href="mailto:yourstruly.fleurdevie@gmail.com"><i class="fas fa-envelope"></i></a>
+    </nav>
   </header>
 
-  <!-- Landing Section -->
-  <div class="landing">
-    <img src="logo.png" alt="Fleur De Vie Logo" class="brand-logo-landing">
+  <main class="hero fleurdevie-hero">
+    <div class="hero-inner">
+      <nav class="landing-links">
+        <a class="big-link" href="about.html">ABOUT US</a>
+        <a class="big-link" href="shop.html">SHOP</a>
+        <a class="big-link" href="contact.html">CONTACT US</a>
+      </nav>
 
-    <nav class="landing-links small-links">
-      <a href="about.html">ABOUT US</a>
-      <a href="shop.html">SHOP</a>
-      <a href="contact.html">CONTACT US</a>
-    </nav>
-
-    <div class="tagline">“Yours Truly”</div>
-  </div>
+      <!-- Replaced address with tagline -->
+      <div class="tagline">“Yours Truly”</div>
+    </div>
+  </main>
 
 </body>
 </html>
