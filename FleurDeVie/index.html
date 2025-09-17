@@ -3,30 +3,30 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Fleur De Vie</title>
+  <title>Sérac</title>
 
   <link rel="stylesheet" href="../styles/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="fleurdevie">
+<body class="serac">
 
   <header class="brand-header">
     <div class="left-controls">
-      <img src="logo.png" alt="Fleur De Vie" class="logo">
+      <img src="logo.png" alt="Sérac" class="logo">
       <a href="index.html" class="home-link">Home</a>
 
       <!-- socials (top-left) -->
       <div class="socials">
-        <a href="https://www.instagram.com/fleurdevie_com/" target="_blank" rel="noreferrer"><i class="fab fa-instagram"></i></a>
-        <a href="https://www.tiktok.com/@fleurdevie.com" target="_blank" rel="noreferrer"><i class="fab fa-tiktok"></i></a>
-        <a href="mailto:yourstruly.fleurdevie@gmail.com"><i class="fas fa-envelope"></i></a>
+        <a href="https://www.instagram.com/serac_com/" target="_blank" rel="noreferrer"><i class="fab fa-instagram"></i></a>
+        <a href="https://www.tiktok.com/@serac.com" target="_blank" rel="noreferrer"><i class="fab fa-tiktok"></i></a>
+        <a href="mailto:stonecold.serac@gmail.com"><i class="fas fa-envelope"></i></a>
       </div>
 
       <!-- hamburger for mobile (shows mobile menu) -->
       <button class="menu-toggle" aria-label="Menu"><i class="fas fa-bars"></i></button>
     </div>
 
-    <div class="brand-site-title">Fleur De Vie</div>
+    <div class="brand-site-title">Sérac</div>
   </header>
 
   <!-- mobile menu (hidden on desktop) -->
@@ -36,7 +36,7 @@
     <a href="contact.html">CONTACT US</a>
   </nav>
 
-  <main class="hero fleurdevie-hero">
+  <main class="hero serac-hero">
     <div class="hero-inner">
       <nav class="landing-links" aria-label="Primary landing links">
         <a class="big-link" href="about.html">ABOUT US</a>
@@ -47,10 +47,9 @@
   </main>
 
   <footer class="site-footer" role="contentinfo">
-    <div class="tagline">“Yours Truly”</div>
+    <div class="tagline">“Stone Cold”</div>
   </footer>
 
-  <!-- Toggle script: safe - checks existence first -->
   <script>
     (function(){
       const toggle = document.querySelector('.menu-toggle');
@@ -58,7 +57,6 @@
       if (!toggle || !mobileMenu) return;
       toggle.addEventListener('click', () => {
         mobileMenu.classList.toggle('active');
-        // prevent background scrolling when menu open:
         document.body.classList.toggle('menu-open', mobileMenu.classList.contains('active'));
       });
     })();
