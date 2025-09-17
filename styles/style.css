@@ -6,8 +6,14 @@
 
 /* === Reset === */
 * { box-sizing: border-box; }
-html,body { margin:0; padding:0; height:100%; }
-body { font-family: 'Montserrat', sans-serif; color:#fff; background:#111; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+html, body { margin:0; padding:0; height:100%; }
+body {
+  font-family: 'Montserrat', sans-serif;
+  color:#fff;
+  background:#111;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
 
 /* === Variables === */
 :root {
@@ -31,10 +37,11 @@ body { font-family: 'Montserrat', sans-serif; color:#fff; background:#111; -webk
   backdrop-filter: blur(2px);
 }
 
-.logo { height:72px; width:auto; display:block; } /* enlarged logo */
+/* Logo enlarged */
+.logo { height:72px; width:auto; display:block; }
 .logo-small { height:50px; }
 
-/* title centered on top */
+/* Title centered */
 .brand-site-title {
   position: absolute;
   left:50%;
@@ -49,10 +56,49 @@ body { font-family: 'Montserrat', sans-serif; color:#fff; background:#111; -webk
   white-space: nowrap;
 }
 
-/* socials (right) */
-.socials { display:flex; gap:14px; align-items:center; z-index:70; }
-.socials a { color: rgba(255,255,255,0.9); font-size:18px; text-decoration:none; }
-.socials a:hover { transform:translateY(-2px); }
+/* === Navigation & Socials === */
+.top-actions {
+  display:flex;
+  align-items:center;
+  gap:1rem;
+}
+
+/* Clean text nav links */
+.nav-link {
+  font-size: 1rem;
+  font-weight: 400;
+  color: #fff;
+  text-decoration: none;
+  padding: 0.25rem 0.5rem;
+}
+.nav-link:hover { text-decoration: underline; }
+
+/* Social icons */
+.social-link {
+  color: rgba(255,255,255,0.75);
+  font-size: 1.1rem;
+  transition: color 0.3s ease;
+}
+.social-link:hover { color:#fff; }
+
+/* Brand colors on hover */
+.fa-instagram:hover { color:#E4405F; }
+.fa-tiktok:hover { color:#000; }
+.fa-envelope:hover { color:#c23a2b; }
+.fa-linkedin:hover { color:#0077b5; }
+.fa-twitter:hover { color:#1DA1F2; }
+
+/* Buttons */
+.btn {
+  display:inline-block;
+  padding:10px 18px;
+  border-radius:6px;
+  text-decoration:none;
+  font-weight:600;
+}
+.btn-primary { background:var(--brandisby-main); color:#fff; border:1px solid rgba(0,0,0,0.15); }
+.btn-outline { background:transparent; color:var(--white); border:1px solid rgba(255,255,255,0.12); }
+.btn-ghost { background:transparent; color:rgba(255,255,255,0.9); border:none; }
 
 /* === HERO base === */
 .hero {
@@ -65,15 +111,13 @@ body { font-family: 'Montserrat', sans-serif; color:#fff; background:#111; -webk
   background-size:cover;
   background-position:center;
 }
-
 .hero::after {
-  content: "";
+  content:"";
   position:absolute;
   inset:0;
   background: linear-gradient(180deg, rgba(0,0,0,0.55), rgba(0,0,0,0.65));
   z-index:0;
 }
-
 .hero-inner {
   position:relative;
   z-index:2;
@@ -95,11 +139,10 @@ body { font-family: 'Montserrat', sans-serif; color:#fff; background:#111; -webk
   gap:20px;
   justify-content:space-evenly;
   align-items:center;
-  padding: 0 8%;
+  padding:0 8%;
   box-sizing:border-box;
   flex-wrap:nowrap;
 }
-
 .big-link {
   flex:1;
   display:flex;
@@ -112,16 +155,16 @@ body { font-family: 'Montserrat', sans-serif; color:#fff; background:#111; -webk
   font-weight:300; /* thin */
   letter-spacing:3px;
   text-decoration: underline;
-  text-decoration-thickness: 2px;
+  text-decoration-thickness:2px;
   text-decoration-color: rgba(255,255,255,0.9);
-  padding: 6px 8px;
-  text-align: center;
+  padding:6px 8px;
+  text-align:center;
   font-size: clamp(28px, 4.8vw, 64px);
-  line-height: 1;
-  white-space: nowrap;
+  line-height:1;
+  white-space:nowrap;
 }
 
-/* address line (optional, you can remove) */
+/* Address line (optional) */
 .address-line {
   margin-top:30px;
   color: rgba(255,255,255,0.55);
@@ -129,65 +172,51 @@ body { font-family: 'Montserrat', sans-serif; color:#fff; background:#111; -webk
   letter-spacing:1px;
 }
 
-/* === Brand specific backgrounds === */
-body.fleurdevie { --main-color: #112e1f; }
-.fleurdevie-hero {
-  background-image: url('../FleurDeVie/bg.jpg');
-}
+/* === Brand-specific === */
+body.fleurdevie { --main-color:#112e1f; }
+.fleurdevie-hero { background-image:url('../FleurDeVie/bg.jpg'); }
 body.fleurdevie .brand-site-title { color: var(--main-color); }
 
-body.serac { --main-color: #141517; }
-.serac-hero {
-  background-image: url('../Serac/bg.jpg');
-}
+body.serac { --main-color:#141517; }
+.serac-hero { background-image:url('../Serac/bg.jpg'); }
 body.serac .brand-site-title { color: var(--main-color); }
 
-/* === Tagline (commented out) === */
-
+/* === Tagline (commented out, optional) === */
 /*
 .tagline {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  text-align: center;
-  font-size: 12px;
-  letter-spacing: 1px;
-  opacity: 0.85;
-  z-index: 5;
-  padding: 0 12px;
+  position:absolute;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  text-align:center;
+  font-size:12px;
+  letter-spacing:1px;
+  opacity:0.85;
+  z-index:5;
+  padding:0 12px;
 }
-*/
-
-/* FleurDeVie tagline style (luxurious serif italic) */
-/*
 body.fleurdevie .tagline {
-  font-family: 'Playfair Display', serif;
-  font-style: italic;
-  color: rgba(255, 255, 255, 0.92);
+  font-family:'Playfair Display', serif;
+  font-style:italic;
+  color:rgba(255,255,255,0.92);
 }
-*/
-
-/* Sérac tagline style (gothic) */
-/*
 body.serac .tagline {
-  font-family: 'UnifrakturCook', cursive;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.9);
-  letter-spacing: 2px;
+  font-family:'UnifrakturCook', cursive;
+  font-weight:700;
+  color:rgba(255,255,255,0.9);
+  letter-spacing:2px;
 }
 */
 
 /* === Responsive === */
-@media (max-width: 900px) {
-  .landing-links { flex-direction:column; gap:18px; padding: 0 12%; }
-  .big-link { font-size: clamp(22px, 7.5vw, 42px); white-space: normal; }
-  .brand-site-title { font-size: clamp(20px, 6vw, 34px); }
+@media (max-width:900px) {
+  .landing-links { flex-direction:column; gap:18px; padding:0 12%; }
+  .big-link { font-size:clamp(22px, 7.5vw, 42px); white-space:normal; }
+  .brand-site-title { font-size:clamp(20px, 6vw, 34px); }
 }
-
-@media (max-width: 420px) {
-  .brand-header { height:64px; padding: 8px 12px; }
+@media (max-width:420px) {
+  .brand-header { height:64px; padding:8px 12px; }
   .logo { height:52px; }
   .brand-site-title { font-size:18px; }
-  .big-link { font-size: clamp(18px, 12vw, 34px); }
+  .big-link { font-size:clamp(18px, 12vw, 34px); }
 }
