@@ -1,230 +1,218 @@
-/* === Reset and Global Styles === */
-html, body {
-  margin: 0;
-  padding: 0;
-  scroll-behavior: smooth;
-  width: 100%;
-  font-family: Arial, sans-serif;
-  overflow-x: hidden;
+/* styles/style.css */
+
+/* === Fonts === */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;500;700&display=swap');
+
+/* === Reset === */
+* { box-sizing: border-box; }
+html,body { margin:0; padding:0; height:100%; }
+body { font-family: 'Montserrat', sans-serif; color:#fff; background:#111; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+
+/* === Variables === */
+:root {
+  --brandisby-main: #5a3c30;
+  --brandisby-dark: #1b1513;
+  --white: #ffffff;
+  --muted: rgba(255,255,255,0.7);
 }
 
-/* --- Fonts --- */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap'); /* FleurDeVie */
-@import url('https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&display=swap'); /* Serac Gothic */
-
-/* --- Top Header --- */
+/* === Header === */
 .brand-header {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 2rem;
-  z-index: 10;
-  background: rgba(0,0,0,0.1);
+  top:0; left:0; right:0;
+  height:72px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 24px;
+  z-index:60;
+  background: linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0.12));
+  backdrop-filter: blur(2px);
 }
 
-/* Top-left static logo placeholder */
-.brand-header .logo-static {
-  height: 180px; /* x3 larger */
-  width: auto;
-}
+.logo { height:48px; width:auto; display:block; }
+.logo-small { height:36px; }
 
-/* Brand name in header */
-.brand-header .brand-name-header {
+/* title centered on top */
+.brand-site-title {
   position: absolute;
-  left: 50%;
+  left:50%;
   transform: translateX(-50%);
-  font-weight: bold;
-  font-size: 3rem;
-  color: inherit; /* per brand */
-  white-space: nowrap;
-  z-index: 5;
+  font-family: 'Playfair Display', serif;
+  letter-spacing:4px;
+  font-size:22px;
+  color:var(--header-color, rgba(255,255,255,0.95));
 }
 
-/* Socials top-right */
-.brand-header .socials {
-  display: flex;
-  gap: 1.5rem;
-  position: absolute;
-  right: 2rem;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 5;
-}
-.brand-header .socials a {
-  font-size: 2rem;
-  transition: 0.3s;
-  color: inherit; /* per brand TikTok color */
-}
-.brand-header .socials a:hover {
-  transform: scale(1.2);
+/* socials (right) */
+.socials { display:flex; gap:14px; align-items:center; z-index:70; }
+.socials a { color: rgba(255,255,255,0.9); font-size:18px; text-decoration:none; }
+.socials a:hover { transform:translateY(-2px); }
+
+/* header right area for Brandisby home */
+.top-actions { display:flex; gap:12px; align-items:center; }
+
+/* Buttons */
+.btn { display:inline-block; padding:10px 18px; border-radius:6px; text-decoration:none; font-weight:600; }
+.btn-primary { background:var(--brandisby-main); color: white; border: 1px solid rgba(0,0,0,0.15); }
+.btn-outline { background:transparent; color:var(--white); border:1px solid rgba(255,255,255,0.12); }
+.btn-ghost { background: transparent; color: rgba(255,255,255,0.9); border:none; }
+
+/* === HERO base === */
+.hero {
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  padding-top:72px; /* header space */
+  background-size:cover;
+  background-position:center;
 }
 
-/* --- Landing Section --- */
-.landing {
-  position: relative;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  overflow: hidden;
-  padding-top: 120px; /* space for header */
-}
-
-.landing::before {
+/* dark overlay sits above bg but under content */
+.hero::after {
   content: "";
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center;
-  filter: blur(3px) brightness(0.6); /* reduced blur */
-  transform: scale(1.05);
-  z-index: 0;
+  position:absolute;
+  inset:0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.55), rgba(0,0,0,0.65));
+  z-index:0;
 }
 
-/* --- Centered landing page logo --- */
-.brand-logo-landing {
-  max-width: 900px;  /* x3 larger */
-  width: 90%;
-  height: auto;
-  margin: 2rem 0;
-  position: relative;
-  z-index: 1;
-  filter: drop-shadow(0 6px 12px rgba(0,0,0,0.5));
+/* center wrapper for hero content */
+.hero-inner {
+  position:relative;
+  z-index:2;
+  width:100%;
+  max-width:1400px;
+  padding:32px;
+  display:flex;
+  flex-direction:column;
+  gap:26px;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
 }
 
-/* --- Landing Links --- */
+/* Brandisby home hero */
+.hero--brandisby {
+  background-image: url('assets/brandisby-bg.jpg');
+  background-size:cover;
+  background-position:center;
+}
+
+.hero-title {
+  font-family: 'Playfair Display', serif;
+  font-weight:700;
+  font-size: clamp(28px, 4.4vw, 48px);
+  margin:0;
+  color:var(--white);
+  letter-spacing:0.6px;
+}
+
+.hero-sub {
+  max-width:900px;
+  color: rgba(255,255,255,0.85);
+  font-size: clamp(14px, 2.2vw, 20px);
+  margin:0;
+}
+
+/* Store links tiles row on homepage */
+.store-links { display:flex; gap:18px; margin-top:18px; }
+.store-tile {
+  display:flex; gap:12px; align-items:center;
+  text-decoration:none; color:rgba(255,255,255,0.95);
+  background: rgba(255,255,255,0.03);
+  padding:8px 12px; border-radius:8px;
+}
+.store-tile img { height:36px; width:auto; display:block; }
+.store-tile span { font-weight:600; letter-spacing:1px; }
+
+/* === Landing links / large words for brand pages === */
 .landing-links {
-  display: flex;
-  justify-content: space-evenly;
-  width: 80%;
-  margin-top: 2rem;
-  z-index: 1;
-  flex-wrap: nowrap;
-  flex-shrink: 0;
+  width:100%;
+  display:flex;
+  gap:20px;
+  justify-content:space-between;
+  align-items:center;
+  padding: 0 8%;
+  box-sizing:border-box;
+  flex-wrap:nowrap;
 }
 
-.landing-links a {
-  text-decoration: none;
-  font-size: 2.5rem;
-  font-weight: bold;
-  color: inherit;
-  transition: 0.3s;
-  text-transform: uppercase;
-}
-.landing-links a:hover {
-  transform: scale(1.1);
-}
-
-/* --- Tagline --- */
-.tagline {
-  position: absolute;
-  bottom: 30px;
-  font-size: 2.5rem;
-  font-style: italic;
-  text-align: center;
-  z-index: 1;
+/* The huge words like EAT DRINK VISIT (ABOUT US SHOP CONTACT US) */
+.big-link {
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-decoration:none;
+  color: rgba(255,255,255,0.92);
+  font-family: 'Playfair Display', serif;
+  text-transform:uppercase;
+  font-weight:700;
+  letter-spacing:6px;
+  position:relative;
+  padding:22px 10px 40px;
+  font-size: clamp(44px, 9.5vw, 140px); /* scales: desktop large, mobile smaller */
+  line-height:0.95;
 }
 
-/* === Brand Specific Styling === */
+/* thin underline below each word */
+.big-link::after {
+  content:"";
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  bottom:12px;
+  width:60%;
+  height:2px;
+  background: rgba(255,255,255,0.18);
+}
+
+/* address line under hero */
+.address-line {
+  margin-top:30px;
+  color: rgba(255,255,255,0.55);
+  font-size: clamp(14px, 2.4vw, 20px);
+  letter-spacing:1px;
+}
+
+/* === Brand specific overrides (backgrounds + colors) === */
 
 /* FleurDeVie */
-body.fleurdevie {
-  --main-color: #112e1f;
-  --accent1: #F5E6CC;
-  --accent2: #FFD6BA;
-  --accent3: #C9E4FF;
-}
-body.fleurdevie .brand-header .brand-name-header,
-body.fleurdevie .tagline,
-body.fleurdevie .landing-links a {
-  color: var(--main-color);
-  font-family: 'Playfair Display', serif;
-}
-body.fleurdevie .landing::before {
+body.fleurdevie { --main-color: #112e1f; }
+.fleurdevie-hero {
   background-image: url('../FleurDeVie/bg.jpg');
+  background-size:cover;
+  background-position:center;
 }
-body.fleurdevie .socials a {
-  color: var(--accent2); /* TikTok color for FleurDeVie */
-}
+body.fleurdevie .brand-site-title { color: var(--main-color); }
 
 /* Serac */
-body.serac {
-  --main-color: #ffffff;
-  --accent1: #4B4E54;
-  --accent2: #B66E41;
-  --accent3: #F5F5F3;
-}
-body.serac .brand-header .brand-name-header,
-body.serac .tagline,
-body.serac .landing-links a {
-  color: var(--main-color);
-  font-family: 'UnifrakturCook', cursive;
-}
-body.serac .landing::before {
+body.serac { --main-color: #141517; }
+.serac-hero {
   background-image: url('../Serac/bg.jpg');
+  background-size:cover;
+  background-position:center;
 }
-body.serac .socials a {
-  color: var(--accent2); /* TikTok color for Serac */
+body.serac .brand-site-title { color: var(--main-color); }
+
+/* smaller screens: stack the three words vertically */
+@media (max-width: 900px) {
+  .landing-links {
+    flex-direction:column;
+    gap:18px;
+    align-items:center;
+    padding: 0 12%;
+  }
+  .big-link { font-size: clamp(36px, 12vw, 84px); letter-spacing:4px; padding-bottom:22px; }
 }
 
-/* --- Responsive --- */
-@media(max-width: 1024px) {
-  .brand-header {
-    height: 90px;
-    padding: 0 1.5rem;
-  }
-  .brand-header .logo-static {
-    height: 150px;
-  }
-  .brand-header .brand-name-header {
-    font-size: 2.5rem;
-  }
-  .brand-logo-landing {
-    max-width: 700px;
-  }
-  .landing-links {
-    width: 90%;
-  }
-  .landing-links a {
-    font-size: 2rem;
-  }
-  .tagline {
-    font-size: 2rem;
-  }
-}
-
-@media(max-width: 600px) {
-  .brand-header {
-    flex-direction: row;
-    justify-content: space-between;
-    height: auto;
-    padding: 0.5rem 1rem;
-  }
-  .brand-header .logo-static {
-    height: 120px;
-  }
-  .brand-header .brand-name-header {
-    font-size: 2rem;
-  }
-  .brand-logo-landing {
-    max-width: 500px;
-  }
-  .landing-links {
-    width: 100%;
-    justify-content: space-evenly; /* even on mobile */
-    flex-wrap: nowrap;
-  }
-  .landing-links a {
-    font-size: 1.8rem;
-  }
-  .tagline {
-    font-size: 1.8rem;
-  }
+/* very small phones */
+@media (max-width: 420px) {
+  .brand-site-title { font-size:18px; }
+  .brand-header { height:64px; padding: 8px 12px; }
+  .logo { height:42px; }
+  .big-link { font-size: clamp(28px, 14vw, 64px); }
 }
