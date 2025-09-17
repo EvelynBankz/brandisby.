@@ -1,26 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Brandisby</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Brandisby — Create your store</title>
+
   <link rel="stylesheet" href="styles/style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="brandisby">
 
   <header class="brand-header">
-    <img src="logo.png" alt="Brandisby Logo" class="brand-logo">
+    <div class="logo-wrap">
+      <!-- Optional: replace with assets/brandisby-logo.png -->
+      <img src="assets/brandisby-logo.png" alt="Brandisby" class="logo logo-small">
+    </div>
+
+    <nav class="top-actions">
+      <a class="btn btn-outline" href="#">Create Your Store</a>
+      <a class="btn btn-ghost" href="#">Learn More</a>
+    </nav>
   </header>
 
-  <div class="landing">
-    <h1>Welcome to Brandisby</h1>
-    <p>Create your store. Build your brand identity. Get your own unique page and share your creativity with the world.</p>
-    <div class="buttons">
-      <a href="FleurDeVie/index.html" class="btn">Fleur de Vie</a>
-      <a href="Serac/index.html" class="btn main-btn">Sérac</a>
+  <main class="hero hero--brandisby" role="main">
+    <div class="hero-inner">
+      <h1 class="hero-title">Welcome to Brandisby</h1>
+      <p class="hero-sub">Create your store. Build your brand identity. Get your own unique page and share your creativity with the world.</p>
+
+      <div class="cta-row">
+        <a class="btn btn-primary" href="#">Create Your Store</a>
+        <a class="btn btn-outline" href="#">Learn More</a>
+      </div>
+
+      <div class="store-links">
+        <a class="store-tile" href="FleurDeVie/">
+          <img src="FleurDeVie/logo.png" alt="Fleur De Vie logo">
+          <span>Fleur De Vie</span>
+        </a>
+        <a class="store-tile" href="Serac/">
+          <img src="Serac/logo.png" alt="Serac logo">
+          <span>Serac</span>
+        </a>
+      </div>
     </div>
-  </div>
+  </main>
+
+  <footer class="site-footer">
+    <small>Brandisby • Minimalist e-commerce demo • Colors: #5a3c30 / #1b1513 / #ffffff</small>
+  </footer>
 
 </body>
 </html>
