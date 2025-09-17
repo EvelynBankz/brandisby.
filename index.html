@@ -1,53 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Brandisby — Create your store</title>
-
-  <link rel="stylesheet" href="styles/style.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brandisby</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="brandisby">
+<body class="h-screen bg-cover bg-center" style="background-image: url('bg.jpg');">
 
-  <header class="brand-header">
-    <div class="logo-wrap">
-      <!-- Optional: replace with assets/brandisby-logo.png -->
-      <img src="assets/brandisby-logo.png" alt="Brandisby" class="logo logo-small">
-    </div>
+  <!-- Header -->
+  <header class="flex items-center justify-between px-6 py-4 bg-black bg-opacity-50 text-white">
+    <!-- Logo -->
+    <img src="logo.png" alt="Brandisby Logo" class="h-10 w-auto">
 
-    <nav class="top-actions">
-      <a class="btn btn-outline" href="#">Create Your Store</a>
-      <a class="btn btn-ghost" href="#">Learn More</a>
+    <!-- Brand Name -->
+    <h1 class="text-xl font-bold tracking-wide text-center absolute left-1/2 transform -translate-x-1/2">
+      Brandisby
+    </h1>
+
+    <!-- Navigation -->
+    <nav class="flex space-x-6 text-sm underline">
+      <a href="about.html">About</a>
+      <a href="shop.html">Shop</a>
+      <a href="contact.html">Contact Us</a>
     </nav>
   </header>
 
-  <main class="hero hero--brandisby" role="main">
-    <div class="hero-inner">
-      <h1 class="hero-title">Welcome to Brandisby</h1>
-      <p class="hero-sub">Create your store. Build your brand identity. Get your own unique page and share your creativity with the world.</p>
-
-      <div class="cta-row">
-        <a class="btn btn-primary" href="#">Create Your Store</a>
-        <a class="btn btn-outline" href="#">Learn More</a>
-      </div>
-
-      <div class="store-links">
-        <a class="store-tile" href="FleurDeVie/">
-          <img src="FleurDeVie/logo.png" alt="Fleur De Vie logo">
-          <span>Fleur De Vie</span>
-        </a>
-        <a class="store-tile" href="Serac/">
-          <img src="Serac/logo.png" alt="Serac logo">
-          <span>Serac</span>
-        </a>
-      </div>
-    </div>
+  <!-- Tagline -->
+  <main class="flex flex-col items-center justify-center h-[80%] text-center text-white">
+    <h2 class="text-2xl md:text-3xl font-semibold drop-shadow-lg">
+      Strength, Softness, Elegance, Wealth, Luxury
+    </h2>
   </main>
-
-  <footer class="site-footer">
-    <small>Brandisby • Minimalist e-commerce demo • Colors: #5a3c30 / #1b1513 / #ffffff</small>
-  </footer>
 
 </body>
 </html>
