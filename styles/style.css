@@ -227,39 +227,3 @@ body {
 .top-actions .social-link {
   text-decoration: none !important;
 }
-
-/* === FleurDeVie & Sérac tweaks === */
-body.fleurdevie .brand-site-title,
-body.serac .brand-site-title {
-  font-weight: 300;          /* thinner */
-  letter-spacing: 0.5px;     /* very tight spacing */
-  text-transform: uppercase;
-  font-size: clamp(22px, 4.5vw, 46px);
-}
-
-body.fleurdevie .big-link,
-body.serac .big-link {
-  font-weight: 300;
-  letter-spacing: 0.5px;
-  text-decoration: none;
-  text-transform: uppercase;
-}
-
-.site-footer {
-  text-align: center;
-  padding: 20px;
-  font-size: 14px;
-  color: rgba(255,255,255,0.75);
-}
-
-.site-footer .tagline {
-  font-family: 'Playfair Display', serif;
-  font-style: italic;
-  font-weight: 300;
-  font-size: 18px;
-  letter-spacing: 0.5px;
-}
- 
-
-
-
