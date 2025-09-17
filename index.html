@@ -47,6 +47,13 @@
   <footer class="site-footer">
     <small>Brandisby • Minimalist e-commerce demo • Colors: #5a3c30 / #1b1513 / #ffffff</small>
   </footer>
+<script>
+  const menuToggle = document.querySelector('.menu-toggle');
+  const topActions = document.querySelector('.top-actions');
+  menuToggle.addEventListener('click', () => {
+    topActions.classList.toggle('active');
+  });
+</script>
 
 </body>
 </html>
