@@ -1,14 +1,14 @@
 /* styles/style.css
-   Rewritten for:
-   - header link styling (Home / About / Create / Learn = same text-link style)
-   - header ordering: links then buttons then socials (using flex order)
-   - large, responsive logo (very visible on all screens)
-   - header height variable so hero padding stays correct
+   Updated with:
+   - Slide-down mobile nav menu
+   - Hamburger toggle
+   - Reduced spacing in nav
+   - Large responsive logo
 */
 
 /* === Fonts === */
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;500;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&display=swap'); /* Gothic for Sérac */
+@import url('https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&display=swap');
 
 /* === Reset & base === */
 * { box-sizing: border-box; margin:0; padding:0; }
@@ -28,28 +28,24 @@ body {
   --white: #ffffff;
   --muted: rgba(255,255,255,0.7);
 
-  /* header sizing controlled by variable for consistent spacing */
-  --header-height: 110px; /* desktop default — scales in media queries below */
+  --header-height: 110px;
   --logo-max-height: 140px;
 }
 
 /* === Header === */
 .brand-header{
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  top: 0; left: 0; right: 0;
   height: var(--header-height);
   display: flex;
   align-items: center;
-  gap: 20px;
-  padding: 0 28px;
+  padding: 0 24px;
   z-index: 1000;
   background: linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0.12));
   backdrop-filter: blur(3px);
 }
 
-/* Logo — large and responsive (visible on all screen sizes) */
+/* Logo */
 .logo {
   height: clamp(64px, 9vw, var(--logo-max-height));
   width: auto;
@@ -58,7 +54,7 @@ body {
   z-index: 1100;
 }
 
-/* Centered brand title (keeps visible over header) */
+/* Title */
 .brand-site-title {
   position: absolute;
   left: 50%;
@@ -73,26 +69,20 @@ body {
   white-space: nowrap;
 }
 
-/* === Top actions container (holds nav links, header CTAs and socials) ===
-   NOTE: HTML order doesn't need to change; we use `order` to place items visually:
-     - .top-actions .nav-link -> order: 1  (Home / About)
-     - .top-actions .cta-link  -> order: 2  (Create Your Store / Learn More)
-     - .top-actions .social-link -> order: 3 (social icons)
-*/
+/* === Navigation container === */
 .top-actions {
-  margin-left: auto;          /* push top-actions to the right of logo */
+  margin-left: auto;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: nowrap;
+  transition: max-height 0.4s ease;
 }
 
-/* Generic look for header text-links (Home / About / Create / Learn) */
+/* Links */
 .top-actions .nav-link,
-.top-actions .cta-link,
-.top-actions .brand-text-link,
-.top-actions .btn-as-link {
-  order: 1;
+.top-actions .btn,
+.top-actions .cta-link {
   color: rgba(255,255,255,0.95);
   text-decoration: none;
   font-size: 15px;
@@ -104,38 +94,15 @@ body {
   cursor: pointer;
 }
 .top-actions .nav-link:hover,
-.top-actions .cta-link:hover,
-.top-actions .btn-as-link:hover {
+.top-actions .btn:hover,
+.top-actions .cta-link:hover {
   text-decoration: underline;
 }
 
-/* Ensure header CTA buttons (if present in HTML as .btn) are rendered as links in header */
-.brand-header .btn {
-  /* Only the header's .btn should look like the other nav text links */
-  background: transparent;
-  border: none;
-  color: rgba(255,255,255,0.95);
-  padding: 6px 8px;
-  font-weight: 400;
-  text-decoration: none;
-  order: 2; /* place header buttons after main nav links */
-  cursor: pointer;
-}
-.brand-header .btn:hover {
-  text-decoration: underline;
-  transform: none;
-}
-
-/* If you still use explicit "cta-link" anchors in header, push them before socials: */
-.top-actions .btn,
-.top-actions .cta-link { order: 2; }
-
-/* Social icons should appear after the links */
+/* Socials */
 .top-actions .social-link {
-  order: 3;
   color: rgba(255,255,255,0.78);
   font-size: 18px;
-  text-decoration: none;
   padding: 6px;
   display: inline-flex;
   align-items: center;
@@ -143,14 +110,7 @@ body {
 }
 .top-actions .social-link:hover { color: #fff; transform: translateY(-2px); }
 
-/* Per-icon brand hover colors (optional, subtle) */
-.top-actions .social-link .fa-instagram:hover { color: #E4405F; }
-.top-actions .social-link .fa-tiktok:hover    { color: #000; }
-.top-actions .social-link .fa-envelope:hover  { color: #c23a2b; }
-.top-actions .social-link .fa-linkedin:hover { color: #0077b5; }
-.top-actions .social-link .fa-twitter:hover  { color: #1DA1F2; }
-
-/* === Primary button styles (used in hero) — keep these untouched */
+/* === Buttons in hero === */
 .btn {
   display: inline-block;
   padding: 10px 18px;
@@ -158,28 +118,21 @@ body {
   text-decoration: none;
   font-weight: 600;
 }
-.btn-primary { background: var(--brandisby-main); color: #fff; border: 1px solid rgba(0,0,0,0.12); }
+.btn-primary { background: var(--brandisby-main); color: #fff; }
 .btn-outline { background: transparent; color: var(--white); border: 1px solid rgba(255,255,255,0.12); }
 .btn-ghost { background: transparent; color: rgba(255,255,255,0.9); border: none; }
 
-/* To ensure hero buttons keep their look, stronger selector for hero */
-.hero .btn-primary, .hero .btn-outline, .hero .btn-ghost {
-  /* hero CTAs keep their button appearance */
-}
-
-/* === HERO === */
+/* === Hero === */
 .hero {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
-  padding-top: calc(var(--header-height)); /* keep content below header */
+  padding-top: calc(var(--header-height));
   background-size: cover;
   background-position: center;
 }
-
-/* subtle overlay */
 .hero::after {
   content: "";
   position: absolute;
@@ -197,11 +150,10 @@ body {
   flex-direction: column;
   gap: 26px;
   align-items: center;
-  justify-content: center;
   text-align: center;
 }
 
-/* === Landing large links (ABOUT / SHOP / CONTACT) === */
+/* === Landing links === */
 .landing-links {
   width: 100%;
   display: flex;
@@ -209,15 +161,11 @@ body {
   justify-content: space-evenly;
   align-items: center;
   padding: 0 8%;
-  box-sizing: border-box;
   flex-wrap: nowrap;
 }
 .big-link {
   flex: 1;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  text-decoration:none;
+  text-decoration: none;
   color: rgba(255,255,255,0.92);
   font-family: 'Playfair Display', serif;
   text-transform: uppercase;
@@ -225,7 +173,6 @@ body {
   letter-spacing: 3px;
   text-decoration: underline;
   text-decoration-thickness: 2px;
-  text-decoration-color: rgba(255,255,255,0.9);
   padding: 6px 8px;
   text-align: center;
   font-size: clamp(28px, 4.8vw, 64px);
@@ -233,52 +180,43 @@ body {
   white-space: nowrap;
 }
 
-/* optional address/tagline styles */
-.address-line{
-  margin-top: 30px;
-  color: rgba(255,255,255,0.55);
-  font-size: clamp(14px, 2.4vw, 20px);
-  letter-spacing: 1px;
+/* === Mobile nav toggle === */
+.menu-toggle {
+  display: none;
+  font-size: 24px;
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  margin-left: auto;
+  z-index: 1200;
 }
 
-/* === Brand backgrounds === */
-body.fleurdevie { --main-color: #112e1f; }
-.fleurdevie-hero { background-image: url('../FleurDeVie/bg.jpg'); }
-body.fleurdevie .brand-site-title { color: var(--main-color); }
+/* === Responsive === */
+@media (max-width: 768px){
+  .menu-toggle { display: block; }
 
-body.serac { --main-color: #141517; }
-.serac-hero { background-image: url('../Serac/bg.jpg'); }
-body.serac .brand-site-title { color: var(--main-color); }
-
-/* === Tagline (commented out example) === */
-/*
-.tagline {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 12px;
-  letter-spacing: 1px;
-  opacity: 0.85;
-  z-index: 5;
+  .top-actions {
+    position: fixed;
+    top: var(--header-height);
+    left: 0; right: 0;
+    background: rgba(0,0,0,0.92);
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    max-height: 0;
+    overflow: hidden;
+  }
+  .top-actions.active {
+    padding: 20px 0;
+    max-height: 400px;
+  }
 }
-*/
 
-/* === Responsive adjustments === */
-/* reduce header height and logo on narrower screens */
-@media (max-width: 900px){
-  :root { --header-height: 90px; --logo-max-height: 110px; }
-  .brand-site-title { font-size: clamp(20px, 6vw, 40px); }
-  .big-link { font-size: clamp(22px, 7.5vw, 42px); white-space: normal; }
-  .top-actions { gap: 10px; }
-}
 @media (max-width: 420px){
   :root { --header-height: 72px; --logo-max-height: 90px; }
   .brand-header { padding: 0 12px; }
   .logo { height: clamp(48px, 14vw, 90px); }
   .brand-site-title { font-size: 18px; }
   .big-link { font-size: clamp(18px, 12vw, 34px); }
-  /* wrap the top-actions if needed on tiny screens */
-  .top-actions { flex-wrap: wrap; gap: 8px; }
-  .top-actions .social-link { order: 99; } /* put socials on next line if wrapped */
 }
