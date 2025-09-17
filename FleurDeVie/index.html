@@ -1,65 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Sérac</title>
-
-  <link rel="stylesheet" href="../styles/style.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fleur De Vie</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-<body class="serac">
+<body class="fleurdevie">
+  <!-- Background -->
+  <div class="background"></div>
 
-  <header class="brand-header">
-    <div class="left-controls">
-      <img src="logo.png" alt="Sérac" class="logo">
+  <!-- Top left nav -->
+  <header class="top-actions">
+    <nav class="nav-links">
       <a href="index.html" class="home-link">Home</a>
-
-      <!-- socials (top-left) -->
-      <div class="socials">
-        <a href="https://www.instagram.com/serac_com/" target="_blank" rel="noreferrer"><i class="fab fa-instagram"></i></a>
-        <a href="https://www.tiktok.com/@serac.com" target="_blank" rel="noreferrer"><i class="fab fa-tiktok"></i></a>
-        <a href="mailto:stonecold.serac@gmail.com"><i class="fas fa-envelope"></i></a>
-      </div>
-
-      <!-- hamburger for mobile (shows mobile menu) -->
-      <button class="menu-toggle" aria-label="Menu"><i class="fas fa-bars"></i></button>
+    </nav>
+    <div class="socials">
+      <a href="#" class="social-link">IG</a>
+      <a href="#" class="social-link">FB</a>
+      <a href="#" class="social-link">TW</a>
     </div>
-
-    <div class="brand-site-title">Sérac</div>
   </header>
 
-  <!-- mobile menu (hidden on desktop) -->
-  <nav class="mobile-menu" aria-hidden="true">
-    <a href="about.html">ABOUT US</a>
-    <a href="shop.html">SHOP</a>
-    <a href="contact.html">CONTACT US</a>
-  </nav>
-
-  <main class="hero serac-hero">
-    <div class="hero-inner">
-      <nav class="landing-links" aria-label="Primary landing links">
-        <a class="big-link" href="about.html">ABOUT US</a>
-        <a class="big-link" href="shop.html">SHOP</a>
-        <a class="big-link" href="contact.html">CONTACT US</a>
-      </nav>
-    </div>
+  <!-- Center brand content -->
+  <main class="brand-content">
+    <img src="logo.png" alt="Fleur De Vie Logo" class="brand-logo">
+    <h1 class="brand-site-title">Fleur De Vie</h1>
+    <nav class="big-links">
+      <a href="about.html" class="big-link">About Us</a>
+      <a href="shop.html" class="big-link">Shop</a>
+      <a href="contact.html" class="big-link">Contact Us</a>
+    </nav>
   </main>
 
-  <footer class="site-footer" role="contentinfo">
-    <div class="tagline">“Stone Cold”</div>
+  <!-- Footer -->
+  <footer class="site-footer">
+    <p class="tagline">Life in Full Bloom</p>
+    <p>© 2025 Fleur De Vie</p>
   </footer>
-
-  <script>
-    (function(){
-      const toggle = document.querySelector('.menu-toggle');
-      const mobileMenu = document.querySelector('.mobile-menu');
-      if (!toggle || !mobileMenu) return;
-      toggle.addEventListener('click', () => {
-        mobileMenu.classList.toggle('active');
-        document.body.classList.toggle('menu-open', mobileMenu.classList.contains('active'));
-      });
-    })();
-  </script>
 </body>
 </html>
