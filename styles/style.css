@@ -74,7 +74,7 @@ body {
   margin-left: auto;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   flex-wrap: nowrap;
   transition: max-height 0.4s ease;
 }
@@ -85,10 +85,10 @@ body {
 .top-actions .cta-link {
   color: rgba(255,255,255,0.95);
   text-decoration: none;
-  font-size: 15px;
-  font-weight: 400;
-  letter-spacing: 0.6px;
-  padding: 6px 8px;
+  font-size: 12px;
+  font-weight: 300;
+  letter-spacing: 0.5px;
+  padding: 4px 6px;
   background: transparent;
   border: none;
   cursor: pointer;
@@ -103,7 +103,7 @@ body {
 .top-actions .social-link {
   color: rgba(255,255,255,0.78);
   font-size: 18px;
-  padding: 6px;
+  padding: 4px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
