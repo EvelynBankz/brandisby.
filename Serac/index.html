@@ -1,42 +1,81 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Sérac</title>
+
+  <!-- local stylesheet -->
   <link rel="stylesheet" href="style.css">
+
+  <!-- Fonts & icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400&family=Playfair+Display:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="serac">
-  <!-- Background -->
-  <div class="background"></div>
 
-  <!-- Top left nav -->
-  <header class="top-actions">
-    <nav class="nav-links">
-      <a href="index.html" class="home-link">Home</a>
-    </nav>
-    <div class="socials">
-      <a href="#" class="social-link">IG</a>
-      <a href="#" class="social-link">FB</a>
-      <a href="#" class="social-link">TW</a>
+  <header class="brand-header" role="banner">
+    <div class="header-left">
+      <!-- local file: /Serac/logo.png -->
+      <img src="logo.png" alt="Sérac logo" class="logo">
+    </div>
+
+    <div class="brand-site-title" aria-hidden="true">Sérac</div>
+
+    <div class="header-right">
+      <!-- desktop nav -->
+      <nav class="desktop-nav" aria-label="Main">
+        <a class="home-link" href="index.html">Home</a>
+        <a class="social-link" href="mailto:stonecold.serac@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
+        <a class="social-link" href="https://www.tiktok.com/@serac.com" target="_blank" rel="noreferrer" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+        <a class="social-link" href="https://www.instagram.com/serac_com/" target="_blank" rel="noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+      </nav>
+
+      <button class="menu-toggle" aria-expanded="false" aria-controls="mobileNav" aria-label="Open menu">
+        <i class="fas fa-bars"></i>
+      </button>
+
+      <nav id="mobileNav" class="mobile-nav" aria-hidden="true">
+        <a href="index.html" class="mobile-link">Home</a>
+        <a href="about.html" class="mobile-link">About Us</a>
+        <a href="shop.html" class="mobile-link">Shop</a>
+        <a href="contact.html" class="mobile-link">Contact Us</a>
+
+        <div class="mobile-socials">
+          <a class="social-link" href="mailto:stonecold.serac@gmail.com" aria-label="Email (mobile)"><i class="fas fa-envelope"></i></a>
+          <a class="social-link" href="https://www.tiktok.com/@serac.com" target="_blank" rel="noreferrer" aria-label="TikTok (mobile)"><i class="fab fa-tiktok"></i></a>
+          <a class="social-link" href="https://www.instagram.com/serac_com/" target="_blank" rel="noreferrer" aria-label="Instagram (mobile)"><i class="fab fa-instagram"></i></a>
+        </div>
+      </nav>
     </div>
   </header>
 
-  <!-- Center brand content -->
-  <main class="brand-content">
-    <img src="logo.png" alt="Sérac Logo" class="brand-logo">
-    <h1 class="brand-site-title">Sérac</h1>
-    <nav class="big-links">
-      <a href="about.html" class="big-link">About Us</a>
-      <a href="shop.html" class="big-link">Shop</a>
-      <a href="contact.html" class="big-link">Contact Us</a>
-    </nav>
+  <main class="hero serac-hero" role="main">
+    <div class="hero-inner">
+      <nav class="big-links" aria-label="Store">
+        <a class="big-link" href="about.html">ABOUT US</a>
+        <a class="big-link" href="shop.html">SHOP</a>
+        <a class="big-link" href="contact.html">CONTACT US</a>
+      </nav>
+    </div>
   </main>
 
-  <!-- Footer -->
-  <footer class="site-footer">
-    <p class="tagline">Strength in Simplicity</p>
-    <p>© 2025 Sérac</p>
+  <footer class="site-footer" role="contentinfo">
+    <div class="tagline">Stone Cold</div>
+    <div class="copyright">© 2025 Sérac</div>
   </footer>
+
+  <script>
+    (function () {
+      const toggle = document.querySelector('.menu-toggle');
+      const mobileNav = document.getElementById('mobileNav');
+      if (!toggle || !mobileNav) return;
+      toggle.addEventListener('click', () => {
+        const isOpen = mobileNav.classList.toggle('open');
+        mobileNav.setAttribute('aria-hidden', String(!isOpen));
+        toggle.setAttribute('aria-expanded', String(isOpen));
+      });
+    })();
+  </script>
 </body>
 </html>
