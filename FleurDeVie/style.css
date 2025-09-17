@@ -1,10 +1,9 @@
-/* Full background */
-body.fleurdevie, html {
+body, html {
   margin: 0;
   padding: 0;
   height: 100%;
-  overflow: hidden; /* prevents scrolling */
-  font-family: Arial, sans-serif;
+  overflow: hidden;
+  font-family: 'Montserrat', sans-serif;
   color: white;
 }
 
@@ -15,29 +14,71 @@ body.fleurdevie, html {
   z-index: -1;
 }
 
-/* Top navigation */
-.top-actions {
+/* Header */
+.site-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 20px;
+  position: relative;
 }
 
-.nav-links a {
+.header-left .brand-logo {
+  max-width: 60px;
+}
+
+.brand-name {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Playfair Display', serif;
+  font-size: 40px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+/* Right nav */
+.desktop-nav {
+  display: flex;
+  gap: 20px;
+}
+
+.nav-link, .social-link {
   color: white;
   text-decoration: none;
   font-size: 16px;
-  margin-right: 20px;
 }
 
-.socials .social-link {
-  margin-left: 15px;
+/* Mobile menu */
+.menu-toggle {
+  display: none;
+  font-size: 28px;
+  cursor: pointer;
+}
+
+.mobile-nav {
+  display: none;
+  flex-direction: column;
+  background: rgba(0,0,0,0.85);
+  position: absolute;
+  top: 70px;
+  right: 20px;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.mobile-nav a {
   color: white;
   text-decoration: none;
-  font-size: 16px;
+  margin: 8px 0;
 }
 
-/* Center brand content */
+.mobile-nav.open {
+  display: flex;
+}
+
+/* Center links */
 .brand-content {
   position: absolute;
   top: 50%;
@@ -46,47 +87,41 @@ body.fleurdevie, html {
   text-align: center;
 }
 
-.brand-logo {
-  max-width: 120px;
-  margin-bottom: 15px;
-}
-
-.brand-site-title {
-  font-weight: 300;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  font-size: clamp(22px, 4.5vw, 46px);
-}
-
-.big-links {
-  margin-top: 20px;
-}
-
 .big-link {
-  display: block;
-  margin: 10px 0;
+  display: inline-block;
+  margin: 0 30px;
+  font-family: 'Montserrat', sans-serif;
   font-weight: 300;
-  letter-spacing: 0.5px;
+  letter-spacing: 2px;
   text-transform: uppercase;
-  text-decoration: underline; /* keep underline */
-  color: white;
-  font-size: 18px;
+  text-decoration: underline;
+  font-size: 20px;
 }
 
 /* Footer */
 .site-footer {
   position: absolute;
-  bottom: 15px;
+  bottom: 20px;
   width: 100%;
   text-align: center;
-  font-size: 14px;
-  color: rgba(255,255,255,0.75);
 }
 
 .site-footer .tagline {
   font-family: 'Playfair Display', serif;
   font-style: italic;
-  font-weight: 300;
-  font-size: 18px;
-  letter-spacing: 0.5px;
+  font-size: 20px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .desktop-nav {
+    display: none;
+  }
+  .menu-toggle {
+    display: block;
+  }
+  .big-link {
+    display: block;
+    margin: 15px 0;
+  }
 }
