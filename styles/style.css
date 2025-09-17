@@ -1,14 +1,17 @@
 /* styles/style.css
-   Updated with:
-   - Slide-down mobile nav menu
-   - Hamburger toggle
-   - Reduced spacing in nav
-   - Large responsive logo
+   Updated for FleurDeVie & Sérac:
+   - Top-left: Home + socials only
+   - Centered brand name (fixed)
+   - Big ABOUT/SHOP/CONTACT centered on page (underlined)
+   - Mobile hamburger -> slide menu with ABOUT/SHOP/CONTACT
+   - Tagline in footer area (centered)
+   - Hero + header + footer = 100vh (no vertical scrolling)
+   - Correct background image paths
 */
 
 /* === Fonts === */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;500;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&display=swap'); /* Gothic for Sérac */
 
 /* === Reset & base === */
 * { box-sizing: border-box; margin:0; padding:0; }
@@ -21,239 +24,253 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* === Globals / variables === */
+/* === variables === */
 :root{
   --brandisby-main: #5a3c30;
-  --brandisby-dark: #1b1513;
   --white: #ffffff;
   --muted: rgba(255,255,255,0.7);
 
-  --header-height: 110px;
+  --header-height: 110px;   /* desktop header height */
+  --footer-height: 60px;    /* footer/tagline area */
   --logo-max-height: 140px;
 }
 
-/* === Header === */
-.brand-header{
+/* ===== HEADER ===== */
+.brand-header {
   position: fixed;
   top: 0; left: 0; right: 0;
   height: var(--header-height);
   display: flex;
   align-items: center;
-  padding: 0 24px;
-  z-index: 1000;
+  gap: 12px;
+  padding: 0 22px;
+  z-index: 1200;
   background: linear-gradient(180deg, rgba(0,0,0,0.45), rgba(0,0,0,0.12));
   backdrop-filter: blur(3px);
 }
 
-/* Logo */
-.logo {
-  height: clamp(64px, 9vw, var(--logo-max-height));
-  width: auto;
-  display: block;
-  object-fit: contain;
-  z-index: 1100;
+/* left controls: logo + home + socials (compact) */
+.left-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-/* Title */
+/* logo (left) */
+.logo {
+  height: clamp(56px, 8.5vw, var(--logo-max-height));
+  width: auto;
+  object-fit: contain;
+  display:block;
+}
+
+/* Home link (small & compact) */
+.left-controls .home-link {
+  color: rgba(255,255,255,0.95);
+  text-decoration: none;
+  font-size: 13px;      /* small */
+  font-weight: 400;
+  letter-spacing: 0.6px;
+  padding: 6px 8px;
+}
+
+/* social icons (placed next to Home) */
+.left-controls .socials {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.left-controls .socials a {
+  color: rgba(255,255,255,0.82);
+  font-size: 18px;
+  text-decoration: none !important; /* ensure no underline */
+  padding: 6px;
+}
+.left-controls .socials a:hover { color: #fff; transform: translateY(-2px); }
+
+/* center brand name stays centered at all sizes */
 .brand-site-title {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
   font-family: 'Playfair Display', serif;
-  font-weight: 800;
-  letter-spacing: 3px;
-  font-size: clamp(28px, 4.6vw, 56px);
+  font-weight: 400;            /* thin-ish */
+  letter-spacing: 0.8px;
+  font-size: clamp(24px, 4.2vw, 44px);
   color: var(--white);
-  text-shadow: 0 4px 10px rgba(0,0,0,0.55);
-  z-index: 1100;
+  text-shadow: 0 3px 8px rgba(0,0,0,0.45);
+  z-index: 1250;
   white-space: nowrap;
+  pointer-events: none;
 }
 
-/* === Navigation container === */
-.top-actions {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  flex-wrap: nowrap;
-  transition: max-height 0.4s ease;
-}
-
-/* Links */
-.top-actions .nav-link,
-.top-actions .btn,
-.top-actions .cta-link {
-  color: rgba(255,255,255,0.95);
-  text-decoration: none;
-  font-size: 12px;
-  font-weight: 400;
-  letter-spacing: 0.5px;
-  padding: 4px 6px;
-  background: transparent;
+/* hamburger (mobile) — shown only on small screens */
+.menu-toggle {
+  display: none;
+  background: none;
   border: none;
+  color: #fff;
+  font-size: 22px;
   cursor: pointer;
-}
-.top-actions .nav-link:hover,
-.top-actions .btn:hover,
-.top-actions .cta-link:hover {
-  text-decoration: underline;
+  padding: 8px;
+  margin-left: 4px;
+  z-index: 1300;
 }
 
-/* Socials */
-.top-actions .social-link {
-  color: rgba(255,255,255,0.78);
-  font-size: 18px;
-  padding: 4px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-.top-actions .social-link:hover { color: #fff; transform: translateY(-2px); }
-
-/* === Buttons in hero === */
-.btn {
-  display: inline-block;
-  padding: 10px 18px;
-  border-radius: 6px;
-  text-decoration: none;
-  font-weight: 600;
-}
-.btn-primary { background: var(--brandisby-main); color: #fff; }
-.btn-outline { background: transparent; color: var(--white); border: 1px solid rgba(255,255,255,0.12); }
-.btn-ghost { background: transparent; color: rgba(255,255,255,0.9); border: none; }
-
-/* === Hero === */
+/* ===== HERO (no scrolling: header + hero + footer = 100vh) ===== */
+/* Hero sits below header, and leaves space for footer. This keeps the page to a single viewport. */
 .hero {
-  min-height: 100vh;
+  margin-top: var(--header-height); /* keeps below fixed header */
+  height: calc(100vh - var(--header-height) - var(--footer-height));
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
-  padding-top: calc(var(--header-height));
   background-size: cover;
   background-position: center;
+  overflow: hidden;
 }
 .hero::after {
+  /* subtle overlay */
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(0,0,0,0.55), rgba(0,0,0,0.65));
+  background: linear-gradient(180deg, rgba(0,0,0,0.48), rgba(0,0,0,0.6));
   z-index: 0;
 }
+
+/* hero-inner centered content */
 .hero-inner {
   position: relative;
   z-index: 2;
   width: 100%;
   max-width: 1400px;
-  padding: 32px;
+  padding: 12px 32px;
   display: flex;
   flex-direction: column;
-  gap: 26px;
+  gap: 10px;
   align-items: center;
+  justify-content: center;
   text-align: center;
 }
 
-/* === Landing links === */
+/* big center words ABOUT / SHOP / CONTACT (keeps underline) */
 .landing-links {
   width: 100%;
   display: flex;
-  gap: 20px;
+  gap: 12px;
   justify-content: space-evenly;
   align-items: center;
-  padding: 0 8%;
-  flex-wrap: nowrap;
+  padding: 0 6%;
+  box-sizing: border-box;
 }
 .big-link {
-  flex: 1;
+  flex: 1 1 auto;
   text-decoration: none;
-  color: rgba(255,255,255,0.92);
+  color: rgba(255,255,255,0.95);
   font-family: 'Playfair Display', serif;
   text-transform: uppercase;
-  font-weight: 300;
-  letter-spacing: 3px;
-  text-decoration: underline;
+  font-weight: 300;           /* thin */
+  letter-spacing: 0.6px;      /* tight */
+  text-decoration: underline; /* keep underline per your request */
   text-decoration-thickness: 2px;
   padding: 6px 8px;
   text-align: center;
-  font-size: clamp(28px, 4.8vw, 64px);
+  font-size: clamp(26px, 6.8vw, 64px); /* responsive and tight */
   line-height: 1;
   white-space: nowrap;
 }
 
-/* === Mobile nav toggle === */
-.menu-toggle {
-  display: none;
-  font-size: 24px;
-  background: none;
-  border: none;
-  color: #fff;
-  cursor: pointer;
-  margin-left: auto;
-  z-index: 1200;
+/* quick guard so the three words fit on one row on desktop, and stack on very small devices */
+@media (max-width: 780px) {
+  .landing-links { gap: 10px; padding: 0 10%; }
+  .big-link { font-size: clamp(22px, 8vw, 46px); white-space: normal; }
 }
 
-/* === Responsive === */
-@media (max-width: 768px){
-  .menu-toggle { display: block; }
-
-  .top-actions {
-    position: fixed;
-    top: var(--header-height);
-    left: 0; right: 0;
-    background: rgba(0,0,0,0.92);
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-    max-height: 0;
-    overflow: hidden;
-  }
-  .top-actions.active {
-    padding: 20px 0;
-    max-height: 400px;
-  }
+/* ===== Mobile menu (slide down) ===== */
+/* Mobile menu is an overlay that appears under the header and contains ABOUT/SHOP/CONTACT */
+.mobile-menu {
+  position: fixed;
+  top: var(--header-height);
+  left: 0;
+  right: 0;
+  background: rgba(0,0,0,0.95);
+  z-index: 1400;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease, padding 0.25s ease;
 }
-
-@media (max-width: 420px){
-  :root { --header-height: 72px; --logo-max-height: 90px; }
-  .brand-header { padding: 0 12px; }
-  .logo { height: clamp(48px, 14vw, 90px); }
-  .brand-site-title { font-size: 18px; }
-  .big-link { font-size: clamp(18px, 12vw, 34px); }
+.mobile-menu.active {
+  padding: 18px 0;
+  max-height: 360px; /* enough to show the links */
 }
-
-/* Remove underline from social icons */
-.top-actions .social-link {
-  text-decoration: none !important;
-}
-
-/* === FleurDeVie & Sérac tweaks === */
-body.fleurdevie .brand-site-title,
-body.serac .brand-site-title {
-  font-weight: 300;          /* thinner */
-  letter-spacing: 0.5px;     /* very tight spacing */
-  text-transform: uppercase;
-  font-size: clamp(22px, 4.5vw, 46px);
-}
-
-body.fleurdevie .big-link,
-body.serac .big-link {
-  font-weight: 300;
-  letter-spacing: 0.5px;
+.mobile-menu a {
+  color: rgba(255,255,255,0.96);
   text-decoration: none;
-  text-transform: uppercase;
+  font-size: 18px;
+  font-weight: 300;
+  letter-spacing: 0.6px;
+  padding: 6px 12px;
 }
+.mobile-menu a:hover { text-decoration: underline; }
 
+/* ===== Footer / tagline (fixed inside viewport bottom) ===== */
 .site-footer {
-  text-align: center;
-  padding: 20px;
-  font-size: 14px;
-  color: rgba(255,255,255,0.75);
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--footer-height);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+  pointer-events: none; /* non-interactive */
 }
-
 .site-footer .tagline {
+  pointer-events: auto; /* allow selection if needed */
   font-family: 'Playfair Display', serif;
   font-style: italic;
   font-weight: 300;
-  font-size: 18px;
-  letter-spacing: 0.5px;
+  font-size: 14px;
+  color: rgba(255,255,255,0.86);
+  letter-spacing: 0.6px;
+}
+
+/* ===== Brand-specific backgrounds (make sure files exist) ===== */
+/* Paths are relative to this CSS file (styles/style.css)
+   - FleurDeVie bg should be at /FleurDeVie/bg.jpg
+   - Sérac bg should be at /Serac/bg.jpg
+   - Brandisby root bg should be at /bg.jpg
+*/
+.hero--brandisby { background-image: url('../bg.jpg'); }
+.fleurdevie-hero   { background-image: url('../FleurDeVie/bg.jpg'); }
+.serac-hero        { background-image: url('../Serac/bg.jpg'); }
+
+/* body classes to control header title color if needed */
+body.fleurdevie .brand-site-title { color: #112e1f; /* optional accent for the title */ }
+body.serac .brand-site-title    { color: #141517; }
+
+/* small adjustments for small viewports */
+@media (max-width: 900px) {
+  :root { --header-height: 90px; --footer-height: 56px; --logo-max-height: 110px; }
+  .brand-site-title { font-size: clamp(18px, 6.0vw, 36px); }
+  .big-link { font-size: clamp(20px, 7.3vw, 42px); }
+}
+
+/* smallest phones */
+@media (max-width: 420px) {
+  :root { --header-height: 72px; --footer-height: 56px; --logo-max-height: 88px; }
+  .brand-header { padding: 0 12px; }
+  .logo { height: clamp(44px, 14vw, 88px); }
+  .brand-site-title { font-size: 18px; }
+  .big-link { font-size: clamp(16px, 10vw, 34px); }
+  .left-controls .home-link { font-size: 13px; padding: 4px 6px; }
+  .left-controls .socials a { font-size: 16px; padding: 4px; }
+  .menu-toggle { display: block; }
 }
