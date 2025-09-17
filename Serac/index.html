@@ -1,36 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Serac</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+
+  <link rel="stylesheet" href="../styles/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="h-screen bg-cover bg-center" style="background-image: url('bg.jpg');">
+<body class="serac">
 
-  <!-- Header -->
-  <header class="flex items-center justify-between px-6 py-4 bg-black bg-opacity-50 text-white">
-    <!-- Logo -->
-    <img src="logo.png" alt="Serac Logo" class="h-10 w-auto">
+  <header class="brand-header">
+    <div class="logo-wrap">
+      <img src="logo.png" alt="Serac" class="logo">
+    </div>
 
-    <!-- Brand Name -->
-    <h1 class="text-xl font-bold tracking-wide text-center absolute left-1/2 transform -translate-x-1/2">
-      Serac
-    </h1>
+    <!-- Centered, more visible brand title -->
+    <div class="brand-site-title">SERAC</div>
 
-    <!-- Navigation -->
-    <nav class="flex space-x-6 text-sm underline">
-      <a href="about.html">About</a>
-      <a href="shop.html">Shop</a>
-      <a href="contact.html">Contact Us</a>
+    <nav class="socials">
+      <a href="https://www.instagram.com/serac_com/" target="_blank" rel="noreferrer"><i class="fab fa-instagram"></i></a>
+      <a href="https://www.tiktok.com/@serac.com" target="_blank" rel="noreferrer"><i class="fab fa-tiktok"></i></a>
+      <a href="mailto:stonecold.serac@gmail.com"><i class="fas fa-envelope"></i></a>
     </nav>
   </header>
 
-  <!-- Tagline -->
-  <main class="flex flex-col items-center justify-center h-[80%] text-center text-white">
-    <h2 class="text-2xl md:text-3xl font-semibold drop-shadow-lg">
-      Bold, Strong, Timeless
-    </h2>
+  <main class="hero serac-hero">
+    <div class="hero-inner">
+      <nav class="landing-links">
+        <a class="big-link" href="about.html">ABOUT US</a>
+        <a class="big-link" href="shop.html">SHOP</a>
+        <a class="big-link" href="contact.html">CONTACT US</a>
+      </nav>
+
+      <!-- Replaced address with tagline -->
+      <div class="tagline">“Stone Cold”</div>
+    </div>
   </main>
 
 </body>
