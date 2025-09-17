@@ -11,30 +11,34 @@
 <body class="fleurdevie">
 
   <header class="brand-header">
-    <div class="logo-wrap">
+    <div class="left-controls">
       <img src="logo.png" alt="Fleur De Vie" class="logo">
+      <a href="index.html" class="home-link">Home</a>
+
+      <!-- socials (top-left) -->
+      <div class="socials">
+        <a href="https://www.instagram.com/fleurdevie_com/" target="_blank" rel="noreferrer"><i class="fab fa-instagram"></i></a>
+        <a href="https://www.tiktok.com/@fleurdevie.com" target="_blank" rel="noreferrer"><i class="fab fa-tiktok"></i></a>
+        <a href="mailto:yourstruly.fleurdevie@gmail.com"><i class="fas fa-envelope"></i></a>
+      </div>
+
+      <!-- hamburger for mobile (shows mobile menu) -->
+      <button class="menu-toggle" aria-label="Menu"><i class="fas fa-bars"></i></button>
     </div>
 
     <div class="brand-site-title">Fleur De Vie</div>
-
-    <!-- Mobile hamburger toggle -->
-    <button class="menu-toggle" aria-label="Menu"><i class="fas fa-bars"></i></button>
-
-    <nav class="top-actions">
-      <a class="nav-link" href="about.html">ABOUT US</a>
-      <a class="nav-link" href="shop.html">SHOP</a>
-      <a class="nav-link" href="contact.html">CONTACT US</a>
-
-      <!-- Socials -->
-      <a href="https://www.instagram.com/fleurdevie_com/" target="_blank" class="social-link"><i class="fab fa-instagram"></i></a>
-      <a href="https://www.tiktok.com/@fleurdevie.com" target="_blank" class="social-link"><i class="fab fa-tiktok"></i></a>
-      <a href="mailto:yourstruly.fleurdevie@gmail.com" class="social-link"><i class="fas fa-envelope"></i></a>
-    </nav>
   </header>
+
+  <!-- mobile menu (hidden on desktop) -->
+  <nav class="mobile-menu" aria-hidden="true">
+    <a href="about.html">ABOUT US</a>
+    <a href="shop.html">SHOP</a>
+    <a href="contact.html">CONTACT US</a>
+  </nav>
 
   <main class="hero fleurdevie-hero">
     <div class="hero-inner">
-      <nav class="landing-links">
+      <nav class="landing-links" aria-label="Primary landing links">
         <a class="big-link" href="about.html">ABOUT US</a>
         <a class="big-link" href="shop.html">SHOP</a>
         <a class="big-link" href="contact.html">CONTACT US</a>
@@ -42,15 +46,22 @@
     </div>
   </main>
 
-  <footer class="site-footer">
+  <footer class="site-footer" role="contentinfo">
     <div class="tagline">“Yours Truly”</div>
   </footer>
 
+  <!-- Toggle script: safe - checks existence first -->
   <script>
-    const toggle = document.querySelector('.menu-toggle');
-    const menu = document.querySelector('.top-actions');
-    toggle.addEventListener('click', () => menu.classList.toggle('active'));
+    (function(){
+      const toggle = document.querySelector('.menu-toggle');
+      const mobileMenu = document.querySelector('.mobile-menu');
+      if (!toggle || !mobileMenu) return;
+      toggle.addEventListener('click', () => {
+        mobileMenu.classList.toggle('active');
+        // prevent background scrolling when menu open:
+        document.body.classList.toggle('menu-open', mobileMenu.classList.contains('active'));
+      });
+    })();
   </script>
-
 </body>
 </html>
