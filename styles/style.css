@@ -6,14 +6,8 @@
 
 /* === Reset === */
 * { box-sizing: border-box; }
-html, body { margin:0; padding:0; height:100%; }
-body {
-  font-family: 'Montserrat', sans-serif;
-  color:#fff;
-  background:#111;
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
-}
+html,body { margin:0; padding:0; height:100%; }
+body { font-family: 'Montserrat', sans-serif; color:#fff; background:#111; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
 
 /* === Variables === */
 :root {
@@ -37,7 +31,7 @@ body {
   backdrop-filter: blur(2px);
 }
 
-/* Logo enlarged */
+/* Logo */
 .logo { height:72px; width:auto; display:block; }
 .logo-small { height:50px; }
 
@@ -56,63 +50,48 @@ body {
   white-space: nowrap;
 }
 
-/* === Navigation & Socials === */
-.top-actions {
+/* === Navigation Links (left) === */
+.nav-links {
   display:flex;
+  gap:22px;
   align-items:center;
-  gap:1rem;
 }
-
-/* Clean text nav links */
-.nav-link {
-  font-size: 1rem;
-  font-weight: 400;
-  color: #fff;
-  text-decoration: none;
-  padding: 0.25rem 0.5rem;
-}
-.nav-link:hover { text-decoration: underline; }
-
-/* Social icons */
-.social-link {
-  color: rgba(255,255,255,0.75);
-  font-size: 1.1rem;
-  transition: color 0.3s ease;
-}
-.social-link:hover { color:#fff; }
-
-/* Brand colors on hover */
-.fa-instagram:hover { color:#E4405F; }
-.fa-tiktok:hover { color:#000; }
-.fa-envelope:hover { color:#c23a2b; }
-.fa-linkedin:hover { color:#0077b5; }
-.fa-twitter:hover { color:#1DA1F2; }
-
-/* Buttons */
-.btn {
-  display:inline-block;
-  padding:10px 18px;
-  border-radius:6px;
+.nav-links a {
+  color: rgba(255,255,255,0.9);
   text-decoration:none;
-  font-weight:600;
+  font-size:16px;
+  font-weight:400;
+  letter-spacing:1px;
 }
-.btn-primary { background:var(--brandisby-main); color:#fff; border:1px solid rgba(0,0,0,0.15); }
-.btn-outline { background:transparent; color:var(--white); border:1px solid rgba(255,255,255,0.12); }
-.btn-ghost { background:transparent; color:rgba(255,255,255,0.9); border:none; }
+.nav-links a:hover { text-decoration:underline; }
 
-/* === HERO base === */
+/* === Socials (right) === */
+.socials {
+  display:flex;
+  gap:14px;
+  align-items:center;
+  z-index:70;
+}
+.socials a {
+  color: rgba(255,255,255,0.9);
+  font-size:18px;
+  text-decoration:none;
+}
+.socials a:hover { transform:translateY(-2px); }
+
+/* === HERO === */
 .hero {
   min-height:100vh;
   display:flex;
   align-items:center;
   justify-content:center;
   position:relative;
-  padding-top:80px; /* header space */
+  padding-top:80px;
   background-size:cover;
   background-position:center;
 }
 .hero::after {
-  content:"";
+  content: "";
   position:absolute;
   inset:0;
   background: linear-gradient(180deg, rgba(0,0,0,0.55), rgba(0,0,0,0.65));
@@ -139,8 +118,7 @@ body {
   gap:20px;
   justify-content:space-evenly;
   align-items:center;
-  padding:0 8%;
-  box-sizing:border-box;
+  padding: 0 8%;
   flex-wrap:nowrap;
 }
 .big-link {
@@ -152,19 +130,19 @@ body {
   color: rgba(255,255,255,0.92);
   font-family: 'Playfair Display', serif;
   text-transform:uppercase;
-  font-weight:300; /* thin */
+  font-weight:300;
   letter-spacing:3px;
   text-decoration: underline;
-  text-decoration-thickness:2px;
+  text-decoration-thickness: 2px;
   text-decoration-color: rgba(255,255,255,0.9);
-  padding:6px 8px;
-  text-align:center;
+  padding: 6px 8px;
+  text-align: center;
   font-size: clamp(28px, 4.8vw, 64px);
-  line-height:1;
-  white-space:nowrap;
+  line-height: 1;
+  white-space: nowrap;
 }
 
-/* Address line (optional) */
+/* Address line */
 .address-line {
   margin-top:30px;
   color: rgba(255,255,255,0.55);
@@ -172,51 +150,50 @@ body {
   letter-spacing:1px;
 }
 
-/* === Brand-specific === */
-body.fleurdevie { --main-color:#112e1f; }
-.fleurdevie-hero { background-image:url('../FleurDeVie/bg.jpg'); }
+/* === Brand-specific backgrounds === */
+body.fleurdevie { --main-color: #112e1f; }
+.fleurdevie-hero { background-image: url('../FleurDeVie/bg.jpg'); }
 body.fleurdevie .brand-site-title { color: var(--main-color); }
 
-body.serac { --main-color:#141517; }
-.serac-hero { background-image:url('../Serac/bg.jpg'); }
+body.serac { --main-color: #141517; }
+.serac-hero { background-image: url('../Serac/bg.jpg'); }
 body.serac .brand-site-title { color: var(--main-color); }
 
-/* === Tagline (commented out, optional) === */
+/* === Tagline (commented out) === */
 /*
 .tagline {
-  position:absolute;
-  bottom:20px;
-  left:50%;
-  transform:translateX(-50%);
-  text-align:center;
-  font-size:12px;
-  letter-spacing:1px;
-  opacity:0.85;
-  z-index:5;
-  padding:0 12px;
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  font-size: 12px;
+  letter-spacing: 1px;
+  opacity: 0.85;
+  z-index: 5;
 }
 body.fleurdevie .tagline {
-  font-family:'Playfair Display', serif;
-  font-style:italic;
-  color:rgba(255,255,255,0.92);
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.92);
 }
 body.serac .tagline {
-  font-family:'UnifrakturCook', cursive;
-  font-weight:700;
-  color:rgba(255,255,255,0.9);
-  letter-spacing:2px;
+  font-family: 'UnifrakturCook', cursive;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 2px;
 }
 */
 
 /* === Responsive === */
-@media (max-width:900px) {
-  .landing-links { flex-direction:column; gap:18px; padding:0 12%; }
-  .big-link { font-size:clamp(22px, 7.5vw, 42px); white-space:normal; }
-  .brand-site-title { font-size:clamp(20px, 6vw, 34px); }
+@media (max-width: 900px) {
+  .landing-links { flex-direction:column; gap:18px; padding: 0 12%; }
+  .big-link { font-size: clamp(22px, 7.5vw, 42px); white-space: normal; }
+  .brand-site-title { font-size: clamp(20px, 6vw, 34px); }
 }
-@media (max-width:420px) {
-  .brand-header { height:64px; padding:8px 12px; }
+@media (max-width: 420px) {
+  .brand-header { height:64px; padding: 8px 12px; }
   .logo { height:52px; }
   .brand-site-title { font-size:18px; }
-  .big-link { font-size:clamp(18px, 12vw, 34px); }
+  .big-link { font-size: clamp(18px, 12vw, 34px); }
 }
