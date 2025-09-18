@@ -106,7 +106,7 @@ body.serac {
   flex-direction: row;                 /* Horizontal by default */
   align-items: center;
   justify-content: space-around;       /* Even spacing across the landing page */
-  gap: 260px;        /* Extra spacing control */
+  gap: 270px;        /* Extra spacing control */
   flex-wrap: nowrap;                   /* Keep horizontal until mobile */
   max-width: 100%;                   /* Optional max width */
   margin: 0 auto;
