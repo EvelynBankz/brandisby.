@@ -1,7 +1,7 @@
 /* ================= VARIABLE TWEAKS ================= */
 :root {
-  --logo-min: 64px;
-  --logo-max: 180px;
+  --logo-min: 70px;
+  --logo-max: 200px;
   --center-gap-large: 64px;
   --center-gap-small: 24px;
   --center-font-size-large: 48px;
@@ -95,7 +95,7 @@ body.serac {
   display:block;
   height:2.5px; 
   width:22px;
-  background:#fff; 
+  background:#112e1f; 
   margin:6px auto;
   border-radius:2px;
   transition: transform .28s ease, opacity .28s ease;
@@ -168,7 +168,7 @@ body.serac {
 .right-nav-overlay .overlay-close {
   position:absolute; top:18px; right:18px;
   background:none; border:none;
-  color:#112e1f; font-size:36px;
+  color:#fff; font-size:36px;
   cursor:pointer;
 }
 
