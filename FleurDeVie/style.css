@@ -42,7 +42,7 @@ body.serac {
  .site-header {
     position: absolute;
     top:0; left:0; right:0;
-    padding: 14px 28px;
+    padding: 10px 20px;
     display:flex;
     align-items:center;
     justify-content:space-between;
@@ -78,17 +78,20 @@ body.serac {
     z-index:1250;
     pointer-events:none;
 }
+
 .header-right {
   display:flex;
   align-items:center;
   gap:12px;
 }
+              
 .header-right .home-link,
 .header-right .social-link {
   color:#112e1f;
   text-decoration:none;
   font-size:14px;
 }
+              
 .header-right .social-link i { font-size:18px; }
 
 /* Hamburger */
@@ -112,6 +115,7 @@ body.serac {
   border-radius:2px;
   transition: transform .28s ease, opacity .28s ease;
 }
+              
 .hamburger.is-active span:nth-child(1){ transform: translateY(8px) rotate(45deg); }
 .hamburger.is-active span:nth-child(2){ opacity:0; transform: scaleX(.2); }
 .hamburger.is-active span:nth-child(3){ transform: translateY(-8px) rotate(-45deg); } 
@@ -119,11 +123,11 @@ body.serac {
 /* ================= CENTER LINKS ================= */
  .center-links {
   z-index: 1100;
-  display: flex; */
+  display: flex; 
   flex-direction: row;              /* Horizontal by default */ 
   align-items: center;              /* Vertically aligned in hero */ 
   justify-content: center;          /* Center horizontally */
-  gap: 80px;                        /* Flexible spacing between links */
+  gap: 150px;                        /* Flexible spacing between links */
   flex-wrap: nowrap;                 /* Keep horizontal until mobile */
   max-width: 100%;
   margin: 0 auto;
@@ -156,7 +160,8 @@ body.serac {
  .right-nav-overlay {
   position: fixed;
   top:0; right:0;
-  height:100%; width:260px;
+  height:100%; 
+  width:260px;
   background: rgba(0,0,0,0.95);
   display:flex;
   flex-direction: column;
@@ -167,6 +172,7 @@ body.serac {
   transition: transform 0.3s ease;
   z-index:1500;
 }
+              
 .right-nav-overlay.open { transform: translateX(0); }
 .right-nav-overlay a {
   color:#fff;
@@ -176,9 +182,11 @@ body.serac {
   align-items:center;
   gap:12px;
 }
+              
 .right-nav-overlay a:hover { opacity:0.7; }
 .right-nav-overlay .overlay-close {
-  position:absolute; top:18px; right:18px;
+  position:absolute; 
+  top:18px; right:18px;
   background:none; border:none;
   color:#fff; font-size:36px;
   cursor:pointer;
@@ -202,6 +210,7 @@ body.serac {
   font-size:16px; 
   color:#112e1f; 
 }
+              
 .site-footer .copyright{ 
   font-size:13px; 
   color: #112e1f; 
