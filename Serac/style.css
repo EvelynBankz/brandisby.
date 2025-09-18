@@ -99,13 +99,13 @@ body.serac {
   flex-direction: row;                 /* Horizontal by default */
   align-items: center;
   justify-content: space-around;       /* Even spacing across the landing page */
-  gap: var(--center-gap-large);        /* Extra spacing control */
+  gap: 80px;        /* Extra spacing control */
   flex-wrap: nowrap;                   /* Keep horizontal until mobile */
-  max-width: 1200px;                   /* Optional max width */
+  max-width: 100%;                   /* Optional max width */
   margin: 0 auto;
   padding: 0 20px;
   position: relative;
-  top: 20%;                             /* Slightly below center */
+  top: 15%;                             /* Slightly below center */
   box-sizing: border-box;
 }
 
