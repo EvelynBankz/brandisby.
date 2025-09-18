@@ -1,101 +1,58 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sérac</title>
-
-  <!-- Local stylesheet -->
   <link rel="stylesheet" href="style.css">
-
-  <!-- Fonts & icons -->
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="serac">
-
   <!-- Header -->
-  <header class="brand-header" role="banner">
-    <div class="header-left">
-      <!-- KEEP this file name exactly: /Serac/logo.png -->
-      <img src="logo.png" alt="Sérac logo" class="logo">
+  <header class="site-header">
+    <div class="logo">
+      <img src="logo.png" alt="Sérac Logo">
     </div>
-
-    <div class="brand-site-title">Sérac</div>
-
-    <div class="header-right">
-      <nav class="desktop-nav" aria-label="Main navigation">
-        <a class="home-link" href="index.html">Home</a>
-        <a class="social-link" href="mailto:stonecold.serac@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
-        <a class="social-link" href="https://www.tiktok.com/@serac.com" target="_blank" rel="noreferrer" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
-        <a class="social-link" href="https://www.instagram.com/serac_com/" target="_blank" rel="noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-      </nav>
-
-      <button class="menu-toggle" aria-expanded="false" aria-controls="mobileNav" aria-label="Open menu">
-        <i class="fas fa-bars" aria-hidden="true"></i>
-      </button>
-    </div>
+    <div class="brand-name">Sérac</div>
+    <nav class="top-nav">
+      <a href="#">Home</a>
+      <a href="mailto:info@serac.com" class="social"><i class="fas fa-envelope"></i></a>
+      <a href="#" class="social"><i class="fab fa-tiktok"></i></a>
+      <a href="#" class="social"><i class="fab fa-instagram"></i></a>
+      <button class="hamburger" id="hamburger">&#9776;</button>
+    </nav>
   </header>
 
-  <!-- Mobile nav -->
-  <nav id="mobileNav" class="mobile-nav" aria-hidden="true">
-    <a href="index.html" class="mobile-link">Home</a>
-    <a href="about.html"   class="mobile-link">About Us</a>
-    <a href="shop.html"    class="mobile-link">Shop</a>
-    <a href="contact.html" class="mobile-link">Contact Us</a>
-
-    <div class="mobile-socials">
-      <a class="social-link" href="mailto:stonecold.serac@gmail.com" aria-label="Email (mobile)"><i class="fas fa-envelope"></i></a>
-      <a class="social-link" href="https://www.tiktok.com/@serac.com" target="_blank" rel="noreferrer" aria-label="TikTok (mobile)"><i class="fab fa-tiktok"></i></a>
-      <a class="social-link" href="https://www.instagram.com/serac_com/" target="_blank" rel="noreferrer" aria-label="Instagram (mobile)"><i class="fab fa-instagram"></i></a>
-    </div>
+  <!-- Fullscreen Nav (mobile menu) -->
+  <nav class="overlay-nav" id="overlay-nav">
+    <a href="#">About Us</a>
+    <a href="#">Shop</a>
+    <a href="#">Contact Us</a>
   </nav>
 
-  <!-- Hero -->
-  <main class="hero serac-hero" role="main">
-    <div class="hero-inner">
-      <nav class="big-links" aria-label="Primary links">
-        <a class="big-link" href="about.html">ABOUT US</a>
-        <a class="big-link" href="shop.html">SHOP</a>
-        <a class="big-link" href="contact.html">CONTACT US</a>
-      </nav>
+  <!-- Landing Page -->
+  <main class="landing">
+    <div class="center-links">
+      <a href="#">ABOUT US</a>
+      <a href="#">SHOP</a>
+      <a href="#">CONTACT US</a>
     </div>
   </main>
 
-  <footer class="site-footer" role="contentinfo">
+  <!-- Footer -->
+  <footer class="site-footer">
     <div class="tagline">Stone Cold</div>
-    <div class="copyright">© 2025 Sérac</div>
+    <p>© 2025 Sérac</p>
   </footer>
 
   <script>
-    (function () {
-      const toggle = document.querySelector('.menu-toggle');
-      const mobileNav = document.getElementById('mobileNav');
-      if (!toggle || !mobileNav) return;
+    // Toggle hamburger menu
+    const hamburger = document.getElementById('hamburger');
+    const overlayNav = document.getElementById('overlay-nav');
 
-      function setIcon(isOpen) {
-        const icon = toggle.querySelector('i');
-        if (!icon) return;
-        icon.classList.toggle('fa-bars', !isOpen);
-        icon.classList.toggle('fa-times', isOpen);
-      }
-
-      toggle.addEventListener('click', () => {
-        const open = mobileNav.classList.toggle('open');
-        mobileNav.setAttribute('aria-hidden', String(!open));
-        toggle.setAttribute('aria-expanded', String(open));
-        setIcon(open);
-      });
-
-      mobileNav.querySelectorAll('a').forEach(a => {
-        a.addEventListener('click', () => {
-          mobileNav.classList.remove('open');
-          mobileNav.setAttribute('aria-hidden', 'true');
-          toggle.setAttribute('aria-expanded', 'false');
-          setIcon(false);
-        });
-      });
-    })();
+    hamburger.addEventListener('click', () => {
+      overlayNav.classList.toggle('open');
+    });
   </script>
 </body>
 </html>
