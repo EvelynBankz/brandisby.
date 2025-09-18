@@ -93,16 +93,15 @@ body.serac {
 .hamburger.is-active span:nth-child(3){ transform: translateY(-8px) rotate(-45deg); }
 
 /* ================= CENTER LINKS ================= */
-/* ================= CENTER LINKS ================= */
 .center-links {
   z-index: 1100;
   display: flex;
-  flex-direction: row;           /* Horizontal on large screens */
+  flex-direction: row;          /* Horizontal by default */
   align-items: center;
   justify-content: center;
-  gap: var(--center-gap-large);  /* Space between links */
-  flex-wrap: wrap;               /* Allows wrapping if screen is narrow */
-  padding: 0 20px;               /* Prevents links from touching edges */
+  gap: var(--center-gap-large);
+  flex-wrap: wrap;              /* Wrap if too wide */
+  padding: 0 20px;              /* Prevents touching edges */
   box-sizing: border-box;
 }
 
@@ -116,7 +115,10 @@ body.serac {
   text-transform: uppercase;
   line-height: 1.1;
   white-space: nowrap;
+  flex-shrink: 1;               /* Allows links to shrink slightly on medium screens */
+  text-align: center;           /* Keeps text centered */
 }
+
 
 
 /* ================= RIGHT SIDE OVERLAY MENU ================= */
@@ -173,15 +175,17 @@ body.serac {
   .header-right .social-link{ display:none; }
   .brand-title{ font-size: clamp(18px, 5.8vw, 34px); }
 }
+
 @media (max-width: 900px) {
   .center-links {
-    flex-direction: column;      /* Stack vertically on smaller screens */
-    gap: var(--center-gap-small);/* Adjust spacing for vertical layout */
+    flex-direction: column;      /* Stack vertically on small screens */
+    gap: var(--center-gap-small);
   }
   .center-link {
     font-size: var(--center-font-size-small);
   }
 }
+
 @media (max-width: 420px){
   :root{ --center-font-size-small: 18px; }
   .brand-logo{ height: clamp(36px, 12vw, 72px); }
