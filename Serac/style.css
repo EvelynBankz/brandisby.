@@ -20,17 +20,23 @@ body.serac {
   overflow: hidden;
 }
 
-/* ================= HERO BACKGROUND ================= */
 .hero {
   height: 100vh;
-  background: url("bg.jpg") center center / cover no-repeat;
+  display: flex;
+  justify-content: center;    /* Horizontally center links */
+  align-items: flex-start;    /* Slightly below center on desktop */
   position: relative;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  background: url("bg.jpg") center center / cover no-repeat;
   filter: blur(var(--blur-strength));
+  padding-top: 20%;           /* Space from top on desktop */
 }
-.hero::after { content:""; position:absolute; inset:0; background: rgba(0,0,0,0.0); }
+.hero::after { 
+  content:""; 
+  position:absolute; 
+  inset:0; 
+  background: rgba(0,0,0,0.0); 
+}
+
 
 /* ================= HEADER ================= */
 .site-header {
@@ -196,15 +202,20 @@ body.serac {
 }
 
 
-/* ================= RESPONSIVE / MOBILE ================= */
-@media (max-width: 600px) {  /* Mobile breakpoint */
-  .center-links {
-    flex-direction: column;            /* Stack vertically on mobile */
-    gap: var(--center-gap-small);
-    top: 25%;                          /* Slightly adjust vertical position on mobile */
+@media (max-width: 600px) {
+  .hero {
+    align-items: center;  /* Vertically center links on mobile */
+    padding-top: 0;       /* Remove desktop offset */
   }
+
+  .center-links {
+    flex-direction: column;      
+    gap: var(--center-gap-small);
+  }
+
   .center-link {
-    font-size: clamp(16px, 5vw, 32px); /* Smaller font for mobile screens */
+    font-size: clamp(16px, 5vw, 32px);  /* Mobile-friendly font size */
+    transform: scaleY(1.8);             /* Slightly less tall on mobile */
   }
 }
 
