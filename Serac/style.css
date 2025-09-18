@@ -120,12 +120,12 @@ body.serac {
 }
 
 /* ================= RESPONSIVE ================= */
-/* @media (max-width: 600px) {  /* Mobile breakpoint */ */
-/*   .center-links { */
-/*     flex-direction: column;      /* Stack vertically on mobile */ */
-/*     gap: var(--center-gap-small); */
-/*   } */
-/* } */
+@media (max-width: 600px) {  /* Mobile breakpoint */ 
+  .center-links {
+    flex-direction: column;      /* Stack vertically on mobile */
+    gap: var(--center-gap-small);
+  }
+ }
 
 
 
