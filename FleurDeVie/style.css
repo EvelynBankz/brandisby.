@@ -1,5 +1,5 @@
 /* ================= VARIABLE TWEAKS ================= */
-:root {
+/* :root {
   --logo-min: 100px;
   --logo-max: 300px;
   --center-gap-large: 64px;
@@ -8,37 +8,37 @@
   --center-font-size-small: 20px;
   --center-letter-spacing: 0.06em;
   --blur-strength: 0px;
-}
+} */
 
 /* ================= RESET & BASE ================= */
-*{box-sizing:border-box;margin:0;padding:0}
+/* *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
 body.serac {
   font-family: "Montserrat", Arial, sans-serif;
   color: #fff;
   background: #000;
   overflow: hidden;
-}
+} */
 
 /* ================= HERO BACKGROUND ================= */
-.hero {
+/* .hero {
   height: 100vh;
   display: flex;
   justify-content: center;    /* Horizontal center */
-  align-items: center;        /* Vertical center on desktop by default */
-  position: relative;
+/*   align-items: center;        /* Vertical center on desktop by default */
+/*   position: relative;
   background: url("bg.jpg") center center / cover no-repeat;
   filter: blur(var(--blur-strength));
-}
-.hero::after { 
+} */
+/* .hero::after { 
   content:""; 
   position:absolute; 
   inset:0; 
-  background: rgba(0,0,0,0); 
-}
+  background: rgba(0,0,0,0);  
+} */
 
 /* ================= HEADER ================= */
-.site-header {
+/* .site-header {
   position: absolute;
   top:0; left:0; right:0;
   padding: 14px 28px;
@@ -49,23 +49,23 @@ body.serac {
   backdrop-filter:none !important;
   box-shadow:none !important;
   z-index:1200;
-}
+} */
 /* .brand-logo { */
 /*   height: clamp(var(--logo-min), 8vw, var(--logo-max)); */
 /*   width:auto; */
 /* } */
 
-.brand-logo {
-  position: absolute;      /* Keep it relative to top-left */
-  top: 30px;               /* Margin from top edge */ 
-  left: 20px;              /* Margin from left edge to keep distance from brand name */
-  height: clamp(80px, 10vw, 200px); /* Responsive height: grows/shrinks */
-  width: auto;             /* Maintain aspect ratio */
-/*   z-index: 1300;           /* Above background */ */
-}
+/* .brand-logo { */
+/*   position: absolute;      /* Keep it relative to top-left */ 
+/*   top: 30px;               /* Margin from top edge */  
+/*   left: 20px;              /* Margin from left edge to keep distance from brand name */ 
+/*   height: clamp(80px, 10vw, 200px); /* Responsive height: grows/shrinks */ 
+/*   width: auto;             /* Maintain aspect ratio */ 
+/*   z-index: 1300;           /* Above background */ 
+/*}*/
 
 
-.brand-title {
+/* .brand-title {
   position: absolute;
   left:50%; transform: translateX(-50%);
   font-family: "Playfair Display", serif;
@@ -89,9 +89,9 @@ body.serac {
   font-size:14px;
 }
 .header-right .social-link i { font-size:18px; }
-
+ */
 /* Hamburger */
-.hamburger {
+/* .hamburger {
   display:none;
   background:none;
   border:none;
@@ -113,24 +113,24 @@ body.serac {
 }
 .hamburger.is-active span:nth-child(1){ transform: translateY(8px) rotate(45deg); }
 .hamburger.is-active span:nth-child(2){ opacity:0; transform: scaleX(.2); }
-.hamburger.is-active span:nth-child(3){ transform: translateY(-8px) rotate(-45deg); }
+.hamburger.is-active span:nth-child(3){ transform: translateY(-8px) rotate(-45deg); } */
 
 /* ================= CENTER LINKS ================= */
-.center-links {
+/* .center-links {
   z-index: 1100;
-  display: flex;
-  flex-direction: row;              /* Horizontal by default */
-  align-items: center;              /* Vertically aligned in hero */
-  justify-content: center;          /* Center horizontally */
-  gap: 80px;                        /* Flexible spacing between links */
-  flex-wrap: nowrap;                 /* Keep horizontal until mobile */
-  max-width: 100%;
+  display: flex; */
+/*   flex-direction: row;              /* Horizontal by default */ 
+/*   align-items: center;              /* Vertically aligned in hero */ 
+/*   justify-content: center;          /* Center horizontally */
+/*   gap: 80px;                        /* Flexible spacing between links */
+/*   flex-wrap: nowrap;                 /* Keep horizontal until mobile */
+/*   max-width: 100%;
   margin: 0 auto;
-  padding: 0 20px;
-  position: relative;               /* Remove top offset */
-  box-sizing: border-box;
-}
-
+  padding: 0 20px; */
+/*   position: relative;               /* Remove top offset */
+/*   box-sizing: border-box; */
+/*} */
+/* 
 .center-link {
   font-family: orpheus-pro;
   font-weight: 400;
@@ -144,15 +144,15 @@ body.serac {
   letter-spacing: 0.05em;
   white-space: nowrap;
   text-align: center;
-  display: inline-block;
-  transform: scaleY(2);                /* Tall letters */
-  font-size: clamp(20px, 3vw, 70px);   /* Responsive scaling */
-}
+  display: inline-block; */
+/*   transform: scaleY(2);                /* Tall letters */
+/*   font-size: clamp(20px, 3vw, 70px);   /* Responsive scaling */ 
+/* } */
 
 
 
 /* ================= RIGHT SIDE OVERLAY MENU ================= */
-.right-nav-overlay {
+/* .right-nav-overlay {
   position: fixed;
   top:0; right:0;
   height:100%; width:260px;
@@ -181,10 +181,10 @@ body.serac {
   background:none; border:none;
   color:#fff; font-size:36px;
   cursor:pointer;
-}
+} */
 
 /* ================= FOOTER ================= */
-.site-footer {
+/* .site-footer {
   position:absolute;
   bottom:0; left:0; right:0;
   padding:10px 20px;
@@ -205,28 +205,28 @@ body.serac {
   font-size:13px; 
   color: #112e1f; 
 }
-
+ */
 /* ================= RESPONSIVE ================= */
-@media (max-width: 900px){
+/* @media (max-width: 900px){
   .hamburger{ display:inline-block; }
   .header-right .home-link,
   .header-right .social-link{ display:none; }
   .brand-title{ font-size: clamp(18px, 5.8vw, 34px); }
-}
+} */
 
 /* --------mobile reponsive------------ */
-@media (max-width: 600px) {
+/* @media (max-width: 600px) {
   .hero {
     align-items: center;   /* Vertical center in hero */
-  }
+/*   }
   .center-links {
     flex-direction: column; /* Stack vertically */
-    gap: 40px;
+/*     gap: 40px;
   }
   .center-link {
     font-size: clamp(16px, 5vw, 32px); /* Smaller font for mobile */
-    transform: scaleY(1.8);           /* Slightly less tall */
-  }
+/*     transform: scaleY(1.8);           /* Slightly less tall */
+/*   }
 }
 
 @media (max-width: 420px){
@@ -236,10 +236,157 @@ body.serac {
 }
 
 @media (max-width: 600px) {
-  .brand-logo {
-    height: clamp(50px, 15vw, 120px); /* Shrink more on mobile */
-    left: 10px;                        /* Maintain some margin */
-    top: 10px;
+  .brand-logo { */
+/*     height: clamp(50px, 15vw, 120px); /* Shrink more on mobile */
+/*     left: 10px;                        /* Maintain some margin */
+/*     top: 10px;
+  } 
+}
+ */ 
+
+
+
+
+/* ================= HEADER ================= */
+.site-header {
+  display: flex;
+  align-items: center;            /* Vertical alignment */
+  justify-content: space-between; /* Left = logo+brand, right = nav */
+  padding: 14px 28px;
+  width: 100%;
+  box-sizing: border-box;
+  background: none;
+  z-index: 1200;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;            /* Logo + brand on same line */
+  gap: 16px;                      /* Space between logo and brand */
+}
+
+.brand-logo {
+  height: clamp(80px, 10vw, 200px);  /* Responsive height */
+  width: auto;
+}
+
+.brand-title {
+  font-family: "Playfair Display", serif;
+  font-weight: 700;
+  font-size: clamp(20px, 3.4vw, 44px); /* Responsive size */
+  color: #112e1f;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Hamburger */
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  width: 44px;
+  height: 40px;
+  position: relative;
+}
+.hamburger span {
+  display: block;
+  height: 2.5px; width: 22px;
+  background: #112e1f;
+  margin: 6px auto;
+  border-radius: 2px;
+  transition: transform .28s ease, opacity .28s ease;
+}
+.hamburger.is-active span:nth-child(1){ transform: translateY(8px) rotate(45deg); }
+.hamburger.is-active span:nth-child(2){ opacity: 0; transform: scaleX(.2); }
+.hamburger.is-active span:nth-child(3){ transform: translateY(-8px) rotate(-45deg); }
+
+/* ================= HERO ================= */
+.hero {
+  height: 100vh;
+  display: flex;
+  justify-content: center;  /* Horizontal center */
+  align-items: center;      /* Vertical center */
+  position: relative;
+  background: url("bg.jpg") center center / cover no-repeat;
+  filter: blur(var(--blur-strength));
+}
+.hero::after { 
+  content:""; 
+  position:absolute; 
+  inset:0; 
+  background: rgba(0,0,0,0); 
+}
+
+/* ================= HERO CENTER LINKS ================= */
+.center-links {
+  z-index: 1100;
+  display: flex;
+  flex-direction: row;           /* Horizontal by default */
+  align-items: center;
+  justify-content: center;       /* Center horizontally */
+  gap: 80px;                     /* Spacing between links */
+  flex-wrap: nowrap;              /* Keep horizontal until mobile */
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+
+.center-link {
+  font-family: orpheus-pro, Montserrat, sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  text-transform: uppercase;
+  color: #112e1f;
+  text-decoration: underline;
+  text-underline-offset: .3em;
+  text-decoration-thickness: 1px;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  text-align: center;
+  display: inline-block;
+  transform: scaleY(2);              /* Tall letters */
+  font-size: clamp(20px, 3vw, 70px); /* Responsive scaling */
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 900px){
+  .hamburger{ display:inline-block; }
+  .header-right .home-link,
+  .header-right .social-link{ display:none; }
+  .brand-title{ font-size: clamp(18px, 5.8vw, 34px); }
+}
+
+@media (max-width: 600px) {
+  .hero {
+    align-items: center;  /* Center links vertically on mobile */
   }
+  .center-links {
+    flex-direction: column; /* Stack vertically */
+    gap: 40px;
+  }
+  .center-link {
+    font-size: clamp(16px, 5vw, 32px); /* Smaller font for mobile */
+    transform: scaleY(1.8);
+  }
+  .brand-logo {
+    height: clamp(50px, 15vw, 120px); /* Shrink logo */
+  }
+  .brand-title {
+    font-size: clamp(16px, 5vw, 28px); /* Shrink brand title */
+  }
+}
+
+@media (max-width: 420px){
+  :root{ --center-font-size-small: 18px; }
+  .brand-logo{ height: clamp(36px, 12vw, 72px); }
+  .brand-title{ font-size: clamp(16px, 7vw, 22px); }
 }
 
