@@ -61,6 +61,8 @@ body.fleurdevie{
   padding: 14px 28px;
   z-index: 1200;
   background: transparent; /* no background */
+  backdrop-filter: blur(5px);
+
 }
 
 /* left logo */
