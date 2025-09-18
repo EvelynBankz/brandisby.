@@ -110,16 +110,18 @@ body.serac {
 }
 
 .center-link {
-  font-family: "Montserrat", sans-serif;
+  font-family:  orpheus-pro, "Montserrat", sans-serif;
   font-weight: 400;
   font-style: normal;
   text-transform: uppercase;
   color: rgba(255,255,255,0.92);
   text-decoration: underline;
-  line-height: 1.2;                    /* Slightly elongated letters */
-  letter-spacing: 0.08em;              /* Optional spacing between letters */
+  line-height: 1.5;                    /* Slightly elongated letters */
+  letter-spacing: 0.03em;              /* Optional spacing between letters */
   white-space: nowrap;
   text-align: center;
+  text-underline-offset: .2em;
+  text-decoration-thickness: 1px;
 
   /* Responsive font: grows on large screens, shrinks as screen reduces */
   font-size: clamp(20px, 3vw, 64px);   /* Adjust min, preferred, max as needed */
