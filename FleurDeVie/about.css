@@ -1,0 +1,72 @@
+/* ================= RESET & BASE ================= */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; font-family: "Montserrat", Arial, sans-serif; color: #fff; background: #000; scroll-behavior: smooth; }
+
+/* ================= HEADER ================= */
+.site-header {
+  position: fixed; /* stays at top when scrolling */
+  top:0; left:0; right:0;
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  padding: 14px 28px;
+  z-index: 1200;
+  background: rgba(0,0,0,0.7); /* semi-transparent background */
+}
+.header-left { display:flex; align-items:center; gap:12px; }
+.brand-logo { height: clamp(100px, 10vw, 200px); width:auto; }
+.brand-title { font-family: "Playfair Display", serif; font-weight:700; font-size: clamp(20px, 3.4vw, 44px); color:#fff; text-align:center; }
+.header-right { display:flex; gap:16px; }
+.header-right a { color:#fff; text-decoration:none; font-weight:500; transition: opacity 0.3s; }
+.header-right a:hover { opacity:0.7; }
+
+/* Hamburger (for mobile) */
+.hamburger { display:none; background:none; border:none; width:44px; height:40px; cursor:pointer; }
+.hamburger span { display:block; height:2.5px; width:22px; background:#fff; margin:6px auto; border-radius:2px; transition: transform .28s ease, opacity .28s ease; }
+
+/* ================= HERO ================= */
+.hero-about {
+  height: 60vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  background: url("hero-bg.jpg") center center / cover no-repeat;
+}
+.hero-about .hero-text h1 { font-family: "Playfair Display", serif; font-size: clamp(36px, 5vw, 64px); margin-bottom:12px; }
+.hero-about .hero-text p { font-family: "Montserrat", sans-serif; font-size: clamp(16px, 2vw, 24px); max-width:700px; }
+
+/* ================= SECTIONS ================= */
+section { padding: 100px 20px; }
+.container { max-width: 1200px; margin:0 auto; text-align:center; }
+
+/* Section Headings */
+section h2 {
+  font-family: "Playfair Display", serif;
+  font-size: clamp(28px, 3vw, 40px);
+  margin-bottom: 24px;
+}
+
+/* Section Content */
+section p { font-size: clamp(16px, 1.5vw, 20px); line-height:1.7; margin-bottom:16px; }
+
+/* ================= FOOTER ================= */
+.site-footer { text-align:center; padding:20px; }
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 900px){
+  .header-right { gap:12px; flex-wrap: wrap; justify-content:center; }
+}
+
+@media (max-width: 600px){
+  .hero-about { height: 50vh; }
+  section { padding: 60px 20px; }
+  section h2 { font-size: clamp(22px, 5vw, 32px); }
+  section p { font-size: clamp(14px, 4vw, 18px); }
+  .header-right { flex-direction: column; gap: 8px; }
+}
+
+@media (max-width: 420px){
+  .brand-logo { height: clamp(50px, 15vw, 120px); }
+  .brand-title { font-size: clamp(16px, 7vw, 22px); }
+}
