@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Serac</title>
 
-  <link rel="stylesheet" href="serac.css">
+  <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -19,22 +19,20 @@
     <div class="brand-title">Serac</div>
     <div class="header-right">
       <a class="home-link" href="index.html">Home</a>
-      <a class="social-link" href="mailto:serac@email.com"><i class="fas fa-envelope"></i></a>
-      <a class="social-link" href="https://www.tiktok.com/@serac" target="_blank"><i class="fab fa-tiktok"></i></a>
-      <a class="social-link" href="https://www.instagram.com/serac" target="_blank"><i class="fab fa-instagram"></i></a>
+      <a class="social-link" href="mailto:yourstruly.serac@gmail.com"><i class="fas fa-envelope"></i></a>
+      <a class="social-link" href="https://www.tiktok.com/@serac.com" target="_blank"><i class="fab fa-tiktok"></i></a>
+      <a class="social-link" href="https://www.instagram.com/serac_com/" target="_blank"><i class="fab fa-instagram"></i></a>
       <button class="hamburger" id="hamburger-s"><span></span><span></span><span></span></button>
     </div>
   </header>
 
-  <!-- Overlay menu -->
-  <nav id="overlay-s" class="nav-overlay">
+  <!-- Right-side overlay menu -->
+  <nav id="rightNav" class="right-nav-overlay">
     <button class="overlay-close" id="close-s">&times;</button>
-    <a href="index.html" class="overlay-item">Home</a>
-    <div class="overlay-socials">
-      <a href="mailto:serac@email.com"><i class="fas fa-envelope"></i></a>
-      <a href="https://www.tiktok.com/@serac" target="_blank"><i class="fab fa-tiktok"></i></a>
-      <a href="https://www.instagram.com/serac" target="_blank"><i class="fab fa-instagram"></i></a>
-    </div>
+    <a href="index.html">Home</a>
+    <a href="mailto:yourstruly.serac@gmail.com"><i class="fas fa-envelope"></i>Email</a>
+    <a href="https://www.tiktok.com/@serac.com" target="_blank"><i class="fab fa-tiktok"></i>TikTok</a>
+    <a href="https://www.instagram.com/serac_com/" target="_blank"><i class="fab fa-instagram"></i>Instagram</a>
   </nav>
 
   <!-- Hero -->
@@ -48,7 +46,7 @@
 
   <!-- Footer -->
   <footer class="site-footer">
-    <div class="tagline">Strength in Style</div>
+    <div class="tagline">Yours Truly</div>
     <div class="copyright">© 2025 Serac</div>
   </footer>
 
@@ -56,7 +54,7 @@
   <script>
     (function () {
       const ham = document.getElementById('hamburger-s');
-      const overlay = document.getElementById('overlay-s');
+      const overlay = document.getElementById('rightNav');
       const closeBtn = document.getElementById('close-s');
 
       function openMenu() {
