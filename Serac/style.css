@@ -107,7 +107,7 @@ body.serac {
   flex-direction: row;              /* Horizontal by default */
   align-items: center;              /* Vertically aligned in hero */
   justify-content: center;          /* Center horizontally */
-  gap: 80px;                        /* Flexible spacing between links */
+  gap: 150px;                        /* Flexible spacing between links */
   flex-wrap: nowrap;                 /* Keep horizontal until mobile */
   max-width: 100%;
   margin: 0 auto;
