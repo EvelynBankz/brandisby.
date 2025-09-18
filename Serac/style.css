@@ -101,77 +101,38 @@ body.serac {
 
 
 /* ================= HERO CENTER LINKS ================= */ 
-.center-links { 
-display: flex; 
-flex-direction: row;    /* Horizontal by default */ 
-align-items: center; 
-justify-content: space-evenly;    /* Even spacing across the landing page */ 
-gap: 260px;     /* Extra spacing control */ 
-/* flex-wrap: nowrap;     /* Keep horizontal until mobile */   */
-max-width: 1000px; /* Optional max width */ 
-width: 100%; 
-/* margin: 0 auto; */
-padding: 0 40px; 
-/* position: relative;  */
-box-sizing: border-box; 
+.center-links {
+  z-index: 1100;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-around;  /* Even spacing */
+  gap: var(--center-gap-large);
+  flex-wrap: nowrap;
+  max-width: 1000px;              /* Adjust as needed */
+  margin: 0 auto;
+  padding: 0 20px;
+  box-sizing: border-box;
 }
 
-/* .center-links { */
-/*   display: flex; */
-/*   flex-direction: row;          /* Horizontal links on desktop */ */
-/*   justify-content: space-evenly;/* Even horizontal spacing across full width */ */
-/*   align-items: center; */
-/*   gap: 100px;                   /* Extra horizontal spacing between links */ */
-/*   max-width: 1000px;            /* Optional max width */ */
-/*   width: 100%;                  /* Take full container width */ */
-/*   padding: 0 20px; */
-/*   box-sizing: border-box; */
-/* } */
-
-
 .center-link {
-  font-family: orpheus-pro;
+  font-family: "Montserrat", sans-serif;
   font-weight: 400;
   text-transform: uppercase;
   color: rgba(255,255,255,0.92);
   text-decoration: underline;
-  text-underline-offset: 0.3em;
-  text-decoration-thickness: 1px;
-  display: inline-block;
-  transform: scaleY(2);           /* Very tall letters */
-  line-height: 1;                  /* Adjusted for tall text */
-  letter-spacing: 0.05em;          /* Slightly more breathing room */
+  line-height: 1.1;
   white-space: nowrap;
   text-align: center;
-  font-size: clamp(20px, 3vw, 70px); /* Responsive font */
+  font-size: clamp(16px, 3vw, 64px);  /* Scales bigger on large screens */
 }
 
-
-/* .center-link { */
-/*   font-family: orpheus-pro; */
-/*   font-weight: 400; */
-/*   text-transform: uppercase; */
-/*   color: rgba(255,255,255,0.92); */
-/*   text-decoration: underline; */
-/*   text-underline-offset: 0.3em; */
-/*   text-decoration-thickness: 1px; */
-/*   display: inline-block; */
-/*   transform: scaleY(2);           /* Tall letters */ 
-/*   line-height: 1; */
-/*   letter-spacing: 0.05em; */
-/*   white-space: nowrap; */
-/*   text-align: center; */
-/*   font-size: clamp(20px, 3vw, 70px); /* Responsive font scaling */ 
-/* } */
-
-/* ================= RESPONSIVE ================= */
-@media (max-width: 600px) {  /* Mobile breakpoint */  
+@media (max-width: 600px) {
   .center-links {
-    flex-direction: column;      /* Stack vertically on mobile */ 
-    gap: var(--center-gap-small); */
-   }
+    flex-direction: column;      
+    gap: var(--center-gap-small);
+  }
 }
-
 
 
 /* ================= RIGHT SIDE OVERLAY MENU ================= */
@@ -229,42 +190,22 @@ box-sizing: border-box;
   .brand-title{ font-size: clamp(18px, 5.8vw, 34px); }
 }
 
+
 /* ================= RESPONSIVE / MOBILE ================= */
-/* @media (max-width: 600px) {  /* Mobile breakpoint */ */
+@media (max-width: 600px) {  /* Mobile breakpoint */
 /*   .hero { */
-/*     align-items: center;   /* Vertically center links */ */
-/*     justify-content: center; */
-/*     padding-top: 0;        /* Remove desktop offset */ */
+/*     align-items: center;   /* Vertical center for mobile */ 
 /*   } */
-
-/*   .center-links { */
-/*     flex-direction: column;       */
-/*     gap: var(--center-gap-small); /* Vertical spacing between links */ */
-/*     align-items: center;          /* Center horizontally */ */
-/*   } */
-
-/*   .center-link { */
-/*     font-size: clamp(16px, 5vw, 32px); /* Shrink font on mobile */ */
-/*     transform: scaleY(1.8);            /* Slightly less tall letters on mobile */ */
-/*   } */
-/* } */
-
-@media (max-width: 600px) {
-  .hero {
-    align-items: center;   /* Vertical center for mobile */
-  }
 
   .center-links {
-    flex-direction: column; /* Stack vertically */
+    flex-direction: column;            /* Stack vertically on mobile */
     gap: var(--center-gap-small);
+    top: 25%;                          /* Slightly adjust vertical position on mobile */
   }
-
   .center-link {
-    font-size: clamp(16px, 5vw, 32px); /* Smaller font on mobile */
-    transform: scaleY(1.8);           /* Slightly less tall for mobile */
+    font-size: clamp(16px, 5vw, 32px); /* Smaller font for mobile screens */
   }
 }
-
 
 
 @media (max-width: 420px){
