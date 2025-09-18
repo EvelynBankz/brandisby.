@@ -24,11 +24,11 @@ body.serac {
   height: 100vh;
   display: flex;
   justify-content: center;    /* Horizontally center links */
-  align-items: flex-start;    /* Slightly below center on desktop */
+  align-items: flex-start;    /* Desktop: slightly below center */
   position: relative;
   background: url("bg.jpg") center center / cover no-repeat;
   filter: blur(var(--blur-strength));
-  padding-top: 20%;           /* Space from top on desktop */
+  padding-top: 20%;           /* Push links slightly below center */
 }
 .hero::after { 
   content:""; 
@@ -36,6 +36,7 @@ body.serac {
   inset:0; 
   background: rgba(0,0,0,0.0); 
 }
+
 
 
 /* ================= HEADER ================= */
@@ -202,10 +203,10 @@ body.serac {
 }
 
 
-@media (max-width: 600px) {
+@media (max-width: 900px) {  /* Tablet + Mobile */
   .hero {
-    align-items: center;  /* Vertically center links on mobile */
-    padding-top: 0;       /* Remove desktop offset */
+    align-items: center;   /* Vertically center links */
+    padding-top: 0;        /* Remove desktop offset */
   }
 
   .center-links {
@@ -214,8 +215,8 @@ body.serac {
   }
 
   .center-link {
-    font-size: clamp(16px, 5vw, 32px);  /* Mobile-friendly font size */
-    transform: scaleY(1.8);             /* Slightly less tall on mobile */
+    font-size: clamp(16px, 5vw, 32px); /* Mobile-friendly font size */
+    transform: scaleY(1.8);            /* Slightly shorter tall letters on mobile */
   }
 }
 
