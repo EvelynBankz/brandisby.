@@ -51,18 +51,21 @@ body.fleurdevie{
 }
 
 /* ================= HEADER (transparent) ================= */
-.site-header{
+/* ================= HEADER (completely transparent) ================= */
+.site-header {
   position: fixed;
-  top:0;left:0;right:0;
+  top: 0; left: 0; right: 0;
   height: var(--header-h);
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: 14px 28px;
   z-index: 1200;
-  background: transparent;   /* keep it transparent */
-  backdrop-filter: none;     /* turn off blur effect */
+  background: none !important;      /* no background */
+  backdrop-filter: none !important; /* no blur */
+  box-shadow: none !important;      /* no shadow */
 }
+
 
 
 /* left logo */
