@@ -14,7 +14,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
 body.serac {
-  font-family: "Montserrat", Arial, sans-serif;
+  font-family: "orpheus-pro", Montserrat, Arial, sans-serif;
   color: #fff;
   background: #000;
   overflow: hidden;
@@ -105,18 +105,18 @@ body.serac {
   margin: 0 auto;
   padding: 0 20px;
   position: relative;
-  top: 15%;                             /* Slightly below center */
+  top: 10%;                             /* Slightly below center */
   box-sizing: border-box;
 }
 
 .center-link {
-  font-family:  orpheus-pro, Montserrat, sans-serif;
+  font-family:  orpheus-pro;
   font-weight: 400;
   font-style: normal;
   text-transform: uppercase;
   color: rgba(255,255,255,0.92);
   text-decoration: underline;
-  line-height: 20;                    /* Slightly elongated letters */
+  line-height: 100;                    /* Slightly elongated letters */
   letter-spacing: 0.03em;              /* Optional spacing between letters */
   white-space: nowrap;
   text-align: center;
