@@ -99,13 +99,13 @@ body.serac {
   flex-direction: row;                 /* Horizontal by default */
   align-items: center;
   justify-content: space-around;       /* Even spacing across the landing page */
-  gap: 150px;        /* Extra spacing control */
+  gap: 260px;        /* Extra spacing control */
   flex-wrap: nowrap;                   /* Keep horizontal until mobile */
   max-width: 100%;                   /* Optional max width */
   margin: 0 auto;
-  padding: 0 10px;
+  padding: 0 40px;
   position: relative;
-  top: 10%;                             /* Slightly below center */
+  top: 2%;                             /* Slightly below center */
   box-sizing: border-box;
 }
 
@@ -122,6 +122,8 @@ body.serac {
   text-align: center;
   text-underline-offset: .3em;
   text-decoration-thickness: 1px;
+  display: inline-block;       /* Required for transform */
+  transform: scaleY(2);  
 
   /* Responsive font: grows on large screens, shrinks as screen reduces */
   font-size: clamp(20px, 3vw, 70px);   /* Adjust min, preferred, max as needed */
