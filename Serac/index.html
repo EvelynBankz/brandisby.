@@ -1,69 +1,61 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sérac</title>
-
-  <link rel="stylesheet" href="style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=UnifrakturCook:wght@700&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="serac.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="serac">
 
-  <header class="site-header" role="banner">
-    <div class="header-left">
-      <img src="logo.png" alt="Sérac logo" class="brand-logo">
-    </div>
+  <!-- HEADER ELEMENTS (without header box) -->
+  <div class="header-left">
+    <img src="logo.png" alt="Sérac Logo" class="brand-logo">
+  </div>
 
-    <div class="brand-title" aria-hidden="true">Sérac</div>
+  <h1 class="brand-title">Sérac</h1>
 
-    <div class="header-right">
-      <a class="home-link" href="index.html">Home</a>
-      <a class="social-link" href="mailto:stonecold.serac@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
-      <a class="social-link" href="https://www.tiktok.com/@serac.com" target="_blank" rel="noreferrer" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
-      <a class="social-link" href="https://www.instagram.com/serac_com/" target="_blank" rel="noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+  <div class="header-right">
+    <a href="#" class="home-link">Home</a>
+    <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+    <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
+    <button class="hamburger" id="hamburger">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
 
-      <button class="hamburger" id="hamburger-s" aria-label="Open menu" aria-expanded="false">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-  </header>
-
-  <nav id="overlay-s" class="nav-overlay" aria-hidden="true" aria-label="Mobile menu">
-    <button class="overlay-close" id="close-s" aria-label="Close menu">&times;</button>
-    <a href="index.html" class="overlay-item">Home</a>
+  <!-- FULLSCREEN OVERLAY MENU -->
+  <nav class="nav-overlay" id="navOverlay">
+    <button class="overlay-close" id="overlayClose">&times;</button>
+    <a href="#" class="overlay-item">Home</a>
+    <a href="#" class="overlay-item">About</a>
+    <a href="#" class="overlay-item">Gallery</a>
+    <a href="#" class="overlay-item">Contact</a>
     <div class="overlay-socials">
-      <a href="mailto:stonecold.serac@gmail.com" class="social-link"><i class="fas fa-envelope"></i></a>
-      <a href="https://www.tiktok.com/@serac.com" target="_blank" rel="noreferrer" class="social-link"><i class="fab fa-tiktok"></i></a>
-      <a href="https://www.instagram.com/serac_com/" target="_blank" rel="noreferrer" class="social-link"><i class="fab fa-instagram"></i></a>
+      <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+      <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
     </div>
   </nav>
 
-  <main class="hero" role="main">
-    <div class="center-links">
-      <a class="center-link" href="about.html">ABOUT US</a>
-      <a class="center-link" href="shop.html">SHOP</a>
-      <a class="center-link" href="contact.html">CONTACT US</a>
-    </div>
-  </main>
-
-  <footer class="site-footer" role="contentinfo">
-    <div class="tagline">Stone Cold</div>
-    <div class="copyright">© 2025 Sérac</div>
-  </footer>
+  <!-- FOOTER ELEMENTS (without footer box) -->
+  <div class="footer-elements">
+    <p class="tagline">Elegance in Simplicity</p>
+    <p class="copyright">© 2025 Sérac</p>
+  </div>
 
   <script>
-    (function () {
-      const ham = document.getElementById('hamburger-s');
-      const overlay = document.getElementById('overlay-s');
-      const closeBtn = document.getElementById('close-s');
-      function openMenu(){ overlay.classList.add('open'); overlay.setAttribute('aria-hidden','false'); ham.classList.add('is-active'); ham.setAttribute('aria-expanded','true'); }
-      function closeMenu(){ overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true'); ham.classList.remove('is-active'); ham.setAttribute('aria-expanded','false'); }
-      ham && ham.addEventListener('click', ()=> overlay.classList.contains('open') ? closeMenu() : openMenu());
-      closeBtn && closeBtn.addEventListener('click', closeMenu);
-      overlay.querySelectorAll('a').forEach(a=>a.addEventListener('click', closeMenu));
-    })();
+    const hamburger = document.getElementById('hamburger');
+    const navOverlay = document.getElementById('navOverlay');
+    const overlayClose = document.getElementById('overlayClose');
+
+    hamburger.addEventListener('click', () => {
+      navOverlay.classList.add('open');
+    });
+    overlayClose.addEventListener('click', () => {
+      navOverlay.classList.remove('open');
+    });
   </script>
+
 </body>
 </html>
