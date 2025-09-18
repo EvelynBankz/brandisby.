@@ -52,20 +52,22 @@ body.fleurdevie{
 
 /* ================= HEADER (transparent) ================= */
 /* ================= HEADER (completely transparent) ================= */
+/* Remove the header box, keep elements floating */
 .site-header {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  height: var(--header-h);
+  position: absolute; /* instead of fixed "bar" */
+  top: 0;
+  left: 0;
+  right: 0;
+  height: auto;       /* no height box */
+  padding: 14px 28px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 28px;
+  background: none !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
   z-index: 1200;
-  background: none !important;      /* no background */
-  backdrop-filter: none !important; /* no blur */
-  box-shadow: none !important;      /* no shadow */
 }
-
 
 
 /* left logo */
@@ -180,17 +182,25 @@ body.fleurdevie{
 }
 
 /* ================= FOOTER ================= */
-.site-footer{
-  position: fixed;
-  left:0; right:0; bottom:0;
-  height: var(--footer-h);
-  display:flex;
+/* Remove footer box, keep elements floating */
+.site-footer {
+  position: absolute; /* sit on hero background */
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: auto;       /* no height box */
+  padding: 10px 20px;
+  background: none !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+  display: flex;
   flex-direction: column;
-  align-items:center;
-  justify-content:center;
-  gap:6px;
-  z-index:1200;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  z-index: 1200;
 }
+
 .site-footer .tagline{ font-family: "Playfair Display", serif; font-style: italic; font-size:16px; color: rgba(255,255,255,0.95); }
 .site-footer .copyright{ font-size:13px; color: rgba(255,255,255,0.75); }
 
