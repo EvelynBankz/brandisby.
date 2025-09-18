@@ -107,7 +107,7 @@ body.serac {
   flex-direction: row;
   align-items: center;
   justify-content: space-around;  /* Even spacing */
-  gap: var(--center-gap-large);
+  gap: 265px;
   flex-wrap: nowrap;
   max-width: 1000px;              /* Adjust as needed */
   margin: 0 auto;
@@ -125,6 +125,8 @@ body.serac {
   white-space: nowrap;
   text-align: center;
   font-size: clamp(16px, 3vw, 64px);  /* Scales bigger on large screens */
+  display: inline-block;       /* Required for transform */
+  transform: scaleY(2);        /* 2 = 2x taller than normal */
 }
 
 @media (max-width: 600px) {
