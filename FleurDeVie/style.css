@@ -157,7 +157,7 @@ body.serac {
 }
 .right-nav-overlay.open { transform: translateX(0); }
 .right-nav-overlay a {
-  color:#fff;
+  color:#112e1f;
   font-size:18px;
   text-decoration:none;
   display:flex;
