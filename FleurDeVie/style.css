@@ -1,7 +1,7 @@
 /* ================= VARIABLE TWEAKS ================= */
 :root {
-  --logo-min: 70px;
-  --logo-max: 200px;
+  --logo-min: 100px;
+  --logo-max: 300px;
   --center-gap-large: 64px;
   --center-gap-small: 24px;
   --center-font-size-large: 48px;
