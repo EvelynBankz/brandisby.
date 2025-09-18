@@ -57,7 +57,7 @@ body.serac {
 
 .brand-logo {
   position: absolute;      /* Keep it relative to top-left */
-  top: 5px;               /* Margin from top edge */
+/*   top: 5px;               /* Margin from top edge */ */
   left: 20px;              /* Margin from left edge to keep distance from brand name */
   height: clamp(80px, 10vw, 200px); /* Responsive height: grows/shrinks */
   width: auto;             /* Maintain aspect ratio */
