@@ -110,13 +110,13 @@ body.serac {
 }
 
 .center-link {
-  font-family:  orpheus-pro, "Montserrat", sans-serif;
+  font-family:  orpheus-pro;
   font-weight: 400;
   font-style: normal;
   text-transform: uppercase;
   color: rgba(255,255,255,0.92);
   text-decoration: underline;
-  line-height: 1.5;                    /* Slightly elongated letters */
+  line-height: 3;                    /* Slightly elongated letters */
   letter-spacing: 0.03em;              /* Optional spacing between letters */
   white-space: nowrap;
   text-align: center;
