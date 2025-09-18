@@ -216,20 +216,20 @@ box-sizing: border-box; }
 /* ================= RESPONSIVE / MOBILE ================= */ 
 @media (max-width: 600px) {
   .hero {
-    align-items: center;  /* Vertically center links */
-    padding-top: 0;       /* Remove desktop offset */
+    align-items: center;   /* Vertical center for mobile */
   }
 
   .center-links {
-    flex-direction: column;      
+    flex-direction: column; /* Stack vertically */
     gap: var(--center-gap-small);
   }
 
   .center-link {
-    font-size: clamp(16px, 5vw, 32px);
-    transform: scaleY(1.8);
+    font-size: clamp(16px, 5vw, 32px); /* Smaller font on mobile */
+    transform: scaleY(1.8);           /* Slightly less tall for mobile */
   }
 }
+
 
 
 
