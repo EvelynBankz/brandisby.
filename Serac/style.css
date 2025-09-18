@@ -101,19 +101,19 @@ body.serac {
 
 
 /* ================= HERO CENTER LINKS ================= */ 
-.center-links {
-  z-index: 1100;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-around;  /* Even spacing */
-  gap: 265px;
-  flex-wrap: nowrap;
-  max-width: 1000px;              /* Adjust as needed */
-  margin: 0 auto;
-  padding: 0 20px;
-  box-sizing: border-box;
-}
+.center-links { 
+z-index: 1100; 
+display: flex; 
+flex-direction: row; /* Horizontal by default */ 
+align-items: center; 
+justify-content: space-around; /* Even spacing across the landing page */ 
+gap: 260px; /* Extra spacing control */ 
+flex-wrap: nowrap; /* Keep horizontal until mobile */ 
+max-width: 100%; /* Optional max width */ 
+margin: 0 auto; padding: 0 40px; 
+position: relative; top: 2%; /* Slightly below center */ 
+box-sizing: border-box; }
+
 
 .center-link {
   font-family: "Montserrat", sans-serif;
@@ -121,13 +121,32 @@ body.serac {
   text-transform: uppercase;
   color: rgba(255,255,255,0.92);
   text-decoration: underline;
-  line-height: 1.1;
+  line-height: 1;
   white-space: nowrap;
   text-align: center;
   font-size: clamp(16px, 3vw, 64px);  /* Scales bigger on large screens */
   display: inline-block;       /* Required for transform */
   transform: scaleY(2);        /* 2 = 2x taller than normal */
 }
+
+.center-link { 
+  font-family: orpheus-pro; 
+  font-weight: 400; 
+  font-style: normal; 
+  text-transform: uppercase; 
+  color: rgba(255,255,255,0.92); 
+  text-decoration: underline; 
+  line-height: 10px; /* Slightly elongated letters */ 
+  letter-spacing: 0.05em; /* Optional spacing between letters */ 
+  white-space: nowrap; 
+  text-align: center; 
+  text-underline-offset: .3em; 
+  text-decoration-thickness: 1px; 
+  display: inline-block; /* Required for transform */ 
+  transform: scaleY(2); /* Responsive font: grows on large screens, shrinks as screen reduces */ 
+  font-size: clamp(20px, 3vw, 70px); /* Adjust min, preferred, max as needed */ }
+
+
 
 @media (max-width: 600px) {
   .center-links {
@@ -194,20 +213,22 @@ body.serac {
 
 
 /* ================= RESPONSIVE / MOBILE ================= */
-@media (max-width: 600px) {  /* Mobile breakpoint */
+/* @media (max-width: 600px) {  /* Mobile breakpoint */ 
 /*   .hero { */
 /*     align-items: center;   /* Vertical center for mobile */ 
 /*   } */
 
-  .center-links {
-    flex-direction: column;            /* Stack vertically on mobile */
-    gap: var(--center-gap-small);
-    top: 25%;                          /* Slightly adjust vertical position on mobile */
-  }
-  .center-link {
-    font-size: clamp(16px, 5vw, 32px); /* Smaller font for mobile screens */
-  }
-}
+
+/* ================= RESPONSIVE / MOBILE ================= */ 
+@media (max-width: 600px) { /* Mobile breakpoint */ 
+  .center-links { 
+    flex-direction: column; /* Stack vertically on mobile */ 
+    gap: var(--center-gap-small); 
+    top: 25%; /* Slightly adjust vertical position on mobile */ 
+  } 
+  .center-link { 
+    font-size: clamp(16px, 5vw, 32px); /* Smaller font for mobile screens */ } 
+
 
 
 @media (max-width: 420px){
