@@ -96,32 +96,37 @@ body.serac {
 .center-links {
   z-index: 1100;
   display: flex;
-  flex-direction: row;          /* Keep horizontal */
+  flex-direction: row;          /* Horizontal by default */
   align-items: center;
   justify-content: center;
   gap: var(--center-gap-large);
-  flex-wrap: nowrap;            /* Keep on one line until mobile */
-  padding: 0 20px;              /* Prevent touching edges */
+  flex-wrap: nowrap;            /* Keep horizontal until mobile */
+  padding: 0 20px;
   box-sizing: border-box;
 }
 
 .center-link {
   font-family: "Montserrat", sans-serif;
   font-weight: 300;
-  font-size: var(--center-font-size-large); /* Will reduce via clamp */
-  letter-spacing: var(--center-letter-spacing);
   color: rgba(255,255,255,0.92);
   text-decoration: underline;
   text-transform: uppercase;
   line-height: 1.1;
   white-space: nowrap;
   text-align: center;
+
+  /* Responsive font: grows on large screens, shrinks on smaller screens */
+  font-size: clamp(16px, 2.5vw, 48px);
 }
 
-/* Make font size responsive */
-.center-link {
-  font-size: clamp(18px, 3vw, var(--center-font-size-large));
+/* ================= RESPONSIVE ================= */
+@media (max-width: 600px) {  /* Mobile breakpoint */
+  .center-links {
+    flex-direction: column;      /* Stack vertically on mobile */
+    gap: var(--center-gap-small);
+  }
 }
+
 
 
 /* ================= RIGHT SIDE OVERLAY MENU ================= */
@@ -180,14 +185,11 @@ body.serac {
 }
 
 
+/* ================= RESPONSIVE ================= */
 @media (max-width: 600px) {  /* Mobile breakpoint */
   .center-links {
     flex-direction: column;      /* Stack vertically on mobile */
     gap: var(--center-gap-small);
-  }
-}
-  .center-link {
-    font-size: var(--center-font-size-small);
   }
 }
 
