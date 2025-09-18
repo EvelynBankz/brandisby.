@@ -98,11 +98,13 @@ body.serac {
   display: flex;
   flex-direction: row;          /* Horizontal by default */
   align-items: center;
-  justify-content: center;
+  justify-content: space-evenly;
   gap: var(--center-gap-large);
   flex-wrap: nowrap;            /* Keep horizontal until mobile */
   padding: 0 20px;
   box-sizing: border-box;
+  max-width: 1000px;             /* Optional: limit total width */
+  margin: 0 auto;                /* Center the whole group */
 }
 
 .center-link {
