@@ -60,10 +60,10 @@ body.fleurdevie{
   justify-content:space-between;
   padding: 14px 28px;
   z-index: 1200;
-  background: transparent; /* no background */
-  backdrop-filter: none;
-
+  background: transparent;   /* keep it transparent */
+  backdrop-filter: none;     /* turn off blur effect */
 }
+
 
 /* left logo */
 .header-left{}
