@@ -1,13 +1,13 @@
-/* ================= VARIABLE TWEAKS (edit here) ================= */
+/* ================= VARIABLE TWEAKS ================= */
 :root {
-  --logo-min: 48px;                 /* logo min height */
-  --logo-max: 120px;                /* logo max height */
-  --center-gap-large: 64px;         /* horizontal gap desktop */
-  --center-gap-small: 24px;         /* vertical gap mobile */
-  --center-font-size-large: 48px;   /* center links font size (desktop) */
-  --center-font-size-small: 20px;   /* center links font size (mobile) */
-  --center-letter-spacing: 0.06em;  /* letter spacing */
-  --blur-strength: 0px;             /* background blur (tweak if needed) */
+  --logo-min: 48px;
+  --logo-max: 120px;
+  --center-gap-large: 64px;
+  --center-gap-small: 24px;
+  --center-font-size-large: 48px;
+  --center-font-size-small: 20px;
+  --center-letter-spacing: 0.06em;
+  --blur-strength: 0px;
 }
 
 /* ================= RESET & BASE ================= */
@@ -17,8 +17,6 @@ body.serac {
   font-family: "Montserrat", Arial, sans-serif;
   color: #fff;
   background: #000;
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
   overflow: hidden;
 }
 
@@ -32,14 +30,9 @@ body.serac {
   justify-content:center;
   filter: blur(var(--blur-strength));
 }
-.hero::after {
-  content:"";
-  position:absolute; inset:0;
-  background: rgba(0,0,0,0.0); /* transparent overlay */
-  z-index:0;
-}
+.hero::after { content:""; position:absolute; inset:0; background: rgba(0,0,0,0.0); }
 
-/* ================= HEADER ELEMENTS ================= */
+/* ================= HEADER ================= */
 .site-header {
   position: absolute;
   top:0; left:0; right:0;
@@ -52,30 +45,21 @@ body.serac {
   box-shadow:none !important;
   z-index:1200;
 }
-
-/* logo */
 .brand-logo {
   height: clamp(var(--logo-min), 8vw, var(--logo-max));
-  width: auto;
-  display:block;
+  width:auto;
 }
-
-/* centered brand name */
 .brand-title {
   position: absolute;
-  left:50%;
-  transform: translateX(-50%);
+  left:50%; transform: translateX(-50%);
   font-family: "Playfair Display", serif;
   font-weight:700;
   font-size: clamp(20px, 3.4vw, 44px);
-  color: #fff;
-  text-align:center;
+  color:#fff; text-align:center;
+  text-shadow: 0 4px 12px rgba(0,0,0,0.45);
   z-index:1250;
   pointer-events:none;
-  text-shadow: 0 4px 12px rgba(0,0,0,0.45);
 }
-
-/* right nav */
 .header-right {
   display:flex;
   align-items:center;
@@ -87,25 +71,20 @@ body.serac {
   text-decoration:none;
   font-size:14px;
 }
-.header-right .social-link i{ font-size:18px; }
+.header-right .social-link i { font-size:18px; }
 
-/* hamburger */
+/* Hamburger */
 .hamburger {
   display:none;
-  background:none;
-  border:none;
-  padding:8px;
-  cursor:pointer;
-  width:44px;
-  height:40px;
+  background:none; border:none;
+  padding:8px; cursor:pointer;
+  width:44px; height:40px;
   position:relative;
 }
 .hamburger span {
   display:block;
-  height:2.5px;
-  width:22px;
-  background:#fff;
-  margin:6px auto;
+  height:2.5px; width:22px;
+  background:#fff; margin:6px auto;
   border-radius:2px;
   transition: transform .28s ease, opacity .28s ease;
 }
@@ -117,9 +96,9 @@ body.serac {
 .center-links {
   z-index:1100;
   display:flex;
-  flex-direction: row;              /* DESKTOP: horizontal */
-  align-items: center;
-  justify-content: center;
+  flex-direction: row; /* desktop: horizontal */
+  align-items:center;
+  justify-content:center;
   gap: var(--center-gap-large);
 }
 .center-link {
@@ -134,39 +113,43 @@ body.serac {
   white-space:nowrap;
 }
 
-/* ================= MOBILE OVERLAY ================= */
-.nav-overlay {
+/* ================= RIGHT SIDE OVERLAY MENU ================= */
+.right-nav-overlay {
   position: fixed;
   top:0; right:0;
-  height:100vh; width:100%;
-  background: rgba(0,0,0,0.96);
+  height:100%; width:260px;
+  background: rgba(0,0,0,0.95);
   display:flex;
   flex-direction: column;
-  align-items:center;
-  justify-content:center;
+  align-items:flex-start;
+  padding:60px 25px;
   gap:24px;
-  padding:20px;
-  z-index:1400;
-  transform: translateY(-100%);
-  transition: transform .32s ease;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  z-index:1500;
 }
-.nav-overlay.open{ transform: translateY(0%); }
-.nav-overlay .overlay-item{ color:#fff; font-size:22px; text-decoration:none; }
-.nav-overlay .overlay-socials{ display:flex; gap:18px; }
-.overlay-close{
+.right-nav-overlay.open { transform: translateX(0); }
+.right-nav-overlay a {
+  color:#fff;
+  font-size:18px;
+  text-decoration:none;
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.right-nav-overlay a:hover { opacity:0.7; }
+.right-nav-overlay .overlay-close {
   position:absolute; top:18px; right:18px;
-  background:none; border:none; color:#fff;
-  font-size:36px; cursor:pointer;
+  background:none; border:none;
+  color:#fff; font-size:36px;
+  cursor:pointer;
 }
 
-/* ================= FOOTER ELEMENTS ================= */
+/* ================= FOOTER ================= */
 .site-footer {
   position:absolute;
   bottom:0; left:0; right:0;
   padding:10px 20px;
-  background:none !important;
-  backdrop-filter:none !important;
-  box-shadow:none !important;
   display:flex;
   flex-direction: column;
   align-items:center;
@@ -184,15 +167,10 @@ body.serac {
   .header-right .social-link{ display:none; }
   .brand-title{ font-size: clamp(18px, 5.8vw, 34px); }
 }
-
 @media (max-width: 768px){
-  .center-links{
-    flex-direction: column;          /* MOBILE: vertical stack */
-    gap: var(--center-gap-small);
-  }
+  .center-links{ flex-direction: column; gap: var(--center-gap-small); }
   .center-link{ font-size: var(--center-font-size-small); }
 }
-
 @media (max-width: 420px){
   :root{ --center-font-size-small: 18px; }
   .brand-logo{ height: clamp(36px, 12vw, 72px); }
