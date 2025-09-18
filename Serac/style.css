@@ -92,34 +92,39 @@ body.serac {
 .hamburger.is-active span:nth-child(2){ opacity:0; transform: scaleX(.2); }
 .hamburger.is-active span:nth-child(3){ transform: translateY(-8px) rotate(-45deg); }
 
-/* ================= CENTER LINKS ================= */
+/* ================= HERO CENTER LINKS ================= */
 .center-links {
   z-index: 1100;
   display: flex;
-  flex-direction: row;          /* Horizontal by default */
+  flex-direction: row;                 /* Horizontal by default */
   align-items: center;
-  justify-content: space-evenly;
-  gap: var(--center-gap-large);
-  flex-wrap: nowrap;            /* Keep horizontal until mobile */
+  justify-content: space-around;       /* Even spacing across the landing page */
+  gap: var(--center-gap-large);        /* Extra spacing control */
+  flex-wrap: nowrap;                   /* Keep horizontal until mobile */
+  max-width: 1200px;                   /* Optional max width */
+  margin: 0 auto;
   padding: 0 20px;
+  position: relative;
+  top: 20%;                             /* Slightly below center */
   box-sizing: border-box;
-  max-width: 1000px;             /* Optional: limit total width */
-  margin: 0 auto;                /* Center the whole group */
 }
 
 .center-link {
   font-family: "Montserrat", sans-serif;
-  font-weight: 300;
+  font-weight: 400;
+  font-style: normal;
+  text-transform: uppercase;
   color: rgba(255,255,255,0.92);
   text-decoration: underline;
-  text-transform: uppercase;
-  line-height: 2;
+  line-height: 1.2;                    /* Slightly elongated letters */
+  letter-spacing: 0.08em;              /* Optional spacing between letters */
   white-space: nowrap;
   text-align: center;
 
-  /* Responsive font: grows on large screens, shrinks on smaller screens */
-  font-size: clamp(16px, 2.5vw, 48px);
+  /* Responsive font: grows on large screens, shrinks as screen reduces */
+  font-size: clamp(20px, 3vw, 64px);   /* Adjust min, preferred, max as needed */
 }
+
 
 /* ================= RESPONSIVE ================= */
 @media (max-width: 600px) {  /* Mobile breakpoint */ 
@@ -187,13 +192,18 @@ body.serac {
 }
 
 
-/* ================= RESPONSIVE ================= */
+/* ================= RESPONSIVE / MOBILE ================= */
 @media (max-width: 600px) {  /* Mobile breakpoint */
   .center-links {
-    flex-direction: column;      /* Stack vertically on mobile */
+    flex-direction: column;            /* Stack vertically on mobile */
     gap: var(--center-gap-small);
+    top: 25%;                          /* Slightly adjust vertical position on mobile */
+  }
+  .center-link {
+    font-size: clamp(16px, 5vw, 32px); /* Smaller font for mobile screens */
   }
 }
+
 
 @media (max-width: 420px){
   :root{ --center-font-size-small: 18px; }
