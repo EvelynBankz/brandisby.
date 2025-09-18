@@ -25,16 +25,16 @@ body.serac {
   height: 100vh;
   display: flex;
   justify-content: center;    /* Horizontally center links */
-  align-items: flex-start;    /* Slightly below center on desktop */
+  align-items: flex-start;    /* Desktop: slightly below center */
   position: relative;
   background: url("bg.jpg") center center / cover no-repeat;
   filter: blur(var(--blur-strength));
-  padding-top: 20%;           /* Push links slightly below center on desktop */
+  padding-top: 20%;           /* Push links slightly below center */
 }
 .hero::after { 
-  content: ""; 
-  position: absolute; 
-  inset: 0; 
+  content:""; 
+  position:absolute; 
+  inset:0; 
   background: rgba(0,0,0,0.0); 
 }
 
@@ -100,22 +100,25 @@ body.serac {
 .hamburger.is-active span:nth-child(3){ transform: translateY(-8px) rotate(-45deg); }
 
 
-/* ================= HERO CENTER LINKS ================= */
-.center-links {
-  z-index: 1100;
-  display: flex;
-  flex-direction: row;                 /* Horizontal on desktop */
-  align-items: center;
-  justify-content: space-evenly;       /* Even horizontal spacing */
-  flex-wrap: nowrap;
-  max-width: 100%;                     
-  margin: 0 auto;
-  padding: 0 40px;
-  box-sizing: border-box;
+/* ================= HERO CENTER LINKS ================= */ 
+.center-links { 
+z-index: 1100; 
+display: flex; 
+flex-direction: row;    /* Horizontal by default */ 
+align-items: center; 
+justify-content: space-around;    /* Even spacing across the landing page */ 
+gap: 260px;     /* Extra spacing control */ 
+flex-wrap: nowrap;     /* Keep horizontal until mobile */ 
+max-width: 100%; /* Optional max width */ 
+margin: 0 auto;
+padding: 0 40px; 
+position: relative; 
+top: 0%;   /* Slightly below center */ 
+box-sizing: border-box; 
 }
 
 .center-link {
-  font-family: orpheus-pro, sans-serif;
+  font-family: orpheus-pro;
   font-weight: 400;
   text-transform: uppercase;
   color: rgba(255,255,255,0.92);
@@ -123,12 +126,14 @@ body.serac {
   text-underline-offset: 0.3em;
   text-decoration-thickness: 1px;
   display: inline-block;
-  transform: scaleY(2);           /* Very tall letters on desktop */
-  line-height: 1;                  /* Works well with scaleY */
-  letter-spacing: 0.05em;          /* Horizontal spacing */
+  transform: scaleY(2);           /* Very tall letters */
+  line-height: 1;                  /* Adjusted for tall text */
+  letter-spacing: 0.05em;          /* Slightly more breathing room */
   white-space: nowrap;
   text-align: center;
-  font-size: clamp(20px, 3vw, 70px); /* Responsive font size for desktop */
+  font-size: clamp(20px, 3vw, 70px); /* Responsive font */
+}
+
 }
 
 
