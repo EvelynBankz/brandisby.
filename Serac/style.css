@@ -1,135 +1,215 @@
-/* SERAC brand style */
-body.serac {
+/* Serac style.css
+   Editable variables at the top — tweak fonts, sizes, spacing, blur here.
+   Files required in the same folder:
+     - logo.png
+     - bg.jpg
+*/
+
+/* ================= VARIABLE TWEAKS (edit here) ================= */
+:root{
+  --header-h: 100px;                /* header height (used for layout) */
+  --footer-h: 70px;                 /* footer height */
+  --logo-min: 48px;                 /* logo min height */
+  --logo-max: 120px;                /* logo max height */
+  --center-gap-large: 56px;         /* vertical gap between center links on large screens */
+  --center-gap-small: 20px;         /* horizontal gap between links on small screens */
+  --center-font-size-large: 64px;   /* center links font size (desktop) */
+  --center-font-size-small: 20px;   /* center links font size (mobile) */
+  --center-letter-spacing: 0.06em;  /* letter spacing */
+  --brand-color: #112e1f;           /* Serac main color (if needed) */
+  --blur-strength: 0px;             /* blur overlay, default 0 */
+}
+
+/* ================= RESET & BASE ================= */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body.serac{
   font-family: "Montserrat", Arial, sans-serif;
+  color:#fff;
+  background: #000;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  overflow: hidden; /* keep everything in viewport */
+}
+
+/* Hero background (scales responsively) */
+.hero{
+  margin-top: var(--header-h);
+  height: calc(100vh - var(--header-h) - var(--footer-h));
   background: url("bg.jpg") center center / cover no-repeat;
-  color: #fff;
-  margin: 0;
-  height: 100vh;
-  overflow: hidden;
+  position: relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  filter: blur(var(--blur-strength));
+}
+.hero::after{
+  content:"";
+  position:absolute;inset:0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.0), rgba(0,0,0,0.0));
+  z-index:0;
 }
 
-/* LOGO */
-.brand-logo {
+/* ================= HEADER ================= */
+.site-header{
   position: fixed;
-  top: 16px;
-  left: 24px;
-  height: 64px;
+  top:0;left:0;right:0;
+  height: var(--header-h);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding: 14px 28px;
+  z-index: 1200;
+  background: transparent;
+  backdrop-filter: blur(5px);
+}
+
+/* left logo */
+.header-left{}
+.brand-logo{
+  height: clamp(var(--logo-min), 8vw, var(--logo-max));
   width: auto;
-  z-index: 2000;
+  display:block;
 }
 
-/* BRAND NAME */
-.brand-title {
-  position: fixed;
-  top: 20px;
-  left: 50%;
+/* centered brand name */
+.brand-title{
+  position: absolute;
+  left:50%;
   transform: translateX(-50%);
   font-family: "Playfair Display", serif;
-  font-size: 32px;
-  font-weight: 700;
-  color: #fff;
-  z-index: 2000;
+  font-weight:700;
+  font-size: clamp(20px, 3.4vw, 44px);
+  color: #ffffff;
+  text-align:center;
+  z-index:1250;
+  pointer-events: none;
   text-shadow: 0 4px 12px rgba(0,0,0,0.45);
 }
 
-/* TOP RIGHT NAV */
-.header-right {
-  position: fixed;
-  top: 18px;
-  right: 24px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  z-index: 2000;
+/* right nav */
+.header-right{
+  display:flex;
+  align-items:center;
+  gap:12px;
 }
 
 .header-right .home-link,
-.header-right .social-link {
+.header-right .social-link{
   color: #fff;
-  text-decoration: none;
-  font-size: 14px;
+  text-decoration:none;
+  font-size:14px;
 }
-.header-right .social-link i { font-size: 18px; }
+.header-right .social-link i{ font-size:18px; }
 
-/* Hamburger button */
-.hamburger {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 6px;
-  display: flex;
+/* hamburger button */
+.hamburger{
+  display:none;
+  background:none;
+  border:none;
+  padding:8px;
+  cursor:pointer;
+  width:44px;
+  height:40px;
+  position:relative;
+}
+.hamburger span{
+  display:block;
+  height:2.5px;
+  width:22px;
+  background:#fff;
+  margin:6px auto;
+  border-radius:2px;
+  transition: transform .28s ease, opacity .28s ease;
+}
+.hamburger.is-active span:nth-child(1){ transform: translateY(8px) rotate(45deg); }
+.hamburger.is-active span:nth-child(2){ opacity:0; transform: scaleX(.2); }
+.hamburger.is-active span:nth-child(3){ transform: translateY(-8px) rotate(-45deg); }
+
+/* ================= CENTER LINKS ================= */
+.center-links{
+  z-index: 1100;
+  display:flex;
   flex-direction: column;
+  align-items: center;
   justify-content: center;
-  gap: 5px;
+  gap: var(--center-gap-large);
 }
-.hamburger span {
-  display: block;
-  width: 24px;
-  height: 2px;
-  background: #fff;
-  border-radius: 2px;
+.center-link{
+  font-family: "Montserrat", sans-serif;
+  font-weight:300;
+  font-size: var(--center-font-size-large);
+  letter-spacing: var(--center-letter-spacing);
+  color: rgba(255,255,255,0.92);
+  text-decoration: underline;
+  text-transform: uppercase;
+  white-space: nowrap;
+  line-height: 0.9;
 }
 
-/* OVERLAY MENU */
-.nav-overlay {
+/* ================= OVERLAY NAV ================= */
+.nav-overlay{
   position: fixed;
-  top: 0; left: 0;
+  top: 0; right: 0;
   height: 100vh;
   width: 100%;
-  background: rgba(0,0,0,0.95);
+  background: rgba(0,0,0,0.96);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 28px;
+  gap: 24px;
+  padding: 20px;
+  z-index: 1400;
   transform: translateY(-100%);
-  transition: transform 0.3s ease-in-out;
-  z-index: 2500;
+  transition: transform .32s ease;
 }
-.nav-overlay.open { transform: translateY(0%); }
-
-.overlay-item {
-  font-size: 28px;
-  color: #fff;
-  text-decoration: none;
-  text-transform: uppercase;
-  font-weight: 400;
-}
-.overlay-item:hover { opacity: 0.8; }
-
-.overlay-socials {
-  display: flex;
-  gap: 18px;
-}
-.overlay-socials a { color: #fff; font-size: 22px; }
-
-.overlay-close {
-  position: absolute;
-  top: 18px;
-  right: 18px;
-  background: none;
-  border: none;
-  font-size: 40px;
-  color: #fff;
-  cursor: pointer;
+.nav-overlay.open{ transform: translateY(0%); }
+.nav-overlay .overlay-item{ color:#fff; font-size:22px; text-decoration:none; }
+.nav-overlay .overlay-socials{ display:flex; gap:18px; }
+.overlay-close{
+  position:absolute;
+  top:18px; right:18px;
+  background:none; border:none; color:#fff; font-size:36px; cursor:pointer;
 }
 
-/* FOOTER ELEMENTS (just floating text) */
-.footer-elements {
+/* ================= FOOTER ================= */
+.site-footer{
   position: fixed;
-  bottom: 14px;
-  left: 50%;
-  transform: translateX(-50%);
-  text-align: center;
-  z-index: 2000;
+  left:0; right:0; bottom:0;
+  height: var(--footer-h);
+  display:flex;
+  flex-direction: column;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  z-index:1200;
 }
-.footer-elements .tagline {
-  font-family: "Playfair Display", serif;
-  font-style: italic;
-  font-size: 16px;
-  color: rgba(255,255,255,0.9);
+.site-footer .tagline{ font-family: "Playfair Display", serif; font-style: italic; font-size:16px; color: rgba(255,255,255,0.95); }
+.site-footer .copyright{ font-size:13px; color: rgba(255,255,255,0.75); }
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 900px){
+  .site-header{ padding: 10px 18px; }
+  .brand-title{ font-size: clamp(18px, 5.8vw, 34px); }
+
+  .hamburger{ display:inline-block; }
+  .header-right .home-link,
+  .header-right .social-link{ display:none; }
 }
-.footer-elements .copyright {
-  font-size: 13px;
-  color: rgba(255,255,255,0.7);
+@media (max-width: 768px){
+  .center-links{
+    flex-direction: row;
+    gap: var(--center-gap-small);
+  }
+  .center-link{
+    font-size: var(--center-font-size-small);
+    white-space: normal;
+  }
+  .hero{ height: calc(100vh - var(--header-h) - var(--footer-h)); background-position:center top; }
+}
+@media (max-width: 420px){
+  :root{ --center-font-size-small: 18px; }
+  .brand-logo{ height: clamp(36px, 12vw, 72px); }
+  .brand-title{ font-size: clamp(16px, 7vw, 22px); }
 }
