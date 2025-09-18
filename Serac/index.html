@@ -1,85 +1,79 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Serac</title>
+
   <link rel="stylesheet" href="serac.css">
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-  <!-- Font Awesome (for icons) -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="serac">
 
-  <!-- HEADER -->
+  <!-- Logo, brand, right nav -->
   <header class="site-header">
-    <!-- left: logo -->
     <div class="header-left">
-      <a href="#">
-        <img src="logo.png" alt="Serac Logo" class="brand-logo">
-      </a>
+      <img src="logo.png" alt="Serac logo" class="brand-logo">
     </div>
-
-    <!-- center: brand title -->
-    <h1 class="brand-title">SERAC</h1>
-
-    <!-- right: nav -->
+    <div class="brand-title">Serac</div>
     <div class="header-right">
-      <a href="#" class="home-link">Home</a>
-      <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
-      <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
-      <button class="hamburger" aria-label="Menu">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
+      <a class="home-link" href="index.html">Home</a>
+      <a class="social-link" href="mailto:serac@email.com"><i class="fas fa-envelope"></i></a>
+      <a class="social-link" href="https://www.tiktok.com/@serac" target="_blank"><i class="fab fa-tiktok"></i></a>
+      <a class="social-link" href="https://www.instagram.com/serac" target="_blank"><i class="fab fa-instagram"></i></a>
+      <button class="hamburger" id="hamburger-s"><span></span><span></span><span></span></button>
     </div>
   </header>
 
-  <!-- HERO -->
-  <section class="hero">
-    <nav class="center-links">
-      <a href="#" class="center-link">About</a>
-      <a href="#" class="center-link">Shop</a>
-      <a href="#" class="center-link">Contact</a>
-    </nav>
-  </section>
-
-  <!-- OVERLAY NAV (mobile menu) -->
-  <div class="nav-overlay">
-    <button class="overlay-close">&times;</button>
-    <a href="#" class="overlay-item">About</a>
-    <a href="#" class="overlay-item">Shop</a>
-    <a href="#" class="overlay-item">Contact</a>
+  <!-- Overlay menu -->
+  <nav id="overlay-s" class="nav-overlay">
+    <button class="overlay-close" id="close-s">&times;</button>
+    <a href="index.html" class="overlay-item">Home</a>
     <div class="overlay-socials">
-      <a href="#"><i class="fab fa-instagram"></i></a>
-      <a href="#"><i class="fab fa-facebook"></i></a>
+      <a href="mailto:serac@email.com"><i class="fas fa-envelope"></i></a>
+      <a href="https://www.tiktok.com/@serac" target="_blank"><i class="fab fa-tiktok"></i></a>
+      <a href="https://www.instagram.com/serac" target="_blank"><i class="fab fa-instagram"></i></a>
     </div>
-  </div>
+  </nav>
 
-  <!-- FOOTER -->
+  <!-- Hero -->
+  <main class="hero">
+    <div class="center-links">
+      <a class="center-link" href="about.html">ABOUT US</a>
+      <a class="center-link" href="shop.html">SHOP</a>
+      <a class="center-link" href="contact.html">CONTACT US</a>
+    </div>
+  </main>
+
+  <!-- Footer -->
   <footer class="site-footer">
-    <div class="tagline">Elevating Style with Serac</div>
-    <div class="copyright">&copy; 2025 Serac. All rights reserved.</div>
+    <div class="tagline">Strength in Style</div>
+    <div class="copyright">© 2025 Serac</div>
   </footer>
 
-  <!-- Script to toggle mobile nav -->
+  <!-- Script -->
   <script>
-    const hamburger = document.querySelector('.hamburger');
-    const navOverlay = document.querySelector('.nav-overlay');
-    const overlayClose = document.querySelector('.overlay-close');
+    (function () {
+      const ham = document.getElementById('hamburger-s');
+      const overlay = document.getElementById('overlay-s');
+      const closeBtn = document.getElementById('close-s');
 
-    hamburger.addEventListener('click', () => {
-      navOverlay.classList.add('open');
-      hamburger.classList.add('is-active');
-    });
+      function openMenu() {
+        overlay.classList.add('open');
+        ham.classList.add('is-active');
+      }
+      function closeMenu() {
+        overlay.classList.remove('open');
+        ham.classList.remove('is-active');
+      }
 
-    overlayClose.addEventListener('click', () => {
-      navOverlay.classList.remove('open');
-      hamburger.classList.remove('is-active');
-    });
+      ham.addEventListener('click', () => {
+        overlay.classList.contains('open') ? closeMenu() : openMenu();
+      });
+      closeBtn.addEventListener('click', closeMenu);
+      overlay.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMenu));
+    })();
   </script>
-
 </body>
 </html>
