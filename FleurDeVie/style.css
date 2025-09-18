@@ -51,14 +51,8 @@ body.serac {
   z-index:1200;
 }
 .brand-logo {
-  position: absolute;      /* Anchor to top-left */
-  top: 0;
-  left: 0;
-  height: clamp(80px, 12vw, 200px); /* Responsive height: grows/shrinks */
-  width: auto;              /* Maintain aspect ratio */
-  margin: 10px;             /* Optional spacing from top-left corner */
-  z-index: 1300;            /* Ensure it stays above background */
-}
+  height: clamp(var(--logo-min), 8vw, var(--logo-max));
+  width:auto;
 
 }
 .brand-title {
