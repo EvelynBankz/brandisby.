@@ -1,157 +1,110 @@
-/* === Global Reset === */
+/* ========== General Reset ========== */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-body.fleurdevie {
-  font-family: 'Montserrat', sans-serif;
+body {
+  font-family: "Helvetica Neue", Arial, sans-serif; /* Change if needed */
+  background: url("bg.jpg") no-repeat center center/cover;
   color: #fff;
-  background: url('bg.jpg') no-repeat center center;
-  background-size: cover;
   height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  text-align: center;
 }
 
-/* === Header === */
-.brand-header {
+/* ========== Header ========== */
+header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 25px;
-  background: transparent; /* No background */
-  position: relative;
-  z-index: 20;
+  padding: 1.5rem 2rem;
+  background: none; /* No background */
 }
 
-.brand-header .logo {
-  height: 40px;
+header img {
+  height: 50px;
 }
 
-.brand-site-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.6rem;
-  font-weight: 700;
+header h1 {
+  font-size: 1.8rem;
+  font-weight: 600;
 }
 
-/* === Top right nav === */
-.desktop-nav {
+/* Hamburger */
+.hamburger {
+  width: 30px;
+  height: 20px;
   display: flex;
-  align-items: center;
-  gap: 18px;
-}
-
-.desktop-nav a {
-  color: #fff;
-  text-decoration: none;
-  font-size: 0.95rem;
-}
-
-.desktop-nav .social-link i {
-  font-size: 1rem;
-}
-
-/* === Hamburger === */
-.menu-toggle {
-  display: none;
-  background: none;
-  border: none;
-  color: #fff;
-  font-size: 1.4rem;
+  flex-direction: column;
+  justify-content: space-between;
   cursor: pointer;
-  transition: transform 0.3s ease;
-}
-.menu-toggle.open {
-  transform: rotate(90deg);
 }
 
-/* === Hero Section === */
-.hero {
+.hamburger span {
+  display: block;
+  height: 3px;
+  background: #fff;
+  border-radius: 3px;
+  transition: 0.4s;
+}
+
+/* Animation when active */
+.hamburger.active span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+.hamburger.active span:nth-child(2) {
+  opacity: 0;
+}
+.hamburger.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(6px, -6px);
+}
+
+/* ========== Navigation Links ========== */
+.nav-links {
   flex: 1;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  justify-content: center; /* vertical centering on big screens */
   align-items: center;
-}
-
-.hero-inner {
-  text-align: center;
-}
-
-.big-links {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.big-link {
-  font-family: 'Montserrat', sans-serif;
+  gap: 2rem;
+  font-size: 2rem;
   font-weight: 300;
-  font-size: clamp(1.2rem, 3vw, 2rem);
-  letter-spacing: 8px;
-  text-decoration: underline;
-  text-transform: uppercase;
-  color: #fff;
-}
-
-/* === Footer === */
-.site-footer {
-  background: transparent; /* No background */
-  padding: 15px;
-  text-align: center;
-  font-size: 14px;
-  color: rgba(255,255,255,0.85);
-}
-
-.site-footer .tagline {
-  font-family: 'Playfair Display', serif;
-  font-style: italic;
-  margin-bottom: 5px;
-}
-
-/* === Mobile Nav === */
-.mobile-nav {
-  display: none;
-  flex-direction: column;
-  background: rgba(0,0,0,0.85);
-  position: absolute;
-  top: 100%;
-  right: 0;
-  left: 0;
-  padding: 20px;
+  letter-spacing: 4px;
   text-align: center;
 }
 
-.mobile-nav.open {
-  display: flex;
-}
-
-.mobile-nav a {
-  color: #fff;
+.nav-links a {
   text-decoration: none;
-  margin: 10px 0;
-  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.8);
+  transition: color 0.3s;
 }
 
-.mobile-socials {
-  margin-top: 15px;
-}
-
-.mobile-socials a {
-  margin: 0 10px;
+.nav-links a:hover {
   color: #fff;
-  font-size: 1.2rem;
 }
 
-/* === Responsive === */
+/* Mobile - horizontal centering */
 @media (max-width: 768px) {
-  .desktop-nav {
-    display: none;
+  .nav-links {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    margin-top: 3rem;
   }
-  .menu-toggle {
-    display: block;
-  }
+}
+
+/* ========== Footer ========== */
+footer {
+  text-align: center;
+  padding: 1rem;
+  background: none; /* No background */
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+footer p {
+  margin: 0.3rem 0;
 }
