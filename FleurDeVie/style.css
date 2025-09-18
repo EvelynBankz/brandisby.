@@ -15,7 +15,7 @@
 html,body{height:100%}
 body.serac {
   font-family: "Montserrat", Arial, sans-serif;
-  color: #fff;
+  color: #112e1f;
   background: #000;
   overflow: hidden;
 }
@@ -62,7 +62,8 @@ body.serac {
   font-family: "Playfair Display", serif;
   font-weight:700;
   font-size: clamp(20px, 3.4vw, 44px);
-  color:#fff; text-align:center;
+  color:#112e1f; 
+  text-align:center;
   text-shadow: 0 4px 12px rgba(0,0,0,0.45);
   z-index:1250;
   pointer-events:none;
@@ -74,7 +75,7 @@ body.serac {
 }
 .header-right .home-link,
 .header-right .social-link {
-  color:#fff;
+  color:#112e1f
   text-decoration:none;
   font-size:14px;
 }
