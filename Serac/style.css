@@ -203,7 +203,7 @@ body.serac {
 }
 
 
-@media (max-width: 900px) {  /* Tablet + Mobile */
+@media (max-width: 600px) {  /* Mobile breakpoint */
   .hero {
     align-items: center;   /* Vertically center links */
     padding-top: 0;        /* Remove desktop offset */
@@ -219,6 +219,7 @@ body.serac {
     transform: scaleY(1.8);            /* Slightly shorter tall letters on mobile */
   }
 }
+
 
 
 @media (max-width: 420px){
