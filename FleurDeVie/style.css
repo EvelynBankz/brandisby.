@@ -94,24 +94,39 @@ body.serac {
 
 /* ================= CENTER LINKS ================= */
 .center-links {
-  z-index:1100;
-  display:flex;
-  flex-direction: row; /* desktop: horizontal */
-  align-items:center;
-  justify-content:center;
-  gap: var(--center-gap-large);
+  z-index: 1100;
+  display: flex;
+  flex-direction: row;              /* Horizontal by default */
+  align-items: center;              /* Vertically aligned in hero */
+  justify-content: center;          /* Center horizontally */
+  gap: 80px;                        /* Flexible spacing between links */
+  flex-wrap: nowrap;                 /* Keep horizontal until mobile */
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 20px;
+  position: relative;               /* Remove top offset */
+  box-sizing: border-box;
 }
+
 .center-link {
-  font-family: "Montserrat", sans-serif;
-  font-weight:300;
-  font-size: var(--center-font-size-large);
-  letter-spacing: var(--center-letter-spacing);
+  font-family: orpheus-pro, Montserrat, sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  text-transform: uppercase;
   color: rgba(255,255,255,0.92);
   text-decoration: underline;
-  text-transform: uppercase;
-  line-height:1.1;
-  white-space:nowrap;
+  text-underline-offset: .3em;
+  text-decoration-thickness: 1px;
+  line-height: 1;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  text-align: center;
+  display: inline-block;
+  transform: scaleY(2);                /* Tall letters */
+  font-size: clamp(20px, 3vw, 70px);   /* Responsive scaling */
 }
+
+
 
 /* ================= RIGHT SIDE OVERLAY MENU ================= */
 .right-nav-overlay {
@@ -167,10 +182,22 @@ body.serac {
   .header-right .social-link{ display:none; }
   .brand-title{ font-size: clamp(18px, 5.8vw, 34px); }
 }
-@media (max-width: 768px){
-  .center-links{ flex-direction: column; gap: var(--center-gap-small); }
-  .center-link{ font-size: var(--center-font-size-small); }
+
+/* --------mobile reponsive------------ */
+@media (max-width: 600px) {
+  .hero {
+    align-items: center;   /* Vertical center in hero */
+  }
+  .center-links {
+    flex-direction: column; /* Stack vertically */
+    gap: var(--center-gap-small);
+  }
+  .center-link {
+    font-size: clamp(16px, 5vw, 32px); /* Smaller font for mobile */
+    transform: scaleY(1.8);           /* Slightly less tall */
+  }
 }
+
 @media (max-width: 420px){
   :root{ --center-font-size-small: 18px; }
   .brand-logo{ height: clamp(36px, 12vw, 72px); }
