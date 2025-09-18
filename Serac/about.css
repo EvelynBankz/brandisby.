@@ -1,0 +1,68 @@
+/* ================= RESET & BASE ================= */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; font-family: "Montserrat", Arial, sans-serif; color: #fff; background: #000; }
+
+/* ================= HEADER ================= */
+.site-header {
+  position: absolute;
+  top:0; left:0; right:0;
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  padding: 14px 28px;
+  z-index: 1200;
+}
+.header-left { display:flex; align-items:center; gap:12px; }
+.brand-logo { height: clamp(100px, 10vw, 200px); width:auto; }
+.brand-title { font-family: "Playfair Display", serif; font-weight:700; font-size: clamp(20px, 3.4vw, 44px); color:#fff; text-align:center; }
+.header-right a { color:#fff; text-decoration:none; margin-left: 12px; }
+
+/* Hamburger */
+.hamburger { display:none; background:none; border:none; width:44px; height:40px; cursor:pointer; }
+.hamburger span { display:block; height:2.5px; width:22px; background:#fff; margin:6px auto; border-radius:2px; transition: transform .28s ease, opacity .28s ease; }
+
+/* ================= HERO ================= */
+.hero-about {
+  height: 60vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  background: url("hero-bg.jpg") center center / cover no-repeat;
+}
+.hero-about .hero-text h1 { font-family: "Playfair Display", serif; font-size: clamp(36px, 5vw, 64px); margin-bottom:12px; }
+.hero-about .hero-text p { font-family: "Montserrat", sans-serif; font-size: clamp(16px, 2vw, 24px); max-width:700px; }
+
+/* ================= SECTIONS ================= */
+section { padding: 80px 20px; }
+.container { max-width: 1200px; margin:0 auto; }
+
+/* Story */
+.story-section p { font-size: clamp(16px,1.5vw,20px); line-height:1.7; margin-bottom:16px; }
+
+/* Team */
+.team-members { display:flex; flex-wrap:wrap; gap:40px; justify-content:center; }
+.team-member { text-align:center; max-width:200px; }
+.team-member img { width:100%; border-radius:8px; margin-bottom:12px; }
+.team-member h3 { margin:8px 0 4px; font-size:18px; }
+.team-member p { font-size:14px; color:#aaa; }
+
+/* Press */
+.press-logos { display:flex; flex-wrap:wrap; gap:40px; justify-content:center; }
+.press-logos img { max-height:60px; object-fit:contain; }
+
+/* Contact */
+.contact-section p { font-size:16px; margin-bottom:8px; }
+.contact-section a { color:#fff; text-decoration:underline; }
+
+/* Footer */
+.site-footer { text-align:center; padding:20px; }
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 900px){
+  .team-members, .press-logos { gap:24px; }
+}
+@media (max-width: 600px){
+  .team-members, .press-logos { flex-direction: column; }
+  .team-member { max-width: 100%; }
+}
