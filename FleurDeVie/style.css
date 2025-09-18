@@ -1,7 +1,7 @@
 /* ================= VARIABLE TWEAKS ================= */
 :root {
-  --logo-min: 48px;
-  --logo-max: 120px;
+  --logo-min: 64px;
+  --logo-max: 180px;
   --center-gap-large: 64px;
   --center-gap-small: 24px;
   --center-font-size-large: 48px;
@@ -15,7 +15,7 @@
 html,body{height:100%}
 body.serac {
   font-family: "Montserrat", Arial, sans-serif;
-  color: #112e1f;
+  color: #fff;
   background: #000;
   overflow: hidden;
 }
@@ -36,8 +36,6 @@ body.serac {
   inset:0; 
   background: rgba(0,0,0,0); 
 }
-
-
 
 /* ================= HEADER ================= */
 .site-header {
@@ -75,7 +73,7 @@ body.serac {
 }
 .header-right .home-link,
 .header-right .social-link {
-  color:#112e1f
+  color:#112e1f;
   text-decoration:none;
   font-size:14px;
 }
@@ -84,11 +82,15 @@ body.serac {
 /* Hamburger */
 .hamburger {
   display:none;
-  background:none; border:none;
-  padding:8px; cursor:pointer;
-  width:44px; height:40px;
+  background:none;
+  border:none;
+  padding:8px; 
+  cursor:pointer;
+  width:44px; 
+  height:40px;
   position:relative;
 }
+
 .hamburger span {
   display:block;
   height:2.5px; width:22px;
@@ -180,8 +182,16 @@ body.serac {
   gap:6px;
   z-index:1200;
 }
-.site-footer .tagline{ font-family: "Playfair Display", serif; font-style:italic; font-size:16px; color: rgba(255,255,255,0.95); }
-.site-footer .copyright{ font-size:13px; color: rgba(255,255,255,0.75); }
+.site-footer .tagline{ 
+  font-family: "Playfair Display", serif; 
+  font-style:italic; 
+  font-size:16px; 
+  color:#112e1f; 
+}
+.site-footer .copyright{ 
+  font-size:13px; 
+  color: #112e1f; 
+}
 
 /* ================= RESPONSIVE ================= */
 @media (max-width: 900px){
