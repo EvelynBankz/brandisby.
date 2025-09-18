@@ -24,19 +24,19 @@ body.serac {
 .hero {
   height: 100vh;
   display: flex;
-  justify-content: center;    /* Horizontally center links */
-  align-items: flex-start;    /* Desktop: slightly below center */
+  justify-content: center;    /* Horizontal center */
+  align-items: center;        /* Vertical center on desktop by default */
   position: relative;
   background: url("bg.jpg") center center / cover no-repeat;
   filter: blur(var(--blur-strength));
-  padding-top: 20%;           /* Push links slightly below center */
 }
 .hero::after { 
   content:""; 
   position:absolute; 
   inset:0; 
-  background: rgba(0,0,0,0.0); 
+  background: rgba(0,0,0,0); 
 }
+
 
 
 /* ================= HEADER ================= */
@@ -102,20 +102,33 @@ body.serac {
 
 /* ================= HERO CENTER LINKS ================= */ 
 .center-links { 
-z-index: 1100; 
+/* z-index: 1100;  */
 display: flex; 
 flex-direction: row;    /* Horizontal by default */ 
 align-items: center; 
-justify-content: space-around;    /* Even spacing across the landing page */ 
+justify-content: space-evenly;    /* Even spacing across the landing page */ 
 gap: 260px;     /* Extra spacing control */ 
-flex-wrap: nowrap;     /* Keep horizontal until mobile */ 
-max-width: 100%; /* Optional max width */ 
-margin: 0 auto;
+/* flex-wrap: nowrap;     /* Keep horizontal until mobile */  */
+max-width: 1000px; /* Optional max width */ 
+width: 100%; 
+/* margin: 0 auto; */
 padding: 0 40px; 
-position: relative; 
-top: 0%;   /* Slightly below center */ 
+/* position: relative;  */
 box-sizing: border-box; 
 }
+
+/* .center-links { */
+/*   display: flex; */
+/*   flex-direction: row;          /* Horizontal links on desktop */ */
+/*   justify-content: space-evenly;/* Even horizontal spacing across full width */ */
+/*   align-items: center; */
+/*   gap: 100px;                   /* Extra horizontal spacing between links */ */
+/*   max-width: 1000px;            /* Optional max width */ */
+/*   width: 100%;                  /* Take full container width */ */
+/*   padding: 0 20px; */
+/*   box-sizing: border-box; */
+/* } */
+
 
 .center-link {
   font-family: orpheus-pro;
@@ -134,16 +147,34 @@ box-sizing: border-box;
   font-size: clamp(20px, 3vw, 70px); /* Responsive font */
 }
 
-}
 
+/* .center-link { */
+/*   font-family: orpheus-pro; */
+/*   font-weight: 400; */
+/*   text-transform: uppercase; */
+/*   color: rgba(255,255,255,0.92); */
+/*   text-decoration: underline; */
+/*   text-underline-offset: 0.3em; */
+/*   text-decoration-thickness: 1px; */
+/*   display: inline-block; */
+/*   transform: scaleY(2);           /* Tall letters */ */
+/*   line-height: 1; */
+/*   letter-spacing: 0.05em; */
+/*   white-space: nowrap; */
+/*   text-align: center; */
+/*   font-size: clamp(20px, 3vw, 70px); /* Responsive font scaling */ */
+/* } */
 
 /* ================= RESPONSIVE ================= */
-@media (max-width: 600px) {  /* Mobile breakpoint */ 
-  .center-links {
-    flex-direction: column;      /* Stack vertically on mobile */
-    gap: var(--center-gap-small);
-  }
- }
+/* @media (max-width: 600px) {  /* Mobile breakpoint */  */
+/*   .center-links { */
+/*     flex-direction: column;      /* Stack vertically on mobile */ */
+/*     gap: var(--center-gap-small); */
+/*   } */
+/*  } */
+
+
+
 
 
 /* ================= RIGHT SIDE OVERLAY MENU ================= */
@@ -202,22 +233,38 @@ box-sizing: border-box;
 }
 
 /* ================= RESPONSIVE / MOBILE ================= */
-@media (max-width: 600px) {  /* Mobile breakpoint */
+/* @media (max-width: 600px) {  /* Mobile breakpoint */ */
+/*   .hero { */
+/*     align-items: center;   /* Vertically center links */ */
+/*     justify-content: center; */
+/*     padding-top: 0;        /* Remove desktop offset */ */
+/*   } */
+
+/*   .center-links { */
+/*     flex-direction: column;       */
+/*     gap: var(--center-gap-small); /* Vertical spacing between links */ */
+/*     align-items: center;          /* Center horizontally */ */
+/*   } */
+
+/*   .center-link { */
+/*     font-size: clamp(16px, 5vw, 32px); /* Shrink font on mobile */ */
+/*     transform: scaleY(1.8);            /* Slightly less tall letters on mobile */ */
+/*   } */
+/* } */
+
+@media (max-width: 600px) {
   .hero {
-    align-items: center;   /* Vertically center links */
-    justify-content: center;
-    padding-top: 0;        /* Remove desktop offset */
+    align-items: center;   /* Vertical center for mobile */
   }
 
   .center-links {
-    flex-direction: column;      
-    gap: var(--center-gap-small); /* Vertical spacing between links */
-    align-items: center;          /* Center horizontally */
+    flex-direction: column; /* Stack vertically */
+    gap: var(--center-gap-small);
   }
 
   .center-link {
-    font-size: clamp(16px, 5vw, 32px); /* Shrink font on mobile */
-    transform: scaleY(1.8);            /* Slightly less tall letters on mobile */
+    font-size: clamp(16px, 5vw, 32px); /* Smaller font on mobile */
+    transform: scaleY(1.8);           /* Slightly less tall for mobile */
   }
 }
 
