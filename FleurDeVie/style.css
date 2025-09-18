@@ -145,8 +145,8 @@ body.serac {
   white-space: nowrap;
   text-align: center;
   display: inline-block; 
-   transform: scaleY(2);                /* Tall letters */
-  font-size: clamp(20px, 3vw, 70px);   /* Responsive scaling */ 
+  transform: scaleY(2);                /* Tall letters */
+  font-size: clamp(20px, 3vw, 60px);   /* Responsive scaling */ 
  }
 
 
