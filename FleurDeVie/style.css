@@ -51,8 +51,15 @@ body.serac {
   z-index:1200;
 }
 .brand-logo {
-  height: clamp(var(--logo-min), 8vw, var(--logo-max));
-  width:auto;
+  position: absolute;      /* Anchor to top-left */
+  top: 0;
+  left: 0;
+  height: clamp(80px, 12vw, 200px); /* Responsive height: grows/shrinks */
+  width: auto;              /* Maintain aspect ratio */
+  margin: 10px;             /* Optional spacing from top-left corner */
+  z-index: 1300;            /* Ensure it stays above background */
+}
+
 }
 .brand-title {
   position: absolute;
@@ -222,4 +229,10 @@ body.serac {
   :root{ --center-font-size-small: 18px; }
   .brand-logo{ height: clamp(36px, 12vw, 72px); }
   .brand-title{ font-size: clamp(16px, 7vw, 22px); }
+}
+
+@media (max-width: 600px) {
+  .brand-logo {
+    height: clamp(50px, 20vw, 120px); /* Smaller logo on mobile */
+  }
 }
