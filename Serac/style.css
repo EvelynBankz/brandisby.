@@ -20,23 +20,23 @@ body.serac {
   overflow: hidden;
 }
 
+/* ================= HERO BACKGROUND ================= */
 .hero {
   height: 100vh;
   display: flex;
   justify-content: center;    /* Horizontally center links */
-  align-items: flex-start;    /* Desktop: slightly below center */
+  align-items: flex-start;    /* Slightly below center on desktop */
   position: relative;
   background: url("bg.jpg") center center / cover no-repeat;
   filter: blur(var(--blur-strength));
-  padding-top: 20%;           /* Push links slightly below center */
+  padding-top: 20%;           /* Push links slightly below center on desktop */
 }
 .hero::after { 
-  content:""; 
-  position:absolute; 
-  inset:0; 
+  content: ""; 
+  position: absolute; 
+  inset: 0; 
   background: rgba(0,0,0,0.0); 
 }
-
 
 
 /* ================= HEADER ================= */
@@ -99,41 +99,36 @@ body.serac {
 .hamburger.is-active span:nth-child(2){ opacity:0; transform: scaleX(.2); }
 .hamburger.is-active span:nth-child(3){ transform: translateY(-8px) rotate(-45deg); }
 
+
 /* ================= HERO CENTER LINKS ================= */
 .center-links {
   z-index: 1100;
   display: flex;
-  flex-direction: row;                 /* Horizontal by default */
+  flex-direction: row;                 /* Horizontal on desktop */
   align-items: center;
-  justify-content: space-around;       /* Even spacing across the landing page */
-  gap: 270px;        /* Extra spacing control */
-  flex-wrap: nowrap;                   /* Keep horizontal until mobile */
-  max-width: 100%;                   /* Optional max width */
+  justify-content: space-evenly;       /* Even horizontal spacing */
+  flex-wrap: nowrap;
+  max-width: 100%;                     
   margin: 0 auto;
   padding: 0 40px;
-  position: relative;
-  top: 2%;                             /* Slightly below center */
   box-sizing: border-box;
 }
 
 .center-link {
-  font-family:  orpheus-pro;
+  font-family: orpheus-pro, sans-serif;
   font-weight: 400;
-  font-style: normal;
   text-transform: uppercase;
   color: rgba(255,255,255,0.92);
   text-decoration: underline;
-  line-height: 2;                    /* Slightly elongated letters */
-  letter-spacing: 0.05em;              /* Optional spacing between letters */
+  text-underline-offset: 0.3em;
+  text-decoration-thickness: 1px;
+  display: inline-block;
+  transform: scaleY(2);           /* Very tall letters on desktop */
+  line-height: 1;                  /* Works well with scaleY */
+  letter-spacing: 0.05em;          /* Horizontal spacing */
   white-space: nowrap;
   text-align: center;
-  text-underline-offset: .3em;
-  text-decoration-thickness: 1px;
-  display: inline-block;       /* Required for transform */
-  transform: scaleY(1.8);  
-
-  /* Responsive font: grows on large screens, shrinks as screen reduces */
-  font-size: clamp(20px, 3vw, 70px);   /* Adjust min, preferred, max as needed */
+  font-size: clamp(20px, 3vw, 70px); /* Responsive font size for desktop */
 }
 
 
@@ -144,7 +139,6 @@ body.serac {
     gap: var(--center-gap-small);
   }
  }
-
 
 
 /* ================= RIGHT SIDE OVERLAY MENU ================= */
@@ -202,21 +196,23 @@ body.serac {
   .brand-title{ font-size: clamp(18px, 5.8vw, 34px); }
 }
 
-
+/* ================= RESPONSIVE / MOBILE ================= */
 @media (max-width: 600px) {  /* Mobile breakpoint */
   .hero {
     align-items: center;   /* Vertically center links */
+    justify-content: center;
     padding-top: 0;        /* Remove desktop offset */
   }
 
   .center-links {
     flex-direction: column;      
-    gap: var(--center-gap-small);
+    gap: var(--center-gap-small); /* Vertical spacing between links */
+    align-items: center;          /* Center horizontally */
   }
 
   .center-link {
-    font-size: clamp(16px, 5vw, 32px); /* Mobile-friendly font size */
-    transform: scaleY(1.8);            /* Slightly shorter tall letters on mobile */
+    font-size: clamp(16px, 5vw, 32px); /* Shrink font on mobile */
+    transform: scaleY(1.8);            /* Slightly less tall letters on mobile */
   }
 }
 
