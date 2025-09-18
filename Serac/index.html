@@ -5,7 +5,10 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Sérac</title>
 
+  <!-- Local stylesheet -->
   <link rel="stylesheet" href="style.css">
+
+  <!-- Fonts & icons -->
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -14,6 +17,7 @@
   <!-- Header -->
   <header class="brand-header" role="banner">
     <div class="header-left">
+      <!-- KEEP this file name exactly: /Serac/logo.png -->
       <img src="logo.png" alt="Sérac logo" class="logo">
     </div>
 
@@ -28,7 +32,7 @@
       </nav>
 
       <button class="menu-toggle" aria-expanded="false" aria-controls="mobileNav" aria-label="Open menu">
-        <i class="fas fa-bars"></i>
+        <i class="fas fa-bars" aria-hidden="true"></i>
       </button>
     </div>
   </header>
@@ -36,9 +40,10 @@
   <!-- Mobile nav -->
   <nav id="mobileNav" class="mobile-nav" aria-hidden="true">
     <a href="index.html" class="mobile-link">Home</a>
-    <a href="about.html" class="mobile-link">About Us</a>
-    <a href="shop.html" class="mobile-link">Shop</a>
+    <a href="about.html"   class="mobile-link">About Us</a>
+    <a href="shop.html"    class="mobile-link">Shop</a>
     <a href="contact.html" class="mobile-link">Contact Us</a>
+
     <div class="mobile-socials">
       <a class="social-link" href="mailto:stonecold.serac@gmail.com" aria-label="Email (mobile)"><i class="fas fa-envelope"></i></a>
       <a class="social-link" href="https://www.tiktok.com/@serac.com" target="_blank" rel="noreferrer" aria-label="TikTok (mobile)"><i class="fab fa-tiktok"></i></a>
@@ -57,7 +62,6 @@
     </div>
   </main>
 
-  <!-- Footer -->
   <footer class="site-footer" role="contentinfo">
     <div class="tagline">Stone Cold</div>
     <div class="copyright">© 2025 Sérac</div>
@@ -68,10 +72,28 @@
       const toggle = document.querySelector('.menu-toggle');
       const mobileNav = document.getElementById('mobileNav');
       if (!toggle || !mobileNav) return;
+
+      function setIcon(isOpen) {
+        const icon = toggle.querySelector('i');
+        if (!icon) return;
+        icon.classList.toggle('fa-bars', !isOpen);
+        icon.classList.toggle('fa-times', isOpen);
+      }
+
       toggle.addEventListener('click', () => {
         const open = mobileNav.classList.toggle('open');
         mobileNav.setAttribute('aria-hidden', String(!open));
         toggle.setAttribute('aria-expanded', String(open));
+        setIcon(open);
+      });
+
+      mobileNav.querySelectorAll('a').forEach(a => {
+        a.addEventListener('click', () => {
+          mobileNav.classList.remove('open');
+          mobileNav.setAttribute('aria-hidden', 'true');
+          toggle.setAttribute('aria-expanded', 'false');
+          setIcon(false);
+        });
       });
     })();
   </script>
