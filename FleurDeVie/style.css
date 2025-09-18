@@ -23,14 +23,21 @@ body.serac {
 /* ================= HERO BACKGROUND ================= */
 .hero {
   height: 100vh;
-  background: url("bg.jpg") center center / cover no-repeat;
+  display: flex;
+  justify-content: center;    /* Horizontal center */
+  align-items: center;        /* Vertical center on desktop by default */
   position: relative;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  background: url("bg.jpg") center center / cover no-repeat;
   filter: blur(var(--blur-strength));
 }
-.hero::after { content:""; position:absolute; inset:0; background: rgba(0,0,0,0.0); }
+.hero::after { 
+  content:""; 
+  position:absolute; 
+  inset:0; 
+  background: rgba(0,0,0,0); 
+}
+
+
 
 /* ================= HEADER ================= */
 .site-header {
@@ -113,7 +120,7 @@ body.serac {
   font-weight: 400;
   font-style: normal;
   text-transform: uppercase;
-  color: rgba(255,255,255,0.92);
+  color: #112e1f;
   text-decoration: underline;
   text-underline-offset: .3em;
   text-decoration-thickness: 1px;
