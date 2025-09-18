@@ -1,110 +1,139 @@
-/* ========== General Reset ========== */
+/* === GENERAL RESET === */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-body {
-  font-family: "Helvetica Neue", Arial, sans-serif; /* Change if needed */
+body.serac {
   background: url("bg.jpg") no-repeat center center/cover;
-  color: #fff;
   height: 100vh;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  font-family: "Arial", sans-serif; /* ⬅️ change font */
+  color: white;
 }
 
-/* ========== Header ========== */
-header {
+/* === HEADER === */
+.site-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem 2rem;
-  background: none; /* No background */
+  padding: 20px;
+  position: relative;
+  z-index: 10;
 }
 
-header img {
-  height: 50px;
+.logo img {
+  height: 50px; /* ⬅️ tweak logo size */
 }
 
-header h1 {
-  font-size: 1.8rem;
-  font-weight: 600;
+.brand-name {
+  font-family: "Playfair Display", serif; /* ⬅️ change font */
+  font-size: 28px; /* ⬅️ tweak brand name size */
+  font-weight: 700;
+  text-align: center;
+  flex-grow: 1;
+}
+
+/* Top Right Nav */
+.top-nav {
+  display: flex;
+  align-items: center;
+  gap: 15px; /* ⬅️ adjust spacing */
+}
+
+.top-nav a {
+  text-decoration: none;
+  color: white;
+  font-size: 16px; /* ⬅️ tweak Home size */
+}
+
+.social i {
+  font-size: 18px; /* ⬅️ tweak icon size */
 }
 
 /* Hamburger */
 .hamburger {
-  width: 30px;
-  height: 20px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  display: none;
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: white;
   cursor: pointer;
 }
 
-.hamburger span {
-  display: block;
-  height: 3px;
-  background: #fff;
-  border-radius: 3px;
-  transition: 0.4s;
-}
-
-/* Animation when active */
-.hamburger.active span:nth-child(1) {
-  transform: rotate(45deg) translate(5px, 5px);
-}
-.hamburger.active span:nth-child(2) {
-  opacity: 0;
-}
-.hamburger.active span:nth-child(3) {
-  transform: rotate(-45deg) translate(6px, -6px);
-}
-
-/* ========== Navigation Links ========== */
-.nav-links {
-  flex: 1;
+/* === CENTER LINKS (BIG SCREEN) === */
+.center-links {
   display: flex;
   flex-direction: column;
-  justify-content: center; /* vertical centering on big screens */
   align-items: center;
-  gap: 2rem; /* spacing */
-  font-size: 2rem;
+  justify-content: center;
+  gap: 40px; /* ⬅️ adjust vertical spacing */
+  height: 100%;
+}
+
+.center-links a {
+  font-family: "Playfair Display", serif; /* ⬅️ change font */
+  font-size: 36px; /* ⬅️ tweak About/Shop/Contact size */
   font-weight: 300;
-  letter-spacing: 4px; /* tweak spacing */
+  letter-spacing: 2px; /* ⬅️ tweak letter spacing */
+  text-decoration: underline;
+  color: rgba(255,255,255,0.85);
+}
+
+/* === FOOTER === */
+.site-footer {
   text-align: center;
+  padding: 20px;
 }
 
-.nav-links a {
-  text-decoration: none;
-  color: rgba(255, 255, 255, 0.8);
-  transition: color 0.3s;
+.site-footer .tagline {
+  font-family: "Playfair Display", serif; /* ⬅️ luxurious font */
+  font-style: italic;
+  font-size: 18px; /* ⬅️ tweak tagline size */
+  margin-bottom: 5px;
 }
 
-.nav-links a:hover {
-  color: #fff;
+/* === MOBILE MENU === */
+.overlay-nav {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  height: 100%;
+  width: 100%;
+  background: rgba(0,0,0,0.95);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  transition: right 0.3s ease;
+  z-index: 100;
 }
 
-/* Mobile - horizontal centering */
+.overlay-nav.open {
+  right: 0;
+}
+
+.overlay-nav a {
+  font-size: 28px; /* ⬅️ tweak size on mobile */
+  text-decoration: underline;
+  color: white;
+}
+
+/* === RESPONSIVE === */
 @media (max-width: 768px) {
-  .nav-links {
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    margin-top: 3rem;
+  .top-nav a:not(:first-child) {
+    display: none; /* hide socials + Home */
   }
-}
 
-/* ========== Footer ========== */
-footer {
-  text-align: center;
-  padding: 1rem;
-  background: none; /* No background */
-  font-size: 0.9rem;
-  opacity: 0.9;
-}
+  .hamburger {
+    display: block;
+  }
 
-footer p {
-  margin: 0.3rem 0;
+  .center-links {
+    display: none; /* hide big-screen links */
+  }
 }
