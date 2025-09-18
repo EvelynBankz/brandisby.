@@ -50,11 +50,21 @@ body.serac {
   box-shadow:none !important;
   z-index:1200;
 }
-.brand-logo {
-  height: clamp(var(--logo-min), 8vw, var(--logo-max));
-  width:auto;
+/* .brand-logo { */
+/*   height: clamp(var(--logo-min), 8vw, var(--logo-max)); */
+/*   width:auto; */
+/* } */
 
+.brand-logo {
+  position: absolute;      /* Keep it relative to top-left */
+  top: 10px;               /* Margin from top edge */
+  left: 20px;              /* Margin from left edge to keep distance from brand name */
+  height: clamp(80px, 10vw, 200px); /* Responsive height: grows/shrinks */
+  width: auto;             /* Maintain aspect ratio */
+  z-index: 1300;           /* Above background */
 }
+
+
 .brand-title {
   position: absolute;
   left:50%; transform: translateX(-50%);
@@ -227,6 +237,9 @@ body.serac {
 
 @media (max-width: 600px) {
   .brand-logo {
-    height: clamp(50px, 20vw, 120px); /* Smaller logo on mobile */
+    height: clamp(50px, 15vw, 120px); /* Shrink more on mobile */
+    left: 10px;                        /* Maintain some margin */
+    top: 10px;
   }
 }
+
