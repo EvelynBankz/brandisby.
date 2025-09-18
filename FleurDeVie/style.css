@@ -1,161 +1,225 @@
-/* === Variables for easy tweaking === */
-:root {
-  --brand-font: 'Playfair Display', serif;  /* brand name font */
-  --nav-font: 'Montserrat', sans-serif;    /* navigation font */
-  --luxury-font: 'Cormorant Garamond', serif; /* tagline font */
+/* FleurDeVie style.css
+   Editable variables at the top — tweak fonts, sizes, spacing, blur here.
+   Files required in the same folder:
+     - logo.png
+     - bg.jpg
+*/
 
-  --text-color: #fff;
-  --nav-size: 16px;
-  --nav-spacing: 0.25em;
+/* ================= VARIABLE TWEAKS (edit here) ================= */
+:root{
+  --header-h: 100px;                /* header height (used for layout) */
+  --footer-h: 70px;                 /* footer height */
+  --logo-min: 48px;                 /* logo min height */
+  --logo-max: 120px;                /* logo max height */
+  --center-gap-large: 56px;         /* vertical gap between center links on large screens */
+  --center-gap-small: 20px;         /* horizontal gap between links on small screens */
+  --center-font-size-large: 64px;   /* center links font size (desktop) */
+  --center-font-size-small: 20px;   /* center links font size (mobile) */
+  --center-letter-spacing: 0.06em;  /* letter spacing */
+  --brand-color: #112e1f;           /* FleurDeVie main color (if needed) */
+  --blur-strength: 0px;             /* blur overlay, default 0 */
 }
 
-/* Reset */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+/* ================= RESET & BASE ================= */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body.fleurdevie{
+  font-family: "Montserrat", Arial, sans-serif;
+  color:#fff;
+  background: #000;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  overflow: hidden; /* keep everything in viewport */
 }
 
-body.fleurdevie {
-  font-family: var(--nav-font);
-  color: var(--text-color);
-  background: url("bg.jpg") no-repeat center center/cover;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+/* Hero background (scales responsively) */
+.hero{
+  margin-top: var(--header-h);
+  height: calc(100vh - var(--header-h) - var(--footer-h));
+  background: url("bg.jpg") center center / cover no-repeat;
+  position: relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  filter: blur(var(--blur-strength));
+}
+.hero::after{ /* subtle overlay if needed - default transparent */
+  content:"";
+  position:absolute;inset:0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.0), rgba(0,0,0,0.0));
+  z-index:0;
 }
 
-/* === Header === */
-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 2rem;
-  background: none;
-  backdrop-filter: blur(0px); /* tweak if you want blur */
+/* ================= HEADER (transparent) ================= */
+.site-header{
+  position: fixed;
+  top:0;left:0;right:0;
+  height: var(--header-h);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding: 14px 28px;
+  z-index: 1200;
+  background: transparent; /* no background */
 }
 
-/* Logo scaling */
-.logo {
-  max-width: 180px;
-  height: auto;
-}
-@media (max-width: 768px) {
-  .logo { max-width: 120px; }
-}
-
-/* === Top-right Nav (Home + Socials) === */
-.top-actions {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+/* left logo */
+.header-left{}
+.brand-logo{
+  height: clamp(var(--logo-min), 8vw, var(--logo-max));
+  width: auto;
+  display:block;
 }
 
-.top-actions a {
-  text-decoration: none;
-  color: var(--text-color);
-  font-size: var(--nav-size);
-}
-
-.top-actions .social-link {
-  font-size: 1.2rem;
-  text-decoration: none;
-}
-
-/* Hide menu toggle on desktop */
-.menu-toggle {
-  display: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-  background: none;
-  border: none;
-  color: var(--text-color);
-}
-
-/* Mobile nav hidden by default */
-@media (max-width: 768px) {
-  .top-actions {
-    display: none;
-    flex-direction: column;
-    position: absolute;
-    top: 70px;
-    right: 20px;
-    background: rgba(0, 0, 0, 0.7);
-    padding: 1rem;
-    border-radius: 8px;
-  }
-
-  .top-actions.active {
-    display: flex;
-  }
-
-  .menu-toggle {
-    display: block;
-  }
-}
-
-/* === Brand Name in Center === */
-.brand-site-title {
+/* centered brand name */
+.brand-title{
   position: absolute;
-  left: 50%;
-  top: 20px;
+  left:50%;
   transform: translateX(-50%);
-  font-family: var(--brand-font);
-  font-size: clamp(22px, 4vw, 48px);
-  letter-spacing: 2px;
-  text-transform: uppercase;
+  font-family: "Playfair Display", serif;
+  font-weight:700;
+  font-size: clamp(20px, 3.4vw, 44px);
+  color: #ffffff;
+  text-align:center;
+  z-index:1250;
+  pointer-events: none;
+  text-shadow: 0 4px 12px rgba(0,0,0,0.45);
 }
 
-/* === Main Navigation (AboutUs / Shop / ContactUs) === */
-.main-nav {
-  flex: 1;
-  display: flex;
+/* right nav: Home + icons + hamburger hidden on desktop */
+.header-right{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+/* links/icons (desktop) */
+.header-right .home-link,
+.header-right .social-link{
+  color: #fff;
+  text-decoration:none;
+  font-size:14px;
+}
+.header-right .social-link i{ font-size:18px; }
+
+/* hamburger button */
+.hamburger{
+  display:none;
+  background:none;
+  border:none;
+  padding:8px;
+  cursor:pointer;
+  width:44px;
+  height:40px;
+  position:relative;
+}
+.hamburger span{
+  display:block;
+  height:2.5px;
+  width:22px;
+  background:#fff;
+  margin:6px auto;
+  border-radius:2px;
+  transition: transform .28s ease, opacity .28s ease;
+}
+.hamburger.is-active span:nth-child(1){ transform: translateY(8px) rotate(45deg); }
+.hamburger.is-active span:nth-child(2){ opacity:0; transform: scaleX(.2); }
+.hamburger.is-active span:nth-child(3){ transform: translateY(-8px) rotate(-45deg); }
+
+/* ================= CENTER LINKS (desktop: vertical stack, mobile: horizontal) ================= */
+.center-links{
+  z-index: 1100;
+  display:flex;
+  flex-direction: column;            /* LARGE SCREEN: vertical stack */
   align-items: center;
   justify-content: center;
-  gap: 2rem;
+  gap: var(--center-gap-large);      /* vertical spacing between items */
 }
 
-.main-nav a {
+.center-link{
+  font-family: "Montserrat", sans-serif;
+  font-weight:300;
+  font-size: var(--center-font-size-large);
+  letter-spacing: var(--center-letter-spacing);
+  color: rgba(255,255,255,0.92);
   text-decoration: underline;
-  font-family: var(--nav-font);
-  font-size: clamp(16px, 2vw, 24px);
-  font-weight: 300;
-  letter-spacing: var(--nav-spacing);
-  color: var(--text-color);
+  text-transform: uppercase;
+  white-space: nowrap;
+  line-height: 0.9;
 }
 
-/* Big screens → horizontal */
-@media (min-width: 1024px) {
-  .main-nav {
-    flex-direction: row;
+/* ================= OVERLAY NAV (mobile) ================= */
+.nav-overlay{
+  position: fixed;
+  top: 0; right: 0;
+  height: 100vh;
+  width: 100%;
+  background: rgba(0,0,0,0.96);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 20px;
+  z-index: 1400;
+  transform: translateY(-100%);
+  transition: transform .32s ease;
+}
+.nav-overlay.open{ transform: translateY(0%); }
+.nav-overlay .overlay-item{ color:#fff; font-size:22px; text-decoration:none; }
+.nav-overlay .overlay-socials{ display:flex; gap:18px; }
+.overlay-close{
+  position:absolute;
+  top:18px; right:18px;
+  background:none; border:none; color:#fff; font-size:36px; cursor:pointer;
+}
+
+/* ================= FOOTER ================= */
+.site-footer{
+  position: fixed;
+  left:0; right:0; bottom:0;
+  height: var(--footer-h);
+  display:flex;
+  flex-direction: column;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  z-index:1200;
+}
+.site-footer .tagline{ font-family: "Playfair Display", serif; font-style: italic; font-size:16px; color: rgba(255,255,255,0.95); }
+.site-footer .copyright{ font-size:13px; color: rgba(255,255,255,0.75); }
+
+/* ================= RESPONSIVE BEHAVIOUR ================= */
+@media (max-width: 900px){
+  /* shrink header spacing & brand title */
+  .site-header{ padding: 10px 18px; }
+  .brand-title{ font-size: clamp(18px, 5.8vw, 34px); }
+
+  /* show hamburger, hide icons on header */
+  .hamburger{ display:inline-block; }
+  .header-right .home-link,
+  .header-right .social-link{ display:none; }
+}
+
+/* Mobile: center-links become horizontal row */
+@media (max-width: 768px){
+  .center-links{
+    flex-direction: row;             /* SMALL SCREEN: horizontal row */
+    gap: var(--center-gap-small);    /* horizontal spacing */
   }
-}
-
-/* Small screens → vertical, centered */
-@media (max-width: 1023px) {
-  .main-nav {
-    flex-direction: column;
+  .center-link{
+    font-size: var(--center-font-size-small);
+    white-space: normal;
   }
+  /* ensure hero height fits small screens */
+  .hero{ height: calc(100vh - var(--header-h) - var(--footer-h)); background-position:center top; }
 }
 
-/* === Footer === */
-footer {
-  text-align: center;
-  padding: 1rem;
-  background: none;
-  backdrop-filter: blur(0px);
-  margin-top: auto;
-}
-
-footer .tagline {
-  font-family: var(--luxury-font);
-  font-style: italic;
-  font-size: 18px;
-  margin-bottom: 0.5rem;
-}
-
-footer small {
-  display: block;
-  font-size: 14px;
-  opacity: 0.7;
+/* final small phones */
+@media (max-width: 420px){
+  :root{
+    --center-font-size-small: 18px;
+  }
+  .brand-logo{ height: clamp(36px, 12vw, 72px); }
+  .brand-title{ font-size: clamp(16px, 7vw, 22px); }
 }
