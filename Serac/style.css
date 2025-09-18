@@ -102,13 +102,13 @@ body.serac {
 
 /* ================= HERO CENTER LINKS ================= */ 
 .center-links { 
-/* z-index: 1100;  */
+z-index: 1100;  */
 display: flex; 
 flex-direction: row;    /* Horizontal by default */ 
 align-items: center; 
 justify-content: space-evenly;    /* Even spacing across the landing page */ 
 gap: 260px;     /* Extra spacing control */ 
-/* flex-wrap: nowrap;     /* Keep horizontal until mobile */  */
+/* flex-wrap: nowrap;     /* Keep horizontal until mobile */   */
 max-width: 1000px; /* Optional max width */ 
 width: 100%; 
 /* margin: 0 auto; */
