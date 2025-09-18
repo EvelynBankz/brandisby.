@@ -1,32 +1,26 @@
-/* FleurDeVie style.css
-   Uses local assets:
-     - logo.png  (place in /FleurDeVie/logo.png)
-     - bg.jpg    (place in /FleurDeVie/bg.jpg)
+/* Fleur De Vie - style.css
+   Place this file inside /FleurDeVie/
+   Use logo.png and bg.jpg inside the same folder (exact filenames)
 */
-
-/* Fonts are loaded in the HTML head */
 
 /* === Variables === */
 :root{
-  --header-h: 100px;
+  --header-h: 110px;
   --footer-h: 70px;
-  --brand-color: #112e1f;
-  --white: #ffffff;
+  --brand-white: #ffffff;
 }
 
-/* === Reset === */
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; }
+/* === Reset & base === */
+* { box-sizing: border-box; margin:0; padding:0; }
+html,body { height:100%; }
 body {
   font-family: 'Montserrat', sans-serif;
-  color: var(--white);
+  color: var(--brand-white);
+  overflow: hidden; /* keep single-viewport layout */
   background: #000;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  overflow: hidden; /* keep everything in single viewport */
 }
 
-/* === Header === */
+/* === Header (transparent) === */
 .brand-header {
   position: fixed;
   top: 0; left: 0; right: 0;
@@ -35,118 +29,102 @@ body {
   align-items: center;
   padding: 12px 28px;
   z-index: 1200;
-  background: linear-gradient(180deg, rgba(0,0,0,0.35), rgba(0,0,0,0.12));
+  background: transparent; /* no background as requested */
 }
 
 /* left logo */
 .header-left { display:flex; align-items:center; gap:12px; }
 .logo {
   display:block;
-  height: clamp(56px, 8vw, 120px); /* visible & responsive */
+  height: clamp(64px, 9vw, 120px); /* large, visible */
   width: auto;
 }
 
-/* centered brand title */
+/* centered brand title (luxurious font) */
 .brand-site-title {
   position: absolute;
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
   font-family: 'Playfair Display', serif;
-  font-size: clamp(26px, 4.2vw, 48px);
-  font-weight: 400;
-  letter-spacing: 0.6px;
-  color: var(--brand-color);
-  text-align: center;
+  font-weight: 700;
+  font-size: clamp(26px, 4.4vw, 54px);
+  color: var(--brand-white);
+  text-shadow: 0 6px 18px rgba(0,0,0,0.5);
   z-index: 1250;
   pointer-events: none;
 }
 
-/* right-side nav (desktop) */
-.header-right {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
+/* right-side controls (desktop) */
+.header-right { margin-left: auto; display:flex; align-items:center; gap:10px; }
 
-/* Desktop nav: Home + icons */
-.desktop-nav { display:flex; align-items:center; gap:12px; }
+/* desktop nav: Home + icons */
+.desktop-nav { display:flex; gap:12px; align-items:center; }
 .home-link {
-  color: var(--white);
+  color: var(--brand-white);
   text-decoration: none;
-  font-weight: 400;
   font-size: 14px;
+  font-weight: 400;
   padding: 6px 8px;
 }
-.social-link { color: var(--white); font-size: 18px; text-decoration: none; padding: 6px; }
-.social-link:hover { color: #fff; transform: translateY(-2px); }
-
-/* hamburger (mobile) */
-.menu-toggle {
-  display: none;
-  background: none;
-  border: none;
-  color: var(--white);
-  font-size: 22px;
-  padding: 8px;
-  cursor: pointer;
+.social-link {
+  color: var(--brand-white);
+  font-size: 20px;
+  padding: 6px;
+  text-decoration: none !important;
 }
+.social-link:hover { transform: translateY(-2px); }
 
-/* mobile nav (slide down) */
+/* hamburger toggle (hidden on desktop) */
+.menu-toggle { display: none; background:none; border:none; color:var(--brand-white); font-size:22px; padding:8px; cursor:pointer; }
+
+/* mobile nav (hidden by default) */
 .mobile-nav {
   position: absolute;
-  right: 18px;
+  right: 16px;
   top: calc(var(--header-h));
   background: rgba(0,0,0,0.95);
   border-radius: 8px;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
   width: 220px;
+  padding: 0;
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.32s ease, padding 0.25s ease;
   z-index: 1300;
 }
-.mobile-nav.open {
-  padding: 14px;
-  max-height: 420px;
-}
+.mobile-nav.open { padding: 12px; max-height: 380px; }
 .mobile-link {
-  color: var(--white);
+  display:block;
+  color: var(--brand-white);
   text-decoration: none;
+  padding: 8px 6px;
   font-size: 16px;
-  font-weight: 400;
+  font-weight: 300;
 }
+.mobile-socials { display:flex; gap:12px; padding-top:8px; }
 
-/* mobile socials inside mobile nav */
-.mobile-socials { display:flex; gap:12px; justify-content:flex-start; align-items:center; padding-top:6px; }
-
-/* === Hero (full center area) === */
+/* === Hero (center area, uses bg.jpg in same folder) === */
 .hero {
   margin-top: var(--header-h);
   height: calc(100vh - var(--header-h) - var(--footer-h));
   background: url("bg.jpg") center/cover no-repeat;
-  position: relative;
   display:flex;
   align-items:center;
   justify-content:center;
+  position: relative;
 }
 .hero::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(0,0,0,0.36), rgba(0,0,0,0.45));
+  background: linear-gradient(180deg, rgba(0,0,0,0.28), rgba(0,0,0,0.45));
   z-index: 0;
 }
 .hero-inner {
-  position: relative;
   z-index: 2;
   width: 100%;
-  max-width: 1200px;
-  padding: 12px 20px;
+  max-width: 1100px;
+  padding: 8px 36px;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -156,53 +134,52 @@ body {
 .big-links {
   width: 100%;
   display:flex;
-  justify-content: space-between;    /* evenly spaced across the width */
-  align-items: flex-end;
+  justify-content: space-between; /* evenly spaced across frame */
+  align-items: baseline;
   gap: 18px;
-  padding: 0 6%;
+  padding: 0 4%;
   box-sizing: border-box;
 }
 .big-link {
   font-family: 'Montserrat', sans-serif;
-  font-weight: 300;               /* thin */
-  font-size: clamp(26px, 6.0vw, 72px); /* large on desktop, responsive */
-  line-height: 0.95;              /* slightly elongated look */
-  letter-spacing: 0.06em;         /* small spacing */
+  font-weight: 300;                      /* thin */
+  font-size: clamp(24px, 6.8vw, 56px);   /* elongated / responsive */
+  line-height: 0.95;                     /* elongated feel */
+  letter-spacing: 0.04em;                /* small letter spacing */
   text-transform: uppercase;
-  color: var(--white);
+  color: var(--brand-white);
   text-decoration: underline;
   text-decoration-thickness: 2px;
-  padding-bottom: 8px;
+  padding-bottom: 6px;
   white-space: nowrap;
   display: inline-block;
   text-align: center;
-  -webkit-font-smoothing: antialiased;
 }
 
-/* === Footer / tagline + copyright === */
+/* === Footer: tagline + copyright === */
 .site-footer {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  left: 0; right: 0; bottom: 0;
   height: var(--footer-h);
   display:flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  z-index: 1200;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  z-index:1200;
   pointer-events: none;
 }
-.site-footer .tagline {
+.tagline {
   pointer-events: auto;
   font-family: 'Playfair Display', serif;
   font-style: italic;
   font-weight: 400;
   font-size: 16px;
-  color: rgba(255,255,255,0.94);
+  color: var(--brand-white);
 }
-.site-footer .copyright {
+copyright { display: block; }
+
+copyright, .copyright {
   pointer-events: auto;
   font-size: 13px;
   color: rgba(255,255,255,0.75);
@@ -210,32 +187,30 @@ body {
 
 /* === Responsive adjustments === */
 @media (max-width: 920px) {
-  .big-links { padding: 0 8%; gap: 12px; }
   .brand-site-title { font-size: clamp(20px, 6vw, 40px); }
+  .big-links { gap: 12px; padding: 0 6%; }
 }
-
 @media (max-width: 768px) {
-  /* hide desktop nav, show toggle */
-  .desktop-nav { display: none; }
-  .menu-toggle { display: inline-block; }
-  .mobile-nav { right: 12px; left: auto; }
+  .desktop-nav { display: none; }         /* hide desktop nav on mobile */
+  .menu-toggle { display: inline-block; } /* show toggle */
+  .mobile-nav { right: 12px; }
 
+  /* stack center links on mobile */
   .big-links {
     flex-direction: column;
     justify-content: center;
-    gap: 20px;
+    align-items: center;
+    gap: 18px;
   }
   .big-link {
-    font-size: clamp(20px, 10vw, 46px);
+    font-size: clamp(20px, 9.5vw, 44px);
     white-space: normal;
   }
 
-  /* keep logo small-ish on phones */
-  .logo { height: clamp(46px, 12vw, 80px); }
+  .logo { height: clamp(46px, 12vw, 88px); }
 }
-
 @media (max-width: 420px) {
-  .brand-site-title { font-size: clamp(18px, 7vw, 28px); }
-  .site-footer .tagline { font-size: 14px; }
-  .big-link { font-size: clamp(18px, 9vw, 36px); }
+  .brand-site-title { font-size: clamp(18px, 8.5vw, 28px); }
+  .tagline { font-size: 14px; }
+  .big-link { font-size: clamp(18px, 12vw, 36px); }
 }
