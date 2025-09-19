@@ -53,27 +53,29 @@
     </table>
   </div>
 
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+  <!-- Firebase SDKs (Modular) -->
+  <script type="module">
+    // Import Firebase modules
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, doc, updateDoc, getDocs, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-storage.js";
 
-  <script>
-    // ====== Firebase Config ======
+    // Your Firebase config
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_PROJECT_ID.appspot.com",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId: "YOUR_APP_ID"
+      apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
+      authDomain: "brandisby.firebaseapp.com",
+      projectId: "brandisby",
+      storageBucket: "brandisby.firebasestorage.app",
+      messagingSenderId: "87213267039",
+      appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
     };
-    firebase.initializeApp(firebaseConfig);
 
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-    const storage = firebase.storage();
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const storage = getStorage(app);
 
     // ====== Elements ======
     const loginSection = document.getElementById('login-section');
@@ -94,17 +96,15 @@
 
     // ====== Auth ======
     loginBtn.addEventListener('click', () => {
-      const email = emailInput.value;
-      const password = passwordInput.value;
-      auth.signInWithEmailAndPassword(email, password)
+      signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value)
         .catch(err => alert(err.message));
     });
 
     logoutBtn.addEventListener('click', () => {
-      auth.signOut();
+      signOut(auth);
     });
 
-    auth.onAuthStateChanged(user => {
+    onAuthStateChanged(auth, (user) => {
       if (user) {
         loginSection.classList.add('hidden');
         dashboardSection.classList.remove('hidden');
@@ -117,10 +117,11 @@
 
     // ====== Load Products ======
     function loadProducts() {
-      db.collection('products').onSnapshot(snapshot => {
+      const productsCollection = collection(db, 'products');
+      onSnapshot(productsCollection, (snapshot) => {
         productsBody.innerHTML = '';
-        snapshot.forEach(doc => {
-          const product = doc.data();
+        snapshot.forEach(docSnap => {
+          const product = docSnap.data();
           const tr = document.createElement('tr');
           tr.innerHTML = `
             <td><img src="${product.imageUrl || ''}" alt="${product.name}"></td>
@@ -128,8 +129,8 @@
             <td>$${product.price}</td>
             <td>${product.description}</td>
             <td>
-              <button onclick="editProduct('${doc.id}')">Edit</button>
-              <button onclick="deleteProduct('${doc.id}')">Delete</button>
+              <button onclick="editProduct('${docSnap.id}')">Edit</button>
+              <button onclick="deleteProduct('${docSnap.id}')">Delete</button>
             </td>
           `;
           productsBody.appendChild(tr);
@@ -148,9 +149,9 @@
       let imageUrl = '';
 
       if (file) {
-        const storageRef = storage.ref().child('product-images/' + file.name);
-        await storageRef.put(file);
-        imageUrl = await storageRef.getDownloadURL();
+        const storageRef = ref(storage, 'product-images/' + file.name);
+        await uploadBytes(storageRef, file);
+        imageUrl = await getDownloadURL(storageRef);
       }
 
       const productData = { name, price, description };
@@ -158,10 +159,11 @@
 
       if (id) {
         // Update existing product
-        db.collection('products').doc(id).update(productData);
+        const productDoc = doc(db, 'products', id);
+        await updateDoc(productDoc, productData);
       } else {
         // Add new product
-        db.collection('products').add(productData);
+        await addDoc(collection(db, 'products'), productData);
       }
 
       // Reset form
@@ -174,8 +176,9 @@
 
     // ====== Edit Product ======
     window.editProduct = async (id) => {
-      const doc = await db.collection('products').doc(id).get();
-      const product = doc.data();
+      const productDoc = doc(db, 'products', id);
+      const docSnap = await getDocs(productDoc);
+      const product = (await productDoc.get()).data();
       productIdInput.value = id;
       nameInput.value = product.name;
       priceInput.value = product.price;
@@ -183,9 +186,9 @@
     }
 
     // ====== Delete Product ======
-    window.deleteProduct = (id) => {
+    window.deleteProduct = async (id) => {
       if (confirm('Are you sure you want to delete this product?')) {
-        db.collection('products').doc(id).delete();
+        await deleteDoc(doc(db, 'products', id));
       }
     }
   </script>
