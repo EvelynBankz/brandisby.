@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cart - SERAC</title> <!-- Change brand here -->
+  <link rel="stylesheet" href="shop.css"> <!-- reuse existing shop CSS -->
+  <style>
+    .cart-container { padding: 20px; max-width: 900px; margin: auto; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+    th { background-color: #f2f2f2; }
+    img { width: 80px; }
+    button { padding: 8px 12px; margin: 4px; cursor: pointer; }
+    .cart-total { margin-top: 20px; font-size: 1.2em; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Cart - SERAC</h1>
+  </header>
+
+  <div class="cart-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Price</th>
+          <th>Quantity</th>
+          <th>Subtotal</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="cart-items"></tbody>
+    </table>
+    <div class="cart-total">
+      Total: $<span id="cart-total">0.00</span>
+    </div>
+    <button id="checkout-btn">Proceed to Checkout</button>
+  </div>
+
+  <script>
+    const BRAND = "serac"; // Change this to "fleurdevie" for the other brand
+    const CART_KEY = `${BRAND}_cart`;
+
+    const cartItemsEl = document.getElementById('cart-items');
+    const cartTotalEl = document.getElementById('cart-total');
+    const checkoutBtn = document.getElementById('checkout-btn');
+
+    let cart = JSON.parse(localStorage.getItem(CART_KEY)) || [];
+
+    function renderCart() {
+      cartItemsEl.innerHTML = '';
+      let total = 0;
+
+      cart.forEach((item, index) => {
+        const subtotal = item.price * item.quantity;
+        total += subtotal;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${item.name}</td>
+          <td>$${item.price.toFixed(2)}</td>
+          <td>
+            <input type="number" min="1" value="${item.quantity}" data-index="${index}" class="qty-input">
+          </td>
+          <td>$${subtotal.toFixed(2)}</td>
+          <td><button data-index="${index}" class="remove-btn">Remove</button></td>
+        `;
+        cartItemsEl.appendChild(tr);
+      });
+
+      cartTotalEl.textContent = total.toFixed(2);
+    }
+
+    // Update quantity
+    cartItemsEl.addEventListener('input', (e) => {
+      if (e.target.classList.contains('qty-input')) {
+        const index = e.target.dataset.index;
+        cart[index].quantity = parseInt(e.target.value);
+        localStorage.setItem(CART_KEY, JSON.stringify(cart));
+        renderCart();
+      }
+    });
+
+    // Remove item
+    cartItemsEl.addEventListener('click', (e) => {
+      if (e.target.classList.contains('remove-btn')) {
+        const index = e.target.dataset.index;
+        cart.splice(index, 1);
+        localStorage.setItem(CART_KEY, JSON.stringify(cart));
+        renderCart();
+      }
+    });
+
+    checkoutBtn.addEventListener('click', () => {
+      window.location.href = `checkout.html?brand=${BRAND}`;
+    });
+
+    renderCart();
+  </script>
+
+</body>
+</html>
