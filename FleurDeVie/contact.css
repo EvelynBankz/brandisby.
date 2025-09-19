@@ -1,0 +1,76 @@
+/* ================= RESET & BASE ================= */
+* { box-sizing:border-box; margin:0; padding:0; }
+html, body { height:100%; font-family:"Montserrat", Arial, sans-serif; color:#fff; background:#000; scroll-behavior: smooth; }
+.fleur-body { overflow-x:hidden; }
+
+/* ================= HEADER ================= */
+.site-header {
+  position: fixed; top:0; left:0; right:0;
+  display:flex; align-items:center; justify-content: space-between;
+  padding:14px 28px; z-index:1200; background: rgba(0,0,0,0.7);
+}
+.header-left { display:flex; align-items:center; gap:12px; }
+.brand-logo { height: clamp(100px, 10vw, 200px); width:auto; }
+.brand-title { font-family:"Playfair Display", serif; font-weight:700; font-size: clamp(20px,3.4vw,44px); color:#fff; }
+.header-right { display:flex; gap:16px; }
+.header-right a { color:#fff; text-decoration:none; font-weight:500; transition: opacity 0.3s; }
+.header-right a:hover { opacity:0.7; }
+
+/* Hamburger */
+.hamburger { display:none; background:none; border:none; width:44px; height:40px; cursor:pointer; }
+.hamburger span { display:block; height:2.5px; width:22px; background:#fff; margin:6px auto; border-radius:2px; transition: transform .28s ease, opacity .28s ease; }
+
+/* ================= HERO ================= */
+.hero-contact {
+  height:50vh; display:flex; align-items:center; justify-content:center; text-align:center;
+  background: url("contact-hero.jpg") center center / cover no-repeat;
+}
+.hero-contact .hero-text h1 { font-family:"Playfair Display", serif; font-size: clamp(36px,5vw,64px); margin-bottom:12px; }
+.hero-contact .hero-text p { font-family:"Montserrat", sans-serif; font-size: clamp(16px,2vw,24px); max-width:700px; }
+
+/* ================= CONTACT FORM ================= */
+.contact-form-section { padding:80px 20px; text-align:center; }
+.contact-form-section h2 { font-family:"Playfair Display", serif; font-size: clamp(28px,3vw,40px); margin-bottom:24px; }
+.contact-form-section form { display:flex; flex-direction: column; gap:16px; max-width:500px; margin:0 auto; }
+.contact-form-section input,
+.contact-form-section textarea { padding:12px; font-size:16px; border:none; border-radius:4px; }
+.contact-form-section textarea { resize: vertical; height:120px; }
+.contact-form-section button { padding:12px; font-size:16px; background:#fff; color:#000; border:none; cursor:pointer; transition:opacity 0.3s; }
+.contact-form-section button:hover { opacity:0.8; }
+
+/* ================= CONTACT INFO ================= */
+.contact-info-section { padding:60px 20px; text-align:center; }
+.contact-info-section h2 { font-family:"Playfair Display", serif; font-size: clamp(28px,3vw,40px); margin-bottom:24px; }
+.contact-info-section p { font-size: clamp(16px,1.5vw,20px); line-height:1.7; margin-bottom:12px; }
+
+/* ================= FOOTER ================= */
+.site-footer { text-align:center; padding:20px; }
+
+/* ================= RESPONSIVE ================= */
+@media (max-width:900px){
+  .header-right { gap:12px; flex-wrap: wrap; justify-content:center; }
+}
+
+@media (max-width:600px){
+  .hero-contact { height:40vh; }
+  .contact-form-section, .contact-info-section { padding:40px 20px; }
+  .header-right { display:none; } 
+  .hamburger { display:block; }
+  .brand-logo { height: clamp(50px,15vw,120px); }
+  .brand-title { font-size: clamp(16px,7vw,22px); }
+}
+
+/* Hamburger mobile menu */
+.hamburger.is-active span:nth-child(1){ transform: translateY(8px) rotate(45deg); }
+.hamburger.is-active span:nth-child(2){ opacity:0; transform: scaleX(.2); }
+.hamburger.is-active span:nth-child(3){ transform: translateY(-8px) rotate(-45deg); }
+
+.mobile-nav {
+  position: fixed; top:0; left:0; right:0; height:100%;
+  background: rgba(0,0,0,0.95); display:flex; flex-direction: column;
+  align-items:center; justify-content:center; gap:24px;
+  transform: translateY(-100%); transition: transform 0.3s ease; z-index:1300;
+}
+.mobile-nav.open { transform: translateY(0); }
+.mobile-nav a { color:#fff; font-size:24px; text-decoration:none; }
+.mobile-nav a:hover { opacity:0.7; }
