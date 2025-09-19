@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout - FLEUR DE VIE</title>
+  <link rel="stylesheet" href="shop.css">
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    form { max-width: 500px; margin: auto; display: flex; flex-direction: column; }
+    input, button { margin: 8px 0; padding: 10px; border-radius: 4px; border: 1px solid #ccc; }
+    button { background-color: #4CAF50; color: white; border: none; cursor: pointer; }
+    button:hover { background-color: #45a049; }
+  </style>
+</head>
+<body>
+
+  <h1>Checkout - FLEUR DE VIE</h1>
+  <form id="checkout-form">
+    <input type="text" name="name" placeholder="Full Name" required>
+    <input type="email" name="email" placeholder="Email" required>
+    <input type="text" name="address" placeholder="Shipping Address" required>
+    <input type="text" name="city" placeholder="City" required>
+    <input type="text" name="zip" placeholder="ZIP / Postal Code" required>
+    <button type="submit">Place Order</button>
+  </form>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
+      authDomain: "brandisby.firebaseapp.com",
+      projectId: "brandisby",
+      storageBucket: "brandisby.firebasestorage.app",
+      messagingSenderId: "87213267039",
+      appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const BRAND = urlParams.get('brand') || 'fleurdevie';
+    const CART_KEY = `${BRAND}_cart`;
+
+    const form = document.getElementById('checkout-form');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const cart = JSON.parse(localStorage.getItem(CART_KEY)) || [];
+
+      if(cart.length === 0) {
+        alert("Your cart is empty!");
+        return;
+      }
+
+      const order = {
+        brand: BRAND,
+        items: cart,
+        customer: {
+          name: form.name.value,
+          email: form.email.value,
+          address: form.address.value,
+          city: form.city.value,
+          zip: form.zip.value
+        },
+        createdAt: new Date()
+      };
+
+      try {
+        await addDoc(collection(db, 'orders'), order);
+        alert("Order placed successfully!");
+        localStorage.removeItem(CART_KEY);
+        window.location.href = `fleurdevie-thankyou.html?brand=${BRAND}`;
+      } catch (err) {
+        console.error(err);
+        alert("Error placing order. Please try again.");
+      }
+    });
+  </script>
+
+</body>
+</html>
