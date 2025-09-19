@@ -7,6 +7,42 @@
   <link rel="stylesheet" href="shop.css">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { font-family: 'Montserrat', sans-serif; margin: 0; padding: 0; background: #fff; color: #333; }
+    .site-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: #f5bfbe; }
+    .brand-logo { width: 60px; }
+    .brand-title { font-size: 1.5rem; font-weight: 700; text-align: center; flex: 1; }
+    .header-left { display: flex; align-items: center; gap: 10px; }
+    .header-right a { margin-left: 15px; color: #fff; font-weight: 500; text-decoration: none; }
+    .hamburger { display: none; background: none; border: none; cursor: pointer; flex-direction: column; gap: 5px; }
+    .hamburger span { display: block; width: 25px; height: 3px; background: #fff; border-radius: 2px; }
+
+    .cart-container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+    .cart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
+    .cart-header h1 { margin: 0; flex: 1 1 100%; text-align: center; margin-bottom: 15px; }
+    .currency-select { padding: 8px; border-radius: 6px; border: 1px solid #ccc; }
+
+    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    th, td { padding: 10px; text-align: center; border-bottom: 1px solid #ddd; }
+    img { width: 80px; border-radius: 6px; }
+
+    input.qty-input { width: 60px; padding: 5px; border-radius: 4px; border: 1px solid #ccc; text-align: center; }
+
+    button { padding: 10px 20px; border: none; border-radius: 6px; background: #f5bfbe; color: #fff; font-weight: 500; cursor: pointer; transition: 0.3s; }
+    button:hover { opacity: 0.9; }
+    .cart-buttons { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+
+    .empty-cart { text-align: center; font-size: 1.2rem; margin: 20px 0; }
+
+    @media (max-width: 768px) {
+      table, thead, tbody, th, td, tr { display: block; }
+      th { display: none; }
+      td { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; }
+      td:before { content: attr(data-label); font-weight: bold; flex: 1; }
+      td img { margin-right: 10px; }
+      .cart-buttons { flex-direction: column; }
+    }
+  </style>
 </head>
 <body class="fleurdevie">
 
@@ -27,44 +63,67 @@
   </header>
 
   <!-- CART CONTENT -->
-  <section class="cart">
-    <div class="container">
+  <div class="cart-container">
+    <div class="cart-header">
       <h1>Your Cart</h1>
-      <table id="cart-table">
-        <thead>
-          <tr>
-            <th>Image</th>
-            <th>Name</th>
-            <th>Price</th>
-            <th>Quantity</th>
-            <th>Total</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody id="cart-body"></tbody>
-      </table>
-      <h2 id="cart-total">Total: $0.00</h2>
-      <a href="checkout.html"><button>Proceed to Checkout</button></a>
+      <select class="currency-select" id="currency">
+        <option value="USD" selected>USD $</option>
+        <option value="EUR">EUR €</option>
+        <option value="NGN">NGN ₦</option>
+      </select>
     </div>
-  </section>
+
+    <div class="cart-buttons">
+      <a href="shop.html"><button>Continue Shopping</button></a>
+      <a href="checkout.html"><button id="checkout-btn">Proceed to Checkout</button></a>
+    </div>
+
+    <div id="cart-empty" class="empty-cart">Your cart is empty.</div>
+
+    <table id="cart-table">
+      <thead>
+        <tr>
+          <th>Image</th>
+          <th>Name</th>
+          <th>Price</th>
+          <th>Quantity</th>
+          <th>Total</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="cart-body"></tbody>
+    </table>
+
+    <h2 id="cart-total">Total: $0.00</h2>
+  </div>
 
   <script>
     const hamburger = document.getElementById('hamburger');
     const headerRight = document.querySelector('.header-right');
+    hamburger.addEventListener('click', () => { headerRight.classList.toggle('open'); });
 
-    hamburger.addEventListener('click', () => {
-      headerRight.classList.toggle('open');
-    });
-
-    // ===== FLEUR DE VIE CART LOGIC =====
+    // ===== Fleur De Vie Cart Logic =====
     let cart = JSON.parse(localStorage.getItem('fleurdevie-cart')) || [];
-
     const cartBody = document.getElementById('cart-body');
     const cartTotalEl = document.getElementById('cart-total');
+    const cartEmpty = document.getElementById('cart-empty');
 
     function renderCart() {
       cartBody.innerHTML = '';
       let total = 0;
+
+      if(cart.length === 0) {
+        cartEmpty.style.display = 'block';
+        document.getElementById('cart-table').style.display = 'none';
+        cartTotalEl.style.display = 'none';
+        document.getElementById('checkout-btn').disabled = true;
+        return;
+      } else {
+        cartEmpty.style.display = 'none';
+        document.getElementById('cart-table').style.display = 'table';
+        cartTotalEl.style.display = 'block';
+        document.getElementById('checkout-btn').disabled = false;
+      }
 
       cart.forEach((item, index) => {
         const row = document.createElement('tr');
@@ -72,14 +131,12 @@
         total += itemTotal;
 
         row.innerHTML = `
-          <td><img src="${item.imageUrl}" alt="${item.name}" width="80"></td>
-          <td>${item.name}</td>
-          <td>$${item.price}</td>
-          <td>
-            <input type="number" min="1" value="${item.quantity}" data-index="${index}" class="qty-input">
-          </td>
-          <td>$${itemTotal.toFixed(2)}</td>
-          <td><button data-index="${index}" class="remove-btn">Remove</button></td>
+          <td data-label="Image"><img src="${item.imageUrl}" alt="${item.name}"></td>
+          <td data-label="Name">${item.name}</td>
+          <td data-label="Price">$${item.price.toFixed(2)}</td>
+          <td data-label="Quantity"><input type="number" min="1" value="${item.quantity}" data-index="${index}" class="qty-input"></td>
+          <td data-label="Total">$${itemTotal.toFixed(2)}</td>
+          <td data-label="Action"><button data-index="${index}" class="remove-btn">Remove</button></td>
         `;
         cartBody.appendChild(row);
       });
@@ -108,6 +165,11 @@
         });
       });
     }
+
+    document.getElementById('currency').addEventListener('change', (e) => {
+      // Future: implement currency conversion
+      renderCart();
+    });
 
     renderCart();
   </script>
