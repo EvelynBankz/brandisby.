@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    h1 { margin-bottom: 20px; }
+    input, button, textarea { display: block; margin: 10px 0; padding: 8px; width: 300px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background-color: #f2f2f2; }
+    img { width: 80px; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+
+  <h1>Admin Dashboard</h1>
+
+  <!-- Login Section -->
+  <div id="login-section">
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Password">
+    <button id="login-btn">Login</button>
+  </div>
+
+  <!-- Dashboard Section -->
+  <div id="dashboard-section" class="hidden">
+    <button id="logout-btn">Logout</button>
+
+    <h2>Add / Edit Product</h2>
+    <input type="text" id="product-id" placeholder="Product ID (leave empty for new)">
+    <input type="text" id="name" placeholder="Product Name">
+    <input type="number" id="price" placeholder="Price">
+    <textarea id="description" placeholder="Description"></textarea>
+    <input type="file" id="image">
+    <button id="save-product-btn">Save Product</button>
+
+    <h2>All Products</h2>
+    <table id="products-table">
+      <thead>
+        <tr>
+          <th>Image</th>
+          <th>Name</th>
+          <th>Price</th>
+          <th>Description</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="products-body"></tbody>
+    </table>
+  </div>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+
+  <script>
+    // ====== Firebase Config ======
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+    firebase.initializeApp(firebaseConfig);
+
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+
+    // ====== Elements ======
+    const loginSection = document.getElementById('login-section');
+    const dashboardSection = document.getElementById('dashboard-section');
+    const loginBtn = document.getElementById('login-btn');
+    const logoutBtn = document.getElementById('logout-btn');
+
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+
+    const productIdInput = document.getElementById('product-id');
+    const nameInput = document.getElementById('name');
+    const priceInput = document.getElementById('price');
+    const descriptionInput = document.getElementById('description');
+    const imageInput = document.getElementById('image');
+    const saveProductBtn = document.getElementById('save-product-btn');
+    const productsBody = document.getElementById('products-body');
+
+    // ====== Auth ======
+    loginBtn.addEventListener('click', () => {
+      const email = emailInput.value;
+      const password = passwordInput.value;
+      auth.signInWithEmailAndPassword(email, password)
+        .catch(err => alert(err.message));
+    });
+
+    logoutBtn.addEventListener('click', () => {
+      auth.signOut();
+    });
+
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        loginSection.classList.add('hidden');
+        dashboardSection.classList.remove('hidden');
+        loadProducts();
+      } else {
+        loginSection.classList.remove('hidden');
+        dashboardSection.classList.add('hidden');
+      }
+    });
+
+    // ====== Load Products ======
+    function loadProducts() {
+      db.collection('products').onSnapshot(snapshot => {
+        productsBody.innerHTML = '';
+        snapshot.forEach(doc => {
+          const product = doc.data();
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><img src="${product.imageUrl || ''}" alt="${product.name}"></td>
+            <td>${product.name}</td>
+            <td>$${product.price}</td>
+            <td>${product.description}</td>
+            <td>
+              <button onclick="editProduct('${doc.id}')">Edit</button>
+              <button onclick="deleteProduct('${doc.id}')">Delete</button>
+            </td>
+          `;
+          productsBody.appendChild(tr);
+        });
+      });
+    }
+
+    // ====== Save Product ======
+    saveProductBtn.addEventListener('click', async () => {
+      const id = productIdInput.value.trim();
+      const name = nameInput.value;
+      const price = parseFloat(priceInput.value);
+      const description = descriptionInput.value;
+      const file = imageInput.files[0];
+
+      let imageUrl = '';
+
+      if (file) {
+        const storageRef = storage.ref().child('product-images/' + file.name);
+        await storageRef.put(file);
+        imageUrl = await storageRef.getDownloadURL();
+      }
+
+      const productData = { name, price, description };
+      if (imageUrl) productData.imageUrl = imageUrl;
+
+      if (id) {
+        // Update existing product
+        db.collection('products').doc(id).update(productData);
+      } else {
+        // Add new product
+        db.collection('products').add(productData);
+      }
+
+      // Reset form
+      productIdInput.value = '';
+      nameInput.value = '';
+      priceInput.value = '';
+      descriptionInput.value = '';
+      imageInput.value = '';
+    });
+
+    // ====== Edit Product ======
+    window.editProduct = async (id) => {
+      const doc = await db.collection('products').doc(id).get();
+      const product = doc.data();
+      productIdInput.value = id;
+      nameInput.value = product.name;
+      priceInput.value = product.price;
+      descriptionInput.value = product.description;
+    }
+
+    // ====== Delete Product ======
+    window.deleteProduct = (id) => {
+      if (confirm('Are you sure you want to delete this product?')) {
+        db.collection('products').doc(id).delete();
+      }
+    }
+  </script>
+</body>
+</html>
