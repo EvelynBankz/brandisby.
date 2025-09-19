@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Serac - Shop</title>
+  <title>Fleur De Vie - Shop</title>
   <link rel="stylesheet" href="shop.css">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -21,6 +21,9 @@
       <a href="about.html">About</a>
       <a href="shop.html">Shop</a>
       <a href="contact.html">Contact</a>
+      <a href="fleurdevie-cart.html" class="cart-icon">
+        <i class="fas fa-shopping-cart"></i>
+      </a>
     </nav>
     <button class="hamburger" id="hamburger">
       <span></span><span></span><span></span>
@@ -35,18 +38,18 @@
     </div>
   </section>
 
- <!-- PRODUCTS GRID -->
-<section class="products">
-  <div class="container">
-    <div class="product-grid" id="product-grid">
-      <!-- Products will be loaded here from Firestore -->
+  <!-- PRODUCTS GRID -->
+  <section class="products">
+    <div class="container">
+      <div class="product-grid" id="product-grid">
+        <!-- Products will be loaded here from Firestore -->
+      </div>
     </div>
-  </div>
-</section>
+  </section>
 
   <!-- FOOTER -->
   <footer class="site-footer">
-    <p>© 2025 Serac</p>
+    <p>© 2025 Fleur De Vie</p>
   </footer>
 
   <!-- HAMBURGER SCRIPT -->
@@ -59,51 +62,50 @@
     });
   </script>
 
-<!-- FIREBASE SCRIPT -->
-<script type="module">
-  // Import Firebase
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-  import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+  <!-- FIREBASE SCRIPT -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-  // Your Firebase config (replace with yours from Firebase Console)
-  const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
-  };
+    // Firebase config
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
 
-  // Init Firebase
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-  // Reference the "products" collection
-  const productGrid = document.getElementById("product-grid");
+    const productGrid = document.getElementById("product-grid");
 
-  async function loadProducts() {
-    const querySnapshot = await getDocs(collection(db, "products"));
-    querySnapshot.forEach((doc) => {
-      const product = doc.data();
+    async function loadProducts() {
+      const querySnapshot = await getDocs(collection(db, "fleurdevie")); // Fleur de Vie collection
+      productGrid.innerHTML = '';
 
-      // Create card dynamically
-      const card = document.createElement("div");
-      card.classList.add("product-card");
-      card.innerHTML = `
-        <img src="${product.image}" alt="${product.name}">
-        <h3>${product.name}</h3>
-        <p>$${product.price}</p>
-        <a href="product.html?id=${doc.id}">
-          <button>View Details</button>
-        </a>
-      `;
-      productGrid.appendChild(card);
-    });
-  }
+      querySnapshot.forEach((doc) => {
+        const product = doc.data();
 
-  loadProducts();
-</script>
-  
+        const card = document.createElement("div");
+        card.classList.add("product-card");
+        card.innerHTML = `
+          <img src="${product.imageUrl || 'placeholder.jpg'}" alt="${product.name}">
+          <h3>${product.name}</h3>
+          <p>$${product.price}</p>
+          <a href="product.html?id=${doc.id}&brand=fleurdevie">
+            <button>View Details</button>
+          </a>
+        `;
+        productGrid.appendChild(card);
+      });
+    }
+
+    loadProducts();
+  </script>
+
 </body>
 </html>
