@@ -61,18 +61,18 @@
 
   <!-- FIREBASE SCRIPT -->
   <script type="module">
-    // Import Firebase
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+    // Import Firebase modules
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-    // Firebase config
+    // Your Firebase config
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_PROJECT_ID.appspot.com",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId: "YOUR_APP_ID"
+      apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
+      authDomain: "brandisby.firebaseapp.com",
+      projectId: "brandisby",
+      storageBucket: "brandisby.firebasestorage.app",
+      messagingSenderId: "87213267039",
+      appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
     };
 
     // Initialize Firebase
@@ -88,7 +88,7 @@
       querySnapshot.forEach((doc) => {
         const product = doc.data();
 
-        // Use the imageUrl field uploaded from admin dashboard
+        // Create product card dynamically
         const card = document.createElement("div");
         card.classList.add("product-card");
         card.innerHTML = `
