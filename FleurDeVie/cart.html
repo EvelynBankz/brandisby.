@@ -9,9 +9,15 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     body { font-family: 'Montserrat', sans-serif; margin: 0; padding: 0; background: #fff; color: #000; }
-    .site-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: #FFD6BA; }
-    .brand-logo { width: 50px; height: auto; }
-    .brand-title { font-size: 1.5rem; font-weight: 700; text-align: center; flex: 1; color: #000; }
+    .site-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 20px; background: #FFD6BA; position: relative;
+    }
+    .brand-logo { width: 80px; height: auto; }
+    .brand-title {
+      position: absolute; left: 50%; transform: translateX(-50%);
+      font-size: 1.8rem; font-weight: 700; color: #000; text-align: center;
+    }
     .header-left { display: flex; align-items: center; gap: 10px; }
     .header-right a { margin-left: 15px; color: #000; font-weight: 500; text-decoration: none; }
     .hamburger { display: none; background: none; border: none; cursor: pointer; flex-direction: column; gap: 4px; }
@@ -50,8 +56,8 @@
   <header class="site-header">
     <div class="header-left">
       <img src="logo.png" alt="FleurDeVie Logo" class="brand-logo">
-      <div class="brand-title">Fleur De Vie</div>
     </div>
+    <div class="brand-title">Your Cart</div>
     <nav class="header-right">
       <a href="index.html">Home</a>
       <a href="shop.html">Shop</a>
@@ -65,7 +71,6 @@
   <!-- CART CONTENT -->
   <div class="cart-container">
     <div class="cart-header">
-      <h1>Your Cart</h1>
       <select class="currency-select" id="currency">
         <option value="USD" selected>USD $</option>
         <option value="EUR">EUR €</option>
