@@ -21,6 +21,9 @@
       <a href="about.html">About</a>
       <a href="shop.html">Shop</a>
       <a href="contact.html">Contact</a>
+      <a href="cart.html" class="cart-icon">
+        <i class="fas fa-shopping-cart"></i>
+      </a>
     </nav>
     <button class="hamburger" id="hamburger">
       <span></span><span></span><span></span>
@@ -61,18 +64,17 @@
 
   <!-- FIREBASE SCRIPT -->
   <script type="module">
-    // Import Firebase modules
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
     import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-    // Your Firebase config
+    // Firebase config
     const firebaseConfig = {
-      apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
-      authDomain: "brandisby.firebaseapp.com",
-      projectId: "brandisby",
-      storageBucket: "brandisby.firebasestorage.app",
-      messagingSenderId: "87213267039",
-      appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
     };
 
     // Initialize Firebase
@@ -82,20 +84,19 @@
     const productGrid = document.getElementById("product-grid");
 
     async function loadProducts() {
-      const querySnapshot = await getDocs(collection(db, "products"));
-      productGrid.innerHTML = ""; // clear existing content
+      const querySnapshot = await getDocs(collection(db, "serac")); // Serac collection
+      productGrid.innerHTML = '';
 
       querySnapshot.forEach((doc) => {
         const product = doc.data();
 
-        // Create product card dynamically
         const card = document.createElement("div");
         card.classList.add("product-card");
         card.innerHTML = `
           <img src="${product.imageUrl || 'placeholder.jpg'}" alt="${product.name}">
           <h3>${product.name}</h3>
           <p>$${product.price}</p>
-          <a href="product.html?id=${doc.id}">
+          <a href="product.html?id=${doc.id}&brand=serac">
             <button>View Details</button>
           </a>
         `;
