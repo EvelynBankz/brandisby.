@@ -3,103 +3,113 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cart - SERAC</title> <!-- Change brand here -->
-  <link rel="stylesheet" href="shop.css"> <!-- reuse existing shop CSS -->
-  <style>
-    .cart-container { padding: 20px; max-width: 900px; margin: auto; }
-    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-    th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
-    th { background-color: #f2f2f2; }
-    img { width: 80px; }
-    button { padding: 8px 12px; margin: 4px; cursor: pointer; }
-    .cart-total { margin-top: 20px; font-size: 1.2em; font-weight: bold; }
-  </style>
+  <title>Serac - Cart</title>
+  <link rel="stylesheet" href="shop.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="serac">
 
-  <header>
-    <h1>Cart - SERAC</h1>
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="header-left">
+      <img src="logo.png" alt="Serac Logo" class="brand-logo">
+      <div class="brand-title">Serac</div>
+    </div>
+    <nav class="header-right">
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="checkout.html">Checkout</a>
+    </nav>
+    <button class="hamburger" id="hamburger">
+      <span></span><span></span><span></span>
+    </button>
   </header>
 
-  <div class="cart-container">
-    <table>
-      <thead>
-        <tr>
-          <th>Product</th>
-          <th>Price</th>
-          <th>Quantity</th>
-          <th>Subtotal</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody id="cart-items"></tbody>
-    </table>
-    <div class="cart-total">
-      Total: $<span id="cart-total">0.00</span>
+  <!-- CART CONTENT -->
+  <section class="cart">
+    <div class="container">
+      <h1>Your Cart</h1>
+      <table id="cart-table">
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Total</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="cart-body"></tbody>
+      </table>
+      <h2 id="cart-total">Total: $0.00</h2>
+      <a href="checkout.html"><button>Proceed to Checkout</button></a>
     </div>
-    <button id="checkout-btn">Proceed to Checkout</button>
-  </div>
+  </section>
 
   <script>
-    const BRAND = "serac"; // Change this to "fleurdevie" for the other brand
-    const CART_KEY = `${BRAND}_cart`;
+    const hamburger = document.getElementById('hamburger');
+    const headerRight = document.querySelector('.header-right');
 
-    const cartItemsEl = document.getElementById('cart-items');
+    hamburger.addEventListener('click', () => {
+      headerRight.classList.toggle('open');
+    });
+
+    // ===== CART LOGIC =====
+    let cart = JSON.parse(localStorage.getItem('serac-cart')) || [];
+
+    const cartBody = document.getElementById('cart-body');
     const cartTotalEl = document.getElementById('cart-total');
-    const checkoutBtn = document.getElementById('checkout-btn');
-
-    let cart = JSON.parse(localStorage.getItem(CART_KEY)) || [];
 
     function renderCart() {
-      cartItemsEl.innerHTML = '';
+      cartBody.innerHTML = '';
       let total = 0;
 
       cart.forEach((item, index) => {
-        const subtotal = item.price * item.quantity;
-        total += subtotal;
+        const row = document.createElement('tr');
+        const itemTotal = item.price * item.quantity;
+        total += itemTotal;
 
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
+        row.innerHTML = `
+          <td><img src="${item.imageUrl}" alt="${item.name}" width="80"></td>
           <td>${item.name}</td>
-          <td>$${item.price.toFixed(2)}</td>
+          <td>$${item.price}</td>
           <td>
             <input type="number" min="1" value="${item.quantity}" data-index="${index}" class="qty-input">
           </td>
-          <td>$${subtotal.toFixed(2)}</td>
+          <td>$${itemTotal.toFixed(2)}</td>
           <td><button data-index="${index}" class="remove-btn">Remove</button></td>
         `;
-        cartItemsEl.appendChild(tr);
+        cartBody.appendChild(row);
       });
 
-      cartTotalEl.textContent = total.toFixed(2);
+      cartTotalEl.textContent = `Total: $${total.toFixed(2)}`;
+      attachCartEvents();
     }
 
-    // Update quantity
-    cartItemsEl.addEventListener('input', (e) => {
-      if (e.target.classList.contains('qty-input')) {
-        const index = e.target.dataset.index;
-        cart[index].quantity = parseInt(e.target.value);
-        localStorage.setItem(CART_KEY, JSON.stringify(cart));
-        renderCart();
-      }
-    });
+    function attachCartEvents() {
+      document.querySelectorAll('.remove-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const index = e.target.dataset.index;
+          cart.splice(index, 1);
+          localStorage.setItem('serac-cart', JSON.stringify(cart));
+          renderCart();
+        });
+      });
 
-    // Remove item
-    cartItemsEl.addEventListener('click', (e) => {
-      if (e.target.classList.contains('remove-btn')) {
-        const index = e.target.dataset.index;
-        cart.splice(index, 1);
-        localStorage.setItem(CART_KEY, JSON.stringify(cart));
-        renderCart();
-      }
-    });
-
-    checkoutBtn.addEventListener('click', () => {
-      window.location.href = `checkout.html?brand=${BRAND}`;
-    });
+      document.querySelectorAll('.qty-input').forEach(input => {
+        input.addEventListener('change', (e) => {
+          const index = e.target.dataset.index;
+          const qty = parseInt(e.target.value);
+          cart[index].quantity = qty;
+          localStorage.setItem('serac-cart', JSON.stringify(cart));
+          renderCart();
+        });
+      });
+    }
 
     renderCart();
   </script>
-
 </body>
 </html>
