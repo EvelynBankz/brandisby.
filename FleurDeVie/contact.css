@@ -1,6 +1,6 @@
 /* ================= RESET & BASE ================= */
-* { box-sizing:border-box; margin:0; padding:0; }
-html, body { height:100%; font-family:"Montserrat", Arial, sans-serif; color:#fff; background:#000; scroll-behavior: smooth; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; font-family: "Montserrat", Arial, sans-serif; color:#fff; background:#000; scroll-behavior: smooth; }
 .fleur-body { overflow-x:hidden; }
 
 /* ================= HEADER ================= */
@@ -20,15 +20,20 @@ html, body { height:100%; font-family:"Montserrat", Arial, sans-serif; color:#ff
 .hamburger { display:none; background:none; border:none; width:44px; height:40px; cursor:pointer; }
 .hamburger span { display:block; height:2.5px; width:22px; background:#fff; margin:6px auto; border-radius:2px; transition: transform .28s ease, opacity .28s ease; }
 
-/* ================= HERO ================= */
+/* ================= MAIN CONTENT ================= */
+main { padding-top: 120px; }
+
+/* HERO */
 .hero-contact {
   height:50vh; display:flex; align-items:center; justify-content:center; text-align:center;
   background: url("contact-hero.jpg") center center / cover no-repeat;
+  position: relative;
 }
+.hero-contact .hero-text { position: relative; z-index: 1; }
 .hero-contact .hero-text h1 { font-family:"Playfair Display", serif; font-size: clamp(36px,5vw,64px); margin-bottom:12px; }
 .hero-contact .hero-text p { font-family:"Montserrat", sans-serif; font-size: clamp(16px,2vw,24px); max-width:700px; }
 
-/* ================= CONTACT FORM ================= */
+/* CONTACT FORM */
 .contact-form-section { padding:80px 20px; text-align:center; }
 .contact-form-section h2 { font-family:"Playfair Display", serif; font-size: clamp(28px,3vw,40px); margin-bottom:24px; }
 .contact-form-section form { display:flex; flex-direction: column; gap:16px; max-width:500px; margin:0 auto; }
@@ -38,12 +43,12 @@ html, body { height:100%; font-family:"Montserrat", Arial, sans-serif; color:#ff
 .contact-form-section button { padding:12px; font-size:16px; background:#fff; color:#000; border:none; cursor:pointer; transition:opacity 0.3s; }
 .contact-form-section button:hover { opacity:0.8; }
 
-/* ================= CONTACT INFO ================= */
+/* CONTACT INFO */
 .contact-info-section { padding:60px 20px; text-align:center; }
 .contact-info-section h2 { font-family:"Playfair Display", serif; font-size: clamp(28px,3vw,40px); margin-bottom:24px; }
 .contact-info-section p { font-size: clamp(16px,1.5vw,20px); line-height:1.7; margin-bottom:12px; }
 
-/* ================= FOOTER ================= */
+/* FOOTER */
 .site-footer { text-align:center; padding:20px; }
 
 /* ================= RESPONSIVE ================= */
