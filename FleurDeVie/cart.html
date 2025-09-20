@@ -71,64 +71,64 @@
       background: none;
       border: none;
       cursor: pointer;
-      z-index: 1000;
+      z-index: 1001;
     }
 
     .hamburger span {
       display: block;
       width: 25px;
       height: 3px;
-      background: #000; /* Black for visibility */
+      background: #000; /* visible */
       border-radius: 2px;
+    }
+
+    /* Dropdown menu */
+    .dropdown-menu {
+      display: none;
+      flex-direction: column;
+      position: absolute;
+      top: 100%;
+      right: 20px;
+      background: #fff;
+      border: 1px solid #ddd;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      width: 200px;
+      z-index: 1000;
+      padding: 10px;
+    }
+
+    .dropdown-menu.open {
+      display: flex;
+    }
+
+    .dropdown-menu .close-btn {
+      align-self: flex-end;
+      background: none;
+      border: none;
+      font-size: 1.4rem;
+      cursor: pointer;
+      margin-bottom: 10px;
+    }
+
+    .dropdown-menu a {
+      text-decoration: none;
+      color: #333;
+      padding: 8px 0;
+      font-weight: 500;
+    }
+
+    .dropdown-menu a:hover {
+      color: #d87a56;
     }
 
     /* Responsive header */
     @media (max-width: 768px) {
-      .site-header {
-        flex-wrap: wrap;
-        justify-content: space-between;
-        align-items: flex-start;
-        padding: 15px 20px;
-        height: auto;
-        min-height: 80px;
-      }
-
-      .header-center {
-        width: 100%;
-        text-align: center;
-        margin-top: 10px; /* Drop Your Cart down */
-        position: static;
-        transform: none;
-      }
-
-      .header-right {
-        display: none;
-        flex-direction: column;
-        position: absolute;
-        top: 100%;
-        right: 0;
-        background: #fff;
-        width: 200px;
-        border: 1px solid #ddd;
-        padding: 10px;
-      }
-
-      .header-right.open {
-        display: flex;
-      }
-
-      .hamburger {
-        display: flex;
-        position: absolute;
-        top: 20px;
-        right: 20px;
-      }
+      .header-right { display: none; }
+      .hamburger { display: flex; }
     }
 
     /* CART CONTENT */
-    .cart {
-      padding: 30px 20px;
-    }
+    .cart { padding: 30px 20px; }
 
     table {
       width: 100%;
@@ -178,9 +178,7 @@
       cursor: pointer;
     }
 
-    button:hover {
-      background: #555;
-    }
+    button:hover { background: #555; }
 
     .currency-select {
       padding: 8px 10px;
@@ -191,12 +189,8 @@
     }
 
     @media (max-width: 480px) {
-      .bottom-controls {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      .currency-select { width: 100%; }
-      .bottom-controls button { width: 100%; }
+      .bottom-controls { flex-direction: column; align-items: stretch; }
+      .currency-select, .bottom-controls button { width: 100%; }
     }
   </style>
 </head>
@@ -220,6 +214,14 @@
     <button class="hamburger" id="hamburger">
       <span></span><span></span><span></span>
     </button>
+
+    <!-- Dropdown menu -->
+    <div class="dropdown-menu" id="dropdown-menu">
+      <button class="close-btn" id="close-menu">&times;</button>
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="checkout.html">Checkout</a>
+    </div>
   </header>
 
   <!-- CART CONTENT -->
@@ -257,11 +259,17 @@
   </section>
 
   <script>
-    // ===== Hamburger menu toggle =====
+    // ===== Hamburger dropdown menu =====
     const hamburger = document.getElementById('hamburger');
-    const headerRight = document.querySelector('.header-right');
+    const dropdownMenu = document.getElementById('dropdown-menu');
+    const closeMenu = document.getElementById('close-menu');
+
     hamburger.addEventListener('click', () => {
-      headerRight.classList.toggle('open');
+      dropdownMenu.classList.add('open');
+    });
+
+    closeMenu.addEventListener('click', () => {
+      dropdownMenu.classList.remove('open');
     });
 
     // ===== CART LOGIC =====
