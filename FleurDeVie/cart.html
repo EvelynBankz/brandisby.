@@ -6,34 +6,6 @@
   <title>Fleur De Vie - Cart</title>
   <link rel="stylesheet" href="cart.css">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
-
-  <style>
-    body { font-family: 'Montserrat', sans-serif; margin: 0; padding: 0; background: #fff; color: #000; }
-    .header { background: #FFD6BA; padding: 10px 20px; }
-    .header .container { display: flex; justify-content: space-between; align-items: center; }
-    .logo { font-size: 1.5rem; font-weight: 700; color: #000; }
-    .page-title { margin: 0; font-size: 1.2rem; font-weight: 600; text-align: center; }
-    .nav ul { display: flex; list-style: none; margin: 0; padding: 0; }
-    .nav ul li { margin-left: 20px; }
-    .nav ul li a { text-decoration: none; color: #000; font-weight: 500; }
-    .hamburger { display: none; cursor: pointer; font-size: 1.5rem; }
-
-    .cart { padding: 30px 20px; }
-    .cart h2 { text-align: center; margin-bottom: 20px; }
-    .cart-items { margin-bottom: 20px; }
-    .cart-item { display: flex; justify-content: space-between; border-bottom: 1px solid #ddd; padding: 10px 0; }
-    .cart-summary { text-align: center; }
-    .cart-actions { display: flex; justify-content: center; gap: 10px; margin-top: 15px; }
-    .checkout-btn { padding: 10px 20px; background: #FFD6BA; border: none; cursor: pointer; font-weight: 600; }
-    .currency-selector { padding: 8px; border-radius: 6px; border: 1px solid #ccc; }
-
-    @media (max-width: 768px) {
-      .nav ul { display: none; flex-direction: column; background: #FFD6BA; position: absolute; top: 60px; right: 20px; padding: 10px; }
-      .nav ul.active { display: flex; }
-      .hamburger { display: block; }
-      .cart-item { flex-direction: column; align-items: flex-start; }
-    }
-  </style>
 </head>
 <body>
   <!-- HEADER -->
@@ -64,16 +36,19 @@
   <section class="cart">
     <div class="container">
       <h2>Your Shopping Cart</h2>
+
+      <!-- items from localStorage will be injected here -->
       <div class="cart-items" id="cart-items">
-        <!-- Products dynamically inserted here -->
+        <!-- Products dynamically inserted here by script -->
       </div>
+
       <div class="cart-summary">
-        <h3>Total: <span id="cart-total" data-original="0">0.00</span></h3>
+        <h3>Total: <span id="cart-total">0.00</span></h3>
         <div class="cart-actions">
-          <button class="checkout-btn">Proceed to Checkout</button>
+          <button class="checkout-btn" id="checkout-btn">Proceed to Checkout</button>
 
           <!-- CURRENCY SELECTOR -->
-          <select id="currency-selector" class="currency-selector">
+          <select id="currency-selector" class="currency-selector" aria-label="Select currency">
             <option value="USD" selected>USD ($)</option>
             <option value="EUR">EUR (€)</option>
             <option value="GBP">GBP (£)</option>
@@ -85,63 +60,196 @@
   </section>
 
   <script>
-    // Mobile menu toggle
+    // keep your existing hamburger behavior
     function toggleMenu() {
-      document.querySelector('.nav ul').classList.toggle('active');
+      const ul = document.querySelector('.nav ul');
+      if (!ul) return;
+      ul.classList.toggle('active');
     }
 
-    // Example cart data (for demo; replace with localStorage/Firestore)
-    let cart = [
-      { name: "Sample Product 1", price: 50, quantity: 1 },
-      { name: "Sample Product 2", price: 30, quantity: 2 }
-    ];
+    /************************************************************
+     * Cart rendering + currency conversion
+     * - Reads cart from localStorage key 'fleurdevie-cart'
+     * - Expects each cart item to have: { id, name, price, quantity, imageUrl }
+     *   where price is the base price in USD (number).
+     * - Currency rates are static here (replace with live rates if desired).
+     ************************************************************/
 
-    const cartItemsEl = document.getElementById("cart-items");
-    const cartTotalEl = document.getElementById("cart-total");
-    const currencySelector = document.getElementById("currency-selector");
+    const CART_KEY = 'fleurdevie-cart';
+    const currencySelector = document.getElementById('currency-selector');
+    const cartItemsEl = document.getElementById('cart-items');
+    const cartTotalEl = document.getElementById('cart-total');
+    const checkoutBtn = document.getElementById('checkout-btn');
 
-    // Conversion rates (static example)
-    const rates = {
+    // static example rates relative to USD (base = USD).
+    // Replace these with a live API if/when you want real-time rates.
+    const RATES = {
       USD: 1,
       EUR: 0.93,
       GBP: 0.80,
       NGN: 1600
     };
 
-    function renderCart(currency = "USD") {
-      cartItemsEl.innerHTML = "";
-      let total = 0;
+    // Utility: safely parse cart from localStorage
+    function loadCart() {
+      try {
+        const raw = localStorage.getItem(CART_KEY);
+        if (!raw) return [];
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (e) {
+        console.error('Failed to parse cart from localStorage', e);
+        return [];
+      }
+    }
 
-      cart.forEach(item => {
-        const convertedPrice = item.price * rates[currency];
-        const itemTotal = convertedPrice * item.quantity;
-        total += itemTotal;
+    function saveCart(cart) {
+      try {
+        localStorage.setItem(CART_KEY, JSON.stringify(cart));
+      } catch (e) {
+        console.error('Failed to save cart', e);
+      }
+    }
 
-        const div = document.createElement("div");
-        div.className = "cart-item";
-        div.innerHTML = `
-          <p>${item.name}</p>
-          <p>${formatPrice(convertedPrice, currency)} x ${item.quantity}</p>
-          <p>${formatPrice(itemTotal, currency)}</p>
+    // Format price for each currency
+    function formatPrice(amount, currency) {
+      // amount is numeric
+      if (currency === 'USD') return '$' + amount.toFixed(2);
+      if (currency === 'EUR') return '€' + amount.toFixed(2);
+      if (currency === 'GBP') return '£' + amount.toFixed(2);
+      if (currency === 'NGN') return '₦' + Math.round(amount); // round NGN
+      return amount.toFixed(2);
+    }
+
+    // Render cart items into #cart-items
+    function renderCart() {
+      const cart = loadCart();
+      const currency = currencySelector.value || 'USD';
+      cartItemsEl.innerHTML = ''; // clear
+
+      if (!cart || cart.length === 0) {
+        // Empty state (keeps the page structure you provided)
+        const p = document.createElement('p');
+        p.className = 'empty-message';
+        p.textContent = 'Your cart is empty.';
+        cartItemsEl.appendChild(p);
+        cartTotalEl.textContent = formatPrice(0, currency);
+        checkoutBtn.disabled = true;
+        return;
+      }
+
+      checkoutBtn.disabled = false;
+
+      let grandTotal = 0;
+
+      cart.forEach((item, idx) => {
+        // ensure fields exist
+        const name = item.name || 'Product';
+        const qty = Number(item.quantity) || 1;
+        const basePrice = Number(item.price) || 0; // base USD
+        const rate = Number(RATES[currency] || 1);
+
+        const unitConverted = basePrice * rate;
+        const subtotal = unitConverted * qty;
+        grandTotal += subtotal;
+
+        // Create item element (keeps structure minimal; your cart.css will style this)
+        const wrap = document.createElement('div');
+        wrap.className = 'cart-item';
+        wrap.innerHTML = `
+          <div class="cart-item-left">
+            ${ item.imageUrl ? `<img src="${item.imageUrl}" alt="${escapeHtml(name)}" class="cart-item-image">` : '' }
+          </div>
+          <div class="cart-item-middle">
+            <div class="cart-item-name">${escapeHtml(name)}</div>
+          </div>
+          <div class="cart-item-right">
+            <div class="cart-item-price" data-base="${basePrice}">${formatPrice(unitConverted, currency)}</div>
+            <div class="cart-item-qty">
+              <input type="number" min="1" class="qty-input" value="${qty}" data-index="${idx}" aria-label="Quantity for ${escapeHtml(name)}">
+            </div>
+            <div class="cart-item-sub" data-sub="${subtotal}">${formatPrice(subtotal, currency)}</div>
+            <div><button class="remove-btn" data-index="${idx}">Remove</button></div>
+          </div>
         `;
-        cartItemsEl.appendChild(div);
+        cartItemsEl.appendChild(wrap);
       });
 
-      cartTotalEl.textContent = formatPrice(total, currency);
+      cartTotalEl.textContent = formatPrice(grandTotal, currency);
+
+      wireUpItemEvents(); // attach qty/change & remove listeners
     }
 
-    function formatPrice(amount, currency) {
-      if (currency === "USD") return `$${amount.toFixed(2)}`;
-      if (currency === "EUR") return `€${amount.toFixed(2)}`;
-      if (currency === "GBP") return `£${amount.toFixed(2)}`;
-      if (currency === "NGN") return `₦${Math.round(amount)}`;
+    // Wire quantity change and remove
+    function wireUpItemEvents() {
+      // quantity inputs
+      document.querySelectorAll('.qty-input').forEach(input => {
+        input.removeEventListener('change', onQtyChange);
+        input.addEventListener('change', onQtyChange);
+      });
+
+      // remove buttons
+      document.querySelectorAll('.remove-btn').forEach(btn => {
+        btn.removeEventListener('click', onRemoveItem);
+        btn.addEventListener('click', onRemoveItem);
+      });
     }
 
-    currencySelector.addEventListener("change", function() {
-      renderCart(this.value);
+    function onQtyChange(e) {
+      const idx = Number(e.target.dataset.index);
+      let qty = parseInt(e.target.value, 10);
+      if (!Number.isFinite(qty) || qty < 1) qty = 1;
+
+      const cart = loadCart();
+      if (!cart[idx]) return;
+      cart[idx].quantity = qty;
+      saveCart(cart);
+
+      // re-render with the currently selected currency
+      renderCart();
+    }
+
+    function onRemoveItem(e) {
+      const idx = Number(e.target.dataset.index);
+      let cart = loadCart();
+      if (!cart[idx]) return;
+      cart.splice(idx, 1);
+      saveCart(cart);
+
+      renderCart();
+    }
+
+    // Utility escape for inserted text
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    // currency selector change: re-render
+    currencySelector.addEventListener('change', function() {
+      renderCart();
     });
 
-    renderCart("USD");
+    // Checkout button: include currency selection in query so checkout page can respect it
+    document.getElementById('checkout-btn').addEventListener('click', function () {
+      const cart = loadCart();
+      if (!cart || cart.length === 0) {
+        alert('Your cart is empty.');
+        return;
+      }
+      const cur = currencySelector.value || 'USD';
+      // redirect to checkout and pass currency
+      window.location.href = `checkout.html?currency=${encodeURIComponent(cur)}`;
+    });
+
+    // initial render on page load
+    document.addEventListener('DOMContentLoaded', function () {
+      renderCart();
+    });
   </script>
 </body>
 </html>
