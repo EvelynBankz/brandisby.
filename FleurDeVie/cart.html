@@ -5,29 +5,54 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fleur De Vie - Cart</title>
   <link rel="stylesheet" href="cart.css">
-  <script src="https://kit.fontawesome.com/your-kit-id.js" crossorigin="anonymous"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    body { font-family: 'Montserrat', sans-serif; margin: 0; padding: 0; background: #fff; color: #000; }
+    .header { background: #FFD6BA; padding: 10px 20px; }
+    .header .container { display: flex; justify-content: space-between; align-items: center; }
+    .logo { font-size: 1.5rem; font-weight: 700; color: #000; }
+    .page-title { margin: 0; font-size: 1.2rem; font-weight: 600; text-align: center; }
+    .nav ul { display: flex; list-style: none; margin: 0; padding: 0; }
+    .nav ul li { margin-left: 20px; }
+    .nav ul li a { text-decoration: none; color: #000; font-weight: 500; }
+    .hamburger { display: none; cursor: pointer; font-size: 1.5rem; }
+
+    .cart { padding: 30px 20px; }
+    .cart h2 { text-align: center; margin-bottom: 20px; }
+    .cart-items { margin-bottom: 20px; }
+    .cart-item { display: flex; justify-content: space-between; border-bottom: 1px solid #ddd; padding: 10px 0; }
+    .cart-summary { text-align: center; }
+    .cart-actions { display: flex; justify-content: center; gap: 10px; margin-top: 15px; }
+    .checkout-btn { padding: 10px 20px; background: #FFD6BA; border: none; cursor: pointer; font-weight: 600; }
+    .currency-selector { padding: 8px; border-radius: 6px; border: 1px solid #ccc; }
+
+    @media (max-width: 768px) {
+      .nav ul { display: none; flex-direction: column; background: #FFD6BA; position: absolute; top: 60px; right: 20px; padding: 10px; }
+      .nav ul.active { display: flex; }
+      .hamburger { display: block; }
+      .cart-item { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
 </head>
 <body>
   <!-- HEADER -->
   <header class="header">
     <div class="container">
-      <!-- Left: Brand -->
       <div class="header-left">
         <h1 class="logo">Fleur De Vie</h1>
       </div>
 
-      <!-- Center: Page Title -->
       <div class="header-center">
         <h2 class="page-title">Your Cart</h2>
       </div>
 
-      <!-- Right: Nav -->
       <div class="header-right">
         <nav class="nav">
           <ul>
+            <li><a href="index.html">Home</a></li>
             <li><a href="shop.html">Shop</a></li>
-            <li><a href="cart.html">Cart</a></li>
-            <li><a href="checkout.html">Checkout</a></li>
+            <li><a href="contact.html">Contact</a></li>
           </ul>
         </nav>
         <div class="hamburger" onclick="toggleMenu()">☰</div>
@@ -35,80 +60,88 @@
     </div>
   </header>
 
-  <!-- CART -->
-  <main class="cart container">
-    <div class="cart-items" id="cart-items">
-      <!-- Example product (these would load dynamically later) -->
-      <div class="cart-item" data-price="50">
-        <p>Product 1</p>
-        <span class="price" data-original="50">$50</span>
+  <!-- CART SECTION -->
+  <section class="cart">
+    <div class="container">
+      <h2>Your Shopping Cart</h2>
+      <div class="cart-items" id="cart-items">
+        <!-- Products dynamically inserted here -->
       </div>
-      <div class="cart-item" data-price="30">
-        <p>Product 2</p>
-        <span class="price" data-original="30">$30</span>
-      </div>
-    </div>
+      <div class="cart-summary">
+        <h3>Total: <span id="cart-total" data-original="0">0.00</span></h3>
+        <div class="cart-actions">
+          <button class="checkout-btn">Proceed to Checkout</button>
 
-    <!-- Summary + Actions -->
-    <div class="cart-summary">
-      <h3>Total: <span id="cart-total">$80</span></h3>
-      <div class="cart-actions">
-        <button class="checkout-btn" onclick="window.location.href='checkout.html'">
-          Proceed to Checkout
-        </button>
-        <select id="currency-selector" class="currency-selector">
-          <option value="USD" selected>USD ($)</option>
-          <option value="EUR">EUR (€)</option>
-          <option value="GBP">GBP (£)</option>
-          <option value="NGN">NGN (₦)</option>
-        </select>
+          <!-- CURRENCY SELECTOR -->
+          <select id="currency-selector" class="currency-selector">
+            <option value="USD" selected>USD ($)</option>
+            <option value="EUR">EUR (€)</option>
+            <option value="GBP">GBP (£)</option>
+            <option value="NGN">NGN (₦)</option>
+          </select>
+        </div>
       </div>
     </div>
-  </main>
+  </section>
 
   <script>
-    // Toggle hamburger nav
+    // Mobile menu toggle
     function toggleMenu() {
       document.querySelector('.nav ul').classList.toggle('active');
     }
 
-    // Currency conversion rates (example, update with live rates if needed)
+    // Example cart data (for demo; replace with localStorage/Firestore)
+    let cart = [
+      { name: "Sample Product 1", price: 50, quantity: 1 },
+      { name: "Sample Product 2", price: 30, quantity: 2 }
+    ];
+
+    const cartItemsEl = document.getElementById("cart-items");
+    const cartTotalEl = document.getElementById("cart-total");
+    const currencySelector = document.getElementById("currency-selector");
+
+    // Conversion rates (static example)
     const rates = {
       USD: 1,
       EUR: 0.93,
       GBP: 0.80,
-      NGN: 1600 // Example conversion
+      NGN: 1600
     };
 
-    const selector = document.getElementById('currency-selector');
-    const cartTotal = document.getElementById('cart-total');
-    const prices = document.querySelectorAll('.price');
-
-    function updateCurrency() {
-      const currency = selector.value;
+    function renderCart(currency = "USD") {
+      cartItemsEl.innerHTML = "";
       let total = 0;
 
-      prices.forEach(priceEl => {
-        const original = parseFloat(priceEl.getAttribute('data-original'));
-        const converted = (original * rates[currency]).toFixed(2);
+      cart.forEach(item => {
+        const convertedPrice = item.price * rates[currency];
+        const itemTotal = convertedPrice * item.quantity;
+        total += itemTotal;
 
-        // Update display
-        if (currency === "USD") priceEl.textContent = `$${converted}`;
-        if (currency === "EUR") priceEl.textContent = `€${converted}`;
-        if (currency === "GBP") priceEl.textContent = `£${converted}`;
-        if (currency === "NGN") priceEl.textContent = `₦${Math.round(converted)}`;
-
-        total += parseFloat(converted);
+        const div = document.createElement("div");
+        div.className = "cart-item";
+        div.innerHTML = `
+          <p>${item.name}</p>
+          <p>${formatPrice(convertedPrice, currency)} x ${item.quantity}</p>
+          <p>${formatPrice(itemTotal, currency)}</p>
+        `;
+        cartItemsEl.appendChild(div);
       });
 
-      // Update total
-      if (currency === "USD") cartTotal.textContent = `$${total.toFixed(2)}`;
-      if (currency === "EUR") cartTotal.textContent = `€${total.toFixed(2)}`;
-      if (currency === "GBP") cartTotal.textContent = `£${total.toFixed(2)}`;
-      if (currency === "NGN") cartTotal.textContent = `₦${Math.round(total)}`;
+      cartTotalEl.textContent = formatPrice(total, currency);
     }
 
-    selector.addEventListener("change", updateCurrency);
+    function formatPrice(amount, currency) {
+      if (currency === "USD") return `$${amount.toFixed(2)}`;
+      if (currency === "EUR") return `€${amount.toFixed(2)}`;
+      if (currency === "GBP") return `£${amount.toFixed(2)}`;
+      if (currency === "NGN") return `₦${Math.round(amount)}`;
+    }
+
+    currencySelector.addEventListener("change", function() {
+      renderCart(this.value);
+    });
+
+    renderCart("USD");
   </script>
 </body>
 </html>
