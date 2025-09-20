@@ -1,5 +1,5 @@
 /* ================= RESET & BASE ================= */
-{ box-sizing:border-box; margin:0; padding:0; }
+*{ box-sizing:border-box; margin:0; padding:0; }
 
 html, body { height:100%; font-family:"Montserrat", Arial, sans-serif; color:#fff; background:#000; scroll-behavior: smooth; }
 .serac-body { overflow-x:hidden; }
