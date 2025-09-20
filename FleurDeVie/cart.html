@@ -43,14 +43,6 @@
       color: #333;
     }
 
-    .header-right a {
-      margin-left: 15px;
-      text-decoration: none;
-      color: #333;
-      font-weight: 500;
-    }
-
-    /* "Your Cart" in center */
     .header-center {
       position: absolute;
       left: 50%;
@@ -58,6 +50,69 @@
       font-size: 1.2rem;
       font-weight: 600;
       color: #333;
+    }
+
+    .header-right {
+      display: flex;
+      gap: 15px;
+    }
+
+    .header-right a {
+      text-decoration: none;
+      color: #333;
+      font-weight: 500;
+    }
+
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    .hamburger span {
+      display: block;
+      width: 25px;
+      height: 3px;
+      background: #333;
+      border-radius: 2px;
+    }
+
+    @media (max-width: 768px) {
+      .header-right {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background: #fff;
+        width: 200px;
+        border: 1px solid #ddd;
+        padding: 10px;
+      }
+
+      .header-right.open {
+        display: flex;
+      }
+
+      .hamburger {
+        display: flex;
+      }
+
+      .header-center {
+        position: static;
+        transform: none;
+        margin: 10px 0;
+        text-align: center;
+        width: 100%;
+      }
+
+      .site-header {
+        flex-wrap: wrap;
+        justify-content: space-between;
+      }
     }
 
     /* CART CONTENT */
@@ -106,23 +161,6 @@
     button:hover {
       background: #555;
     }
-
-    @media (max-width: 768px) {
-      .site-header {
-        flex-wrap: wrap;
-        justify-content: center;
-      }
-
-      .header-right {
-        margin-top: 10px;
-      }
-
-      .header-center {
-        position: static;
-        transform: none;
-        margin-top: 10px;
-      }
-    }
   </style>
 </head>
 <body class="fleurdevie">
@@ -141,6 +179,10 @@
       <a href="shop.html">Shop</a>
       <a href="checkout.html">Checkout</a>
     </nav>
+
+    <button class="hamburger" id="hamburger">
+      <span></span><span></span><span></span>
+    </button>
   </header>
 
   <!-- CART CONTENT -->
@@ -165,6 +207,13 @@
   </section>
 
   <script>
+    // ===== Hamburger menu toggle =====
+    const hamburger = document.getElementById('hamburger');
+    const headerRight = document.querySelector('.header-right');
+    hamburger.addEventListener('click', () => {
+      headerRight.classList.toggle('open');
+    });
+
     // ===== FLEUR DE VIE CART LOGIC =====
     let cart = JSON.parse(localStorage.getItem('fleurdevie-cart')) || [];
 
