@@ -23,6 +23,7 @@
       background: #fff;
       border-bottom: 1px solid #ddd;
       position: relative;
+      z-index: 1000; /* keep header above page content */
     }
 
     .header-left {
@@ -50,6 +51,8 @@
       font-size: 1.2rem;
       font-weight: 600;
       color: #333;
+      z-index: 1; /* behind the hamburger which will be higher */
+      white-space: nowrap;
     }
 
     .header-right {
@@ -63,39 +66,45 @@
       font-weight: 500;
     }
 
-    /* Hamburger button */
+    /* ----- HAMBURGER: visible and exact 3 short lines ----- */
     .hamburger {
-      display: none;
+      display: none;               /* shown on small screens via media query */
       flex-direction: column;
       justify-content: center;
+      align-items: center;
       gap: 5px;
-      background: none;
+      width: 38px;                 /* visible clickable area */
+      height: 34px;
+      background: transparent;
       border: none;
+      padding: 6px;
       cursor: pointer;
-      z-index: 1001;
+      z-index: 3000;               /* above header-center and dropdown */
     }
 
+    /* three short horizontal bars */
     .hamburger span {
       display: block;
-      width: 20px; /* shorter, clean lines */
-      height: 2px;
-      background: #000; /* black */
+      width: 22px;   /* short bar as in screenshot */
+      height: 3px;   /* visible thickness */
+      background: #000; /* solid black lines to ensure visibility */
       border-radius: 2px;
     }
 
-    /* Dropdown menu */
+    /* Dropdown menu (small) */
     .dropdown-menu {
       display: none;
       flex-direction: column;
-      position: absolute;
-      top: 70px; /* below header */
+      position: absolute;   /* relative to header */
+      top: 100%;            /* exactly below header */
       right: 20px;
       background: #fff;
       border: 1px solid #ddd;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      width: 200px;
-      z-index: 1000;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+      width: 220px;
+      z-index: 2500;        /* above header content */
       padding: 10px;
+      border-radius: 6px;
     }
 
     .dropdown-menu.open {
@@ -106,9 +115,12 @@
       align-self: flex-end;
       background: none;
       border: none;
-      font-size: 1.4rem;
+      font-size: 22px;    /* visible size */
+      line-height: 1;
       cursor: pointer;
-      margin-bottom: 10px;
+      color: #000;        /* ensure visible on white background */
+      padding: 2px 6px;
+      margin-bottom: 6px;
     }
 
     .dropdown-menu a {
@@ -122,33 +134,39 @@
       color: #d87a56;
     }
 
-    /* Responsive header */
+    /* Responsive header adjustments */
     @media (max-width: 768px) {
       .site-header {
         flex-wrap: wrap;
         align-items: flex-start;
         padding: 15px 20px;
-        min-height: 100px; /* taller header */
+        min-height: 120px; /* increase header height so "Your Cart" drops lower */
       }
 
-      .header-right { display: none; }
+      .header-right { display: none; } /* hide desktop nav on mobile */
       .hamburger {
         display: flex;
         position: absolute;
-        top: 20px;
-        right: 20px;
+        top: 18px;   /* top-right area like the screenshot */
+        right: 18px;
       }
 
       .header-center {
+        position: static;  /* let it sit in document flow below */
+        transform: none;
         width: 100%;
         text-align: center;
-        margin-top: 40px; /* push Your Cart lower */
-        position: static;
-        transform: none;
+        margin-top: 44px;  /* pushes Your Cart down so hamburger sits top-right */
+      }
+
+      /* dropdown menu top offset for very small screens (keeps it visible) */
+      .dropdown-menu {
+        top: calc(100% + 6px);
+        right: 12px;
       }
     }
 
-    /* CART CONTENT */
+    /* CART CONTENT (unchanged behavior / layout kept) */
     .cart { padding: 30px 20px; }
 
     table {
@@ -232,13 +250,14 @@
       <a href="checkout.html">Checkout</a>
     </nav>
 
-    <button class="hamburger" id="hamburger">
+    <!-- Hamburger button (three short horizontal lines) -->
+    <button class="hamburger" id="hamburger" aria-label="Open menu">
       <span></span><span></span><span></span>
     </button>
 
-    <!-- Dropdown menu -->
-    <div class="dropdown-menu" id="dropdown-menu">
-      <button class="close-btn" id="close-menu">&times;</button>
+    <!-- Dropdown menu (small) -->
+    <div class="dropdown-menu" id="dropdown-menu" aria-hidden="true">
+      <button class="close-btn" id="close-menu" aria-label="Close menu">&times;</button>
       <a href="index.html">Home</a>
       <a href="shop.html">Shop</a>
       <a href="checkout.html">Checkout</a>
@@ -280,20 +299,24 @@
   </section>
 
   <script>
-    // ===== Hamburger dropdown menu =====
+    // ===== Hamburger dropdown menu (toggle & close) =====
     const hamburger = document.getElementById('hamburger');
     const dropdownMenu = document.getElementById('dropdown-menu');
     const closeMenu = document.getElementById('close-menu');
 
+    // toggle the menu when hamburger clicked (open/close)
     hamburger.addEventListener('click', () => {
-      dropdownMenu.classList.add('open');
+      const isOpen = dropdownMenu.classList.toggle('open');
+      dropdownMenu.setAttribute('aria-hidden', String(!isOpen));
     });
 
+    // close button inside the dropdown
     closeMenu.addEventListener('click', () => {
       dropdownMenu.classList.remove('open');
+      dropdownMenu.setAttribute('aria-hidden', 'true');
     });
 
-    // ===== CART LOGIC =====
+    // ===== CART LOGIC (kept exact as you provided) =====
     function getCart() {
       try {
         return JSON.parse(localStorage.getItem('fleurdevie-cart')) || [];
@@ -333,13 +356,13 @@
       if (!cart || cart.length === 0) {
         emptyMessage.style.display = 'block';
         cartTotalEl.textContent = `Total: ${formatPrice(0, currency)}`;
-        checkoutButton.disabled = true;
+        if (checkoutButton) checkoutButton.disabled = true;
         checkoutLink.href = `checkout.html?currency=${currency}`;
         return;
       }
 
       emptyMessage.style.display = 'none';
-      checkoutButton.disabled = false;
+      if (checkoutButton) checkoutButton.disabled = false;
 
       cart.forEach((item, index) => {
         const basePrice = Number(item.price) || 0;
