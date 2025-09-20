@@ -5,24 +5,22 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Fleur De Vie - Cart</title>
 
-  <!-- Fonts & icons (you already used these elsewhere) -->
+  <!-- Fonts & icons -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
-    /* ---------- Base ---------- */
     :root{
       --brand:#FFD6BA;
       --text:#000;
-      --white:#ffffff;
+      --white:#fff;
       --muted:#666;
-      --header-height:76px;
       --max-width:1100px;
     }
-    html,body{height:100%;margin:0;background:var(--white);color:var(--text);font-family:'Montserrat',sans-serif;-webkit-font-smoothing:antialiased}
-    .container{max-width:var(--max-width);margin:0 auto;padding:0 18px;box-sizing:border-box}
+    body{margin:0;background:var(--white);color:var(--text);font-family:'Montserrat',sans-serif}
+    .container{max-width:var(--max-width);margin:0 auto;padding:0 18px}
 
-    /* ---------- Header ---------- */
+    /* ===== HEADER ===== */
     .site-header{
       background:var(--brand);
       display:flex;
@@ -30,228 +28,125 @@
       justify-content:space-between;
       padding:10px 18px;
       position:relative;
-      box-sizing:border-box;
-      border-bottom:1px solid rgba(0,0,0,0.06);
-      min-height:var(--header-height);
     }
+    .header-left{display:flex;align-items:center;gap:10px;flex:1}
+    .brand-logo{height:54px;width:auto}
+    .brand-title{font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:700;color:var(--text)}
 
-    .header-left{display:flex;align-items:center;gap:12px;flex:0 0 auto}
-    .brand-logo{height:64px;width:auto;display:block} /* visible logo */
-    .brand-title{font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:700;color:var(--text);margin:0}
-
-    /* center title "Your Cart" */
-    .header-center{
-      position:absolute;
-      left:50%;
-      transform:translateX(-50%);
-      font-weight:600;
-      font-size:1.1rem;
-      color:var(--text);
-      text-align:center;
-      white-space:nowrap;
-    }
-
-    /* top-right nav (desktop) */
-    .header-right{display:flex;gap:14px;align-items:center}
+    .header-center{flex:1;text-align:center;font-weight:600;font-size:1.1rem;color:var(--text)}
+    .header-right{display:flex;gap:14px;align-items:center;flex:1;justify-content:flex-end}
     .header-right a{color:var(--text);text-decoration:none;font-weight:500}
-    .header-right a:hover{text-decoration:underline}
 
-    /* ---------- Hamburger (mobile) ---------- */
+    /* Hamburger */
     .hamburger{
-      display:none; /* shown in media query */
-      width:28px;
-      height:20px;
-      padding:0;
-      border:0;
-      background:none;
+      display:none;
+      flex-direction:column;
+      justify-content:space-between;
+      width:25px;height:18px;
+      border:none;background:none;
       cursor:pointer;
-      align-items:center;
-      justify-content:center;
-      z-index:4000;
     }
     .hamburger span{
       display:block;
-      width:100%;
-      height:3px;
-      background:var(--text); /* black lines */
+      height:3px;width:100%;
+      background:var(--text);
       border-radius:2px;
-      margin:2px 0;
     }
 
-    /* small dropdown (not fullscreen) */
+    /* Dropdown (mobile) */
     .dropdown-menu{
       display:none;
       position:absolute;
-      top:100%;
-      right:18px;
-      margin-top:8px;
+      top:100%; right:18px;
       background:var(--brand);
-      color:var(--text);
-      border-radius:8px;
-      padding:10px;
-      box-shadow:0 6px 18px rgba(0,0,0,0.12);
-      min-width:200px;
-      z-index:3500;
+      padding:12px;
+      border-radius:6px;
+      flex-direction:column;
+      gap:10px;
+      min-width:180px;
+      box-shadow:0 4px 12px rgba(0,0,0,0.15);
     }
-    .dropdown-menu.open{display:flex;flex-direction:column;gap:8px}
+    .dropdown-menu.open{display:flex}
     .dropdown-close{
       align-self:flex-end;
-      background:none;border:0;color:var(--text);font-size:20px;cursor:pointer;padding:2px 6px;
-    }
-    .dropdown-menu a{color:var(--text);text-decoration:none;padding:6px 4px;border-radius:4px}
-    .dropdown-menu a:hover{background:rgba(0,0,0,0.04)}
-
-    /* ---------- Cart content ---------- */
-    .cart{
-      padding:28px 0 60px 0;
-    }
-
-    .cart-table-wrap{width:100%;overflow:auto;background:var(--white);border-radius:8px}
-    table.cart-table{
-      width:100%;
-      border-collapse:collapse;
-      min-width:720px; /* allow shrink down to scroll on mobile */
-    }
-    table.cart-table thead th{
-      text-align:center;padding:12px;background:#141517;color:#fff;font-weight:600; /* header dark for readability */
-    }
-    table.cart-table td{padding:12px;text-align:center;border-bottom:1px solid #eee;vertical-align:middle}
-    table.cart-table img{width:80px;height:auto;border-radius:6px;display:inline-block}
-
-    /* empty message (always below table per requirement) */
-    .empty-message{margin-top:18px;text-align:center;color:var(--muted);font-size:1rem}
-
-    /* total and bottom controls centered */
-    #cart-total{margin-top:18px;text-align:center;font-weight:700;font-size:1.15rem}
-    .bottom-controls{
-      display:flex;
-      gap:12px;
-      justify-content:center;
-      align-items:center;
-      margin-top:16px;
-      flex-wrap:wrap;
-    }
-
-    /* Buttons styled as brand color */
-    .btn{
-      background:var(--brand);
-      color:var(--text);
-      border:1px solid rgba(0,0,0,0.06);
-      padding:10px 16px;
-      border-radius:8px;
-      font-weight:600;
+      border:none;background:none;
+      font-size:20px;color:var(--text);
       cursor:pointer;
-      text-decoration:none;
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
     }
-    .btn:disabled{opacity:0.5;cursor:not-allowed}
+    .dropdown-menu a{color:var(--text);text-decoration:none;font-weight:500}
 
-    .currency-select{
-      padding:8px 10px;border-radius:8px;border:1px solid rgba(0,0,0,0.08);font-weight:600;background:var(--white);
-      color:var(--text)
-    }
+    /* ===== CART ===== */
+    .cart{padding:28px 0 60px}
+    .cart-table-wrap{overflow:auto;background:var(--white);border-radius:8px}
+    table{width:100%;border-collapse:collapse;min-width:720px}
+    th{padding:12px;background:#141517;color:#fff;font-weight:600;text-align:center}
+    td{padding:12px;text-align:center;border-bottom:1px solid #eee}
+    td img{width:80px;border-radius:6px}
 
-    /* ---------- Responsiveness (fonts + table shrink) ---------- */
-    /* brand & title scale */
-    .brand-title{font-size:clamp(1rem, 2.6vw, 1.25rem)}
-    .header-center{font-size:clamp(1rem, 2.8vw, 1.1rem)}
+    .empty-message{text-align:center;margin-top:15px;color:var(--muted)}
+    #cart-total{text-align:center;font-weight:700;margin-top:18px}
+    .bottom-controls{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:16px}
 
-    @media (max-width:900px){
-      table.cart-table{min-width:680px}
-    }
-    @media (max-width:720px){
-      table.cart-table{min-width:520px}
-    }
-    @media (max-width:520px){
-      /* show hamburger and collapse header-right */
+    .btn{background:var(--brand);color:var(--text);padding:10px 16px;border:none;border-radius:8px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+    .currency-select{padding:8px 10px;border-radius:6px;border:1px solid #ccc;font-weight:600}
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width:768px){
       .header-right{display:none}
       .hamburger{display:flex}
-      .brand-logo{height:54px}
-      .site-header{min-height:96px;padding:12px 14px}
-      .header-center{margin-top:10px; font-size:clamp(0.95rem,2.8vw,1.0rem)}
-      table.cart-table{min-width:420px}
+      .brand-title{font-size:1.1rem}
+      .header-center{font-size:1rem}
+      table{min-width:520px}
     }
-    @media (max-width:380px){
-      table.cart-table{min-width:360px}
-      .brand-logo{height:48px}
-      .brand-title{font-size:0.95rem}
+    @media (max-width:480px){
+      .brand-logo{height:46px}
+      .brand-title{font-size:1rem}
       .header-center{font-size:0.95rem}
+      table{min-width:380px}
     }
-
-    /* small visual tweaks */
-    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
   </style>
 </head>
 <body>
 
-  <!-- HEADER -->
+  <!-- ===== HEADER ===== -->
   <header class="site-header">
-    <div class="header-left container" style="display:flex;align-items:center;gap:12px;padding:0;">
-      <!-- Logo + Brand side-by-side top-left -->
-      <img src="logo.png" alt="Fleur De Vie logo" class="brand-logo" onerror="this.style.opacity=0.6">
+    <div class="header-left">
+      <img src="logo.png" alt="Fleur De Vie" class="brand-logo">
       <div class="brand-title">Fleur De Vie</div>
     </div>
-
-    <!-- Center title -->
     <div class="header-center">Your Cart</div>
-
-    <!-- Right nav (desktop) -->
-    <div class="header-right container" style="justify-content:flex-end;padding:0;">
-      <nav style="display:flex;gap:14px;align-items:center">
-        <a href="../index.html">Home</a>
-        <a href="shop.html">Shop</a>
-        <a href="checkout.html">Checkout</a>
-      </nav>
+    <div class="header-right">
+      <a href="../index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="checkout.html">Checkout</a>
     </div>
-
-    <!-- Hamburger (mobile) -->
-    <button class="hamburger" id="hamburger" aria-label="Open menu" title="Menu">
-      <span></span><span></span><span></span>
-    </button>
-
-    <!-- Small dropdown menu (mobile) -->
-    <div class="dropdown-menu" id="dropdown-menu" aria-hidden="true">
-      <button class="dropdown-close" id="dropdown-close" aria-label="Close menu">&times;</button>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    <div class="dropdown-menu" id="dropdown-menu">
+      <button class="dropdown-close" id="dropdown-close">&times;</button>
       <a href="../index.html">Home</a>
       <a href="shop.html">Shop</a>
       <a href="checkout.html">Checkout</a>
     </div>
   </header>
 
-  <!-- CART CONTENT -->
-  <main class="container cart" role="main">
-    <!-- Table always shows even if empty (requirement) -->
-    <div class="cart-table-wrap" aria-live="polite">
-      <table class="cart-table" id="cart-table" aria-label="Shopping cart">
+  <!-- ===== CART ===== -->
+  <main class="container cart">
+    <div class="cart-table-wrap">
+      <table id="cart-table">
         <thead>
           <tr>
-            <th>Image</th>
-            <th>Name</th>
-            <th>Price</th>
-            <th style="width:110px">Quantity</th>
-            <th>Total</th>
-            <th>Action</th>
+            <th>Image</th><th>Name</th><th>Price</th><th>Qty</th><th>Total</th><th>Action</th>
           </tr>
         </thead>
-        <tbody id="cart-body">
-          <!-- rows inserted via JS -->
-        </tbody>
+        <tbody id="cart-body"></tbody>
       </table>
     </div>
-
-    <!-- Empty message shown below table if no items -->
-    <div id="empty-message" class="empty-message" aria-hidden="true">Your cart is empty</div>
-
-    <!-- Total -->
+    <div id="empty-message" class="empty-message">Your cart is empty</div>
     <div id="cart-total">Total: $0.00</div>
-
-    <!-- Bottom controls -->
-    <div class="bottom-controls" role="group" aria-label="Cart actions">
-      <a class="btn" href="shop.html" id="continue-shopping"><i class="fa-solid fa-arrow-left"></i> Continue Shopping</a>
-      <a class="btn" id="checkout-link" href="checkout.html"><i class="fa-solid fa-credit-card"></i> Proceed to Checkout</a>
-      <select id="currency-selector" class="currency-select" aria-label="Select currency">
+    <div class="bottom-controls">
+      <a class="btn" href="shop.html"><i class="fa fa-arrow-left"></i> Continue Shopping</a>
+      <a class="btn" id="checkout-link" href="checkout.html"><i class="fa fa-credit-card"></i> Checkout</a>
+      <select id="currency-selector" class="currency-select">
         <option value="USD" selected>USD $</option>
         <option value="EUR">EUR €</option>
         <option value="GBP">GBP £</option>
@@ -261,131 +156,55 @@
   </main>
 
   <script>
-    /* ---------- Mobile menu behavior ---------- */
-    const hamburger = document.getElementById('hamburger');
-    const dropdown = document.getElementById('dropdown-menu');
-    const dropdownClose = document.getElementById('dropdown-close');
-
-    function openDropdown(){ dropdown.classList.add('open'); dropdown.setAttribute('aria-hidden','false'); }
-    function closeDropdown(){ dropdown.classList.remove('open'); dropdown.setAttribute('aria-hidden','true'); }
-
-    hamburger.addEventListener('click', (e) => {
-      e.stopPropagation();
-      openDropdown();
-    });
-    dropdownClose.addEventListener('click', (e) => { e.stopPropagation(); closeDropdown(); });
-    // click outside to close
-    document.addEventListener('click', (e) => {
-      if (!dropdown.contains(e.target) && !hamburger.contains(e.target)) closeDropdown();
+    // Mobile menu
+    const hamburger=document.getElementById('hamburger');
+    const dropdown=document.getElementById('dropdown-menu');
+    const closeBtn=document.getElementById('dropdown-close');
+    hamburger.onclick=()=>dropdown.classList.add('open');
+    closeBtn.onclick=()=>dropdown.classList.remove('open');
+    document.addEventListener('click',e=>{
+      if(!dropdown.contains(e.target)&&!hamburger.contains(e.target)) dropdown.classList.remove('open');
     });
 
-    /* ---------- Cart logic (localStorage 'fleurdevie-cart') ---------- */
-    function getCart(){
-      try { return JSON.parse(localStorage.getItem('fleurdevie-cart')) || []; } catch { return []; }
-    }
-    function saveCart(cart){ localStorage.setItem('fleurdevie-cart', JSON.stringify(cart)); }
+    // Cart logic (simplified)
+    const cartBody=document.getElementById('cart-body');
+    const totalEl=document.getElementById('cart-total');
+    const emptyEl=document.getElementById('empty-message');
+    const currencySel=document.getElementById('currency-selector');
+    const checkoutLink=document.getElementById('checkout-link');
+    const RATES={USD:1,EUR:0.93,GBP:0.8,NGN:1600};
 
-    const cartBody = document.getElementById('cart-body');
-    const cartTotalEl = document.getElementById('cart-total');
-    const emptyMessageEl = document.getElementById('empty-message');
-    const currencySelector = document.getElementById('currency-selector');
-    const checkoutLink = document.getElementById('checkout-link');
+    function getCart(){return JSON.parse(localStorage.getItem('fleurdevie-cart')||'[]');}
+    function saveCart(c){localStorage.setItem('fleurdevie-cart',JSON.stringify(c));}
+    function fmt(val,c){if(c==="USD")return"$"+val.toFixed(2);if(c==="EUR")return"€"+val.toFixed(2);if(c==="GBP")return"£"+val.toFixed(2);if(c==="NGN")return"₦"+Math.round(val);return val;}
 
-    // simple static rates (base USD). Replace with live API if desired.
-    const RATES = { USD: 1, EUR: 0.93, GBP: 0.80, NGN: 1600 };
-
-    function formatPrice(amount, currency){
-      if (currency === 'USD') return '$' + amount.toFixed(2);
-      if (currency === 'EUR') return '€' + amount.toFixed(2);
-      if (currency === 'GBP') return '£' + amount.toFixed(2);
-      if (currency === 'NGN') return '₦' + Math.round(amount);
-      return amount.toFixed(2);
-    }
-
-    function renderCart(){
-      const currency = localStorage.getItem('fleurdevie-currency') || currencySelector.value || 'USD';
-      currencySelector.value = currency;
-      const cart = getCart();
-      cartBody.innerHTML = '';
-
-      // always show table (per your request). If empty, table body will be empty and empty message visible.
-      if (!cart || cart.length === 0){
-        emptyMessageEl.style.display = 'block';
-        cartTotalEl.textContent = `Total: ${formatPrice(0, currency)}`;
-        checkoutLink.classList.add('disabled');
-        checkoutLink.setAttribute('aria-disabled','true');
-        checkoutLink.href = `checkout.html?currency=${currency}`;
-        return;
-      }
-
-      emptyMessageEl.style.display = 'none';
-      checkoutLink.classList.remove('disabled');
-      checkoutLink.removeAttribute('aria-disabled');
-
-      let grandTotal = 0;
-      cart.forEach((item, idx) => {
-        const base = Number(item.price) || 0; // assume stored base is USD
-        const unit = base * (RATES[currency] || 1);
-        const qty = Number(item.quantity) || 1;
-        const subtotal = unit * qty;
-        grandTotal += subtotal;
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><img src="${item.imageUrl || 'placeholder.jpg'}" alt="${(item.name||'Product')}"></td>
-          <td>${item.name || ''}</td>
-          <td>${formatPrice(unit, currency)}</td>
-          <td><input type="number" min="1" value="${qty}" data-idx="${idx}" class="qty-input" style="width:70px;padding:6px;border-radius:6px;border:1px solid #ddd;text-align:center"></td>
-          <td>${formatPrice(subtotal, currency)}</td>
-          <td><button class="remove" data-idx="${idx}" style="padding:6px 10px;border-radius:6px;border:0;background:#eee;cursor:pointer">Remove</button></td>
-        `;
+    function render(){
+      const cur=localStorage.getItem('fleurdevie-currency')||currencySel.value;
+      currencySel.value=cur;
+      const cart=getCart();cartBody.innerHTML="";let total=0;
+      if(cart.length===0){emptyEl.style.display="block";totalEl.textContent="Total: "+fmt(0,cur);return;}
+      emptyEl.style.display="none";
+      cart.forEach((it,i)=>{let unit=it.price*RATES[cur];let sub=unit*it.quantity;total+=sub;
+        const tr=document.createElement("tr");
+        tr.innerHTML=`<td><img src="${it.imageUrl||'placeholder.jpg'}"></td>
+          <td>${it.name}</td><td>${fmt(unit,cur)}</td>
+          <td><input type="number" min="1" value="${it.quantity}" data-i="${i}" style="width:60px"></td>
+          <td>${fmt(sub,cur)}</td>
+          <td><button data-r="${i}">Remove</button></td>`;
         cartBody.appendChild(tr);
       });
-
-      cartTotalEl.textContent = `Total: ${formatPrice(grandTotal, currency)}`;
-      checkoutLink.href = `checkout.html?currency=${currency}`;
-      attachRowEvents();
+      totalEl.textContent="Total: "+fmt(total,cur);
+      checkoutLink.href=`checkout.html?currency=${cur}`;
+      attachEvents();
     }
-
-    function attachRowEvents(){
-      document.querySelectorAll('.qty-input').forEach(input => {
-        input.onchange = (e) => {
-          let idx = Number(e.target.dataset.idx);
-          let value = parseInt(e.target.value,10);
-          if (!value || value < 1) value = 1;
-          const cart = getCart();
-          if (!cart[idx]) return;
-          cart[idx].quantity = value;
-          saveCart(cart);
-          renderCart();
-        };
+    function attachEvents(){
+      document.querySelectorAll("[data-i]").forEach(inp=>inp.onchange=e=>{
+        const c=getCart();c[e.target.dataset.i].quantity=parseInt(e.target.value)||1;saveCart(c);render();
       });
-
-      document.querySelectorAll('.remove').forEach(btn => {
-        btn.onclick = (e) => {
-          const idx = Number(e.target.dataset.idx);
-          let cart = getCart();
-          if (!cart[idx]) return;
-          cart.splice(idx,1);
-          saveCart(cart);
-          renderCart();
-        };
-      });
+      document.querySelectorAll("[data-r]").forEach(btn=>btn.onclick=()=>{const c=getCart();c.splice(btn.dataset.r,1);saveCart(c);render();});
     }
-
-    // currency selector persists and triggers re-render
-    currencySelector.addEventListener('change', (e) => {
-      localStorage.setItem('fleurdevie-currency', e.target.value);
-      renderCart();
-    });
-
-    // initial render
-    renderCart();
-
-    // Expose a small helper to add test item (dev). Remove if you don't need it.
-    // window.__addTest = () => {
-    //   const cart = getCart(); cart.push({ name:'Test product', price:12.50, quantity:1, imageUrl:'placeholder.jpg' }); saveCart(cart); renderCart();
-    // };
+    currencySel.onchange=e=>{localStorage.setItem('fleurdevie-currency',e.target.value);render();}
+    render();
   </script>
 </body>
 </html>
