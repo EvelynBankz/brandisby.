@@ -120,11 +120,6 @@
       padding: 30px 20px;
     }
 
-    .cart h1 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
     table {
       width: 100%;
       border-collapse: collapse;
@@ -146,7 +141,22 @@
       text-align: center;
       font-size: 1.2rem;
       color: #555;
-      margin: 30px 0;
+      margin: 20px 0;
+    }
+
+    #cart-total {
+      text-align: center;
+      margin: 20px 0;
+      font-size: 1.4rem;
+      font-weight: 600;
+    }
+
+    .bottom-controls {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      align-items: center;
+      margin-top: 12px;
     }
 
     button {
@@ -160,14 +170,6 @@
 
     button:hover {
       background: #555;
-    }
-
-    /* small spacing for the bottom controls */
-    .bottom-controls {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      margin-top: 8px;
     }
 
     .currency-select {
@@ -184,7 +186,7 @@
         align-items: stretch;
       }
       .currency-select { width: 100%; }
-      .checkout-anchor button { width: 100%; }
+      .bottom-controls button { width: 100%; }
     }
   </style>
 </head>
@@ -227,13 +229,13 @@
         <tbody id="cart-body"></tbody>
       </table>
 
+      <div id="empty-cart-message" class="empty-message" style="display:none;">Your cart is empty</div>
+
       <h2 id="cart-total">Total: $0.00</h2>
 
-      <!-- bottom actions: checkout + currency selector (added) -->
       <div class="bottom-controls">
-        <a href="checkout.html" id="checkout-link" class="checkout-anchor"><button id="checkout-button">Proceed to Checkout</button></a>
-
-        <!-- currency selector added here -->
+        <a href="shop.html"><button>Continue Shopping</button></a>
+        <a href="checkout.html" id="checkout-link"><button id="checkout-button">Proceed to Checkout</button></a>
         <select id="currency-selector" class="currency-select" aria-label="Select currency">
           <option value="USD" selected>USD $</option>
           <option value="EUR">EUR €</option>
@@ -252,8 +254,7 @@
       headerRight.classList.toggle('open');
     });
 
-    // ===== FLEUR DE VIE CART LOGIC =====
-    // Keep exactly your cart source: localStorage 'fleurdevie-cart'
+    // ===== CART LOGIC =====
     function getCart() {
       try {
         return JSON.parse(localStorage.getItem('fleurdevie-cart')) || [];
@@ -270,17 +271,10 @@
     const currencySelector = document.getElementById('currency-selector');
     const checkoutLink = document.getElementById('checkout-link');
     const checkoutButton = document.getElementById('checkout-button');
-    const cartTable = document.getElementById('cart-table');
+    const emptyMessage = document.getElementById('empty-cart-message');
 
-    // Static example rates (base currency = USD). Replace with live rates if needed.
-    const RATES = {
-      USD: 1,
-      EUR: 0.93,
-      GBP: 0.80,
-      NGN: 1600
-    };
+    const RATES = { USD: 1, EUR: 0.93, GBP: 0.80, NGN: 1600 };
 
-    // format for display
     function formatPrice(amount, currency) {
       if (currency === 'USD') return '$' + amount.toFixed(2);
       if (currency === 'EUR') return '€' + amount.toFixed(2);
@@ -289,32 +283,27 @@
       return amount.toFixed(2);
     }
 
-    // render the cart based on localStorage and selected currency
     function renderCart() {
-      const cart = getCart(); // from localStorage
+      const cart = getCart();
       const currency = localStorage.getItem('fleurdevie-currency') || currencySelector.value || 'USD';
-
-      // set selector to persisted value (if any)
       currencySelector.value = currency;
 
       cartBody.innerHTML = '';
       let grandTotal = 0;
 
       if (!cart || cart.length === 0) {
-        cartTable.style.display = 'none';
-        cartBody.innerHTML = `<tr><td colspan="6" class="empty-message">Your cart is empty</td></tr>`;
+        emptyMessage.style.display = 'block';
         cartTotalEl.textContent = `Total: ${formatPrice(0, currency)}`;
         checkoutButton.disabled = true;
-        // ensure checkout link points to checkout with currency param (but disabled visually by button)
         checkoutLink.href = `checkout.html?currency=${currency}`;
         return;
       }
 
-      cartTable.style.display = '';
+      emptyMessage.style.display = 'none';
       checkoutButton.disabled = false;
+
       cart.forEach((item, index) => {
-        // expected item shape: { name, price, quantity, imageUrl, ... }
-        const basePrice = Number(item.price) || 0; // assume base price in USD
+        const basePrice = Number(item.price) || 0;
         const convertedUnit = basePrice * (RATES[currency] || 1);
         const qty = Number(item.quantity) || 1;
         const subtotal = convertedUnit * qty;
@@ -322,7 +311,7 @@
 
         const row = document.createElement('tr');
         row.innerHTML = `
-          <td><img src="${item.imageUrl || 'placeholder.jpg'}" alt="${(item.name||'Product')} " width="80"></td>
+          <td><img src="${item.imageUrl || 'placeholder.jpg'}" alt="${item.name || 'Product'}" width="80"></td>
           <td>${item.name || ''}</td>
           <td>${formatPrice(convertedUnit, currency)}</td>
           <td><input class="qty-input" type="number" min="1" value="${qty}" data-index="${index}"></td>
@@ -333,58 +322,40 @@
       });
 
       cartTotalEl.textContent = `Total: ${formatPrice(grandTotal, currency)}`;
-      // update checkout link with currency param so checkout page knows selected currency
       checkoutLink.href = `checkout.html?currency=${currency}`;
-
       attachRowEvents();
     }
 
     function attachRowEvents() {
-      // quantity change
       document.querySelectorAll('.qty-input').forEach(input => {
-        input.removeEventListener('change', onQtyChange);
-        input.addEventListener('change', onQtyChange);
+        input.onchange = (e) => {
+          const idx = Number(e.target.dataset.index);
+          let qty = parseInt(e.target.value, 10);
+          if (!qty || qty < 1) qty = 1;
+          const cart = getCart();
+          cart[idx].quantity = qty;
+          saveCart(cart);
+          renderCart();
+        };
       });
 
-      // remove buttons
       document.querySelectorAll('.remove-btn').forEach(btn => {
-        btn.removeEventListener('click', onRemove);
-        btn.addEventListener('click', onRemove);
+        btn.onclick = (e) => {
+          const idx = Number(e.target.dataset.index);
+          let cart = getCart();
+          cart.splice(idx, 1);
+          saveCart(cart);
+          renderCart();
+        };
       });
     }
 
-    function onQtyChange(e) {
-      const idx = Number(e.target.dataset.index);
-      let qty = parseInt(e.target.value, 10);
-      if (!qty || qty < 1) qty = 1;
-      const cart = getCart();
-      if (!cart[idx]) return;
-      cart[idx].quantity = qty;
-      saveCart(cart);
-      renderCart();
-    }
-
-    function onRemove(e) {
-      const idx = Number(e.target.dataset.index);
-      let cart = getCart();
-      if (!cart[idx]) return;
-      cart.splice(idx, 1);
-      saveCart(cart);
-      renderCart();
-    }
-
-    // currency selection persisted + re-render
     currencySelector.addEventListener('change', (e) => {
-      const cur = e.target.value;
-      localStorage.setItem('fleurdevie-currency', cur);
+      localStorage.setItem('fleurdevie-currency', e.target.value);
       renderCart();
     });
 
-    // initial render
     renderCart();
-
-    // checkout click: already a link; keep behavior. (checkout page reads ?currency=)
-    // nothing else to do here
   </script>
 </body>
 </html>
