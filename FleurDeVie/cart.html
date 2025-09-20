@@ -4,85 +4,275 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fleur De Vie - Cart</title>
-  <link rel="stylesheet" href="cart.css">
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shop.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      background-color: #FFD6BA;
+      margin: 0;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    /* HEADER */
+    .site-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px;
+      background: #fff;
+      border-bottom: 1px solid #ddd;
+      position: relative;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-logo {
+      height: 60px;
+      width: auto;
+    }
+
+    .brand-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #333;
+    }
+
+    .header-center {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .header-right {
+      display: flex;
+      gap: 15px;
+    }
+
+    .header-right a {
+      text-decoration: none;
+      color: #333;
+      font-weight: 500;
+    }
+
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    .hamburger span {
+      display: block;
+      width: 25px;
+      height: 3px;
+      background: #333;
+      border-radius: 2px;
+    }
+
+    @media (max-width: 768px) {
+      .header-right {
+        display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background: #fff;
+        width: 200px;
+        border: 1px solid #ddd;
+        padding: 10px;
+      }
+
+      .header-right.open {
+        display: flex;
+      }
+
+      .hamburger {
+        display: flex;
+      }
+
+      .header-center {
+        position: static;
+        transform: none;
+        margin: 10px 0;
+        text-align: center;
+        width: 100%;
+      }
+
+      .site-header {
+        flex-wrap: wrap;
+        justify-content: space-between;
+      }
+    }
+
+    /* CART CONTENT */
+    .cart {
+      padding: 30px 20px;
+    }
+
+    .cart h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+
+    th, td {
+      padding: 12px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+
+    th {
+      background: #333;
+      color: #fff;
+    }
+
+    .empty-message {
+      text-align: center;
+      font-size: 1.2rem;
+      color: #555;
+      margin: 30px 0;
+    }
+
+    button {
+      background: #333;
+      color: #fff;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #555;
+    }
+
+    /* small spacing for the bottom controls */
+    .bottom-controls {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-top: 8px;
+    }
+
+    .currency-select {
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      background: #fff;
+      font-weight: 600;
+    }
+
+    @media (max-width: 480px) {
+      .bottom-controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .currency-select { width: 100%; }
+      .checkout-anchor button { width: 100%; }
+    }
+  </style>
 </head>
-<body>
+<body class="fleurdevie">
+
   <!-- HEADER -->
-  <header class="header">
-    <div class="container">
-      <div class="header-left">
-        <h1 class="logo">Fleur De Vie</h1>
-      </div>
-
-      <div class="header-center">
-        <h2 class="page-title">Your Cart</h2>
-      </div>
-
-      <div class="header-right">
-        <nav class="nav">
-          <ul>
-            <li><a href="index.html">Home</a></li>
-            <li><a href="shop.html">Shop</a></li>
-            <li><a href="contact.html">Contact</a></li>
-          </ul>
-        </nav>
-        <div class="hamburger" onclick="toggleMenu()">☰</div>
-      </div>
+  <header class="site-header">
+    <div class="header-left">
+      <img src="logo.png" alt="FleurDeVie Logo" class="brand-logo">
+      <div class="brand-title">Fleur De Vie</div>
     </div>
+
+    <div class="header-center">Your Cart</div>
+
+    <nav class="header-right">
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="checkout.html">Checkout</a>
+    </nav>
+
+    <button class="hamburger" id="hamburger">
+      <span></span><span></span><span></span>
+    </button>
   </header>
 
-  <!-- CART SECTION -->
+  <!-- CART CONTENT -->
   <section class="cart">
     <div class="container">
-      <h2>Your Shopping Cart</h2>
+      <table id="cart-table">
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Total</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="cart-body"></tbody>
+      </table>
 
-      <!-- items from localStorage will be injected here -->
-      <div class="cart-items" id="cart-items">
-        <!-- Products dynamically inserted here by script -->
-      </div>
+      <h2 id="cart-total">Total: $0.00</h2>
 
-      <div class="cart-summary">
-        <h3>Total: <span id="cart-total">0.00</span></h3>
-        <div class="cart-actions">
-          <button class="checkout-btn" id="checkout-btn">Proceed to Checkout</button>
+      <!-- bottom actions: checkout + currency selector (added) -->
+      <div class="bottom-controls">
+        <a href="checkout.html" id="checkout-link" class="checkout-anchor"><button id="checkout-button">Proceed to Checkout</button></a>
 
-          <!-- CURRENCY SELECTOR -->
-          <select id="currency-selector" class="currency-selector" aria-label="Select currency">
-            <option value="USD" selected>USD ($)</option>
-            <option value="EUR">EUR (€)</option>
-            <option value="GBP">GBP (£)</option>
-            <option value="NGN">NGN (₦)</option>
-          </select>
-        </div>
+        <!-- currency selector added here -->
+        <select id="currency-selector" class="currency-select" aria-label="Select currency">
+          <option value="USD" selected>USD $</option>
+          <option value="EUR">EUR €</option>
+          <option value="GBP">GBP £</option>
+          <option value="NGN">NGN ₦</option>
+        </select>
       </div>
     </div>
   </section>
 
   <script>
-    // keep your existing hamburger behavior
-    function toggleMenu() {
-      const ul = document.querySelector('.nav ul');
-      if (!ul) return;
-      ul.classList.toggle('active');
+    // ===== Hamburger menu toggle =====
+    const hamburger = document.getElementById('hamburger');
+    const headerRight = document.querySelector('.header-right');
+    hamburger.addEventListener('click', () => {
+      headerRight.classList.toggle('open');
+    });
+
+    // ===== FLEUR DE VIE CART LOGIC =====
+    // Keep exactly your cart source: localStorage 'fleurdevie-cart'
+    function getCart() {
+      try {
+        return JSON.parse(localStorage.getItem('fleurdevie-cart')) || [];
+      } catch {
+        return [];
+      }
+    }
+    function saveCart(cart) {
+      localStorage.setItem('fleurdevie-cart', JSON.stringify(cart));
     }
 
-    /************************************************************
-     * Cart rendering + currency conversion
-     * - Reads cart from localStorage key 'fleurdevie-cart'
-     * - Expects each cart item to have: { id, name, price, quantity, imageUrl }
-     *   where price is the base price in USD (number).
-     * - Currency rates are static here (replace with live rates if desired).
-     ************************************************************/
-
-    const CART_KEY = 'fleurdevie-cart';
-    const currencySelector = document.getElementById('currency-selector');
-    const cartItemsEl = document.getElementById('cart-items');
+    const cartBody = document.getElementById('cart-body');
     const cartTotalEl = document.getElementById('cart-total');
-    const checkoutBtn = document.getElementById('checkout-btn');
+    const currencySelector = document.getElementById('currency-selector');
+    const checkoutLink = document.getElementById('checkout-link');
+    const checkoutButton = document.getElementById('checkout-button');
+    const cartTable = document.getElementById('cart-table');
 
-    // static example rates relative to USD (base = USD).
-    // Replace these with a live API if/when you want real-time rates.
+    // Static example rates (base currency = USD). Replace with live rates if needed.
     const RATES = {
       USD: 1,
       EUR: 0.93,
@@ -90,99 +280,67 @@
       NGN: 1600
     };
 
-    // Utility: safely parse cart from localStorage
-    function loadCart() {
-      try {
-        const raw = localStorage.getItem(CART_KEY);
-        if (!raw) return [];
-        const parsed = JSON.parse(raw);
-        return Array.isArray(parsed) ? parsed : [];
-      } catch (e) {
-        console.error('Failed to parse cart from localStorage', e);
-        return [];
-      }
-    }
-
-    function saveCart(cart) {
-      try {
-        localStorage.setItem(CART_KEY, JSON.stringify(cart));
-      } catch (e) {
-        console.error('Failed to save cart', e);
-      }
-    }
-
-    // Format price for each currency
+    // format for display
     function formatPrice(amount, currency) {
-      // amount is numeric
       if (currency === 'USD') return '$' + amount.toFixed(2);
       if (currency === 'EUR') return '€' + amount.toFixed(2);
       if (currency === 'GBP') return '£' + amount.toFixed(2);
-      if (currency === 'NGN') return '₦' + Math.round(amount); // round NGN
+      if (currency === 'NGN') return '₦' + Math.round(amount);
       return amount.toFixed(2);
     }
 
-    // Render cart items into #cart-items
+    // render the cart based on localStorage and selected currency
     function renderCart() {
-      const cart = loadCart();
-      const currency = currencySelector.value || 'USD';
-      cartItemsEl.innerHTML = ''; // clear
+      const cart = getCart(); // from localStorage
+      const currency = localStorage.getItem('fleurdevie-currency') || currencySelector.value || 'USD';
+
+      // set selector to persisted value (if any)
+      currencySelector.value = currency;
+
+      cartBody.innerHTML = '';
+      let grandTotal = 0;
 
       if (!cart || cart.length === 0) {
-        // Empty state (keeps the page structure you provided)
-        const p = document.createElement('p');
-        p.className = 'empty-message';
-        p.textContent = 'Your cart is empty.';
-        cartItemsEl.appendChild(p);
-        cartTotalEl.textContent = formatPrice(0, currency);
-        checkoutBtn.disabled = true;
+        cartTable.style.display = 'none';
+        cartBody.innerHTML = `<tr><td colspan="6" class="empty-message">Your cart is empty</td></tr>`;
+        cartTotalEl.textContent = `Total: ${formatPrice(0, currency)}`;
+        checkoutButton.disabled = true;
+        // ensure checkout link points to checkout with currency param (but disabled visually by button)
+        checkoutLink.href = `checkout.html?currency=${currency}`;
         return;
       }
 
-      checkoutBtn.disabled = false;
-
-      let grandTotal = 0;
-
-      cart.forEach((item, idx) => {
-        // ensure fields exist
-        const name = item.name || 'Product';
+      cartTable.style.display = '';
+      checkoutButton.disabled = false;
+      cart.forEach((item, index) => {
+        // expected item shape: { name, price, quantity, imageUrl, ... }
+        const basePrice = Number(item.price) || 0; // assume base price in USD
+        const convertedUnit = basePrice * (RATES[currency] || 1);
         const qty = Number(item.quantity) || 1;
-        const basePrice = Number(item.price) || 0; // base USD
-        const rate = Number(RATES[currency] || 1);
-
-        const unitConverted = basePrice * rate;
-        const subtotal = unitConverted * qty;
+        const subtotal = convertedUnit * qty;
         grandTotal += subtotal;
 
-        // Create item element (keeps structure minimal; your cart.css will style this)
-        const wrap = document.createElement('div');
-        wrap.className = 'cart-item';
-        wrap.innerHTML = `
-          <div class="cart-item-left">
-            ${ item.imageUrl ? `<img src="${item.imageUrl}" alt="${escapeHtml(name)}" class="cart-item-image">` : '' }
-          </div>
-          <div class="cart-item-middle">
-            <div class="cart-item-name">${escapeHtml(name)}</div>
-          </div>
-          <div class="cart-item-right">
-            <div class="cart-item-price" data-base="${basePrice}">${formatPrice(unitConverted, currency)}</div>
-            <div class="cart-item-qty">
-              <input type="number" min="1" class="qty-input" value="${qty}" data-index="${idx}" aria-label="Quantity for ${escapeHtml(name)}">
-            </div>
-            <div class="cart-item-sub" data-sub="${subtotal}">${formatPrice(subtotal, currency)}</div>
-            <div><button class="remove-btn" data-index="${idx}">Remove</button></div>
-          </div>
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td><img src="${item.imageUrl || 'placeholder.jpg'}" alt="${(item.name||'Product')} " width="80"></td>
+          <td>${item.name || ''}</td>
+          <td>${formatPrice(convertedUnit, currency)}</td>
+          <td><input class="qty-input" type="number" min="1" value="${qty}" data-index="${index}"></td>
+          <td>${formatPrice(subtotal, currency)}</td>
+          <td><button class="remove-btn" data-index="${index}">Remove</button></td>
         `;
-        cartItemsEl.appendChild(wrap);
+        cartBody.appendChild(row);
       });
 
-      cartTotalEl.textContent = formatPrice(grandTotal, currency);
+      cartTotalEl.textContent = `Total: ${formatPrice(grandTotal, currency)}`;
+      // update checkout link with currency param so checkout page knows selected currency
+      checkoutLink.href = `checkout.html?currency=${currency}`;
 
-      wireUpItemEvents(); // attach qty/change & remove listeners
+      attachRowEvents();
     }
 
-    // Wire quantity change and remove
-    function wireUpItemEvents() {
-      // quantity inputs
+    function attachRowEvents() {
+      // quantity change
       document.querySelectorAll('.qty-input').forEach(input => {
         input.removeEventListener('change', onQtyChange);
         input.addEventListener('change', onQtyChange);
@@ -190,66 +348,43 @@
 
       // remove buttons
       document.querySelectorAll('.remove-btn').forEach(btn => {
-        btn.removeEventListener('click', onRemoveItem);
-        btn.addEventListener('click', onRemoveItem);
+        btn.removeEventListener('click', onRemove);
+        btn.addEventListener('click', onRemove);
       });
     }
 
     function onQtyChange(e) {
       const idx = Number(e.target.dataset.index);
       let qty = parseInt(e.target.value, 10);
-      if (!Number.isFinite(qty) || qty < 1) qty = 1;
-
-      const cart = loadCart();
+      if (!qty || qty < 1) qty = 1;
+      const cart = getCart();
       if (!cart[idx]) return;
       cart[idx].quantity = qty;
       saveCart(cart);
-
-      // re-render with the currently selected currency
       renderCart();
     }
 
-    function onRemoveItem(e) {
+    function onRemove(e) {
       const idx = Number(e.target.dataset.index);
-      let cart = loadCart();
+      let cart = getCart();
       if (!cart[idx]) return;
       cart.splice(idx, 1);
       saveCart(cart);
-
       renderCart();
     }
 
-    // Utility escape for inserted text
-    function escapeHtml(str) {
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-    }
-
-    // currency selector change: re-render
-    currencySelector.addEventListener('change', function() {
+    // currency selection persisted + re-render
+    currencySelector.addEventListener('change', (e) => {
+      const cur = e.target.value;
+      localStorage.setItem('fleurdevie-currency', cur);
       renderCart();
     });
 
-    // Checkout button: include currency selection in query so checkout page can respect it
-    document.getElementById('checkout-btn').addEventListener('click', function () {
-      const cart = loadCart();
-      if (!cart || cart.length === 0) {
-        alert('Your cart is empty.');
-        return;
-      }
-      const cur = currencySelector.value || 'USD';
-      // redirect to checkout and pass currency
-      window.location.href = `checkout.html?currency=${encodeURIComponent(cur)}`;
-    });
+    // initial render
+    renderCart();
 
-    // initial render on page load
-    document.addEventListener('DOMContentLoaded', function () {
-      renderCart();
-    });
+    // checkout click: already a link; keep behavior. (checkout page reads ?currency=)
+    // nothing else to do here
   </script>
 </body>
 </html>
