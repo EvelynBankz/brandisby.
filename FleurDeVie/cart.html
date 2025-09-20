@@ -4,276 +4,111 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fleur De Vie - Cart</title>
-  <link rel="stylesheet" href="shop.css">
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    body {
-      background-color: #FFD6BA;
-      margin: 0;
-      font-family: 'Montserrat', sans-serif;
-    }
-
-    /* HEADER */
-    .site-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 20px;
-      background: #fff;
-      border-bottom: 1px solid #ddd;
-      position: relative;
-    }
-
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .brand-logo {
-      height: 60px;
-      width: auto;
-    }
-
-    .brand-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: #333;
-    }
-
-    .header-center {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: #333;
-    }
-
-    .header-right {
-      display: flex;
-      gap: 15px;
-    }
-
-    .header-right a {
-      text-decoration: none;
-      color: #333;
-      font-weight: 500;
-    }
-
-    .hamburger {
-      display: none;
-      flex-direction: column;
-      gap: 4px;
-      background: none;
-      border: none;
-      cursor: pointer;
-    }
-
-    .hamburger span {
-      display: block;
-      width: 25px;
-      height: 3px;
-      background: #333;
-      border-radius: 2px;
-    }
-
-    @media (max-width: 768px) {
-      .header-right {
-        display: none;
-        flex-direction: column;
-        position: absolute;
-        top: 100%;
-        right: 0;
-        background: #fff;
-        width: 200px;
-        border: 1px solid #ddd;
-        padding: 10px;
-      }
-
-      .header-right.open {
-        display: flex;
-      }
-
-      .hamburger {
-        display: flex;
-      }
-
-      .header-center {
-        position: static;
-        transform: none;
-        margin: 10px 0;
-        text-align: center;
-        width: 100%;
-      }
-
-      .site-header {
-        flex-wrap: wrap;
-        justify-content: space-between;
-      }
-    }
-
-    /* CART CONTENT */
-    .cart {
-      padding: 30px 20px;
-    }
-
-    .cart h1 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 20px;
-    }
-
-    th, td {
-      padding: 12px;
-      border: 1px solid #ccc;
-      text-align: center;
-    }
-
-    th {
-      background: #333;
-      color: #fff;
-    }
-
-    .empty-message {
-      text-align: center;
-      font-size: 1.2rem;
-      color: #555;
-      margin: 30px 0;
-    }
-
-    button {
-      background: #333;
-      color: #fff;
-      padding: 10px 15px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #555;
-    }
-  </style>
+  <link rel="stylesheet" href="cart.css">
+  <script src="https://kit.fontawesome.com/your-kit-id.js" crossorigin="anonymous"></script>
 </head>
-<body class="fleurdevie">
-
+<body>
   <!-- HEADER -->
-  <header class="site-header">
-    <div class="header-left">
-      <img src="logo.png" alt="FleurDeVie Logo" class="brand-logo">
-      <div class="brand-title">Fleur De Vie</div>
+  <header class="header">
+    <div class="container">
+      <!-- Left: Brand -->
+      <div class="header-left">
+        <h1 class="logo">Fleur De Vie</h1>
+      </div>
+
+      <!-- Center: Page Title -->
+      <div class="header-center">
+        <h2 class="page-title">Your Cart</h2>
+      </div>
+
+      <!-- Right: Nav -->
+      <div class="header-right">
+        <nav class="nav">
+          <ul>
+            <li><a href="shop.html">Shop</a></li>
+            <li><a href="cart.html">Cart</a></li>
+            <li><a href="checkout.html">Checkout</a></li>
+          </ul>
+        </nav>
+        <div class="hamburger" onclick="toggleMenu()">☰</div>
+      </div>
     </div>
-
-    <div class="header-center">Your Cart</div>
-
-    <nav class="header-right">
-      <a href="index.html">Home</a>
-      <a href="shop.html">Shop</a>
-      <a href="checkout.html">Checkout</a>
-    </nav>
-
-    <button class="hamburger" id="hamburger">
-      <span></span><span></span><span></span>
-    </button>
   </header>
 
-  <!-- CART CONTENT -->
-  <section class="cart">
-    <div class="container">
-      <table id="cart-table">
-        <thead>
-          <tr>
-            <th>Image</th>
-            <th>Name</th>
-            <th>Price</th>
-            <th>Quantity</th>
-            <th>Total</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody id="cart-body"></tbody>
-      </table>
-      <h2 id="cart-total">Total: $0.00</h2>
-      <a href="checkout.html"><button>Proceed to Checkout</button></a>
+  <!-- CART -->
+  <main class="cart container">
+    <div class="cart-items" id="cart-items">
+      <!-- Example product (these would load dynamically later) -->
+      <div class="cart-item" data-price="50">
+        <p>Product 1</p>
+        <span class="price" data-original="50">$50</span>
+      </div>
+      <div class="cart-item" data-price="30">
+        <p>Product 2</p>
+        <span class="price" data-original="30">$30</span>
+      </div>
     </div>
-  </section>
+
+    <!-- Summary + Actions -->
+    <div class="cart-summary">
+      <h3>Total: <span id="cart-total">$80</span></h3>
+      <div class="cart-actions">
+        <button class="checkout-btn" onclick="window.location.href='checkout.html'">
+          Proceed to Checkout
+        </button>
+        <select id="currency-selector" class="currency-selector">
+          <option value="USD" selected>USD ($)</option>
+          <option value="EUR">EUR (€)</option>
+          <option value="GBP">GBP (£)</option>
+          <option value="NGN">NGN (₦)</option>
+        </select>
+      </div>
+    </div>
+  </main>
 
   <script>
-    // ===== Hamburger menu toggle =====
-    const hamburger = document.getElementById('hamburger');
-    const headerRight = document.querySelector('.header-right');
-    hamburger.addEventListener('click', () => {
-      headerRight.classList.toggle('open');
-    });
+    // Toggle hamburger nav
+    function toggleMenu() {
+      document.querySelector('.nav ul').classList.toggle('active');
+    }
 
-    // ===== FLEUR DE VIE CART LOGIC =====
-    let cart = JSON.parse(localStorage.getItem('fleurdevie-cart')) || [];
+    // Currency conversion rates (example, update with live rates if needed)
+    const rates = {
+      USD: 1,
+      EUR: 0.93,
+      GBP: 0.80,
+      NGN: 1600 // Example conversion
+    };
 
-    const cartBody = document.getElementById('cart-body');
-    const cartTotalEl = document.getElementById('cart-total');
+    const selector = document.getElementById('currency-selector');
+    const cartTotal = document.getElementById('cart-total');
+    const prices = document.querySelectorAll('.price');
 
-    function renderCart() {
-      cartBody.innerHTML = '';
+    function updateCurrency() {
+      const currency = selector.value;
       let total = 0;
 
-      if (cart.length === 0) {
-        cartBody.innerHTML = `<tr><td colspan="6" class="empty-message">Your cart is empty</td></tr>`;
-        cartTotalEl.textContent = "Total: $0.00";
-        return;
-      }
+      prices.forEach(priceEl => {
+        const original = parseFloat(priceEl.getAttribute('data-original'));
+        const converted = (original * rates[currency]).toFixed(2);
 
-      cart.forEach((item, index) => {
-        const row = document.createElement('tr');
-        const itemTotal = item.price * item.quantity;
-        total += itemTotal;
+        // Update display
+        if (currency === "USD") priceEl.textContent = `$${converted}`;
+        if (currency === "EUR") priceEl.textContent = `€${converted}`;
+        if (currency === "GBP") priceEl.textContent = `£${converted}`;
+        if (currency === "NGN") priceEl.textContent = `₦${Math.round(converted)}`;
 
-        row.innerHTML = `
-          <td><img src="${item.imageUrl}" alt="${item.name}" width="80"></td>
-          <td>${item.name}</td>
-          <td>$${item.price}</td>
-          <td>
-            <input type="number" min="1" value="${item.quantity}" data-index="${index}" class="qty-input">
-          </td>
-          <td>$${itemTotal.toFixed(2)}</td>
-          <td><button data-index="${index}" class="remove-btn">Remove</button></td>
-        `;
-        cartBody.appendChild(row);
+        total += parseFloat(converted);
       });
 
-      cartTotalEl.textContent = `Total: $${total.toFixed(2)}`;
-      attachCartEvents();
+      // Update total
+      if (currency === "USD") cartTotal.textContent = `$${total.toFixed(2)}`;
+      if (currency === "EUR") cartTotal.textContent = `€${total.toFixed(2)}`;
+      if (currency === "GBP") cartTotal.textContent = `£${total.toFixed(2)}`;
+      if (currency === "NGN") cartTotal.textContent = `₦${Math.round(total)}`;
     }
 
-    function attachCartEvents() {
-      document.querySelectorAll('.remove-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const index = e.target.dataset.index;
-          cart.splice(index, 1);
-          localStorage.setItem('fleurdevie-cart', JSON.stringify(cart));
-          renderCart();
-        });
-      });
-
-      document.querySelectorAll('.qty-input').forEach(input => {
-        input.addEventListener('change', (e) => {
-          const index = e.target.dataset.index;
-          const qty = parseInt(e.target.value);
-          cart[index].quantity = qty;
-          localStorage.setItem('fleurdevie-cart', JSON.stringify(cart));
-          renderCart();
-        });
-      });
-    }
-
-    renderCart();
+    selector.addEventListener("change", updateCurrency);
   </script>
 </body>
 </html>
