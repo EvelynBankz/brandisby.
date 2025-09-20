@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Serac - Shop</title>
-  <link rel="stylesheet" href="shop.css">
+  <title>Serac - Cart</title>
   <style>
     /* Reset */
     * {
@@ -15,8 +14,7 @@
 
     body {
       font-family: Arial, sans-serif;
-      line-height: 1.6;
-      background-color: #f9f9f9;
+      background: #f9f9f9;
     }
 
     /* Header */
@@ -24,33 +22,30 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 15px 30px;
+      padding: 15px 20px;
       background: #fff;
       border-bottom: 1px solid #ddd;
       position: relative;
       z-index: 1000;
     }
 
-    .header-left {
-      flex: 1;
-    }
-
-    .logo {
+    .header-left .logo {
       font-size: 22px;
       font-weight: bold;
     }
 
     .header-center {
-      flex: 2;
+      font-size: 18px;
+      font-weight: bold;
       text-align: center;
+      flex-grow: 1;
     }
 
     .header-right {
-      flex: 1;
-      text-align: right;
+      font-size: 14px;
     }
 
-    /* Hamburger button */
+    /* Hamburger */
     .hamburger {
       display: none;
       flex-direction: column;
@@ -62,14 +57,13 @@
       background: transparent;
       border: none;
       cursor: pointer;
-      z-index: 2000;
     }
 
     .hamburger span {
       display: block;
-      width: 28px;
+      width: 25px;
       height: 3px;
-      background: #000; /* solid black bars */
+      background: #000;
       border-radius: 2px;
     }
 
@@ -92,7 +86,6 @@
       display: flex;
     }
 
-    /* Close button inside dropdown */
     .dropdown-menu .close-btn {
       align-self: flex-end;
       font-size: 26px;
@@ -104,32 +97,25 @@
       margin-bottom: 20px;
     }
 
-    /* Responsive header */
+    /* Responsive */
     @media (max-width: 768px) {
-      .site-header {
-        flex-wrap: wrap;
-        align-items: flex-start;
-        padding: 15px 20px;
-        min-height: 120px;
-      }
-
       .header-right {
         display: none;
       }
 
       .hamburger {
         display: flex;
-        position: absolute;
-        top: 20px;
-        right: 20px;
       }
 
       .header-center {
-        width: 100%;
-        text-align: center;
-        margin-top: 50px;
-        position: static;
-        transform: none;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+
+      .site-header {
+        min-height: 120px; /* more height for mobile */
       }
     }
   </style>
@@ -146,7 +132,7 @@
       <span>Profile</span>
     </div>
 
-    <!-- Hamburger button -->
+    <!-- Hamburger -->
     <button class="hamburger" id="hamburger">
       <span></span>
       <span></span>
@@ -154,7 +140,7 @@
     </button>
   </header>
 
-  <!-- Dropdown Menu -->
+  <!-- Dropdown -->
   <nav class="dropdown-menu" id="dropdownMenu">
     <button class="close-btn" id="closeMenu">&times;</button>
     <a href="#">Home</a>
