@@ -63,6 +63,7 @@
       font-weight: 500;
     }
 
+    /* Hamburger button */
     .hamburger {
       display: none;
       flex-direction: column;
@@ -70,17 +71,36 @@
       background: none;
       border: none;
       cursor: pointer;
+      z-index: 1000;
     }
 
     .hamburger span {
       display: block;
       width: 25px;
       height: 3px;
-      background: #333;
+      background: #000; /* Black for visibility */
       border-radius: 2px;
     }
 
+    /* Responsive header */
     @media (max-width: 768px) {
+      .site-header {
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 15px 20px;
+        height: auto;
+        min-height: 80px;
+      }
+
+      .header-center {
+        width: 100%;
+        text-align: center;
+        margin-top: 10px; /* Drop Your Cart down */
+        position: static;
+        transform: none;
+      }
+
       .header-right {
         display: none;
         flex-direction: column;
@@ -99,19 +119,9 @@
 
       .hamburger {
         display: flex;
-      }
-
-      .header-center {
-        position: static;
-        transform: none;
-        margin: 10px 0;
-        text-align: center;
-        width: 100%;
-      }
-
-      .site-header {
-        flex-wrap: wrap;
-        justify-content: space-between;
+        position: absolute;
+        top: 20px;
+        right: 20px;
       }
     }
 
