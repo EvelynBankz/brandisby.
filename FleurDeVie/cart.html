@@ -1,305 +1,391 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Fleur De Vie - Cart</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Fonts & icons (you already used these elsewhere) -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
   <style>
-    /* GENERAL */
-    body {
-      margin: 0;
-      font-family: 'Montserrat', sans-serif;
-      background: #fff;
-      color: #000;
+    /* ---------- Base ---------- */
+    :root{
+      --brand:#FFD6BA;
+      --text:#000;
+      --white:#ffffff;
+      --muted:#666;
+      --header-height:76px;
+      --max-width:1100px;
+    }
+    html,body{height:100%;margin:0;background:var(--white);color:var(--text);font-family:'Montserrat',sans-serif;-webkit-font-smoothing:antialiased}
+    .container{max-width:var(--max-width);margin:0 auto;padding:0 18px;box-sizing:border-box}
+
+    /* ---------- Header ---------- */
+    .site-header{
+      background:var(--brand);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:10px 18px;
+      position:relative;
+      box-sizing:border-box;
+      border-bottom:1px solid rgba(0,0,0,0.06);
+      min-height:var(--header-height);
     }
 
-    .container {
-      width: 90%;
-      max-width: 1200px;
-      margin: auto;
+    .header-left{display:flex;align-items:center;gap:12px;flex:0 0 auto}
+    .brand-logo{height:64px;width:auto;display:block} /* visible logo */
+    .brand-title{font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:700;color:var(--text);margin:0}
+
+    /* center title "Your Cart" */
+    .header-center{
+      position:absolute;
+      left:50%;
+      transform:translateX(-50%);
+      font-weight:600;
+      font-size:1.1rem;
+      color:var(--text);
+      text-align:center;
+      white-space:nowrap;
     }
 
-    /* HEADER */
-    .header {
-      background: #FFD6BA;
-      padding: 10px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+    /* top-right nav (desktop) */
+    .header-right{display:flex;gap:14px;align-items:center}
+    .header-right a{color:var(--text);text-decoration:none;font-weight:500}
+    .header-right a:hover{text-decoration:underline}
+
+    /* ---------- Hamburger (mobile) ---------- */
+    .hamburger{
+      display:none; /* shown in media query */
+      width:28px;
+      height:20px;
+      padding:0;
+      border:0;
+      background:none;
+      cursor:pointer;
+      align-items:center;
+      justify-content:center;
+      z-index:4000;
+    }
+    .hamburger span{
+      display:block;
+      width:100%;
+      height:3px;
+      background:var(--text); /* black lines */
+      border-radius:2px;
+      margin:2px 0;
     }
 
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
+    /* small dropdown (not fullscreen) */
+    .dropdown-menu{
+      display:none;
+      position:absolute;
+      top:100%;
+      right:18px;
+      margin-top:8px;
+      background:var(--brand);
+      color:var(--text);
+      border-radius:8px;
+      padding:10px;
+      box-shadow:0 6px 18px rgba(0,0,0,0.12);
+      min-width:200px;
+      z-index:3500;
+    }
+    .dropdown-menu.open{display:flex;flex-direction:column;gap:8px}
+    .dropdown-close{
+      align-self:flex-end;
+      background:none;border:0;color:var(--text);font-size:20px;cursor:pointer;padding:2px 6px;
+    }
+    .dropdown-menu a{color:var(--text);text-decoration:none;padding:6px 4px;border-radius:4px}
+    .dropdown-menu a:hover{background:rgba(0,0,0,0.04)}
+
+    /* ---------- Cart content ---------- */
+    .cart{
+      padding:28px 0 60px 0;
     }
 
-    .logo {
-      height: 50px;
-      width: auto;
+    .cart-table-wrap{width:100%;overflow:auto;background:var(--white);border-radius:8px}
+    table.cart-table{
+      width:100%;
+      border-collapse:collapse;
+      min-width:720px; /* allow shrink down to scroll on mobile */
+    }
+    table.cart-table thead th{
+      text-align:center;padding:12px;background:#141517;color:#fff;font-weight:600; /* header dark for readability */
+    }
+    table.cart-table td{padding:12px;text-align:center;border-bottom:1px solid #eee;vertical-align:middle}
+    table.cart-table img{width:80px;height:auto;border-radius:6px;display:inline-block}
+
+    /* empty message (always below table per requirement) */
+    .empty-message{margin-top:18px;text-align:center;color:var(--muted);font-size:1rem}
+
+    /* total and bottom controls centered */
+    #cart-total{margin-top:18px;text-align:center;font-weight:700;font-size:1.15rem}
+    .bottom-controls{
+      display:flex;
+      gap:12px;
+      justify-content:center;
+      align-items:center;
+      margin-top:16px;
+      flex-wrap:wrap;
     }
 
-    .brand {
-      font-size: 24px;
-      font-weight: 600;
+    /* Buttons styled as brand color */
+    .btn{
+      background:var(--brand);
+      color:var(--text);
+      border:1px solid rgba(0,0,0,0.06);
+      padding:10px 16px;
+      border-radius:8px;
+      font-weight:600;
+      cursor:pointer;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
+    .btn:disabled{opacity:0.5;cursor:not-allowed}
+
+    .currency-select{
+      padding:8px 10px;border-radius:8px;border:1px solid rgba(0,0,0,0.08);font-weight:600;background:var(--white);
+      color:var(--text)
     }
 
-    .header-center .page-title {
-      font-size: 20px;
-      font-weight: 600;
+    /* ---------- Responsiveness (fonts + table shrink) ---------- */
+    /* brand & title scale */
+    .brand-title{font-size:clamp(1rem, 2.6vw, 1.25rem)}
+    .header-center{font-size:clamp(1rem, 2.8vw, 1.1rem)}
+
+    @media (max-width:900px){
+      table.cart-table{min-width:680px}
+    }
+    @media (max-width:720px){
+      table.cart-table{min-width:520px}
+    }
+    @media (max-width:520px){
+      /* show hamburger and collapse header-right */
+      .header-right{display:none}
+      .hamburger{display:flex}
+      .brand-logo{height:54px}
+      .site-header{min-height:96px;padding:12px 14px}
+      .header-center{margin-top:10px; font-size:clamp(0.95rem,2.8vw,1.0rem)}
+      table.cart-table{min-width:420px}
+    }
+    @media (max-width:380px){
+      table.cart-table{min-width:360px}
+      .brand-logo{height:48px}
+      .brand-title{font-size:0.95rem}
+      .header-center{font-size:0.95rem}
     }
 
-    .nav ul {
-      display: flex;
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      gap: 20px;
-    }
-
-    .nav ul li a {
-      text-decoration: none;
-      color: #000;
-      font-weight: 500;
-    }
-
-    /* HAMBURGER */
-    .hamburger {
-      font-size: 26px;
-      cursor: pointer;
-      display: none;
-      color: #000;
-    }
-
-    /* DROPDOWN MENU */
-    .dropdown-menu {
-      display: none;
-      position: fixed;
-      top: 0;
-      right: 0;
-      background: #FFD6BA;
-      width: 250px;
-      height: 100%;
-      padding: 20px;
-      z-index: 999;
-    }
-
-    .dropdown-menu.active {
-      display: block;
-    }
-
-    .dropdown-menu .close {
-      font-size: 28px;
-      cursor: pointer;
-      color: #000;
-      display: block;
-      margin-bottom: 20px;
-    }
-
-    .dropdown-menu ul {
-      list-style: none;
-      padding: 0;
-    }
-
-    .dropdown-menu ul li {
-      margin: 15px 0;
-    }
-
-    .dropdown-menu ul li a {
-      text-decoration: none;
-      color: #000;
-      font-size: 18px;
-      font-weight: 500;
-    }
-
-    /* CART */
-    .cart {
-      padding: 30px 0;
-    }
-
-    .cart-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 20px;
-    }
-
-    .cart-table th, .cart-table td {
-      border: 1px solid #ddd;
-      padding: 12px;
-      text-align: center;
-      font-size: 14px;
-    }
-
-    .cart-table th {
-      background: #FFD6BA;
-      font-weight: 600;
-    }
-
-    #empty-cart-message {
-      text-align: center;
-      font-size: 16px;
-      margin: 15px 0;
-      color: #555;
-    }
-
-    /* CART SUMMARY */
-    .cart-summary {
-      text-align: right;
-      margin-top: 20px;
-    }
-
-    .cart-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 15px;
-      justify-content: flex-end;
-      margin-top: 15px;
-    }
-
-    button {
-      padding: 10px 16px;
-      border: none;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-      border-radius: 4px;
-    }
-
-    .continue-btn, .checkout-btn {
-      background: #FFD6BA;
-      color: #000;
-    }
-
-    .currency-selector {
-      padding: 10px;
-      border: 1px solid #000;
-      background: #fff;
-      font-size: 14px;
-    }
-
-    /* RESPONSIVENESS */
-    @media (max-width: 768px) {
-      .nav ul {
-        display: none;
-      }
-
-      .hamburger {
-        display: block;
-      }
-
-      .brand {
-        font-size: 18px;
-      }
-
-      .header-center .page-title {
-        font-size: 16px;
-      }
-
-      .cart-table, .cart-table thead, .cart-table tbody, .cart-table th, .cart-table td, .cart-table tr {
-        display: block;
-      }
-
-      .cart-table thead tr {
-        display: none;
-      }
-
-      .cart-table tr {
-        margin-bottom: 15px;
-        border: 1px solid #ddd;
-        padding: 10px;
-      }
-
-      .cart-table td {
-        text-align: right;
-        position: relative;
-        padding-left: 50%;
-      }
-
-      .cart-table td::before {
-        content: attr(data-label);
-        position: absolute;
-        left: 10px;
-        font-weight: 600;
-        text-align: left;
-      }
-    }
+    /* small visual tweaks */
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
   </style>
 </head>
 <body>
+
   <!-- HEADER -->
-  <header class="header">
-    <div class="container">
-      <div class="header-left">
-        <img src="logo.png" alt="Fleur De Vie Logo" class="logo">
-        <h1 class="brand">Fleur De Vie</h1>
-      </div>
-      <div class="header-center">
-        <h2 class="page-title">Your Cart</h2>
-      </div>
-      <div class="header-right">
-        <nav class="nav">
-          <ul>
-            <li><a href="index.html">Home</a></li>
-            <li><a href="shop.html">Shop</a></li>
-            <li><a href="checkout.html">Checkout</a></li>
-          </ul>
-        </nav>
-        <div class="hamburger" onclick="toggleMenu()">&#9776;</div>
-      </div>
+  <header class="site-header">
+    <div class="header-left container" style="display:flex;align-items:center;gap:12px;padding:0;">
+      <!-- Logo + Brand side-by-side top-left -->
+      <img src="logo.png" alt="Fleur De Vie logo" class="brand-logo" onerror="this.style.opacity=0.6">
+      <div class="brand-title">Fleur De Vie</div>
+    </div>
+
+    <!-- Center title -->
+    <div class="header-center">Your Cart</div>
+
+    <!-- Right nav (desktop) -->
+    <div class="header-right container" style="justify-content:flex-end;padding:0;">
+      <nav style="display:flex;gap:14px;align-items:center">
+        <a href="../index.html">Home</a>
+        <a href="shop.html">Shop</a>
+        <a href="checkout.html">Checkout</a>
+      </nav>
+    </div>
+
+    <!-- Hamburger (mobile) -->
+    <button class="hamburger" id="hamburger" aria-label="Open menu" title="Menu">
+      <span></span><span></span><span></span>
+    </button>
+
+    <!-- Small dropdown menu (mobile) -->
+    <div class="dropdown-menu" id="dropdown-menu" aria-hidden="true">
+      <button class="dropdown-close" id="dropdown-close" aria-label="Close menu">&times;</button>
+      <a href="../index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="checkout.html">Checkout</a>
     </div>
   </header>
 
-  <!-- DROPDOWN MENU -->
-  <div class="dropdown-menu" id="dropdown-menu">
-    <span class="close" onclick="toggleMenu()">&times;</span>
-    <ul>
-      <li><a href="index.html">Home</a></li>
-      <li><a href="shop.html">Shop</a></li>
-      <li><a href="checkout.html">Checkout</a></li>
-    </ul>
-  </div>
-
-  <!-- CART SECTION -->
-  <section class="cart">
-    <div class="container">
-      <table class="cart-table">
+  <!-- CART CONTENT -->
+  <main class="container cart" role="main">
+    <!-- Table always shows even if empty (requirement) -->
+    <div class="cart-table-wrap" aria-live="polite">
+      <table class="cart-table" id="cart-table" aria-label="Shopping cart">
         <thead>
           <tr>
-            <th>Product</th>
+            <th>Image</th>
+            <th>Name</th>
             <th>Price</th>
-            <th>Quantity</th>
-            <th>Subtotal</th>
+            <th style="width:110px">Quantity</th>
+            <th>Total</th>
+            <th>Action</th>
           </tr>
         </thead>
-        <tbody id="cart-items">
-          <!-- Example row -->
-          <!-- Cart content dynamically inserted here -->
+        <tbody id="cart-body">
+          <!-- rows inserted via JS -->
         </tbody>
       </table>
-
-      <p id="empty-cart-message">Your Cart is empty</p>
-
-      <div class="cart-summary">
-        <h3>Total: $<span id="cart-total">0.00</span></h3>
-        <div class="cart-actions">
-          <button class="continue-btn">Continue Shopping</button>
-          <button class="checkout-btn">Proceed to Checkout</button>
-          <select id="currency-selector" class="currency-selector">
-            <option value="USD" selected>USD ($)</option>
-            <option value="EUR">EUR (€)</option>
-            <option value="GBP">GBP (£)</option>
-            <option value="NGN">NGN (₦)</option>
-          </select>
-        </div>
-      </div>
     </div>
-  </section>
+
+    <!-- Empty message shown below table if no items -->
+    <div id="empty-message" class="empty-message" aria-hidden="true">Your cart is empty</div>
+
+    <!-- Total -->
+    <div id="cart-total">Total: $0.00</div>
+
+    <!-- Bottom controls -->
+    <div class="bottom-controls" role="group" aria-label="Cart actions">
+      <a class="btn" href="shop.html" id="continue-shopping"><i class="fa-solid fa-arrow-left"></i> Continue Shopping</a>
+      <a class="btn" id="checkout-link" href="checkout.html"><i class="fa-solid fa-credit-card"></i> Proceed to Checkout</a>
+      <select id="currency-selector" class="currency-select" aria-label="Select currency">
+        <option value="USD" selected>USD $</option>
+        <option value="EUR">EUR €</option>
+        <option value="GBP">GBP £</option>
+        <option value="NGN">NGN ₦</option>
+      </select>
+    </div>
+  </main>
 
   <script>
-    function toggleMenu() {
-      document.getElementById("dropdown-menu").classList.toggle("active");
+    /* ---------- Mobile menu behavior ---------- */
+    const hamburger = document.getElementById('hamburger');
+    const dropdown = document.getElementById('dropdown-menu');
+    const dropdownClose = document.getElementById('dropdown-close');
+
+    function openDropdown(){ dropdown.classList.add('open'); dropdown.setAttribute('aria-hidden','false'); }
+    function closeDropdown(){ dropdown.classList.remove('open'); dropdown.setAttribute('aria-hidden','true'); }
+
+    hamburger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openDropdown();
+    });
+    dropdownClose.addEventListener('click', (e) => { e.stopPropagation(); closeDropdown(); });
+    // click outside to close
+    document.addEventListener('click', (e) => {
+      if (!dropdown.contains(e.target) && !hamburger.contains(e.target)) closeDropdown();
+    });
+
+    /* ---------- Cart logic (localStorage 'fleurdevie-cart') ---------- */
+    function getCart(){
+      try { return JSON.parse(localStorage.getItem('fleurdevie-cart')) || []; } catch { return []; }
     }
+    function saveCart(cart){ localStorage.setItem('fleurdevie-cart', JSON.stringify(cart)); }
+
+    const cartBody = document.getElementById('cart-body');
+    const cartTotalEl = document.getElementById('cart-total');
+    const emptyMessageEl = document.getElementById('empty-message');
+    const currencySelector = document.getElementById('currency-selector');
+    const checkoutLink = document.getElementById('checkout-link');
+
+    // simple static rates (base USD). Replace with live API if desired.
+    const RATES = { USD: 1, EUR: 0.93, GBP: 0.80, NGN: 1600 };
+
+    function formatPrice(amount, currency){
+      if (currency === 'USD') return '$' + amount.toFixed(2);
+      if (currency === 'EUR') return '€' + amount.toFixed(2);
+      if (currency === 'GBP') return '£' + amount.toFixed(2);
+      if (currency === 'NGN') return '₦' + Math.round(amount);
+      return amount.toFixed(2);
+    }
+
+    function renderCart(){
+      const currency = localStorage.getItem('fleurdevie-currency') || currencySelector.value || 'USD';
+      currencySelector.value = currency;
+      const cart = getCart();
+      cartBody.innerHTML = '';
+
+      // always show table (per your request). If empty, table body will be empty and empty message visible.
+      if (!cart || cart.length === 0){
+        emptyMessageEl.style.display = 'block';
+        cartTotalEl.textContent = `Total: ${formatPrice(0, currency)}`;
+        checkoutLink.classList.add('disabled');
+        checkoutLink.setAttribute('aria-disabled','true');
+        checkoutLink.href = `checkout.html?currency=${currency}`;
+        return;
+      }
+
+      emptyMessageEl.style.display = 'none';
+      checkoutLink.classList.remove('disabled');
+      checkoutLink.removeAttribute('aria-disabled');
+
+      let grandTotal = 0;
+      cart.forEach((item, idx) => {
+        const base = Number(item.price) || 0; // assume stored base is USD
+        const unit = base * (RATES[currency] || 1);
+        const qty = Number(item.quantity) || 1;
+        const subtotal = unit * qty;
+        grandTotal += subtotal;
+
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><img src="${item.imageUrl || 'placeholder.jpg'}" alt="${(item.name||'Product')}"></td>
+          <td>${item.name || ''}</td>
+          <td>${formatPrice(unit, currency)}</td>
+          <td><input type="number" min="1" value="${qty}" data-idx="${idx}" class="qty-input" style="width:70px;padding:6px;border-radius:6px;border:1px solid #ddd;text-align:center"></td>
+          <td>${formatPrice(subtotal, currency)}</td>
+          <td><button class="remove" data-idx="${idx}" style="padding:6px 10px;border-radius:6px;border:0;background:#eee;cursor:pointer">Remove</button></td>
+        `;
+        cartBody.appendChild(tr);
+      });
+
+      cartTotalEl.textContent = `Total: ${formatPrice(grandTotal, currency)}`;
+      checkoutLink.href = `checkout.html?currency=${currency}`;
+      attachRowEvents();
+    }
+
+    function attachRowEvents(){
+      document.querySelectorAll('.qty-input').forEach(input => {
+        input.onchange = (e) => {
+          let idx = Number(e.target.dataset.idx);
+          let value = parseInt(e.target.value,10);
+          if (!value || value < 1) value = 1;
+          const cart = getCart();
+          if (!cart[idx]) return;
+          cart[idx].quantity = value;
+          saveCart(cart);
+          renderCart();
+        };
+      });
+
+      document.querySelectorAll('.remove').forEach(btn => {
+        btn.onclick = (e) => {
+          const idx = Number(e.target.dataset.idx);
+          let cart = getCart();
+          if (!cart[idx]) return;
+          cart.splice(idx,1);
+          saveCart(cart);
+          renderCart();
+        };
+      });
+    }
+
+    // currency selector persists and triggers re-render
+    currencySelector.addEventListener('change', (e) => {
+      localStorage.setItem('fleurdevie-currency', e.target.value);
+      renderCart();
+    });
+
+    // initial render
+    renderCart();
+
+    // Expose a small helper to add test item (dev). Remove if you don't need it.
+    // window.__addTest = () => {
+    //   const cart = getCart(); cart.push({ name:'Test product', price:12.50, quantity:1, imageUrl:'placeholder.jpg' }); saveCart(cart); renderCart();
+    // };
   </script>
 </body>
 </html>
