@@ -5,7 +5,226 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fleur De Vie - Cart</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="cart.css">
+  <style>
+    /* GENERAL */
+    body {
+      margin: 0;
+      font-family: 'Montserrat', sans-serif;
+      background: #fff;
+      color: #000;
+    }
+
+    .container {
+      width: 90%;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    /* HEADER */
+    .header {
+      background: #FFD6BA;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo {
+      height: 50px;
+      width: auto;
+    }
+
+    .brand {
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .header-center .page-title {
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .nav ul {
+      display: flex;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      gap: 20px;
+    }
+
+    .nav ul li a {
+      text-decoration: none;
+      color: #000;
+      font-weight: 500;
+    }
+
+    /* HAMBURGER */
+    .hamburger {
+      font-size: 26px;
+      cursor: pointer;
+      display: none;
+      color: #000;
+    }
+
+    /* DROPDOWN MENU */
+    .dropdown-menu {
+      display: none;
+      position: fixed;
+      top: 0;
+      right: 0;
+      background: #FFD6BA;
+      width: 250px;
+      height: 100%;
+      padding: 20px;
+      z-index: 999;
+    }
+
+    .dropdown-menu.active {
+      display: block;
+    }
+
+    .dropdown-menu .close {
+      font-size: 28px;
+      cursor: pointer;
+      color: #000;
+      display: block;
+      margin-bottom: 20px;
+    }
+
+    .dropdown-menu ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .dropdown-menu ul li {
+      margin: 15px 0;
+    }
+
+    .dropdown-menu ul li a {
+      text-decoration: none;
+      color: #000;
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    /* CART */
+    .cart {
+      padding: 30px 0;
+    }
+
+    .cart-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+
+    .cart-table th, .cart-table td {
+      border: 1px solid #ddd;
+      padding: 12px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .cart-table th {
+      background: #FFD6BA;
+      font-weight: 600;
+    }
+
+    #empty-cart-message {
+      text-align: center;
+      font-size: 16px;
+      margin: 15px 0;
+      color: #555;
+    }
+
+    /* CART SUMMARY */
+    .cart-summary {
+      text-align: right;
+      margin-top: 20px;
+    }
+
+    .cart-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: flex-end;
+      margin-top: 15px;
+    }
+
+    button {
+      padding: 10px 16px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 4px;
+    }
+
+    .continue-btn, .checkout-btn {
+      background: #FFD6BA;
+      color: #000;
+    }
+
+    .currency-selector {
+      padding: 10px;
+      border: 1px solid #000;
+      background: #fff;
+      font-size: 14px;
+    }
+
+    /* RESPONSIVENESS */
+    @media (max-width: 768px) {
+      .nav ul {
+        display: none;
+      }
+
+      .hamburger {
+        display: block;
+      }
+
+      .brand {
+        font-size: 18px;
+      }
+
+      .header-center .page-title {
+        font-size: 16px;
+      }
+
+      .cart-table, .cart-table thead, .cart-table tbody, .cart-table th, .cart-table td, .cart-table tr {
+        display: block;
+      }
+
+      .cart-table thead tr {
+        display: none;
+      }
+
+      .cart-table tr {
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        padding: 10px;
+      }
+
+      .cart-table td {
+        text-align: right;
+        position: relative;
+        padding-left: 50%;
+      }
+
+      .cart-table td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 10px;
+        font-weight: 600;
+        text-align: left;
+      }
+    }
+  </style>
 </head>
 <body>
   <!-- HEADER -->
