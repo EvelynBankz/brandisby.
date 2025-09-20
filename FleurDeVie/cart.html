@@ -8,50 +8,120 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    body { font-family: 'Montserrat', sans-serif; margin: 0; padding: 0; background: #fff; color: #000; }
-    
+    body {
+      background-color: #FFD6BA;
+      margin: 0;
+      font-family: 'Montserrat', sans-serif;
+    }
+
     /* HEADER */
     .site-header {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 10px 20px; background: #FFD6BA; position: relative;
-    }
-    .header-left { display: flex; align-items: center; gap: 10px; }
-    .brand-logo { width: 80px; height: auto; }
-    .brand-title { font-size: 1.8rem; font-weight: 700; color: #000; }
-    .header-right a { margin-left: 15px; color: #000; font-weight: 500; text-decoration: none; }
-    .hamburger { display: none; background: none; border: none; cursor: pointer; flex-direction: column; gap: 4px; }
-    .hamburger span { display: block; width: 25px; height: 3px; background: #000; border-radius: 2px; }
-
-    /* PAGE TITLE */
-    .page-title {
-      text-align: center; font-size: 2rem; font-weight: 700; margin: 30px 0; color: #000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px;
+      background: #fff;
+      border-bottom: 1px solid #ddd;
+      position: relative;
     }
 
-    /* CART */
-    .cart-container { max-width: 1100px; margin: 0 auto 50px; padding: 0 20px; }
-    .cart-header { display: flex; justify-content: flex-end; margin-bottom: 15px; }
-    .currency-select { padding: 8px; border-radius: 6px; border: 1px solid #ccc; }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
-    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; color: #000; }
-    th, td { padding: 10px; text-align: center; border-bottom: 1px solid #ddd; }
-    img { width: 80px; border-radius: 6px; }
+    .brand-logo {
+      height: 60px;
+      width: auto;
+    }
 
-    input.qty-input { width: 60px; padding: 5px; border-radius: 4px; border: 1px solid #ccc; text-align: center; }
+    .brand-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #333;
+    }
 
-    button { padding: 10px 20px; border: none; border-radius: 6px; background: #FFD6BA; color: #000; font-weight: 500; cursor: pointer; transition: 0.3s; }
-    button:hover { opacity: 0.85; }
+    .header-right a {
+      margin-left: 15px;
+      text-decoration: none;
+      color: #333;
+      font-weight: 500;
+    }
 
-    .cart-buttons { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
-    .empty-cart { text-align: center; font-size: 1.2rem; margin: 20px 0; color: #000; }
+    /* "Your Cart" in center */
+    .header-center {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #333;
+    }
+
+    /* CART CONTENT */
+    .cart {
+      padding: 30px 20px;
+    }
+
+    .cart h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+
+    th, td {
+      padding: 12px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+
+    th {
+      background: #333;
+      color: #fff;
+    }
+
+    .empty-message {
+      text-align: center;
+      font-size: 1.2rem;
+      color: #555;
+      margin: 30px 0;
+    }
+
+    button {
+      background: #333;
+      color: #fff;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #555;
+    }
 
     @media (max-width: 768px) {
-      table, thead, tbody, th, td, tr { display: block; }
-      th { display: none; }
-      td { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; }
-      td:before { content: attr(data-label); font-weight: bold; flex: 1; }
-      td img { margin-right: 10px; }
-      .cart-buttons { flex-direction: column; }
-      .cart-header { justify-content: center; margin-bottom: 10px; }
+      .site-header {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .header-right {
+        margin-top: 10px;
+      }
+
+      .header-center {
+        position: static;
+        transform: none;
+        margin-top: 10px;
+      }
     }
   </style>
 </head>
@@ -63,79 +133,52 @@
       <img src="logo.png" alt="FleurDeVie Logo" class="brand-logo">
       <div class="brand-title">Fleur De Vie</div>
     </div>
+
+    <div class="header-center">Your Cart</div>
+
     <nav class="header-right">
       <a href="index.html">Home</a>
       <a href="shop.html">Shop</a>
       <a href="checkout.html">Checkout</a>
     </nav>
-    <button class="hamburger" id="hamburger">
-      <span></span><span></span><span></span>
-    </button>
   </header>
 
-  <!-- PAGE TITLE -->
-  <div class="page-title">Your Cart</div>
-
   <!-- CART CONTENT -->
-  <div class="cart-container">
-    <div class="cart-header">
-      <select class="currency-select" id="currency">
-        <option value="USD" selected>USD $</option>
-        <option value="EUR">EUR €</option>
-        <option value="NGN">NGN ₦</option>
-      </select>
+  <section class="cart">
+    <div class="container">
+      <table id="cart-table">
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Total</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="cart-body"></tbody>
+      </table>
+      <h2 id="cart-total">Total: $0.00</h2>
+      <a href="checkout.html"><button>Proceed to Checkout</button></a>
     </div>
-
-    <div class="cart-buttons">
-      <a href="shop.html"><button>Continue Shopping</button></a>
-      <a href="checkout.html"><button id="checkout-btn">Proceed to Checkout</button></a>
-    </div>
-
-    <div id="cart-empty" class="empty-cart">Your cart is empty.</div>
-
-    <table id="cart-table">
-      <thead>
-        <tr>
-          <th>Image</th>
-          <th>Name</th>
-          <th>Price</th>
-          <th>Quantity</th>
-          <th>Total</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody id="cart-body"></tbody>
-    </table>
-
-    <h2 id="cart-total">Total: $0.00</h2>
-  </div>
+  </section>
 
   <script>
-    const hamburger = document.getElementById('hamburger');
-    const headerRight = document.querySelector('.header-right');
-    hamburger.addEventListener('click', () => { headerRight.classList.toggle('open'); });
-
-    // ===== Fleur De Vie Cart Logic =====
+    // ===== FLEUR DE VIE CART LOGIC =====
     let cart = JSON.parse(localStorage.getItem('fleurdevie-cart')) || [];
+
     const cartBody = document.getElementById('cart-body');
     const cartTotalEl = document.getElementById('cart-total');
-    const cartEmpty = document.getElementById('cart-empty');
 
     function renderCart() {
       cartBody.innerHTML = '';
       let total = 0;
 
-      if(cart.length === 0) {
-        cartEmpty.style.display = 'block';
-        document.getElementById('cart-table').style.display = 'none';
-        cartTotalEl.style.display = 'none';
-        document.getElementById('checkout-btn').disabled = true;
+      if (cart.length === 0) {
+        cartBody.innerHTML = `<tr><td colspan="6" class="empty-message">Your cart is empty</td></tr>`;
+        cartTotalEl.textContent = "Total: $0.00";
         return;
-      } else {
-        cartEmpty.style.display = 'none';
-        document.getElementById('cart-table').style.display = 'table';
-        cartTotalEl.style.display = 'block';
-        document.getElementById('checkout-btn').disabled = false;
       }
 
       cart.forEach((item, index) => {
@@ -144,12 +187,14 @@
         total += itemTotal;
 
         row.innerHTML = `
-          <td data-label="Image"><img src="${item.imageUrl}" alt="${item.name}"></td>
-          <td data-label="Name">${item.name}</td>
-          <td data-label="Price">$${item.price.toFixed(2)}</td>
-          <td data-label="Quantity"><input type="number" min="1" value="${item.quantity}" data-index="${index}" class="qty-input"></td>
-          <td data-label="Total">$${itemTotal.toFixed(2)}</td>
-          <td data-label="Action"><button data-index="${index}" class="remove-btn">Remove</button></td>
+          <td><img src="${item.imageUrl}" alt="${item.name}" width="80"></td>
+          <td>${item.name}</td>
+          <td>$${item.price}</td>
+          <td>
+            <input type="number" min="1" value="${item.quantity}" data-index="${index}" class="qty-input">
+          </td>
+          <td>$${itemTotal.toFixed(2)}</td>
+          <td><button data-index="${index}" class="remove-btn">Remove</button></td>
         `;
         cartBody.appendChild(row);
       });
@@ -178,11 +223,6 @@
         });
       });
     }
-
-    document.getElementById('currency').addEventListener('change', () => {
-      // Future: implement currency conversion
-      renderCart();
-    });
 
     renderCart();
   </script>
