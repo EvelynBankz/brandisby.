@@ -50,7 +50,6 @@
       font-size: 1.2rem;
       font-weight: 600;
       color: #333;
-      white-space: nowrap;
     }
 
     .header-right {
@@ -64,7 +63,6 @@
       font-weight: 500;
     }
 
-    /* HAMBURGER */
     .hamburger {
       display: none;
       flex-direction: column;
@@ -72,7 +70,6 @@
       background: none;
       border: none;
       cursor: pointer;
-      z-index: 1001;
     }
 
     .hamburger span {
@@ -94,7 +91,6 @@
         width: 200px;
         border: 1px solid #ddd;
         padding: 10px;
-        z-index: 1000;
       }
 
       .header-right.open {
@@ -105,11 +101,17 @@
         display: flex;
       }
 
-      /* Keep "Your Cart" centered in mobile */
       .header-center {
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
+        position: static;
+        transform: none;
+        margin: 10px 0;
+        text-align: center;
+        width: 100%;
+      }
+
+      .site-header {
+        flex-wrap: wrap;
+        justify-content: space-between;
       }
     }
 
