@@ -67,7 +67,8 @@
     .hamburger {
       display: none;
       flex-direction: column;
-      gap: 4px;
+      justify-content: center;
+      gap: 5px;
       background: none;
       border: none;
       cursor: pointer;
@@ -76,9 +77,9 @@
 
     .hamburger span {
       display: block;
-      width: 25px;
-      height: 3px;
-      background: #000; /* visible */
+      width: 20px; /* shorter, clean lines */
+      height: 2px;
+      background: #000; /* black */
       border-radius: 2px;
     }
 
@@ -87,7 +88,7 @@
       display: none;
       flex-direction: column;
       position: absolute;
-      top: 100%;
+      top: 70px; /* below header */
       right: 20px;
       background: #fff;
       border: 1px solid #ddd;
@@ -123,8 +124,28 @@
 
     /* Responsive header */
     @media (max-width: 768px) {
+      .site-header {
+        flex-wrap: wrap;
+        align-items: flex-start;
+        padding: 15px 20px;
+        min-height: 100px; /* taller header */
+      }
+
       .header-right { display: none; }
-      .hamburger { display: flex; }
+      .hamburger {
+        display: flex;
+        position: absolute;
+        top: 20px;
+        right: 20px;
+      }
+
+      .header-center {
+        width: 100%;
+        text-align: center;
+        margin-top: 40px; /* push Your Cart lower */
+        position: static;
+        transform: none;
+      }
     }
 
     /* CART CONTENT */
