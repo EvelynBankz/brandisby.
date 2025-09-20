@@ -1,177 +1,210 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Serac - Cart</title>
-  <link rel="stylesheet" href="shop.css">
+
+  <!-- Fonts & icons -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
   <style>
-    body { font-family: 'Montserrat', sans-serif; margin: 0; padding: 0; background: #fff; color: #fff; }
-    .site-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: #141517; }
-    .brand-logo { width: 50px; height: auto; }
-    .brand-title { font-size: 1.5rem; font-weight: 700; text-align: center; flex: 1; color: #fff; }
-    .header-left { display: flex; align-items: center; gap: 10px; }
-    .header-right a { margin-left: 15px; color: #fff; font-weight: 500; text-decoration: none; }
-    .hamburger { display: none; background: none; border: none; cursor: pointer; flex-direction: column; gap: 4px; }
-    .hamburger span { display: block; width: 25px; height: 3px; background: #fff; border-radius: 2px; }
+    :root{
+      --brand:#FFD6BA;
+      --text:#000;
+      --white:#fff;
+      --muted:#666;
+      --max-width:1100px;
+    }
+    body{margin:0;background:var(--white);color:var(--text);font-family:'Montserrat',sans-serif}
+    .container{max-width:var(--max-width);margin:0 auto;padding:0 18px}
 
-    .cart-container { max-width: 1100px; margin: 30px auto; padding: 0 20px; color: #000; }
-    .cart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
-    .cart-header h1 { margin: 0; flex: 1 1 100%; text-align: center; margin-bottom: 15px; color: #141517; }
-    .currency-select { padding: 8px; border-radius: 6px; border: 1px solid #ccc; }
+    /* ===== HEADER ===== */
+    .site-header{
+      background:var(--brand);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:10px 18px;
+      position:relative;
+    }
+    .header-left{display:flex;align-items:center;gap:10px;flex:1}
+    .brand-logo{height:54px;width:auto}
+    .brand-title{font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:700;color:var(--text)}
 
-    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; color: #141517; }
-    th, td { padding: 10px; text-align: center; border-bottom: 1px solid #ddd; }
-    img { width: 80px; border-radius: 6px; }
+    .header-center{flex:1;text-align:center;font-weight:600;font-size:1.1rem;color:var(--text)}
+    .header-right{display:flex;gap:14px;align-items:center;flex:1;justify-content:flex-end}
+    .header-right a{color:var(--text);text-decoration:none;font-weight:500}
 
-    input.qty-input { width: 60px; padding: 5px; border-radius: 4px; border: 1px solid #ccc; text-align: center; }
+    /* Hamburger */
+    .hamburger{
+      display:none;
+      flex-direction:column;
+      justify-content:space-between;
+      width:25px;height:18px;
+      border:none;background:none;
+      cursor:pointer;
+    }
+    .hamburger span{
+      display:block;
+      height:3px;width:100%;
+      background:var(--text);
+      border-radius:2px;
+    }
 
-    button { padding: 10px 20px; border: none; border-radius: 6px; background: #141517; color: #fff; font-weight: 500; cursor: pointer; transition: 0.3s; }
-    button:hover { opacity: 0.85; }
-    .cart-buttons { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+    /* Dropdown (mobile) */
+    .dropdown-menu{
+      display:none;
+      position:absolute;
+      top:100%; right:18px;
+      background:var(--brand);
+      padding:12px;
+      border-radius:6px;
+      flex-direction:column;
+      gap:10px;
+      min-width:180px;
+      box-shadow:0 4px 12px rgba(0,0,0,0.15);
+    }
+    .dropdown-menu.open{display:flex}
+    .dropdown-close{
+      align-self:flex-end;
+      border:none;background:none;
+      font-size:20px;color:var(--text);
+      cursor:pointer;
+    }
+    .dropdown-menu a{color:var(--text);text-decoration:none;font-weight:500}
 
-    .empty-cart { text-align: center; font-size: 1.2rem; margin: 20px 0; color: #141517; }
+    /* ===== CART ===== */
+    .cart{padding:28px 0 60px}
+    .cart-table-wrap{overflow:auto;background:var(--white);border-radius:8px}
+    table{width:100%;border-collapse:collapse;min-width:720px}
+    th{padding:12px;background:#141517;color:#fff;font-weight:600;text-align:center}
+    td{padding:12px;text-align:center;border-bottom:1px solid #eee}
+    td img{width:80px;border-radius:6px}
 
-    @media (max-width: 768px) {
-      table, thead, tbody, th, td, tr { display: block; }
-      th { display: none; }
-      td { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; }
-      td:before { content: attr(data-label); font-weight: bold; flex: 1; }
-      td img { margin-right: 10px; }
-      .cart-buttons { flex-direction: column; }
+    .empty-message{text-align:center;margin-top:15px;color:var(--muted)}
+    #cart-total{text-align:center;font-weight:700;margin-top:18px}
+    .bottom-controls{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+
+    .btn{background:var(--brand);color:var(--text);padding:10px 16px;border:none;border-radius:8px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+    .currency-select{padding:8px 10px;border-radius:6px;border:1px solid #ccc;font-weight:600}
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width:768px){
+      .header-right{display:none}
+      .hamburger{display:flex}
+      .brand-title{font-size:1.1rem}
+      .header-center{font-size:1rem}
+      table{min-width:520px}
+    }
+    @media (max-width:480px){
+      .brand-logo{height:46px}
+      .brand-title{font-size:1rem}
+      .header-center{font-size:0.95rem}
+      table{min-width:380px}
     }
   </style>
 </head>
-<body class="serac">
+<body>
 
-  <!-- HEADER -->
+  <!-- ===== HEADER ===== -->
   <header class="site-header">
     <div class="header-left">
-      <img src="logo.png" alt="Serac Logo" class="brand-logo">
+      <img src="logo.png" alt="Serac" class="brand-logo">
       <div class="brand-title">Serac</div>
     </div>
-    <nav class="header-right">
-      <a href="index.html">Home</a>
+    <div class="header-center">Your Cart</div>
+    <div class="header-right">
+      <a href="../index.html">Home</a>
       <a href="shop.html">Shop</a>
       <a href="checkout.html">Checkout</a>
-    </nav>
-    <button class="hamburger" id="hamburger">
-      <span></span><span></span><span></span>
-    </button>
+    </div>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    <div class="dropdown-menu" id="dropdown-menu">
+      <button class="dropdown-close" id="dropdown-close">&times;</button>
+      <a href="../index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="checkout.html">Checkout</a>
+    </div>
   </header>
 
-  <!-- CART CONTENT -->
-  <div class="cart-container">
-    <div class="cart-header">
-      <h1>Your Cart</h1>
-      <select class="currency-select" id="currency">
+  <!-- ===== CART ===== -->
+  <main class="container cart">
+    <div class="cart-table-wrap">
+      <table id="cart-table">
+        <thead>
+          <tr>
+            <th>Image</th><th>Name</th><th>Price</th><th>Qty</th><th>Total</th><th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="cart-body"></tbody>
+      </table>
+    </div>
+    <div id="empty-message" class="empty-message">Your cart is empty</div>
+    <div id="cart-total">Total: $0.00</div>
+    <div class="bottom-controls">
+      <a class="btn" href="shop.html"><i class="fa fa-arrow-left"></i> Continue Shopping</a>
+      <a class="btn" id="checkout-link" href="checkout.html"><i class="fa fa-credit-card"></i> Checkout</a>
+      <select id="currency-selector" class="currency-select">
         <option value="USD" selected>USD $</option>
         <option value="EUR">EUR €</option>
+        <option value="GBP">GBP £</option>
         <option value="NGN">NGN ₦</option>
       </select>
     </div>
-
-    <div class="cart-buttons">
-      <a href="shop.html"><button>Continue Shopping</button></a>
-      <a href="checkout.html"><button id="checkout-btn">Proceed to Checkout</button></a>
-    </div>
-
-    <div id="cart-empty" class="empty-cart">Your cart is empty.</div>
-
-    <table id="cart-table">
-      <thead>
-        <tr>
-          <th>Image</th>
-          <th>Name</th>
-          <th>Price</th>
-          <th>Quantity</th>
-          <th>Total</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody id="cart-body"></tbody>
-    </table>
-
-    <h2 id="cart-total">Total: $0.00</h2>
-  </div>
+  </main>
 
   <script>
-    const hamburger = document.getElementById('hamburger');
-    const headerRight = document.querySelector('.header-right');
-    hamburger.addEventListener('click', () => { headerRight.classList.toggle('open'); });
-
-    // ===== Serac Cart Logic =====
-    let cart = JSON.parse(localStorage.getItem('serac-cart')) || [];
-    const cartBody = document.getElementById('cart-body');
-    const cartTotalEl = document.getElementById('cart-total');
-    const cartEmpty = document.getElementById('cart-empty');
-
-    function renderCart() {
-      cartBody.innerHTML = '';
-      let total = 0;
-
-      if(cart.length === 0) {
-        cartEmpty.style.display = 'block';
-        document.getElementById('cart-table').style.display = 'none';
-        cartTotalEl.style.display = 'none';
-        document.getElementById('checkout-btn').disabled = true;
-        return;
-      } else {
-        cartEmpty.style.display = 'none';
-        document.getElementById('cart-table').style.display = 'table';
-        cartTotalEl.style.display = 'block';
-        document.getElementById('checkout-btn').disabled = false;
-      }
-
-      cart.forEach((item, index) => {
-        const row = document.createElement('tr');
-        const itemTotal = item.price * item.quantity;
-        total += itemTotal;
-
-        row.innerHTML = `
-          <td data-label="Image"><img src="${item.imageUrl}" alt="${item.name}"></td>
-          <td data-label="Name">${item.name}</td>
-          <td data-label="Price">$${item.price.toFixed(2)}</td>
-          <td data-label="Quantity"><input type="number" min="1" value="${item.quantity}" data-index="${index}" class="qty-input"></td>
-          <td data-label="Total">$${itemTotal.toFixed(2)}</td>
-          <td data-label="Action"><button data-index="${index}" class="remove-btn">Remove</button></td>
-        `;
-        cartBody.appendChild(row);
-      });
-
-      cartTotalEl.textContent = `Total: $${total.toFixed(2)}`;
-      attachCartEvents();
-    }
-
-    function attachCartEvents() {
-      document.querySelectorAll('.remove-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const index = e.target.dataset.index;
-          cart.splice(index, 1);
-          localStorage.setItem('serac-cart', JSON.stringify(cart));
-          renderCart();
-        });
-      });
-
-      document.querySelectorAll('.qty-input').forEach(input => {
-        input.addEventListener('change', (e) => {
-          const index = e.target.dataset.index;
-          const qty = parseInt(e.target.value);
-          cart[index].quantity = qty;
-          localStorage.setItem('serac-cart', JSON.stringify(cart));
-          renderCart();
-        });
-      });
-    }
-
-    document.getElementById('currency').addEventListener('change', (e) => {
-      // Future: implement currency conversion
-      renderCart();
+    // Mobile menu
+    const hamburger=document.getElementById('hamburger');
+    const dropdown=document.getElementById('dropdown-menu');
+    const closeBtn=document.getElementById('dropdown-close');
+    hamburger.onclick=()=>dropdown.classList.add('open');
+    closeBtn.onclick=()=>dropdown.classList.remove('open');
+    document.addEventListener('click',e=>{
+      if(!dropdown.contains(e.target)&&!hamburger.contains(e.target)) dropdown.classList.remove('open');
     });
 
-    renderCart();
+    // Cart logic (simplified)
+    const cartBody=document.getElementById('cart-body');
+    const totalEl=document.getElementById('cart-total');
+    const emptyEl=document.getElementById('empty-message');
+    const currencySel=document.getElementById('currency-selector');
+    const checkoutLink=document.getElementById('checkout-link');
+    const RATES={USD:1,EUR:0.93,GBP:0.8,NGN:1600};
+
+    function getCart(){return JSON.parse(localStorage.getItem('serac-cart')||'[]');}
+    function saveCart(c){localStorage.setItem('serac-cart',JSON.stringify(c));}
+    function fmt(val,c){if(c==="USD")return"$"+val.toFixed(2);if(c==="EUR")return"€"+val.toFixed(2);if(c==="GBP")return"£"+val.toFixed(2);if(c==="NGN")return"₦"+Math.round(val);return val;}
+
+    function render(){
+      const cur=localStorage.getItem('serac-currency')||currencySel.value;
+      currencySel.value=cur;
+      const cart=getCart();cartBody.innerHTML="";let total=0;
+      if(cart.length===0){emptyEl.style.display="block";totalEl.textContent="Total: "+fmt(0,cur);return;}
+      emptyEl.style.display="none";
+      cart.forEach((it,i)=>{let unit=it.price*RATES[cur];let sub=unit*it.quantity;total+=sub;
+        const tr=document.createElement("tr");
+        tr.innerHTML=`<td><img src="${it.imageUrl||'placeholder.jpg'}"></td>
+          <td>${it.name}</td><td>${fmt(unit,cur)}</td>
+          <td><input type="number" min="1" value="${it.quantity}" data-i="${i}" style="width:60px"></td>
+          <td>${fmt(sub,cur)}</td>
+          <td><button data-r="${i}">Remove</button></td>`;
+        cartBody.appendChild(tr);
+      });
+      totalEl.textContent="Total: "+fmt(total,cur);
+      checkoutLink.href=`checkout.html?currency=${cur}`;
+      attachEvents();
+    }
+    function attachEvents(){
+      document.querySelectorAll("[data-i]").forEach(inp=>inp.onchange=e=>{
+        const c=getCart();c[e.target.dataset.i].quantity=parseInt(e.target.value)||1;saveCart(c);render();
+      });
+      document.querySelectorAll("[data-r]").forEach(btn=>btn.onclick=()=>{const c=getCart();c.splice(btn.dataset.r,1);saveCart(c);render();});
+    }
+    currencySel.onchange=e=>{localStorage.setItem('serac-currency',e.target.value);render();}
+    render();
   </script>
 </body>
 </html>
