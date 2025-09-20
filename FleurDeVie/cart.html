@@ -3,163 +3,398 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Serac - Cart</title>
+  <title>Fleur De Vie - Cart</title>
+  <link rel="stylesheet" href="shop.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* Reset */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
     body {
-      font-family: Arial, sans-serif;
-      background: #f9f9f9;
+      background-color: #FFD6BA;
+      margin: 0;
+      font-family: 'Montserrat', sans-serif;
     }
 
-    /* Header */
+    /* HEADER */
     .site-header {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      padding: 15px 20px;
+      justify-content: space-between;
+      padding: 10px 20px;
       background: #fff;
       border-bottom: 1px solid #ddd;
       position: relative;
-      z-index: 1000;
     }
 
-    .header-left .logo {
-      font-size: 22px;
-      font-weight: bold;
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-logo {
+      height: 60px;
+      width: auto;
+    }
+
+    .brand-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #333;
     }
 
     .header-center {
-      font-size: 18px;
-      font-weight: bold;
-      text-align: center;
-      flex-grow: 1;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #333;
     }
 
     .header-right {
-      font-size: 14px;
+      display: flex;
+      gap: 15px;
     }
 
-    /* Hamburger */
+    .header-right a {
+      text-decoration: none;
+      color: #333;
+      font-weight: 500;
+    }
+
+    /* Hamburger button */
     .hamburger {
       display: none;
       flex-direction: column;
       justify-content: center;
-      align-items: center;
       gap: 5px;
-      width: 35px;
-      height: 30px;
-      background: transparent;
+      background: none;
       border: none;
       cursor: pointer;
+      z-index: 1001;
     }
 
     .hamburger span {
       display: block;
-      width: 25px;
-      height: 3px;
-      background: #000;
+      width: 20px; /* shorter, clean lines */
+      height: 2px;
+      background: #000; /* black */
       border-radius: 2px;
     }
 
     /* Dropdown menu */
     .dropdown-menu {
       display: none;
-      position: fixed;
-      top: 0;
-      right: 0;
-      width: 250px;
-      height: 100%;
-      background: #fff;
-      box-shadow: -2px 0 5px rgba(0,0,0,0.1);
-      padding: 20px;
-      z-index: 1500;
       flex-direction: column;
+      position: absolute;
+      top: 70px; /* below header */
+      right: 20px;
+      background: #fff;
+      border: 1px solid #ddd;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      width: 200px;
+      z-index: 1000;
+      padding: 10px;
     }
 
-    .dropdown-menu.active {
+    .dropdown-menu.open {
       display: flex;
     }
 
     .dropdown-menu .close-btn {
       align-self: flex-end;
-      font-size: 26px;
-      font-weight: bold;
       background: none;
       border: none;
+      font-size: 1.4rem;
       cursor: pointer;
-      color: #000;
-      margin-bottom: 20px;
+      margin-bottom: 10px;
     }
 
-    /* Responsive */
+    .dropdown-menu a {
+      text-decoration: none;
+      color: #333;
+      padding: 8px 0;
+      font-weight: 500;
+    }
+
+    .dropdown-menu a:hover {
+      color: #d87a56;
+    }
+
+    /* Responsive header */
     @media (max-width: 768px) {
-      .header-right {
-        display: none;
+      .site-header {
+        flex-wrap: wrap;
+        align-items: flex-start;
+        padding: 15px 20px;
+        min-height: 100px; /* taller header */
       }
 
+      .header-right { display: none; }
       .hamburger {
         display: flex;
+        position: absolute;
+        top: 20px;
+        right: 20px;
       }
 
       .header-center {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
+        width: 100%;
+        text-align: center;
+        margin-top: 40px; /* push Your Cart lower */
+        position: static;
+        transform: none;
       }
+    }
 
-      .site-header {
-        min-height: 120px; /* more height for mobile */
-      }
+    /* CART CONTENT */
+    .cart { padding: 30px 20px; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+
+    th, td {
+      padding: 12px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+
+    th {
+      background: #333;
+      color: #fff;
+    }
+
+    .empty-message {
+      text-align: center;
+      font-size: 1.2rem;
+      color: #555;
+      margin: 20px 0;
+    }
+
+    #cart-total {
+      text-align: center;
+      margin: 20px 0;
+      font-size: 1.4rem;
+      font-weight: 600;
+    }
+
+    .bottom-controls {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      align-items: center;
+      margin-top: 12px;
+    }
+
+    button {
+      background: #333;
+      color: #fff;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover { background: #555; }
+
+    .currency-select {
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      background: #fff;
+      font-weight: 600;
+    }
+
+    @media (max-width: 480px) {
+      .bottom-controls { flex-direction: column; align-items: stretch; }
+      .currency-select, .bottom-controls button { width: 100%; }
     }
   </style>
 </head>
-<body>
+<body class="fleurdevie">
+
+  <!-- HEADER -->
   <header class="site-header">
     <div class="header-left">
-      <div class="logo">Serac</div>
+      <img src="logo.png" alt="FleurDeVie Logo" class="brand-logo">
+      <div class="brand-title">Fleur De Vie</div>
     </div>
 
     <div class="header-center">Your Cart</div>
 
-    <div class="header-right">
-      <span>Profile</span>
-    </div>
+    <nav class="header-right">
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="checkout.html">Checkout</a>
+    </nav>
 
-    <!-- Hamburger -->
     <button class="hamburger" id="hamburger">
-      <span></span>
-      <span></span>
-      <span></span>
+      <span></span><span></span><span></span>
     </button>
+
+    <!-- Dropdown menu -->
+    <div class="dropdown-menu" id="dropdown-menu">
+      <button class="close-btn" id="close-menu">&times;</button>
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="checkout.html">Checkout</a>
+    </div>
   </header>
 
-  <!-- Dropdown -->
-  <nav class="dropdown-menu" id="dropdownMenu">
-    <button class="close-btn" id="closeMenu">&times;</button>
-    <a href="#">Home</a>
-    <a href="#">Shop</a>
-    <a href="#">Contact</a>
-  </nav>
+  <!-- CART CONTENT -->
+  <section class="cart">
+    <div class="container">
+      <table id="cart-table">
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Total</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="cart-body"></tbody>
+      </table>
+
+      <div id="empty-cart-message" class="empty-message" style="display:none;">Your cart is empty</div>
+
+      <h2 id="cart-total">Total: $0.00</h2>
+
+      <div class="bottom-controls">
+        <a href="shop.html"><button>Continue Shopping</button></a>
+        <a href="checkout.html" id="checkout-link"><button id="checkout-button">Proceed to Checkout</button></a>
+        <select id="currency-selector" class="currency-select" aria-label="Select currency">
+          <option value="USD" selected>USD $</option>
+          <option value="EUR">EUR €</option>
+          <option value="GBP">GBP £</option>
+          <option value="NGN">NGN ₦</option>
+        </select>
+      </div>
+    </div>
+  </section>
 
   <script>
+    // ===== Hamburger dropdown menu =====
     const hamburger = document.getElementById('hamburger');
-    const dropdownMenu = document.getElementById('dropdownMenu');
-    const closeMenu = document.getElementById('closeMenu');
+    const dropdownMenu = document.getElementById('dropdown-menu');
+    const closeMenu = document.getElementById('close-menu');
 
     hamburger.addEventListener('click', () => {
-      dropdownMenu.classList.add('active');
+      dropdownMenu.classList.add('open');
     });
 
     closeMenu.addEventListener('click', () => {
-      dropdownMenu.classList.remove('active');
+      dropdownMenu.classList.remove('open');
     });
+
+    // ===== CART LOGIC =====
+    function getCart() {
+      try {
+        return JSON.parse(localStorage.getItem('fleurdevie-cart')) || [];
+      } catch {
+        return [];
+      }
+    }
+    function saveCart(cart) {
+      localStorage.setItem('fleurdevie-cart', JSON.stringify(cart));
+    }
+
+    const cartBody = document.getElementById('cart-body');
+    const cartTotalEl = document.getElementById('cart-total');
+    const currencySelector = document.getElementById('currency-selector');
+    const checkoutLink = document.getElementById('checkout-link');
+    const checkoutButton = document.getElementById('checkout-button');
+    const emptyMessage = document.getElementById('empty-cart-message');
+
+    const RATES = { USD: 1, EUR: 0.93, GBP: 0.80, NGN: 1600 };
+
+    function formatPrice(amount, currency) {
+      if (currency === 'USD') return '$' + amount.toFixed(2);
+      if (currency === 'EUR') return '€' + amount.toFixed(2);
+      if (currency === 'GBP') return '£' + amount.toFixed(2);
+      if (currency === 'NGN') return '₦' + Math.round(amount);
+      return amount.toFixed(2);
+    }
+
+    function renderCart() {
+      const cart = getCart();
+      const currency = localStorage.getItem('fleurdevie-currency') || currencySelector.value || 'USD';
+      currencySelector.value = currency;
+
+      cartBody.innerHTML = '';
+      let grandTotal = 0;
+
+      if (!cart || cart.length === 0) {
+        emptyMessage.style.display = 'block';
+        cartTotalEl.textContent = `Total: ${formatPrice(0, currency)}`;
+        checkoutButton.disabled = true;
+        checkoutLink.href = `checkout.html?currency=${currency}`;
+        return;
+      }
+
+      emptyMessage.style.display = 'none';
+      checkoutButton.disabled = false;
+
+      cart.forEach((item, index) => {
+        const basePrice = Number(item.price) || 0;
+        const convertedUnit = basePrice * (RATES[currency] || 1);
+        const qty = Number(item.quantity) || 1;
+        const subtotal = convertedUnit * qty;
+        grandTotal += subtotal;
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td><img src="${item.imageUrl || 'placeholder.jpg'}" alt="${item.name || 'Product'}" width="80"></td>
+          <td>${item.name || ''}</td>
+          <td>${formatPrice(convertedUnit, currency)}</td>
+          <td><input class="qty-input" type="number" min="1" value="${qty}" data-index="${index}"></td>
+          <td>${formatPrice(subtotal, currency)}</td>
+          <td><button class="remove-btn" data-index="${index}">Remove</button></td>
+        `;
+        cartBody.appendChild(row);
+      });
+
+      cartTotalEl.textContent = `Total: ${formatPrice(grandTotal, currency)}`;
+      checkoutLink.href = `checkout.html?currency=${currency}`;
+      attachRowEvents();
+    }
+
+    function attachRowEvents() {
+      document.querySelectorAll('.qty-input').forEach(input => {
+        input.onchange = (e) => {
+          const idx = Number(e.target.dataset.index);
+          let qty = parseInt(e.target.value, 10);
+          if (!qty || qty < 1) qty = 1;
+          const cart = getCart();
+          cart[idx].quantity = qty;
+          saveCart(cart);
+          renderCart();
+        };
+      });
+
+      document.querySelectorAll('.remove-btn').forEach(btn => {
+        btn.onclick = (e) => {
+          const idx = Number(e.target.dataset.index);
+          let cart = getCart();
+          cart.splice(idx, 1);
+          saveCart(cart);
+          renderCart();
+        };
+      });
+    }
+
+    currencySelector.addEventListener('change', (e) => {
+      localStorage.setItem('fleurdevie-currency', e.target.value);
+      renderCart();
+    });
+
+    renderCart();
   </script>
 </body>
 </html>
