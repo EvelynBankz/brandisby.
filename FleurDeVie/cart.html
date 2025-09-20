@@ -1,465 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Fleur De Vie — Cart</title>
-
-  <!-- fonts/icons -->
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-  <style>
-    /* ---------- Page + base ---------- */
-    :root{
-      --brand:#FFD6BA;
-      --black:#000;
-      --white:#fff;
-      --text:#111;
-      --radius:8px;
-    }
-    html,body{height:100%; margin:0; background:var(--white); color:var(--text); font-family: 'Montserrat', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; -webkit-font-smoothing:antialiased;}
-    a{color:inherit; text-decoration:none;}
-
-    /* ---------- Header ---------- */
-    .site-header{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:16px;
-      padding:12px 20px;
-      background:var(--brand);
-      border-bottom:1px solid rgba(0,0,0,0.06);
-      position:relative;
-    }
-
-    .header-left{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      flex:0 0 auto;
-    }
-    .brand-logo{
-      width:64px;
-      height:auto;
-      display:block;
-    }
-    .brand-title{
-      font-family:'Playfair Display', serif;
-      font-size:1.4rem;
-      font-weight:700;
-      color:var(--black);
-      line-height:1;
-    }
-
-    .header-center{
-      position:absolute;
-      left:50%;
-      transform:translateX(-50%);
-      text-align:center;
-      font-weight:600;
-      font-size:1.1rem;
-      color:var(--black);
-      pointer-events:none; /* header center shouldn't block clicks */
-      white-space:nowrap;
-    }
-
-    .header-right{
-      display:flex;
-      gap:18px;
-      align-items:center;
-      margin-left:auto;
-    }
-    .header-right a{
-      color:var(--black);
-      font-weight:500;
-      padding:6px 8px;
-      border-radius:6px;
-    }
-
-    /* hamburger (mobile only) */
-    .hamburger{
-      display:none; /* shown in media query */
-      -webkit-appearance:none;
-      appearance:none;
-      background:transparent;
-      border:0;
-      width:36px;
-      height:36px;
-      padding:6px;
-      box-sizing:border-box;
-      cursor:pointer;
-      align-items:center;
-      justify-content:center;
-    }
-    .hamburger-inner{
-      width:24px;
-      height:18px;
-      display:flex;
-      flex-direction:column;
-      justify-content:space-between;
-    }
-    .hamburger-inner span{
-      display:block;
-      height:3px;
-      background:var(--black);
-      border-radius:2px;
-      width:100%;
-    }
-
-    /* small dropdown (mobile) */
-    .nav-dropdown{
-      display:none;
-      position:absolute;
-      top:100%;
-      right:18px;
-      background:var(--brand);
-      border-radius:10px;
-      box-shadow:0 6px 18px rgba(0,0,0,0.12);
-      padding:10px 12px;
-      min-width:180px;
-      z-index:4000;
-      gap:8px;
-      flex-direction:column;
-    }
-    .nav-dropdown.open{display:flex;}
-    .nav-dropdown a{
-      color:var(--black);
-      font-weight:600;
-      padding:8px 6px;
-      border-radius:6px;
-    }
-    .nav-dropdown .close{
-      align-self:flex-end;
-      font-size:20px;
-      line-height:1;
-      background:none;
-      border:0;
-      cursor:pointer;
-      color:var(--black);
-      padding:4px;
-      margin-bottom:4px;
-    }
-
-    /* ---------- Main cart area ---------- */
-    main.container{
-      max-width:1100px;
-      margin:28px auto;
-      padding:0 18px;
-      box-sizing:border-box;
-    }
-
-    .cart-table-wrap{
-      width:100%;
-      overflow-x:auto;
-      background:var(--white);
-      border-radius:10px;
-      padding:8px;
-      box-sizing:border-box;
-    }
-    table.cart-table{
-      width:100%;
-      border-collapse:collapse;
-      min-width:700px;
-      background:var(--white);
-    }
-    table.cart-table thead th{
-      background:var(--black);
-      color:var(--white);
-      padding:12px;
-      text-align:center;
-      font-weight:600;
-    }
-    table.cart-table td{
-      padding:12px;
-      border:1px solid #e7e7e7;
-      text-align:center;
-      vertical-align:middle;
-    }
-    table.cart-table img{
-      width:80px;
-      height:auto;
-      border-radius:6px;
-    }
-
-    .empty-note{
-      margin-top:12px;
-      text-align:center;
-      font-size:1rem;
-      color:#444;
-    }
-
-    /* total & bottom controls */
-    .cart-total{
-      margin-top:18px;
-      text-align:center;
-      font-size:1.25rem;
-      font-weight:700;
-    }
-
-    .controls{
-      margin-top:14px;
-      display:flex;
-      gap:12px;
-      justify-content:center;
-      align-items:center;
-      flex-wrap:wrap;
-    }
-
-    .btn{
-      background:var(--brand);
-      color:var(--black);
-      border:0;
-      padding:10px 16px;
-      border-radius:8px;
-      font-weight:600;
-      cursor:pointer;
-    }
-    .btn:disabled{opacity:0.45; cursor:not-allowed;}
-
-    .currency-select{
-      padding:8px 10px;
-      border-radius:8px;
-      border:1px solid #ddd;
-      background:var(--white);
-      font-weight:600;
-    }
-
-    /* ---------- Responsive behavior ---------- */
-    @media (max-width: 992px){
-      .brand-logo{width:56px;}
-      .brand-title{font-size:1.2rem;}
-      .header-center{font-size:1.05rem;}
-      table.cart-table{min-width:650px;}
-    }
-
-    @media (max-width: 768px){
-      .header-right{display:none;}           /* hide top nav on mobile */
-      .hamburger{display:flex;}              /* show hamburger */
-      .brand-logo{width:56px;}
-      .brand-title{font-size:1.05rem;}
-      .header-center{font-size:1rem; margin-top:8px;}
-      table.cart-table{min-width:520px;}
-      main.container{margin-top:18px;}
-    }
-
-    @media (max-width:480px){
-      .brand-logo{width:48px;}
-      .brand-title{font-size:0.95rem;}
-      .header-center{font-size:0.95rem;}
-      table.cart-table{min-width:480px;}
-      .hamburger{right:12px; top:12px;}
-    }
-
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fleur De Vie - Cart</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="cart.css">
 </head>
 <body>
-
   <!-- HEADER -->
-  <header class="site-header" role="banner">
-    <div class="header-left">
-      <img class="brand-logo" src="logo.png" alt="Fleur De Vie logo">
-      <div class="brand-title">Fleur De Vie</div>
-    </div>
-
-    <div class="header-center" aria-hidden="false">Your Cart</div>
-
-    <nav class="header-right" aria-label="Main navigation">
-      <a href="index.html">Home</a>
-      <a href="shop.html">Shop</a>
-      <a href="checkout.html">Checkout</a>
-    </nav>
-
-    <!-- hamburger (mobile) -->
-    <button class="hamburger" id="hamburger" aria-label="Open menu">
-      <span class="hamburger-inner" aria-hidden="true">
-        <span></span><span></span><span></span>
-      </span>
-    </button>
-
-    <!-- dropdown small menu for mobile -->
-    <div class="nav-dropdown" id="navDropdown" aria-hidden="true">
-      <button class="close" id="navClose" aria-label="Close menu">&times;</button>
-      <a href="index.html">Home</a>
-      <a href="shop.html">Shop</a>
-      <a href="checkout.html">Checkout</a>
+  <header class="header">
+    <div class="container">
+      <div class="header-left">
+        <img src="logo.png" alt="Fleur De Vie Logo" class="logo">
+        <h1 class="brand">Fleur De Vie</h1>
+      </div>
+      <div class="header-center">
+        <h2 class="page-title">Your Cart</h2>
+      </div>
+      <div class="header-right">
+        <nav class="nav">
+          <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="shop.html">Shop</a></li>
+            <li><a href="checkout.html">Checkout</a></li>
+          </ul>
+        </nav>
+        <div class="hamburger" onclick="toggleMenu()">&#9776;</div>
+      </div>
     </div>
   </header>
 
-  <!-- MAIN -->
-  <main class="container" role="main">
-    <div class="cart-table-wrap">
-      <table class="cart-table" id="cartTable" aria-describedby="cart-desc">
+  <!-- DROPDOWN MENU -->
+  <div class="dropdown-menu" id="dropdown-menu">
+    <span class="close" onclick="toggleMenu()">&times;</span>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="shop.html">Shop</a></li>
+      <li><a href="checkout.html">Checkout</a></li>
+    </ul>
+  </div>
+
+  <!-- CART SECTION -->
+  <section class="cart">
+    <div class="container">
+      <table class="cart-table">
         <thead>
           <tr>
-            <th scope="col">Image</th>
-            <th scope="col">Name</th>
-            <th scope="col">Price</th>
-            <th scope="col">Quantity</th>
-            <th scope="col">Total</th>
-            <th scope="col">Action</th>
+            <th>Product</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Subtotal</th>
           </tr>
         </thead>
-        <tbody id="cartBody">
-          <!-- rows injected by JS (table remains visible always) -->
+        <tbody id="cart-items">
+          <!-- Example row -->
+          <!-- Cart content dynamically inserted here -->
         </tbody>
       </table>
+
+      <p id="empty-cart-message">Your Cart is empty</p>
+
+      <div class="cart-summary">
+        <h3>Total: $<span id="cart-total">0.00</span></h3>
+        <div class="cart-actions">
+          <button class="continue-btn">Continue Shopping</button>
+          <button class="checkout-btn">Proceed to Checkout</button>
+          <select id="currency-selector" class="currency-selector">
+            <option value="USD" selected>USD ($)</option>
+            <option value="EUR">EUR (€)</option>
+            <option value="GBP">GBP (£)</option>
+            <option value="NGN">NGN (₦)</option>
+          </select>
+        </div>
+      </div>
     </div>
-
-    <div id="cartEmptyNote" class="empty-note" aria-live="polite" style="display:none;">Your cart is empty</div>
-
-    <div id="cartTotal" class="cart-total">Total: $0.00</div>
-
-    <div class="controls" role="region" aria-label="Cart actions">
-      <a href="shop.html"><button class="btn" id="continueBtn" type="button">Continue Shopping</button></a>
-      <a id="checkoutAnchor" href="checkout.html"><button class="btn" id="checkoutBtn" type="button">Proceed to Checkout</button></a>
-      <select id="currencySelect" class="currency-select" aria-label="Select currency">
-        <option value="USD" selected>USD $</option>
-        <option value="EUR">EUR €</option>
-        <option value="GBP">GBP £</option>
-        <option value="NGN">NGN ₦</option>
-      </select>
-    </div>
-  </main>
+  </section>
 
   <script>
-    // ---------- Mobile nav toggle ----------
-    const hamburger = document.getElementById('hamburger');
-    const navDropdown = document.getElementById('navDropdown');
-    const navClose = document.getElementById('navClose');
-
-    hamburger.addEventListener('click', () => {
-      const open = navDropdown.classList.toggle('open');
-      navDropdown.setAttribute('aria-hidden', String(!open));
-    });
-    navClose.addEventListener('click', () => {
-      navDropdown.classList.remove('open');
-      navDropdown.setAttribute('aria-hidden', 'true');
-    });
-
-    // ---------- Cart logic (localStorage 'fleurdevie-cart') ----------
-    const CART_KEY = 'fleurdevie-cart';
-    const CUR_KEY = 'fleurdevie-currency';
-
-    // static rates (base USD). Replace with live rates if desired.
-    const RATES = { USD: 1, EUR: 0.93, GBP: 0.80, NGN: 1600 };
-
-    const cartBody = document.getElementById('cartBody');
-    const cartTotalEl = document.getElementById('cartTotal');
-    const emptyNote = document.getElementById('cartEmptyNote');
-    const currencySelect = document.getElementById('currencySelect');
-    const checkoutAnchor = document.getElementById('checkoutAnchor');
-    const checkoutBtn = document.getElementById('checkoutBtn');
-
-    function getCart(){
-      try {
-        return JSON.parse(localStorage.getItem(CART_KEY)) || [];
-      } catch { return []; }
+    function toggleMenu() {
+      document.getElementById("dropdown-menu").classList.toggle("active");
     }
-    function saveCart(c){ localStorage.setItem(CART_KEY, JSON.stringify(c)); }
-
-    function formatPrice(amount, currency){
-      if(currency === 'USD') return '$' + amount.toFixed(2);
-      if(currency === 'EUR') return '€' + amount.toFixed(2);
-      if(currency === 'GBP') return '£' + amount.toFixed(2);
-      if(currency === 'NGN') return '₦' + Math.round(amount);
-      return amount.toFixed(2);
-    }
-
-    function renderCart(){
-      const cart = getCart();
-      const currency = localStorage.getItem(CUR_KEY) || currencySelect.value || 'USD';
-      currencySelect.value = currency;
-
-      cartBody.innerHTML = ''; // clear rows
-      let grand = 0;
-
-      // Table remains visible always — populate rows if any; otherwise leave empty table body.
-      if(!cart || cart.length === 0){
-        // no rows
-        emptyNote.style.display = 'block';
-        cartTotalEl.textContent = `Total: ${formatPrice(0, currency)}`;
-        checkoutBtn.disabled = true;
-        checkoutAnchor.href = `checkout.html?currency=${currency}`;
-        return;
-      }
-
-      emptyNote.style.display = 'none';
-      checkoutBtn.disabled = false;
-
-      cart.forEach((item, idx) => {
-        const priceBase = Number(item.price) || 0; // assume stored price is in USD base
-        const convertedUnit = priceBase * (RATES[currency] || 1);
-        const qty = Number(item.quantity) || 1;
-        const subtotal = convertedUnit * qty;
-        grand += subtotal;
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td><img src="${item.imageUrl || 'placeholder.jpg'}" alt="${(item.name||'Product')}"></td>
-          <td style="text-align:left;">${item.name || ''}</td>
-          <td>${formatPrice(convertedUnit, currency)}</td>
-          <td>
-            <input type="number" min="1" value="${qty}" data-idx="${idx}" class="qty-input" style="width:72px;padding:6px;border-radius:6px;border:1px solid #ddd;">
-          </td>
-          <td>${formatPrice(subtotal, currency)}</td>
-          <td>
-            <button class="btn remove" data-idx="${idx}" style="background:#fff;color:#000;border:1px solid #ddd;padding:6px 10px;">Remove</button>
-          </td>
-        `;
-        cartBody.appendChild(tr);
-      });
-
-      cartTotalEl.textContent = `Total: ${formatPrice(grand, currency)}`;
-      checkoutAnchor.href = `checkout.html?currency=${currency}`;
-
-      attachRowEvents();
-    }
-
-    function attachRowEvents(){
-      // qty changes
-      document.querySelectorAll('.qty-input').forEach(input=>{
-        input.removeEventListener('change', qtyChanged);
-        input.addEventListener('change', qtyChanged);
-      });
-      // remove buttons
-      document.querySelectorAll('.remove').forEach(btn=>{
-        btn.removeEventListener('click', removeItem);
-        btn.addEventListener('click', removeItem);
-      });
-    }
-
-    function qtyChanged(e){
-      const idx = Number(e.target.dataset.idx);
-      let val = parseInt(e.target.value,10);
-      if(!val || val < 1) val = 1;
-      const cart = getCart();
-      if(!cart[idx]) return;
-      cart[idx].quantity = val;
-      saveCart(cart);
-      renderCart();
-    }
-
-    function removeItem(e){
-      const idx = Number(e.currentTarget.dataset.idx);
-      let cart = getCart();
-      if(!cart[idx]) return;
-      cart.splice(idx,1);
-      saveCart(cart);
-      renderCart();
-    }
-
-    // currency selector
-    currencySelect.addEventListener('change', (e)=>{
-      localStorage.setItem(CUR_KEY, e.target.value);
-      renderCart();
-    });
-
-    // initial render
-    renderCart();
-
-    // Expose renderCart for manual testing in console if needed
-    window.renderFleurCart = renderCart;
   </script>
 </body>
 </html>
