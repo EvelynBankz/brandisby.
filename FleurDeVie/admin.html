@@ -77,6 +77,7 @@
       padding: 0.4rem 0.6rem;
       font-size: 0.9rem;
     }
+    .hidden { display: none; }
   </style>
 </head>
 <body>
@@ -85,8 +86,19 @@
     <h1>Fleur De Vie Admin Dashboard</h1>
   </header>
 
-  <div class="container">
-    <!-- Product Form -->
+  <!-- 🔒 LOGIN FORM -->
+  <div class="container" id="loginContainer">
+    <h2>Admin Login</h2>
+    <label for="loginEmail">Email</label>
+    <input type="email" id="loginEmail" required>
+    <label for="loginPassword">Password</label>
+    <input type="password" id="loginPassword" required>
+    <button id="loginBtn">Login</button>
+    <div class="message" id="loginMessage"></div>
+  </div>
+
+  <!-- ✅ DASHBOARD (hidden until login) -->
+  <div class="container hidden" id="dashboardContainer">
     <form id="productForm">
       <input type="hidden" id="productId">
 
@@ -100,7 +112,7 @@
       <input type="number" id="price" step="0.01" required>
 
       <label for="imageUrl">Image URL</label>
-      <input type="url" id="imageUrl" placeholder="https://example.com/image.jpg" required>
+      <input type="url" id="imageUrl" required>
 
       <label for="published">Published</label>
       <select id="published">
@@ -112,7 +124,6 @@
       <div class="message" id="message"></div>
     </form>
 
-    <!-- Products Table -->
     <h2>All Products</h2>
     <table>
       <thead>
@@ -127,6 +138,7 @@
       </thead>
       <tbody id="productsBody"></tbody>
     </table>
+    <button onclick="logout()">Logout</button>
   </div>
 
   <!-- Firebase SDKs -->
@@ -149,15 +161,54 @@
     const db = firebase.firestore();
     const auth = firebase.auth();
 
-    // ✅ Temporary sign-in
-    auth.signInAnonymously().catch(err => console.error(err));
+    // ✅ Whitelisted admin emails
+    const allowedAdmins = ["admin@fleurdevie.com", "owner@brandisby.com"];
 
+    const loginContainer = document.getElementById("loginContainer");
+    const dashboardContainer = document.getElementById("dashboardContainer");
+    const loginBtn = document.getElementById("loginBtn");
+    const loginMessage = document.getElementById("loginMessage");
+
+    // 🔒 Handle Login
+    loginBtn.addEventListener("click", async () => {
+      const email = document.getElementById("loginEmail").value;
+      const password = document.getElementById("loginPassword").value;
+
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+      } catch (error) {
+        loginMessage.textContent = "❌ " + error.message;
+        loginMessage.style.color = "red";
+      }
+    });
+
+    // 🔒 Auth State
+    auth.onAuthStateChanged(user => {
+      if (user && allowedAdmins.includes(user.email)) {
+        loginContainer.classList.add("hidden");
+        dashboardContainer.classList.remove("hidden");
+        loadProducts();
+      } else {
+        loginContainer.classList.remove("hidden");
+        dashboardContainer.classList.add("hidden");
+        if (user && !allowedAdmins.includes(user.email)) {
+          loginMessage.textContent = "❌ Unauthorized account.";
+          auth.signOut();
+        }
+      }
+    });
+
+    // ✅ Logout
+    function logout() {
+      auth.signOut();
+    }
+
+    // ✅ Product Form & Firestore Logic
     const form = document.getElementById('productForm');
     const message = document.getElementById('message');
     const productsBody = document.getElementById('productsBody');
     const productIdInput = document.getElementById('productId');
 
-    // ✅ Save Product
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
@@ -173,11 +224,9 @@
 
       try {
         if (id) {
-          // update existing
           await db.collection("brands").doc("fleurdevie").collection("products").doc(id).update(product);
           message.textContent = "✅ Product updated!";
         } else {
-          // add new
           product.createdAt = firebase.firestore.FieldValue.serverTimestamp();
           await db.collection("brands").doc("fleurdevie").collection("products").add(product);
           message.textContent = "✅ Product added!";
@@ -192,28 +241,30 @@
       }
     });
 
-    // ✅ Load products live
-    db.collection("brands").doc("fleurdevie").collection("products")
-      .orderBy("createdAt", "desc")
-      .onSnapshot(snapshot => {
-        productsBody.innerHTML = "";
-        snapshot.forEach(doc => {
-          const p = doc.data();
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td><img src="${p.imageUrl}" alt="${p.name}"></td>
-            <td>${p.name}</td>
-            <td>$${p.price.toFixed(2)}</td>
-            <td>${p.description}</td>
-            <td>${p.published ? "Yes" : "No"}</td>
-            <td class="actions">
-              <button onclick="editProduct('${doc.id}', '${p.name}', '${p.description}', ${p.price}, '${p.imageUrl}', ${p.published})">Edit</button>
-              <button onclick="deleteProduct('${doc.id}')">Delete</button>
-            </td>
-          `;
-          productsBody.appendChild(tr);
+    // ✅ Load Products
+    function loadProducts() {
+      db.collection("brands").doc("fleurdevie").collection("products")
+        .orderBy("createdAt", "desc")
+        .onSnapshot(snapshot => {
+          productsBody.innerHTML = "";
+          snapshot.forEach(doc => {
+            const p = doc.data();
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td><img src="${p.imageUrl}" alt="${p.name}"></td>
+              <td>${p.name}</td>
+              <td>₦${p.price.toFixed(2)}</td>
+              <td>${p.description}</td>
+              <td>${p.published ? "Yes" : "No"}</td>
+              <td class="actions">
+                <button onclick="editProduct('${doc.id}', '${p.name}', '${p.description}', ${p.price}, '${p.imageUrl}', ${p.published})">Edit</button>
+                <button onclick="deleteProduct('${doc.id}')">Delete</button>
+              </td>
+            `;
+            productsBody.appendChild(tr);
+          });
         });
-      });
+    }
 
     // ✅ Edit
     window.editProduct = (id, name, description, price, imageUrl, published) => {
