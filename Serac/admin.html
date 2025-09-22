@@ -3,64 +3,91 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="admin.css">
-  <title>Serac Admin Dashboard</title>
+  <title>Serac Admin</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    h1 { margin-bottom: 20px; }
-    input, button, textarea { display: block; margin: 10px 0; padding: 8px; width: 300px; }
-    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-    th { background-color: #f2f2f2; }
-    img { width: 80px; }
-    .hidden { display: none; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      padding: 30px;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    form {
+      max-width: 500px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      margin-top: 15px;
+      width: 100%;
+      padding: 12px;
+      background: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    #message {
+      margin-top: 15px;
+      text-align: center;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
-
   <h1>Serac Admin Dashboard</h1>
+  <form id="productForm">
+    <label>Product Name:</label>
+    <input type="text" id="name" required>
 
-  <!-- Login Section -->
-  <div id="login-section">
-    <input type="email" id="email" placeholder="Email">
-    <input type="password" id="password" placeholder="Password">
-    <button id="login-btn">Login</button>
-  </div>
+    <label>Description:</label>
+    <textarea id="description" required></textarea>
 
-  <!-- Dashboard Section -->
-  <div id="dashboard-section" class="hidden">
-    <button id="logout-btn">Logout</button>
+    <label>Price ($):</label>
+    <input type="number" id="price" step="0.01" required>
 
-    <h2>Add / Edit Product</h2>
-    <input type="text" id="product-id" placeholder="Product ID (leave empty for new)">
-    <input type="text" id="name" placeholder="Product Name">
-    <input type="number" id="price" placeholder="Price">
-    <textarea id="description" placeholder="Description"></textarea>
-    <input type="file" id="image">
-    <button id="save-product-btn">Save Product</button>
+    <label>Image URL:</label>
+    <input type="text" id="image" placeholder="https://example.com/product.jpg" required>
 
-    <h2>All Products</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Image</th>
-          <th>Name</th>
-          <th>Price</th>
-          <th>Description</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody id="products-body"></tbody>
-    </table>
-  </div>
+    <label>Published:</label>
+    <select id="published">
+      <option value="true">Yes</option>
+      <option value="false">No</option>
+    </select>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, doc, updateDoc, getDoc, onSnapshot, deleteDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-storage.js";
+    <button type="submit">Save Product</button>
+  </form>
 
-    // Firebase config
+  <p id="message"></p>
+
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+
+  <script>
+    // Firebase config (replace with your actual project config)
     const firebaseConfig = {
       apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
       authDomain: "brandisby.firebaseapp.com",
@@ -70,119 +97,43 @@
       appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const storage = getStorage(app);
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
 
-    // Elements
-    const loginSection = document.getElementById('login-section');
-    const dashboardSection = document.getElementById('dashboard-section');
-    const loginBtn = document.getElementById('login-btn');
-    const logoutBtn = document.getElementById('logout-btn');
-    const emailInput = document.getElementById('email');
-    const passwordInput = document.getElementById('password');
-    const productIdInput = document.getElementById('product-id');
-    const nameInput = document.getElementById('name');
-    const priceInput = document.getElementById('price');
-    const descriptionInput = document.getElementById('description');
-    const imageInput = document.getElementById('image');
-    const saveProductBtn = document.getElementById('save-product-btn');
-    const productsBody = document.getElementById('products-body');
+    const form = document.getElementById("productForm");
+    const message = document.getElementById("message");
 
-    // Auth
-    loginBtn.addEventListener('click', () => {
-      signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value)
-        .catch(err => alert(err.message));
-    });
-
-    logoutBtn.addEventListener('click', () => {
-      signOut(auth);
-    });
-
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        loginSection.classList.add('hidden');
-        dashboardSection.classList.remove('hidden');
-        loadProducts();
-      } else {
-        loginSection.classList.remove('hidden');
-        dashboardSection.classList.add('hidden');
-      }
-    });
-
-    // Load Serac products
-    function loadProducts() {
-      const productsCollection = collection(db, 'serac_products');
-      onSnapshot(productsCollection, (snapshot) => {
-        productsBody.innerHTML = '';
-        snapshot.forEach(docSnap => {
-          const product = docSnap.data();
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td><img src="${product.imageUrl || ''}" alt="${product.name}"></td>
-            <td>${product.name}</td>
-            <td>$${product.price}</td>
-            <td>${product.description}</td>
-            <td>
-              <button onclick="editProduct('${docSnap.id}')">Edit</button>
-              <button onclick="deleteProduct('${docSnap.id}')">Delete</button>
-            </td>
-          `;
-          productsBody.appendChild(tr);
-        });
+    // Ensure only admin can add products
+    auth.signInWithEmailAndPassword("your-admin-email@example.com", "your-admin-password")
+      .catch(err => {
+        message.textContent = "Auth error: " + err.message;
       });
-    }
 
-    // Save Product
-    saveProductBtn.addEventListener('click', async () => {
-      const id = productIdInput.value.trim();
-      const name = nameInput.value;
-      const price = parseFloat(priceInput.value);
-      const description = descriptionInput.value;
-      const file = imageInput.files[0];
-      let imageUrl = '';
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = document.getElementById("name").value;
+      const description = document.getElementById("description").value;
+      const price = parseFloat(document.getElementById("price").value);
+      const image = document.getElementById("image").value;
+      const published = document.getElementById("published").value === "true";
 
-      if (file) {
-        const storageRef = ref(storage, 'serac-product-images/' + file.name);
-        await uploadBytes(storageRef, file);
-        imageUrl = await getDownloadURL(storageRef);
+      try {
+        await db.collection("brands").doc("serac").collection("products").add({
+          name,
+          description,
+          price,
+          image,
+          published,
+          createdAt: new Date()
+        });
+        message.textContent = "✅ Product saved successfully!";
+        form.reset();
+      } catch (error) {
+        message.textContent = "❌ Error: " + error.message;
       }
-
-      const productData = { name, price, description };
-      if (imageUrl) productData.imageUrl = imageUrl;
-
-      if (id) {
-        const productDoc = doc(db, 'serac_products', id);
-        await updateDoc(productDoc, productData);
-      } else {
-        await addDoc(collection(db, 'serac_products'), productData);
-      }
-
-      productIdInput.value = '';
-      nameInput.value = '';
-      priceInput.value = '';
-      descriptionInput.value = '';
-      imageInput.value = '';
     });
-
-    // Edit Product
-    window.editProduct = async (id) => {
-      const productDoc = doc(db, 'serac_products', id);
-      const docSnap = await getDoc(productDoc);
-      const product = docSnap.data();
-      productIdInput.value = id;
-      nameInput.value = product.name;
-      priceInput.value = product.price;
-      descriptionInput.value = product.description;
-    }
-
-    // Delete Product
-    window.deleteProduct = async (id) => {
-      if (confirm('Are you sure you want to delete this product?')) {
-        await deleteDoc(doc(db, 'serac_products', id));
-      }
-    }
   </script>
 </body>
 </html>
