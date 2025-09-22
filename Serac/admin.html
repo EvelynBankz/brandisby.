@@ -3,93 +3,139 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Serac Admin</title>
+  <title>Serac Admin Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f8f9fa;
+      font-family: 'Montserrat', sans-serif;
       margin: 0;
-      padding: 20px;
+      padding: 0;
+      background: #f4f4f4;
     }
-    h1 {
+    header {
+      background: #4a2c2a;
+      color: #fff;
+      padding: 1rem;
       text-align: center;
-      margin-bottom: 20px;
-      color: #333;
     }
-    form {
-      max-width: 500px;
-      margin: auto;
+    .container {
+      max-width: 800px;
+      margin: 2rem auto;
+      padding: 2rem;
       background: #fff;
-      padding: 20px;
       border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
     label {
       display: block;
-      margin-top: 10px;
-      font-weight: bold;
+      margin-top: 1rem;
+      font-weight: 500;
     }
     input, textarea, select {
       width: 100%;
-      padding: 10px;
-      margin-top: 5px;
+      padding: 0.5rem;
+      margin-top: 0.5rem;
       border: 1px solid #ccc;
       border-radius: 4px;
     }
     button {
-      margin-top: 15px;
-      width: 100%;
-      padding: 10px;
-      background: #28a745;
-      color: white;
+      margin-top: 1rem;
+      padding: 0.75rem;
+      background: #4a2c2a;
+      color: #fff;
       border: none;
       border-radius: 4px;
       cursor: pointer;
-      font-size: 16px;
+      font-weight: 600;
     }
     button:hover {
-      background: #218838;
+      background: #6d3d39;
     }
-    #message {
-      margin-top: 15px;
-      text-align: center;
-      font-weight: bold;
+    .message {
+      margin-top: 1rem;
+      font-weight: 500;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 2rem;
+    }
+    th, td {
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+    th {
+      background: #f4f4f4;
+    }
+    img {
+      width: 60px;
+      border-radius: 4px;
+    }
+    .actions button {
+      margin-right: 0.5rem;
+      padding: 0.4rem 0.6rem;
+      font-size: 0.9rem;
     }
   </style>
 </head>
 <body>
-  <h1>Serac Admin Dashboard</h1>
-  <form id="productForm">
-    <label>Product Name:</label>
-    <input type="text" id="name" required>
 
-    <label>Description:</label>
-    <textarea id="description" required></textarea>
+  <header>
+    <h1>Serac Admin Dashboard</h1>
+  </header>
 
-    <label>Price ($):</label>
-    <input type="number" id="price" step="0.01" required>
+  <div class="container">
+    <!-- Product Form -->
+    <form id="productForm">
+      <input type="hidden" id="productId">
 
-    <label>Image URL:</label>
-    <input type="text" id="image" placeholder="https://example.com/product.jpg" required>
+      <label for="name">Product Name</label>
+      <input type="text" id="name" required>
 
-    <label>Published:</label>
-    <select id="published">
-      <option value="true">Yes</option>
-      <option value="false">No</option>
-    </select>
+      <label for="description">Description</label>
+      <textarea id="description" required></textarea>
 
-    <button type="submit">Save Product</button>
-  </form>
+      <label for="price">Price (NGN)</label>
+      <input type="number" id="price" step="0.01" required>
 
-  <p id="message"></p>
+      <label for="imageUrl">Image URL</label>
+      <input type="url" id="imageUrl" placeholder="https://example.com/image.jpg" required>
+
+      <label for="published">Published</label>
+      <select id="published">
+        <option value="true">Yes</option>
+        <option value="false">No</option>
+      </select>
+
+      <button type="submit">Save Product</button>
+      <div class="message" id="message"></div>
+    </form>
+
+    <!-- Products Table -->
+    <h2>All Products</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Image</th>
+          <th>Name</th>
+          <th>Price</th>
+          <th>Description</th>
+          <th>Published</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="productsBody"></tbody>
+    </table>
+  </div>
 
   <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js"></script>
 
   <script>
-    // Firebase config (same project)
+    // ✅ Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
       authDomain: "brandisby.firebaseapp.com",
@@ -99,43 +145,94 @@
       appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
     };
 
-    // Initialize Firebase
-    const app = firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
+    firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
+    const auth = firebase.auth();
 
-    const form = document.getElementById("productForm");
-    const message = document.getElementById("message");
+    // ✅ Temporary sign-in
+    auth.signInAnonymously().catch(err => console.error(err));
 
-    // Admin login
-    auth.signInWithEmailAndPassword("your-admin-email@example.com", "your-admin-password")
-      .catch(err => {
-        message.textContent = "Auth error: " + err.message;
-      });
+    const form = document.getElementById('productForm');
+    const message = document.getElementById('message');
+    const productsBody = document.getElementById('productsBody');
+    const productIdInput = document.getElementById('productId');
 
-    form.addEventListener("submit", async (e) => {
+    // ✅ Save Product
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const name = document.getElementById("name").value;
-      const description = document.getElementById("description").value;
-      const price = parseFloat(document.getElementById("price").value);
-      const image = document.getElementById("image").value;
-      const published = document.getElementById("published").value === "true";
+
+      const id = productIdInput.value;
+      const product = {
+        name: document.getElementById('name').value,
+        description: document.getElementById('description').value,
+        price: parseFloat(document.getElementById('price').value),
+        imageUrl: document.getElementById('imageUrl').value,
+        published: document.getElementById('published').value === "true",
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      };
 
       try {
-        await db.collection("brands").doc("serac").collection("products").add({
-          name,
-          description,
-          price,
-          image,
-          published,
-          createdAt: new Date()
-        });
-        message.textContent = "✅ Product saved successfully!";
+        if (id) {
+          // update existing
+          await db.collection("brands").doc("serac").collection("products").doc(id).update(product);
+          message.textContent = "✅ Product updated!";
+        } else {
+          // add new
+          product.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+          await db.collection("brands").doc("serac").collection("products").add(product);
+          message.textContent = "✅ Product added!";
+        }
+        message.style.color = "green";
         form.reset();
+        productIdInput.value = "";
       } catch (error) {
-        message.textContent = "❌ Error: " + error.message;
+        console.error(error);
+        message.textContent = "❌ Error saving product.";
+        message.style.color = "red";
       }
     });
+
+    // ✅ Load products live
+    db.collection("brands").doc("serac").collection("products")
+      .orderBy("createdAt", "desc")
+      .onSnapshot(snapshot => {
+        productsBody.innerHTML = "";
+        snapshot.forEach(doc => {
+          const p = doc.data();
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td><img src="${p.imageUrl}" alt="${p.name}"></td>
+            <td>${p.name}</td>
+            <td>₦${p.price.toFixed(2)}</td>
+            <td>${p.description}</td>
+            <td>${p.published ? "Yes" : "No"}</td>
+            <td class="actions">
+              <button onclick="editProduct('${doc.id}', '${p.name}', '${p.description}', ${p.price}, '${p.imageUrl}', ${p.published})">Edit</button>
+              <button onclick="deleteProduct('${doc.id}')">Delete</button>
+            </td>
+          `;
+          productsBody.appendChild(tr);
+        });
+      });
+
+    // ✅ Edit
+    window.editProduct = (id, name, description, price, imageUrl, published) => {
+      productIdInput.value = id;
+      document.getElementById('name').value = name;
+      document.getElementById('description').value = description;
+      document.getElementById('price').value = price;
+      document.getElementById('imageUrl').value = imageUrl;
+      document.getElementById('published').value = published ? "true" : "false";
+      message.textContent = "✏️ Editing product...";
+      message.style.color = "blue";
+    };
+
+    // ✅ Delete
+    window.deleteProduct = async (id) => {
+      if (confirm("Are you sure you want to delete this product?")) {
+        await db.collection("brands").doc("serac").collection("products").doc(id).delete();
+      }
+    };
   </script>
 </body>
 </html>
