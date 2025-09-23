@@ -114,6 +114,18 @@
     .testimonial-text { font-size:16px; line-height:1.6; margin-bottom:12px; }
     .testimonial-author { font-weight:500; font-size: 0.95rem; color:#F5F5F3; }
 
+    .toggle-btn {
+      margin-top:20px;
+      background:#B66E41;
+      color:#fff;
+      border:none;
+      padding:10px 18px;
+      border-radius:6px;
+      cursor:pointer;
+      font-weight:500;
+    }
+    .toggle-btn:hover { background:#8d522f; }
+
     /* ================= FOOTER ================= */
     .site-footer { text-align:center; padding:20px; background: #141517; color:#F5F5F3; }
 
@@ -184,6 +196,11 @@
         <div class="faq-question">How can I contact support? <i class="fas fa-plus"></i></div>
         <div class="faq-answer"><p>You can reach us via the Contact page or email support@serac.com. Our team is available Monday to Friday.</p></div>
       </div>
+      <div class="faq-item">
+        <div class="faq-question">Where does Serac operate? <i class="fas fa-plus"></i></div>
+        <div class="faq-answer"><p>We operate globally, offering products and services to customers worldwide.</p></div>
+      </div>
+      <button id="faq-toggle" class="toggle-btn">More</button>
     </div>
   </section>
 
@@ -214,6 +231,7 @@
           <div class="testimonial-author">— Emily R.</div>
         </div>
       </div>
+      <button id="testimonial-toggle" class="toggle-btn">More</button>
     </div>
   </section>
 
@@ -256,41 +274,79 @@
 
   <!-- SCRIPTS -->
   <script>
-    // Hamburger toggle with X
+    // HAMBURGER TOGGLE
     const hamburger = document.getElementById('hamburger');
     const headerRight = document.querySelector('.header-right');
-    hamburger.addEventListener('click', () => {
-      headerRight.classList.toggle('open'); 
-      hamburger.classList.toggle('open');
-    });
-
-    // FAQ toggle
-    document.querySelectorAll('.faq-item').forEach(item => {
-      item.addEventListener('click', () => {
-        const answer = item.querySelector('.faq-answer');
-        const icon = item.querySelector('i');
-        answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
-        icon.classList.toggle('fa-plus');
-        icon.classList.toggle('fa-minus');
+    if (hamburger && headerRight) {
+      hamburger.addEventListener('click', () => {
+        headerRight.classList.toggle('open');
+        hamburger.classList.toggle('open');
       });
+    }
+
+    // FAQ ACCORDION
+    document.querySelectorAll('.faq-item').forEach(item => {
+      const question = item.querySelector('.faq-question');
+      const answer = item.querySelector('.faq-answer');
+      const icon = item.querySelector('i');
+
+      if (answer) answer.style.display = 'none';
+
+      if (question) {
+        question.addEventListener('click', () => {
+          if (answer.style.display === 'block') {
+            answer.style.display = 'none';
+            if (icon) { icon.classList.add('fa-plus'); icon.classList.remove('fa-minus'); }
+          } else {
+            answer.style.display = 'block';
+            if (icon) { icon.classList.remove('fa-plus'); icon.classList.add('fa-minus'); }
+          }
+        });
+      }
     });
 
-    // Smooth scroll for header links
+    // FAQ SHOW MORE/LESS
+    const faqItems = document.querySelectorAll('.faq-item');
+    const faqToggle = document.getElementById('faq-toggle');
+    if (faqItems.length > 2) {
+      faqItems.forEach((item, index) => { if (index > 1) item.style.display = 'none'; });
+      if (faqToggle) {
+        faqToggle.addEventListener('click', () => {
+          const isExpanded = faqToggle.textContent.trim() === 'Less';
+          faqItems.forEach((item, index) => { if (index > 1) item.style.display = isExpanded ? 'none' : 'block'; });
+          faqToggle.textContent = isExpanded ? 'More' : 'Less';
+        });
+      }
+    }
+
+    // TESTIMONIAL SHOW MORE/LESS
+    const testimonialCards = document.querySelectorAll('.testimonial-card');
+    const testimonialToggle = document.getElementById('testimonial-toggle');
+    if (testimonialCards.length > 2) {
+      testimonialCards.forEach((card, index) => { if (index > 1) card.style.display = 'none'; });
+      if (testimonialToggle) {
+        testimonialToggle.addEventListener('click', () => {
+          const isExpanded = testimonialToggle.textContent.trim() === 'Less';
+          testimonialCards.forEach((card, index) => { if (index > 1) card.style.display = isExpanded ? 'none' : 'flex'; });
+          testimonialToggle.textContent = isExpanded ? 'More' : 'Less';
+        });
+      }
+    }
+
+    // SMOOTH SCROLL
     document.querySelectorAll('.header-right a').forEach(link => {
       link.addEventListener('click', (e) => {
-        e.preventDefault();
         const href = link.getAttribute('href');
-        if(href.startsWith("#")){
+        if (href.startsWith('#')) {
+          e.preventDefault();
           const targetId = href.substring(1);
           const targetSection = document.getElementById(targetId);
-          if(targetSection){
+          if (targetSection) {
             window.scrollTo({ top: targetSection.offsetTop - 80, behavior: 'smooth' });
           }
-        } else {
-          window.location.href = href; // normal page navigation
+          headerRight.classList.remove('open');
+          hamburger.classList.remove('open');
         }
-        headerRight.classList.remove('open');
-        hamburger.classList.remove('open');
       });
     });
   </script>
