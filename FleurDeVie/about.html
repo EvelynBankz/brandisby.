@@ -9,7 +9,7 @@
   <style>
     /* ================= RESET & BASE ================= */
     * { box-sizing: border-box; margin:0; padding:0; }
-    html, body { height:100%; font-family:"Montserrat", Arial, sans-serif; color:#F5E6CC; background:#112e1f; scroll-behavior:smooth; }
+    html, body { height:100%; font-family:"Montserrat", Arial, sans-serif; scroll-behavior:smooth; background:#112e1f; color:#F5E6CC; }
     a { text-decoration:none; color: inherit; }
 
     /* ================= HEADER ================= */
@@ -72,40 +72,41 @@
     @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
 
     /* ================= SECTIONS ================= */
-    section { padding:100px 20px; border-radius: 12px; transition: background 1s ease, transform 0.6s ease; box-shadow: 0 6px 18px rgba(0,0,0,0.15); }
+    section {
+      padding:100px 20px;
+      border-radius: 12px;
+      transition: background 1s ease, transform 0.6s ease;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+    }
     .container { max-width:1200px; margin:0 auto; text-align:center; }
+    section h2 { font-family:"Playfair Display", serif; font-size: clamp(28px,3vw,40px); margin-bottom:32px; color:#FFD6BA; }
+    section p { font-size: clamp(16px,1.5vw,20px); line-height:1.7; margin-bottom:16px; color:#F5E6CC; }
 
-    /* Section-specific colors & spacing */
+    /* Section-specific background and text colors */
     #vision { background: linear-gradient(135deg, #112e1f, #4B4E54); color:#F5E6CC; }
-    #vision h2 { color:#FFD6BA; margin-bottom:32px; }
     #faq { background: linear-gradient(135deg, #C9E4FF, #F5E6CC); color:#112e1f; }
-    #faq h2 { color:#112e1f; margin-bottom:32px; }
-    #testimonials { background: linear-gradient(135deg, #112e1f, #112e1f 80%, #FFD6BA); color:#F5E6CC; }
-    #testimonials h2 { color:#FFD6BA; margin-bottom:32px; }
+    #testimonials { background: linear-gradient(135deg, #112e1f, #112e1f 80%, #FFD6BA); color:#112e1f; }
     #how-to-shop { background: linear-gradient(135deg, #FFD6BA, #F5E6CC); color:#112e1f; }
-    #how-to-shop h2 { color:#112e1f; margin-bottom:32px; }
     #affiliate { background: linear-gradient(135deg, #112e1f, #112e1f 70%, #C9E4FF); color:#F5E6CC; }
-    #affiliate h2 { color:#FFD6BA; margin-bottom:32px; } /* spacing increased only */
     #working-hours { background: linear-gradient(135deg, #F5E6CC, #FFD6BA); color:#112e1f; }
-    #working-hours h2 { margin-bottom:24px; } /* spacing increased */
-    #partnerships { background: linear-gradient(135deg, #112e1f, #112e1f 70%, #FFD6BA); color:#F5E6CC; }
-    #partnerships h2 { margin-bottom:32px; } /* spacing increased */
+    #partnerships { background: linear-gradient(135deg, #112e1f, #112e1f 70%, #B66E41); color:#F5E6CC; }
 
-    section:hover { transform: translateY(-8px); }
+    section:hover { background-position: right center; transform: translateY(-8px); }
 
     /* ================= FAQ CARDS ================= */
     .faq-item {
-      background:#F5E6CC;
-      margin-bottom:12px;
-      border-radius:12px;
+      background: linear-gradient(135deg, #FFD6BA, #F5E6CC);
+      margin-bottom:16px;
+      border-radius:16px;
       overflow:hidden;
       cursor:pointer;
-      transition: background 0.8s ease, transform 0.6s ease, box-shadow 0.6s ease;
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
       color:#112e1f;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.12);
     }
-    .faq-item:hover { background: linear-gradient(135deg, #FFD6BA, #F5E6CC); transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.12); }
-    .faq-question { padding:16px; font-weight:500; display:flex; justify-content: space-between; align-items:center; }
-    .faq-answer { padding:0 16px 16px 16px; display:none; font-size:16px; line-height:1.6; }
+    .faq-item:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
+    .faq-question { padding:20px; font-weight:600; display:flex; justify-content: space-between; align-items:center; font-size:1.1rem; }
+    .faq-answer { padding:0 20px 20px 20px; display:none; font-size:1rem; line-height:1.7; color:#112e1f; }
 
     /* ================= TESTIMONIALS ================= */
     .testimonials { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap:24px; margin-top:32px; }
@@ -122,6 +123,22 @@
     }
     .testimonial-card:hover { transform: translateY(-10px) scale(1.02); background: linear-gradient(135deg, #FFD6BA, #C9E4FF); box-shadow: 0 12px 24px rgba(0,0,0,0.2); }
     .testimonial-stars i { background: linear-gradient(90deg, #FFD6BA, #F5E6CC, #FFD6BA); -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmer 2.5s infinite linear; }
+    .testimonial-text, .testimonial-author { color:#112e1f; }
+
+    /* ================= HOW TO SHOP CARD ================= */
+    .how-to-shop-card {
+      background: linear-gradient(135deg, #F5E6CC, #FFD6BA);
+      border-radius:16px;
+      padding:24px;
+      max-width:800px;
+      margin:0 auto;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      color:#112e1f;
+      font-size:1rem;
+      line-height:1.7;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .how-to-shop-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.2); }
 
     /* ================= FOOTER ================= */
     .site-footer { text-align:center; padding:20px; background:#112e1f; color:#F5E6CC; }
@@ -136,7 +153,7 @@
         right:0;
         background: rgba(17,46,31,0.95);
         flex-direction: column;
-        width:220px;
+        width:200px;
         padding:20px;
         display:none;
         border-radius:0 0 0 10px;
@@ -145,6 +162,7 @@
       .hamburger { display:block; }
       section{ padding:60px 20px; }
     }
+    @media(max-width:420px){ .brand-logo { height:clamp(40px,15vw,80px); } .brand-title{ font-size: clamp(16px,7vw,22px); } }
   </style>
 </head>
 <body class="fleurdevie">
@@ -201,11 +219,9 @@
       <h2>Testimonials</h2>
       <div class="testimonials">
         <div class="testimonial-card">
-          <div class="testimonial-stars">
-            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
-          </div>
-          <div class="testimonial-text">Serac’s service was exceptional, and the product quality exceeded my expectations. Highly recommend!</div>
-          <div class="testimonial-author">— Jane Doe</div>
+          <div class="testimonial-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+          <div class="testimonial-text">An amazing experience! Elegant products and exceptional service.</div>
+          <div class="testimonial-author">— Vic Sound</div>
         </div>
         <div class="testimonial-card">
           <div class="testimonial-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
@@ -257,7 +273,6 @@
 
   <!-- SCRIPTS -->
   <script>
-    // Hamburger toggle with X
     const hamburger = document.getElementById('hamburger');
     const headerRight = document.querySelector('.header-right');
     hamburger.addEventListener('click', () => {
@@ -265,7 +280,6 @@
       hamburger.classList.toggle('open');
     });
 
-    // FAQ toggle
     document.querySelectorAll('.faq-item').forEach(item => {
       item.addEventListener('click', () => {
         const answer = item.querySelector('.faq-answer');
@@ -276,10 +290,8 @@
       });
     });
 
-    // Smooth scroll
     document.querySelectorAll('.header-right a').forEach(link => {
       link.addEventListener('click', (e) => {
-        e.preventDefault();
         const targetId = link.getAttribute('href').substring(1);
         const targetSection = document.getElementById(targetId);
         if(targetSection){
