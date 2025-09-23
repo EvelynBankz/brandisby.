@@ -42,6 +42,8 @@
       justify-content:center;
       text-align:center;
       background: url("hero-bg.jpg") center center / cover no-repeat;
+      margin-top: 100px; /* drop below header */
+      border-radius: 12px;
     }
     .hero-about .hero-text h1 { font-family:"Playfair Display", serif; font-size: clamp(36px,5vw,64px); margin-bottom:12px; }
     .hero-about .hero-text p { font-family:"Montserrat", sans-serif; font-size: clamp(16px,2vw,24px); max-width:700px; }
@@ -80,7 +82,23 @@
 
     /* ================= RESPONSIVE ================= */
     @media(max-width:900px){ .header-right { gap:12px; flex-wrap: wrap; justify-content:center; } }
-    @media(max-width:600px){ .hero-about { height:50vh; } section{ padding:60px 20px; } }
+    @media(max-width:600px){
+      .hero-about { margin-top: 80px; }
+      .header-right { 
+        position: absolute;
+        top: 70px;
+        right: 0;
+        background: rgba(0,0,0,0.9);
+        flex-direction: column;
+        width: 200px;
+        padding: 20px;
+        display: none;
+        border-radius: 0 0 0 10px;
+      }
+      .header-right.open { display: flex; }
+      .hamburger { display: block; }
+      section{ padding:60px 20px; }
+    }
     @media(max-width:420px){ .brand-logo { height:clamp(50px,15vw,120px); } .brand-title{ font-size: clamp(16px,7vw,22px); } }
   </style>
 </head>
@@ -95,7 +113,13 @@
     <nav class="header-right">
       <a href="index.html">Home</a>
       <a href="shop.html">Shop</a>
-      <a href="about.html">About Us</a>
+      <a href="#vision">Vision</a>
+      <a href="#faq">FAQ</a>
+      <a href="#testimonials">Testimonials</a>
+      <a href="#how-to-shop">How to Shop</a>
+      <a href="#affiliate">Affiliate Program</a>
+      <a href="#working-hours">Working Hours</a>
+      <a href="#partnerships">Partnerships</a>
       <a href="contact.html">Contact</a>
     </nav>
     <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
@@ -162,6 +186,22 @@
     </div>
   </section>
 
+  <!-- HOW TO SHOP -->
+  <section id="how-to-shop">
+    <div class="container">
+      <h2>How to Shop</h2>
+      <p>Browse our collection online, select your favorite items, and enjoy a seamless checkout experience. We ship worldwide with care.</p>
+    </div>
+  </section>
+
+  <!-- AFFILIATE PROGRAM -->
+  <section id="affiliate">
+    <div class="container">
+      <h2>Affiliate Program</h2>
+      <p>Join our affiliate program and earn rewards by sharing Serac with your network. Contact us for more details.</p>
+    </div>
+  </section>
+
   <!-- WORKING HOURS -->
   <section id="working-hours">
     <div class="container">
@@ -200,8 +240,23 @@
         icon.classList.toggle('fa-minus');
       });
     });
+
+    // Smooth scroll for header links
+    document.querySelectorAll('.header-right a').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetId = link.getAttribute('href').substring(1);
+        const targetSection = document.getElementById(targetId);
+        if(targetSection){
+          window.scrollTo({
+            top: targetSection.offsetTop - 80, // offset for fixed header
+            behavior: 'smooth'
+          });
+        }
+        headerRight.classList.remove('open'); // close menu on mobile
+      });
+    });
   </script>
 
 </body>
 </html>
-
