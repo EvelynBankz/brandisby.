@@ -87,9 +87,6 @@
     #working-hours { background: linear-gradient(135deg, #F5E6CC, #FFD6BA); color: #112e1f; }
     #partnerships { background: linear-gradient(135deg, #112e1f, #112e1f 70%, #B66E41); color:#F5E6CC; }
 
-    section h2 { margin-bottom:24px; }
-    #vision p, #affiliate p, #partnerships p { margin-top:24px; }
-
     /* ================= FAQ ================= */
     .faq-item {
       background:#FFD6BA; 
@@ -132,10 +129,24 @@
       -webkit-text-fill-color: transparent;
       animation: shimmer 2.5s infinite linear;
     }
-    .testimonial-text, .testimonial-author { color:#112e1f; }
 
     /* ===== FIX TESTIMONIAL TITLE VISIBILITY ===== */
     #testimonials h2 { color:#FFD6BA; text-shadow: 1px 1px 2px rgba(0,0,0,0.6); }
+
+    /* ================= TOGGLE BUTTON ================= */
+    .toggle-btn {
+      display: inline-block;
+      margin: 20px auto 0;
+      padding: 10px 20px;
+      background: #112e1f;
+      color: #F5E6CC;
+      border: none;
+      cursor: pointer;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: background 0.3s ease;
+    }
+    .toggle-btn:hover { background:#334d3a; }
 
     /* ================= FOOTER ================= */
     .site-footer { text-align:center; padding:20px; background:#112e1f; color:#F5E6CC; }
@@ -207,6 +218,15 @@
         <div class="faq-question">How do I contact customer support? <i class="fas fa-plus"></i></div>
         <div class="faq-answer"><p>You can reach us via our Contact page or email support@fleurdevie.com. Our team is available Monday through Friday.</p></div>
       </div>
+      <div class="faq-item">
+        <div class="faq-question">Do you ship internationally? <i class="fas fa-plus"></i></div>
+        <div class="faq-answer"><p>Yes, we ship worldwide with reliable delivery partners.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">Can I return a product? <i class="fas fa-plus"></i></div>
+        <div class="faq-answer"><p>Returns are accepted within 30 days of purchase. Please check our policy for details.</p></div>
+      </div>
+      <button id="faq-toggle" class="toggle-btn">More</button>
     </div>
   </section>
 
@@ -219,7 +239,7 @@
           <div class="testimonial-stars">
             <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
           </div>
-          <div class="testimonial-text">FDV’s service was exceptional, and the product quality exceeded my expectations. Highly recommend!</div>
+          <div class="testimonial-text">Serac’s service was exceptional, and the product quality exceeded my expectations. Highly recommend!</div>
           <div class="testimonial-author">— Jane Doe</div>
         </div>
         <div class="testimonial-card">
@@ -227,7 +247,13 @@
           <div class="testimonial-text">An amazing experience! Elegant products and exceptional service.</div>
           <div class="testimonial-author">— John Smith</div>
         </div>
+        <div class="testimonial-card">
+          <div class="testimonial-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+          <div class="testimonial-text">Luxury products that truly stand out. I’m a lifelong customer now.</div>
+          <div class="testimonial-author">— Amaka</div>
+        </div>
       </div>
+      <button id="testimonial-toggle" class="toggle-btn">More</button>
     </div>
   </section>
 
@@ -278,9 +304,9 @@
       hamburger.classList.toggle('open');
     });
 
-    // FAQ toggle
+    // FAQ accordion toggle
     document.querySelectorAll('.faq-item').forEach(item => {
-      item.addEventListener('click', () => {
+      item.querySelector('.faq-question').addEventListener('click', () => {
         const answer = item.querySelector('.faq-answer');
         const icon = item.querySelector('i');
         answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
@@ -304,11 +330,20 @@
             });
           }
         }
-        // Close mobile menu after any click
         headerRight.classList.remove('open');
         hamburger.classList.remove('open');
       });
     });
-  </script>
-</body>
-</html>
+
+    // Show More/Less for FAQ
+    const faqItems = document.querySelectorAll('.faq-item');
+    const faqToggle = document.getElementById('faq-toggle');
+    faqItems.forEach((item, index) => { if (index > 1) item.style.display = 'none'; });
+    faqToggle.addEventListener('click', () => {
+      const isExpanded = faqToggle.textContent === 'Less';
+      faqItems.forEach((item, index) => { if (index > 1) item.style.display = isExpanded ? 'none' : 'block'; });
+      faqToggle.textContent = isExpanded ? 'More' : 'Less';
+    });
+
+    // Show More/Less for Testimonials
+    const
