@@ -309,9 +309,16 @@
       item.querySelector('.faq-question').addEventListener('click', () => {
         const answer = item.querySelector('.faq-answer');
         const icon = item.querySelector('i');
-        answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
-        icon.classList.toggle('fa-plus');
-        icon.classList.toggle('fa-minus');
+        const isOpen = answer.style.display === 'block';
+        // close all
+        document.querySelectorAll('.faq-answer').forEach(a => a.style.display = 'none');
+        document.querySelectorAll('.faq-question i').forEach(i => { i.classList.remove('fa-minus'); i.classList.add('fa-plus'); });
+        // open clicked
+        if (!isOpen) {
+          answer.style.display = 'block';
+          icon.classList.remove('fa-plus');
+          icon.classList.add('fa-minus');
+        }
       });
     });
 
@@ -341,9 +348,4 @@
     faqItems.forEach((item, index) => { if (index > 1) item.style.display = 'none'; });
     faqToggle.addEventListener('click', () => {
       const isExpanded = faqToggle.textContent === 'Less';
-      faqItems.forEach((item, index) => { if (index > 1) item.style.display = isExpanded ? 'none' : 'block'; });
-      faqToggle.textContent = isExpanded ? 'More' : 'Less';
-    });
-
-    // Show More/Less for Testimonials
-    const
+      faqItems.forEach((item,
