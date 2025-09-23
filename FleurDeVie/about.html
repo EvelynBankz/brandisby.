@@ -69,61 +69,50 @@
     }
     .hero-about .hero-text h1 { font-family:"Playfair Display", serif; font-size: clamp(36px,5vw,64px); margin-bottom:12px; }
     .hero-about .hero-text p { font-family:"Montserrat", sans-serif; font-size: clamp(16px,2vw,24px); max-width:700px; }
-    @keyframes shimmer {
-      0% { background-position: -200% 0; }
-      100% { background-position: 200% 0; }
-    }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
 
     /* ================= SECTIONS ================= */
-    section {
-      padding:100px 20px;
-      border-radius: 12px;
-      transition: background 1s ease, transform 0.6s ease;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.15);
-    }
+    section { padding:100px 20px; border-radius: 12px; transition: background 1s ease, transform 0.6s ease; box-shadow: 0 6px 18px rgba(0,0,0,0.15); }
     .container { max-width:1200px; margin:0 auto; text-align:center; }
 
-    /* ================= INDIVIDUAL SECTION TEXT COLORS ================= */
+    /* Section-specific colors */
     #vision { background: linear-gradient(135deg, #112e1f, #4B4E54); color:#F5E6CC; }
     #vision h2 { color:#FFD6BA; }
-    #vision p { color:#F5E6CC; }
-
     #faq { background: linear-gradient(135deg, #C9E4FF, #F5E6CC); color:#112e1f; }
     #faq h2 { color:#112e1f; }
-    #faq p { color:#112e1f; }
-
     #testimonials { background: linear-gradient(135deg, #112e1f, #112e1f 80%, #FFD6BA); color:#F5E6CC; }
     #testimonials h2 { color:#FFD6BA; }
-
     #how-to-shop { background: linear-gradient(135deg, #FFD6BA, #F5E6CC); color:#112e1f; }
     #how-to-shop h2 { color:#112e1f; }
-    #how-to-shop p { color:#112e1f; }
-
     #affiliate { background: linear-gradient(135deg, #112e1f, #112e1f 70%, #C9E4FF); color:#F5E6CC; }
     #affiliate h2, #affiliate p { color:#F5E6CC; }
-
     #working-hours { background: linear-gradient(135deg, #F5E6CC, #FFD6BA); color:#112e1f; }
     #working-hours h2, #working-hours p { color:#112e1f; }
-
     #partnerships { background: linear-gradient(135deg, #112e1f, #112e1f 70%, #FFD6BA); color:#F5E6CC; }
     #partnerships h2, #partnerships p { color:#F5E6CC; }
 
     /* Section hover effects */
     section:hover { transform: translateY(-8px); }
 
-    /* ================= FAQ ================= */
-    .faq-item {
-      background:#F5E6CC;
-      margin-bottom:12px;
-      border-radius:12px;
-      overflow:hidden;
-      cursor:pointer;
-      transition: background 0.8s ease, transform 0.6s ease, box-shadow 0.6s ease;
+    /* ================= FAQ & HOW TO SHOP CARDS ================= */
+    .faq-item, .how-to-shop-card, .working-hours-card {
+      background: linear-gradient(135deg, #FFD6BA, #F5E6CC);
+      margin:20px auto;
+      border-radius:16px;
+      padding:24px;
+      max-width:800px;
+      text-align:left;
       color:#112e1f;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+      cursor:pointer;
     }
-    .faq-item:hover { background: linear-gradient(135deg, #FFD6BA, #F5E6CC); transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.12); }
-    .faq-question { padding:16px; font-weight:500; display:flex; justify-content: space-between; align-items:center; }
-    .faq-answer { padding:0 16px 16px 16px; display:none; font-size:16px; line-height:1.6; }
+    .faq-item:hover, .how-to-shop-card:hover, .working-hours-card:hover { transform: translateY(-6px); box-shadow: 0 12px 24px rgba(0,0,0,0.2); }
+    .faq-question { display:flex; justify-content:space-between; align-items:center; font-weight:500; font-size:1.1rem; }
+    .faq-answer { display:none; padding-top:12px; line-height:1.6; }
+
+    /* How to Shop & Working Hours text styling */
+    .how-to-shop-card p, .working-hours-card p { margin:0; line-height:1.7; }
 
     /* ================= TESTIMONIALS ================= */
     .testimonials { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap:24px; margin-top:32px; }
@@ -144,7 +133,6 @@
       box-shadow: 0 12px 24px rgba(0,0,0,0.2);
     }
     .testimonial-stars i { background: linear-gradient(90deg, #FFD6BA, #F5E6CC, #FFD6BA); -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmer 2.5s infinite linear; }
-    .testimonial-text, .testimonial-author { color:#112e1f; }
 
     /* ================= FOOTER ================= */
     .site-footer { text-align:center; padding:20px; background:#112e1f; color:#F5E6CC; }
@@ -159,7 +147,7 @@
         right:0;
         background: rgba(17,46,31,0.95);
         flex-direction: column;
-        width:200px;
+        width:220px;
         padding:20px;
         display:none;
         border-radius:0 0 0 10px;
@@ -168,7 +156,6 @@
       .hamburger { display:block; }
       section{ padding:60px 20px; }
     }
-    @media(max-width:420px){ .brand-logo { height:clamp(40px,15vw,80px); } .brand-title{ font-size: clamp(16px,7vw,22px); } }
   </style>
 </head>
 <body class="fleurdevie">
@@ -244,7 +231,9 @@
   <section id="how-to-shop">
     <div class="container">
       <h2>How to Shop</h2>
-      <p>Browse our curated collection online, select your favorite luxurious items, and enjoy a seamless checkout experience. We ship worldwide with care.</p>
+      <div class="how-to-shop-card">
+        <p>Browse our curated collection online, select your favorite luxurious items, and enjoy a seamless checkout experience. We ship worldwide with care.</p>
+      </div>
     </div>
   </section>
 
@@ -260,7 +249,9 @@
   <section id="working-hours">
     <div class="container">
       <h2>Working Hours</h2>
-      <p>Our team is available Monday through Friday, 9 AM – 6 PM, to assist you with any inquiries or support.</p>
+      <div class="working-hours-card">
+        <p>Our team is available Monday through Friday, 9 AM – 6 PM, to assist you with any inquiries or support.</p>
+      </div>
     </div>
   </section>
 
@@ -305,10 +296,7 @@
         const targetId = link.getAttribute('href').substring(1);
         const targetSection = document.getElementById(targetId);
         if(targetSection){
-          window.scrollTo({
-            top: targetSection.offsetTop - 80,
-            behavior: 'smooth'
-          });
+          window.scrollTo({ top: targetSection.offsetTop - 80, behavior: 'smooth' });
         }
         headerRight.classList.remove('open');
         hamburger.classList.remove('open');
