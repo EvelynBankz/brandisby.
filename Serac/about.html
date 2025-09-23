@@ -5,259 +5,185 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Serac</title>
   <style>
-    /* ================= RESET ================= */
+    /* RESET */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
 
-    html {
-      scroll-behavior: smooth;
-    }
-
     body {
-      font-family: 'Georgia', serif;
-      background-color: #f5f5f5;
-      color: #222;
-      line-height: 1.7;
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      background-color: #f9f9f9;
+      color: #333;
+      line-height: 1.6;
     }
 
-    a {
-      text-decoration: none;
-      color: inherit;
-    }
-
-    h1, h2, h3 {
-      font-family: 'Georgia', serif;
-      font-weight: 600;
-      letter-spacing: 0.05em;
-      margin-bottom: 15px;
-    }
-
-    p {
-      margin-bottom: 15px;
-    }
-
-    section {
-      padding: 80px 20px;
-      text-align: center;
-    }
-
-    .container {
-      max-width: 1200px;
-      margin: auto;
-    }
-
-    /* ================= HEADER ================= */
     header {
       position: fixed;
       top: 0;
+      left: 0;
       width: 100%;
-      background-color: #111;
-      color: #fff;
-      padding: 12px 20px;
+      background: rgba(17, 46, 31, 0.95);
+      color: white;
       z-index: 1000;
+      padding: 15px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
     }
 
     header h1 {
-      font-size: 28px;
-      font-weight: bold;
-      letter-spacing: 0.1em;
+      font-size: 1.5rem;
+      letter-spacing: 2px;
     }
 
     nav ul {
       list-style: none;
       display: flex;
-      gap: 25px;
+      gap: 20px;
     }
 
     nav ul li a {
-      color: #fff;
-      font-size: 16px;
+      text-decoration: none;
+      color: white;
       font-weight: 500;
       transition: color 0.3s ease;
     }
 
     nav ul li a:hover {
-      color: #c0a062;
+      color: #FFD6BA;
     }
 
-    /* ================= HERO ================= */
-    .hero {
-      height: 100vh;
-      background: url('https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?auto=format&fit=crop&w=1600&q=80') no-repeat center/cover;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding-top: 80px;
+    /* HAMBURGER */
+    .hamburger {
+      display: none;
+      font-size: 2rem;
+      cursor: pointer;
+      color: white;
     }
 
-    .hero h2 {
-      font-size: 56px;
-      color: #fff;
-      text-shadow: 0 4px 20px rgba(0,0,0,0.8);
-      background: rgba(0,0,0,0.4);
-      padding: 20px 40px;
-      border-radius: 12px;
-    }
-
-    /* ================= SECTION TITLES ================= */
-    .section-title {
-      font-size: 32px;
-      margin-bottom: 40px;
-      position: relative;
-      display: inline-block;
-      color: #111;
-    }
-
-    .section-title::after {
-      content: "";
-      position: absolute;
-      bottom: -12px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 60px;
-      height: 3px;
-      background: #c0a062;
-      border-radius: 2px;
-    }
-
-    /* ================= TESTIMONIALS ================= */
-    .testimonials {
-      background-color: #fff;
-    }
-
-    .testimonial-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 25px;
-    }
-
-    .testimonial-card {
-      background: #fafafa;
-      padding: 25px;
-      border-radius: 16px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
-      font-style: italic;
-    }
-
-    .testimonial-card h3 {
-      margin-top: 20px;
-      font-size: 18px;
-      color: #444;
-    }
-
-    /* ================= FOOTER ================= */
-    footer {
-      background: #111;
-      color: #ccc;
-      text-align: center;
-      padding: 40px 20px;
-      font-size: 14px;
-    }
-
-    footer p {
-      margin: 5px 0;
-    }
-
-    footer a {
-      color: #c0a062;
-    }
-
-    /* ================= RESPONSIVE ================= */
     @media (max-width: 768px) {
       nav ul {
         display: none;
+        flex-direction: column;
+        background: rgba(17, 46, 31, 0.95);
+        position: absolute;
+        top: 60px;
+        right: 20px;
+        padding: 20px;
+        border-radius: 10px;
+        width: 200px;
       }
+
+      nav ul.show {
+        display: flex;
+      }
+
+      .hamburger {
+        display: block;
+      }
+    }
+
+    /* Section Styles */
+    section {
+      padding: 100px 20px;
+      text-align: center;
+    }
+
+    section h2 {
+      font-size: 2rem;
+      margin-bottom: 20px;
+    }
+
+    section p {
+      max-width: 800px;
+      margin: 0 auto 20px;
     }
   </style>
 </head>
 <body>
-
-  <!-- HEADER -->
   <header>
     <h1>Serac</h1>
     <nav>
-      <ul>
+      <div class="hamburger" id="hamburger">&#9776;</div>
+      <ul id="nav-links">
         <li><a href="#hero">Home</a></li>
-        <li><a href="#vision">Vision</a></li>
-        <li><a href="#affiliate">Affiliate</a></li>
+        <li><a href="#vision">Our Vision</a></li>
+        <li><a href="#affiliate">Affiliate Program</a></li>
+        <li><a href="#partnership">Partnership</a></li>
+        <li><a href="#shop">How to Shop</a></li>
+        <li><a href="#hours">Working Hours</a></li>
         <li><a href="#faq">FAQ</a></li>
         <li><a href="#testimonials">Testimonials</a></li>
-        <li><a href="#contact">Contact</a></li>
       </ul>
     </nav>
   </header>
 
   <!-- HERO -->
-  <section class="hero" id="hero">
-    <h2>Elevating Masculine Luxury</h2>
+  <section id="hero">
+    <h2>About Serac</h2>
+    <p>Luxury meets elegance. Explore timeless fashion with Serac.</p>
   </section>
 
-  <!-- VISION -->
+  <!-- OUR VISION -->
   <section id="vision">
-    <div class="container">
-      <h2 class="section-title">Our Vision</h2>
-      <p>
-        At Serac, we believe in redefining masculine luxury — timeless, powerful, and built with precision. 
-        Our mission is to create a brand that reflects elegance, confidence, and sophistication in every detail.
-      </p>
-    </div>
+    <h2>Our Vision</h2>
+    <p>We envision a world where style meets sustainability and luxury is accessible without compromise.</p>
   </section>
 
-  <!-- AFFILIATE -->
+  <!-- AFFILIATE PROGRAM -->
   <section id="affiliate">
-    <div class="container">
-      <h2 class="section-title">Affiliate Program</h2>
-      <p>
-        Join our exclusive affiliate program and be part of the Serac family. 
-        Earn commissions while promoting products that redefine modern masculinity and style.
-      </p>
-    </div>
+    <h2>Affiliate Program</h2>
+    <p>Partner with Serac and earn rewards while sharing our luxurious collections.</p>
+  </section>
+
+  <!-- PARTNERSHIP -->
+  <section id="partnership">
+    <h2>Partnership</h2>
+    <p>We believe in meaningful collaborations that elevate fashion and lifestyle.</p>
+  </section>
+
+  <!-- HOW TO SHOP -->
+  <section id="shop">
+    <h2>How to Shop</h2>
+    <p>Browse our collections, add items to your cart, and experience seamless checkout.</p>
+  </section>
+
+  <!-- WORKING HOURS -->
+  <section id="hours">
+    <h2>Working Hours</h2>
+    <p>We are available Monday - Friday from 9am - 6pm.</p>
   </section>
 
   <!-- FAQ -->
-  <section id="faq" style="background:#fff;">
-    <div class="container">
-      <h2 class="section-title">Frequently Asked Questions</h2>
-      <p>
-        Have questions about Serac? We’ve got answers. From product details to our partnership programs,
-        our FAQ is here to guide you every step of the way.
-      </p>
-    </div>
+  <section id="faq">
+    <h2>Frequently Asked Questions</h2>
+    <p>Find answers to common questions about our products, delivery, and more.</p>
   </section>
 
   <!-- TESTIMONIALS -->
-  <section id="testimonials" class="testimonials">
-    <div class="container">
-      <h2 class="section-title">Testimonials</h2>
-      <div class="testimonial-grid">
-        <div class="testimonial-card">
-          <p>"Serac has completely transformed how I see luxury. Every piece feels timeless."</p>
-          <h3>- David</h3>
-        </div>
-        <div class="testimonial-card">
-          <p>"Finally, a brand that truly captures masculine elegance and strength."</p>
-          <h3>- Michael</h3>
-        </div>
-        <div class="testimonial-card">
-          <p>"From the packaging to the product itself, Serac screams luxury."</p>
-          <h3>- James</h3>
-        </div>
-      </div>
-    </div>
+  <section id="testimonials">
+    <h2>What Our Clients Say</h2>
+    <p>"Serac has completely transformed my wardrobe with elegance." – Client A</p>
+    <p>"I love the luxurious feel and timeless style." – Client B</p>
+    <p>"Affordable luxury at its finest." – Client C</p>
   </section>
 
-  <!-- CONTACT -->
-  <footer id="contact">
-    <p>&copy; 2025 Serac. All rights reserved.</p>
-    <p><a href="#hero">Back to top</a></p>
-  </footer>
+  <script>
+    const hamburger = document.getElementById("hamburger");
+    const navLinks = document.getElementById("nav-links");
 
+    hamburger.addEventListener("click", () => {
+      navLinks.classList.toggle("show");
+
+      // Toggle icon between hamburger and close
+      if (navLinks.classList.contains("show")) {
+        hamburger.innerHTML = "&times;"; // Close (X)
+      } else {
+        hamburger.innerHTML = "&#9776;"; // Hamburger
+      }
+    });
+  </script>
 </body>
 </html>
