@@ -138,7 +138,8 @@
       <a href="#faq">FAQ</a>
       <a href="contact.html">Contact</a>
     </nav>
-    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    <!-- kept structure identical; added aria attrs for accessibility -->
+    <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
   </header>
 
   <!-- HERO -->
@@ -241,12 +242,27 @@
 
   <!-- SCRIPTS -->
   <script>
-    // Hamburger toggle with X
+    // Hamburger toggle with X (minimal change only)
     const hamburger = document.getElementById('hamburger');
     const headerRight = document.querySelector('.header-right');
+    const hamburgerOriginal = hamburger.innerHTML; // store original (three spans)
+
     hamburger.addEventListener('click', () => {
-      headerRight.classList.toggle('open'); 
+      // toggle menu open/close
+      const isOpen = headerRight.classList.toggle('open');
       hamburger.classList.toggle('open');
+
+      if (isOpen) {
+        // replace the three-bars with a simple "×" close symbol
+        hamburger.innerHTML = '&times;';
+        hamburger.setAttribute('aria-label', 'Close menu');
+        hamburger.setAttribute('aria-expanded', 'true');
+      } else {
+        // restore original three bars
+        hamburger.innerHTML = hamburgerOriginal;
+        hamburger.setAttribute('aria-label', 'Open menu');
+        hamburger.setAttribute('aria-expanded', 'false');
+      }
     });
 
     // FAQ toggle
@@ -274,8 +290,13 @@
         } else {
           window.location.href = href; // normal page navigation
         }
+
+        // ensure menu closes and hamburger is restored when a link is clicked
         headerRight.classList.remove('open');
         hamburger.classList.remove('open');
+        hamburger.innerHTML = hamburgerOriginal;
+        hamburger.setAttribute('aria-label', 'Open menu');
+        hamburger.setAttribute('aria-expanded', 'false');
       });
     });
   </script>
