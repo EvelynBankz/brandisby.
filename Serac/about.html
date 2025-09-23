@@ -3,187 +3,282 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Serac</title>
+  <title>Serac - About Us</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* RESET */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    /* ================= RESET & BASE ================= */
+    * { box-sizing: border-box; margin:0; padding:0; }
+    html, body { height: 100%; font-family: "Montserrat", Arial, sans-serif; color:#F5F5F3; background:#141517; scroll-behavior:smooth; }
+    a { text-decoration:none; color: inherit; }
 
-    body {
-      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-      background-color: #f9f9f9;
-      color: #333;
-      line-height: 1.6;
-    }
-
-    header {
+    /* ================= HEADER ================= */
+    .site-header {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      background: rgba(17, 46, 31, 0.95);
-      color: white;
-      z-index: 1000;
-      padding: 15px 20px;
-      display: flex;
+      top:0; left:0; right:0;
+      display:flex;
+      align-items:center;
       justify-content: space-between;
-      align-items: center;
+      padding:14px 28px;
+      z-index: 1200;
+      background: rgba(20,21,23,0.95);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.5);
     }
+    .header-left { display:flex; align-items:center; gap:12px; }
+    .brand-logo { height: clamp(80px, 10vw, 150px); width:auto; }
+    .brand-title { font-family:"Playfair Display", serif; font-weight:700; font-size: clamp(20px, 3vw, 44px); color:#B66E41; text-align:center; }
+    .header-right { display:flex; gap:16px; }
+    .header-right a { color:#F5F5F3; font-weight:500; transition: opacity 0.3s; }
+    .header-right a:hover { color:#B66E41; }
 
-    header h1 {
-      font-size: 1.5rem;
-      letter-spacing: 2px;
+    /* Hamburger */
+    .hamburger { display:none; background:none; border:none; width:44px; height:40px; cursor:pointer; position: relative; z-index:1300; }
+    .hamburger span {
+      display:block;
+      height:2.5px;
+      width:22px;
+      background:#F5F5F3;
+      margin:6px auto;
+      border-radius:2px;
+      transition: all 0.3s ease;
     }
+    .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+    .hamburger.open span:nth-child(2) { opacity:0; }
+    .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
 
-    nav ul {
-      list-style: none;
-      display: flex;
-      gap: 20px;
+    /* ================= HERO ================= */
+    .hero-about {
+      height: 60vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      background: url("bg.jpg") center center / cover no-repeat;
+      margin-top: 100px;
+      border-radius: 12px;
+      box-shadow: inset 0 0 0 2000px rgba(20,21,23,0.3);
     }
+    .hero-about .hero-text h1 { font-family:"Playfair Display", serif; font-size: clamp(36px,5vw,64px); margin-bottom:12px; color:#F5F5F3; }
+    .hero-about .hero-text p { font-family:"Montserrat", sans-serif; font-size: clamp(16px,2vw,24px); max-width:700px; color:#F5F5F3; }
 
-    nav ul li a {
-      text-decoration: none;
-      color: white;
-      font-weight: 500;
-      transition: color 0.3s ease;
+    /* ================= SECTIONS ================= */
+    section { padding:100px 20px; }
+    .container { max-width:1200px; margin:0 auto; text-align:center; }
+    section h2 { font-family:"Playfair Display", serif; font-size: clamp(28px,3vw,40px); margin-bottom:24px; color:#B66E41; }
+    section p { font-size: clamp(16px,1.5vw,20px); line-height:1.7; margin-bottom:16px; color:#F5F5F3; }
+
+    /* Section backgrounds */
+    #vision { background-color: #141517; }
+    #faq { background-color: #4B4E54; }
+    #testimonials { background-color: #141517; }
+    #how-to-shop { background-color: #4B4E54; }
+    #affiliate { background-color: #141517; }
+    #working-hours { background-color: #4B4E54; }
+    #partnerships { background-color: #141517; }
+
+    /* ================= FAQ ================= */
+    .faq-item { background: #141517; margin-bottom:12px; border-radius:6px; overflow:hidden; cursor:pointer; transition: background 0.3s; }
+    .faq-item:hover { background: #B66E41; color:#F5F5F3; }
+    .faq-question { padding:16px; font-weight:500; display:flex; justify-content: space-between; align-items:center; }
+    .faq-answer { padding:0 16px 16px 16px; display:none; font-size:16px; line-height:1.6; color:#F5F5F3; }
+
+    /* ================= TESTIMONIALS ================= */
+    .testimonials { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:24px; margin-top:32px; }
+    .testimonial-card {
+      background: #4B4E54;
+      padding:24px;
+      border-radius:12px;
+      min-height:180px;
+      display:flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.3s, background 0.3s;
     }
+    .testimonial-card:hover { transform: translateY(-6px); background: #B66E41; color:#F5F5F3; }
+    .testimonial-stars { color: #FFD700; margin-bottom:8px; }
+    .testimonial-text { font-size:16px; line-height:1.6; margin-bottom:12px; }
+    .testimonial-author { font-weight:500; font-size: 0.95rem; color:#F5F5F3; }
 
-    nav ul li a:hover {
-      color: #FFD6BA;
-    }
+    /* ================= FOOTER ================= */
+    .site-footer { text-align:center; padding:20px; background: #141517; color:#F5F5F3; }
 
-    /* HAMBURGER */
-    .hamburger {
-      display: none;
-      font-size: 2rem;
-      cursor: pointer;
-      color: white;
-    }
-
-    @media (max-width: 768px) {
-      nav ul {
-        display: none;
-        flex-direction: column;
-        background: rgba(17, 46, 31, 0.95);
+    /* ================= RESPONSIVE ================= */
+    @media(max-width:900px){ .header-right { gap:12px; flex-wrap: wrap; justify-content:center; } }
+    @media(max-width:600px){
+      .hero-about { margin-top: 80px; }
+      .header-right { 
         position: absolute;
-        top: 60px;
-        right: 20px;
-        padding: 20px;
-        border-radius: 10px;
+        top: 70px;
+        right: 0;
+        background: rgba(20,21,23,0.95);
+        flex-direction: column;
         width: 200px;
+        padding: 20px;
+        display: none;
+        border-radius: 0 0 0 10px;
       }
-
-      nav ul.show {
-        display: flex;
-      }
-
-      .hamburger {
-        display: block;
-      }
+      .header-right.open { display: flex; }
+      .hamburger { display: block; }
+      section{ padding:60px 20px; }
     }
-
-    /* Section Styles */
-    section {
-      padding: 100px 20px;
-      text-align: center;
-    }
-
-    section h2 {
-      font-size: 2rem;
-      margin-bottom: 20px;
-    }
-
-    section p {
-      max-width: 800px;
-      margin: 0 auto 20px;
-    }
+    @media(max-width:420px){ .brand-logo { height:clamp(50px,15vw,120px); } .brand-title{ font-size: clamp(16px,7vw,22px); } }
   </style>
 </head>
-<body>
-  <header>
-    <h1>Serac</h1>
-    <nav>
-      <div class="hamburger" id="hamburger">&#9776;</div>
-      <ul id="nav-links">
-        <li><a href="#hero">Home</a></li>
-        <li><a href="#vision">Our Vision</a></li>
-        <li><a href="#affiliate">Affiliate Program</a></li>
-        <li><a href="#partnership">Partnership</a></li>
-        <li><a href="#shop">How to Shop</a></li>
-        <li><a href="#hours">Working Hours</a></li>
-        <li><a href="#faq">FAQ</a></li>
-        <li><a href="#testimonials">Testimonials</a></li>
-      </ul>
+<body class="serac">
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="header-left">
+      <img src="logo.png" alt="Serac Logo" class="brand-logo">
+      <div class="brand-title">Serac</div>
+    </div>
+    <nav class="header-right">
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="#faq">FAQ</a>
+      <a href="contact.html">Contact</a>
     </nav>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
   </header>
 
   <!-- HERO -->
-  <section id="hero">
-    <h2>About Serac</h2>
-    <p>Luxury meets elegance. Explore timeless fashion with Serac.</p>
+  <section class="hero-about">
+    <div class="hero-text">
+      <h1>About Serac</h1>
+      <p>Discover our vision, values, and how we deliver excellence in every experience.</p>
+    </div>
   </section>
 
-  <!-- OUR VISION -->
+  <!-- VISION -->
   <section id="vision">
-    <h2>Our Vision</h2>
-    <p>We envision a world where style meets sustainability and luxury is accessible without compromise.</p>
-  </section>
-
-  <!-- AFFILIATE PROGRAM -->
-  <section id="affiliate">
-    <h2>Affiliate Program</h2>
-    <p>Partner with Serac and earn rewards while sharing our luxurious collections.</p>
-  </section>
-
-  <!-- PARTNERSHIP -->
-  <section id="partnership">
-    <h2>Partnership</h2>
-    <p>We believe in meaningful collaborations that elevate fashion and lifestyle.</p>
-  </section>
-
-  <!-- HOW TO SHOP -->
-  <section id="shop">
-    <h2>How to Shop</h2>
-    <p>Browse our collections, add items to your cart, and experience seamless checkout.</p>
-  </section>
-
-  <!-- WORKING HOURS -->
-  <section id="hours">
-    <h2>Working Hours</h2>
-    <p>We are available Monday - Friday from 9am - 6pm.</p>
+    <div class="container">
+      <h2>Our Vision</h2>
+      <p>At Serac, our vision is to create innovative solutions and experiences that inspire and connect people worldwide.</p>
+    </div>
   </section>
 
   <!-- FAQ -->
   <section id="faq">
-    <h2>Frequently Asked Questions</h2>
-    <p>Find answers to common questions about our products, delivery, and more.</p>
+    <div class="container">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <div class="faq-question">What products/services does Serac offer? <i class="fas fa-plus"></i></div>
+        <div class="faq-answer"><p>We offer a wide range of products and services designed to meet diverse needs, from premium items to specialized solutions.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">How can I contact support? <i class="fas fa-plus"></i></div>
+        <div class="faq-answer"><p>You can reach us via the Contact page or email support@serac.com. Our team is available Monday to Friday.</p></div>
+      </div>
+    </div>
   </section>
 
   <!-- TESTIMONIALS -->
   <section id="testimonials">
-    <h2>What Our Clients Say</h2>
-    <p>"Serac has completely transformed my wardrobe with elegance." – Client A</p>
-    <p>"I love the luxurious feel and timeless style." – Client B</p>
-    <p>"Affordable luxury at its finest." – Client C</p>
+    <div class="container">
+      <h2>Testimonials</h2>
+      <div class="testimonials">
+        <div class="testimonial-card">
+          <div class="testimonial-stars">
+            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+          </div>
+          <div class="testimonial-text">Serac’s service was exceptional, and the product quality exceeded my expectations. Highly recommend!</div>
+          <div class="testimonial-author">— Jane Doe</div>
+        </div>
+        <div class="testimonial-card">
+          <div class="testimonial-stars">
+            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+          </div>
+          <div class="testimonial-text">Amazing experience! The team was very professional and responsive throughout.</div>
+          <div class="testimonial-author">— John Smith</div>
+        </div>
+        <div class="testimonial-card">
+          <div class="testimonial-stars">
+            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+          </div>
+          <div class="testimonial-text">I love Serac! Their attention to detail and customer care is top-notch.</div>
+          <div class="testimonial-author">— Emily R.</div>
+        </div>
+      </div>
+    </div>
   </section>
 
+  <!-- HOW TO SHOP -->
+  <section id="how-to-shop">
+    <div class="container">
+      <h2>How to Shop</h2>
+      <p>Browse our collection online, select your favorite items, and enjoy a seamless checkout experience. We ship worldwide with care.</p>
+    </div>
+  </section>
+
+  <!-- AFFILIATE PROGRAM -->
+  <section id="affiliate">
+    <div class="container">
+      <h2>Affiliate Program</h2>
+      <p>Join our affiliate program and earn rewards by sharing Serac with your network. Contact us for more details.</p>
+    </div>
+  </section>
+
+  <!-- WORKING HOURS -->
+  <section id="working-hours">
+    <div class="container">
+      <h2>Working Hours</h2>
+      <p>Our team is available Monday through Friday, 9 AM – 6 PM, to assist you with any inquiries or support.</p>
+    </div>
+  </section>
+
+  <!-- PARTNERSHIPS -->
+  <section id="partnerships">
+    <div class="container">
+      <h2>Partnerships</h2>
+      <p>We collaborate with selected partners to deliver exclusive products and experiences to our clients.</p>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <p>© 2025 Serac</p>
+  </footer>
+
+  <!-- SCRIPTS -->
   <script>
-    const hamburger = document.getElementById("hamburger");
-    const navLinks = document.getElementById("nav-links");
+    // Hamburger toggle with X
+    const hamburger = document.getElementById('hamburger');
+    const headerRight = document.querySelector('.header-right');
+    hamburger.addEventListener('click', () => {
+      headerRight.classList.toggle('open'); 
+      hamburger.classList.toggle('open');
+    });
 
-    hamburger.addEventListener("click", () => {
-      navLinks.classList.toggle("show");
+    // FAQ toggle
+    document.querySelectorAll('.faq-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const answer = item.querySelector('.faq-answer');
+        const icon = item.querySelector('i');
+        answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
+        icon.classList.toggle('fa-plus');
+        icon.classList.toggle('fa-minus');
+      });
+    });
 
-      // Toggle icon between hamburger and close
-      if (navLinks.classList.contains("show")) {
-        hamburger.innerHTML = "&times;"; // Close (X)
-      } else {
-        hamburger.innerHTML = "&#9776;"; // Hamburger
-      }
+    // Smooth scroll for header links
+    document.querySelectorAll('.header-right a').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const href = link.getAttribute('href');
+        if(href.startsWith("#")){
+          const targetId = href.substring(1);
+          const targetSection = document.getElementById(targetId);
+          if(targetSection){
+            window.scrollTo({ top: targetSection.offsetTop - 80, behavior: 'smooth' });
+          }
+        } else {
+          window.location.href = href; // normal page navigation
+        }
+        headerRight.classList.remove('open');
+        hamburger.classList.remove('open');
+      });
     });
   </script>
+
 </body>
 </html>
