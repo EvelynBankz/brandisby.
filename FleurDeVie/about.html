@@ -85,50 +85,27 @@
     #how-to-shop { background: linear-gradient(135deg, #FFD6BA, #F5E6CC); color:#112e1f; }
     #how-to-shop h2 { color:#112e1f; margin-bottom:32px; }
     #affiliate { background: linear-gradient(135deg, #112e1f, #112e1f 70%, #C9E4FF); color:#F5E6CC; }
-    #affiliate h2, #affiliate p { color:#F5E6CC; margin-bottom:32px; }
+    #affiliate h2 { color:#FFD6BA; margin-bottom:32px; } /* spacing increased only */
     #working-hours { background: linear-gradient(135deg, #F5E6CC, #FFD6BA); color:#112e1f; }
-    #working-hours h2, #working-hours p { color:#112e1f; margin-bottom:24px; }
+    #working-hours h2 { margin-bottom:24px; } /* spacing increased */
     #partnerships { background: linear-gradient(135deg, #112e1f, #112e1f 70%, #FFD6BA); color:#F5E6CC; }
-    #partnerships h2, #partnerships p { color:#F5E6CC; margin-bottom:32px; }
+    #partnerships h2 { margin-bottom:32px; } /* spacing increased */
 
-    /* Section hover effects */
     section:hover { transform: translateY(-8px); }
 
-    /* ================= FAQ & HOW TO SHOP & WORKING HOURS CARDS ================= */
-    .faq-item, .how-to-shop-card, .working-hours-card, .affiliate-card, .partnership-card {
-      background: linear-gradient(135deg, #FFD6BA, #F5E6CC);
-      margin:20px auto;
-      border-radius:16px;
-      padding:24px 32px;
-      max-width:800px;
-      text-align:left;
-      color:#112e1f;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-      transition: transform 0.4s ease, box-shadow 0.4s ease;
+    /* ================= FAQ CARDS ================= */
+    .faq-item {
+      background:#F5E6CC;
+      margin-bottom:12px;
+      border-radius:12px;
+      overflow:hidden;
       cursor:pointer;
-      position: relative;
+      transition: background 0.8s ease, transform 0.6s ease, box-shadow 0.6s ease;
+      color:#112e1f;
     }
-    .faq-item:hover, .how-to-shop-card:hover, .working-hours-card:hover, .affiliate-card:hover, .partnership-card:hover { transform: translateY(-6px); box-shadow: 0 12px 24px rgba(0,0,0,0.2); }
-
-    /* Icon decorations */
-    .faq-item::before, .how-to-shop-card::before, .working-hours-card::before, .affiliate-card::before, .partnership-card::before {
-      font-family: "Font Awesome 6 Free";
-      font-weight: 900;
-      position: absolute;
-      top:16px;
-      left:16px;
-      font-size:24px;
-    }
-    .faq-item::before { content: "\f059"; color:#112e1f; } /* info circle */
-    .how-to-shop-card::before { content: "\f07a"; color:#112e1f; } /* shopping bag */
-    .working-hours-card::before { content: "\f017"; color:#112e1f; } /* clock */
-    .affiliate-card::before { content: "\f0c0"; color:#112e1f; } /* users */
-    .partnership-card::before { content: "\f0c1"; color:#112e1f; } /* link */
-
-    .faq-question { display:flex; justify-content:space-between; align-items:center; font-weight:500; font-size:1.1rem; }
-    .faq-answer { display:none; padding-top:12px; line-height:1.6; }
-
-    .how-to-shop-card p, .working-hours-card p, .affiliate-card p, .partnership-card p { margin:0; line-height:1.7; padding-left:32px; }
+    .faq-item:hover { background: linear-gradient(135deg, #FFD6BA, #F5E6CC); transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.12); }
+    .faq-question { padding:16px; font-weight:500; display:flex; justify-content: space-between; align-items:center; }
+    .faq-answer { padding:0 16px 16px 16px; display:none; font-size:16px; line-height:1.6; }
 
     /* ================= TESTIMONIALS ================= */
     .testimonials { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap:24px; margin-top:32px; }
@@ -253,9 +230,7 @@
   <section id="affiliate">
     <div class="container">
       <h2>Affiliate Program</h2>
-      <div class="affiliate-card">
-        <p>Join our affiliate program and earn rewards by sharing Fleur De Vie with your network. Contact us for more details.</p>
-      </div>
+      <p>Join our affiliate program and earn rewards by sharing Fleur De Vie with your network. Contact us for more details.</p>
     </div>
   </section>
 
@@ -263,9 +238,7 @@
   <section id="working-hours">
     <div class="container">
       <h2>Working Hours</h2>
-      <div class="working-hours-card">
-        <p>Our team is available Monday through Friday, 9 AM – 6 PM, to assist you with any inquiries or support.</p>
-      </div>
+      <p>Our team is available Monday through Friday, 9 AM – 6 PM, to assist you with any inquiries or support.</p>
     </div>
   </section>
 
@@ -273,9 +246,7 @@
   <section id="partnerships">
     <div class="container">
       <h2>Partnerships</h2>
-      <div class="partnership-card">
-        <p>We collaborate with selected luxury partners to deliver exclusive experiences and products.</p>
-      </div>
+      <p>We collaborate with selected luxury partners to deliver exclusive experiences and products.</p>
     </div>
   </section>
 
