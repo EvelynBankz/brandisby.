@@ -289,18 +289,22 @@
       });
     });
 
-    // Smooth scroll
+    // Smooth scroll for in-page anchors only
     document.querySelectorAll('.header-right a').forEach(link => {
       link.addEventListener('click', (e) => {
-        e.preventDefault();
-        const targetId = link.getAttribute('href').substring(1);
-        const targetSection = document.getElementById(targetId);
-        if(targetSection){
-          window.scrollTo({
-            top: targetSection.offsetTop - 80,
-            behavior: 'smooth'
-          });
+        const href = link.getAttribute('href');
+        if (href.startsWith('#')) {
+          e.preventDefault();
+          const targetId = href.substring(1);
+          const targetSection = document.getElementById(targetId);
+          if (targetSection) {
+            window.scrollTo({
+              top: targetSection.offsetTop - 80,
+              behavior: 'smooth'
+            });
+          }
         }
+        // Close mobile menu after any click
         headerRight.classList.remove('open');
         hamburger.classList.remove('open');
       });
