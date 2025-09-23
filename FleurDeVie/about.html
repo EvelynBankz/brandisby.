@@ -78,11 +78,11 @@
     /* ================= SECTIONS ================= */
     section { padding:100px 20px; border-radius: 12px; transition: background 1s ease, transform 0.6s ease; box-shadow: 0 6px 18px rgba(0,0,0,0.15); }
     .container { max-width:1200px; margin:0 auto; text-align:center; }
-    section h2 { font-family:"Playfair Display", serif; font-size: clamp(28px,3vw,40px); margin-bottom:24px; color:#FFD6BA; }
-    section p { font-size: clamp(16px,1.5vw,20px); line-height:1.7; margin-bottom:16px; color:#F5E6CC; }
+    section h2 { font-family:"Playfair Display", serif; font-size: clamp(28px,3vw,40px); margin-bottom:24px; color:#112e1f; }
+    section p { font-size: clamp(16px,1.5vw,20px); line-height:1.7; margin-bottom:16px; color:#112e1f; }
 
     /* ================= SECTION GRADIENTS ================= */
-    #vision { background: linear-gradient(135deg, #112e1f, #4B4E54); }
+    #vision { background: linear-gradient(135deg, #112e1f, #4B4E54); color:#F5E6CC; }
     #faq { background: linear-gradient(135deg, #C9E4FF, #F5E6CC); color: #112e1f; }
     #testimonials { background: linear-gradient(135deg, #112e1f, #112e1f 80%, #FFD6BA); color:#112e1f; }
     #how-to-shop { background: linear-gradient(135deg, #FFD6BA, #F5E6CC); color: #112e1f; }
@@ -103,8 +103,8 @@
       color:#112e1f;
     }
     .faq-item:hover { background: linear-gradient(135deg, #FFD6BA, #F5E6CC); transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.12); }
-    .faq-question { padding:16px; font-weight:500; display:flex; justify-content: space-between; align-items:center; }
-    .faq-answer { padding:0 16px 16px 16px; display:none; font-size:16px; line-height:1.6; }
+    .faq-question { padding:16px; font-weight:500; display:flex; justify-content: space-between; align-items:center; color:#112e1f; }
+    .faq-answer { padding:0 16px 16px 16px; display:none; font-size:16px; line-height:1.6; color:#112e1f; }
 
     /* ================= TESTIMONIALS ================= */
     .testimonials { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap:24px; margin-top:32px; }
@@ -148,7 +148,7 @@
     @media(max-width:420px){ .brand-logo { height:clamp(40px,15vw,80px); } .brand-title{ font-size: clamp(16px,7vw,22px); } }
   </style>
 </head>
-<body class="fleurdevie">
+<body>
 
   <!-- HEADER -->
   <header class="site-header">
@@ -220,7 +220,7 @@
   <!-- HOW TO SHOP -->
   <section id="how-to-shop">
     <div class="container">
-      <h2 style="color:#112e1f;">How to Shop</h2>
+      <h2>How to Shop</h2>
       <p>Browse our curated collection online, select your favorite luxurious items, and enjoy a seamless checkout experience. We ship worldwide with care.</p>
     </div>
   </section>
@@ -236,7 +236,7 @@
   <!-- WORKING HOURS -->
   <section id="working-hours">
     <div class="container">
-      <h2 style="color:#112e1f;">Working Hours</h2>
+      <h2>Working Hours</h2>
       <p>Our team is available Monday through Friday, 9 AM – 6 PM, to assist you with any inquiries or support.</p>
     </div>
   </section>
@@ -254,7 +254,6 @@
     <p>© 2025 Fleur De Vie</p>
   </footer>
 
-  <!-- SCRIPTS -->
   <script>
     const hamburger = document.getElementById('hamburger');
     const headerRight = document.querySelector('.header-right');
@@ -276,7 +275,7 @@
       });
     });
 
-    // Smooth scroll only for internal links
+    // Smooth scroll for internal links
     document.querySelectorAll('.header-right a').forEach(link => {
       link.addEventListener('click', (e) => {
         const href = link.getAttribute('href');
@@ -295,5 +294,6 @@
       });
     });
   </script>
+
 </body>
 </html>
