@@ -9,7 +9,7 @@
   <style>
     /* ================= RESET & BASE ================= */
     * { box-sizing: border-box; margin:0; padding:0; }
-    html, body { height:100%; font-family:"Montserrat", Arial, sans-serif; color:#F5E6CC; background:#112e1f; scroll-behavior:smooth; }
+    html, body { height:100%; font-family:"Montserrat", Arial, sans-serif; scroll-behavior:smooth; }
     a { text-decoration:none; color: inherit; }
 
     /* ================= HEADER ================= */
@@ -69,38 +69,49 @@
     }
     .hero-about .hero-text h1 { font-family:"Playfair Display", serif; font-size: clamp(36px,5vw,64px); margin-bottom:12px; }
     .hero-about .hero-text p { font-family:"Montserrat", sans-serif; font-size: clamp(16px,2vw,24px); max-width:700px; }
+
     @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
 
     /* ================= SECTIONS ================= */
-    section { padding:100px 20px; border-radius: 12px; transition: background 1s ease, transform 0.6s ease; box-shadow: 0 6px 18px rgba(0,0,0,0.15); }
+    section { padding:100px 20px; border-radius: 12px; transition: background 1s ease, transform 0.6s ease, color 0.6s ease; }
     .container { max-width:1200px; margin:0 auto; text-align:center; }
-    section h2 { font-family:"Playfair Display", serif; font-size: clamp(28px,3vw,40px); margin-bottom:24px; color:#FFD6BA; }
-    section p { font-size: clamp(16px,1.5vw,20px); line-height:1.7; margin-bottom:16px; color:#F5E6CC; }
+    section h2 { font-family:"Playfair Display", serif; font-size: clamp(28px,3vw,40px); margin-bottom:24px; }
+    section p { font-size: clamp(16px,1.5vw,20px); line-height:1.7; margin-top:16px; }
 
-    /* Section-specific backgrounds */
-    #vision { background: linear-gradient(135deg, #112e1f, #4B4E54); }
-    #faq { background: linear-gradient(135deg, #C9E4F, #F5E6CC); color: #112e1f; }
-    #faq h2 { color:#112e1f; } /* Ensure FAQ title is visible */
+    /* ================= INDIVIDUAL SECTION STYLES ================= */
+    #vision { background: linear-gradient(135deg, #112e1f, #4B4E54); color:#F5E6CC; }
+    #faq { background: linear-gradient(135deg, #C9E4FF, #F5E6CC); color: #112e1f; }
     #testimonials { background: linear-gradient(135deg, #112e1f, #112e1f 80%, #FFD6BA); color:#112e1f; }
-    #testimonials h2 { color:#FFD6BA; } /* Fix visibility of testimonial title */
     #how-to-shop { background: linear-gradient(135deg, #FFD6BA, #F5E6CC); color: #112e1f; }
-    #affiliate { background: linear-gradient(135deg, #112e1f, #112e1f 70%, #C9E4F); color:#112e1f; }
+    #affiliate { background: linear-gradient(135deg, #112e1f, #112e1f 70%, #C9E4FF); color:#F5E6CC; }
     #working-hours { background: linear-gradient(135deg, #F5E6CC, #FFD6BA); color: #112e1f; }
     #partnerships { background: linear-gradient(135deg, #112e1f, #112e1f 70%, #B66E41); color:#F5E6CC; }
 
-    /* Hover effect for premium feel */
-    section:hover { background-position: right center; transform: translateY(-8px); }
+    section h2 { margin-bottom:24px; }
+    #vision p, #affiliate p, #partnerships p { margin-top:24px; }
 
     /* ================= FAQ ================= */
-    .faq-item { background:#F5E6CC; margin-bottom:12px; border-radius:12px; overflow:hidden; cursor:pointer; transition: background 0.8s ease, transform 0.6s ease, box-shadow 0.6s ease; color:#112e1f; }
-    .faq-item:hover { background: linear-gradient(135deg, #FFD6BA, #F5E6CC); transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.12); }
+    .faq-item {
+      background:#FFD6BA; 
+      margin-bottom:12px;
+      border-radius:12px;
+      overflow:hidden;
+      cursor:pointer;
+      transition: background 0.8s ease, transform 0.6s ease, box-shadow 0.6s ease;
+      color:#112e1f;
+    }
+    .faq-item:hover {
+      background: linear-gradient(135deg, #FFD6BA, #F5E6CC);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    }
     .faq-question { padding:16px; font-weight:500; display:flex; justify-content: space-between; align-items:center; }
     .faq-answer { padding:0 16px 16px 16px; display:none; font-size:16px; line-height:1.6; }
 
     /* ================= TESTIMONIALS ================= */
     .testimonials { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap:24px; margin-top:32px; }
     .testimonial-card {
-      background:#C9E4F;
+      background:#C9E4FF;
       padding:24px;
       border-radius:16px;
       min-height:180px;
@@ -110,8 +121,17 @@
       transition: transform 0.6s ease, background 1s ease, box-shadow 0.6s ease;
       color:#112e1f;
     }
-    .testimonial-card:hover { transform: translateY(-10px) scale(1.02); background: linear-gradient(135deg, #FFD6BA, #C9E4F); box-shadow: 0 12px 24px rgba(0,0,0,0.2); }
-    .testimonial-stars i { background: linear-gradient(90deg, #FFD6BA, #F5E6CC, #FFD6BA); -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmer 2.5s infinite linear; }
+    .testimonial-card:hover {
+      transform: translateY(-10px) scale(1.02);
+      background: linear-gradient(135deg, #FFD6BA, #C9E4FF);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.2);
+    }
+    .testimonial-stars i {
+      background: linear-gradient(90deg, #FFD6BA, #F5E6CC, #FFD6BA);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 2.5s infinite linear;
+    }
     .testimonial-text, .testimonial-author { color:#112e1f; }
 
     /* ================= FOOTER ================= */
@@ -121,16 +141,22 @@
     @media(max-width:900px){ .header-right { gap:12px; flex-wrap: wrap; justify-content:center; } }
     @media(max-width:600px){
       .hero-about { margin-top: 80px; }
-      .header-right { position:absolute; top:70px; right:0; background: rgba(17,46,31,0.95); flex-direction: column; width:200px; padding:20px; display:none; border-radius:0 0 0 10px; }
+      .header-right { 
+        position:absolute;
+        top:70px;
+        right:0;
+        background: rgba(17,46,31,0.95);
+        flex-direction: column;
+        width:200px;
+        padding:20px;
+        display:none;
+        border-radius:0 0 0 10px;
+      }
       .header-right.open { display:flex; }
       .hamburger { display:block; }
       section{ padding:60px 20px; }
     }
     @media(max-width:420px){ .brand-logo { height:clamp(40px,15vw,80px); } .brand-title{ font-size: clamp(16px,7vw,22px); } }
-
-    /* ================= ADDITIONAL SPACING ================= */
-    #vision p, #affiliate p, #partnerships p { margin-top:20px; } /* extra spacing between title and content */
-    #how-to-shop:hover, #working-hours:hover { transform: translateY(-6px); box-shadow: 0 10px 22px rgba(0,0,0,0.2); } /* subtle hover luxury feel */
   </style>
 </head>
 <body class="fleurdevie">
