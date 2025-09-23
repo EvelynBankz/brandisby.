@@ -3,236 +3,214 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Fleur de Vie</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <title>Fleur De Vie - About Us</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    body {
-      margin: 0;
-      font-family: 'Montserrat', sans-serif;
-      background-color: #F5E6CC;
-      color: #112e1f;
-      line-height: 1.6;
-    }
+    /* ================= RESET & BASE ================= */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; font-family: "Montserrat", Arial, sans-serif; color: #fff; background: #000; scroll-behavior: smooth; }
 
-    header {
-      background: #112e1f;
-      color: #F5E6CC;
-      display: flex;
+    /* ================= HEADER ================= */
+    .site-header {
+      position: fixed; /* stays at top when scrolling */
+      top:0; left:0; right:0;
+      display:flex;
+      align-items:center;
       justify-content: space-between;
-      align-items: center;
-      padding: 12px 40px;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
+      padding: 14px 28px;
+      z-index: 1200;
+      background: rgba(0,0,0,0.7); /* semi-transparent background */
     }
+    .header-left { display:flex; align-items:center; gap:12px; }
+    .brand-logo { height: clamp(100px, 10vw, 200px); width:auto; }
+    .brand-title { font-family: "Playfair Display", serif; font-weight:700; font-size: clamp(20px, 3.4vw, 44px); color:#fff; text-align:center; }
+    .header-right { display:flex; gap:16px; }
+    .header-right a { color:#fff; text-decoration:none; font-weight:500; transition: opacity 0.3s; }
+    .header-right a:hover { opacity:0.7; }
 
-    header .logo {
-      font-size: 1.5rem;
-      font-weight: bold;
-      letter-spacing: 2px;
+    /* Hamburger (for mobile) */
+    .hamburger { display:none; background:none; border:none; width:44px; height:40px; cursor:pointer; }
+    .hamburger span { display:block; height:2.5px; width:22px; background:#fff; margin:6px auto; border-radius:2px; transition: transform .28s ease, opacity .28s ease; }
+    .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(4px, 4px); }
+    .hamburger.open span:nth-child(2) { opacity: 0; transform: scale(0.8); }
+    .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(4px, -4px); }
+
+    /* ================= HERO ================= */
+    .hero-about {
+      height: 60vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      background: url("hero-bg.jpg") center center / cover no-repeat;
     }
+    .hero-about .hero-text h1 { font-family: "Playfair Display", serif; font-size: clamp(36px, 5vw, 64px); margin-bottom:12px; }
+    .hero-about .hero-text p { font-family: "Montserrat", sans-serif; font-size: clamp(16px, 2vw, 24px); max-width:700px; }
 
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
+    /* ================= SECTIONS ================= */
+    section { padding: 100px 20px; }
+    .container { max-width: 1200px; margin:0 auto; text-align:center; }
 
-    .header-right a {
-      color: #F5E6CC;
-      text-decoration: none;
-      font-weight: 500;
-    }
-
-    .hamburger {
-      display: none;
-      font-size: 1.8rem;
-      cursor: pointer;
-    }
-
-    .hero {
-      background: url('hero-bg.jpg') no-repeat center center/cover;
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      color: #F5E6CC;
-      padding-top: 80px;
-    }
-
-    .hero h1 {
-      font-size: 3rem;
-      margin-bottom: 20px;
-    }
-
-    section {
-      padding: 80px 20px;
-    }
-
+    /* Section Headings */
     section h2 {
-      font-size: 2rem;
-      margin-bottom: 20px;
-      text-align: center;
-      color: #112e1f;
+      font-family: "Playfair Display", serif;
+      font-size: clamp(28px, 3vw, 40px);
+      margin-bottom: 24px;
     }
 
-    section p {
-      max-width: 800px;
-      margin: 0 auto;
-      text-align: center;
+    /* Section Content */
+    section p { font-size: clamp(16px, 1.5vw, 20px); line-height:1.7; margin-bottom:16px; }
+
+    /* ================= FOOTER ================= */
+    .site-footer { text-align:center; padding:20px; }
+
+    /* ================= RESPONSIVE ================= */
+    @media (max-width: 900px){
+      .header-right { gap:12px; flex-wrap: wrap; justify-content:center; }
     }
 
-    /* Mobile styles */
-    @media (max-width: 768px) {
-      .hamburger {
-        display: block;
-      }
+    @media (max-width: 600px){
+      .hero-about { height: 50vh; }
+      section { padding: 60px 20px; }
+      section h2 { font-size: clamp(22px, 5vw, 32px); }
+      section p { font-size: clamp(14px, 4vw, 18px); }
+      .header-right { flex-direction: column; gap: 8px; }
       .header-right {
-        display: none;
-        flex-direction: column;
-        background: #112e1f;
         position: absolute;
-        top: 60px;
+        top: 70px;
         right: 0;
-        width: 200px;
-        padding: 20px;
+        background: rgba(0,0,0,0.95);
+        width: 220px;
+        padding: 18px;
+        display: none;
+        border-radius: 0 0 0 10px;
       }
-      .header-right.open {
-        display: flex;
-      }
-      .header-right a {
-        margin: 10px 0;
-      }
+      .header-right.open { display: flex; }
+      .hamburger { display:block; }
+    }
+
+    @media (max-width: 420px){
+      .brand-logo { height: clamp(50px, 15vw, 120px); }
+      .brand-title { font-size: clamp(16px, 7vw, 22px); }
     }
   </style>
 </head>
-<body>
-  <header>
-    <div class="logo">Fleur de Vie</div>
+<body class="fleurdevie">
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="header-left">
+      <img src="logo.png" alt="Fleur De Vie logo" class="brand-logo">
+      <div class="brand-title">Fleur De Vie</div>
+    </div>
     <nav class="header-right">
       <a href="index.html">Home</a>
       <a href="shop.html">Shop</a>
-      <a href="contact.html">Contact</a>
-      <a href="#about">About</a>
       <a href="#faq">FAQ</a>
+      <a href="contact.html">Contact</a>
     </nav>
-    <div class="hamburger" id="hamburger">
-      <i class="fas fa-bars"></i>
-    </div>
+    <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
   </header>
 
-  <section class="hero">
-    <div>
-      <h1>Welcome to Fleur de Vie</h1>
-      <p>Experience feminine luxury redefined.</p>
+  <!-- HERO -->
+  <section class="hero-about">
+    <div class="hero-text">
+      <h1>About Fleur De Vie</h1>
+      <p>Discover our vision, values, and how we bring beauty and elegance to your everyday life.</p>
     </div>
   </section>
 
-  <section id="about">
-    <h2>About Fleur de Vie</h2>
-    <p>Fleur de Vie embodies timeless elegance and luxury. Our brand is dedicated to creating products that celebrate femininity, sophistication, and exquisite craftsmanship.</p>
+  <!-- VISION -->
+  <section id="vision">
+    <div class="container">
+      <h2>Our Vision</h2>
+      <p>At Fleur De Vie, our vision is to create timeless and luxurious designs that inspire elegance and sophistication in every moment.</p>
+    </div>
   </section>
 
-  <section id="how-to-shop">
-    <h2>How to Shop</h2>
-    <p>Shopping with us is simple: browse our collection, add items to your cart, and securely checkout in just a few steps.</p>
-  </section>
-
-  <section id="affiliate">
-    <h2>Affiliate Program</h2>
-    <p>Join our affiliate program and become part of the Fleur de Vie family. Earn rewards by sharing our luxurious products with your audience.</p>
-  </section>
-
-  <section id="partnership">
-    <h2>Partnership</h2>
-    <p>We welcome collaborations that align with our values of elegance and sophistication. Let’s build something beautiful together.</p>
-  </section>
-
+  <!-- WORKING HOURS -->
   <section id="working-hours">
-    <h2>Working Hours</h2>
-    <p>Monday – Friday: 9 AM – 6 PM <br> Saturday: 10 AM – 4 PM <br> Sunday: Closed</p>
-  </section>
-
-  <section id="faq">
-    <h2>Frequently Asked Questions</h2>
-    <div class="faq-item">
-      <h3>What is Fleur de Vie about? <i class="fas fa-plus"></i></h3>
-      <div class="faq-answer" style="display:none;">
-        <p>Fleur de Vie is about redefining feminine luxury with timeless designs and premium craftsmanship.</p>
-      </div>
-    </div>
-    <div class="faq-item">
-      <h3>How can I join the affiliate program? <i class="fas fa-plus"></i></h3>
-      <div class="faq-answer" style="display:none;">
-        <p>Simply click the Affiliate Program section and follow the instructions to apply.</p>
-      </div>
+    <div class="container">
+      <h2>Working Hours</h2>
+      <p>Our team is available Monday through Friday, 9 AM – 6 PM, to assist you with any inquiries or support.</p>
     </div>
   </section>
 
-  <section id="testimonials">
-    <h2>Testimonials</h2>
-    <p>"Fleur de Vie has completely redefined my wardrobe. Luxurious and elegant!"</p>
-    <p>"The quality is unmatched — truly feminine luxury at its best."</p>
-    <p>"I feel empowered and sophisticated every time I wear Fleur de Vie."</p>
+  <!-- HOW TO SHOP -->
+  <section id="how-to-shop">
+    <div class="container">
+      <h2>How to Shop</h2>
+      <p>Browse our collection online, select your favorite items, and enjoy a seamless checkout experience. We ship worldwide with care.</p>
+    </div>
   </section>
 
-  <footer>
-    <p style="text-align:center; padding:20px; background:#112e1f; color:#F5E6CC;">
-      © 2025 Fleur de Vie. All Rights Reserved.
-    </p>
+  <!-- PARTNERSHIPS -->
+  <section id="partnerships">
+    <div class="container">
+      <h2>Partnerships</h2>
+      <p>We collaborate with selected luxury brands and artisans to bring exclusive products and experiences to our clients.</p>
+    </div>
+  </section>
+
+  <!-- AFFILIATES -->
+  <section id="affiliates">
+    <div class="container">
+      <h2>Affiliate Program</h2>
+      <p>Join our affiliate program and earn rewards by sharing Fleur De Vie with your network. Contact us for more details.</p>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <p>© 2025 Fleur De Vie</p>
   </footer>
 
+  <!-- HAMBURGER & NAV SCRIPT -->
   <script>
-    // Hamburger toggle with X
+    // Minimal safe change: only adjust behavior for links so external .html links navigate normally,
+    // while only preventing default for in-page anchors (href starting with '#').
     const hamburger = document.getElementById('hamburger');
     const headerRight = document.querySelector('.header-right');
-    const hamburgerIcon = hamburger.querySelector('i');
 
+    // Toggle mobile menu and animate hamburger -> X
     hamburger.addEventListener('click', () => {
-      headerRight.classList.toggle('open'); 
+      const isOpen = headerRight.classList.toggle('open');
       hamburger.classList.toggle('open');
-      if (hamburger.classList.contains('open')) {
-        hamburgerIcon.classList.remove('fa-bars');
-        hamburgerIcon.classList.add('fa-times');
-      } else {
-        hamburgerIcon.classList.remove('fa-times');
-        hamburgerIcon.classList.add('fa-bars');
-      }
+      hamburger.setAttribute('aria-expanded', String(isOpen));
     });
 
-    // FAQ toggle
-    document.querySelectorAll('.faq-item').forEach(item => {
-      item.addEventListener('click', () => {
-        const answer = item.querySelector('.faq-answer');
-        const icon = item.querySelector('i');
-        answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
-        icon.classList.toggle('fa-plus');
-        icon.classList.toggle('fa-minus');
-      });
-    });
-
-    // Smooth scroll for header links
+    // Smooth scroll & link handling: only prevent default for in-page anchors
     document.querySelectorAll('.header-right a').forEach(link => {
       link.addEventListener('click', (e) => {
-        const href = link.getAttribute('href');
-        if (href.startsWith("#")) {
-          e.preventDefault(); // only for in-page anchors
-          const targetId = href.substring(1);
-          const targetSection = document.getElementById(targetId);
-          if (targetSection) {
-            window.scrollTo({ top: targetSection.offsetTop - 80, behavior: 'smooth' });
+        const href = link.getAttribute('href') || '';
+        if (href.startsWith('#')) {
+          e.preventDefault(); // only block default when it's an in-page anchor
+          const id = href.substring(1);
+          const el = document.getElementById(id);
+          if (el) {
+            window.scrollTo({
+              top: el.offsetTop - 80, // offset for fixed header
+              behavior: 'smooth'
+            });
           }
+          // close mobile menu after click
           headerRight.classList.remove('open');
           hamburger.classList.remove('open');
-          hamburgerIcon.classList.remove('fa-times');
-          hamburgerIcon.classList.add('fa-bars');
+          hamburger.setAttribute('aria-expanded', 'false');
+        } else {
+          // external page link (e.g., index.html) -> allow browser navigation
+          // also ensure mobile menu closes when navigating away on small screens
+          headerRight.classList.remove('open');
+          hamburger.classList.remove('open');
+          hamburger.setAttribute('aria-expanded', 'false');
+          // do NOT call e.preventDefault()
         }
-        // external pages like .html load normally
       });
     });
   </script>
+
 </body>
 </html>
