@@ -1,265 +1,299 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fleur De Vie - About Us</title>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<style>
-/* ================= RESET & BASE ================= */
-* { box-sizing: border-box; margin:0; padding:0; }
-html, body { height:100%; font-family:"Montserrat", Arial, sans-serif; color:#F5E6CC; background:#112e1f; scroll-behavior:smooth; }
-a { text-decoration:none; color: inherit; }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fleur De Vie - About Us</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* ================= RESET & BASE ================= */
+    * { box-sizing: border-box; margin:0; padding:0; }
+    html, body { height:100%; font-family:"Montserrat", Arial, sans-serif; color:#F5E6CC; background:#112e1f; scroll-behavior:smooth; }
+    a { text-decoration:none; color: inherit; }
 
-/* ================= HEADER ================= */
-.site-header {
-  position: fixed;
-  top:0; left:0; right:0;
-  display:flex;
-  align-items:center;
-  justify-content: space-between;
-  padding: 8px 20px;
-  z-index: 1200;
-  background: rgba(17,46,31,0.95);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
-}
-.header-left { display:flex; align-items:center; gap:12px; }
-.brand-logo { height: clamp(50px, 8vw, 100px); width:auto; }
-.brand-title { font-family:"Playfair Display", serif; font-weight:700; font-size: clamp(20px, 3vw, 44px); color:#FFD6BA; text-align:center; }
-.header-right { display:flex; gap:16px; }
-.header-right a { color:#F5E6CC; font-weight:500; transition: opacity 0.3s; }
-.header-right a:hover { color:#FFD6BA; }
+    /* ================= HEADER ================= */
+    .site-header {
+      position: fixed;
+      top:0; left:0; right:0;
+      display:flex;
+      align-items:center;
+      justify-content: space-between;
+      padding: 8px 20px;
+      z-index: 1200;
+      background: rgba(17,46,31,0.95);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+    }
+    .header-left { display:flex; align-items:center; gap:12px; }
+    .brand-logo { height: clamp(50px, 8vw, 100px); width:auto; }
+    .brand-title { font-family:"Playfair Display", serif; font-weight:700; font-size: clamp(20px, 3vw, 44px); color:#FFD6BA; text-align:center; }
+    .header-right { display:flex; gap:16px; }
+    .header-right a { color:#F5E6CC; font-weight:500; transition: opacity 0.3s; }
+    .header-right a:hover { color:#FFD6BA; }
 
-/* Hamburger */
-.hamburger { display:none; background:none; border:none; width:44px; height:40px; cursor:pointer; position: relative; z-index: 1300; }
-.hamburger span {
-  display:block;
-  height:2.5px;
-  width:22px;
-  background:#F5E6CC;
-  margin:6px auto;
-  border-radius:2px;
-  transition: all 0.3s ease;
-}
-.hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px,5px); }
-.hamburger.open span:nth-child(2) { opacity:0; }
-.hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px,-5px); }
+    /* Hamburger */
+    .hamburger { display:none; background:none; border:none; width:44px; height:40px; cursor:pointer; position: relative; z-index: 1300; }
+    .hamburger span {
+      display:block;
+      height:2.5px;
+      width:22px;
+      background:#F5E6CC;
+      margin:6px auto;
+      border-radius:2px;
+      transition: all 0.3s ease;
+    }
+    .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+    .hamburger.open span:nth-child(2) { opacity:0; }
+    .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
 
-/* ================= HERO ================= */
-.hero-about {
-  height: 60vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  background: url("bg.jpg") center center / cover no-repeat;
-  margin-top: 100px;
-  border-radius: 12px;
-  box-shadow: inset 0 0 0 2000px rgba(17,46,31,0.3);
-}
-.hero-about .hero-text h1, .hero-about .hero-text p {
-  position: relative;
-  display: inline-block;
-  background: linear-gradient(90deg, #F5E6CC 0%, #FFD6BA 50%, #F5E6CC 100%);
-  background-size: 200% 100%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: shimmer 3s infinite linear;
-}
-.hero-about .hero-text h1 { font-family:"Playfair Display", serif; font-size: clamp(36px,5vw,64px); margin-bottom:12px; }
-.hero-about .hero-text p { font-family:"Montserrat", sans-serif; font-size: clamp(16px,2vw,24px); max-width:700px; }
-@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+    /* ================= HERO ================= */
+    .hero-about {
+      height: 60vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      background: url("bg.jpg") center center / cover no-repeat;
+      margin-top: 100px;
+      border-radius: 12px;
+      box-shadow: inset 0 0 0 2000px rgba(17,46,31,0.3);
+    }
+    .hero-about .hero-text h1, .hero-about .hero-text p {
+      position: relative;
+      display: inline-block;
+      background: linear-gradient(90deg, #F5E6CC 0%, #FFD6BA 50%, #F5E6CC 100%);
+      background-size: 200% 100%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shimmer 3s infinite linear;
+    }
+    .hero-about .hero-text h1 { font-family:"Playfair Display", serif; font-size: clamp(36px,5vw,64px); margin-bottom:12px; }
+    .hero-about .hero-text p { font-family:"Montserrat", sans-serif; font-size: clamp(16px,2vw,24px); max-width:700px; }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
 
-/* ================= SECTIONS ================= */
-section { padding:100px 20px; border-radius: 12px; transition: background 1s ease, transform 0.6s ease; box-shadow:0 6px 18px rgba(0,0,0,0.15);}
-.container { max-width:1200px; margin:0 auto; text-align:center; }
-section h2 { font-family:"Playfair Display", serif; font-size: clamp(28px,3vw,40px); margin-bottom:24px; color:#FFD6BA; }
-section p { font-size: clamp(16px,1.5vw,20px); line-height:1.7; margin-bottom:16px; color:inherit; }
+    /* ================= SECTIONS ================= */
+    section {
+      padding:100px 20px;
+      border-radius: 12px;
+      transition: background 1s ease, transform 0.6s ease;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+    }
+    .container { max-width:1200px; margin:0 auto; text-align:center; }
+    section h2 { font-family:"Playfair Display", serif; font-size: clamp(28px,3vw,40px); margin-bottom:24px; color:#FFD6BA; }
+    section p { font-size: clamp(16px,1.5vw,20px); line-height:1.7; margin-bottom:16px; color:#F5E6CC; }
 
-/* ================= SECTION GRADIENTS ================= */
-#vision { background: linear-gradient(135deg, #112e1f, #112e1f 80%, #C9E4FF); color:#F5E6CC; }
-#faq { background: linear-gradient(135deg, #F5E6CC, #FFD6BA); color: #112e1f; }
-#testimonials { background: linear-gradient(135deg, #C9E4FF, #112e1f); color:#F5E6CC; }
-#how-to-shop { background: linear-gradient(135deg, #FFD6BA, #F5E6CC); color:#112e1f; }
-#affiliate { background: linear-gradient(135deg, #112e1f, #C9E4FF); color:#F5E6CC; }
-#working-hours { background: linear-gradient(135deg, #F5E6CC, #FFD6BA); color:#112e1f; }
-#partnerships { background: linear-gradient(135deg, #112e1f, #112e1f 70%, #C9E4FF); color:#F5E6CC; }
+    /* ================= SECTION GRADIENTS ================= */
+    #vision { background: linear-gradient(135deg, #112e1f, #4B4E54); }
+    #faq { background: linear-gradient(135deg, #C9E4FF, #F5E6CC); color: #112e1f; }
+    #testimonials { background: linear-gradient(135deg, #112e1f, #112e1f 80%, #FFD6BA); color:#112e1f; }
+    #how-to-shop { background: linear-gradient(135deg, #FFD6BA, #F5E6CC); color: #112e1f; }
+    #affiliate { background: linear-gradient(135deg, #112e1f, #112e1f 70%, #C9E4FF); color:#112e1f; }
+    #working-hours { background: linear-gradient(135deg, #F5E6CC, #FFD6BA); color: #112e1f; }
+    #partnerships { background: linear-gradient(135deg, #112e1f, #112e1f 70%, #B66E41); color:#F5E6CC; }
 
-/* Hover effect */
-section:hover { background-position: right center; transform: translateY(-8px); }
+    section:hover { background-position: right center; transform: translateY(-8px); }
 
-/* ================= FAQ ================= */
-.faq-item { color:#112e1f; background:#F5E6CC; margin-bottom:12px; border-radius:12px; overflow:hidden; cursor:pointer; transition: background 0.8s ease, transform 0.6s ease, box-shadow 0.6s ease; }
-.faq-item:hover { background: linear-gradient(135deg,#FFD6BA,#F5E6CC); transform: translateY(-4px); box-shadow:0 8px 20px rgba(0,0,0,0.12); }
-.faq-question { padding:16px; font-weight:500; display:flex; justify-content: space-between; align-items:center; }
-.faq-answer { padding:0 16px 16px 16px; display:none; font-size:16px; line-height:1.6; }
+    /* ================= FAQ ================= */
+    .faq-item {
+      background:#F5E6CC;
+      margin-bottom:12px;
+      border-radius:12px;
+      overflow:hidden;
+      cursor:pointer;
+      transition: background 0.8s ease, transform 0.6s ease, box-shadow 0.6s ease;
+      color:#112e1f;
+    }
+    .faq-item:hover { background: linear-gradient(135deg, #FFD6BA, #F5E6CC); transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+    .faq-question { padding:16px; font-weight:500; display:flex; justify-content: space-between; align-items:center; }
+    .faq-answer { padding:0 16px 16px 16px; display:none; font-size:16px; line-height:1.6; }
 
-/* ================= TESTIMONIALS ================= */
-.testimonials { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap:24px; margin-top:32px; }
-.testimonial-card { background: #FFD6BA; color:#112e1f; padding:24px; border-radius:16px; min-height:180px; display:flex; flex-direction:column; justify-content:space-between; box-shadow:0 8px 20px rgba(0,0,0,0.15); transition: transform 0.5s ease, background 0.5s ease; }
-.testimonial-card:hover { transform: translateY(-8px) scale(1.02); background: linear-gradient(135deg, #FFD6BA, #C9E4FF); }
-.testimonial-stars i { color:#FFD6BA; margin-right:2px; }
-.testimonial-text, .testimonial-author { color:#112e1f; }
+    /* FAQ heading visibility fix */
+    #faq h2, #how-to-shop h2, #working-hours h2 { color:#112e1f; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); }
+    #faq p, #how-to-shop p, #working-hours p { color:#112e1f; }
 
-/* ================= FOOTER ================= */
-.site-footer { text-align:center; padding:20px; background:#112e1f; color:#F5E6CC; }
+    /* ================= TESTIMONIALS ================= */
+    .testimonials { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr)); gap:24px; margin-top:32px; }
+    .testimonial-card {
+      background:#C9E4FF;
+      padding:24px;
+      border-radius:16px;
+      min-height:180px;
+      display:flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.6s ease, background 1s ease, box-shadow 0.6s ease;
+      color:#112e1f;
+    }
+    .testimonial-card:hover { transform: translateY(-10px) scale(1.02); background: linear-gradient(135deg, #FFD6BA, #C9E4FF); box-shadow: 0 12px 24px rgba(0,0,0,0.2); }
+    .testimonial-stars i { background: linear-gradient(90deg, #FFD6BA, #F5E6CC, #FFD6BA); -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmer 2.5s infinite linear; }
+    .testimonial-text, .testimonial-author { color:#112e1f; }
 
-/* ================= RESPONSIVE ================= */
-@media(max-width:900px){ .header-right { gap:12px; flex-wrap: wrap; justify-content:center; } }
-@media(max-width:600px){
-  .hero-about { margin-top: 80px; }
-  .header-right { position:absolute; top:70px; right:0; background: rgba(17,46,31,0.95); flex-direction:column; width:200px; padding:20px; display:none; border-radius:0 0 0 10px; }
-  .header-right.open { display:flex; }
-  .hamburger { display:block; }
-  section{ padding:60px 20px; }
-}
-@media(max-width:420px){ .brand-logo { height:clamp(40px,15vw,80px); } .brand-title{ font-size: clamp(16px,7vw,22px); } }
-</style>
+    /* ================= FOOTER ================= */
+    .site-footer { text-align:center; padding:20px; background:#112e1f; color:#F5E6CC; }
+
+    /* ================= RESPONSIVE ================= */
+    @media(max-width:900px){ .header-right { gap:12px; flex-wrap: wrap; justify-content:center; } }
+    @media(max-width:600px){
+      .hero-about { margin-top: 80px; }
+      .header-right { 
+        position:absolute;
+        top:70px;
+        right:0;
+        background: rgba(17,46,31,0.95);
+        flex-direction: column;
+        width:200px;
+        padding:20px;
+        display:none;
+        border-radius:0 0 0 10px;
+      }
+      .header-right.open { display:flex; }
+      .hamburger { display:block; }
+      section{ padding:60px 20px; }
+    }
+    @media(max-width:420px){ .brand-logo { height:clamp(40px,15vw,80px); } .brand-title{ font-size: clamp(16px,7vw,22px); } }
+  </style>
 </head>
 <body class="fleurdevie">
 
-<!-- HEADER -->
-<header class="site-header">
-  <div class="header-left">
-    <img src="logo.png" alt="Fleur De Vie Logo" class="brand-logo">
-    <div class="brand-title">Fleur De Vie</div>
-  </div>
-  <nav class="header-right">
-    <a href="index.html">Home</a>
-    <a href="shop.html">Shop</a>
-    <a href="#faq">FAQ</a>
-    <a href="contact.html">Contact</a>
-  </nav>
-  <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
-</header>
-
-<!-- HERO -->
-<section class="hero-about">
-  <div class="hero-text">
-    <h1>About Fleur De Vie</h1>
-    <p>Discover our vision, values, and how we bring elegance and luxury to your everyday life.</p>
-  </div>
-</section>
-
-<!-- VISION -->
-<section id="vision">
-  <div class="container">
-    <h2>Our Vision</h2>
-    <p>At Fleur De Vie, we create timeless designs and luxurious experiences that inspire and delight.</p>
-  </div>
-</section>
-
-<!-- FAQ -->
-<section id="faq">
-  <div class="container">
-    <h2>Frequently Asked Questions</h2>
-    <div class="faq-item">
-      <div class="faq-question">What products does Fleur De Vie offer? <i class="fas fa-plus"></i></div>
-      <div class="faq-answer"><p>We offer curated collections of luxurious lifestyle and fashion products designed for elegance and comfort.</p></div>
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="header-left">
+      <img src="logo.png" alt="Fleur De Vie Logo" class="brand-logo">
+      <div class="brand-title">Fleur De Vie</div>
     </div>
-    <div class="faq-item">
-      <div class="faq-question">How do I contact customer support? <i class="fas fa-plus"></i></div>
-      <div class="faq-answer"><p>You can reach us via our Contact page or email support@fleurdevie.com. Our team is available Monday through Friday.</p></div>
-    </div>
-  </div>
-</section>
+    <nav class="header-right">
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="#faq">FAQ</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+  </header>
 
-<!-- TESTIMONIALS -->
-<section id="testimonials">
-  <div class="container">
-    <h2>Testimonials</h2>
-    <div class="testimonials">
-      <div class="testimonial-card">
-        <div class="testimonial-stars">
-          <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+  <!-- HERO -->
+  <section class="hero-about">
+    <div class="hero-text">
+      <h1>About Fleur De Vie</h1>
+      <p>Discover our vision, values, and how we bring elegance and luxury to your everyday life.</p>
+    </div>
+  </section>
+
+  <!-- VISION -->
+  <section id="vision">
+    <div class="container">
+      <h2>Our Vision</h2>
+      <p>At Fleur De Vie, we create timeless designs and luxurious experiences that inspire and delight.</p>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq">
+    <div class="container">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-item">
+        <div class="faq-question">What products does Fleur De Vie offer? <i class="fas fa-plus"></i></div>
+        <div class="faq-answer"><p>We offer curated collections of luxurious lifestyle and fashion products designed for elegance and comfort.</p></div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">How do I contact customer support? <i class="fas fa-plus"></i></div>
+        <div class="faq-answer"><p>You can reach us via our Contact page or email support@fleurdevie.com. Our team is available Monday through Friday.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section id="testimonials">
+    <div class="container">
+      <h2>Testimonials</h2>
+      <div class="testimonials">
+        <div class="testimonial-card">
+          <div class="testimonial-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
+          <div class="testimonial-text">Serac’s service was exceptional, and the product quality exceeded my expectations. Highly recommend!</div>
+          <div class="testimonial-author">— Jane Doe</div>
         </div>
-        <div class="testimonial-text">Serac’s service was exceptional, and the product quality exceeded my expectations. Highly recommend!</div>
-        <div class="testimonial-author">— Jane Doe</div>
-      </div>
-      <div class="testimonial-card">
-        <div class="testimonial-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-        <div class="testimonial-text">An amazing experience! Elegant products and exceptional service.</div>
-        <div class="testimonial-author">— John Smith</div>
+        <div class="testimonial-card">
+          <div class="testimonial-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+          <div class="testimonial-text">An amazing experience! Elegant products and exceptional service.</div>
+          <div class="testimonial-author">— John Smith</div>
+        </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- HOW TO SHOP -->
-<section id="how-to-shop">
-  <div class="container">
-    <h2>How to Shop</h2>
-    <p>Browse our curated collection online, select your favorite luxurious items, and enjoy a seamless checkout experience. We ship worldwide with care.</p>
-  </div>
-</section>
+  <!-- HOW TO SHOP -->
+  <section id="how-to-shop">
+    <div class="container">
+      <h2>How to Shop</h2>
+      <p>Browse our curated collection online, select your favorite luxurious items, and enjoy a seamless checkout experience. We ship worldwide with care.</p>
+    </div>
+  </section>
 
-<!-- AFFILIATE PROGRAM -->
-<section id="affiliate">
-  <div class="container">
-    <h2>Affiliate Program</h2>
-    <p>Join our affiliate program and earn rewards by sharing Fleur De Vie with your network. Contact us for more details.</p>
-  </div>
-</section>
+  <!-- AFFILIATE PROGRAM -->
+  <section id="affiliate">
+    <div class="container">
+      <h2>Affiliate Program</h2>
+      <p>Join our affiliate program and earn rewards by sharing Fleur De Vie with your network. Contact us for more details.</p>
+    </div>
+  </section>
 
-<!-- WORKING HOURS -->
-<section id="working-hours">
-  <div class="container">
-    <h2>Working Hours</h2>
-    <p>Our team is available Monday through Friday, 9 AM – 6 PM, to assist you with any inquiries or support.</p>
-  </div>
-</section>
+  <!-- WORKING HOURS -->
+  <section id="working-hours">
+    <div class="container">
+      <h2>Working Hours</h2>
+      <p>Our team is available Monday through Friday, 9 AM – 6 PM, to assist you with any inquiries or support.</p>
+    </div>
+  </section>
 
-<!-- PARTNERSHIPS -->
-<section id="partnerships">
-  <div class="container">
-    <h2>Partnerships</h2>
-    <p>We collaborate with selected luxury partners to deliver exclusive experiences and products.</p>
-  </div>
-</section>
+  <!-- PARTNERSHIPS -->
+  <section id="partnerships">
+    <div class="container">
+      <h2>Partnerships</h2>
+      <p>We collaborate with selected luxury partners to deliver exclusive experiences and products.</p>
+    </div>
+  </section>
 
-<!-- FOOTER -->
-<footer class="site-footer">
-  <p>© 2025 Fleur De Vie</p>
-</footer>
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <p>© 2025 Fleur De Vie</p>
+  </footer>
 
-<!-- SCRIPTS -->
-<script>
-// Hamburger toggle with X
-const hamburger = document.getElementById('hamburger');
-const headerRight = document.querySelector('.header-right');
-hamburger.addEventListener('click', () => {
-  headerRight.classList.toggle('open'); 
-  hamburger.classList.toggle('open');
-});
+  <!-- SCRIPTS -->
+  <script>
+    // Hamburger toggle with X
+    const hamburger = document.getElementById('hamburger');
+    const headerRight = document.querySelector('.header-right');
+    hamburger.addEventListener('click', () => {
+      headerRight.classList.toggle('open'); 
+      hamburger.classList.toggle('open');
+    });
 
-// FAQ toggle
-document.querySelectorAll('.faq-item').forEach(item => {
-  item.addEventListener('click', () => {
-    const answer = item.querySelector('.faq-answer');
-    const icon = item.querySelector('i');
-    answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
-    icon.classList.toggle('fa-plus');
-    icon.classList.toggle('fa-minus');
-  });
-});
-
-// Smooth scroll
-document.querySelectorAll('.header-right a').forEach(link => {
-  link.addEventListener('click', (e) => {
-    e.preventDefault();
-    const targetId = link.getAttribute('href').substring(1);
-    const targetSection = document.getElementById(targetId);
-    if(targetSection){
-      window.scrollTo({
-        top: targetSection.offsetTop - 80,
-        behavior: 'smooth'
+    // FAQ toggle
+    document.querySelectorAll('.faq-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const answer = item.querySelector('.faq-answer');
+        const icon = item.querySelector('i');
+        answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
+        icon.classList.toggle('fa-plus');
+        icon.classList.toggle('fa-minus');
       });
-    }
-    headerRight.classList.remove('open');
-    hamburger.classList.remove('open');
-  });
-});
-</script>
+    });
+
+    // Smooth scroll
+    document.querySelectorAll('.header-right a').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetId = link.getAttribute('href').substring(1);
+        const targetSection = document.getElementById(targetId);
+        if(targetSection){
+          window.scrollTo({
+            top: targetSection.offsetTop - 80,
+            behavior: 'smooth'
+          });
+        }
+        headerRight.classList.remove('open');
+        hamburger.classList.remove('open');
+      });
+    });
+  </script>
 </body>
 </html>
