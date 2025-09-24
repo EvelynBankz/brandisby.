@@ -1,210 +1,182 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Fleur De Vie - Cart</title>
-
-  <!-- Fonts & icons -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fleur De Vie - Shop</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
   <style>
-    :root{
-      --brand:#FFD6BA;
-      --text:#000;
-      --white:#fff;
-      --muted:#666;
-      --max-width:1100px;
-    }
-    body{margin:0;background:var(--white);color:var(--text);font-family:'Montserrat',sans-serif}
-    .container{max-width:var(--max-width);margin:0 auto;padding:0 18px}
+    /* RESET */
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: "Montserrat", sans-serif; background: #F5E6CC; color:#112e1f; line-height:1.6; }
+    a { text-decoration:none; color:inherit; }
 
-    /* ===== HEADER ===== */
-    .site-header{
-      background:var(--brand);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding:10px 18px;
-      position:relative;
-    }
-    .header-left{display:flex;align-items:center;gap:10px;flex:1}
-    .brand-logo{height:54px;width:auto}
-    .brand-title{font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:700;color:var(--text)}
-
-    .header-center{flex:1;text-align:center;font-weight:600;font-size:1.1rem;color:var(--text)}
-    .header-right{display:flex;gap:14px;align-items:center;flex:1;justify-content:flex-end}
-    .header-right a{color:var(--text);text-decoration:none;font-weight:500}
+    /* HEADER */
+    .site-header { background: #112e1f; color: #F5E6CC; display:flex; justify-content:space-between; align-items:center; padding:16px 28px; position:fixed; top:0; left:0; right:0; z-index:1000; }
+    .header-left { display:flex; align-items:center; gap:12px; }
+    .brand-logo { height:60px; }
+    .brand-title { font-family:"Playfair Display", serif; font-size:24px; font-weight:700; }
+    .header-right { display:flex; gap:20px; align-items:center; }
+    .header-right a { font-weight:500; transition: color 0.3s; }
+    .header-right a:hover { color:#FFD6BA; }
+    .cart-count { background:#FFD6BA; color:#112e1f; font-size:12px; font-weight:600; border-radius:50%; padding:2px 6px; margin-left:4px; }
 
     /* Hamburger */
-    .hamburger{
-      display:none;
-      flex-direction:column;
-      justify-content:space-between;
-      width:25px;height:18px;
-      border:none;background:none;
-      cursor:pointer;
-    }
-    .hamburger span{
-      display:block;
-      height:3px;width:100%;
-      background:var(--text);
-      border-radius:2px;
-    }
+    .hamburger { display:none; background:none; border:none; cursor:pointer; width:30px; height:24px; position:relative; }
+    .hamburger span { display:block; width:100%; height:3px; background:#F5E6CC; border-radius:2px; position:absolute; left:0; transition:0.3s; }
+    .hamburger span:nth-child(1){ top:0; }
+    .hamburger span:nth-child(2){ top:10px; }
+    .hamburger span:nth-child(3){ top:20px; }
+    .hamburger.open span:nth-child(1){ transform:rotate(45deg); top:10px; }
+    .hamburger.open span:nth-child(2){ opacity:0; }
+    .hamburger.open span:nth-child(3){ transform:rotate(-45deg); top:10px; }
 
-    /* Dropdown (mobile) */
-    .dropdown-menu{
-      display:none;
-      position:absolute;
-      top:100%; right:18px;
-      background:var(--brand);
-      padding:12px;
-      border-radius:6px;
-      flex-direction:column;
-      gap:10px;
-      min-width:180px;
-      box-shadow:0 4px 12px rgba(0,0,0,0.15);
-    }
-    .dropdown-menu.open{display:flex}
-    .dropdown-close{
-      align-self:flex-end;
-      border:none;background:none;
-      font-size:20px;color:var(--text);
-      cursor:pointer;
-    }
-    .dropdown-menu a{color:var(--text);text-decoration:none;font-weight:500}
+    /* HERO */
+    .hero { position: relative; height: 50vh; display: flex; justify-content: center; align-items: center; text-align: center; margin-top: 80px; overflow: hidden; }
+    .hero::after { content: ""; position: absolute; inset: 0; background: url("bg.jpg") center/cover no-repeat; transform: scale(1.1); z-index: -1; border-radius: 12px; box-shadow: inset 0 0 0 2000px rgba(17,46,31,0.3); }
+    .hero-text { position: relative; display: inline-block; color: #FFD6BA; margin-bottom:12px; animation: shimmer 3s infinite linear; }
+    .hero-text h1 { font-family: "Playfair Display", serif; font-size: clamp(36px,5vw,64px); margin-bottom:12px; }
+    .hero-text p { font-size: clamp(16px,2vw,24px); max-width:700px; }
 
-    /* ===== CART ===== */
-    .cart{padding:28px 0 60px}
-    .cart-table-wrap{overflow:auto;background:var(--white);border-radius:8px}
-    table{width:100%;border-collapse:collapse;min-width:720px}
-    th{padding:12px;background:#141517;color:#fff;font-weight:600;text-align:center}
-    td{padding:12px;text-align:center;border-bottom:1px solid #eee}
-    td img{width:80px;border-radius:6px}
+    /* SHOP GRID */
+    section.shop { padding:80px 20px; background:#F5E6CC; }
+    .container { max-width:1100px; margin:auto; }
+    .shop h2 { text-align:center; font-size:24px; margin-bottom:40px; font-family:"Playfair Display", serif; color:#112e1f; }
+    .shop-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:20px; }
+    .product-card { background:#FFD6BA; border-radius:12px; overflow:hidden; box-shadow:0 4px 10px rgba(0,0,0,0.1); display:flex; flex-direction:column; }
+    .product-card img { width:100%; height:200px; object-fit:cover; }
+    .product-details { padding:16px; flex:1; display:flex; flex-direction:column; justify-content:space-between; }
+    .product-details h3 { font-family:"Playfair Display", serif; font-size:18px; margin-bottom:8px; }
+    .product-details .price { font-weight:600; font-size:16px; margin-bottom:12px; }
+    .product-details input[type="number"] { width:60px; padding:6px; margin-bottom:8px; border-radius:6px; border:1px solid #112e1f; }
+    .product-details button { padding:10px; background:#112e1f; color:#F5E6CC; border:none; border-radius:6px; cursor:pointer; transition:background 0.3s; margin-bottom:6px; }
+    .product-details button:hover { background:#0a1d14; }
+    .view-cart { background:#FFD6BA; color:#112e1f; font-weight:600; border:1px solid #112e1f; }
+    .view-cart:hover { background:#112e1f; color:#F5E6CC; }
 
-    .empty-message{text-align:center;margin-top:15px;color:var(--muted)}
-    #cart-total{text-align:center;font-weight:700;margin-top:18px}
-    .bottom-controls{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+    /* FOOTER */
+    footer { text-align:center; padding:20px; background:#112e1f; color:#F5E6CC; margin-top:60px; }
 
-    .btn{background:var(--brand);color:var(--text);padding:10px 16px;border:none;border-radius:8px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
-    .currency-select{padding:8px 10px;border-radius:6px;border:1px solid #ccc;font-weight:600}
-
-    /* ===== RESPONSIVE ===== */
-    @media (max-width:768px){
-      .header-right{display:none}
-      .hamburger{display:flex}
-      .brand-title{font-size:1.1rem}
-      .header-center{font-size:1rem}
-      table{min-width:520px}
-    }
-    @media (max-width:480px){
-      .brand-logo{height:46px}
-      .brand-title{font-size:1rem}
-      .header-center{font-size:0.95rem}
-      table{min-width:380px}
+    /* RESPONSIVE */
+    @media(max-width:600px){
+      .header-right { display:none; flex-direction:column; background:#112e1f; position:absolute; top:70px; right:0; width:200px; padding:20px; }
+      .header-right.open { display:flex; }
+      .hamburger { display:block; }
+      .hero-text h1 { font-size:32px; }
     }
   </style>
 </head>
 <body>
 
-  <!-- ===== HEADER ===== -->
+  <!-- HEADER -->
   <header class="site-header">
     <div class="header-left">
-      <img src="logo.png" alt="Fleur De Vie" class="brand-logo">
+      <img src="logo.png" alt="Fleur De Vie Logo" class="brand-logo">
       <div class="brand-title">Fleur De Vie</div>
     </div>
-    <div class="header-center">Your Cart</div>
-    <div class="header-right">
+    <nav class="header-right">
       <a href="index.html">Home</a>
       <a href="shop.html">Shop</a>
-      <a href="checkout.html">Checkout</a>
-    </div>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+      <a href="cart.html">Cart <span class="cart-count" id="cartCount">0</span></a>
+    </nav>
     <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
-    <div class="dropdown-menu" id="dropdown-menu">
-      <button class="dropdown-close" id="dropdown-close">&times;</button>
-      <a href="index.html">Home</a>
-      <a href="shop.html">Shop</a>
-      <a href="checkout.html">Checkout</a>
-    </div>
   </header>
 
-  <!-- ===== CART ===== -->
-  <main class="container cart">
-    <div class="cart-table-wrap">
-      <table id="cart-table">
-        <thead>
-          <tr>
-            <th>Image</th><th>Name</th><th>Price</th><th>Qty</th><th>Total</th><th>Action</th>
-          </tr>
-        </thead>
-        <tbody id="cart-body"></tbody>
-      </table>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-text">
+      <h1>Shop Our Products</h1>
+      <p>High-quality products from Fleur De Vie</p>
     </div>
-    <div id="empty-message" class="empty-message">Your cart is empty</div>
-    <div id="cart-total">Total: $0.00</div>
-    <div class="bottom-controls">
-      <a class="btn" href="shop.html"><i class="fa fa-arrow-left"></i> Continue Shopping</a>
-      <a class="btn" id="checkout-link" href="checkout.html"><i class="fa fa-credit-card"></i> Checkout</a>
-      <select id="currency-selector" class="currency-select">
-        <option value="USD" selected>USD $</option>
-        <option value="EUR">EUR €</option>
-        <option value="GBP">GBP £</option>
-        <option value="NGN">NGN ₦</option>
-      </select>
-    </div>
-  </main>
+  </section>
 
-  <script>
-    // Mobile menu
-    const hamburger=document.getElementById('hamburger');
-    const dropdown=document.getElementById('dropdown-menu');
-    const closeBtn=document.getElementById('dropdown-close');
-    hamburger.onclick=()=>dropdown.classList.add('open');
-    closeBtn.onclick=()=>dropdown.classList.remove('open');
-    document.addEventListener('click',e=>{
-      if(!dropdown.contains(e.target)&&!hamburger.contains(e.target)) dropdown.classList.remove('open');
+  <!-- SHOP -->
+  <section class="shop">
+    <div class="container">
+      <h2>Our Products</h2>
+      <div class="shop-grid" id="shopGrid"></div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2025 Fleur De Vie</p>
+  </footer>
+
+  <!-- FIREBASE & SCRIPT -->
+  <script type="module">
+    const hamburger = document.getElementById('hamburger');
+    const navMenu = document.querySelector('.header-right');
+    hamburger.addEventListener('click', () => {
+      navMenu.classList.toggle('open');
+      hamburger.classList.toggle('open');
     });
 
-    // Cart logic (simplified)
-    const cartBody=document.getElementById('cart-body');
-    const totalEl=document.getElementById('cart-total');
-    const emptyEl=document.getElementById('empty-message');
-    const currencySel=document.getElementById('currency-selector');
-    const checkoutLink=document.getElementById('checkout-link');
-    const RATES={USD:1,EUR:0.93,GBP:0.8,NGN:1600};
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-    function getCart(){return JSON.parse(localStorage.getItem('fleurdevie-cart')||'[]');}
-    function saveCart(c){localStorage.setItem('fleurdevie-cart',JSON.stringify(c));}
-    function fmt(val,c){if(c==="USD")return"$"+val.toFixed(2);if(c==="EUR")return"€"+val.toFixed(2);if(c==="GBP")return"£"+val.toFixed(2);if(c==="NGN")return"₦"+Math.round(val);return val;}
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
 
-    function render(){
-      const cur=localStorage.getItem('fleurdevie-currency')||currencySel.value;
-      currencySel.value=cur;
-      const cart=getCart();cartBody.innerHTML="";let total=0;
-      if(cart.length===0){emptyEl.style.display="block";totalEl.textContent="Total: "+fmt(0,cur);return;}
-      emptyEl.style.display="none";
-      cart.forEach((it,i)=>{let unit=it.price*RATES[cur];let sub=unit*it.quantity;total+=sub;
-        const tr=document.createElement("tr");
-        tr.innerHTML=`<td><img src="${it.imageUrl||'placeholder.jpg'}"></td>
-          <td>${it.name}</td><td>${fmt(unit,cur)}</td>
-          <td><input type="number" min="1" value="${it.quantity}" data-i="${i}" style="width:60px"></td>
-          <td>${fmt(sub,cur)}</td>
-          <td><button data-r="${i}">Remove</button></td>`;
-        cartBody.appendChild(tr);
-      });
-      totalEl.textContent="Total: "+fmt(total,cur);
-      checkoutLink.href=`checkout.html?currency=${cur}`;
-      attachEvents();
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const shopGrid = document.getElementById('shopGrid');
+    const cartCount = document.getElementById('cartCount');
+
+    function updateCartCount() {
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const total = cart.reduce((sum, item) => sum + item.quantity, 0);
+      cartCount.textContent = total;
     }
-    function attachEvents(){
-      document.querySelectorAll("[data-i]").forEach(inp=>inp.onchange=e=>{
-        const c=getCart();c[e.target.dataset.i].quantity=parseInt(e.target.value)||1;saveCart(c);render();
+
+    async function loadProducts() {
+      const querySnapshot = await getDocs(collection(db, "products"));
+      querySnapshot.forEach(doc => {
+        const data = doc.data();
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.innerHTML = `
+          <img src="${data.imageUrl}" alt="${data.name}">
+          <div class="product-details">
+            <h3>${data.name}</h3>
+            <div class="price">$${data.price.toFixed(2)}</div>
+            <input type="number" min="1" value="1" id="qty-${doc.id}">
+            <button onclick="addToCart('${doc.id}')">Add to Cart</button>
+            <button class="view-cart" onclick="location.href='cart.html'">View Cart</button>
+          </div>
+        `;
+        shopGrid.appendChild(card);
       });
-      document.querySelectorAll("[data-r]").forEach(btn=>btn.onclick=()=>{const c=getCart();c.splice(btn.dataset.r,1);saveCart(c);render();});
     }
-    currencySel.onchange=e=>{localStorage.setItem('fleurdevie-currency',e.target.value);render();}
-    render();
+
+    function addToCart(id){
+      let cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const qtyInput = document.getElementById(`qty-${id}`);
+      const quantity = parseInt(qtyInput.value) || 1;
+
+      const index = cart.findIndex(item => item.id === id);
+      if(index > -1){
+        cart[index].quantity += quantity;
+      } else {
+        cart.push({id:id, quantity});
+      }
+
+      localStorage.setItem('cart', JSON.stringify(cart));
+      updateCartCount();
+      alert(`${quantity} product(s) added to cart!`);
+    }
+
+    updateCartCount();
+    loadProducts();
   </script>
 </body>
 </html>
