@@ -70,7 +70,6 @@
   </div>
 </section>
 
-/* ================= HERO ABOUT ================= */
 .hero-about {
   position: relative;
   height: 60vh;
@@ -80,49 +79,25 @@
   text-align: center;
   margin-top: 100px;
   border-radius: 12px;
-  overflow: hidden;
+  overflow: hidden; /* ensures blurred image doesn't overflow edges */
 }
 
-/* Blurred background layer */
+/* Background image layer */
 .hero-about::before {
   content: "";
   position: absolute;
-  inset: 0;
+  inset: 0; /* top:0; right:0; bottom:0; left:0; */
   background: url("bg.jpg") center/cover no-repeat;
-  transform: scale(1.05); /* avoid edges showing through blur */
-  filter: blur(8px);      /* adjust blur strength */
-  will-change: transform, filter; /* improves performance */
+  filter: blur(6px); /* adjust blur strength here */
   z-index: 0;
 }
 
 /* Text layer */
 .hero-about .hero-text {
   position: relative;
-  z-index: 1;
+  z-index: 1; /* makes sure text is above blurred background */
 }
 
-.hero-about .hero-text h1,
-.hero-about .hero-text p {
-  display: inline-block;
-  background: linear-gradient(90deg, #F5E6CC 0%, #FFD6BA 50%, #F5E6CC 100%);
-  background-size: 200% 100%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: shimmer 3s infinite linear;
-  margin: 0;
-}
-
-.hero-about .hero-text h1 {
-  font-family: "Playfair Display", serif;
-  font-size: clamp(36px, 5vw, 64px);
-  margin-bottom: 12px;
-}
-
-.hero-about .hero-text p {
-  font-family: "Montserrat", sans-serif;
-  font-size: clamp(16px, 2vw, 24px);
-  max-width: 700px;
-}
 
 @keyframes shimmer {
   0% { background-position: -200% 0; }
