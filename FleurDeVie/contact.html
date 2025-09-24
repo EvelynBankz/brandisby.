@@ -69,33 +69,42 @@
     }
 
     /* ========== HERO ========== */
-    .hero {
-      background: url("bg.jpg") center/cover no-repeat;
-      height:50vh;
-      display:flex; justify-content:center; align-items:center;
-      text-align:center;
-      margin-top:80px;
-      position:relative;
-    }
-    .hero::after {
-      content:""; position:absolute; inset:0; background:none;
-    }
-    .hero-text {
-      position:relative; color:#112e1f;
-      position: relative;
-      color: #112e1f;
-      background: rgba(255, 255, 255, 0.3); /* translucent white */
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px); /* Safari support */
-      padding: 2rem 3rem;
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    }
-    .hero-text h1 {
-      font-family:"Playfair Display", serif;
-      font-size:48px; margin-bottom:12px;
-    }
-    .hero-text p { font-size:18px; }
+.hero {
+  position: relative;
+  height: 50vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  margin-top: 80px;
+  overflow: hidden; /* ensures blur doesn’t spill outside */
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("bg.jpg") center/cover no-repeat;
+  filter: blur(6px); /* adjust blur strength */
+  transform: scale(1.1); /* prevents edges from cutting off */
+  z-index: -1; /* keeps it behind text */
+}
+
+.hero-text {
+  position: relative;
+  color: #112e1f;
+}
+
+.hero-text h1 {
+  font-family: "Playfair Display", serif;
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.hero-text p {
+  font-size: 18px;
+}
+
 
     /* ========== CONTACT SECTION ========== */
     section.contact { padding:80px 20px; background:#F5E6CC; }
