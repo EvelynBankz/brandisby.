@@ -104,93 +104,109 @@
 
   <!-- FIREBASE + SCRIPT -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_AUTH_DOMAIN",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_STORAGE_BUCKET",
-      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-      appId: "YOUR_APP_ID"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
+    authDomain: "brandisby.firebaseapp.com",
+    projectId: "brandisby",
+    storageBucket: "brandisby.firebasestorage.app",
+    messagingSenderId: "87213267039",
+    appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
-    const cartGrid = document.getElementById('cartGrid');
-    const cartEmpty = document.getElementById('cartEmpty');
-    const cartCountElem = document.getElementById('cartCount');
+  const cartGrid = document.getElementById('cartGrid');
+  const cartEmpty = document.getElementById('cartEmpty');
+  const cartCountElem = document.getElementById('cartCount');
 
-    function updateCartCount() {
-      const cart = JSON.parse(localStorage.getItem('cart')) || [];
-      const total = cart.reduce((sum, item) => sum + item.quantity, 0);
-      cartCountElem.textContent = total;
+  function getCart() {
+    return JSON.parse(localStorage.getItem('cart')) || [];
+  }
+
+  function saveCart(cart) {
+    localStorage.setItem('cart', JSON.stringify(cart));
+    updateCartCount();
+  }
+
+  function updateCartCount() {
+    const cart = getCart();
+    const total = cart.reduce((sum, item) => sum + item.quantity, 0);
+    cartCountElem.textContent = total;
+  }
+
+  async function loadCart() {
+    const cart = getCart();
+    cartGrid.innerHTML = '';
+    if(cart.length === 0){
+      cartEmpty.style.display = 'block';
+      return;
     }
+    cartEmpty.style.display = 'none';
+    for(const item of cart){
+      const docRef = doc(db, "products", item.id);
+      const docSnap = await getDoc(docRef);
+      if(docSnap.exists()){
+        const data = docSnap.data();
+        const div = document.createElement('div');
+        div.className = 'cart-item';
+        div.innerHTML = `
+          <img src="${data.imageUrl}" alt="${data.name}">
+          <div class="cart-item-details">
+            <h3>${data.name}</h3>
+            <div class="price">$${data.price.toFixed(2)}</div>
+            <input type="number" min="1" value="${item.quantity}" id="qty-${item.id}">
+            <button onclick="removeItem('${item.id}')">Remove</button>
+          </div>
+        `;
+        cartGrid.appendChild(div);
 
-    async function loadCart() {
-      const cart = JSON.parse(localStorage.getItem('cart')) || [];
-      cartGrid.innerHTML = '';
-      if(cart.length === 0){
-        cartEmpty.style.display = 'block';
-        return;
-      }
-      cartEmpty.style.display = 'none';
-      for(const item of cart){
-        // Fetch latest details from Firestore
-        const docRef = doc(db, "products", item.id);
-        const docSnap = await getDoc(docRef);
-        if(docSnap.exists()){
-          const data = docSnap.data();
-          const div = document.createElement('div');
-          div.className = 'cart-item';
-          div.innerHTML = `
-            <img src="${data.imageUrl}" alt="${data.name}">
-            <div class="cart-item-details">
-              <h3>${data.name}</h3>
-              <div class="price">$${data.price.toFixed(2)}</div>
-              <input type="number" min="1" value="${item.quantity}" id="qty-${item.id}">
-              <button onclick="removeItem('${item.id}')">Remove</button>
-            </div>
-          `;
-          cartGrid.appendChild(div);
-
-          // Listen for quantity changes
-          const qtyInput = div.querySelector(`#qty-${item.id}`);
-          qtyInput.addEventListener('change', (e) => {
-            const newQty = parseInt(e.target.value) || 1;
-            updateQuantity(item.id, newQty);
-          });
-        }
-      }
-      updateCartCount();
-    }
-
-    function updateQuantity(id, quantity) {
-      const cart = JSON.parse(localStorage.getItem('cart')) || [];
-      const index = cart.findIndex(i => i.id === id);
-      if(index > -1){
-        cart[index].quantity = quantity;
-        localStorage.setItem('cart', JSON.stringify(cart));
-        updateCartCount();
+        const qtyInput = div.querySelector(`#qty-${item.id}`);
+        qtyInput.addEventListener('change', (e) => {
+          const newQty = parseInt(e.target.value) || 1;
+          updateQuantity(item.id, newQty);
+        });
       }
     }
+  }
 
-    function removeItem(id){
-      let cart = JSON.parse(localStorage.getItem('cart')) || [];
-      cart = cart.filter(i => i.id !== id);
-      localStorage.setItem('cart', JSON.stringify(cart));
-      loadCart();
+  function updateQuantity(id, quantity) {
+    const cart = getCart();
+    const index = cart.findIndex(i => i.id === id);
+    if(index > -1){
+      cart[index].quantity = quantity;
+      saveCart(cart);
+      // Trigger storage event manually for same tab update
+      window.dispatchEvent(new Event('storage'));
     }
+  }
 
-    document.getElementById('hamburger').addEventListener('click', () => {
-      document.querySelector('.header-right').classList.toggle('open');
-      document.getElementById('hamburger').classList.toggle('open');
-    });
+  function removeItem(id){
+    let cart = getCart();
+    cart = cart.filter(i => i.id !== id);
+    saveCart(cart);
+    loadCart();
+    window.dispatchEvent(new Event('storage'));
+  }
 
+  // Hamburger toggle
+  document.getElementById('hamburger').addEventListener('click', () => {
+    document.querySelector('.header-right').classList.toggle('open');
+    document.getElementById('hamburger').classList.toggle('open');
+  });
+
+  // Listen for changes across tabs/windows
+  window.addEventListener('storage', () => {
     updateCartCount();
     loadCart();
-  </script>
+  });
+
+  // Initial load
+  updateCartCount();
+  loadCart();
+</script>
 </body>
 </html>
