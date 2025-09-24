@@ -85,7 +85,7 @@
   position: absolute;
   inset: 0;
   background: url("bg.jpg") center/cover no-repeat;
-  filter: blur(4px); /* adjust blur strength */
+  /* filter: blur(4px); /* adjust blur strength */ 
   transform: scale(1.1); /* prevents edges from cutting off */
   z-index: -1; /* keeps it behind text */
   border-radius: 12px;
@@ -94,8 +94,9 @@
 
 .hero-text {
   position: relative;
-  color: #C9E4FF;
+  color: #FFD6BA;
   margin-bottom:12px; 
+  animation: shimmer 3s infinite linear;
 }
 
 .hero-text h1 {
