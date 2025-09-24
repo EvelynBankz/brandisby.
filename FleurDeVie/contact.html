@@ -4,209 +4,257 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fleur De Vie - Contact Us</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Open+Sans:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    /* ========== RESET ========== */
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body { 
-      font-family: "Montserrat", sans-serif; 
-      background: #F5E6CC; 
-      color:#112e1f; 
-      line-height:1.6; 
-    }
-    a { text-decoration:none; color:inherit; }
+    /* ================= RESET ================= */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Open Sans', sans-serif; background: #F5E6CC; color: #112e1f; }
 
-    /* ========== HEADER ========== */
-    .site-header {
+    a { text-decoration: none; color: inherit; }
+    ul { list-style: none; }
+
+    /* ================= HEADER ================= */
+    header {
       background: #112e1f;
-      color: #F5E6CC;
-      display:flex; justify-content:space-between; align-items:center;
-      padding:16px 28px;
-      position:fixed; top:0; left:0; right:0;
-      z-index:1000;
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
     }
-    .header-left { display:flex; align-items:center; gap:12px; }
-    .brand-logo { height:60px; }
-    .brand-title { font-family:"Playfair Display", serif; font-size:24px; font-weight:700; }
-    .header-right { display:flex; gap:20px; }
-    .header-right a { font-weight:500; transition: color 0.3s; }
-    .header-right a:hover { color:#FFD6BA; }
-    .hamburger { display:none; background:none; border:none; cursor:pointer; }
+    header .logo { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 600; }
+
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+    }
+    .nav-links a {
+      color: #fff;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+    .nav-links a:hover { color: #FFD6BA; }
+
+    /* Hamburger */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      width: 30px;
+      height: 24px;
+      cursor: pointer;
+      position: relative;
+      z-index: 1100;
+    }
     .hamburger span {
-      display:block; width:24px; height:3px; background:#F5E6CC; margin:5px 0; border-radius:2px;
+      height: 3px;
+      background: #fff;
+      margin: 4px 0;
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+    /* X icon effect */
+    .hamburger.open span:nth-child(1) {
+      transform: rotate(45deg) translate(5px, 5px);
+    }
+    .hamburger.open span:nth-child(2) {
+      opacity: 0;
+    }
+    .hamburger.open span:nth-child(3) {
+      transform: rotate(-45deg) translate(6px, -6px);
     }
 
-    /* ========== HERO ========== */
+    /* Mobile Menu */
+    .nav-links-mobile {
+      display: none;
+      flex-direction: column;
+      background: #112e1f;
+      position: absolute;
+      top: 70px;
+      right: 0;
+      width: 100%;
+      padding: 1rem;
+    }
+    .nav-links-mobile a {
+      color: #fff;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+    .nav-links-mobile.open { display: flex; }
+
+    /* ================= HERO SECTION ================= */
     .hero {
-      background: url("contact-bg.jpg") center/cover no-repeat;
-      height:50vh;
-      display:flex; justify-content:center; align-items:center;
-      text-align:center;
-      margin-top:80px;
-      position:relative;
+      background: url('https://images.unsplash.com/photo-1522336572468-97b06e8ef143?auto=format&fit=crop&w=1350&q=80') center/cover no-repeat;
+      height: 250px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+      text-align: center;
+      font-family: 'Playfair Display', serif;
+      font-size: 2.2rem;
+      font-weight: 600;
+      position: relative;
     }
     .hero::after {
-      content:""; position:absolute; inset:0; background:rgba(17,46,31,0.6);
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(17, 46, 31, 0.6); /* dark overlay with brand color */
+      border-bottom: 4px solid #FFD6BA;
     }
-    .hero-text {
-      position:relative; color:#F5E6CC;
-    }
-    .hero-text h1 {
-      font-family:"Playfair Display", serif;
-      font-size:48px; margin-bottom:12px;
-    }
-    .hero-text p { font-size:18px; }
-
-    /* ========== CONTACT SECTION ========== */
-    section.contact { padding:80px 20px; background:#F5E6CC; }
-    .container { max-width:1100px; margin:auto; }
-    .contact h2 {
-      text-align:center; font-size:36px; margin-bottom:20px;
-      font-family:"Playfair Display", serif; color:#112e1f;
-    }
-    .contact-intro {
-      text-align:center; max-width:700px; margin:0 auto 40px auto; font-size:18px;
+    .hero h1 {
+      position: relative;
+      z-index: 1;
     }
 
-    .contact-grid {
-      display:grid; grid-template-columns:1fr 1fr; gap:40px;
+    /* ================= CONTACT SECTION ================= */
+    .contact-section {
+      max-width: 1100px;
+      margin: 3rem auto;
+      padding: 2rem;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
-    .contact-info {
-      background:#C9E4FF;
-      padding:30px;
-      border-radius:12px;
-      box-shadow:0 4px 10px rgba(0,0,0,0.1);
+    .contact-section h2 {
+      text-align: center;
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      color: #112e1f;
+      margin-bottom: 1.5rem;
     }
-    .contact-info h3 {
-      font-family:"Playfair Display", serif; font-size:24px; margin-bottom:20px;
+    .contact-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
     }
-    .contact-info ul { list-style:none; }
-    .contact-info li {
-      margin-bottom:12px; font-size:16px;
-      display:flex; align-items:center; gap:10px;
+    .contact-card {
+      background: #FFD6BA;
+      padding: 1.2rem;
+      border-radius: 10px;
+      font-weight: 500;
+      text-align: center;
+      transition: background 0.3s ease;
     }
-    .contact-info li i { color:#112e1f; }
+    .contact-card:hover { background: #C9E4FF; }
 
-    .contact-form {
-      background:#FFD6BA;
-      padding:30px;
-      border-radius:12px;
-      box-shadow:0 4px 10px rgba(0,0,0,0.1);
+    form {
+      display: grid;
+      gap: 1rem;
     }
-    .contact-form h3 {
-      font-family:"Playfair Display", serif; font-size:24px; margin-bottom:20px;
+    input, textarea {
+      padding: 0.9rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-family: 'Open Sans', sans-serif;
     }
-    .contact-form form { display:flex; flex-direction:column; gap:15px; }
-    .contact-form input,
-    .contact-form textarea {
-      padding:12px 15px; border:none; border-radius:8px;
-      font-size:16px; outline:none;
+    button {
+      background: #112e1f;
+      color: #fff;
+      padding: 0.9rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s ease;
     }
-    .contact-form textarea { min-height:120px; resize:vertical; }
-    .contact-form button {
-      background:#112e1f; color:#F5E6CC; border:none; padding:14px;
-      border-radius:8px; font-size:16px; font-weight:600;
-      cursor:pointer; transition: background 0.3s;
-    }
-    .contact-form button:hover { background:#0a1d14; }
+    button:hover { background: #FFD6BA; color: #112e1f; }
 
-    /* ========== FOOTER ========== */
-    footer { text-align:center; padding:20px; background:#112e1f; color:#F5E6CC; margin-top:60px; }
-
-    /* ========== RESPONSIVE ========== */
-    @media(max-width:900px){
-      .contact-grid { grid-template-columns:1fr; }
+    /* ================= FOOTER ================= */
+    footer {
+      background: #112e1f;
+      color: #fff;
+      text-align: center;
+      padding: 1rem;
+      margin-top: 2rem;
     }
-    @media(max-width:600px){
-      .header-right { display:none; flex-direction:column; background:#112e1f; position:absolute; top:70px; right:0; width:200px; padding:20px; }
-      .header-right.open { display:flex; }
-      .hamburger { display:block; }
-      .hero-text h1 { font-size:32px; }
+
+    /* ================= RESPONSIVE ================= */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+      .contact-options { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
   <!-- HEADER -->
-  <header class="site-header">
-    <div class="header-left">
-      <img src="logo.png" alt="Fleur De Vie Logo" class="brand-logo">
-      <div class="brand-title">Fleur De Vie</div>
-    </div>
-    <nav class="header-right">
+  <header>
+    <div class="logo">Fleur De Vie</div>
+    <nav class="nav-links">
       <a href="index.html">Home</a>
       <a href="shop.html">Shop</a>
       <a href="about.html">About</a>
       <a href="contact.html">Contact</a>
     </nav>
-    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    <div class="hamburger" id="hamburger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+    <nav class="nav-links-mobile" id="mobileMenu">
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </nav>
   </header>
 
   <!-- HERO -->
   <section class="hero">
-    <div class="hero-text">
-      <h1>Contact Us</h1>
-      <p>Talk to our team — we’re here to help</p>
-    </div>
+    <h1>Contact Us</h1>
   </section>
 
-  <!-- CONTACT -->
-  <section class="contact">
-    <div class="container">
-      <h2>Get in Touch</h2>
-      <p class="contact-intro">
-        Got a proposal? Want to partner? Join our Affiliate program? Have some questions or complaints? 
-        We’d love to hear from you.
-      </p>
-
-      <div class="contact-grid">
-        <!-- INFO -->
-        <div class="contact-info">
-          <h3>Our Details</h3>
-          <ul>
-            <li><i class="fas fa-map-marker-alt"></i> 123 Fleur Street, City, Country</li>
-            <li><i class="fas fa-envelope"></i> hello@fleurdevie.com</li>
-            <li><i class="fas fa-phone"></i> +234 800 123 4567</li>
-            <li><i class="fas fa-clock"></i> Mon - Fri: 9AM - 6PM</li>
-          </ul>
-        </div>
-
-        <!-- FORM -->
-        <div class="contact-form">
-          <h3>Send us a Message</h3>
-          <form id="contactForm">
-            <input type="text" id="name" placeholder="Your Name" required>
-            <input type="email" id="email" placeholder="Your Email" required>
-            <textarea id="message" placeholder="Your Message" required></textarea>
-            <button type="submit">Send Message</button>
-          </form>
-        </div>
-      </div>
+  <!-- CONTACT SECTION -->
+  <section class="contact-section">
+    <h2>We’d Love to Hear From You</h2>
+    <div class="contact-options">
+      <div class="contact-card">Got a proposal</div>
+      <div class="contact-card">Want to partner</div>
+      <div class="contact-card">Join our Affiliate program</div>
+      <div class="contact-card">Make enquiries</div>
+      <div class="contact-card">Have some questions?</div>
+      <div class="contact-card">Got some complaints?</div>
+      <div class="contact-card">Be part of our partnership program</div>
+      <div class="contact-card">Talk to our team</div>
     </div>
+
+    <form>
+      <input type="text" placeholder="Your Name" required>
+      <input type="email" placeholder="Your Email" required>
+      <textarea rows="5" placeholder="Your Message"></textarea>
+      <button type="submit">Send Message</button>
+    </form>
   </section>
 
   <!-- FOOTER -->
   <footer>
-    <p>© 2025 Fleur De Vie</p>
+    <p>© 2025 Fleur De Vie. All Rights Reserved.</p>
   </footer>
 
-  <!-- SCRIPT -->
   <script>
-    // Hamburger toggle
+    // Toggle mobile menu + X icon
     const hamburger = document.getElementById('hamburger');
-    const navMenu = document.querySelector('.header-right');
+    const mobileMenu = document.getElementById('mobileMenu');
+
     hamburger.addEventListener('click', () => {
-      navMenu.classList.toggle('open');
       hamburger.classList.toggle('open');
+      mobileMenu.classList.toggle('open');
     });
 
-    // Simple form submission (placeholder only)
-    const form = document.getElementById('contactForm');
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      alert("Thank you for contacting us, " + document.getElementById('name').value + "! We'll get back to you soon.");
-      form.reset();
+    // Auto-close mobile menu on link click
+    document.querySelectorAll('#mobileMenu a').forEach(link => {
+      link.addEventListener('click', () => {
+        hamburger.classList.remove('open');
+        mobileMenu.classList.remove('open');
+      });
     });
   </script>
 </body>
