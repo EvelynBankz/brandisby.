@@ -69,33 +69,43 @@
     }
 
   /* ================= HERO ================= */
-    .hero-about {
-      height: 60vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      background: url("bg.jpg") center center / cover no-repeat;
-      margin-top: 100px;
-      border-radius: 12px;
-      box-shadow: inset 0 0 0 2000px rgba(17,46,31,0.3);
-    }
-    .hero-about .hero-text h1, .hero-about .hero-text p {
-      position: relative;
-      display: inline-block;
-      background: linear-gradient(90deg, #F5E6CC 0%, #FFD6BA 50%, #F5E6CC 100%);
-      background-size: 200% 100%;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: shimmer 3s infinite linear;
-    }
-    .hero-about .hero-text h1 { font-family:"Playfair Display", serif; font-size: clamp(36px,5vw,64px); margin-bottom:12px; }
-    .hero-about .hero-text p { font-family:"Montserrat", sans-serif; font-size: clamp(16px,2vw,24px); max-width:700px; }
+.hero {
+  position: relative;
+  height: 50vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  margin-top: 80px;
+  overflow: hidden; /* ensures blur doesn’t spill outside */
+}
 
-    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url("bg.jpg") center/cover no-repeat;
+  filter: blur(4px); /* adjust blur strength */
+  transform: scale(1.1); /* prevents edges from cutting off */
+  z-index: -1; /* keeps it behind text */
+  border-radius: 12px;
+  box-shadow: inset 0 0 0 2000px rgba(17,46,31,0.2); 
+}
 
-    
+.hero-text {
+  position: relative;
+  color: #112e1f;
+}
 
+.hero-text h1 {
+  font-family: "Playfair Display", serif;
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.hero-text p {
+  font-size: 18px;
+}
     /* ========== CONTACT SECTION ========== */
     section.contact { padding:80px 20px; background:#F5E6CC; }
     .container { max-width:1100px; margin:auto; }
