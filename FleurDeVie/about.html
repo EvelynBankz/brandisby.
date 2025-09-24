@@ -80,9 +80,18 @@
   background: url("bg.jpg") center center / cover no-repeat;
   margin-top: 100px;
   border-radius: 12px;
-  box-shadow: inset 0 0 0 2000px rgba(17,46,31,0.2);
+  /* Original version had a subtle overlay if needed, but can be removed */
+  box-shadow: inset 0 0 0 2000px rgba(17,46,31,0.1); /* very light overlay */
+  position: relative;
 }
 
+/* Keep text above the hero and unaffected by overlay */
+.hero-about .hero-text {
+  position: relative;
+  z-index: 1;
+}
+
+/* Gradient shimmer effect on text */
 .hero-about .hero-text h1,
 .hero-about .hero-text p {
   position: relative;
@@ -94,18 +103,21 @@
   animation: shimmer 3s infinite linear;
 }
 
+/* Heading styling */
 .hero-about .hero-text h1 {
   font-family: "Playfair Display", serif;
   font-size: clamp(36px, 5vw, 64px);
   margin-bottom: 12px;
 }
 
+/* Paragraph styling */
 .hero-about .hero-text p {
   font-family: "Montserrat", sans-serif;
   font-size: clamp(16px, 2vw, 24px);
   max-width: 700px;
 }
 
+/* Shimmer animation */
 @keyframes shimmer {
   0% {
     background-position: -200% 0;
@@ -114,6 +126,7 @@
     background-position: 200% 0;
   }
 }
+
 
 
     /* ================= SECTIONS ================= */
