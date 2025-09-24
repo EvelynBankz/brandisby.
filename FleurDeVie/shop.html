@@ -7,180 +7,204 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* ================= RESET & BASE ================= */
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { height: 100%; font-family: "Montserrat", Arial, sans-serif; color: #fff; background: #000; }
+    /* ========== RESET ========== */
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: "Montserrat", sans-serif; background: #F5E6CC; color:#112e1f; line-height:1.6; }
+    a { text-decoration:none; color:inherit; }
 
-    /* ================= HEADER ================= */
+    /* ========== HEADER ========== */
     .site-header {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      display:flex;
-      align-items:center;
-      justify-content: space-between;
-      padding: 14px 28px;
-      background: rgba(0,0,0,0.85);
-      z-index: 1200;
+      background: #112e1f;
+      color: #F5E6CC;
+      display:flex; justify-content:space-between; align-items:center;
+      padding:16px 28px;
+      position:fixed; top:0; left:0; right:0;
+      z-index:1000;
     }
     .header-left { display:flex; align-items:center; gap:12px; }
-    .brand-logo { height: clamp(80px, 10vw, 180px); width:auto; }
-    .brand-title { font-family: "Playfair Display", serif; font-weight:700; font-size: clamp(20px, 3vw, 44px); color:#fff; text-align:center; }
-    .header-right a { color:#fff; text-decoration:none; margin-left: 12px; }
-    .header-right.open { display:flex; flex-direction: column; background: rgba(0,0,0,0.95); padding: 12px; position: absolute; top: 60px; right: 20px; border-radius: 6px; }
+    .brand-logo { height:60px; }
+    .brand-title { font-family:"Playfair Display", serif; font-size:24px; font-weight:700; }
+    .header-right { display:flex; gap:20px; }
+    .header-right a { font-weight:500; transition: color 0.3s; }
+    .header-right a:hover { color:#FFD6BA; }
 
-    /* Hamburger */
-    .hamburger { display:none; background:none; border:none; width:44px; height:40px; cursor:pointer; }
-    .hamburger span { display:block; height:2.5px; width:22px; background:#fff; margin:6px auto; border-radius:2px; transition: transform .28s ease, opacity .28s ease; }
+    /* Hamburger base */
+    .hamburger { display:none; background:none; border:none; cursor:pointer; width:30px; height:24px; position:relative; }
+    .hamburger span { display:block; width:100%; height:3px; background:#F5E6CC; border-radius:2px; position:absolute; left:0; transition:0.3s; }
+    .hamburger span:nth-child(1){ top:0; }
+    .hamburger span:nth-child(2){ top:10px; }
+    .hamburger span:nth-child(3){ top:20px; }
+    .hamburger.open span:nth-child(1){ transform:rotate(45deg); top:10px; }
+    .hamburger.open span:nth-child(2){ opacity:0; }
+    .hamburger.open span:nth-child(3){ transform:rotate(-45deg); top:10px; }
 
     /* ================= HERO ================= */
-    .hero-shop {
-      height: 40vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      background: url("hero-bg.jpg") center center / cover no-repeat;
+    .hero {
+      position: relative;
+      height: 50vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      margin-top: 80px;
+      overflow: hidden;
     }
-    .hero-shop h1 { font-family: "Playfair Display", serif; font-size: clamp(36px, 5vw, 64px); margin-bottom:12px; }
-    .hero-shop p { font-family: "Montserrat", sans-serif; font-size: clamp(16px, 2vw, 24px); max-width:700px; }
-
-    /* ================= PRODUCTS GRID ================= */
-    .products { padding: 60px 20px; }
-    .container { max-width: 1200px; margin: 0 auto; }
-
-    .product-grid {
-      display:grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 40px;
-      justify-items: center;
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: url("bg.jpg") center/cover no-repeat;
+      transform: scale(1.1);
+      z-index: -1;
+      border-radius: 12px;
+      box-shadow: inset 0 0 0 2000px rgba(17,46,31,0.3);
     }
+    .hero-text {
+      position: relative;
+      display: inline-block;
+      color: #FFD6BA;
+      margin-bottom:12px; 
+      animation: shimmer 3s infinite linear;
+    }
+    .hero-text h1 { font-family: "Playfair Display", serif; font-size: clamp(36px,5vw,64px); margin-bottom:12px; }
+    .hero-text p { font-size: clamp(16px,2vw,24px); max-width:700px; }
 
+    /* ========== SHOP SECTION ========== */
+    section.shop { padding:80px 20px; background:#F5E6CC; }
+    .container { max-width:1100px; margin:auto; }
+    .shop h2 { text-align:center; font-size:24px; margin-bottom:40px; font-family:"Playfair Display", serif; color:#112e1f; }
+    .products-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:30px; }
     .product-card {
-      background: rgba(255,255,255,0.05);
-      padding: 16px;
-      border-radius: 8px;
-      text-align:center;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      background:#FFD6BA;
+      border-radius:12px;
+      overflow:hidden;
+      box-shadow:0 4px 10px rgba(0,0,0,0.1);
+      display:flex; flex-direction:column; justify-content:space-between;
+      transition: transform 0.3s;
     }
-    .product-card img { width: 100%; border-radius: 6px; margin-bottom:12px; }
-    .product-card h3 { font-size: 18px; margin-bottom:8px; }
-    .product-card p { font-size: 16px; margin-bottom:12px; }
-    .product-card button { background:#fff; color:#000; border:none; padding:8px 16px; cursor:pointer; border-radius:4px; transition: background .2s ease; }
-    .product-card button:hover { background:#ddd; }
-
-    /* ================= FOOTER ================= */
-    .site-footer { text-align:center; padding:20px; }
-
-    /* ================= RESPONSIVE ================= */
-    @media (max-width: 900px) {
-      .hamburger { display:inline-block; }
-      .header-right a { display:none; }
+    .product-card:hover { transform:translateY(-5px); }
+    .product-card img { width:100%; height:220px; object-fit:cover; }
+    .product-details { padding:16px; }
+    .product-details h3 { font-family:"Playfair Display", serif; font-size:20px; margin-bottom:8px; }
+    .product-details p { font-size:14px; margin-bottom:12px; min-height:40px; }
+    .product-details .price { font-weight:600; font-size:16px; margin-bottom:12px; }
+    .product-details button {
+      background:#112e1f; color:#F5E6CC; border:none; padding:12px; border-radius:8px; font-size:16px; font-weight:600;
+      cursor:pointer; transition: background 0.3s; width:100%;
     }
+    .product-details button:hover { background:#0a1d14; }
 
-    @media (max-width: 600px) {
-      .header-right.open a { display:block; margin: 8px 0; }
+    /* ========== FOOTER ========== */
+    footer { text-align:center; padding:20px; background:#112e1f; color:#F5E6CC; margin-top:60px; }
+
+    /* ========== RESPONSIVE ========== */
+    @media(max-width:900px){ .products-grid { grid-template-columns:1fr 1fr; } }
+    @media(max-width:600px){
+      .header-right { display:none; flex-direction:column; background:#112e1f; position:absolute; top:70px; right:0; width:200px; padding:20px; }
+      .header-right.open { display:flex; }
+      .hamburger { display:block; }
+      .hero-text h1 { font-size:32px; }
     }
   </style>
 </head>
-<body class="fleurdevie">
+<body>
 
   <!-- HEADER -->
   <header class="site-header">
     <div class="header-left">
-      <img src="logo.png" alt="FleurDeVie Logo" class="brand-logo">
+      <img src="logo.png" alt="Fleur De Vie Logo" class="brand-logo">
       <div class="brand-title">Fleur De Vie</div>
     </div>
     <nav class="header-right">
       <a href="index.html">Home</a>
-      <a href="about.html">About</a>
       <a href="shop.html">Shop</a>
+      <a href="about.html">About</a>
       <a href="contact.html">Contact</a>
-      <a href="cart.html" class="cart-icon">
-        <i class="fas fa-shopping-cart"></i>
-      </a>
+      <a href="cart.html"><i class="fas fa-shopping-cart"></i></a>
     </nav>
-    <button class="hamburger" id="hamburger">
-      <span></span><span></span><span></span>
-    </button>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
   </header>
 
   <!-- HERO -->
-  <section class="hero-shop">
+  <section class="hero">
     <div class="hero-text">
       <h1>Shop Our Collection</h1>
-      <p>Browse our curated selection of premium products.</p>
+      <p>Discover the Fleur De Vie products you’ll love</p>
     </div>
   </section>
 
-  <!-- PRODUCTS GRID -->
-  <section class="products">
+  <!-- SHOP -->
+  <section class="shop">
     <div class="container">
-      <div class="product-grid" id="product-grid">
-        <!-- Products loaded from Firestore -->
+      <h2>Our Products</h2>
+      <div class="products-grid" id="productsGrid">
+        <!-- Products from Firebase will appear here -->
       </div>
     </div>
   </section>
 
   <!-- FOOTER -->
-  <footer class="site-footer">
+  <footer>
     <p>© 2025 Fleur De Vie</p>
   </footer>
 
-  <!-- HAMBURGER SCRIPT -->
-  <script>
-    const hamburger = document.getElementById('hamburger');
-    const headerRight = document.querySelector('.header-right');
-
-    hamburger.addEventListener('click', () => {
-      headerRight.classList.toggle('open');
-    });
-  </script>
-
-  <!-- FIREBASE SCRIPT -->
+  <!-- FIREBASE & SCRIPT -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-    import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+    // Hamburger toggle
+    const hamburger = document.getElementById('hamburger');
+    const navMenu = document.querySelector('.header-right');
+    hamburger.addEventListener('click', () => {
+      navMenu.classList.toggle('open');
+      hamburger.classList.toggle('open');
+    });
 
     // Firebase config
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
     const firebaseConfig = {
-      apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
-      authDomain: "brandisby.firebaseapp.com",
-      projectId: "brandisby",
-      storageBucket: "brandisby.firebasestorage.app",
-      messagingSenderId: "87213267039",
-      appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    const productGrid = document.getElementById("product-grid");
+    // Fetch products
+    const productsGrid = document.getElementById('productsGrid');
 
     async function loadProducts() {
-      const productsRef = collection(db, "brands", "fleurdevie", "products");
-      const q = query(productsRef, orderBy("createdAt", "desc"));
-      const querySnapshot = await getDocs(q);
-
-      productGrid.innerHTML = '';
-
+      const querySnapshot = await getDocs(collection(db, "products"));
       querySnapshot.forEach((doc) => {
         const product = doc.data();
-        const card = document.createElement("div");
-        card.classList.add("product-card");
+        const card = document.createElement('div');
+        card.className = 'product-card';
         card.innerHTML = `
-          <img src="${product.imageUrl || 'placeholder.jpg'}" alt="${product.name}">
-          <h3>${product.name}</h3>
-          <p>₦${product.price.toFixed(2)}</p>
-          <a href="product.html?id=${doc.id}&brand=fleurdevie">
-            <button>View Details</button>
-          </a>
+          <img src="${product.imageUrl}" alt="${product.name}">
+          <div class="product-details">
+            <h3>${product.name}</h3>
+            <p>${product.description}</p>
+            <div class="price">$${product.price}</div>
+            <button onclick="addToCart('${doc.id}', '${product.name}', ${product.price})">Add to Cart</button>
+          </div>
         `;
-        productGrid.appendChild(card);
+        productsGrid.appendChild(card);
       });
     }
 
     loadProducts();
+
+    // Simple Add to Cart (store in localStorage)
+    function addToCart(id, name, price){
+      let cart = JSON.parse(localStorage.getItem('cart')) || [];
+      cart.push({id,name,price,quantity:1});
+      localStorage.setItem('cart', JSON.stringify(cart));
+      alert(name + " added to cart!");
+    }
   </script>
 
 </body>
