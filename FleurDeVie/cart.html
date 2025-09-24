@@ -42,12 +42,15 @@
     .cart-grid { display:grid; gap:20px; }
     .cart-item { display:flex; gap:16px; background:#FFD6BA; padding:16px; border-radius:12px; align-items:center; box-shadow:0 4px 10px rgba(0,0,0,0.1); }
     .cart-item img { width:120px; height:120px; object-fit:cover; border-radius:8px; }
-    .cart-item-details { flex:1; }
-    .cart-item-details h3 { font-family:"Playfair Display", serif; margin-bottom:8px; }
-    .cart-item-details .price { font-weight:600; margin-bottom:8px; }
-    .cart-item-details input { width:60px; padding:6px; border-radius:6px; border:1px solid #112e1f; margin-right:8px; }
-    .cart-item-details button { background:#112e1f; color:#F5E6CC; border:none; border-radius:6px; padding:6px 10px; cursor:pointer; transition:0.3s; }
-    .cart-item-details button:hover { background:#0a1d14; }
+    .cart-item-details { flex:1; display:flex; flex-direction:column; gap:6px; }
+    .cart-item-details h3 { font-family:"Playfair Display", serif; margin-bottom:4px; }
+    .cart-item-details .price { font-weight:600; }
+    .cart-item-controls { display:flex; align-items:center; gap:8px; margin-top:8px; }
+    .cart-item-controls input { width:60px; padding:6px; border-radius:6px; border:1px solid #112e1f; }
+    .cart-item-controls button { background:#112e1f; color:#F5E6CC; border:none; border-radius:6px; padding:6px 10px; cursor:pointer; transition:0.3s; }
+    .cart-item-controls button:hover { background:#0a1d14; }
+
+    .cart-summary { margin-top:20px; text-align:right; font-size:18px; font-weight:600; }
     .cart-empty { text-align:center; font-size:18px; margin-top:20px; color:#112e1f; }
 
     footer { text-align:center; padding:20px; background:#112e1f; color:#F5E6CC; margin-top:60px; }
@@ -58,7 +61,8 @@
       .hamburger { display:block; }
       .cart-item { flex-direction:column; align-items:flex-start; }
       .cart-item img { width:100%; height:auto; }
-      .cart-item-details input { margin-bottom:8px; }
+      .cart-item-controls { flex-direction:column; gap:4px; }
+      .cart-item-controls input { margin-bottom:8px; }
     }
   </style>
 </head>
@@ -90,10 +94,11 @@
 
   <!-- CART -->
   <section class="cart">
-    <div class="container" id="cartContainer">
+    <div class="container">
       <h2>Shopping Cart</h2>
       <div class="cart-grid" id="cartGrid"></div>
       <div class="cart-empty" id="cartEmpty">Your cart is empty.</div>
+      <div class="cart-summary" id="cartSummary"></div>
     </div>
   </section>
 
@@ -122,91 +127,85 @@
   const cartGrid = document.getElementById('cartGrid');
   const cartEmpty = document.getElementById('cartEmpty');
   const cartCountElem = document.getElementById('cartCount');
+  const cartSummary = document.getElementById('cartSummary');
 
-  function getCart() {
-    return JSON.parse(localStorage.getItem('cart')) || [];
-  }
-
-  function saveCart(cart) {
-    localStorage.setItem('cart', JSON.stringify(cart));
-    updateCartCount();
-  }
+  function getCart() { return JSON.parse(localStorage.getItem('cart')) || []; }
+  function saveCart(cart) { localStorage.setItem('cart', JSON.stringify(cart)); updateCartCount(); }
 
   function updateCartCount() {
     const cart = getCart();
-    const total = cart.reduce((sum, item) => sum + item.quantity, 0);
+    const total = cart.reduce((sum,item)=>sum+item.quantity,0);
     cartCountElem.textContent = total;
   }
 
   async function loadCart() {
     const cart = getCart();
     cartGrid.innerHTML = '';
-    if(cart.length === 0){
-      cartEmpty.style.display = 'block';
-      return;
-    }
-    cartEmpty.style.display = 'none';
+    cartSummary.innerHTML = '';
+    if(cart.length === 0){ cartEmpty.style.display='block'; return; }
+    cartEmpty.style.display='none';
+    let subtotal = 0;
+
     for(const item of cart){
-      const docRef = doc(db, "products", item.id);
+      const docRef = doc(db, "brands", "fleurdevie", "products", item.id);
       const docSnap = await getDoc(docRef);
       if(docSnap.exists()){
         const data = docSnap.data();
+        subtotal += data.price * item.quantity;
+
         const div = document.createElement('div');
-        div.className = 'cart-item';
-        div.innerHTML = `
+        div.className='cart-item';
+        div.innerHTML=`
           <img src="${data.imageUrl}" alt="${data.name}">
           <div class="cart-item-details">
             <h3>${data.name}</h3>
-            <div class="price">$${data.price.toFixed(2)}</div>
-            <input type="number" min="1" value="${item.quantity}" id="qty-${item.id}">
-            <button onclick="removeItem('${item.id}')">Remove</button>
+            <div class="price">₦${data.price.toFixed(2)}</div>
+            <div class="cart-item-controls">
+              <input type="number" min="1" value="${item.quantity}" id="qty-${item.id}">
+              <button class="remove-btn">Remove</button>
+            </div>
           </div>
         `;
         cartGrid.appendChild(div);
 
         const qtyInput = div.querySelector(`#qty-${item.id}`);
-        qtyInput.addEventListener('change', (e) => {
-          const newQty = parseInt(e.target.value) || 1;
-          updateQuantity(item.id, newQty);
+        qtyInput.addEventListener('change', e=>{
+          const newQty = parseInt(e.target.value)||1;
+          updateQuantity(item.id,newQty);
         });
+
+        const removeBtn = div.querySelector('.remove-btn');
+        removeBtn.addEventListener('click',()=>removeItem(item.id));
       }
     }
+
+    cartSummary.textContent = `Subtotal: ₦${subtotal.toFixed(2)}`;
   }
 
-  function updateQuantity(id, quantity) {
+  function updateQuantity(id, quantity){
     const cart = getCart();
-    const index = cart.findIndex(i => i.id === id);
-    if(index > -1){
-      cart[index].quantity = quantity;
-      saveCart(cart);
-      // Trigger storage event manually for same tab update
-      window.dispatchEvent(new Event('storage'));
-    }
+    const index = cart.findIndex(i=>i.id===id);
+    if(index>-1){ cart[index].quantity=quantity; saveCart(cart); loadCart(); }
   }
 
   function removeItem(id){
     let cart = getCart();
-    cart = cart.filter(i => i.id !== id);
+    cart = cart.filter(i=>i.id!==id);
     saveCart(cart);
     loadCart();
-    window.dispatchEvent(new Event('storage'));
   }
 
-  // Hamburger toggle
-  document.getElementById('hamburger').addEventListener('click', () => {
+  document.getElementById('hamburger').addEventListener('click', ()=>{
     document.querySelector('.header-right').classList.toggle('open');
     document.getElementById('hamburger').classList.toggle('open');
   });
 
-  // Listen for changes across tabs/windows
-  window.addEventListener('storage', () => {
-    updateCartCount();
-    loadCart();
-  });
+  // Listen for storage updates
+  window.addEventListener('storage', ()=>{ updateCartCount(); loadCart(); });
 
   // Initial load
   updateCartCount();
   loadCart();
-</script>
+  </script>
 </body>
 </html>
