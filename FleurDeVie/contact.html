@@ -76,13 +76,20 @@
       text-align:center;
       margin-top:80px;
       position:relative;
-      filter: blur(5px);
     }
     .hero::after {
       content:""; position:absolute; inset:0; background:none;
     }
     .hero-text {
       position:relative; color:#112e1f;
+      position: relative;
+      color: #112e1f;
+      background: rgba(255, 255, 255, 0.3); /* translucent white */
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px); /* Safari support */
+      padding: 2rem 3rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
     }
     .hero-text h1 {
       font-family:"Playfair Display", serif;
