@@ -210,29 +210,27 @@
       });
     }
 
+    // GET PRODUCT NAME FROM URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const productNameFromURL = urlParams.get('product') || "General Customization";
+
     // CUSTOMIZATION FORM SUBMISSION TO WHATSAPP
     const form = document.getElementById('customizationForm');
     const confirmationMessage = document.getElementById('confirmationMessage');
+
     form.addEventListener('submit', function(e){
       e.preventDefault();
       const name = document.getElementById('custName').value.trim();
       const phone = document.getElementById('custPhone').value.trim();
       const description = document.getElementById('custDescription').value.trim();
-      const productName = "General Customization"; // Change dynamically if needed
 
       if(name && phone && description){
-        // Encode message for WhatsApp
-        const message = `Hello Fleur De Vie, I am interested in customizing: ${productName}. Name: ${name}, Phone: ${phone}, Request: ${description}`;
-        const whatsappNumber = "234XXXXXXXXX"; // Replace with your WhatsApp number
+        const message = `Hello Fleur De Vie, I am interested in customizing: ${productNameFromURL}. Name: ${name}, Phone: ${phone}, Request: ${description}`;
+        const whatsappNumber = "2348110690932"; // Replace with your WhatsApp number
         const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
 
-        // Open WhatsApp link
         window.open(whatsappURL, "_blank");
-
-        // Show confirmation message
         confirmationMessage.style.display = "block";
-
-        // Optional: Reset form
         form.reset();
       }
     });
