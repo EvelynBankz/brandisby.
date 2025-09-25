@@ -59,6 +59,26 @@
       .hamburger{display:block;}
       .thankyou-box{padding:20px;}
     }
+
+    /* MOBILE HERO ADJUSTMENT FOR THANK YOU PAGE */
+@media(max-width:600px){
+  .hero {
+    height:30vh;               /* shorter hero on mobile */
+    margin-top:0;              /* remove extra margin from desktop */
+    padding-top:80px;          /* offset for fixed header */
+    display:flex;
+    justify-content:center;     /* horizontal centering */
+    align-items:center;         /* vertical centering */
+    text-align:center;
+    box-sizing:border-box;      /* include padding in height */
+  }
+
+  .hero-text h1 {
+    font-size:clamp(24px,5vw,32px); /* scale text for mobile */
+    line-height:1.2;                /* tighter line height */
+    margin:0;                        /* remove default margin */
+  }
+}
   </style>
 </head>
 <body>
