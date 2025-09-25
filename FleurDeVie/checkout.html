@@ -67,7 +67,15 @@
     @media(max-width:600px){
   .hero {
     height:30vh;       /* shorter hero on mobile */
-    margin-top:50px;   /* reduce gap between header and hero */
+    margin-top:50px;
+    display:flex;
+    justify-content:center;     /* center horizontally */
+    align-items:center;         /* center vertically */
+    text-align:center;/* reduce gap between header and hero */
+  }
+}
+     .hero-text h1 {
+    font-size:clamp(24px,5vw,36px); /* scale down text on mobile */
   }
 }
   </style>
