@@ -1,77 +1,134 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fleur De Vie - Cart</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    body { font-family: 'Montserrat', sans-serif; margin:0; padding:0; }
-    header { display:flex; justify-content:space-between; align-items:center; padding:10px 20px; border-bottom:1px solid #ddd; position:fixed; top:0; left:0; right:0; background:#fff; z-index:1000; }
-    .header-left a { text-decoration:none; font-weight:bold; font-size:20px; color:#333; }
+    /* RESET & HEADER */
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: "Montserrat", sans-serif; background: #F5E6CC; color:#112e1f; line-height:1.6; }
+    a { text-decoration:none; color:inherit; }
+    .site-header { background: #112e1f; color: #F5E6CC; display:flex; justify-content:space-between; align-items:center; padding:16px 28px; position:fixed; top:0; left:0; right:0; z-index:1000; }
+    .header-left { display:flex; align-items:center; gap:12px; }
+    .brand-logo { height:60px; }
+    .brand-title { font-family:"Playfair Display", serif; font-size:24px; font-weight:700; }
     .header-right { display:flex; gap:20px; align-items:center; }
-    .header-right a { text-decoration:none; color:#333; font-weight:500; }
-    .hamburger { display:none; cursor:pointer; flex-direction:column; gap:4px; }
-    .hamburger div { width:25px; height:3px; background:#333; }
-    .cart-count { background:#333; color:#fff; border-radius:50%; padding:2px 6px; font-size:12px; margin-left:4px; }
-    main { margin-top:80px; padding:20px; }
-    h1 { font-size:24px; margin-bottom:20px; text-align:center; }
+    .header-right a { font-weight:500; transition: color 0.3s; }
+    .header-right a:hover { color:#FFD6BA; }
+    .cart-count { background:#FFD6BA; color:#112e1f; font-size:12px; font-weight:600; border-radius:50%; padding:2px 6px; margin-left:4px; }
+    .hamburger { display:none; background:none; border:none; cursor:pointer; width:30px; height:24px; position:relative; }
+    .hamburger span { display:block; width:100%; height:3px; background:#F5E6CC; border-radius:2px; position:absolute; left:0; transition:0.3s; }
+    .hamburger span:nth-child(1){ top:0; }
+    .hamburger span:nth-child(2){ top:10px; }
+    .hamburger span:nth-child(3){ top:20px; }
+    .hamburger.open span:nth-child(1){ transform:rotate(45deg); top:10px; }
+    .hamburger.open span:nth-child(2){ opacity:0; }
+    .hamburger.open span:nth-child(3){ transform:rotate(-45deg); top:10px; }
+
+    /* HERO */
+    .hero { position: relative; height:50vh; display:flex; justify-content:center; align-items:center; text-align:center; margin-top:80px; overflow:hidden; }
+    .hero::after { content:""; position:absolute; inset:0; background:url('bg.jpg') center/cover no-repeat; transform:scale(1.1); z-index:-1; border-radius:12px; box-shadow: inset 0 0 0 2000px rgba(17,46,31,0.3); }
+    .hero-text { position:relative; display:inline-block; color:#FFD6BA; margin-bottom:12px; animation: shimmer 3s infinite linear; }
+    .hero-text h1 { font-family:"Playfair Display", serif; font-size:clamp(36px,5vw,64px); margin-bottom:12px; }
+    .hero-text p { font-size:clamp(16px,2vw,24px); max-width:700px; }
+
+    /* CART */
+    section.cart { padding:80px 20px; background:#F5E6CC; }
+    .container { max-width:1100px; margin:auto; }
+    h2 { text-align:center; font-size:24px; font-family:"Playfair Display", serif; margin-bottom:20px; }
+    .currency-selector { text-align:right; margin-bottom:10px; }
+    .currency-selector select { padding:5px 10px; border-radius:6px; border:1px solid #112e1f; }
+
     .cart-grid { display:grid; gap:20px; }
-    .cart-item { display:flex; align-items:center; border:1px solid #ddd; padding:10px; border-radius:8px; }
-    .cart-item img { width:80px; height:80px; object-fit:cover; border-radius:8px; margin-right:15px; }
+    .cart-item { display:flex; gap:16px; background:#FFD6BA; padding:16px; border-radius:12px; align-items:center; box-shadow:0 4px 10px rgba(0,0,0,0.1); }
+    .cart-item img { width:120px; height:120px; object-fit:cover; border-radius:8px; }
     .cart-item-details { flex:1; }
-    .cart-item-details h3 { margin:0 0 8px; font-size:18px; }
-    .cart-item-details .price { font-weight:bold; margin-bottom:8px; }
-    .quantity-controls { display:flex; align-items:center; gap:8px; }
-    .quantity-controls button { border:none; background:#333; color:#fff; width:28px; height:28px; border-radius:50%; cursor:pointer; }
-    .subtotal { margin-top:20px; font-size:18px; font-weight:bold; text-align:right; }
-    .cart-buttons { margin-top:20px; display:flex; justify-content:space-between; }
-    .cart-buttons a, .cart-buttons button { background:#333; color:#fff; text-decoration:none; padding:10px 20px; border-radius:6px; font-size:16px; border:none; cursor:pointer; }
-    .empty-cart { text-align:center; margin-top:40px; font-size:18px; }
-    .currency-select { margin-top:20px; text-align:right; }
-    .currency-select select { padding:6px 10px; font-size:14px; }
-    @media(max-width:768px){
-      .header-right { display:none; flex-direction:column; gap:10px; position:absolute; top:60px; right:20px; background:#fff; border:1px solid #ddd; padding:10px; }
+    .cart-item-details h3 { font-family:"Playfair Display", serif; margin-bottom:8px; }
+    .cart-item-details .price { font-weight:600; margin-bottom:8px; }
+    .cart-item-details input { width:60px; padding:6px; border-radius:6px; border:1px solid #112e1f; margin-right:8px; }
+    .cart-item-details button { background:#112e1f; color:#F5E6CC; border:none; border-radius:6px; padding:6px 10px; cursor:pointer; transition:0.3s; }
+    .cart-item-details button:hover { background:#0a1d14; }
+
+    .cart-subtotal { text-align:right; font-weight:600; margin-top:10px; font-size:1.1rem; }
+    .cart-empty { text-align:center; font-size:18px; margin-top:20px; color:#112e1f; }
+
+    .cart-buttons { margin-top:20px; display:flex; justify-content:flex-end; gap:10px; }
+    .cart-buttons a { padding:10px 20px; border-radius:6px; font-weight:600; text-decoration:none; transition:0.3s; display:inline-block; }
+    .cart-buttons a:hover { opacity:0.8; }
+    .cart-buttons .continue-btn { background:#112e1f; color:#F5E6CC; }
+    .cart-buttons .checkout-btn { background:#FFD6BA; color:#112e1f; }
+
+    footer { text-align:center; padding:20px; background:#112e1f; color:#F5E6CC; margin-top:60px; }
+
+    @media(max-width:600px){
+      .header-right { display:none; flex-direction:column; background:#112e1f; position:absolute; top:70px; right:0; width:200px; padding:20px; }
       .header-right.open { display:flex; }
-      .hamburger { display:flex; }
-      .cart-buttons { flex-direction:column; gap:10px; }
+      .hamburger { display:block; }
+      .cart-item { flex-direction:column; align-items:flex-start; }
+      .cart-item img { width:100%; height:auto; }
+      .cart-item-details input { margin-bottom:8px; }
     }
   </style>
 </head>
 <body>
-  <header>
+
+  <!-- HEADER -->
+  <header class="site-header">
     <div class="header-left">
-      <a href="index.html">Fleur De Vie</a>
+      <img src="logo.png" alt="Fleur De Vie Logo" class="brand-logo">
+      <div class="brand-title">Fleur De Vie</div>
     </div>
-    <div class="hamburger" id="hamburger">
-      <div></div><div></div><div></div>
-    </div>
-    <div class="header-right">
-      <a href="about.html">About Us</a>
+    <nav class="header-right">
+      <a href="index.html">Home</a>
       <a href="shop.html">Shop</a>
+      <a href="about.html">About</a>
       <a href="contact.html">Contact</a>
       <a href="cart.html">Cart <span class="cart-count" id="cartCount">0</span></a>
-    </div>
+    </nav>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
   </header>
 
-  <main>
-    <h1>Your Cart</h1>
-    <div class="cart-grid" id="cartGrid"></div>
-    <div class="empty-cart" id="cartEmpty" style="display:none;">Your cart is empty.</div>
-    <div class="subtotal" id="cartSubtotal"></div>
-    <div class="currency-select">
-      <label for="currency">Currency:</label>
-      <select id="currency">
-        <option value="NGN">NGN</option>
-        <option value="USD">USD</option>
-        <option value="EUR">EUR</option>
-      </select>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-text">
+      <h1>Your Cart</h1>
+      <p>Review your items before checkout</p>
     </div>
-    <div class="cart-buttons">
-      <a href="shop.html" id="continueShoppingBtn">Continue Shopping</a>
-      <button id="checkoutBtn" style="display:none;">Proceed to Checkout</button>
-    </div>
-  </main>
+  </section>
 
+  <!-- CART -->
+  <section class="cart">
+    <div class="container">
+      <h2>Shopping Cart</h2>
+      <div class="currency-selector">
+        <label for="currency">Currency: </label>
+        <select id="currency">
+          <option value="NGN">NGN</option>
+          <option value="USD">USD</option>
+          <option value="EUR">EUR</option>
+        </select>
+      </div>
+      <div class="cart-grid" id="cartGrid"></div>
+      <div class="cart-empty" id="cartEmpty">Your cart is empty.</div>
+      <div class="cart-subtotal" id="cartSubtotal"></div>
+
+      <!-- CART BUTTONS -->
+      <div class="cart-buttons">
+        <a href="shop.html" class="continue-btn">Continue Shopping</a>
+        <a href="checkout.html" class="checkout-btn" id="checkoutBtn">Proceed to Checkout</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2025 Fleur De Vie</p>
+  </footer>
+
+  <!-- FIREBASE + SCRIPT -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
     import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
@@ -95,40 +152,46 @@
     const checkoutBtn = document.getElementById('checkoutBtn');
     const currencySelect = document.getElementById('currency');
 
-    const exchangeRates = { NGN:1, USD:450, EUR:500 };
+    const exchangeRates = { NGN:1, USD:450, EUR:500 }; // simple conversion rates, adjust as needed
 
-    // ✅ Always store merged cart
-    function normalizeCart(cart){
-      const merged = [];
-      cart.forEach(item => {
-        const existing = merged.find(i => i.id === item.id);
-        if(existing){
-          existing.quantity += item.quantity;
+    // Normalize (merge) cart entries by id
+    function normalizeCartArray(arr){
+      const map = new Map();
+      (arr || []).forEach(it => {
+        if(!it || !it.id) return;
+        const qty = Number(it.quantity) || 0;
+        if(map.has(it.id)){
+          const ex = map.get(it.id);
+          ex.quantity = (Number(ex.quantity) || 0) + qty;
         } else {
-          merged.push({...item});
+          // ensure quantity is numeric
+          map.set(it.id, {...it, quantity: qty});
         }
       });
-      return merged;
+      return Array.from(map.values());
     }
 
-    function getCart(){
-      return normalizeCart(JSON.parse(localStorage.getItem('cart')) || []);
-    }
+    // Raw localStorage (may have duplicates)
+    function getRawCart(){ return JSON.parse(localStorage.getItem('cart')) || []; }
 
+    // Public getter - always returns normalized cart
+    function getCart(){ return normalizeCartArray(getRawCart()); }
+
+    // Save normalized cart to localStorage
     function saveCart(cart){
-      const merged = normalizeCart(cart);
-      localStorage.setItem('cart', JSON.stringify(merged));
+      const normalized = normalizeCartArray(cart);
+      localStorage.setItem('cart', JSON.stringify(normalized));
       updateCartCount();
     }
 
     function updateCartCount(){
       const cart = getCart();
-      const total = cart.reduce((sum, item) => sum + item.quantity, 0);
+      const total = cart.reduce((sum, item) => sum + (Number(item.quantity)||0), 0);
       cartCountElem.textContent = total;
     }
 
     async function loadCart(){
-      let cart = getCart(); // already normalized
+      const cart = getCart(); // normalized
       cartGrid.innerHTML = '';
 
       if(cart.length === 0){
@@ -142,69 +205,136 @@
       checkoutBtn.style.display = 'inline-block';
       let subtotal = 0;
 
+      // Render each item
       for(const item of cart){
         const docRef = doc(db, "brands","fleurdevie","products", item.id);
-        const docSnap = await getDoc(docRef);
-        if(docSnap.exists()){
-          const data = docSnap.data();
-          const priceConverted = data.price / exchangeRates.NGN * exchangeRates[currencySelect.value];
-          subtotal += priceConverted * item.quantity;
+        try {
+          const docSnap = await getDoc(docRef);
+          if(docSnap.exists()){
+            const data = docSnap.data();
+            const priceConverted = (Number(data.price) || 0) / exchangeRates.NGN * exchangeRates[currencySelect.value];
+            subtotal += priceConverted * Number(item.quantity || 0);
 
-          const div = document.createElement('div');
-          div.className='cart-item';
-          div.innerHTML=`
-            <img src="${data.imageUrl}" alt="${data.name}">
-            <div class="cart-item-details">
-              <h3>${data.name}</h3>
-              <div class="price">${currencySelect.value} ${priceConverted.toFixed(2)}</div>
-              <div class="quantity-controls">
-                <button class="minus-btn" aria-label="Decrease">−</button>
-                <span class="qty" id="qty-${item.id}">${item.quantity}</span>
-                <button class="plus-btn" aria-label="Increase">+</button>
+            const div = document.createElement('div');
+            div.className='cart-item';
+            div.innerHTML=`
+              <img src="${data.imageUrl}" alt="${data.name}">
+              <div class="cart-item-details">
+                <h3>${data.name}</h3>
+                <div class="price">${currencySelect.value} ${priceConverted.toFixed(2)}</div>
+                <input type="number" min="1" value="${item.quantity}" id="qty-${item.id}">
+                <button class="remove-btn">Remove</button>
               </div>
-            </div>
-          `;
-          cartGrid.appendChild(div);
+            `;
+            cartGrid.appendChild(div);
 
-          div.querySelector('.minus-btn').addEventListener('click', () => {
-            updateQuantity(item.id, item.quantity - 1);
-          });
+            // attach listeners that always use fresh cart state
+            const qtyInput = div.querySelector(`#qty-${item.id}`);
+            qtyInput.addEventListener('change', (e) => {
+              const newQty = parseInt(e.target.value) || 1;
+              // read current cart fresh
+              const current = getCart();
+              const idx = current.findIndex(i => i.id === item.id);
+              if(idx > -1){
+                if(newQty <= 0){
+                  current.splice(idx, 1);
+                } else {
+                  current[idx].quantity = newQty;
+                }
+                saveCart(current);
+                // re-render
+                loadCart();
+                // notify other tabs/pages
+                window.dispatchEvent(new Event('storage'));
+              }
+            });
 
-          div.querySelector('.plus-btn').addEventListener('click', () => {
-            updateQuantity(item.id, item.quantity + 1);
-          });
+            const removeBtn = div.querySelector('.remove-btn');
+            removeBtn.addEventListener('click', () => {
+              let current = getCart();
+              current = current.filter(i => i.id !== item.id);
+              saveCart(current);
+              loadCart();
+              window.dispatchEvent(new Event('storage'));
+            });
+
+          } else {
+            // product doc missing: still allow removal from cart
+            const div = document.createElement('div');
+            div.className='cart-item';
+            div.innerHTML=`
+              <div class="cart-item-details">
+                <h3>Unknown product</h3>
+                <input type="number" min="1" value="${item.quantity}" id="qty-${item.id}">
+                <button class="remove-btn">Remove</button>
+              </div>
+            `;
+            cartGrid.appendChild(div);
+            const qtyInput = div.querySelector(`#qty-${item.id}`);
+            qtyInput.addEventListener('change', (e) => {
+              const newQty = parseInt(e.target.value) || 1;
+              const current = getCart();
+              const idx = current.findIndex(i => i.id === item.id);
+              if(idx > -1){
+                if(newQty <= 0) current.splice(idx,1); else current[idx].quantity=newQty;
+                saveCart(current);
+                loadCart();
+                window.dispatchEvent(new Event('storage'));
+              }
+            });
+            div.querySelector('.remove-btn').addEventListener('click', () => {
+              let current = getCart();
+              current = current.filter(i => i.id !== item.id);
+              saveCart(current);
+              loadCart();
+              window.dispatchEvent(new Event('storage'));
+            });
+          }
+        } catch(err){
+          console.error("Error fetching product:", err);
         }
       }
+
       cartSubtotalElem.textContent = `Subtotal: ${currencySelect.value} ${subtotal.toFixed(2)}`;
     }
 
-    function updateQuantity(id, quantity){
-      let cart = getCart();
-      const index = cart.findIndex(i=>i.id===id);
+    // Keep public API names used elsewhere (removeItem/updateQuantity) - they operate on normalized cart
+    function updateQuantity(id, quantity) {
+      const cart = getCart();
+      const index = cart.findIndex(i => i.id === id);
       if(index > -1){
-        if(quantity <= 0){
-          cart.splice(index, 1);
-        } else {
-          cart[index].quantity = quantity;
-        }
+        if(quantity <= 0) cart.splice(index,1);
+        else cart[index].quantity = quantity;
         saveCart(cart);
         loadCart();
         window.dispatchEvent(new Event('storage'));
       }
     }
 
+    function removeItem(id){
+      let cart = getCart();
+      cart = cart.filter(i => i.id !== id);
+      saveCart(cart);
+      loadCart();
+      window.dispatchEvent(new Event('storage'));
+    }
+
+    // hamburger / responsive nav (unchanged)
     document.getElementById('hamburger').addEventListener('click', ()=>{
       document.querySelector('.header-right').classList.toggle('open');
       document.getElementById('hamburger').classList.toggle('open');
     });
 
+    // currency change reload
     currencySelect.addEventListener('change', loadCart);
 
+    // storage sync across tabs
     window.addEventListener('storage', ()=>{
       updateCartCount();
       loadCart();
     });
 
+    // initial
     updateCartCount();
     loadCart();
   </script>
