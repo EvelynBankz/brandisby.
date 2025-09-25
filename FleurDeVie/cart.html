@@ -45,15 +45,13 @@
     .cart-grid { display:grid; gap:20px; }
     .cart-item { display:flex; gap:16px; background:#FFD6BA; padding:16px; border-radius:12px; align-items:center; box-shadow:0 4px 10px rgba(0,0,0,0.1); }
     .cart-item img { width:120px; height:120px; object-fit:cover; border-radius:8px; }
-    .cart-item-details { flex:1; }
+    .cart-item-details { flex:1; display:flex; flex-direction:column; }
     .cart-item-details h3 { font-family:"Playfair Display", serif; margin-bottom:8px; }
     .cart-item-details .price { font-weight:600; margin-bottom:8px; }
-
-    /* quantity controls (plus/minus) */
-    .quantity-controls { display:flex; gap:10px; align-items:center; margin-top:6px; }
-    .quantity-controls button { width:36px; height:36px; border-radius:6px; border:none; background:#112e1f; color:#F5E6CC; font-size:18px; cursor:pointer; }
+    .quantity-controls { display:flex; align-items:center; gap:6px; margin-bottom:8px; }
+    .quantity-controls button { background:#112e1f; color:#F5E6CC; border:none; border-radius:6px; padding:4px 10px; cursor:pointer; font-weight:600; transition:0.3s; }
     .quantity-controls button:hover { background:#0a1d14; }
-    .quantity-controls .qty { min-width:28px; text-align:center; font-weight:600; }
+    .quantity-controls input { width:50px; text-align:center; padding:4px; border-radius:6px; border:1px solid #112e1f; }
 
     .cart-subtotal { text-align:right; font-weight:600; margin-top:10px; font-size:1.1rem; }
     .cart-empty { text-align:center; font-size:18px; margin-top:20px; color:#112e1f; }
@@ -72,6 +70,7 @@
       .hamburger { display:block; }
       .cart-item { flex-direction:column; align-items:flex-start; }
       .cart-item img { width:100%; height:auto; }
+      .quantity-controls input { margin-bottom:8px; }
     }
   </style>
 </head>
@@ -113,7 +112,6 @@
           <option value="EUR">EUR</option>
         </select>
       </div>
-
       <div class="cart-grid" id="cartGrid"></div>
       <div class="cart-empty" id="cartEmpty">Your cart is empty.</div>
       <div class="cart-subtotal" id="cartSubtotal"></div>
@@ -155,70 +153,20 @@
     const checkoutBtn = document.getElementById('checkoutBtn');
     const currencySelect = document.getElementById('currency');
 
-    const exchangeRates = { NGN:1, USD:450, EUR:500 }; // adjust when needed
+    const exchangeRates = { NGN:1, USD:450, EUR:500 };
 
-    // Helper: normalize cart array to merge duplicate ids and ensure numeric qty
-    function normalizeCartArray(arr){
-      const map = new Map();
-      (arr || []).forEach(it => {
-        if(!it || !it.id) return;
-        const qty = Number(it.quantity) || 0;
-        if(map.has(it.id)){
-          const ex = map.get(it.id);
-          ex.quantity = (Number(ex.quantity)||0) + qty;
-        } else {
-          map.set(it.id, {...it, quantity: qty});
-        }
-      });
-      return Array.from(map.values());
-    }
-
-    // Always return normalized cart
-    function getCart(){
-      const raw = JSON.parse(localStorage.getItem('cart')) || [];
-      return normalizeCartArray(raw);
-    }
-
-    // Save normalized
-    function saveCart(cart){
-      const normalized = normalizeCartArray(cart);
-      localStorage.setItem('cart', JSON.stringify(normalized));
-      updateCartCount();
-    }
+    function getCart() { return JSON.parse(localStorage.getItem('cart')) || []; }
+    function saveCart(cart){ localStorage.setItem('cart', JSON.stringify(cart)); updateCartCount(); }
 
     function updateCartCount(){
       const cart = getCart();
-      const total = cart.reduce((s,i)=>s + (Number(i.quantity)||0), 0);
+      const total = cart.reduce((sum, item) => sum + item.quantity, 0);
       cartCountElem.textContent = total;
     }
 
-    // change quantity by delta (+1 or -1), or set absolute with quantity param if provided (optional)
-    function changeQuantity(id, delta){
-      const cart = getCart(); // fresh
-      const idx = cart.findIndex(i => i.id === id);
-      if(idx > -1){
-        const newQty = Number(cart[idx].quantity || 0) + delta;
-        if(newQty <= 0){
-          cart.splice(idx, 1);
-        } else {
-          cart[idx].quantity = newQty;
-        }
-      } else if(delta > 0) {
-        // not in cart: add with minimal info (shop page logic should add full product elsewhere)
-        cart.push({ id, quantity: delta });
-      }
-      saveCart(cart);
-      // re-render UI
-      loadCart();
-      // broadcast to other tabs/pages
-      window.dispatchEvent(new Event('storage'));
-    }
-
-    // render UI (fetch product docs in parallel, then build UI once)
     async function loadCart(){
       const cart = getCart();
       cartGrid.innerHTML = '';
-
       if(cart.length === 0){
         cartEmpty.style.display = 'block';
         cartSubtotalElem.textContent = '';
@@ -227,72 +175,67 @@
       }
       cartEmpty.style.display = 'none';
       checkoutBtn.style.display = 'inline-block';
-
-      // build concurrent fetch promises
-      const fetches = cart.map(item => {
-        const docRef = doc(db, "brands","fleurdevie","products", item.id);
-        return getDoc(docRef)
-          .then(snap => ({ item, data: snap.exists() ? snap.data() : null }))
-          .catch(err => ({ item, data: null, err }));
-      });
-
-      const results = await Promise.all(fetches);
-
       let subtotal = 0;
-      // Render items in the same order as cart
-      for(const res of results){
-        const item = res.item;
-        const data = res.data;
 
-        // calculate price using Firestore product price if available, otherwise fallback to item.price if present
-        const unitPrice = data && data.price ? Number(data.price) : (Number(item.price) || 0);
-        const priceConverted = (unitPrice) / exchangeRates.NGN * exchangeRates[currencySelect.value];
-        subtotal += priceConverted * Number(item.quantity || 0);
+      for(const item of cart){
+        const docRef = doc(db, "brands","fleurdevie","products", item.id);
+        const docSnap = await getDoc(docRef);
+        if(docSnap.exists()){
+          const data = docSnap.data();
+          const priceConverted = data.price / exchangeRates.NGN * exchangeRates[currencySelect.value];
+          subtotal += priceConverted * item.quantity;
 
-        const div = document.createElement('div');
-        div.className = 'cart-item';
-        div.innerHTML = `
-          <img src="${(data && data.imageUrl) ? data.imageUrl : (item.imageUrl || 'placeholder.png')}" alt="${(data && data.name) ? data.name : (item.name || 'Product')}">
-          <div class="cart-item-details">
-            <h3>${(data && data.name) ? data.name : (item.name || 'Product')}</h3>
-            <div class="price">${currencySelect.value} ${priceConverted.toFixed(2)}</div>
-            <div class="quantity-controls">
-              <button class="minus-btn" aria-label="Decrease">−</button>
-              <span class="qty" id="qty-${item.id}">${item.quantity}</span>
-              <button class="plus-btn" aria-label="Increase">+</button>
+          const div = document.createElement('div');
+          div.className='cart-item';
+          div.innerHTML=`
+            <img src="${data.imageUrl}" alt="${data.name}">
+            <div class="cart-item-details">
+              <h3>${data.name}</h3>
+              <div class="price">${currencySelect.value} ${priceConverted.toFixed(2)}</div>
+              <div class="quantity-controls">
+                <button class="minus" data-id="${item.id}">–</button>
+                <input type="number" min="1" value="${item.quantity}" id="qty-${item.id}">
+                <button class="plus" data-id="${item.id}">+</button>
+              </div>
             </div>
-          </div>
-        `;
-        cartGrid.appendChild(div);
+          `;
+          cartGrid.appendChild(div);
 
-        // attach event listeners that always use fresh cart state through changeQuantity()
-        const minus = div.querySelector('.minus-btn');
-        const plus = div.querySelector('.plus-btn');
+          const qtyInput = div.querySelector(`#qty-${item.id}`);
+          const plusBtn = div.querySelector('.plus');
+          const minusBtn = div.querySelector('.minus');
 
-        // use dataset or closure id (safe)
-        minus.addEventListener('click', () => changeQuantity(item.id, -1));
-        plus.addEventListener('click', () => changeQuantity(item.id, +1));
+          qtyInput.addEventListener('change', (e)=>updateQuantity(item.id, parseInt(e.target.value)||1));
+          plusBtn.addEventListener('click', ()=>updateQuantity(item.id, item.quantity+1));
+          minusBtn.addEventListener('click', ()=>updateQuantity(item.id, Math.max(1, item.quantity-1)));
+        }
       }
-
       cartSubtotalElem.textContent = `Subtotal: ${currencySelect.value} ${subtotal.toFixed(2)}`;
     }
 
-    // hamburger unchanged
+    function updateQuantity(id, quantity){
+      const cart = getCart();
+      const index = cart.findIndex(i=>i.id===id);
+      if(index>-1){
+        cart[index].quantity=quantity;
+        saveCart(cart);
+        loadCart();
+        window.dispatchEvent(new Event('storage'));
+      }
+    }
+
     document.getElementById('hamburger').addEventListener('click', ()=>{
       document.querySelector('.header-right').classList.toggle('open');
       document.getElementById('hamburger').classList.toggle('open');
     });
 
-    // currency change reloads cart (to recalc)
     currencySelect.addEventListener('change', loadCart);
 
-    // storage event sync across tabs
     window.addEventListener('storage', ()=>{
       updateCartCount();
       loadCart();
     });
 
-    // initial load
     updateCartCount();
     loadCart();
   </script>
