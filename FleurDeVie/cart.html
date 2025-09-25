@@ -131,139 +131,130 @@
 
   <!-- FIREBASE + SCRIPT -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
-      authDomain: "brandisby.firebaseapp.com",
-      projectId: "brandisby",
-      storageBucket: "brandisby.firebasestorage.app",
-      messagingSenderId: "87213267039",
-      appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
+    authDomain: "brandisby.firebaseapp.com",
+    projectId: "brandisby",
+    storageBucket: "brandisby.firebasestorage.app",
+    messagingSenderId: "87213267039",
+    appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
-    const cartGrid = document.getElementById('cartGrid');
-    const cartEmpty = document.getElementById('cartEmpty');
-    const cartCountElem = document.getElementById('cartCount');
-    const cartSubtotalElem = document.getElementById('cartSubtotal');
-    const checkoutBtn = document.getElementById('checkoutBtn');
-    const currencySelect = document.getElementById('currency');
+  const cartGrid = document.getElementById('cartGrid');
+  const cartEmpty = document.getElementById('cartEmpty');
+  const cartCountElem = document.getElementById('cartCount');
+  const cartSubtotalElem = document.getElementById('cartSubtotal');
+  const checkoutBtn = document.getElementById('checkoutBtn');
+  const currencySelect = document.getElementById('currency');
 
-    const exchangeRates = { NGN:1, USD:450, EUR:500 }; // simple conversion rates, adjust as needed
+  const exchangeRates = { NGN:1, USD:450, EUR:500 };
 
-    function getCart() { return JSON.parse(localStorage.getItem('cart')) || []; }
-    function saveCart(cart){ localStorage.setItem('cart', JSON.stringify(cart)); updateCartCount(); }
+  function getCart() { return JSON.parse(localStorage.getItem('cart')) || []; }
+  function saveCart(cart){ localStorage.setItem('cart', JSON.stringify(cart)); updateCartCount(); }
 
-    function updateCartCount(){
-      const cart = getCart();
-      const total = cart.reduce((sum, item) => sum + item.quantity, 0);
-      cartCountElem.textContent = total;
-    }
+  function updateCartCount(){
+    const cart = getCart();
+    const total = cart.reduce((sum, item) => sum + item.quantity, 0);
+    cartCountElem.textContent = total;
+  }
 
-    async function loadCart(){
-      const cart = getCart();
-      cartGrid.innerHTML = '';
-      if(cart.length === 0){
-        cartEmpty.style.display = 'block';
-        cartSubtotalElem.textContent = '';
-        checkoutBtn.style.display = 'none';
-        return;
+  async function loadCart(){
+    let cart = getCart();
+
+    // ✅ Merge duplicates by ID
+    const mergedCart = [];
+    cart.forEach(item => {
+      const existing = mergedCart.find(i => i.id === item.id);
+      if(existing){
+        existing.quantity += item.quantity;
+      } else {
+        mergedCart.push({...item});
       }
-      cartEmpty.style.display = 'none';
-      checkoutBtn.style.display = 'inline-block';
-      let subtotal = 0;
+    });
 
-      for(const item of cart){
-        const docRef = doc(db, "brands","fleurdevie","products", item.id);
-        const docSnap = await getDoc(docRef);
-        if(docSnap.exists()){
-          const data = docSnap.data();
-          const priceConverted = data.price / exchangeRates.NGN * exchangeRates[currencySelect.value];
-          subtotal += priceConverted * item.quantity;
+    cartGrid.innerHTML = '';
+    if(mergedCart.length === 0){
+      cartEmpty.style.display = 'block';
+      cartSubtotalElem.textContent = '';
+      checkoutBtn.style.display = 'none';
+      return;
+    }
+    cartEmpty.style.display = 'none';
+    checkoutBtn.style.display = 'inline-block';
+    let subtotal = 0;
 
-          const div = document.createElement('div');
-          div.className='cart-item';
-          div.innerHTML=`
-            <img src="${data.imageUrl}" alt="${data.name}">
-            <div class="cart-item-details">
-              <h3>${data.name}</h3>
-              <div class="price">${currencySelect.value} ${priceConverted.toFixed(2)}</div>
-              <div class="quantity-controls">
-                <button class="minus-btn" aria-label="Decrease">−</button>
-                <span class="qty" id="qty-${item.id}">${item.quantity}</span>
-                <button class="plus-btn" aria-label="Increase">+</button>
-              </div>
+    for(const item of mergedCart){
+      const docRef = doc(db, "brands","fleurdevie","products", item.id);
+      const docSnap = await getDoc(docRef);
+      if(docSnap.exists()){
+        const data = docSnap.data();
+        const priceConverted = data.price / exchangeRates.NGN * exchangeRates[currencySelect.value];
+        subtotal += priceConverted * item.quantity;
+
+        const div = document.createElement('div');
+        div.className='cart-item';
+        div.innerHTML=`
+          <img src="${data.imageUrl}" alt="${data.name}">
+          <div class="cart-item-details">
+            <h3>${data.name}</h3>
+            <div class="price">${currencySelect.value} ${priceConverted.toFixed(2)}</div>
+            <div class="quantity-controls">
+              <button class="minus-btn" aria-label="Decrease">−</button>
+              <span class="qty" id="qty-${item.id}">${item.quantity}</span>
+              <button class="plus-btn" aria-label="Increase">+</button>
             </div>
-          `;
-          cartGrid.appendChild(div);
+          </div>
+        `;
+        cartGrid.appendChild(div);
 
-          // attach listeners (use fresh cart state inside handlers to avoid stale closures)
-          const minusBtn = div.querySelector('.minus-btn');
-          const plusBtn = div.querySelector('.plus-btn');
+        // attach listeners
+        div.querySelector('.minus-btn').addEventListener('click', () => {
+          updateQuantity(item.id, item.quantity - 1);
+        });
 
-          minusBtn.addEventListener('click', () => {
-            const currentCart = getCart();
-            const cur = currentCart.find(i => i.id === item.id);
-            const newQty = (cur ? cur.quantity : 0) - 1;
-            updateQuantity(item.id, newQty);
-          });
-
-          plusBtn.addEventListener('click', () => {
-            const currentCart = getCart();
-            const cur = currentCart.find(i => i.id === item.id);
-            const newQty = (cur ? cur.quantity : 0) + 1;
-            updateQuantity(item.id, newQty);
-          });
-        }
-      }
-      cartSubtotalElem.textContent = `Subtotal: ${currencySelect.value} ${subtotal.toFixed(2)}`;
-    }
-
-    function updateQuantity(id, quantity){
-      const cart = getCart();
-      const index = cart.findIndex(i=>i.id===id);
-      if(index > -1){
-        if(quantity <= 0){
-          // remove item
-          cart.splice(index, 1);
-        } else {
-          cart[index].quantity = quantity;
-        }
-        saveCart(cart);
-        // refresh UI
-        loadCart();
-        // notify other pages/tabs
-        window.dispatchEvent(new Event('storage'));
+        div.querySelector('.plus-btn').addEventListener('click', () => {
+          updateQuantity(item.id, item.quantity + 1);
+        });
       }
     }
+    cartSubtotalElem.textContent = `Subtotal: ${currencySelect.value} ${subtotal.toFixed(2)}`;
+  }
 
-    // keep removeItem (still available if other code calls it)
-    function removeItem(id){
-      let cart = getCart();
-      cart = cart.filter(i=>i.id!==id);
+  function updateQuantity(id, quantity){
+    let cart = getCart();
+    const index = cart.findIndex(i=>i.id===id);
+    if(index > -1){
+      if(quantity <= 0){
+        cart.splice(index, 1);
+      } else {
+        cart[index].quantity = quantity;
+      }
       saveCart(cart);
       loadCart();
       window.dispatchEvent(new Event('storage'));
     }
+  }
 
-    document.getElementById('hamburger').addEventListener('click', ()=>{
-      document.querySelector('.header-right').classList.toggle('open');
-      document.getElementById('hamburger').classList.toggle('open');
-    });
+  document.getElementById('hamburger').addEventListener('click', ()=>{
+    document.querySelector('.header-right').classList.toggle('open');
+    document.getElementById('hamburger').classList.toggle('open');
+  });
 
-    currencySelect.addEventListener('change', loadCart);
+  currencySelect.addEventListener('change', loadCart);
 
-    window.addEventListener('storage', ()=>{
-      updateCartCount();
-      loadCart();
-    });
-
+  window.addEventListener('storage', ()=>{
     updateCartCount();
     loadCart();
-  </script>
+  });
+
+  updateCartCount();
+  loadCart();
+</script>
 </body>
 </html>
