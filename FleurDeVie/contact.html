@@ -174,6 +174,31 @@
       .hamburger { display:block; }
       .hero-text h1 { font-size:32px; }
     }
+    /* MOBILE HERO ADJUSTMENT FOR CONTACT PAGE */
+@media(max-width:600px){
+  .hero {
+    height:30vh;               /* shorter hero on mobile */
+    margin-top:0;              /* remove extra desktop margin */
+    padding-top:80px;          /* offset for fixed header */
+    display:flex;
+    justify-content:center;     /* horizontal centering */
+    align-items:center;         /* vertical centering */
+    text-align:center;
+    box-sizing:border-box;      /* include padding in height */
+  }
+
+  .hero-text h1 {
+    font-size:clamp(24px,5vw,32px); /* scale down text for mobile */
+    line-height:1.2;                /* tighten vertical spacing */
+    margin:0;                        /* remove default margin */
+  }
+
+  .hero-text p {
+    font-size:clamp(14px,2.5vw,18px); /* scale paragraph text */
+    margin:0 auto;                    /* keep centered */
+  }
+}
+
   </style>
 </head>
 <body>
