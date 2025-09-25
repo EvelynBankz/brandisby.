@@ -4,119 +4,104 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Thank You - Fleur De Vie</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css"> <!-- Same stylesheet as others -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* Extra styling for Thank You page */
-    .thankyou-hero {
-      background: url("bg.jpg") center/cover no-repeat;
-      height: 50vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      color: white;
-      position: relative;
-    }
-    .thankyou-hero::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: rgba(0,0,0,0.5);
-    }
-    .thankyou-hero h1 {
-      font-size: 2.5rem;
-      z-index: 1;
-      position: relative;
-    }
+    /* RESET */
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:"Montserrat",sans-serif;background:#F5E6CC;color:#112e1f;line-height:1.6;text-align:center;}
+    a{text-decoration:none;color:inherit;}
 
-    .thankyou-container {
-      max-width: 800px;
-      margin: 40px auto;
-      padding: 20px;
-      text-align: center;
-    }
+    /* HEADER */
+    .site-header{background:#112e1f;color:#F5E6CC;display:flex;justify-content:space-between;align-items:center;padding:16px 28px;position:fixed;top:0;left:0;right:0;z-index:1000;}
+    .header-left{display:flex;align-items:center;gap:12px;}
+    .brand-logo{height:60px;}
+    .brand-title{font-family:"Playfair Display",serif;font-size:24px;font-weight:700;}
+    .header-right{display:flex;gap:20px;align-items:center;}
+    .header-right a{font-weight:500;transition:color 0.3s;}
+    .header-right a:hover{color:#FFD6BA;}
+    .cart-count{background:#FFD6BA;color:#112e1f;font-size:12px;font-weight:600;border-radius:50%;padding:2px 6px;margin-left:4px;}
+    .hamburger{display:none;background:none;border:none;cursor:pointer;width:30px;height:24px;position:relative;}
+    .hamburger span{display:block;width:100%;height:3px;background:#F5E6CC;border-radius:2px;position:absolute;left:0;transition:0.3s;}
+    .hamburger span:nth-child(1){top:0;}
+    .hamburger span:nth-child(2){top:10px;}
+    .hamburger span:nth-child(3){top:20px;}
+    .hamburger.open span:nth-child(1){transform:rotate(45deg);top:10px;}
+    .hamburger.open span:nth-child(2){opacity:0;}
+    .hamburger.open span:nth-child(3){transform:rotate(-45deg);top:10px;}
 
-    .thankyou-container p {
-      margin: 15px 0;
-      font-size: 1.1rem;
-      color: #444;
-    }
+    /* HERO */
+    .hero{position:relative;height:40vh;display:flex;justify-content:center;align-items:center;text-align:center;margin-top:80px;overflow:hidden;}
+    .hero::after{content:"";position:absolute;inset:0;background:url('bg.jpg') center/cover no-repeat;transform:scale(1.1);z-index:-1;border-radius:12px;box-shadow:inset 0 0 0 2000px rgba(17,46,31,0.3);}
+    .hero-text{position:relative;display:inline-block;color:#FFD6BA;}
+    .hero-text h1{font-family:"Playfair Display",serif;font-size:clamp(32px,5vw,56px);}
 
-    .thankyou-buttons {
-      margin-top: 30px;
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
+    /* THANK YOU SECTION */
+    .thankyou-section{padding:80px 20px;}
+    .thankyou-box{background:#FFD6BA;padding:40px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.15);max-width:700px;margin:auto;}
+    .thankyou-box h2{font-family:"Playfair Display",serif;font-size:28px;margin-bottom:20px;}
+    .thankyou-box p{font-size:18px;margin-bottom:24px;}
+    .btn{display:inline-block;padding:14px 28px;border-radius:8px;font-weight:600;transition:0.3s;}
+    .btn-primary{background:#112e1f;color:#F5E6CC;border:none;}
+    .btn-primary:hover{background:#0a1d14;}
+    .btn-secondary{background:#fff;color:#112e1f;border:2px solid #112e1f;margin-left:10px;}
+    .btn-secondary:hover{background:#112e1f;color:#FFD6BA;}
 
-    .thankyou-buttons a {
-      background: #333;
-      color: white;
-      padding: 12px 24px;
-      border-radius: 6px;
-      text-decoration: none;
-      font-weight: 500;
-      transition: background 0.3s;
-    }
-    .thankyou-buttons a:hover {
-      background: #555;
+    footer{text-align:center;padding:20px;background:#112e1f;color:#F5E6CC;margin-top:60px;}
+
+    @media(max-width:800px){
+      .header-right{display:none;flex-direction:column;position:absolute;top:70px;right:0;background:#112e1f;width:200px;padding:20px;}
+      .header-right.open{display:flex;}
+      .hamburger{display:block;}
+      .thankyou-box{padding:20px;}
     }
   </style>
 </head>
 <body>
 
-  <!-- HEADER (reuse from FleurDeVie) -->
-  <header class="header">
-    <div class="logo">Fleur De Vie</div>
-    <nav class="nav">
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="header-left">
+      <img src="logo.png" alt="Fleur De Vie Logo" class="brand-logo">
+      <div class="brand-title">Fleur De Vie</div>
+    </div>
+    <nav class="header-right">
       <a href="index.html">Home</a>
       <a href="shop.html">Shop</a>
-      <a href="cart.html">Cart</a>
-      <a href="checkout.html">Checkout</a>
       <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
     </nav>
-    <div class="hamburger">&#9776;</div>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
   </header>
 
-  <!-- THANK YOU HERO -->
-  <section class="thankyou-hero">
-    <h1>Thank You for Your Purchase!</h1>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-text">
+      <h1>Thank You</h1>
+    </div>
   </section>
 
-  <!-- THANK YOU CONTENT -->
-  <section class="thankyou-container">
-    <p>Your order has been received and is now being processed. 🎉</p>
-    <p>We’ve sent a confirmation email with your order details.  
-      Please keep it for your records.</p>
-    <p>We’ll notify you as soon as your order ships.</p>
-
-    <div class="thankyou-buttons">
-      <a href="shop.html">Continue Shopping</a>
-      <a href="index.html">Return Home</a>
+  <!-- THANK YOU SECTION -->
+  <section class="thankyou-section">
+    <div class="thankyou-box">
+      <h2>We’ve received your order 🎉</h2>
+      <p>Thank you for shopping with <strong>Fleur De Vie</strong>.  
+      Your order is being processed and you’ll receive a confirmation email shortly.</p>
+      <a href="shop.html" class="btn btn-primary">Continue Shopping</a>
+      <a href="index.html" class="btn btn-secondary">Return Home</a>
     </div>
   </section>
 
   <!-- FOOTER -->
-  <footer class="footer">
-    <p>&copy; 2025 Fleur De Vie. All rights reserved.</p>
+  <footer>
+    <p>© 2025 Fleur De Vie</p>
   </footer>
 
   <script>
-    // Simple hamburger toggle
-    document.querySelector('.hamburger').addEventListener('click', () => {
-      document.querySelector('.nav').classList.toggle('active');
+    document.getElementById('hamburger').addEventListener('click',()=>{
+      document.querySelector('.header-right').classList.toggle('open');
+      document.getElementById('hamburger').classList.toggle('open');
     });
-
-    // OPTIONAL: Display order reference if passed from checkout
-    const params = new URLSearchParams(window.location.search);
-    const ref = params.get("ref");
-    if (ref) {
-      const p = document.createElement("p");
-      p.textContent = `Your Order Reference: ${ref}`;
-      document.querySelector(".thankyou-container").appendChild(p);
-    }
   </script>
 </body>
 </html>
