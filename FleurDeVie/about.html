@@ -152,25 +152,43 @@
     .site-footer { text-align:center; padding:20px; background:#112e1f; color:#F5E6CC; }
 
     /* ================= RESPONSIVE ================= */
-    @media(max-width:900px){ .header-right { gap:12px; flex-wrap: wrap; justify-content:center; } }
-    @media(max-width:600px){
-      .hero-about { margin-top: 80px; height: 60vh;}
-      .header-right { 
-        position:absolute;
-        top:70px;
-        right:0;
-        background: rgba(17,46,31,0.95);
-        flex-direction: column;
-        width:200px;
-        padding:20px;
-        display:none;
-        border-radius:0 0 0 10px;
-      }
-      .header-right.open { display:flex; }
-      .hamburger { display:block; }
-      section{ padding:60px 20px; }
-    }
-    @media(max-width:420px){ .brand-logo { height:clamp(40px,15vw,80px); } .brand-title{ font-size: clamp(16px,7vw,22px); } }
+    /* ================= RESPONSIVE ================= */
+@media(max-width:900px){ 
+  .header-right { 
+    gap:12px; 
+    flex-wrap: wrap; 
+    justify-content:center; 
+  } 
+}
+
+@media(max-width:600px){
+  .hero-about { 
+    margin-top: 80px; 
+    height: 40vh; /* reduced hero height on mobile */
+  }
+  .header-right { 
+    position:absolute;
+    top:70px;
+    right:0;
+    background: rgba(17,46,31,0.95);
+    flex-direction: column;
+    width:200px;
+    padding:20px;
+    display:none;
+    border-radius:0 0 0 10px;
+  }
+  .header-right.open { display:flex; }
+  .hamburger { display:block; }
+  section{ padding:60px 20px; }
+}
+
+@media(max-width:420px){ 
+  .brand-logo { height:clamp(40px,15vw,80px); } 
+  .brand-title{ font-size: clamp(16px,7vw,22px); } 
+  .hero-about { 
+    height: 35vh; /* further reduce for very small screens */
+  }
+}
   </style>
 </head>
 <body class="fleurdevie">
