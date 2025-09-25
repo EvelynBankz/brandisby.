@@ -1,81 +1,233 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Fleur De Vie</title>
+
+  <!-- Fonts & icons -->
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    /* RESET */
-    *{margin:0;padding:0;box-sizing:border-box;}
-    body{font-family:"Montserrat",sans-serif;background:#000;color:#112e1f;overflow:hidden;}
 
-    /* HEADER */
-    .site-header{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:14px 24px;z-index:1000;}
-    .brand-logo{height:clamp(60px,10vw,140px);}
-    .brand-title{font-family:"Playfair Display",serif;font-weight:700;font-size:clamp(20px,3vw,40px);color:#112e1f;text-shadow:0 2px 6px rgba(0,0,0,0.45);}
-    .header-right{display:flex;align-items:center;gap:14px;}
-    .header-right a{color:#112e1f;font-size:14px;text-decoration:none;}
-    .header-right i{font-size:18px;}
-    .hamburger{display:none;background:none;border:none;cursor:pointer;width:36px;height:28px;position:relative;}
-    .hamburger span{display:block;width:100%;height:3px;background:#112e1f;border-radius:2px;position:absolute;left:0;transition:0.3s;}
-    .hamburger span:nth-child(1){top:0;}
-    .hamburger span:nth-child(2){top:10px;}
-    .hamburger span:nth-child(3){top:20px;}
-    .hamburger.is-active span:nth-child(1){transform:rotate(45deg);top:10px;}
-    .hamburger.is-active span:nth-child(2){opacity:0;}
-    .hamburger.is-active span:nth-child(3){transform:rotate(-45deg);top:10px;}
+  <style>
+    :root{
+      --gold: #c9a45c;
+      --bg-tint: rgba(0,0,0,0.25);
+      --brand: #112e1f;
+      --max-width: 1200px;
+    }
+
+    /* RESET */
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{
+      font-family: "Montserrat", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      color:var(--brand);
+      background:#000; /* hero covers the viewport anyway */
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+    a{color:inherit;text-decoration:none}
+
+    /* HEADER (transparent) */
+    .site-header{
+      position: absolute;
+      top:0; left:0; right:0;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:12px 24px;
+      z-index:1200;
+      background:transparent; /* intentionally transparent */
+    }
+    .header-left{display:flex;align-items:center;gap:14px}
+    .brand-logo{height:clamp(56px,9vw,140px); width:auto; display:block}
+    .brand-title{
+      font-family:"Playfair Display", serif;
+      font-weight:700;
+      font-size:clamp(20px,3.4vw,40px);
+      color:var(--brand);
+      pointer-events:none;
+      text-shadow: 0 4px 10px rgba(0,0,0,0.25);
+      margin-left:8px;
+    }
+
+    .header-right{display:flex;align-items:center;gap:14px}
+    .header-right .home-link,
+    .header-right .social-link{
+      font-size:14px; color:var(--brand);
+      position:relative; padding:6px 2px;
+    }
+    .header-right .home-link::after{
+      content:""; position:absolute; left:0; bottom:0; height:1px; width:0; background:var(--gold); transition:width .28s ease;
+    }
+    .header-right .home-link:hover::after{ width:100% }
+    .header-right i{font-size:18px}
+
+    /* Hamburger (hidden on wide screens) */
+    .hamburger{
+      display:none; width:40px; height:32px; background:none; border:0; padding:6px; cursor:pointer;
+    }
+    .hamburger span{
+      display:block; height:3px; background:var(--brand); border-radius:3px; margin:5px 0; transition:transform .28s ease, opacity .28s ease;
+    }
+    .hamburger.is-active span:nth-child(1){ transform:translateY(8px) rotate(45deg) }
+    .hamburger.is-active span:nth-child(2){ opacity:0 }
+    .hamburger.is-active span:nth-child(3){ transform:translateY(-8px) rotate(-45deg) }
 
     /* HERO */
-    .hero{height:100vh;display:flex;justify-content:center;align-items:center;background:url("bg.jpg") center/cover no-repeat;position:relative;}
-    .hero::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,0.15);}
-    .center-links{position:relative;z-index:2;display:flex;gap:120px;flex-wrap:nowrap;}
-    .center-link{font-family:"Playfair Display",serif;text-transform:uppercase;font-weight:400;color:#112e1f;text-decoration:underline;text-underline-offset:.3em;text-decoration-thickness:1px;font-size:clamp(22px,3vw,60px);letter-spacing:.05em;transform:scaleY(1.8);}
+    .hero{
+      height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      position:relative;
+      overflow:hidden;
+      background-image: url('bg.jpg');
+      background-position:center;
+      background-size:cover;
+      background-repeat:no-repeat;
+    }
+    /* tint + subtle vignette for premium depth */
+    .hero::after{
+      content:"";
+      position:absolute; inset:0;
+      background: linear-gradient(180deg, rgba(0,0,0,0.14), rgba(0,0,0,0.22)), radial-gradient(ellipse at center, rgba(0,0,0,0.06) 0%, transparent 40%);
+      z-index:0;
+    }
+
+    /* center links (big, elegant) */
+    .center-links{
+      position:relative;
+      z-index:2;
+      display:flex;
+      gap:140px;
+      align-items:center;
+      justify-content:center;
+      max-width:var(--max-width);
+      padding:0 20px;
+    }
+    .center-link{
+      font-family:"Playfair Display", serif;
+      font-weight:400;
+      text-transform:uppercase;
+      color:var(--brand);
+      text-decoration:underline;
+      text-underline-offset:.28em;
+      text-decoration-thickness:1px;
+      letter-spacing:0.04em;
+      transform-origin:center;
+      font-size:clamp(22px, 3.4vw, 64px);
+      line-height:1;
+      display:inline-block;
+      cursor:pointer;
+      opacity:0;
+      transform: translateY(12px) scaleY(1.6);
+    }
+    .center-link:focus,
+    .center-link:hover{ color: var(--gold); outline:none; }
+
+    /* small caption / subtle CTA under links (optional) */
+    .hero-sub{
+      position:relative; z-index:2; margin-top:28px; text-align:center; color:rgba(17,46,31,0.9);
+      font-size:14px; max-width:720px; margin-left:auto;margin-right:auto; padding:0 18px;
+      opacity:0; transform: translateY(6px);
+    }
 
     /* RIGHT NAV OVERLAY */
-    .right-nav-overlay{position:fixed;top:0;right:0;height:100%;width:260px;background:rgba(0,0,0,0.95);display:flex;flex-direction:column;align-items:flex-start;padding:60px 25px;gap:24px;transform:translateX(100%);transition:0.3s;z-index:2000;}
-    .right-nav-overlay.open{transform:translateX(0);}
-    .right-nav-overlay a{color:#fff;font-size:18px;text-decoration:none;display:flex;align-items:center;gap:12px;}
-    .overlay-close{position:absolute;top:18px;right:18px;background:none;border:none;color:#fff;font-size:36px;cursor:pointer;}
-
-    /* FOOTER */
-    .site-footer{position:absolute;bottom:20px;left:0;right:0;text-align:center;z-index:1200;}
-    .tagline{font-family:"Playfair Display",serif;font-style:italic;font-size:16px;color:#112e1f;}
-    .copyright{font-size:13px;color:#112e1f;margin-top:4px;}
-
-    /* RESPONSIVE */
-    @media(max-width:900px){
-      .hamburger{display:block;}
-      .header-right .home-link,
-      .header-right .social-link{display:none;}
-      .center-links{gap:60px;}
+    .right-nav-overlay{
+      position:fixed; top:0; right:0; height:100%; width:300px;
+      background: rgba(17,46,31,0.98);
+      color:#fff;
+      display:flex; flex-direction:column; align-items:flex-start;
+      padding:60px 26px; gap:18px;
+      transform: translateX(100%);
+      transition: transform .28s ease;
+      z-index:2000;
     }
-    @media(max-width:600px){
-      .center-links{flex-direction:column;align-items:center;gap:40px;text-align:center;}
-      .center-link{font-size:clamp(18px,6vw,34px);transform:scaleY(1.5);}
+    .right-nav-overlay.open{ transform: translateX(0); }
+    .right-nav-overlay a{ color:#FFD6BA; font-size:18px; display:block; padding:8px 0; }
+    .right-nav-overlay .overlay-close{ position:absolute; top:18px; right:18px; background:none; border:0; color:#FFD6BA; font-size:36px; cursor:pointer }
+
+    /* FOOTER (transparent) */
+    .site-footer{
+      position:absolute; left:0; right:0; bottom:18px; text-align:center; z-index:1200; pointer-events:none;
     }
+    .tagline{ font-family:"Playfair Display", serif; font-style:italic; font-size:16px; color:var(--brand); }
+    .copyright{ font-size:13px; color:var(--brand); margin-top:6px }
+
+    /* subtle fade-up animation (staggered) */
+    @keyframes fadeUp {
+      from { opacity:0; transform: translateY(12px) scaleY(1.6) }
+      to   { opacity:1; transform: translateY(0) scaleY(1) }
+    }
+
+    /* reduced motion preference */
+    @media (prefers-reduced-motion: no-preference){
+      .center-link{ animation: fadeUp .6s ease forwards; }
+      .center-link:nth-child(1){ animation-delay: .18s; }
+      .center-link:nth-child(2){ animation-delay: .34s; }
+      .center-link:nth-child(3){ animation-delay: .50s; }
+
+      .hero-sub{ animation: fadeUp .6s ease forwards; animation-delay:.7s; }
+    }
+    @media (prefers-reduced-motion: reduce){
+      .center-link, .hero-sub{ transition:none; animation:none; opacity:1; transform:none; }
+    }
+
+    /* RESPONSIVE tweaks */
+    @media (max-width: 900px){
+      .center-links{ gap:80px; }
+      .header-right .home-link, .header-right .social-link { display:none }
+      .hamburger{ display:inline-block }
+    }
+    @media (max-width: 600px){
+      .center-links{
+        flex-direction:column;
+        gap:36px;
+        align-items:center;
+        text-align:center;
+        padding: 0 28px;
+      }
+      .center-link{
+        font-size: clamp(18px, 8.6vw, 36px);
+        transform-origin:center;
+      }
+      /* center overlay items vertically on small screens */
+      .right-nav-overlay{ justify-content:center; align-items:center; text-align:center; padding:30px; width:100% }
+      .right-nav-overlay a{ font-size:22px }
+      .brand-title{ display:none; } /* keep header uncluttered on tiny screens */
+      .brand-logo{ position: absolute; left:12px; top:10px; height:clamp(42px, 12vw, 90px) }
+    }
+
+    /* utility */
+    .visually-hidden{ position:absolute !important; height:1px; width:1px; overflow:hidden; clip:rect(1px,1px,1px,1px); white-space:nowrap; }
   </style>
 </head>
 <body>
+
   <!-- HEADER -->
-  <header class="site-header">
+  <header class="site-header" role="banner">
     <div class="header-left">
-      <img src="logo.png" alt="Fleur De Vie Logo" class="brand-logo">
+      <img src="logo.png" alt="Fleur De Vie" class="brand-logo">
+      <div class="brand-title" aria-hidden="true">Fleur De Vie</div>
     </div>
-    <div class="brand-title">Fleur De Vie</div>
-    <div class="header-right">
+
+    <nav class="header-right" aria-label="Primary">
       <a class="home-link" href="index.html">Home</a>
-      <a class="social-link" href="mailto:yourstruly.fleurdevie@gmail.com"><i class="fas fa-envelope"></i></a>
-      <a class="social-link" href="https://www.tiktok.com/@fleurdevie.com" target="_blank"><i class="fab fa-tiktok"></i></a>
-      <a class="social-link" href="https://www.instagram.com/fleurdevie_com/" target="_blank"><i class="fab fa-instagram"></i></a>
-      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
-    </div>
+      <a class="social-link" href="mailto:yourstruly.fleurdevie@gmail.com" aria-label="Email us"><i class="fas fa-envelope"></i></a>
+      <a class="social-link" href="https://www.tiktok.com/@fleurdevie.com" target="_blank" rel="noopener"><i class="fab fa-tiktok"></i></a>
+      <a class="social-link" href="https://www.instagram.com/fleurdevie_com/" target="_blank" rel="noopener"><i class="fab fa-instagram"></i></a>
+
+      <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </nav>
   </header>
 
-  <!-- RIGHT NAV -->
-  <nav id="rightNav" class="right-nav-overlay">
-    <button class="overlay-close" id="close">&times;</button>
+  <!-- RIGHT NAV OVERLAY -->
+  <nav id="rightNav" class="right-nav-overlay" aria-hidden="true" aria-label="Mobile menu">
+    <button class="overlay-close" id="close" aria-label="Close menu">&times;</button>
     <a href="index.html">Home</a>
     <a href="about.html">About Us</a>
     <a href="shop.html">Shop</a>
@@ -83,28 +235,61 @@
   </nav>
 
   <!-- HERO -->
-  <main class="hero">
-    <div class="center-links">
-      <a class="center-link" href="about.html">About Us</a>
-      <a class="center-link" href="shop.html">Shop</a>
-      <a class="center-link" href="contact.html">Contact Us</a>
+  <main class="hero" role="main">
+    <div class="center-links" role="navigation" aria-label="Primary links">
+      <a href="about.html" class="center-link">About Us</a>
+      <a href="shop.html" class="center-link">Shop</a>
+      <a href="contact.html" class="center-link">Contact Us</a>
+    </div>
+
+    <div class="hero-sub" aria-hidden="true">
+      Timeless luxury, handcrafted details — curated for those who appreciate the finer things.
     </div>
   </main>
 
   <!-- FOOTER -->
-  <footer class="site-footer">
+  <footer class="site-footer" role="contentinfo">
     <div class="tagline">Yours Truly</div>
     <div class="copyright">© 2025 Fleur De Vie</div>
   </footer>
 
   <!-- SCRIPT -->
   <script>
-    const ham=document.getElementById('hamburger');
-    const overlay=document.getElementById('rightNav');
-    const closeBtn=document.getElementById('close');
-    ham.addEventListener('click',()=>{overlay.classList.toggle('open');ham.classList.toggle('is-active');});
-    closeBtn.addEventListener('click',()=>{overlay.classList.remove('open');ham.classList.remove('is-active');});
-    overlay.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{overlay.classList.remove('open');ham.classList.remove('is-active');}));
+    (function(){
+      const ham = document.getElementById('hamburger');
+      const overlay = document.getElementById('rightNav');
+      const closeBtn = document.getElementById('close');
+
+      function openMenu(){
+        overlay.classList.add('open');
+        overlay.setAttribute('aria-hidden','false');
+        ham.classList.add('is-active');
+        ham.setAttribute('aria-expanded','true');
+        // lock scroll
+        document.body.style.overflow = 'hidden';
+      }
+      function closeMenu(){
+        overlay.classList.remove('open');
+        overlay.setAttribute('aria-hidden','true');
+        ham.classList.remove('is-active');
+        ham.setAttribute('aria-expanded','false');
+        document.body.style.overflow = '';
+      }
+
+      ham.addEventListener('click', ()=> {
+        overlay.classList.contains('open') ? closeMenu() : openMenu();
+      });
+      closeBtn.addEventListener('click', closeMenu);
+      overlay.querySelectorAll('a').forEach(a => {
+        a.addEventListener('click', closeMenu);
+      });
+
+      // keyboard: close on Escape
+      document.addEventListener('keydown', (e) => {
+        if(e.key === 'Escape' && overlay.classList.contains('open')) closeMenu();
+      });
+
+    })();
   </script>
 </body>
 </html>
