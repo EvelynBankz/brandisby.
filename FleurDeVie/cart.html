@@ -48,9 +48,10 @@
     .cart-item-details { flex:1; }
     .cart-item-details h3 { font-family:"Playfair Display", serif; margin-bottom:8px; }
     .cart-item-details .price { font-weight:600; margin-bottom:8px; }
-    .cart-item-details input { width:60px; padding:6px; border-radius:6px; border:1px solid #112e1f; margin-right:8px; }
-    .cart-item-details button { background:#112e1f; color:#F5E6CC; border:none; border-radius:6px; padding:6px 10px; cursor:pointer; transition:0.3s; }
-    .cart-item-details button:hover { background:#0a1d14; }
+    .quantity-controls { display:flex; gap:10px; align-items:center; margin-top:6px; }
+    .quantity-controls button { width:36px; height:36px; border-radius:6px; border:none; background:#112e1f; color:#F5E6CC; font-size:18px; cursor:pointer; }
+    .quantity-controls button:hover { background:#0a1d14; }
+    .quantity-controls .qty { min-width:28px; text-align:center; font-weight:600; }
 
     .cart-subtotal { text-align:right; font-weight:600; margin-top:10px; font-size:1.1rem; }
     .cart-empty { text-align:center; font-size:18px; margin-top:20px; color:#112e1f; }
@@ -191,18 +192,32 @@
             <div class="cart-item-details">
               <h3>${data.name}</h3>
               <div class="price">${currencySelect.value} ${priceConverted.toFixed(2)}</div>
-              <input type="number" min="1" value="${item.quantity}" id="qty-${item.id}">
-              <button class="remove-btn">Remove</button>
+              <div class="quantity-controls">
+                <button class="minus-btn" aria-label="Decrease">−</button>
+                <span class="qty" id="qty-${item.id}">${item.quantity}</span>
+                <button class="plus-btn" aria-label="Increase">+</button>
+              </div>
             </div>
           `;
           cartGrid.appendChild(div);
 
-          const qtyInput = div.querySelector(`#qty-${item.id}`);
-          qtyInput.addEventListener('change', (e)=>updateQuantity(item.id, parseInt(e.target.value)||1));
+          // attach listeners (use fresh cart state inside handlers to avoid stale closures)
+          const minusBtn = div.querySelector('.minus-btn');
+          const plusBtn = div.querySelector('.plus-btn');
 
-          // ✅ attach remove button event listener
-          const removeBtn = div.querySelector('.remove-btn');
-          removeBtn.addEventListener('click', ()=>removeItem(item.id));
+          minusBtn.addEventListener('click', () => {
+            const currentCart = getCart();
+            const cur = currentCart.find(i => i.id === item.id);
+            const newQty = (cur ? cur.quantity : 0) - 1;
+            updateQuantity(item.id, newQty);
+          });
+
+          plusBtn.addEventListener('click', () => {
+            const currentCart = getCart();
+            const cur = currentCart.find(i => i.id === item.id);
+            const newQty = (cur ? cur.quantity : 0) + 1;
+            updateQuantity(item.id, newQty);
+          });
         }
       }
       cartSubtotalElem.textContent = `Subtotal: ${currencySelect.value} ${subtotal.toFixed(2)}`;
@@ -211,9 +226,22 @@
     function updateQuantity(id, quantity){
       const cart = getCart();
       const index = cart.findIndex(i=>i.id===id);
-      if(index>-1){ cart[index].quantity=quantity; saveCart(cart); window.dispatchEvent(new Event('storage')); }
+      if(index > -1){
+        if(quantity <= 0){
+          // remove item
+          cart.splice(index, 1);
+        } else {
+          cart[index].quantity = quantity;
+        }
+        saveCart(cart);
+        // refresh UI
+        loadCart();
+        // notify other pages/tabs
+        window.dispatchEvent(new Event('storage'));
+      }
     }
 
+    // keep removeItem (still available if other code calls it)
     function removeItem(id){
       let cart = getCart();
       cart = cart.filter(i=>i.id!==id);
