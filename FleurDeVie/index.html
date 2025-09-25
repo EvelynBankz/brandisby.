@@ -1,22 +1,126 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Fleur De Vie</title>
 
-  <link rel="stylesheet" href="style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Montserrat:wght@300;400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* RESET */
+    *{margin:0;padding:0;box-sizing:border-box;}
+    html,body{height:100%;}
+    body{
+      font-family:"Montserrat",sans-serif;
+      background:#F5E6CC;
+      color:#112e1f;
+      overflow:hidden;
+    }
+
+    /* HEADER */
+    .site-header{
+      position:absolute;top:0;left:0;right:0;
+      padding:12px 24px;
+      display:flex;align-items:center;justify-content:space-between;
+      background:none !important;
+      box-shadow:none !important;
+      z-index:1200;
+    }
+    .brand-logo{height:clamp(60px,10vw,160px);width:auto;}
+    .brand-title{
+      font-family:"Playfair Display",serif;
+      font-weight:700;
+      font-size:clamp(20px,3.4vw,44px);
+      color:#112e1f;
+      text-shadow:0 4px 12px rgba(0,0,0,0.25);
+      position:absolute;
+      left:50%;transform:translateX(-50%);
+      pointer-events:none;
+    }
+    .header-right{display:flex;align-items:center;gap:14px;}
+    .header-right .home-link,
+    .header-right .social-link{color:#112e1f;text-decoration:none;font-size:14px;}
+    .header-right .social-link i{font-size:18px;}
+
+    /* Hamburger */
+    .hamburger{display:none;background:none;border:none;cursor:pointer;width:30px;height:22px;position:relative;}
+    .hamburger span{display:block;width:100%;height:3px;background:#112e1f;border-radius:2px;margin:4px 0;transition:.3s;}
+    .hamburger.is-active span:nth-child(1){transform:translateY(7px) rotate(45deg);}
+    .hamburger.is-active span:nth-child(2){opacity:0;}
+    .hamburger.is-active span:nth-child(3){transform:translateY(-7px) rotate(-45deg);}
+
+    /* RIGHT NAV OVERLAY */
+    .right-nav-overlay{
+      position:fixed;top:0;right:0;height:100%;width:260px;
+      background:rgba(17,46,31,0.97);
+      display:flex;flex-direction:column;align-items:flex-start;
+      padding:60px 25px;gap:24px;
+      transform:translateX(100%);transition:transform .3s ease;
+      z-index:1500;
+    }
+    .right-nav-overlay.open{transform:translateX(0);}
+    .right-nav-overlay a{color:#FFD6BA;font-size:18px;text-decoration:none;display:flex;align-items:center;gap:12px;}
+    .right-nav-overlay a:hover{opacity:.7;}
+    .right-nav-overlay .overlay-close{
+      position:absolute;top:18px;right:18px;
+      background:none;border:none;color:#FFD6BA;font-size:36px;cursor:pointer;
+    }
+
+    /* HERO */
+    .hero{
+      height:100vh;display:flex;justify-content:center;align-items:center;
+      position:relative;overflow:hidden;
+      background:url("bg.jpg") center/cover no-repeat;
+    }
+    .hero::after{content:"";position:absolute;inset:0;background:rgba(17,46,31,0.15);z-index:0;}
+    .center-links{
+      position:relative;z-index:1;
+      display:flex;flex-direction:row;gap:140px;
+    }
+    .center-link{
+      font-family:"Playfair Display",serif;
+      text-transform:uppercase;
+      color:#112e1f;
+      font-size:clamp(22px,3.5vw,60px);
+      text-decoration:underline;text-underline-offset:.25em;text-decoration-thickness:1px;
+      letter-spacing:.05em;
+      transition:color .3s;
+    }
+    .center-link:hover{color:#FFD6BA;}
+
+    /* FOOTER */
+    .site-footer{
+      position:absolute;bottom:0;left:0;right:0;
+      padding:10px 20px;
+      display:flex;flex-direction:column;align-items:center;gap:6px;
+      background:none !important;
+      z-index:1200;
+    }
+    .site-footer .tagline{
+      font-family:"Playfair Display",serif;font-style:italic;font-size:16px;color:#112e1f;
+    }
+    .site-footer .copyright{font-size:13px;color:#112e1f;}
+
+    /* RESPONSIVE */
+    @media(max-width:900px){
+      .hamburger{display:inline-block;}
+      .header-right .home-link,.header-right .social-link{display:none;}
+      .brand-title{font-size:clamp(18px,5.5vw,32px);}
+    }
+    @media(max-width:600px){
+      .center-links{flex-direction:column;gap:40px;}
+      .center-link{font-size:clamp(18px,5vw,32px);}
+    }
+  </style>
 </head>
-<body class="fleurdevie">
+<body>
 
-
-  
-  <!-- Logo, brand, right nav -->
+  <!-- HEADER -->
   <header class="site-header">
     <div class="header-left">
-      <img src="logo.png" alt="Fleur De Vie logo" class="brand-logo">
+      <img src="logo.png" alt="Fleur De Vie Logo" class="brand-logo">
     </div>
     <div class="brand-title">Fleur De Vie</div>
     <div class="header-right">
@@ -28,8 +132,8 @@
     </div>
   </header>
 
-  <!-- Right-side overlay menu -->
-   <nav id="rightNav" class="right-nav-overlay">
+  <!-- RIGHT NAV -->
+  <nav id="rightNav" class="right-nav-overlay">
     <button class="overlay-close" id="close-f">&times;</button>
     <a href="index.html">Home</a>
     <a href="mailto:yourstruly.fleurdevie@gmail.com"><i class="fas fa-envelope"></i>Email</a>
@@ -37,67 +141,34 @@
     <a href="https://www.instagram.com/fleurdevie_com/" target="_blank"><i class="fab fa-instagram"></i>Instagram</a>
   </nav>
 
-  <!-- Hero -->
+  <!-- HERO -->
   <main class="hero">
     <div class="center-links">
-      <a class="center-link" href="about.html">ABOUT US</a>
-      <a class="center-link" href="shop.html">SHOP</a>
-      <a class="center-link" href="contact.html">CONTACT US</a>
+      <a class="center-link" href="about.html">About Us</a>
+      <a class="center-link" href="shop.html">Shop</a>
+      <a class="center-link" href="contact.html">Contact Us</a>
     </div>
   </main>
 
-
-<!--   <header class="site-header">
-  <div class="header-left">
-    <img src="logo.png" alt="Serac logo" class="brand-logo">
-    <div class="brand-title">Serac</div>
-  </div>
-
-  <div class="header-right">
-    <a class="home-link" href="index.html">Home</a>
-    <a class="social-link" href="#"><i class="fas fa-envelope"></i></a>
-    <a class="social-link" href="#"><i class="fab fa-tiktok"></i></a>
-    <a class="social-link" href="#"><i class="fab fa-instagram"></i></a>
-    <button class="hamburger" id="hamburger-f"><span></span><span></span><span></span></button>
-  </div>
-</header>
-
-<main class="hero">
-  <div class="center-links">
-    <a class="center-link" href="about.html">ABOUT US</a>
-    <a class="center-link" href="shop.html">SHOP</a>
-    <a class="center-link" href="contact.html">CONTACT US</a>
-  </div>
-</main>
- -->
-  
-  <!-- Footer -->
+  <!-- FOOTER -->
   <footer class="site-footer">
     <div class="tagline">Yours Truly</div>
     <div class="copyright">© 2025 Fleur De Vie</div>
   </footer>
 
-  <!-- Script -->
+  <!-- SCRIPT -->
   <script>
     (function () {
       const ham = document.getElementById('hamburger-f');
       const overlay = document.getElementById('rightNav');
       const closeBtn = document.getElementById('close-f');
 
-      function openMenu() {
-        overlay.classList.add('open');
-        ham.classList.add('is-active');
-      }
-      function closeMenu() {
-        overlay.classList.remove('open');
-        ham.classList.remove('is-active');
-      }
+      function openMenu(){ overlay.classList.add('open'); ham.classList.add('is-active'); }
+      function closeMenu(){ overlay.classList.remove('open'); ham.classList.remove('is-active'); }
 
-      ham.addEventListener('click', () => {
-        overlay.classList.contains('open') ? closeMenu() : openMenu();
-      });
-      closeBtn.addEventListener('click', closeMenu);
-      overlay.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMenu));
+      ham.addEventListener('click',()=>overlay.classList.contains('open')?closeMenu():openMenu());
+      closeBtn.addEventListener('click',closeMenu);
+      overlay.querySelectorAll('a').forEach(a=>a.addEventListener('click',closeMenu));
     })();
   </script>
 </body>
