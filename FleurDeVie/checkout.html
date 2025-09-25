@@ -3,83 +3,224 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Checkout - FLEUR DE VIE</title>
-  <link rel="stylesheet" href="shop.css">
+  <title>Fleur De Vie - Checkout</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    form { max-width: 500px; margin: auto; display: flex; flex-direction: column; }
-    input, button { margin: 8px 0; padding: 10px; border-radius: 4px; border: 1px solid #ccc; }
-    button { background-color: #4CAF50; color: white; border: none; cursor: pointer; }
-    button:hover { background-color: #45a049; }
+    /* RESET */
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:"Montserrat",sans-serif;background:#F5E6CC;color:#112e1f;line-height:1.6;}
+    a{text-decoration:none;color:inherit;}
+
+    /* HEADER */
+    .site-header{background:#112e1f;color:#F5E6CC;display:flex;justify-content:space-between;align-items:center;padding:16px 28px;position:fixed;top:0;left:0;right:0;z-index:1000;}
+    .header-left{display:flex;align-items:center;gap:12px;}
+    .brand-logo{height:60px;}
+    .brand-title{font-family:"Playfair Display",serif;font-size:24px;font-weight:700;}
+    .header-right{display:flex;gap:20px;align-items:center;}
+    .header-right a{font-weight:500;transition:color 0.3s;}
+    .header-right a:hover{color:#FFD6BA;}
+    .cart-count{background:#FFD6BA;color:#112e1f;font-size:12px;font-weight:600;border-radius:50%;padding:2px 6px;margin-left:4px;}
+    .hamburger{display:none;background:none;border:none;cursor:pointer;width:30px;height:24px;position:relative;}
+    .hamburger span{display:block;width:100%;height:3px;background:#F5E6CC;border-radius:2px;position:absolute;left:0;transition:0.3s;}
+    .hamburger span:nth-child(1){top:0;}
+    .hamburger span:nth-child(2){top:10px;}
+    .hamburger span:nth-child(3){top:20px;}
+    .hamburger.open span:nth-child(1){transform:rotate(45deg);top:10px;}
+    .hamburger.open span:nth-child(2){opacity:0;}
+    .hamburger.open span:nth-child(3){transform:rotate(-45deg);top:10px;}
+
+    /* HERO */
+    .hero{position:relative;height:40vh;display:flex;justify-content:center;align-items:center;text-align:center;margin-top:80px;overflow:hidden;}
+    .hero::after{content:"";position:absolute;inset:0;background:url('bg.jpg') center/cover no-repeat;transform:scale(1.1);z-index:-1;border-radius:12px;box-shadow:inset 0 0 0 2000px rgba(17,46,31,0.3);}
+    .hero-text{position:relative;display:inline-block;color:#FFD6BA;}
+    .hero-text h1{font-family:"Playfair Display",serif;font-size:clamp(32px,5vw,56px);}
+
+    /* CHECKOUT */
+    section.checkout{padding:60px 20px;}
+    .container{max-width:1100px;margin:auto;display:grid;grid-template-columns:2fr 1fr;gap:30px;}
+    .checkout-form,.order-summary{background:#FFD6BA;padding:20px;border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,0.1);}
+    h2{font-family:"Playfair Display",serif;margin-bottom:16px;font-size:22px;}
+    label{display:block;margin-bottom:6px;font-weight:500;}
+    input,textarea,select{width:100%;padding:10px;margin-bottom:14px;border-radius:6px;border:1px solid #112e1f;font-family:"Montserrat",sans-serif;}
+    textarea{resize:vertical;min-height:80px;}
+
+    .order-summary ul{list-style:none;margin:0;padding:0;}
+    .order-summary li{display:flex;justify-content:space-between;margin-bottom:10px;}
+    .order-summary .subtotal{font-weight:600;margin-top:10px;text-align:right;}
+    .currency-selector{text-align:right;margin-bottom:10px;}
+    .currency-selector select{padding:5px 10px;border-radius:6px;border:1px solid #112e1f;}
+
+    .checkout-btn{display:block;width:100%;background:#112e1f;color:#F5E6CC;text-align:center;padding:14px;font-weight:600;border-radius:6px;cursor:pointer;transition:0.3s;border:none;}
+    .checkout-btn:hover{background:#0a1d14;}
+
+    footer{text-align:center;padding:20px;background:#112e1f;color:#F5E6CC;margin-top:60px;}
+
+    @media(max-width:800px){
+      .container{grid-template-columns:1fr;}
+      .header-right{display:none;flex-direction:column;position:absolute;top:70px;right:0;background:#112e1f;width:200px;padding:20px;}
+      .header-right.open{display:flex;}
+      .hamburger{display:block;}
+    }
   </style>
 </head>
 <body>
 
-  <h1>Checkout - FLEUR DE VIE</h1>
-  <form id="checkout-form">
-    <input type="text" name="name" placeholder="Full Name" required>
-    <input type="email" name="email" placeholder="Email" required>
-    <input type="text" name="address" placeholder="Shipping Address" required>
-    <input type="text" name="city" placeholder="City" required>
-    <input type="text" name="zip" placeholder="ZIP / Postal Code" required>
-    <button type="submit">Place Order</button>
-  </form>
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="header-left">
+      <img src="logo.png" alt="Fleur De Vie Logo" class="brand-logo">
+      <div class="brand-title">Fleur De Vie</div>
+    </div>
+    <nav class="header-right">
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+      <a href="cart.html">Cart <span class="cart-count" id="cartCount">0</span></a>
+    </nav>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+  </header>
 
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-text">
+      <h1>Checkout</h1>
+    </div>
+  </section>
+
+  <!-- CHECKOUT SECTION -->
+  <section class="checkout">
+    <div class="container">
+
+      <!-- FORM -->
+      <div class="checkout-form">
+        <h2>Billing Details</h2>
+        <form id="checkoutForm">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" required>
+          <label for="email">Email</label>
+          <input type="email" id="email" required>
+          <label for="phone">Phone</label>
+          <input type="tel" id="phone" required>
+          <label for="address">Address</label>
+          <textarea id="address" required></textarea>
+        </form>
+      </div>
+
+      <!-- ORDER SUMMARY -->
+      <div class="order-summary">
+        <h2>Order Summary</h2>
+        <div class="currency-selector">
+          <label for="currency">Currency:</label>
+          <select id="currency">
+            <option value="NGN">NGN</option>
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+          </select>
+        </div>
+        <ul id="orderItems"></ul>
+        <div class="subtotal" id="orderSubtotal"></div>
+        <button class="checkout-btn" id="payBtn">Proceed to Payment</button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2025 Fleur De Vie</p>
+  </footer>
+
+  <!-- FLUTTERWAVE SDK -->
+  <script src="https://checkout.flutterwave.com/v3.js"></script>
+
+  <!-- SCRIPT -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+    const cartCountElem = document.getElementById('cartCount');
+    const orderItems = document.getElementById('orderItems');
+    const orderSubtotal = document.getElementById('orderSubtotal');
+    const currencySelect = document.getElementById('currency');
+    const payBtn = document.getElementById('payBtn');
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
-      authDomain: "brandisby.firebaseapp.com",
-      projectId: "brandisby",
-      storageBucket: "brandisby.firebasestorage.app",
-      messagingSenderId: "87213267039",
-      appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
-    };
+    const exchangeRates = { NGN:1, USD:450, EUR:500 };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    function getCart(){ return JSON.parse(localStorage.getItem('cart'))||[]; }
+    function updateCartCount(){
+      const cart=getCart();
+      const total=cart.reduce((s,i)=>s+i.quantity,0);
+      cartCountElem.textContent=total;
+    }
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const BRAND = urlParams.get('brand') || 'fleurdevie';
-    const CART_KEY = `${BRAND}_cart`;
+    function renderOrder(){
+      const cart=getCart();
+      orderItems.innerHTML='';
+      let subtotal=0;
+      const currency=currencySelect.value;
+      cart.forEach(item=>{
+        const priceConverted=item.price/exchangeRates.NGN*exchangeRates[currency];
+        subtotal+=priceConverted*item.quantity;
+        const li=document.createElement('li');
+        li.innerHTML=`${item.name} (x${item.quantity}) <span>${currency} ${priceConverted.toFixed(2)}</span>`;
+        orderItems.appendChild(li);
+      });
+      orderSubtotal.textContent=`Subtotal: ${currency} ${subtotal.toFixed(2)}`;
+    }
 
-    const form = document.getElementById('checkout-form');
+    document.getElementById('hamburger').addEventListener('click',()=>{
+      document.querySelector('.header-right').classList.toggle('open');
+      document.getElementById('hamburger').classList.toggle('open');
+    });
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const cart = JSON.parse(localStorage.getItem(CART_KEY)) || [];
+    currencySelect.addEventListener('change', renderOrder);
 
-      if(cart.length === 0) {
-        alert("Your cart is empty!");
+    payBtn.addEventListener('click', ()=>{
+      const name=document.getElementById('name').value;
+      const email=document.getElementById('email').value;
+      const phone=document.getElementById('phone').value;
+      const address=document.getElementById('address').value;
+      const currency=currencySelect.value;
+
+      if(!name||!email||!phone||!address){
+        alert("Please fill in all billing details.");
         return;
       }
 
-      const order = {
-        brand: BRAND,
-        items: cart,
+      const cart=getCart();
+      let subtotal=0;
+      cart.forEach(item=>{
+        subtotal+=(item.price/exchangeRates.NGN*exchangeRates[currency])*item.quantity;
+      });
+
+      FlutterwaveCheckout({
+        public_key: "FLWPUBK_TEST-xxxxxxxxxxxxxxxxxxxxx-X", // replace with your key
+        tx_ref: "fleurdevie-"+Date.now(),
+        amount: subtotal.toFixed(2),
+        currency: currency,
         customer: {
-          name: form.name.value,
-          email: form.email.value,
-          address: form.address.value,
-          city: form.city.value,
-          zip: form.zip.value
+          email: email,
+          phonenumber: phone,
+          name: name
         },
-        createdAt: new Date()
-      };
-
-      try {
-        await addDoc(collection(db, 'orders'), order);
-        alert("Order placed successfully!");
-        localStorage.removeItem(CART_KEY);
-        window.location.href = `fleurdevie-thankyou.html?brand=${BRAND}`;
-      } catch (err) {
-        console.error(err);
-        alert("Error placing order. Please try again.");
-      }
+        customizations: {
+          title: "Fleur De Vie",
+          description: "Order Payment",
+          logo: "logo.png"
+        },
+        callback: function (data) {
+          console.log(data);
+          alert("Payment complete! Reference: " + data.tx_ref);
+          localStorage.removeItem('cart');
+          window.location.href="thankyou.html";
+        },
+        onclose: function() {
+          console.log("Checkout closed");
+        }
+      });
     });
-  </script>
 
+    updateCartCount();
+    renderOrder();
+  </script>
 </body>
 </html>
