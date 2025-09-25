@@ -201,15 +201,13 @@
       cartEmpty.style.display = 'none';
       checkoutBtn.style.display = 'inline-block';
 
-      let subtotal = 0;
-
       for(const item of cart){
         const docRef = doc(db, "brands","fleurdevie","products", item.id);
         const docSnap = await getDoc(docRef);
         if(docSnap.exists()){
           const data = docSnap.data();
           const pricePerUnit = data.price / exchangeRates.NGN * exchangeRates[currencySelect.value];
-          subtotal += pricePerUnit * item.quantity;
+          if(!item.pricePerUnit) item.pricePerUnit = pricePerUnit;
 
           const div = document.createElement('div');
           div.className='cart-item';
@@ -218,7 +216,7 @@
             <img src="${data.imageUrl}" alt="${data.name}">
             <div class="cart-item-details">
               <h3>${data.name}</h3>
-              <div class="price" id="price-${item.id}">${currencySelect.value} ${(pricePerUnit*item.quantity).toFixed(2)}</div>
+              <div class="price" id="price-${item.id}">${currencySelect.value} ${(item.pricePerUnit*item.quantity).toFixed(2)}</div>
               <div class="quantity-controls">
                 <button class="minus" data-id="${item.id}">–</button>
                 <input type="number" min="0" value="${item.quantity}" id="qty-${item.id}">
@@ -247,11 +245,10 @@
               saveCart(cart);
 
               // Update item price
-              animatePrice(document.getElementById(`price-${item.id}`), `${currencySelect.value} ${(pricePerUnit*newQty).toFixed(2)}`);
+              animatePrice(document.getElementById(`price-${item.id}`), `${currencySelect.value} ${(cart[index]?.pricePerUnit*newQty || item.pricePerUnit*newQty).toFixed(2)}`);
 
-              // Update subtotal from memory, not DOM
-              let subtotal = 0;
-              cart.forEach(i=>subtotal += (i.pricePerUnit??pricePerUnit)*i.quantity);
+              // Update subtotal
+              const subtotal = cart.reduce((sum,i)=>sum + i.pricePerUnit*i.quantity,0);
               animatePrice(cartSubtotalElem, `Subtotal: ${currencySelect.value} ${subtotal.toFixed(2)}`);
 
               if(cart.length === 0){
@@ -271,6 +268,7 @@
         }
       }
 
+      const subtotal = getCart().reduce((sum,i)=>sum + i.pricePerUnit*i.quantity,0);
       animatePrice(cartSubtotalElem, `Subtotal: ${currencySelect.value} ${subtotal.toFixed(2)}`);
     }
 
