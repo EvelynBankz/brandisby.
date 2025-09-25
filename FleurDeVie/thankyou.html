@@ -41,6 +41,10 @@
     .thankyou-box{background:#FFD6BA;padding:40px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.15);max-width:700px;margin:auto;}
     .thankyou-box h2{font-family:"Playfair Display",serif;font-size:28px;margin-bottom:20px;}
     .thankyou-box p{font-size:18px;margin-bottom:24px;}
+    .order-details{text-align:left;margin-top:20px;}
+    .order-details h3{margin-bottom:10px;font-family:"Playfair Display",serif;}
+    .order-details ul{list-style:none;padding:0;margin:0;}
+    .order-details li{margin-bottom:8px;font-size:16px;}
     .btn{display:inline-block;padding:14px 28px;border-radius:8px;font-weight:600;transition:0.3s;}
     .btn-primary{background:#112e1f;color:#F5E6CC;border:none;}
     .btn-primary:hover{background:#0a1d14;}
@@ -87,6 +91,10 @@
       <h2>We’ve received your order 🎉</h2>
       <p>Thank you for shopping with <strong>Fleur De Vie</strong>.  
       Your order is being processed and you’ll receive a confirmation email shortly.</p>
+
+      <!-- ORDER DETAILS -->
+      <div class="order-details" id="orderDetails"></div>
+
       <a href="shop.html" class="btn btn-primary">Continue Shopping</a>
       <a href="index.html" class="btn btn-secondary">Return Home</a>
     </div>
@@ -98,10 +106,37 @@
   </footer>
 
   <script>
+    // Hamburger toggle
     document.getElementById('hamburger').addEventListener('click',()=>{
       document.querySelector('.header-right').classList.toggle('open');
       document.getElementById('hamburger').classList.toggle('open');
     });
+
+    // Load order details from localStorage (set in checkout.html)
+    const orderData = JSON.parse(localStorage.getItem('lastOrder'));
+    if(orderData){
+      const detailsDiv = document.getElementById('orderDetails');
+      let html = `
+        <h3>Order Details</h3>
+        <ul>
+          <li><strong>Name:</strong> ${orderData.name}</li>
+          <li><strong>Email:</strong> ${orderData.email}</li>
+          <li><strong>Phone:</strong> ${orderData.phone}</li>
+          <li><strong>Address:</strong> ${orderData.address}</li>
+          <li><strong>Currency:</strong> ${orderData.currency}</li>
+          <li><strong>Total Paid:</strong> ${orderData.currency} ${orderData.total}</li>
+        </ul>
+        <h3>Items</h3>
+        <ul>`;
+      orderData.items.forEach(item=>{
+        html+=`<li>${item.name} (x${item.quantity})</li>`;
+      });
+      html+=`</ul>`;
+      detailsDiv.innerHTML = html;
+
+      // Clear after displaying
+      localStorage.removeItem('lastOrder');
+    }
   </script>
 </body>
 </html>
