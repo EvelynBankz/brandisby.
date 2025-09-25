@@ -208,7 +208,7 @@
       });
 
       FlutterwaveCheckout({
-        public_key: "FLWPUBK_TEST-xxxxxxxxxxxxxxxxxxxxx-X", // replace with your key
+        public_key: "FLWPUBK_TEST-xxxxxxxxxxxxxxxxxxxxx-X", // replace with your live/test key
         tx_ref: "fleurdevie-"+Date.now(),
         amount: subtotal.toFixed(2),
         currency: currency,
@@ -236,7 +236,7 @@
             window.location.href="thankyou.html";
           } catch(err){
             console.error("Error saving order:", err);
-            alert("Order saved failed, but payment succeeded!");
+            alert("Order save failed, but payment succeeded!");
           }
         },
         onclose: function(){ console.log("Checkout closed"); }
