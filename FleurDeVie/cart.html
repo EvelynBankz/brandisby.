@@ -42,8 +42,8 @@
     .currency-selector { text-align:right; margin-bottom:10px; }
     .currency-selector select { padding:5px 10px; border-radius:6px; border:1px solid #112e1f; }
 
-    .cart-grid { display:grid; gap:20px; }
-    .cart-item { display:flex; gap:16px; background:#FFD6BA; padding:16px; border-radius:12px; align-items:center; box-shadow:0 4px 10px rgba(0,0,0,0.1); }
+    .cart-grid { display:grid; gap:20px; transition: opacity 0.3s ease-in-out; }
+    .cart-item { display:flex; gap:16px; background:#FFD6BA; padding:16px; border-radius:12px; align-items:center; box-shadow:0 4px 10px rgba(0,0,0,0.1); opacity:0; transition: opacity 0.4s ease-in-out; }
     .cart-item img { width:120px; height:120px; object-fit:cover; border-radius:8px; }
     .cart-item-details { flex:1; display:flex; flex-direction:column; }
     .cart-item-details h3 { font-family:"Playfair Display", serif; margin-bottom:8px; }
@@ -118,7 +118,6 @@
       <div class="cart-empty" id="cartEmpty">Your cart is empty.</div>
       <div class="cart-subtotal" id="cartSubtotal"></div>
 
-      <!-- CART BUTTONS -->
       <div class="cart-buttons">
         <a href="shop.html" class="continue-btn">Continue Shopping</a>
         <a href="checkout.html" class="checkout-btn" id="checkoutBtn">Proceed to Checkout</a>
@@ -131,7 +130,6 @@
     <p>© 2025 Fleur De Vie</p>
   </footer>
 
-  <!-- FIREBASE + SCRIPT -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
     import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
@@ -183,6 +181,14 @@
       }, 150);
     }
 
+    function fadeOutIn(element, callback){
+      element.style.opacity='0';
+      setTimeout(()=>{
+        callback();
+        element.style.opacity='1';
+      }, 200);
+    }
+
     async function loadCart(){
       const cart = getCart();
       cartGrid.innerHTML = '';
@@ -221,6 +227,9 @@
             </div>
           `;
           cartGrid.appendChild(div);
+
+          // fade-in effect for each item
+          setTimeout(()=>div.style.opacity='1',50);
 
           const qtyInput = div.querySelector(`#qty-${item.id}`);
           const plusBtn = div.querySelector('.plus');
@@ -276,7 +285,9 @@
       document.getElementById('hamburger').classList.toggle('open');
     });
 
-    currencySelect.addEventListener('change', loadCart);
+    currencySelect.addEventListener('change', ()=>{
+      fadeOutIn(cartGrid, loadCart);
+    });
 
     window.addEventListener('storage', ()=>{
       updateCartCount();
