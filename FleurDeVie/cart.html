@@ -194,7 +194,7 @@
               <div class="price">${currencySelect.value} ${priceConverted.toFixed(2)}</div>
               <div class="quantity-controls">
                 <button class="minus" data-id="${item.id}">–</button>
-                <input type="number" min="1" value="${item.quantity}" id="qty-${item.id}">
+                <input type="number" min="0" value="${item.quantity}" id="qty-${item.id}">
                 <button class="plus" data-id="${item.id}">+</button>
               </div>
             </div>
@@ -205,23 +205,26 @@
           const plusBtn = div.querySelector('.plus');
           const minusBtn = div.querySelector('.minus');
 
-          qtyInput.addEventListener('change', (e)=>updateQuantity(item.id, parseInt(e.target.value)||1));
-          plusBtn.addEventListener('click', ()=>updateQuantity(item.id, item.quantity+1));
-          minusBtn.addEventListener('click', ()=>updateQuantity(item.id, Math.max(1, item.quantity-1)));
+          function updateItemQuantity(newQty){
+            const cart = getCart();
+            const index = cart.findIndex(i=>i.id===item.id);
+            if(index>-1){
+              if(newQty <= 0){
+                cart.splice(index,1); // remove item if quantity zero
+              } else {
+                cart[index].quantity = newQty;
+              }
+              saveCart(cart);
+              loadCart();
+            }
+          }
+
+          qtyInput.addEventListener('change', (e)=>updateItemQuantity(parseInt(e.target.value)||1));
+          plusBtn.addEventListener('click', ()=>updateItemQuantity(getCart().find(i=>i.id===item.id).quantity+1));
+          minusBtn.addEventListener('click', ()=>updateItemQuantity(getCart().find(i=>i.id===item.id).quantity-1));
         }
       }
       cartSubtotalElem.textContent = `Subtotal: ${currencySelect.value} ${subtotal.toFixed(2)}`;
-    }
-
-    function updateQuantity(id, quantity){
-      const cart = getCart();
-      const index = cart.findIndex(i=>i.id===id);
-      if(index>-1){
-        cart[index].quantity=quantity;
-        saveCart(cart);
-        loadCart();
-        window.dispatchEvent(new Event('storage'));
-      }
     }
 
     document.getElementById('hamburger').addEventListener('click', ()=>{
