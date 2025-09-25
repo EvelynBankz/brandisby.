@@ -64,17 +64,17 @@
       .hamburger{display:block;}
     }
 
-    @media(max-width:600px){
+  @media(max-width:600px){
   .hero {
-    height:30vh;       /* shorter hero on mobile */
-    margin-top:50px;
+    height:30vh;               /* shorter hero on mobile */
+    margin-top:60px;           /* reduce gap from header */
     display:flex;
     justify-content:center;     /* center horizontally */
     align-items:center;         /* center vertically */
-    text-align:center;/* reduce gap between header and hero */
+    text-align:center;
   }
-}
-     .hero-text h1 {
+
+  .hero-text h1 {
     font-size:clamp(24px,5vw,36px); /* scale down text on mobile */
   }
 }
