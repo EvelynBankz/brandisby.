@@ -130,6 +130,7 @@
     <p>© 2025 Fleur De Vie</p>
   </footer>
 
+  <!-- FIREBASE + OPTIMIZED SCRIPT -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
     import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
@@ -152,45 +153,57 @@
     const cartSubtotalElem = document.getElementById('cartSubtotal');
     const checkoutBtn = document.getElementById('checkoutBtn');
     const currencySelect = document.getElementById('currency');
-
     const exchangeRates = { NGN:1, USD:450, EUR:500 };
 
+    let cart = [];
+    let productsData = {};
+
     function getCart() { return JSON.parse(localStorage.getItem('cart')) || []; }
-    function saveCart(cart){
-      localStorage.setItem('cart', JSON.stringify(cart));
-      animateCartCount();
+    function saveCart(updatedCart){
+      localStorage.setItem('cart', JSON.stringify(updatedCart));
+      cart = updatedCart;
       updateCartCount();
+      renderCartItems();
     }
 
     function updateCartCount(){
-      const cart = getCart();
       const total = cart.reduce((sum, item) => sum + item.quantity, 0);
       cartCountElem.textContent = total;
-    }
-
-    function animateCartCount(){
       cartCountElem.style.transform = 'scale(1.4)';
       setTimeout(()=>cartCountElem.style.transform='scale(1)', 150);
     }
 
     function animatePrice(elem, newValue){
-      elem.style.opacity = '0';
+      elem.style.opacity='0';
       setTimeout(()=>{
         elem.textContent = newValue;
-        elem.style.opacity = '1';
+        elem.style.opacity='1';
       }, 150);
     }
 
-    function fadeOutIn(element, callback){
-      element.style.opacity='0';
-      setTimeout(()=>{
-        callback();
-        element.style.opacity='1';
-      }, 200);
+    async function fetchProductsData(){
+      const tempData = {};
+      for(const item of cart){
+        const docRef = doc(db, "brands","fleurdevie","products", item.id);
+        const docSnap = await getDoc(docRef);
+        if(docSnap.exists()) tempData[item.id] = docSnap.data();
+      }
+      productsData = tempData;
     }
 
-    async function loadCart(){
-      const cart = getCart();
+    function calculateSubtotal(){
+      let subtotal = 0;
+      cart.forEach(item=>{
+        const data = productsData[item.id];
+        if(data){
+          const pricePerUnit = data.price / exchangeRates.NGN * exchangeRates[currencySelect.value];
+          subtotal += pricePerUnit * item.quantity;
+        }
+      });
+      cartSubtotalElem.textContent = `Subtotal: ${currencySelect.value} ${subtotal.toFixed(2)}`;
+    }
+
+    function renderCartItems(){
       cartGrid.innerHTML = '';
       if(cart.length === 0){
         cartEmpty.style.display = 'block';
@@ -198,86 +211,66 @@
         checkoutBtn.style.display = 'none';
         return;
       }
+      cartEmpty.style.display = 'none';
+      checkoutBtn.style.display = 'inline-block';
 
-      let subtotal = 0;
+      cart.forEach(item=>{
+        const data = productsData[item.id];
+        if(!data) return;
 
-      for(const item of cart){
-        const docRef = doc(db, "brands","fleurdevie","products", item.id);
-        const docSnap = await getDoc(docRef);
-        if(docSnap.exists()){
-          const data = docSnap.data();
-          const pricePerUnit = data.price / exchangeRates.NGN * exchangeRates[currencySelect.value];
-          subtotal += pricePerUnit * item.quantity;
-
-          const div = document.createElement('div');
-          div.className='cart-item';
-          div.id = `cart-item-${item.id}`;
-          div.innerHTML=`
-            <img src="${data.imageUrl}" alt="${data.name}">
-            <div class="cart-item-details">
-              <h3>${data.name}</h3>
-              <div class="price" id="price-${item.id}">${currencySelect.value} ${(pricePerUnit*item.quantity).toFixed(2)}</div>
-              <div class="quantity-controls">
-                <button class="minus" data-id="${item.id}">–</button>
-                <input type="number" min="0" value="${item.quantity}" id="qty-${item.id}">
-                <button class="plus" data-id="${item.id}">+</button>
-              </div>
+        const pricePerUnit = data.price / exchangeRates.NGN * exchangeRates[currencySelect.value];
+        const div = document.createElement('div');
+        div.className='cart-item';
+        div.id = `cart-item-${item.id}`;
+        div.innerHTML=`
+          <img src="${data.imageUrl}" alt="${data.name}">
+          <div class="cart-item-details">
+            <h3>${data.name}</h3>
+            <div class="price" id="price-${item.id}">${currencySelect.value} ${(pricePerUnit*item.quantity).toFixed(2)}</div>
+            <div class="quantity-controls">
+              <button class="minus" data-id="${item.id}">–</button>
+              <input type="number" min="0" value="${item.quantity}" id="qty-${item.id}">
+              <button class="plus" data-id="${item.id}">+</button>
             </div>
-          `;
-          cartGrid.appendChild(div);
-          setTimeout(()=>div.style.opacity='1',50);
+          </div>
+        `;
+        cartGrid.appendChild(div);
+        setTimeout(()=>div.style.opacity='1',50);
 
-          const qtyInput = div.querySelector(`#qty-${item.id}`);
-          const plusBtn = div.querySelector('.plus');
-          const minusBtn = div.querySelector('.minus');
+        const qtyInput = div.querySelector(`#qty-${item.id}`);
+        const plusBtn = div.querySelector('.plus');
+        const minusBtn = div.querySelector('.minus');
 
-          function updateItemQuantity(newQty){
-            let cart = getCart();
-            const index = cart.findIndex(i=>i.id===item.id);
-            if(index > -1){
-              if(newQty <= 0){
-                cart.splice(index,1);
-                document.getElementById(`cart-item-${item.id}`).remove();
-              } else {
-                cart[index].quantity = newQty;
-                qtyInput.value = newQty;
-                animatePrice(document.getElementById(`price-${item.id}`), `${currencySelect.value} ${(pricePerUnit*newQty).toFixed(2)}`);
-              }
-              saveCart(cart);
-
-              // Recalculate subtotal from scratch
-              let newSubtotal = 0;
-              cart.forEach(ci=>{
-                const docRef = doc(db, "brands","fleurdevie","products", ci.id);
-                getDoc(docRef).then(docSnap=>{
-                  if(docSnap.exists()){
-                    const ciData = docSnap.data();
-                    const ciPrice = ciData.price / exchangeRates.NGN * exchangeRates[currencySelect.value];
-                    newSubtotal += ciPrice * ci.quantity;
-                    animatePrice(cartSubtotalElem, `Subtotal: ${currencySelect.value} ${newSubtotal.toFixed(2)}`);
-                  }
-                });
-              });
-
-              if(cart.length === 0){
-                cartEmpty.style.display = 'block';
-                checkoutBtn.style.display = 'none';
-                cartSubtotalElem.textContent = '';
-              }
+        function updateQuantity(newQty){
+          const index = cart.findIndex(i=>i.id===item.id);
+          if(index > -1){
+            if(newQty <= 0){
+              cart.splice(index,1);
+              document.getElementById(`cart-item-${item.id}`).remove();
+            } else {
+              cart[index].quantity = newQty;
+              qtyInput.value = newQty;
+              animatePrice(document.getElementById(`price-${item.id}`), `${currencySelect.value} ${(pricePerUnit*newQty).toFixed(2)}`);
             }
+            saveCart(cart);
+            calculateSubtotal();
           }
-
-          plusBtn.addEventListener('click', ()=>updateItemQuantity(getCart().find(i=>i.id===item.id).quantity+1));
-          minusBtn.addEventListener('click', ()=>updateItemQuantity(getCart().find(i=>i.id===item.id).quantity-1));
-          qtyInput.addEventListener('input', (e)=>{
-            const val = parseInt(e.target.value);
-            if(!isNaN(val)) updateItemQuantity(val);
-          });
         }
-      }
 
-      cartSubtotalElem.textContent = `Subtotal: ${currencySelect.value} ${subtotal.toFixed(2)}`;
+        plusBtn.addEventListener('click', ()=>updateQuantity(cart.find(i=>i.id===item.id).quantity+1));
+        minusBtn.addEventListener('click', ()=>updateQuantity(cart.find(i=>i.id===item.id).quantity-1));
+        qtyInput.addEventListener('input', e=>{
+          const val = parseInt(e.target.value);
+          if(!isNaN(val)) updateQuantity(val);
+        });
+      });
+
+      calculateSubtotal();
     }
+
+    cart = getCart();
+    fetchProductsData().then(renderCartItems);
+    updateCartCount();
 
     document.getElementById('hamburger').addEventListener('click', ()=>{
       document.querySelector('.header-right').classList.toggle('open');
@@ -285,16 +278,14 @@
     });
 
     currencySelect.addEventListener('change', ()=>{
-      fadeOutIn(cartGrid, loadCart);
+      renderCartItems();
     });
 
     window.addEventListener('storage', ()=>{
+      cart = getCart();
+      renderCartItems();
       updateCartCount();
-      loadCart();
     });
-
-    updateCartCount();
-    loadCart();
   </script>
 </body>
 </html>
