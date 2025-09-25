@@ -64,15 +64,36 @@
 
     footer { text-align:center; padding:20px; background:#112e1f; color:#F5E6CC; margin-top:60px; }
 
-    @media(max-width:600px){
+    /* MOBILE STYLING */
+    @media (max-width: 600px) {
+      /* Header adjustments */
       .header-right { display:none; flex-direction:column; background:#112e1f; position:absolute; top:70px; right:0; width:200px; padding:20px; }
       .header-right.open { display:flex; }
       .hamburger { display:block; }
-      .cart-item { flex-direction:column; align-items:flex-start; }
-      .cart-item img { width:100%; height:auto; }
-      .quantity-controls input { margin-bottom:8px; }
-      .quantity-controls button { padding: 8px 14px; font-size: 18px; }
-      .quantity-controls input { width: 60px; padding: 6px; font-size: 16px; }
+
+      /* CART: row layout preserved but smaller */
+      .cart-item {
+        flex-direction: row; /* keep desktop row layout */
+        align-items: center;
+        gap: 12px;
+        padding: 12px; /* smaller padding */
+      }
+      .cart-item img {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 6px;
+      }
+      .cart-item-details h3 { font-size: 16px; }
+      .cart-item-details .price { font-size: 14px; }
+      .quantity-controls button { padding: 4px 8px; font-size: 14px; }
+      .quantity-controls input { width: 40px; padding: 4px; font-size: 14px; }
+
+      /* HERO adjustments */
+      .hero { height: 40vh; margin-top: 80px; }
+      .hero::after { transform: scale(1.05); }
+      .hero-text h1 { font-size: clamp(28px, 5vw, 48px); }
+      .hero-text p { font-size: clamp(14px, 2vw, 18px); max-width: 90%; }
     }
   </style>
 </head>
