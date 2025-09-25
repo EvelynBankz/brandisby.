@@ -82,12 +82,12 @@
 
   <!-- THANK YOU HERO -->
   <section class="thankyou-hero">
-    <h1 id="thankyou-message">Thank You for Your Purchase!</h1>
+    <h1>Thank You for Your Purchase!</h1>
   </section>
 
   <!-- THANK YOU CONTENT -->
   <section class="thankyou-container">
-    <p id="thankyou-text">Your order has been received and is now being processed. 🎉</p>
+    <p>Your order has been received and is now being processed. 🎉</p>
     <p>We’ve sent a confirmation email with your order details.  
       Please keep it for your records.</p>
     <p>We’ll notify you as soon as your order ships.</p>
@@ -109,11 +109,13 @@
       document.querySelector('.nav').classList.toggle('active');
     });
 
-    // Get customer name from localStorage (set during checkout)
-    const customerName = localStorage.getItem("customerName");
-    if (customerName) {
-      document.getElementById("thankyou-message").textContent = `Thank you, ${customerName}! 🎉`;
-      document.getElementById("thankyou-text").textContent = `${customerName}, your order has been received and is now being processed.`;
+    // OPTIONAL: Display order reference if passed from checkout
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get("ref");
+    if (ref) {
+      const p = document.createElement("p");
+      p.textContent = `Your Order Reference: ${ref}`;
+      document.querySelector(".thankyou-container").appendChild(p);
     }
   </script>
 </body>
