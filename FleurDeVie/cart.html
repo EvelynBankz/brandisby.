@@ -156,6 +156,7 @@
     const exchangeRates = { NGN:1, USD:450, EUR:500 };
 
     function getCart() { return JSON.parse(localStorage.getItem('cart')) || []; }
+
     function saveCart(cart){
       localStorage.setItem('cart', JSON.stringify(cart));
       animateCartCount();
@@ -201,15 +202,12 @@
       cartEmpty.style.display = 'none';
       checkoutBtn.style.display = 'inline-block';
 
-      let subtotal = 0;
-
       for(const item of cart){
         const docRef = doc(db, "brands","fleurdevie","products", item.id);
         const docSnap = await getDoc(docRef);
         if(docSnap.exists()){
           const data = docSnap.data();
           const pricePerUnit = data.price / exchangeRates.NGN * exchangeRates[currencySelect.value];
-          subtotal += pricePerUnit * item.quantity;
 
           const div = document.createElement('div');
           div.className='cart-item';
@@ -227,8 +225,6 @@
             </div>
           `;
           cartGrid.appendChild(div);
-
-          // fade-in effect for each item
           setTimeout(()=>div.style.opacity='1',50);
 
           const qtyInput = div.querySelector(`#qty-${item.id}`);
@@ -237,7 +233,7 @@
 
           function updateItemQuantity(newQty){
             const cart = getCart();
-            const index = cart.findIndex(i=>i.id===item.id);
+            const index = cart.findIndex(i => i.id === item.id);
             if(index > -1){
               if(newQty <= 0){
                 cart.splice(index,1);
@@ -246,17 +242,17 @@
                 cart[index].quantity = newQty;
                 qtyInput.value = newQty;
               }
+              // Store pricePerUnit in cart to use for subtotal
+              cart[index]?.pricePerUnit = pricePerUnit;
               saveCart(cart);
 
-              // Update item price with animation
               animatePrice(document.getElementById(`price-${item.id}`), `${currencySelect.value} ${(pricePerUnit*newQty).toFixed(2)}`);
 
-              // Update subtotal
+              // Recalculate subtotal directly from cart
               let subtotal = 0;
               cart.forEach(i=>{
-                const priceElem = document.getElementById(`price-${i.id}`);
-                const priceNum = parseFloat(priceElem.textContent.replace(/[^0-9.-]+/g,"")) / i.quantity;
-                subtotal += priceNum * i.quantity;
+                const unitPrice = i.pricePerUnit ?? pricePerUnit;
+                subtotal += unitPrice * i.quantity;
               });
               animatePrice(cartSubtotalElem, `Subtotal: ${currencySelect.value} ${subtotal.toFixed(2)}`);
 
@@ -277,6 +273,13 @@
         }
       }
 
+      // Final subtotal for page load
+      const cartFinal = getCart();
+      let subtotal = 0;
+      cartFinal.forEach(i=>{
+        const unitPrice = i.pricePerUnit ?? 0;
+        subtotal += unitPrice * i.quantity;
+      });
       cartSubtotalElem.textContent = `Subtotal: ${currencySelect.value} ${subtotal.toFixed(2)}`;
     }
 
