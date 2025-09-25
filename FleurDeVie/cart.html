@@ -158,6 +158,7 @@
     function getCart() { return JSON.parse(localStorage.getItem('cart')) || []; }
     function saveCart(cart){
       localStorage.setItem('cart', JSON.stringify(cart));
+      animateCartCount();
       updateCartCount();
     }
 
@@ -165,6 +166,9 @@
       const cart = getCart();
       const total = cart.reduce((sum, item) => sum + item.quantity, 0);
       cartCountElem.textContent = total;
+    }
+
+    function animateCartCount(){
       cartCountElem.style.transform = 'scale(1.4)';
       setTimeout(()=>cartCountElem.style.transform='scale(1)', 150);
     }
@@ -177,6 +181,22 @@
       }, 150);
     }
 
+    function updateSubtotal(){
+      const cart = getCart();
+      let subtotal = 0;
+      cart.forEach(item=>{
+        subtotal += (item.pricePerUnit * item.quantity);
+      });
+      animatePrice(cartSubtotalElem, `Subtotal: ${currencySelect.value} ${subtotal.toFixed(2)}`);
+      if(cart.length === 0){
+        cartEmpty.style.display = 'block';
+        checkoutBtn.style.display = 'none';
+      } else {
+        cartEmpty.style.display = 'none';
+        checkoutBtn.style.display = 'inline-block';
+      }
+    }
+
     async function loadCart(){
       const cart = getCart();
       cartGrid.innerHTML = '';
@@ -186,21 +206,14 @@
         checkoutBtn.style.display = 'none';
         return;
       }
-      cartEmpty.style.display = 'none';
-      checkoutBtn.style.display = 'inline-block';
 
       for(const item of cart){
         const docRef = doc(db, "brands","fleurdevie","products", item.id);
         const docSnap = await getDoc(docRef);
         if(docSnap.exists()){
           const data = docSnap.data();
-          const pricePerUnit = data.price / exchangeRates.NGN * exchangeRates[currencySelect.value];
-
-          // ensure pricePerUnit is stored in localStorage for accurate subtotal
-          if(item.pricePerUnit !== pricePerUnit){
-            item.pricePerUnit = pricePerUnit;
-            saveCart(cart);
-          }
+          // store price per unit in cart
+          item.pricePerUnit = data.price / exchangeRates.NGN * exchangeRates[currencySelect.value];
 
           const div = document.createElement('div');
           div.className='cart-item';
@@ -209,7 +222,7 @@
             <img src="${data.imageUrl}" alt="${data.name}">
             <div class="cart-item-details">
               <h3>${data.name}</h3>
-              <div class="price" id="price-${item.id}">${currencySelect.value} ${(pricePerUnit*item.quantity).toFixed(2)}</div>
+              <div class="price" id="price-${item.id}">${currencySelect.value} ${(item.pricePerUnit*item.quantity).toFixed(2)}</div>
               <div class="quantity-controls">
                 <button class="minus" data-id="${item.id}">–</button>
                 <input type="number" min="0" value="${item.quantity}" id="qty-${item.id}">
@@ -225,25 +238,24 @@
           const minusBtn = div.querySelector('.minus');
 
           function updateItemQuantity(newQty){
-            const cart = getCart();
+            let cart = getCart();
             const index = cart.findIndex(i=>i.id===item.id);
-            if(index > -1){
+            if(index>-1){
               if(newQty <= 0){
                 cart.splice(index,1);
                 document.getElementById(`cart-item-${item.id}`).remove();
               } else {
                 cart[index].quantity = newQty;
                 qtyInput.value = newQty;
+                animatePrice(document.getElementById(`price-${item.id}`), `${currencySelect.value} ${(cart[index].pricePerUnit*newQty).toFixed(2)}`);
               }
               saveCart(cart);
-              // update item price
-              animatePrice(document.getElementById(`price-${item.id}`), `${currencySelect.value} ${(cart[index]?.pricePerUnit * newQty || 0).toFixed(2)}`);
               updateSubtotal();
             }
           }
 
-          plusBtn.addEventListener('click', ()=>updateItemQuantity(getCart().find(i=>i.id===item.id).quantity + 1));
-          minusBtn.addEventListener('click', ()=>updateItemQuantity(getCart().find(i=>i.id===item.id).quantity - 1));
+          plusBtn.addEventListener('click', ()=>updateItemQuantity(getCart().find(i=>i.id===item.id).quantity+1));
+          minusBtn.addEventListener('click', ()=>updateItemQuantity(getCart().find(i=>i.id===item.id).quantity-1));
           qtyInput.addEventListener('input', (e)=>{
             const val = parseInt(e.target.value);
             if(!isNaN(val)) updateItemQuantity(val);
@@ -254,27 +266,20 @@
       updateSubtotal();
     }
 
-    function updateSubtotal(){
-      const cart = getCart();
-      const subtotal = cart.reduce((sum,item)=>sum + (item.pricePerUnit*item.quantity),0);
-      if(cart.length === 0){
-        cartEmpty.style.display = 'block';
-        checkoutBtn.style.display = 'none';
-        cartSubtotalElem.textContent = '';
-      } else {
-        cartEmpty.style.display = 'none';
-        checkoutBtn.style.display = 'inline-block';
-        animatePrice(cartSubtotalElem, `Subtotal: ${currencySelect.value} ${subtotal.toFixed(2)}`);
-      }
-    }
-
     document.getElementById('hamburger').addEventListener('click', ()=>{
       document.querySelector('.header-right').classList.toggle('open');
       document.getElementById('hamburger').classList.toggle('open');
     });
 
     currencySelect.addEventListener('change', ()=>{
+      // recalc prices per unit in selected currency
+      const cart = getCart();
+      cart.forEach(item=>{
+        item.pricePerUnit = item.pricePerUnit / exchangeRates[currencySelect.dataset.old || 'NGN'] * exchangeRates[currencySelect.value];
+      });
+      saveCart(cart);
       loadCart();
+      currencySelect.dataset.old = currencySelect.value;
     });
 
     window.addEventListener('storage', ()=>{
