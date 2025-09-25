@@ -226,19 +226,30 @@
     cartSubtotalElem.textContent = `Subtotal: ${currencySelect.value} ${subtotal.toFixed(2)}`;
   }
 
+  // ✅ Fixed updateQuantity: merge before save
   function updateQuantity(id, quantity){
     let cart = getCart();
-    const index = cart.findIndex(i=>i.id===id);
-    if(index > -1){
-      if(quantity <= 0){
-        cart.splice(index, 1);
-      } else {
-        cart[index].quantity = quantity;
+    cart = cart.map(item => {
+      if(item.id === id){
+        return {...item, quantity: Math.max(0, quantity)};
       }
-      saveCart(cart);
-      loadCart();
-      window.dispatchEvent(new Event('storage'));
-    }
+      return item;
+    }).filter(item => item.quantity > 0);
+
+    // Merge duplicates
+    const mergedCart = [];
+    cart.forEach(item => {
+      const existing = mergedCart.find(i => i.id === item.id);
+      if(existing){
+        existing.quantity += item.quantity;
+      } else {
+        mergedCart.push({...item});
+      }
+    });
+
+    saveCart(mergedCart);
+    loadCart();
+    window.dispatchEvent(new Event('storage'));
   }
 
   document.getElementById('hamburger').addEventListener('click', ()=>{
