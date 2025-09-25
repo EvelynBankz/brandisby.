@@ -9,17 +9,17 @@
   <style>
     /* RESET */
     *{margin:0;padding:0;box-sizing:border-box;}
-    body{font-family:"Montserrat",sans-serif;background:#000;color:#112e1f;overflow:hidden;}
+    body{font-family:"Montserrat",sans-serif;background:#000;color:#fff;overflow:hidden;}
 
     /* HEADER */
-    .site-header{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:14px 24px;z-index:1000;}
+    .site-header{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:14px 24px;z-index:1000;background:transparent;}
     .brand-logo{height:clamp(60px,10vw,140px);}
-    .brand-title{font-family:"Playfair Display",serif;font-weight:700;font-size:clamp(20px,3vw,40px);color:#112e1f;text-shadow:0 2px 6px rgba(0,0,0,0.45);}
+    .brand-title{font-family:"Playfair Display",serif;font-weight:700;font-size:clamp(20px,3vw,40px);color:#fff;text-shadow:0 2px 6px rgba(0,0,0,0.45);}
     .header-right{display:flex;align-items:center;gap:14px;}
-    .header-right a{color:#112e1f;font-size:14px;text-decoration:none;}
+    .header-right a{color:#fff;font-size:14px;text-decoration:none;}
     .header-right i{font-size:18px;}
     .hamburger{display:none;background:none;border:none;cursor:pointer;width:36px;height:28px;position:relative;}
-    .hamburger span{display:block;width:100%;height:3px;background:#112e1f;border-radius:2px;position:absolute;left:0;transition:0.3s;}
+    .hamburger span{display:block;width:100%;height:3px;background:#fff;border-radius:2px;position:absolute;left:0;transition:0.3s;}
     .hamburger span:nth-child(1){top:0;}
     .hamburger span:nth-child(2){top:10px;}
     .hamburger span:nth-child(3){top:20px;}
@@ -29,9 +29,31 @@
 
     /* HERO */
     .hero{height:100vh;display:flex;justify-content:center;align-items:center;background:url("bg.jpg") center/cover no-repeat;position:relative;}
-    .hero::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,0.15);}
-    .center-links{position:relative;z-index:2;display:flex;gap:120px;flex-wrap:nowrap;}
-    .center-link{font-family:"Playfair Display",serif;text-transform:uppercase;font-weight:400;color:#112e1f;text-decoration:underline;text-underline-offset:.3em;text-decoration-thickness:1px;font-size:clamp(22px,3vw,60px);letter-spacing:.05em;transform:scaleY(1.8);}
+    .hero::after{content:"";position:absolute;inset:0;background:rgba(0,0,0,0.3);} /* overlay tint */
+    .center-links{position:relative;z-index:2;display:flex;gap:120px;flex-wrap:nowrap;animation:fadeIn 2s ease forwards;}
+    .center-link{
+      font-family:"Playfair Display",serif;
+      text-transform:uppercase;
+      font-weight:400;
+      color:#fff;
+      text-decoration:underline;
+      text-decoration-color:transparent;
+      text-underline-offset:.3em;
+      text-decoration-thickness:1px;
+      font-size:clamp(22px,3vw,60px);
+      letter-spacing:.05em;
+      transform:scaleY(1.8);
+      transition:all .3s ease;
+    }
+    .center-link:hover{
+      color:#FFD6BA;
+      text-decoration-color:#FFD6BA;
+    }
+
+    @keyframes fadeIn{
+      from{opacity:0;transform:translateY(40px);}
+      to{opacity:1;transform:translateY(0);}
+    }
 
     /* RIGHT NAV OVERLAY */
     .right-nav-overlay{position:fixed;top:0;right:0;height:100%;width:260px;background:rgba(0,0,0,0.95);display:flex;flex-direction:column;align-items:flex-start;padding:60px 25px;gap:24px;transform:translateX(100%);transition:0.3s;z-index:2000;}
@@ -40,9 +62,9 @@
     .overlay-close{position:absolute;top:18px;right:18px;background:none;border:none;color:#fff;font-size:36px;cursor:pointer;}
 
     /* FOOTER */
-    .site-footer{position:absolute;bottom:20px;left:0;right:0;text-align:center;z-index:1200;}
-    .tagline{font-family:"Playfair Display",serif;font-style:italic;font-size:16px;color:#112e1f;}
-    .copyright{font-size:13px;color:#112e1f;margin-top:4px;}
+    .site-footer{position:absolute;bottom:20px;left:0;right:0;text-align:center;z-index:1200;background:transparent;}
+    .tagline{font-family:"Playfair Display",serif;font-style:italic;font-size:16px;color:#fff;}
+    .copyright{font-size:13px;color:#fff;margin-top:4px;}
 
     /* RESPONSIVE */
     @media(max-width:900px){
