@@ -5,75 +5,76 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Fleur De Vie</title>
 
-  <!-- Fonts & icons -->
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <style>
     :root{
-      --gold: #c9a45c;
-      --bg-tint: rgba(0,0,0,0.25);
-      --brand: #112e1f;
-      --max-width: 1200px;
+      --brand:#112e1f;
+      --gold-1:#d4af37;
+      --gold-2:#f7e7ce;
+      --max-width:1200px;
     }
 
     /* RESET */
     *{box-sizing:border-box;margin:0;padding:0}
     html,body{height:100%}
     body{
-      font-family: "Montserrat", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      font-family:"Montserrat",system-ui,-apple-system,Segoe UI,Roboto,Arial;
       color:var(--brand);
-      background:#000; /* hero covers the viewport anyway */
+      background:#000;
       -webkit-font-smoothing:antialiased;
       -moz-osx-font-smoothing:grayscale;
     }
     a{color:inherit;text-decoration:none}
 
-    /* HEADER (transparent) */
+    /* HEADER - TRANSPARENT */
     .site-header{
-      position: absolute;
+      position:absolute;
       top:0; left:0; right:0;
       display:flex;
       align-items:center;
       justify-content:space-between;
-      padding:12px 24px;
+      padding:12px 22px;
       z-index:1200;
       background:transparent; /* intentionally transparent */
     }
-    .header-left{display:flex;align-items:center;gap:14px}
+    .header-left{display:flex;align-items:center;gap:12px}
     .brand-logo{height:clamp(56px,9vw,140px); width:auto; display:block}
     .brand-title{
-      font-family:"Playfair Display", serif;
+      font-family:"Playfair Display",serif;
       font-weight:700;
       font-size:clamp(20px,3.4vw,40px);
       color:var(--brand);
       pointer-events:none;
-      text-shadow: 0 4px 10px rgba(0,0,0,0.25);
-      margin-left:8px;
+      text-shadow:0 4px 10px rgba(0,0,0,0.25);
+      margin-left:6px;
     }
 
-    .header-right{display:flex;align-items:center;gap:14px}
+    .header-right{
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
     .header-right .home-link,
-    .header-right .social-link{
+    .header-right .social-link {
       font-size:14px; color:var(--brand);
-      position:relative; padding:6px 2px;
     }
-    .header-right .home-link::after{
-      content:""; position:absolute; left:0; bottom:0; height:1px; width:0; background:var(--gold); transition:width .28s ease;
+    /* small tasteful gold dot between links */
+    .header-right a:not(:last-child)::after{
+      content:"\2022";
+      color:var(--gold-1);
+      margin-left:10px;
+      opacity:0.9;
+      font-size:10px;
     }
-    .header-right .home-link:hover::after{ width:100% }
-    .header-right i{font-size:18px}
 
-    /* Hamburger (hidden on wide screens) */
-    .hamburger{
-      display:none; width:40px; height:32px; background:none; border:0; padding:6px; cursor:pointer;
-    }
-    .hamburger span{
-      display:block; height:3px; background:var(--brand); border-radius:3px; margin:5px 0; transition:transform .28s ease, opacity .28s ease;
-    }
-    .hamburger.is-active span:nth-child(1){ transform:translateY(8px) rotate(45deg) }
-    .hamburger.is-active span:nth-child(2){ opacity:0 }
-    .hamburger.is-active span:nth-child(3){ transform:translateY(-8px) rotate(-45deg) }
+    /* Hamburger */
+    .hamburger{display:none;width:40px;height:34px;background:none;border:0;padding:6px;cursor:pointer}
+    .hamburger span{display:block;height:3px;background:var(--brand);border-radius:3px;margin:5px 0;transition:transform .28s,opacity .28s}
+    .hamburger.is-active span:nth-child(1){transform:translateY(8px) rotate(45deg)}
+    .hamburger.is-active span:nth-child(2){opacity:0}
+    .hamburger.is-active span:nth-child(3){transform:translateY(-8px) rotate(-45deg)}
 
     /* HERO */
     .hero{
@@ -82,134 +83,113 @@
       align-items:center;
       justify-content:center;
       position:relative;
-      overflow:hidden;
-      background-image: url('bg.jpg');
-      background-position:center;
+      background-image:url('bg.jpg');
       background-size:cover;
-      background-repeat:no-repeat;
+      background-position:center;
+      overflow:hidden;
     }
-    /* tint + subtle vignette for premium depth */
     .hero::after{
       content:"";
-      position:absolute; inset:0;
-      background: linear-gradient(180deg, rgba(0,0,0,0.14), rgba(0,0,0,0.22)), radial-gradient(ellipse at center, rgba(0,0,0,0.06) 0%, transparent 40%);
+      position:absolute;inset:0;
+      background:linear-gradient(180deg, rgba(17,46,31,0.06), rgba(17,46,31,0.14));
       z-index:0;
     }
 
-    /* center links (big, elegant) */
     .center-links{
-      position:relative;
-      z-index:2;
-      display:flex;
-      gap:140px;
-      align-items:center;
-      justify-content:center;
-      max-width:var(--max-width);
-      padding:0 20px;
+      position:relative; z-index:2;
+      display:flex; gap:140px;
+      align-items:center; justify-content:center;
+      max-width:var(--max-width); padding:0 20px;
     }
     .center-link{
-      font-family:"Playfair Display", serif;
-      font-weight:400;
+      font-family:"Playfair Display",serif;
       text-transform:uppercase;
       color:var(--brand);
       text-decoration:underline;
       text-underline-offset:.28em;
       text-decoration-thickness:1px;
-      letter-spacing:0.04em;
-      transform-origin:center;
+      letter-spacing:.04em;
       font-size:clamp(22px, 3.4vw, 64px);
+      transform-origin:center;
       line-height:1;
       display:inline-block;
       cursor:pointer;
-      opacity:0;
-      transform: translateY(12px) scaleY(1.6);
+      transition:color .25s, transform .25s;
     }
-    .center-link:focus,
-    .center-link:hover{ color: var(--gold); outline:none; }
+    .center-link:hover{ color:var(--gold-1); transform:translateY(-4px) }
 
-    /* small caption / subtle CTA under links (optional) */
     .hero-sub{
       position:relative; z-index:2; margin-top:28px; text-align:center; color:rgba(17,46,31,0.9);
-      font-size:14px; max-width:720px; margin-left:auto;margin-right:auto; padding:0 18px;
-      opacity:0; transform: translateY(6px);
+      font-size:14px; max-width:720px; margin-left:auto;margin-right:auto;padding:0 18px;
     }
 
     /* RIGHT NAV OVERLAY */
     .right-nav-overlay{
       position:fixed; top:0; right:0; height:100%; width:300px;
-      background: rgba(17,46,31,0.98);
-      color:#fff;
-      display:flex; flex-direction:column; align-items:flex-start;
-      padding:60px 26px; gap:18px;
-      transform: translateX(100%);
-      transition: transform .28s ease;
-      z-index:2000;
+      background: rgba(17,46,31,0.98); color:#fff;
+      display:flex; flex-direction:column; align-items:flex-start; padding:60px 26px; gap:18px;
+      transform: translateX(100%); transition:transform .28s ease; z-index:2000;
     }
     .right-nav-overlay.open{ transform: translateX(0); }
     .right-nav-overlay a{ color:#FFD6BA; font-size:18px; display:block; padding:8px 0; }
     .right-nav-overlay .overlay-close{ position:absolute; top:18px; right:18px; background:none; border:0; color:#FFD6BA; font-size:36px; cursor:pointer }
 
-    /* FOOTER (transparent) */
+    /* FOOTER - TRANSPARENT */
     .site-footer{
       position:absolute; left:0; right:0; bottom:18px; text-align:center; z-index:1200; pointer-events:none;
     }
-    .tagline{ font-family:"Playfair Display", serif; font-style:italic; font-size:16px; color:var(--brand); }
+    .tagline{ font-family:"Playfair Display",serif; font-style:italic; font-size:16px; color:var(--brand); }
     .copyright{ font-size:13px; color:var(--brand); margin-top:6px }
 
-    /* subtle fade-up animation (staggered) */
-    @keyframes fadeUp {
-      from { opacity:0; transform: translateY(12px) scaleY(1.6) }
-      to   { opacity:1; transform: translateY(0) scaleY(1) }
+    /* small luxury CTA button (optional) */
+    .btn {
+      padding:12px 26px;
+      border-radius:8px;
+      border:1px solid var(--gold-1);
+      background:transparent;
+      color:var(--brand);
+      font-weight:600;
+      cursor:pointer;
+      transition:all .25s;
     }
+    .btn:hover{ background:linear-gradient(45deg,var(--gold-1),var(--gold-2)); color:#111; box-shadow:0 6px 18px rgba(212,175,55,0.2) }
 
-    /* reduced motion preference */
+    /* subtle animation */
+    @keyframes fadeUp { from { opacity:0; transform:translateY(12px) scaleY(1.6)} to{ opacity:1; transform:none } }
     @media (prefers-reduced-motion: no-preference){
-      .center-link{ animation: fadeUp .6s ease forwards; }
-      .center-link:nth-child(1){ animation-delay: .18s; }
-      .center-link:nth-child(2){ animation-delay: .34s; }
-      .center-link:nth-child(3){ animation-delay: .50s; }
-
-      .hero-sub{ animation: fadeUp .6s ease forwards; animation-delay:.7s; }
+      .center-link{ animation: fadeUp .6s ease forwards }
+      .center-link:nth-child(1){ animation-delay:.12s }
+      .center-link:nth-child(2){ animation-delay:.28s }
+      .center-link:nth-child(3){ animation-delay:.44s }
+      .hero-sub{ animation: fadeUp .6s ease forwards; animation-delay:.6s }
     }
     @media (prefers-reduced-motion: reduce){
-      .center-link, .hero-sub{ transition:none; animation:none; opacity:1; transform:none; }
+      .center-link, .hero-sub{ animation:none; opacity:1; transform:none }
     }
 
-    /* RESPONSIVE tweaks */
+    /* RESPONSIVE */
     @media (max-width: 900px){
-      .center-links{ gap:80px; }
-      .header-right .home-link, .header-right .social-link { display:none }
+      .center-links{ gap:72px }
       .hamburger{ display:inline-block }
+      .header-right .home-link, .header-right .social-link{ display:none }
     }
-    @media (max-width: 600px){
-      .center-links{
-        flex-direction:column;
-        gap:36px;
-        align-items:center;
-        text-align:center;
-        padding: 0 28px;
-      }
-      .center-link{
-        font-size: clamp(18px, 8.6vw, 36px);
-        transform-origin:center;
-      }
-      /* center overlay items vertically on small screens */
-      .right-nav-overlay{ justify-content:center; align-items:center; text-align:center; padding:30px; width:100% }
-      .right-nav-overlay a{ font-size:22px }
-      .brand-title{ display:none; } /* keep header uncluttered on tiny screens */
-      .brand-logo{ position: absolute; left:12px; top:10px; height:clamp(42px, 12vw, 90px) }
+    @media (max-width:600px){
+      .center-links{ flex-direction:column; gap:36px; align-items:center; text-align:center; padding:0 26px }
+      .center-link{ font-size:clamp(18px,7.8vw,36px); transform-origin:center }
+      .right-nav-overlay{ width:100%; justify-content:center; align-items:center; text-align:center; padding:28px }
+      .brand-title{ display:none }
+      .brand-logo{ position:absolute; left:12px; top:10px; height:clamp(42px,12vw,90px) }
     }
 
-    /* utility */
-    .visually-hidden{ position:absolute !important; height:1px; width:1px; overflow:hidden; clip:rect(1px,1px,1px,1px); white-space:nowrap; }
+    /* utility for hidden text */
+    .visually-hidden{ position:absolute !important; height:1px; width:1px; overflow:hidden; clip:rect(1px,1px,1px,1px); white-space:nowrap }
   </style>
 </head>
 <body>
-
   <!-- HEADER -->
   <header class="site-header" role="banner">
     <div class="header-left">
-      <img src="logo.png" alt="Fleur De Vie" class="brand-logo">
+      <img src="logo.png" alt="Fleur De Vie logo" class="brand-logo">
       <div class="brand-title" aria-hidden="true">Fleur De Vie</div>
     </div>
 
@@ -219,13 +199,13 @@
       <a class="social-link" href="https://www.tiktok.com/@fleurdevie.com" target="_blank" rel="noopener"><i class="fab fa-tiktok"></i></a>
       <a class="social-link" href="https://www.instagram.com/fleurdevie_com/" target="_blank" rel="noopener"><i class="fab fa-instagram"></i></a>
 
-      <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+      <button class="hamburger" id="hamburger" aria-expanded="false" aria-controls="rightNav" aria-label="Open menu">
         <span></span><span></span><span></span>
       </button>
     </nav>
   </header>
 
-  <!-- RIGHT NAV OVERLAY -->
+  <!-- RIGHT NAV -->
   <nav id="rightNav" class="right-nav-overlay" aria-hidden="true" aria-label="Mobile menu">
     <button class="overlay-close" id="close" aria-label="Close menu">&times;</button>
     <a href="index.html">Home</a>
@@ -253,42 +233,53 @@
     <div class="copyright">© 2025 Fleur De Vie</div>
   </footer>
 
-  <!-- SCRIPT -->
+  <!-- SCRIPT - hamburger / overlay handling -->
   <script>
-    (function(){
+    (function () {
       const ham = document.getElementById('hamburger');
       const overlay = document.getElementById('rightNav');
       const closeBtn = document.getElementById('close');
 
-      function openMenu(){
+      function openMenu() {
         overlay.classList.add('open');
-        overlay.setAttribute('aria-hidden','false');
+        overlay.setAttribute('aria-hidden', 'false');
         ham.classList.add('is-active');
-        ham.setAttribute('aria-expanded','true');
+        ham.setAttribute('aria-expanded', 'true');
         // lock scroll
+        document.documentElement.style.overflow = 'hidden';
         document.body.style.overflow = 'hidden';
       }
-      function closeMenu(){
+      function closeMenu() {
         overlay.classList.remove('open');
-        overlay.setAttribute('aria-hidden','true');
+        overlay.setAttribute('aria-hidden', 'true');
         ham.classList.remove('is-active');
-        ham.setAttribute('aria-expanded','false');
+        ham.setAttribute('aria-expanded', 'false');
+        document.documentElement.style.overflow = '';
         document.body.style.overflow = '';
       }
 
-      ham.addEventListener('click', ()=> {
+      ham.addEventListener('click', () => {
         overlay.classList.contains('open') ? closeMenu() : openMenu();
       });
       closeBtn.addEventListener('click', closeMenu);
+
+      // close when a nav link is clicked (mobile)
       overlay.querySelectorAll('a').forEach(a => {
-        a.addEventListener('click', closeMenu);
+        a.addEventListener('click', () => {
+          // small delay to allow the navigation to start then close the menu
+          setTimeout(closeMenu, 120);
+        });
       });
 
-      // keyboard: close on Escape
+      // close on Escape
       document.addEventListener('keydown', (e) => {
-        if(e.key === 'Escape' && overlay.classList.contains('open')) closeMenu();
+        if (e.key === 'Escape' && overlay.classList.contains('open')) closeMenu();
       });
 
+      // keep experience respectful for reduced motion preferences
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.documentElement.style.scrollBehavior = 'auto';
+      }
     })();
   </script>
 </body>
