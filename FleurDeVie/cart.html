@@ -192,13 +192,17 @@
               <h3>${data.name}</h3>
               <div class="price">${currencySelect.value} ${priceConverted.toFixed(2)}</div>
               <input type="number" min="1" value="${item.quantity}" id="qty-${item.id}">
-              <button onclick="removeItem('${item.id}')">Remove</button>
+              <button class="remove-btn">Remove</button>
             </div>
           `;
           cartGrid.appendChild(div);
 
           const qtyInput = div.querySelector(`#qty-${item.id}`);
           qtyInput.addEventListener('change', (e)=>updateQuantity(item.id, parseInt(e.target.value)||1));
+
+          // ✅ attach remove button event listener
+          const removeBtn = div.querySelector('.remove-btn');
+          removeBtn.addEventListener('click', ()=>removeItem(item.id));
         }
       }
       cartSubtotalElem.textContent = `Subtotal: ${currencySelect.value} ${subtotal.toFixed(2)}`;
