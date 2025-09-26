@@ -6,18 +6,17 @@
   <title>Fleur De Vie Admin Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    /* RESET & BASE */
     * { box-sizing:border-box; margin:0; padding:0; }
     body { font-family: "Montserrat", sans-serif; background:#F5E6CC; color:#112e1f; line-height:1.6; }
     a { text-decoration:none; color:inherit; }
 
     header { background:#112e1f; color:#FFD6BA; padding:16px; text-align:center; font-family:"Playfair Display", serif; font-size:24px; font-weight:700; }
 
-    .container { max-width:900px; margin:2rem auto; padding:2rem; background:#FFD6BA; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1); }
+    .container { max-width:1000px; margin:2rem auto; padding:2rem; background:#FFD6BA; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1); }
 
-    h2 { font-family:"Playfair Display", serif; margin-bottom:16px; color:#112e1f; text-align:center; }
+    h2 { font-family:"Playfair Display", serif; margin-bottom:16px; color:#112e1f; }
 
-    label { display:block; margin-top:1rem; font-weight:500; color:#112e1f; }
+    label { display:block; margin-top:1rem; font-weight:500; }
     input, textarea, select { width:100%; padding:0.6rem; margin-top:0.5rem; border:1px solid #112e1f; border-radius:6px; font-size:1rem; }
 
     button { margin-top:1rem; padding:0.75rem 1.2rem; background:#112e1f; color:#FFD6BA; border:none; border-radius:6px; cursor:pointer; font-weight:600; transition:0.3s; }
@@ -25,7 +24,7 @@
 
     .message { margin-top:1rem; font-weight:500; font-size:1rem; text-align:center; }
 
-    table { width:100%; border-collapse:collapse; margin-top:2rem; background:#fff; border-radius:12px; overflow:hidden; }
+    table { width:100%; border-collapse:collapse; margin-top:1.5rem; background:#fff; border-radius:12px; overflow:hidden; }
     th, td { padding:0.75rem; border-bottom:1px solid #ddd; text-align:left; font-size:0.95rem; }
     th { background:#F5E6CC; font-family:"Playfair Display", serif; color:#112e1f; }
     td img { width:60px; border-radius:6px; }
@@ -33,7 +32,18 @@
     .actions button { margin-right:0.5rem; padding:0.4rem 0.6rem; font-size:0.9rem; }
     .actions button:hover { opacity:0.85; }
 
-    .quote-link { color:#112e1f; font-weight:600; text-decoration:underline; }
+    /* Dashboard Navigation */
+    .dashboard-nav { display:flex; gap:10px; margin-bottom:1.5rem; }
+    .dashboard-nav button { flex:1; }
+    .section { display:none; margin-top:1rem; }
+    .section.active { display:block; }
+
+    @media(max-width:600px){
+      .container { padding:1rem; }
+      table, th, td { font-size:0.85rem; }
+      th, td { padding:0.5rem; }
+      .dashboard-nav { flex-direction:column; }
+    }
   </style>
 </head>
 <body>
@@ -57,88 +67,88 @@
 
   <!-- DASHBOARD -->
   <div class="container" id="dashboardContainer" style="display:none;">
+    <div class="dashboard-nav">
+      <button type="button" data-target="productsSection">📦 Products</button>
+      <button type="button" data-target="quotesSection">💳 Quotes</button>
+    </div>
 
-    <!-- Product Form -->
-    <form id="productForm">
-      <input type="hidden" id="productId">
+    <!-- PRODUCTS SECTION -->
+    <div class="section" id="productsSection">
+      <h2>Manage Products</h2>
+      <form id="productForm">
+        <input type="hidden" id="productId">
 
-      <label for="name">Product Name</label>
-      <input type="text" id="name" required>
+        <label for="name">Product Name</label>
+        <input type="text" id="name" required>
 
-      <label for="description">Description</label>
-      <textarea id="description" required></textarea>
+        <label for="description">Description</label>
+        <textarea id="description" required></textarea>
 
-      <label for="price">Price (NGN)</label>
-      <input type="number" id="price" step="0.01" required>
+        <label for="price">Price (NGN)</label>
+        <input type="number" id="price" step="0.01" required>
 
-      <label for="imageUrl">Image URL</label>
-      <input type="url" id="imageUrl" placeholder="https://example.com/image.jpg" required>
+        <label for="imageUrl">Image URL</label>
+        <input type="url" id="imageUrl" placeholder="https://example.com/image.jpg" required>
 
-      <label for="published">Published</label>
-      <select id="published">
-        <option value="true">Yes</option>
-        <option value="false">No</option>
-      </select>
+        <label for="published">Published</label>
+        <select id="published">
+          <option value="true">Yes</option>
+          <option value="false">No</option>
+        </select>
 
-      <label for="customizable">Customization Available?</label>
-      <select id="customizable">
-        <option value="false">No</option>
-        <option value="true">Yes</option>
-      </select>
+        <button type="submit">Save Product</button>
+        <div class="message" id="message"></div>
+      </form>
 
-      <button type="submit">Save Product</button>
-      <div class="message" id="message"></div>
-    </form>
+      <!-- Products Table -->
+      <h2>All Products</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Description</th>
+            <th>Published</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="productsBody"></tbody>
+      </table>
+    </div>
 
-    <!-- Products Table -->
-    <h2>All Products</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Image</th>
-          <th>Name</th>
-          <th>Price</th>
-          <th>Description</th>
-          <th>Published</th>
-          <th>Customizable</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody id="productsBody"></tbody>
-    </table>
+    <!-- QUOTES SECTION -->
+    <div class="section" id="quotesSection">
+      <h2>Generate Quote</h2>
+      <form id="quoteForm">
+        <label for="customerName">Customer Name</label>
+        <input type="text" id="customerName" required>
 
-    <!-- Quotes Section -->
-    <h2>Create Quote</h2>
-    <form id="quoteForm">
-      <label for="customerName">Customer Name</label>
-      <input type="text" id="customerName" required>
+        <label for="customerEmail">Customer Email</label>
+        <input type="email" id="customerEmail" required>
 
-      <label for="customerContact">Customer Contact (Phone/Email)</label>
-      <input type="text" id="customerContact" required>
+        <label for="quoteItems">Quote Items (JSON format)</label>
+        <textarea id="quoteItems" placeholder='[{"name":"Rose Bouquet","price":2500,"qty":2}]' required></textarea>
 
-      <label for="quoteDescription">Quote Description</label>
-      <textarea id="quoteDescription" required></textarea>
+        <button type="submit">Generate Quote</button>
+        <div class="message" id="quoteMessage"></div>
+      </form>
 
-      <label for="quoteAmount">Quote Amount (NGN)</label>
-      <input type="number" id="quoteAmount" step="0.01" required>
-
-      <button type="submit">Generate Quote</button>
-      <div class="message" id="quoteMessage"></div>
-    </form>
-
-    <h2>All Quotes</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Customer</th>
-          <th>Contact</th>
-          <th>Description</th>
-          <th>Amount</th>
-          <th>Payment Link</th>
-        </tr>
-      </thead>
-      <tbody id="quotesBody"></tbody>
-    </table>
+      <!-- Quotes Table -->
+      <h2>All Quotes</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Customer</th>
+            <th>Email</th>
+            <th>Items</th>
+            <th>Total</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody id="quotesBody"></tbody>
+      </table>
+    </div>
   </div>
 
   <!-- Firebase SDKs -->
@@ -160,6 +170,7 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
+    // Admin emails
     const allowedAdmins = ["yourstruly.fleurdevie@gmail.com"];
     const loginForm = document.getElementById("loginForm");
     const loginMessage = document.getElementById("loginMessage");
@@ -174,8 +185,11 @@
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
         if (allowedAdmins.includes(user.email)) {
+          loginMessage.textContent = "✅ Login successful!";
+          loginMessage.style.color = "green";
           loginContainer.style.display = "none";
           dashboardContainer.style.display = "block";
+          showSection("productsSection");
           loadProducts();
           loadQuotes();
         } else {
@@ -184,6 +198,7 @@
           await signOut(auth);
         }
       } catch (err) {
+        console.error(err);
         loginMessage.textContent = `❌ ${err.code}: ${err.message}`;
         loginMessage.style.color = "red";
       }
@@ -193,6 +208,7 @@
       if(user && allowedAdmins.includes(user.email)) {
         loginContainer.style.display = "none";
         dashboardContainer.style.display = "block";
+        showSection("productsSection");
         loadProducts();
         loadQuotes();
       } else {
@@ -201,7 +217,18 @@
       }
     });
 
-    // Product Management
+    // Section toggle
+    document.querySelectorAll(".dashboard-nav button").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        showSection(btn.dataset.target);
+      });
+    });
+    function showSection(id){
+      document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+    }
+
+    // === PRODUCTS ===
     const form = document.getElementById('productForm');
     const message = document.getElementById('message');
     const productsBody = document.getElementById('productsBody');
@@ -216,7 +243,6 @@
         price: parseFloat(document.getElementById('price').value),
         imageUrl: document.getElementById('imageUrl').value,
         published: document.getElementById('published').value === "true",
-        customizable: document.getElementById('customizable').value === "true",
         updatedAt: serverTimestamp()
       };
 
@@ -235,6 +261,7 @@
         form.reset();
         productIdInput.value = "";
       } catch(err) {
+        console.error(err);
         message.textContent = "❌ Error saving product.";
         message.style.color = "red";
       }
@@ -254,9 +281,8 @@
             <td>₦${p.price.toFixed(2)}</td>
             <td>${p.description}</td>
             <td>${p.published ? "Yes" : "No"}</td>
-            <td>${p.customizable ? "Yes" : "No"}</td>
             <td class="actions">
-              <button onclick="editProduct('${docSnap.id}', '${p.name}', '${p.description}', ${p.price}, '${p.imageUrl}', ${p.published}, ${p.customizable})">Edit</button>
+              <button onclick="editProduct('${docSnap.id}', '${p.name}', '${p.description}', ${p.price}, '${p.imageUrl}', ${p.published})">Edit</button>
               <button onclick="deleteProduct('${docSnap.id}')">Delete</button>
             </td>
           `;
@@ -265,14 +291,13 @@
       });
     }
 
-    window.editProduct = (id, name, description, price, imageUrl, published, customizable) => {
+    window.editProduct = (id, name, description, price, imageUrl, published) => {
       productIdInput.value = id;
       document.getElementById('name').value = name;
       document.getElementById('description').value = description;
       document.getElementById('price').value = price;
       document.getElementById('imageUrl').value = imageUrl;
       document.getElementById('published').value = published ? "true" : "false";
-      document.getElementById('customizable').value = customizable ? "true" : "false";
       message.textContent = "✏️ Editing product...";
       message.style.color = "blue";
     };
@@ -284,30 +309,31 @@
       }
     };
 
-    // Quotes Management
+    // === QUOTES ===
     const quoteForm = document.getElementById("quoteForm");
     const quoteMessage = document.getElementById("quoteMessage");
     const quotesBody = document.getElementById("quotesBody");
 
-    quoteForm.addEventListener("submit", async (e) => {
+    quoteForm.addEventListener("submit", async (e)=>{
       e.preventDefault();
-      const quote = {
-        customerName: document.getElementById("customerName").value,
-        customerContact: document.getElementById("customerContact").value,
-        description: document.getElementById("quoteDescription").value,
-        amount: parseFloat(document.getElementById("quoteAmount").value),
-        createdAt: serverTimestamp(),
-        status: "pending"
-      };
-
-      try {
+      try{
+        const items = JSON.parse(document.getElementById("quoteItems").value);
+        const total = items.reduce((sum,i)=>sum+i.price*i.qty,0);
+        const quote = {
+          customerName: document.getElementById("customerName").value,
+          customerEmail: document.getElementById("customerEmail").value,
+          items,
+          total,
+          createdAt: serverTimestamp()
+        };
         const quotesCol = collection(db, "brands", "fleurdevie", "quotes");
         await addDoc(quotesCol, quote);
-        quoteMessage.textContent = "✅ Quote created!";
+        quoteMessage.textContent = "✅ Quote generated!";
         quoteMessage.style.color = "green";
         quoteForm.reset();
-      } catch(err) {
-        quoteMessage.textContent = "❌ Error creating quote.";
+      } catch(err){
+        console.error(err);
+        quoteMessage.textContent = "❌ Error generating quote.";
         quoteMessage.style.color = "red";
       }
     });
@@ -315,18 +341,17 @@
     async function loadQuotes() {
       const quotesCol = collection(db, "brands", "fleurdevie", "quotes");
       const q = query(quotesCol, orderBy("createdAt", "desc"));
-      onSnapshot(q, snapshot => {
+      onSnapshot(q, snapshot=>{
         quotesBody.innerHTML = "";
-        snapshot.forEach(docSnap => {
-          const qData = docSnap.data();
-          const paymentLink = `checkout.html?quoteId=${docSnap.id}`;
+        snapshot.forEach(docSnap=>{
+          const qd = docSnap.data();
           const tr = document.createElement("tr");
           tr.innerHTML = `
-            <td>${qData.customerName}</td>
-            <td>${qData.customerContact}</td>
-            <td>${qData.description}</td>
-            <td>₦${qData.amount.toFixed(2)}</td>
-            <td><a class="quote-link" href="${paymentLink}" target="_blank">Payment Link</a></td>
+            <td>${qd.customerName}</td>
+            <td>${qd.customerEmail}</td>
+            <td>${qd.items.map(i=>`${i.name} x${i.qty}`).join(", ")}</td>
+            <td>₦${qd.total.toFixed(2)}</td>
+            <td>${qd.createdAt?.toDate().toLocaleString() || ""}</td>
           `;
           quotesBody.appendChild(tr);
         });
