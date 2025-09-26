@@ -25,18 +25,23 @@
     .message { margin-top:1rem; font-weight:500; font-size:1rem; text-align:center; }
 
     table { width:100%; border-collapse:collapse; margin-top:1.5rem; background:#fff; border-radius:12px; overflow:hidden; }
-    th, td { padding:0.75rem; border-bottom:1px solid #ddd; text-align:left; font-size:0.95rem; }
+    th, td { padding:0.75rem; border-bottom:1px solid #ddd; text-align:left; font-size:0.95rem; vertical-align:top; }
     th { background:#F5E6CC; font-family:"Playfair Display", serif; color:#112e1f; }
     td img { width:60px; border-radius:6px; }
 
     .actions button { margin-right:0.5rem; padding:0.4rem 0.6rem; font-size:0.9rem; }
     .actions button:hover { opacity:0.85; }
 
+    .small-note { font-size:0.9rem; color:#334d3a; margin-top:8px; }
+
     /* Dashboard Navigation */
     .dashboard-nav { display:flex; gap:10px; margin-bottom:1.5rem; }
     .dashboard-nav button { flex:1; }
     .section { display:none; margin-top:1rem; }
     .section.active { display:block; }
+
+    .details-row { background:#fff6e8; }
+    .details-row td { padding:12px; }
 
     @media(max-width:600px){
       .container { padding:1rem; }
@@ -117,19 +122,28 @@
     <!-- ORDERS -->
     <div class="section" id="ordersSection">
       <h2>Orders</h2>
-      <button onclick="exportOrders()">⬇ Export Orders (CSV)</button>
-      <table><thead><tr><th>ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th></tr></thead>
-      <tbody id="ordersBody"></tbody></table>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <button onclick="exportOrders()">⬇ Export Orders (CSV)</button>
+        <div class="small-note">Click <strong>Details</strong> to expand order items. Change the status and click <strong>Save</strong> to persist.</div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="ordersBody"></tbody>
+      </table>
     </div>
   </div>
 
-  <!-- FIREBASE -->
+  <!-- FIREBASE & LOGIC -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
     import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-    // --- Use your real firebase config here (this matches the project keys you posted earlier) ---
     const firebaseConfig = {
       apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
       authDomain: "brandisby.firebaseapp.com",
@@ -143,7 +157,6 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // allowed admins - normalized to avoid case/whitespace mismatches
     const allowedAdmins = ["yourstruly.fleurdevie@gmail.com"].map(e => e.toLowerCase().trim());
 
     // DOM refs
@@ -152,62 +165,45 @@
     const loginContainer = document.getElementById("loginContainer");
     const dashboardContainer = document.getElementById("dashboardContainer");
 
-    // LOGIN - use element values directly, then check normalized user email
+    // LOGIN
     loginForm.addEventListener("submit", async e => {
       e.preventDefault();
       const rawEmail = document.getElementById("loginEmail").value;
       const password = document.getElementById("loginPassword").value;
       loginMessage.textContent = "";
       try {
-        console.log("Attempting sign-in for:", rawEmail);
         const userCredential = await signInWithEmailAndPassword(auth, rawEmail, password);
         const user = userCredential.user;
-        console.log("Firebase returned user:", user && user.email);
         const normalized = (user.email || "").toLowerCase().trim();
         if (allowedAdmins.includes(normalized)) {
-          loginMessage.textContent = "✅ Login successful!";
-          loginMessage.style.color = "green";
           loginContainer.style.display = "none";
           dashboardContainer.style.display = "block";
           showSection("productsSection");
-          loadProducts();
-          loadQuotes();
-          loadOrders();
+          loadProducts(); loadQuotes(); loadOrders();
         } else {
           loginMessage.textContent = "❌ Not authorized.";
           loginMessage.style.color = "red";
           await signOut(auth);
         }
       } catch (err) {
-        console.error("Login error:", err);
         loginMessage.textContent = `❌ ${err.code || ""}: ${err.message || err}`;
         loginMessage.style.color = "red";
       }
     });
 
-    // Listen for auth state (page reloads, existing session)
     onAuthStateChanged(auth, user => {
-      try {
-        if (user) console.log("onAuthStateChanged -> user:", user.email);
-        if (user && allowedAdmins.includes((user.email || "").toLowerCase().trim())) {
-          loginContainer.style.display = "none";
-          dashboardContainer.style.display = "block";
-          showSection("productsSection");
-          loadProducts();
-          loadQuotes();
-          loadOrders();
-        } else {
-          loginContainer.style.display = "block";
-          dashboardContainer.style.display = "none";
-        }
-      } catch (e) {
-        console.error("onAuthStateChanged error:", e);
+      if (user && allowedAdmins.includes((user.email || "").toLowerCase().trim())) {
+        loginContainer.style.display = "none";
+        dashboardContainer.style.display = "block";
+        showSection("productsSection");
+        loadProducts(); loadQuotes(); loadOrders();
+      } else {
         loginContainer.style.display = "block";
         dashboardContainer.style.display = "none";
       }
     });
 
-    // nav buttons
+    // NAV
     document.querySelectorAll(".dashboard-nav button").forEach(btn=>{
       btn.addEventListener("click", ()=> showSection(btn.dataset.target));
     });
@@ -247,7 +243,6 @@
         productForm.reset();
         productIdInput.value = "";
       } catch (err) {
-        console.error("Product save error:", err);
         message.textContent = "❌ Error saving product.";
         message.style.color = "red";
       }
@@ -345,7 +340,6 @@
         quoteMessage.textContent = "✅ Quote generated!";
         quoteMessage.style.color = "green";
       } catch (err) {
-        console.error("Quote save error:", err);
         quoteMessage.textContent = "❌ Error generating quote.";
         quoteMessage.style.color = "red";
       }
@@ -369,21 +363,110 @@
       });
     }
 
-    // === ORDERS ===
+    // === ORDERS MANAGEMENT ===
     const ordersBody = document.getElementById("ordersBody");
+
+    function createStatusSelect(current){
+      const statuses = ["Pending","Paid","Processing","Shipped","Completed","Cancelled"];
+      let html = `<select class="status-select">`;
+      statuses.forEach(s => {
+        html += `<option value="${s}" ${s === current ? "selected" : ""}>${s}</option>`;
+      });
+      html += `</select>`;
+      return html;
+    }
+
+    async function updateOrderStatus(orderId, newStatus, buttonEl){
+      try {
+        await updateDoc(doc(db, "brands", "fleurdevie", "orders", orderId), { status: newStatus, updatedAt: serverTimestamp() });
+        // visual feedback
+        if(buttonEl){
+          const old = buttonEl.textContent;
+          buttonEl.textContent = "Saved";
+          setTimeout(()=> buttonEl.textContent = old, 1200);
+        }
+      } catch(err) {
+        console.error("Failed to update order status:", err);
+        alert("Error updating status. Check console.");
+      }
+    }
+
+    function formatCurrency(n){ return `₦${(n||0).toFixed ? n.toFixed(2) : n}`; }
+
+    function toggleDetailsRow(afterTr, orderId, orderData){
+      // remove existing details if present
+      const next = afterTr.nextElementSibling;
+      if(next && next.classList.contains('details-row') && next.dataset.orderId === orderId){
+        next.remove();
+        return;
+      }
+
+      // create details row
+      const detailsTr = document.createElement('tr');
+      detailsTr.classList.add('details-row');
+      detailsTr.dataset.orderId = orderId;
+
+      const items = orderData.items || [];
+      const itemsHtml = items.length ? `
+        <table style="width:100%;border-collapse:collapse;">
+          <thead><tr style="background:#F5E6CC;"><th>Product</th><th>Qty</th><th>Price</th><th>Subtotal</th></tr></thead>
+          <tbody>
+            ${items.map(it => `<tr><td>${it.name}</td><td>${it.qty}</td><td>${formatCurrency(it.price)}</td><td>${formatCurrency(it.qty*it.price)}</td></tr>`).join('')}
+          </tbody>
+        </table>
+      ` : `<div>No items recorded for this order.</div>`;
+
+      const customerInfo = orderData.customerEmail ? `<div><strong>Email:</strong> ${orderData.customerEmail}</div>` : '';
+      const addressInfo = orderData.address ? `<div><strong>Address:</strong> ${orderData.address}</div>` : '';
+
+      detailsTr.innerHTML = `<td colspan="7">${itemsHtml}${customerInfo}${addressInfo}</td>`;
+      // insert after the main row
+      afterTr.parentNode.insertBefore(detailsTr, afterTr.nextSibling);
+    }
+
     function loadOrders(){
       onSnapshot(query(collection(db, "brands", "fleurdevie", "orders"), orderBy("createdAt", "desc")), snap=>{
         ordersBody.innerHTML = "";
-        snap.forEach(d=>{
-          const o = d.data();
-          const tr = document.createElement("tr");
-          tr.innerHTML = `<td>${d.id}</td><td>${o.customerName || o.customer || "-"}</td><td>${(o.items||[]).map(i=>i.name+" x"+i.qty).join(", ")}</td><td>₦${(o.total||0)}</td><td>${o.status||"Pending"}</td><td>${o.createdAt?.toDate?.().toLocaleString?.() || ""}</td>`;
-          // also attach data-items for CSV export
+        snap.forEach(docSnap=>{
+          const o = docSnap.data();
+          const orderId = docSnap.id;
+          const itemsSummary = (o.items||[]).map(i=>`${i.name} x${i.qty}`).join(", ");
+          const total = o.total || 0;
+          const dateStr = o.createdAt?.toDate?.().toLocaleString?.() || "";
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${orderId}</td>
+            <td>${o.customerName || o.customer || "-"}</td>
+            <td style="max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${itemsSummary}</td>
+            <td>${formatCurrency(total)}</td>
+            <td>${createStatusSelect(o.status || "Pending")}</td>
+            <td>${dateStr}</td>
+            <td>
+              <button class="save-status">Save</button>
+              <button class="toggle-details">Details</button>
+            </td>
+          `;
+
+          // attach dataset (for CSV/export)
           tr.setAttribute("data-items", JSON.stringify(o.items || []));
           tr.setAttribute("data-customer", o.customerName || o.customer || "");
-          tr.setAttribute("data-total", o.total || 0);
+          tr.setAttribute("data-total", total || 0);
           tr.setAttribute("data-status", o.status || "Pending");
           ordersBody.appendChild(tr);
+
+          // add event listeners
+          const saveBtn = tr.querySelector('.save-status');
+          const statusSelect = tr.querySelector('.status-select');
+          saveBtn.addEventListener('click', ()=> {
+            const newStatus = statusSelect.value;
+            updateOrderStatus(orderId, newStatus, saveBtn);
+            // update attribute for export
+            tr.setAttribute('data-status', newStatus);
+          });
+
+          const detailsBtn = tr.querySelector('.toggle-details');
+          detailsBtn.addEventListener('click', ()=> toggleDetailsRow(tr, orderId, o));
         });
       });
     }
@@ -416,6 +499,11 @@
 
     // Initialize small UI: show product section button behavior
     document.querySelectorAll(".dashboard-nav button").forEach(btn=>btn.addEventListener("click", ()=>showSection(btn.dataset.target)));
+
+    // Expose load functions globally (for login)
+    window.loadProducts = loadProducts;
+    window.loadQuotes = loadQuotes;
+    window.loadOrders = loadOrders;
   </script>
 </body>
 </html>
