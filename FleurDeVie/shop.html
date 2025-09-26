@@ -35,7 +35,7 @@ a { text-decoration:none; color:inherit; }
 .hero-text h1 { font-family:"Playfair Display", serif; font-size:clamp(36px,5vw,64px); margin-bottom:12px; }
 .hero-text p { font-size:clamp(16px,2vw,24px); max-width:700px; }
 
-/* SEARCH + SORT */
+/* SEARCH + SORT + CURRENCY */
 .shop-controls { display:flex; justify-content:space-between; flex-wrap:wrap; margin-bottom:20px; gap:10px; }
 .shop-controls input, .shop-controls select { padding:8px; border-radius:6px; border:1px solid #112e1f; font-size:14px; }
 
@@ -93,7 +93,6 @@ footer { text-align:center; padding:20px; background:#112e1f; color:#F5E6CC; mar
   .mobile-cart a { color:#FFD6BA; font-size:20px; position:relative; }
   .mobile-cart .cart-count { position:absolute; top:-8px; right:-8px; }
   .customize-badge { font-size:14px; padding:8px 12px; }
-
   .hero { height:30vh; margin-top:0; padding-top:80px; } 
   .hero-text h1 { font-size:clamp(24px,5vw,32px); line-height:1.2; margin:0; }
   .hero-text p { font-size:clamp(14px,2.5vw,18px); margin:0 auto; }
@@ -117,14 +116,6 @@ footer { text-align:center; padding:20px; background:#112e1f; color:#F5E6CC; mar
     <a href="cart.html">Cart <span class="cart-count" id="cartCount">0</span></a>
     <a href="customization.html">Customize</a>
     <a href="contact.html">Contact</a>
-    <div class="currency-selector">
-      <label for="currency">Currency:</label>
-      <select id="currency">
-        <option value="NGN">NGN</option>
-        <option value="USD">USD</option>
-        <option value="EUR">EUR</option>
-      </select>
-    </div>
   </nav>
   <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
 </header>
@@ -142,6 +133,7 @@ footer { text-align:center; padding:20px; background:#112e1f; color:#F5E6CC; mar
   <div class="container">
     <h2>Our Products</h2>
     <div class="shop-controls">
+      <select id="currencySelect"></select> <!-- Currency selector before search/sort -->
       <input type="text" id="searchInput" placeholder="Search products...">
       <select id="sortSelect">
         <option value="">Sort By</option>
@@ -180,9 +172,10 @@ const cartCountElem = document.getElementById('cartCount');
 const cartCountMobileElem = document.getElementById('cartCountMobile');
 const searchInput = document.getElementById('searchInput');
 const sortSelect = document.getElementById('sortSelect');
-const currencySelect = document.getElementById('currency');
+const currencySelect = document.getElementById('currencySelect');
 
-const exchangeRates = { NGN:1, USD:450, EUR:500 }; // Example live rates
+const exchangeRates = { NGN:1, USD:450, EUR:500 };
+const currencySymbols = { NGN:'₦', USD:'$', EUR:'€' };
 
 function getCart(){ return JSON.parse(localStorage.getItem('cart')) || []; }
 function setCart(cart){ localStorage.setItem('cart', JSON.stringify(cart)); updateCartCount(); }
@@ -219,6 +212,8 @@ function updateProductUI(productId){
   if(item){ addBtn.style.display='none'; badge.textContent=item.quantity; } else { addBtn.style.display='block'; badge.textContent=''; }
 }
 
+function truncateText(text, wordLimit){ return text.split(' ').slice(0,wordLimit).join(' '); }
+
 async function loadProducts(){
   try{
     const q = query(collection(db,"brands","fleurdevie","products"), where("published","==",true));
@@ -251,7 +246,7 @@ function displayProducts(products){
   filtered.forEach(p=>{
     const cartItem = cart.find(i=>i.id===p.id);
     const quantity = cartItem ? cartItem.quantity : 0;
-    const convertedPrice = (p.price / exchangeRates.NGN * exchangeRates[currency]).toFixed(2);
+    const convertedPrice = (p.price/exchangeRates.NGN*exchangeRates[currency]).toFixed(2);
 
     const div = document.createElement('div');
     div.className='product-card';
@@ -261,7 +256,7 @@ function displayProducts(products){
       <img src="${p.imageUrl}" alt="${p.name}">
       <h3>${p.name}</h3>
       <div class="description">${truncateText(p.description||'', 15)}</div>
-      <div class="price">${currency} ${convertedPrice}</div>
+      <div class="price">${currencySymbols[currency]}${convertedPrice}</div>
       <div class="quantity-controls">
         <button class="minus">-</button>
         <span class="quantity-badge">${quantity>0 ? quantity : ''}</span>
@@ -270,22 +265,15 @@ function displayProducts(products){
       <button class="add-cart" style="display:${quantity>0?'none':'block'};">Add to Cart</button>
     `;
 
-    div.addEventListener('click', e=>{
-      if(!e.target.closest('button') && !e.target.closest('.customize-badge')){
-        window.location.href=`product.html?id=${p.id}`;
-      }
-    });
-
+    div.querySelector('.plus').addEventListener('click', e=>{ e.stopPropagation(); addToCart(p); });
+    div.querySelector('.minus').addEventListener('click', e=>{ e.stopPropagation(); removeFromCart(p.id); });
+    div.querySelector('.add-cart').addEventListener('click', e=>{ e.stopPropagation(); addToCart(p); });
     if(p.customizationAvailable){
       div.querySelector('.customize-badge').addEventListener('click', e=>{
         e.stopPropagation();
         window.location.href=`customization.html?id=${p.id}`;
       });
     }
-
-    div.querySelector('.plus').addEventListener('click', e=>{ e.stopPropagation(); addToCart(p); });
-    div.querySelector('.minus').addEventListener('click', e=>{ e.stopPropagation(); removeFromCart(p.id); });
-    div.querySelector('.add-cart').addEventListener('click', e=>{ e.stopPropagation(); addToCart(p); });
 
     const descDiv = div.querySelector('.description');
     if(p.description && p.description.split(' ').length>15){
@@ -306,11 +294,32 @@ function displayProducts(products){
   });
 }
 
-function truncateText(text, wordLimit){ return text.split(' ').slice(0,wordLimit).join(' '); }
+// Load user country to set default currency
+async function setDefaultCurrency(){
+  try{
+    const res = await fetch('https://ipapi.co/json/');
+    const data = await res.json();
+    let userCurrency = 'NGN';
+    if(data.currency && exchangeRates[data.currency]) userCurrency = data.currency;
 
-searchInput.addEventListener('input',()=>loadProducts());
-sortSelect.addEventListener('change',()=>loadProducts());
-currencySelect.addEventListener('change',()=>loadProducts());
+    currencySelect.innerHTML='';
+    for(const cur in exchangeRates){
+      const option = document.createElement('option');
+      option.value = cur;
+      option.textContent = cur;
+      if(cur===userCurrency) option.selected=true;
+      currencySelect.appendChild(option);
+    }
+  } catch(err){
+    console.error(err);
+    // fallback to NGN
+    currencySelect.value='NGN';
+  }
+}
+
+searchInput.addEventListener('input', loadProducts);
+sortSelect.addEventListener('change', loadProducts);
+currencySelect.addEventListener('change', loadProducts);
 
 document.getElementById('hamburger').addEventListener('click',()=>{
   document.querySelector('.header-right').classList.toggle('open');
@@ -322,7 +331,7 @@ window.addEventListener('resize', handleMobileCart);
 handleMobileCart();
 
 updateCartCount();
-loadProducts();
+setDefaultCurrency().then(loadProducts);
 window.addEventListener('storage', updateCartCount);
 </script>
 </body>
