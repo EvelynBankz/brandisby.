@@ -56,23 +56,27 @@ h2 { text-align:center; font-size:24px; font-family:"Playfair Display", serif; m
 .quantity-controls { display:flex; gap:10px; align-items:center; margin-bottom:8px; }
 .quantity-badge { font-weight:600; }
 
-/* CUSTOMIZE BADGE */
+/* CUSTOMIZE BUTTON */
 .customize-badge {
   position:absolute;
   top:10px;
   right:10px;
-  background:#112e1f;
-  color:#FFD6BA;
+  background:#FFD6BA;
+  color:#112e1f;
   font-size:12px;
-  padding:4px 8px;
-  border-radius:6px;
+  padding:6px 10px;
+  border-radius:8px;
+  font-weight:600;
   cursor:pointer;
   z-index:2;
   display:flex;
   align-items:center;
   gap:4px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.2);
+  border:2px solid #112e1f;
+  transition: 0.2s;
 }
-.customize-badge i { font-size:12px; }
+.customize-badge:hover { background:#112e1f; color:#FFD6BA; }
 
 /* FOOTER */
 footer { text-align:center; padding:20px; background:#112e1f; color:#F5E6CC; margin-top:60px; }
@@ -89,6 +93,8 @@ footer { text-align:center; padding:20px; background:#112e1f; color:#F5E6CC; mar
   .mobile-cart { display:flex; align-items:center; margin-right:10px; }
   .mobile-cart a { color:#FFD6BA; font-size:20px; position:relative; }
   .mobile-cart .cart-count { position:absolute; top:-8px; right:-8px; }
+  /* LARGER CUSTOMIZE BADGE ON MOBILE */
+  .customize-badge { font-size:14px; padding:8px 12px; }
 }
 </style>
 </head>
@@ -218,11 +224,8 @@ async function loadProducts(){
 }
 
 function displayProducts(products){
-  // SEARCH
   const term = searchInput.value.toLowerCase();
   let filtered = products.filter(p=>p.name.toLowerCase().includes(term));
-
-  // SORT
   const sortVal = sortSelect.value;
   if(sortVal==='alphabet') filtered.sort((a,b)=>a.name.localeCompare(b.name));
   if(sortVal==='price-asc') filtered.sort((a,b)=>a.price-b.price);
@@ -252,14 +255,12 @@ function displayProducts(products){
       <button class="add-cart" style="display:${quantity>0?'none':'block'};">Add to Cart</button>
     `;
 
-    // CLICK CARD -> PRODUCT PAGE
     div.addEventListener('click', e=>{
       if(!e.target.closest('button') && !e.target.closest('.customize-badge')){
         window.location.href=`product.html?id=${p.id}`;
       }
     });
 
-    // CUSTOMIZE badge click
     if(p.customizationAvailable){
       div.querySelector('.customize-badge').addEventListener('click', e=>{
         e.stopPropagation();
@@ -267,12 +268,10 @@ function displayProducts(products){
       });
     }
 
-    // BUTTON EVENTS
     div.querySelector('.plus').addEventListener('click', e=>{ e.stopPropagation(); addToCart(p); });
     div.querySelector('.minus').addEventListener('click', e=>{ e.stopPropagation(); removeFromCart(p.id); });
     div.querySelector('.add-cart').addEventListener('click', e=>{ e.stopPropagation(); addToCart(p); });
 
-    // DESCRIPTION toggle
     const descDiv = div.querySelector('.description');
     if(p.description && p.description.split(' ').length>15){
       const fullText = p.description;
@@ -294,22 +293,18 @@ function displayProducts(products){
 
 function truncateText(text, wordLimit){ return text.split(' ').slice(0,wordLimit).join(' '); }
 
-// SEARCH + SORT EVENT
 searchInput.addEventListener('input',()=>loadProducts());
 sortSelect.addEventListener('change',()=>loadProducts());
 
-// HAMBURGER
 document.getElementById('hamburger').addEventListener('click',()=>{
   document.querySelector('.header-right').classList.toggle('open');
   document.getElementById('hamburger').classList.toggle('open');
 });
 
-// MOBILE CART ICON
 function handleMobileCart(){ document.querySelector('.mobile-cart').style.display=window.innerWidth<=600?'flex':'none'; }
 window.addEventListener('resize', handleMobileCart);
 handleMobileCart();
 
-// INIT
 updateCartCount();
 loadProducts();
 window.addEventListener('storage', updateCartCount);
