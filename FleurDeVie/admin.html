@@ -70,293 +70,126 @@
     <div class="dashboard-nav">
       <button type="button" data-target="productsSection">📦 Products</button>
       <button type="button" data-target="quotesSection">💳 Quotes</button>
+      <button type="button" data-target="ordersSection">🧾 Orders</button>
     </div>
 
-    <!-- PRODUCTS SECTION -->
+    <!-- PRODUCTS -->
     <div class="section" id="productsSection">
       <h2>Manage Products</h2>
       <form id="productForm">
         <input type="hidden" id="productId">
-
-        <label for="name">Product Name</label>
-        <input type="text" id="name" required>
-
-        <label for="description">Description</label>
-        <textarea id="description" required></textarea>
-
-        <label for="price">Price (NGN)</label>
-        <input type="number" id="price" step="0.01" required>
-
-        <label for="imageUrl">Image URL</label>
-        <input type="url" id="imageUrl" placeholder="https://example.com/image.jpg" required>
-
-        <label for="published">Published</label>
-        <select id="published">
-          <option value="true">Yes</option>
-          <option value="false">No</option>
-        </select>
-
+        <label>Product Name</label><input type="text" id="name" required>
+        <label>Description</label><textarea id="description" required></textarea>
+        <label>Price (NGN)</label><input type="number" id="price" step="0.01" required>
+        <label>Image URL</label><input type="url" id="imageUrl" required>
+        <label>Published</label>
+        <select id="published"><option value="true">Yes</option><option value="false">No</option></select>
         <button type="submit">Save Product</button>
         <div class="message" id="message"></div>
       </form>
 
-      <!-- Products Table -->
       <h2>All Products</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Image</th>
-            <th>Name</th>
-            <th>Price</th>
-            <th>Description</th>
-            <th>Published</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="productsBody"></tbody>
-      </table>
+      <table><thead><tr><th>Image</th><th>Name</th><th>Price</th><th>Description</th><th>Published</th><th>Actions</th></tr></thead>
+      <tbody id="productsBody"></tbody></table>
     </div>
 
-    <!-- QUOTES SECTION -->
+    <!-- QUOTES -->
     <div class="section" id="quotesSection">
       <h2>Generate Quote</h2>
       <form id="quoteForm">
-        <label for="customerName">Customer Name</label>
-        <input type="text" id="customerName" required>
+        <label>Customer Name</label><input type="text" id="customerName" required>
+        <label>Customer Email</label><input type="email" id="customerEmail" required>
 
-        <label for="customerEmail">Customer Email</label>
-        <input type="email" id="customerEmail" required>
+        <h3>Items</h3>
+        <table id="quoteItems"><thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Subtotal</th><th></th></tr></thead><tbody></tbody></table>
+        <button type="button" onclick="addQuoteItem()">Add Item</button>
 
-        <label for="quoteItems">Quote Items (JSON format)</label>
-        <textarea id="quoteItems" placeholder='[{"name":"Rose Bouquet","price":2500,"qty":2}]' required></textarea>
-
+        <h3>Total: ₦<span id="quoteTotal">0</span></h3>
         <button type="submit">Generate Quote</button>
         <div class="message" id="quoteMessage"></div>
       </form>
 
-      <!-- Quotes Table -->
       <h2>All Quotes</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Customer</th>
-            <th>Email</th>
-            <th>Items</th>
-            <th>Total</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-        <tbody id="quotesBody"></tbody>
-      </table>
+      <table><thead><tr><th>Customer</th><th>Email</th><th>Items</th><th>Total</th><th>Date</th></tr></thead>
+      <tbody id="quotesBody"></tbody></table>
+    </div>
+
+    <!-- ORDERS -->
+    <div class="section" id="ordersSection">
+      <h2>Orders</h2>
+      <button onclick="exportOrders()">⬇ Export Orders (CSV)</button>
+      <table><thead><tr><th>ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th></tr></thead>
+      <tbody id="ordersBody"></tbody></table>
     </div>
   </div>
 
-  <!-- Firebase SDKs -->
+  <!-- FIREBASE -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
     import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
     import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
-      authDomain: "brandisby.firebaseapp.com",
-      projectId: "brandisby",
-      storageBucket: "brandisby.firebasestorage.app",
-      messagingSenderId: "87213267039",
-      appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
-    };
-
+    const firebaseConfig = { /* your firebase config here */ };
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // Admin emails
     const allowedAdmins = ["yourstruly.fleurdevie@gmail.com"];
     const loginForm = document.getElementById("loginForm");
     const loginMessage = document.getElementById("loginMessage");
     const loginContainer = document.getElementById("loginContainer");
     const dashboardContainer = document.getElementById("dashboardContainer");
 
-    loginForm.addEventListener("submit", async (e) => {
+    loginForm.addEventListener("submit", async e => {
       e.preventDefault();
-      const email = document.getElementById("loginEmail").value;
-      const password = document.getElementById("loginPassword").value;
+      const email = loginEmail.value, password = loginPassword.value;
       try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-        if (allowedAdmins.includes(user.email)) {
-          loginMessage.textContent = "✅ Login successful!";
-          loginMessage.style.color = "green";
-          loginContainer.style.display = "none";
-          dashboardContainer.style.display = "block";
-          showSection("productsSection");
-          loadProducts();
-          loadQuotes();
-        } else {
-          loginMessage.textContent = "❌ Not authorized.";
-          loginMessage.style.color = "red";
-          await signOut(auth);
-        }
-      } catch (err) {
-        console.error(err);
-        loginMessage.textContent = `❌ ${err.code}: ${err.message}`;
-        loginMessage.style.color = "red";
-      }
+        const { user } = await signInWithEmailAndPassword(auth, email, password);
+        if(allowedAdmins.includes(user.email)){
+          loginContainer.style.display="none"; dashboardContainer.style.display="block"; showSection("productsSection");
+          loadProducts(); loadQuotes(); loadOrders();
+        } else { loginMessage.textContent="❌ Not authorized."; await signOut(auth); }
+      } catch(err){ loginMessage.textContent="❌ "+err.message; }
     });
 
-    onAuthStateChanged(auth, user => {
-      if(user && allowedAdmins.includes(user.email)) {
-        loginContainer.style.display = "none";
-        dashboardContainer.style.display = "block";
-        showSection("productsSection");
-        loadProducts();
-        loadQuotes();
-      } else {
-        loginContainer.style.display = "block";
-        dashboardContainer.style.display = "none";
-      }
+    onAuthStateChanged(auth,user=>{
+      if(user && allowedAdmins.includes(user.email)){
+        loginContainer.style.display="none"; dashboardContainer.style.display="block";
+        showSection("productsSection"); loadProducts(); loadQuotes(); loadOrders();
+      } else { loginContainer.style.display="block"; dashboardContainer.style.display="none"; }
     });
 
-    // Section toggle
-    document.querySelectorAll(".dashboard-nav button").forEach(btn=>{
-      btn.addEventListener("click", ()=>{
-        showSection(btn.dataset.target);
-      });
-    });
-    function showSection(id){
-      document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
-      document.getElementById(id).classList.add("active");
-    }
+    document.querySelectorAll(".dashboard-nav button").forEach(btn=>btn.addEventListener("click",()=>showSection(btn.dataset.target)));
+    function showSection(id){ document.querySelectorAll(".section").forEach(s=>s.classList.remove("active")); document.getElementById(id).classList.add("active"); }
 
-    // === PRODUCTS ===
-    const form = document.getElementById('productForm');
-    const message = document.getElementById('message');
-    const productsBody = document.getElementById('productsBody');
-    const productIdInput = document.getElementById('productId');
-
-    form.addEventListener('submit', async (e) => {
+    // PRODUCTS CRUD
+    const productForm=document.getElementById('productForm'), productsBody=document.getElementById('productsBody'), productIdInput=document.getElementById('productId');
+    productForm.addEventListener('submit',async e=>{
       e.preventDefault();
-      const id = productIdInput.value;
-      const product = {
-        name: document.getElementById('name').value,
-        description: document.getElementById('description').value,
-        price: parseFloat(document.getElementById('price').value),
-        imageUrl: document.getElementById('imageUrl').value,
-        published: document.getElementById('published').value === "true",
-        updatedAt: serverTimestamp()
-      };
-
-      try {
-        if(id) {
-          const docRef = doc(db, "brands", "fleurdevie", "products", id);
-          await updateDoc(docRef, product);
-          message.textContent = "✅ Product updated!";
-        } else {
-          const productsCol = collection(db, "brands", "fleurdevie", "products");
-          product.createdAt = serverTimestamp();
-          await addDoc(productsCol, product);
-          message.textContent = "✅ Product added!";
-        }
-        message.style.color = "green";
-        form.reset();
-        productIdInput.value = "";
-      } catch(err) {
-        console.error(err);
-        message.textContent = "❌ Error saving product.";
-        message.style.color = "red";
-      }
+      const id=productIdInput.value;
+      const product={ name:name.value, description:description.value, price:+price.value, imageUrl:imageUrl.value, published:published.value==="true", updatedAt:serverTimestamp() };
+      if(id){ await updateDoc(doc(db,"brands","fleurdevie","products",id),product); }
+      else{ product.createdAt=serverTimestamp(); await addDoc(collection(db,"brands","fleurdevie","products"),product); }
+      productForm.reset(); productIdInput.value="";
     });
+    function loadProducts(){ onSnapshot(query(collection(db,"brands","fleurdevie","products"),orderBy("createdAt","desc")),snap=>{productsBody.innerHTML=""; snap.forEach(d=>{const p=d.data(); productsBody.innerHTML+=`<tr><td><img src="${p.imageUrl}"></td><td>${p.name}</td><td>₦${p.price}</td><td>${p.description}</td><td>${p.published?"Yes":"No"}</td><td><button onclick="editProduct('${d.id}','${p.name}','${p.description}',${p.price},'${p.imageUrl}',${p.published})">Edit</button><button onclick="deleteProduct('${d.id}')">Delete</button></td></tr>`});});}
+    window.editProduct=(id,n,dsc,pr,img,pub)=>{productIdInput.value=id; name.value=n; description.value=dsc; price.value=pr; imageUrl.value=img; published.value=pub?"true":"false";};
+    window.deleteProduct=async id=>{ if(confirm("Delete?")) await deleteDoc(doc(db,"brands","fleurdevie","products",id)); };
 
-    async function loadProducts() {
-      const productsCol = collection(db, "brands", "fleurdevie", "products");
-      const q = query(productsCol, orderBy("createdAt", "desc"));
-      onSnapshot(q, snapshot => {
-        productsBody.innerHTML = "";
-        snapshot.forEach(docSnap => {
-          const p = docSnap.data();
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td><img src="${p.imageUrl}" alt="${p.name}"></td>
-            <td>${p.name}</td>
-            <td>₦${p.price.toFixed(2)}</td>
-            <td>${p.description}</td>
-            <td>${p.published ? "Yes" : "No"}</td>
-            <td class="actions">
-              <button onclick="editProduct('${docSnap.id}', '${p.name}', '${p.description}', ${p.price}, '${p.imageUrl}', ${p.published})">Edit</button>
-              <button onclick="deleteProduct('${docSnap.id}')">Delete</button>
-            </td>
-          `;
-          productsBody.appendChild(tr);
-        });
-      });
-    }
+    // QUOTES
+    function addQuoteItem(){ const row=document.createElement("tr"); row.innerHTML=`<td><input></td><td><input type='number' value='1' min='1' onchange='updateQuoteTotal()'></td><td><input type='number' value='0' min='0' onchange='updateQuoteTotal()'></td><td class='subtotal'>0</td><td><button type='button' onclick='this.closest("tr").remove();updateQuoteTotal()'>x</button></td>`; document.querySelector("#quoteItems tbody").appendChild(row);}
+    window.addQuoteItem=addQuoteItem;
+    function updateQuoteTotal(){ let t=0; document.querySelectorAll("#quoteItems tbody tr").forEach(r=>{const q=+r.children[1].children[0].value||0,p=+r.children[2].children[0].value||0,s=q*p;r.querySelector(".subtotal").textContent=s;t+=s;}); document.getElementById("quoteTotal").textContent=t;}
+    window.updateQuoteTotal=updateQuoteTotal;
 
-    window.editProduct = (id, name, description, price, imageUrl, published) => {
-      productIdInput.value = id;
-      document.getElementById('name').value = name;
-      document.getElementById('description').value = description;
-      document.getElementById('price').value = price;
-      document.getElementById('imageUrl').value = imageUrl;
-      document.getElementById('published').value = published ? "true" : "false";
-      message.textContent = "✏️ Editing product...";
-      message.style.color = "blue";
-    };
+    const quoteForm=document.getElementById("quoteForm"), quotesBody=document.getElementById("quotesBody");
+    quoteForm.addEventListener("submit",async e=>{e.preventDefault();const items=[...document.querySelectorAll("#quoteItems tbody tr")].map(r=>({name:r.children[0].children[0].value,qty:+r.children[1].children[0].value,price:+r.children[2].children[0].value}));const total=items.reduce((s,i)=>s+i.qty*i.price,0);await addDoc(collection(db,"brands","fleurdevie","quotes"),{customerName:customerName.value,customerEmail:customerEmail.value,items,total,createdAt:serverTimestamp()});quoteForm.reset();document.querySelector("#quoteItems tbody").innerHTML="";document.getElementById("quoteTotal").textContent="0";});
+    function loadQuotes(){ onSnapshot(query(collection(db,"brands","fleurdevie","quotes"),orderBy("createdAt","desc")),snap=>{quotesBody.innerHTML=""; snap.forEach(d=>{const q=d.data(); quotesBody.innerHTML+=`<tr><td>${q.customerName}</td><td>${q.customerEmail}</td><td>${q.items.map(i=>i.name+" x"+i.qty).join(", ")}</td><td>₦${q.total}</td><td>${q.createdAt?.toDate().toLocaleString()||""}</td></tr>`});});}
 
-    window.deleteProduct = async (id) => {
-      if(confirm("Are you sure you want to delete this product?")) {
-        const docRef = doc(db, "brands", "fleurdevie", "products", id);
-        await deleteDoc(docRef);
-      }
-    };
-
-    // === QUOTES ===
-    const quoteForm = document.getElementById("quoteForm");
-    const quoteMessage = document.getElementById("quoteMessage");
-    const quotesBody = document.getElementById("quotesBody");
-
-    quoteForm.addEventListener("submit", async (e)=>{
-      e.preventDefault();
-      try{
-        const items = JSON.parse(document.getElementById("quoteItems").value);
-        const total = items.reduce((sum,i)=>sum+i.price*i.qty,0);
-        const quote = {
-          customerName: document.getElementById("customerName").value,
-          customerEmail: document.getElementById("customerEmail").value,
-          items,
-          total,
-          createdAt: serverTimestamp()
-        };
-        const quotesCol = collection(db, "brands", "fleurdevie", "quotes");
-        await addDoc(quotesCol, quote);
-        quoteMessage.textContent = "✅ Quote generated!";
-        quoteMessage.style.color = "green";
-        quoteForm.reset();
-      } catch(err){
-        console.error(err);
-        quoteMessage.textContent = "❌ Error generating quote.";
-        quoteMessage.style.color = "red";
-      }
-    });
-
-    async function loadQuotes() {
-      const quotesCol = collection(db, "brands", "fleurdevie", "quotes");
-      const q = query(quotesCol, orderBy("createdAt", "desc"));
-      onSnapshot(q, snapshot=>{
-        quotesBody.innerHTML = "";
-        snapshot.forEach(docSnap=>{
-          const qd = docSnap.data();
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td>${qd.customerName}</td>
-            <td>${qd.customerEmail}</td>
-            <td>${qd.items.map(i=>`${i.name} x${i.qty}`).join(", ")}</td>
-            <td>₦${qd.total.toFixed(2)}</td>
-            <td>${qd.createdAt?.toDate().toLocaleString() || ""}</td>
-          `;
-          quotesBody.appendChild(tr);
-        });
-      });
-    }
+    // ORDERS
+    const ordersBody=document.getElementById("ordersBody");
+    function loadOrders(){ onSnapshot(query(collection(db,"brands","fleurdevie","orders"),orderBy("createdAt","desc")),snap=>{ordersBody.innerHTML=""; snap.forEach(d=>{const o=d.data(); ordersBody.innerHTML+=`<tr><td>${d.id}</td><td>${o.customerName}</td><td>${o.items.map(i=>i.name+" x"+i.qty).join(", ")}</td><td>₦${o.total}</td><td>${o.status||"Pending"}</td><td>${o.createdAt?.toDate().toLocaleString()||""}</td></tr>`});});}
+    window.exportOrders=function(){ let rows=[["ID","Customer","Item","Qty","Price","Subtotal","Total","Status","Date"].join(",")]; document.querySelectorAll("#ordersBody tr").forEach(tr=>{const cells=[...tr.children].map(td=>td.innerText); rows.push(cells.join(","));}); const csv="data:text/csv;charset=utf-8,"+rows.join("\\n"); const link=document.createElement("a"); link.href=encodeURI(csv); link.download="orders.csv"; link.click(); }
   </script>
 </body>
 </html>
