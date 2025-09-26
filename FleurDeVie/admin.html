@@ -105,7 +105,6 @@
         <option value="true">Yes</option>
       </select>
 
-      <!-- ✅ Published Checkbox -->
       <label><input type="checkbox" id="productPublished"> Published</label>
 
       <button type="submit">Add Product</button>
@@ -193,7 +192,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// allowed admins (normalized)
+// allowed admins
 const allowedAdmins = ["yourstruly.fleurdevie@gmail.com"].map(e => e.toLowerCase().trim());
 
 // DOM refs
@@ -208,7 +207,6 @@ const searchInput = document.getElementById("orderSearch");
 const statusFilter = document.getElementById("orderStatusFilter");
 const exportBtn = document.getElementById("exportOrders");
 
-// Keep local list of orders for filtering/rendering
 let allOrders = [];
 
 // --- AUTH ---
@@ -256,9 +254,7 @@ onAuthStateChanged(auth, user => {
 
 // Tab nav behavior
 document.querySelectorAll(".dashboard-nav button").forEach(btn => {
-  btn.addEventListener("click", () => {
-    showSection(btn.dataset.target);
-  });
+  btn.addEventListener("click", () => showSection(btn.dataset.target));
 });
 function showSection(id) {
   document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
@@ -270,18 +266,21 @@ const productForm = document.getElementById("productForm");
 const productMessage = document.getElementById("productMessage");
 const productsTable = document.querySelector("#productsTable tbody");
 
+// Save original form submit
+let productFormSubmit = productForm.onsubmit;
+
 productForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const data = {
     name: document.getElementById("productName").value,
     price: +document.getElementById("productPrice").value,
-    desc: document.getElementById("productDesc").value,
-    img: document.getElementById("productImg").value,
-    custom: document.getElementById("productCustom").value === "true",
+    description: document.getElementById("productDesc").value,
+    imageUrl: document.getElementById("productImg").value,
+    customizationAvailable: document.getElementById("productCustom").value === "true",
     published: document.getElementById("productPublished").checked
   };
   try {
-    await addDoc(collection(db, "products"), data);
+    await addDoc(collection(db, "brands", "fleurdevie", "products"), data);
     productMessage.textContent = "✅ Product added.";
     productMessage.style.color = "green";
     productForm.reset();
@@ -293,7 +292,8 @@ productForm.addEventListener("submit", async (e) => {
 });
 
 function subscribeProducts() {
-  onSnapshot(collection(db, "products"), snap => {
+  const productsRef = collection(db, "brands", "fleurdevie", "products");
+  onSnapshot(productsRef, snap => {
     productsTable.innerHTML = "";
     snap.forEach(docSnap => {
       const p = docSnap.data();
@@ -301,12 +301,13 @@ function subscribeProducts() {
       row.innerHTML = `
         <td>${p.name}</td>
         <td>${p.price}</td>
-        <td>${p.desc || ""}</td>
-        <td>${p.img ? `<img src="${p.img}" alt="${p.name}">` : ""}</td>
-        <td>${p.custom ? "Yes" : "No"}</td>
+        <td>${p.description || ""}</td>
+        <td>${p.imageUrl ? `<img src="${p.imageUrl}" alt="${p.name}">` : ""}</td>
+        <td>${p.customizationAvailable ? "Yes" : "No"}</td>
         <td>${p.published ? "Yes" : "No"}</td>
         <td class="actions">
           <button onclick="deleteProduct('${docSnap.id}')">Delete</button>
+          <button onclick="editProduct('${docSnap.id}')">Edit</button>
         </td>`;
       productsTable.appendChild(row);
     });
@@ -316,12 +317,49 @@ function subscribeProducts() {
 window.deleteProduct = async (id) => {
   if (!confirm("Delete this product?")) return;
   try {
-    await deleteDoc(doc(db, "products", id));
+    await deleteDoc(doc(db, "brands", "fleurdevie", "products", id));
   } catch (err) {
     console.error("Delete product error:", err);
     alert("Error deleting product - check console.");
   }
-};
+}
+
+window.editProduct = async (id) => {
+  const docRef = doc(db, "brands", "fleurdevie", "products", id);
+  const docSnap = await getDocs(collection(db, "brands", "fleurdevie", "products"));
+  const docData = docSnap.docs.find(d => d.id === id)?.data();
+  if (!docData) return alert("Product not found");
+
+  document.getElementById("productName").value = docData.name || "";
+  document.getElementById("productPrice").value = docData.price || 0;
+  document.getElementById("productDesc").value = docData.description || "";
+  document.getElementById("productImg").value = docData.imageUrl || "";
+  document.getElementById("productCustom").value = docData.customizationAvailable ? "true" : "false";
+  document.getElementById("productPublished").checked = !!docData.published;
+
+  productForm.onsubmit = async (e) => {
+    e.preventDefault();
+    const updatedData = {
+      name: document.getElementById("productName").value,
+      price: +document.getElementById("productPrice").value,
+      description: document.getElementById("productDesc").value,
+      imageUrl: document.getElementById("productImg").value,
+      customizationAvailable: document.getElementById("productCustom").value === "true",
+      published: document.getElementById("productPublished").checked
+    };
+    try {
+      await updateDoc(docRef, updatedData);
+      productMessage.textContent = "✅ Product updated.";
+      productMessage.style.color = "green";
+      productForm.reset();
+      productForm.onsubmit = productFormSubmit;
+    } catch (err) {
+      console.error("Update product error:", err);
+      productMessage.textContent = "❌ Error updating product.";
+      productMessage.style.color = "red";
+    }
+  }
+}
 
 /* ---------------- QUOTES ---------------- */
 const quoteForm = document.getElementById("quoteForm");
@@ -358,139 +396,80 @@ quoteForm.addEventListener("submit", async (e) => {
     customer: document.getElementById("quoteCustomer").value,
     email: document.getElementById("quoteEmail").value,
     items,
-    total: +document.getElementById("quoteTotal").value || items.reduce((s,i)=>s+(i.qty*i.price),0),
-    status: "Pending"
+    total: +document.getElementById("quoteTotal").value || 0,
+    status: "Pending",
+    createdAt: new Date().toISOString()
   };
   try {
-    await addDoc(collection(db, "quotes"), data);
+    await addDoc(collection(db, "brands", "fleurdevie", "quotes"), data);
     quoteMessage.textContent = "✅ Quote saved.";
     quoteMessage.style.color = "green";
     quoteForm.reset();
     quoteItemsDiv.innerHTML = "";
   } catch (err) {
-    console.error("Save quote error:", err);
+    console.error(err);
     quoteMessage.textContent = "❌ Error saving quote.";
     quoteMessage.style.color = "red";
   }
 });
 
 function subscribeQuotes() {
-  onSnapshot(collection(db, "quotes"), snap => {
+  const quotesRef = collection(db, "brands", "fleurdevie", "quotes");
+  onSnapshot(quotesRef, snap => {
     quotesTable.innerHTML = "";
     snap.forEach(docSnap => {
       const q = docSnap.data();
       const row = document.createElement("tr");
-      row.innerHTML = `<td>${q.customer}</td><td>${q.email}</td><td>${q.total}</td><td>${q.status || "Pending"}</td><td></td>`;
+      row.innerHTML = `
+        <td>${q.customer}</td>
+        <td>${q.email}</td>
+        <td>${q.total}</td>
+        <td>${q.status}</td>
+        <td class="actions">
+          <button onclick="deleteQuote('${docSnap.id}')">Delete</button>
+        </td>`;
       quotesTable.appendChild(row);
     });
   });
 }
 
+window.deleteQuote = async (id) => {
+  if (!confirm("Delete this quote?")) return;
+  try { await deleteDoc(doc(db, "brands", "fleurdevie", "quotes", id)); } 
+  catch(err){console.error(err); alert("Error deleting quote");}
+}
+
 /* ---------------- ORDERS ---------------- */
 function subscribeOrders() {
-  onSnapshot(collection(db, "orders"), snap => {
+  const ordersRef = collection(db, "brands", "fleurdevie", "orders");
+  onSnapshot(ordersRef, snap => {
     allOrders = [];
+    ordersTable.innerHTML = "";
     snap.forEach(docSnap => {
-      allOrders.push({ id: docSnap.id, ...docSnap.data() });
+      const o = docSnap.data(); o.id = docSnap.id;
+      allOrders.push(o);
     });
     renderOrders();
   });
 }
 
 function renderOrders() {
-  const searchTerm = (searchInput.value || "").toLowerCase();
-  const filter = statusFilter.value || "";
+  const term = searchInput.value.toLowerCase();
+  const status = statusFilter.value;
   ordersTable.innerHTML = "";
-
-  allOrders
-    .filter(o => {
-      const matchesSearch = (o.customer || "").toLowerCase().includes(searchTerm) || (o.email || "").toLowerCase().includes(searchTerm);
-      const matchesFilter = filter === "" || (o.status || "") === filter;
-      return matchesSearch && matchesFilter;
-    })
-    .forEach(o => {
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td>${o.id}</td>
-        <td>${o.customer || ""}</td>
-        <td>${o.email || ""}</td>
-        <td>${o.total || 0}</td>
-        <td>
-          <select onchange="updateOrderStatus('${o.id}',this.value)">
-            <option ${o.status === "Pending" ? "selected" : ""}>Pending</option>
-            <option ${o.status === "Paid" ? "selected" : ""}>Paid</option>
-            <option ${o.status === "Processing" ? "selected" : ""}>Processing</option>
-            <option ${o.status === "Shipped" ? "selected" : ""}>Shipped</option>
-            <option ${o.status === "Completed" ? "selected" : ""}>Completed</option>
-            <option ${o.status === "Cancelled" ? "selected" : ""}>Cancelled</option>
-          </select>
-        </td>
-        <td><button onclick="toggleDetails(this)">Details</button></td>
-      `;
-      ordersTable.appendChild(row);
-
-      const details = document.createElement("tr");
-      details.classList.add("details-row");
-      details.style.display = "none";
-      let itemsHTML = "";
-      (o.items || []).forEach(it => {
-        itemsHTML += `<div>${it.name} x${it.qty} @ ${it.price} = ${it.qty * it.price}</div>`;
-      });
-      details.innerHTML = `<td colspan="6"><strong>Items:</strong><br>${itemsHTML || "<em>No items</em>"}<br><strong>Address:</strong> ${o.address || ""}</td>`;
-      ordersTable.appendChild(details);
-    });
+  allOrders.filter(o => {
+    return (!status || o.status === status) &&
+           (!term || o.customer.toLowerCase().includes(term) || o.email.toLowerCase().includes(term));
+  }).forEach(o => {
+    const row = document.createElement("tr");
+    row.innerHTML = `<td>${o.id}</td><td>${o.customer}</td><td>${o.email}</td><td>${o.total}</td><td>${o.status}</td><td></td>`;
+    ordersTable.appendChild(row);
+  });
 }
-
 searchInput.addEventListener("input", renderOrders);
 statusFilter.addEventListener("change", renderOrders);
 
-window.toggleDetails = (btn) => {
-  const detailsRow = btn.parentElement.parentElement.nextElementSibling;
-  if (!detailsRow) return;
-  detailsRow.style.display = detailsRow.style.display === "none" ? "table-row" : "none";
-};
-
-window.updateOrderStatus = async (id, status) => {
-  try {
-    await updateDoc(doc(db, "orders", id), { status });
-  } catch (err) {
-    console.error("Update order status error:", err);
-    alert("Failed to update order status. See console.");
-  }
-};
-
-async function exportOrdersCSV() {
-  try {
-    const snap = await getDocs(collection(db, "orders"));
-    let csv = "OrderID,Customer,Email,Status,Item,Qty,Price,Subtotal\n";
-    snap.forEach(docSnap => {
-      const o = docSnap.data();
-      (o.items || []).forEach(it => {
-        csv += `${docSnap.id},"${(o.customer||"").replace(/"/g,'""')}","${(o.email||"").replace(/"/g,'""')}",${o.status || ""},"${(it.name||"").replace(/"/g,'""')}",${it.qty},${it.price},${it.qty * it.price}\n`;
-      });
-      if (!(o.items && o.items.length)) {
-        csv += `${docSnap.id},"${(o.customer||"").replace(/"/g,'""')}","${(o.email||"").replace(/"/g,'""')}",${o.status || ""},-,0,0,${o.total || 0}\n`;
-      }
-    });
-    const blob = new Blob([csv], { type: "text/csv" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "orders.csv";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  } catch (err) {
-    console.error("Export CSV error:", err);
-    alert("Export failed — check console.");
-  }
-}
-
-exportBtn.addEventListener("click", exportOrdersCSV);
-
-window.subscribeProducts = subscribeProducts;
-window.subscribeQuotes = subscribeQuotes;
-window.subscribeOrders = subscribeOrders;
-
 </script>
+
 </body>
 </html>
