@@ -10,6 +10,8 @@
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family: "Montserrat", sans-serif; background: #F5E6CC; color:#112e1f; line-height:1.6; }
     a { text-decoration:none; color:inherit; }
+
+    /* HEADER */
     .site-header { background: #112e1f; color: #F5E6CC; display:flex; justify-content:space-between; align-items:center; padding:16px 28px; position:fixed; top:0; left:0; right:0; z-index:1000; }
     .header-left { display:flex; align-items:center; gap:12px; }
     .brand-logo { height:60px; }
@@ -18,6 +20,8 @@
     .header-right a { font-weight:500; transition: color 0.3s; }
     .header-right a:hover { color:#FFD6BA; }
     .cart-count { background:#FFD6BA; color:#112e1f; font-size:12px; font-weight:600; border-radius:50%; padding:2px 6px; margin-left:4px; }
+
+    /* Hamburger */
     .hamburger { display:none; background:none; border:none; cursor:pointer; width:30px; height:24px; position:relative; }
     .hamburger span { display:block; width:100%; height:3px; background:#F5E6CC; border-radius:2px; position:absolute; left:0; transition:0.3s; }
     .hamburger span:nth-child(1){ top:0; }
@@ -27,6 +31,7 @@
     .hamburger.open span:nth-child(2){ opacity:0; }
     .hamburger.open span:nth-child(3){ transform:rotate(-45deg); top:10px; }
 
+    /* MAIN PRODUCT */
     main { padding:120px 20px 40px; max-width:1000px; margin:auto; display:flex; gap:40px; flex-wrap:wrap; justify-content:center; }
     .product-image { flex:1 1 300px; max-width:400px; }
     .product-image img { width:100%; object-fit:contain; border-radius:12px; background:#fff; }
@@ -34,15 +39,35 @@
     .product-details h1 { font-family:"Playfair Display", serif; font-size:2rem; }
     .product-details .description { font-size:1rem; color:#112e1f; }
     .product-details .price { font-weight:600; font-size:1.2rem; margin-bottom:12px; }
+
     .quantity-controls { display:flex; align-items:center; gap:10px; margin-bottom:16px; }
     .quantity-controls button { background:#112e1f; color:#F5E6CC; border:none; border-radius:6px; padding:8px 12px; cursor:pointer; transition:0.3s; }
     .quantity-controls button:hover { background:#0a1d14; }
     .quantity-badge { font-weight:600; }
+
     .add-cart { background:#112e1f; color:#F5E6CC; border:none; border-radius:6px; padding:12px; cursor:pointer; font-size:1rem; transition:0.3s; }
     .add-cart:hover { background:#0a1d14; }
 
+    /* CUSTOMIZATION BUTTON */
+    .customize-btn {
+      background:#FFD6BA;
+      color:#112e1f;
+      border:none;
+      border-radius:6px;
+      padding:12px;
+      cursor:pointer;
+      font-size:1rem;
+      font-weight:600;
+      text-align:center;
+      margin-top:10px;
+      transition:0.3s;
+    }
+    .customize-btn:hover { background:#ffc999; }
+
+    /* FOOTER */
     footer { text-align:center; padding:20px; background:#112e1f; color:#F5E6CC; margin-top:60px; }
 
+    /* RESPONSIVE */
     @media(max-width:800px){ main { flex-direction:column; align-items:center; } .product-image, .product-details { max-width:90%; } }
     @media(max-width:600px){
       .header-right { display:none; flex-direction:column; background:#112e1f; position:absolute; top:70px; right:0; width:200px; padding:20px; }
@@ -86,6 +111,11 @@
         <button id="plus">+</button>
       </div>
       <button class="add-cart" id="addCartBtn">Add to Cart</button>
+
+      <!-- CUSTOMIZATION BUTTON (hidden by default) -->
+      <a href="customization.html" id="customizeBtn" class="customize-btn" style="display:none;">
+        Customize this Product
+      </a>
     </div>
   </main>
 
@@ -118,6 +148,7 @@
     const minusBtn = document.getElementById('minus');
     const plusBtn = document.getElementById('plus');
     const cartCountElem = document.getElementById('cartCount');
+    const customizeBtn = document.getElementById('customizeBtn');
 
     function getCart(){ return JSON.parse(localStorage.getItem('cart')) || []; }
     function setCart(cart){ localStorage.setItem('cart', JSON.stringify(cart)); updateCartCount(); }
@@ -169,6 +200,11 @@
           productDescription.textContent = data.description || '';
           productPrice.textContent = `₦${data.price.toFixed(2)}`;
           updateQuantityUI(productId);
+
+          // Show customization button if product is customizable
+          if(data.customizable === true){
+            customizeBtn.style.display = "block";
+          }
         } else {
           document.getElementById('productContainer').innerHTML='<p style="text-align:center; color:red;">Product not found.</p>';
         }
