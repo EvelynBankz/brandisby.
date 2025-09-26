@@ -148,24 +148,43 @@
 
   <!-- FIREBASE & LOGIC -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    // import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    // import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    // import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_AUTH_DOMAIN",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_BUCKET",
-      messagingSenderId: "YOUR_SENDER",
-      appId: "YOUR_APP_ID"
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js"; 
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js"; 
+    import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+    
+    // const firebaseConfig = {
+    //   apiKey: "YOUR_API_KEY",
+    //   authDomain: "YOUR_AUTH_DOMAIN",
+    //   projectId: "YOUR_PROJECT_ID",
+    //   storageBucket: "YOUR_BUCKET",
+    //   messagingSenderId: "YOUR_SENDER",
+    //   appId: "YOUR_APP_ID"
+    // };
+
+    const firebaseConfig = { 
+      apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg", 
+      authDomain: "brandisby.firebaseapp.com", 
+      projectId: "brandisby", 
+      storageBucket: "brandisby.firebasestorage.app", 
+      messagingSenderId: "87213267039", 
+      appId: "1:87213267039:web:339e9fd49e3ad31f7423ea" 
     };
 
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
+    // const app = initializeApp(firebaseConfig);
+    // const auth = getAuth(app);
+    // const db = getFirestore(app);
+
+    const app = initializeApp(firebaseConfig); 
+    const auth = getAuth(app); 
     const db = getFirestore(app);
 
-    const allowedAdmins = ["admin@example.com"];
+    // const allowedAdmins = ["admin@example.com"];
+
+    const allowedAdmins = ["yourstruly.fleurdevie@gmail.com"].map(e => e.toLowerCase().trim());
 
     const loginForm = document.getElementById("loginForm");
     const loginMessage = document.getElementById("loginMessage");
