@@ -3,454 +3,229 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fleur De Vie Admin Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <title>FleurDeVie Admin Panel</title>
   <style>
-    /* RESET & BASE */
-    * { box-sizing:border-box; margin:0; padding:0; }
-    body { font-family: "Montserrat", sans-serif; background:#F5E6CC; color:#112e1f; line-height:1.6; }
-    a { text-decoration:none; color:inherit; }
-
-    header { background:#112e1f; color:#FFD6BA; padding:16px; text-align:center; font-family:"Playfair Display", serif; font-size:24px; font-weight:700; }
-
-    .container { max-width:1000px; margin:2rem auto; padding:2rem; background:#FFD6BA; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1); }
-
-    h2 { font-family:"Playfair Display", serif; margin-bottom:16px; color:#112e1f; text-align:center; }
-
-    label { display:block; margin-top:1rem; font-weight:500; color:#112e1f; }
-    input, textarea, select { width:100%; padding:0.6rem; margin-top:0.5rem; border:1px solid #112e1f; border-radius:6px; font-size:1rem; }
-
-    button { margin-top:1rem; padding:0.75rem 1.2rem; background:#112e1f; color:#FFD6BA; border:none; border-radius:6px; cursor:pointer; font-weight:600; transition:0.3s; }
-    button:hover { background:#0a1d14; }
-
-    .message { margin-top:1rem; font-weight:500; font-size:1rem; text-align:center; }
-
-    table { width:100%; border-collapse:collapse; margin-top:1rem; background:#fff; border-radius:12px; overflow:hidden; }
-    th, td { padding:0.75rem; border-bottom:1px solid #ddd; text-align:left; font-size:0.95rem; }
-    th { background:#F5E6CC; font-family:"Playfair Display", serif; color:#112e1f; }
-    td img { width:60px; border-radius:6px; }
-
-    .actions button { margin-right:0.5rem; padding:0.4rem 0.6rem; font-size:0.9rem; }
-    .actions button:hover { opacity:0.85; }
-
-    /* Collapsible Sections */
-    .section { margin-top:2rem; }
-    .section button.toggle { width:100%; text-align:left; font-size:1.1rem; background:#112e1f; color:#FFD6BA; border-radius:6px; padding:0.75rem; }
-    .section button.toggle:hover { background:#0a1d14; }
-    .section-content { display:none; margin-top:1rem; }
-
-    @media(max-width:600px){
-      .container { padding:1rem; }
-      table, th, td { font-size:0.85rem; }
-      th, td { padding:0.5rem; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #fafafa;
+      color: #333;
+    }
+    header {
+      background: #222;
+      color: #fff;
+      padding: 15px;
+      text-align: center;
+    }
+    h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 30px auto;
+      padding: 20px;
+    }
+    .accordion {
+      background: #fff;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    .accordion button {
+      width: 100%;
+      text-align: left;
+      padding: 15px;
+      font-size: 16px;
+      font-weight: bold;
+      background: #f5f5f5;
+      border: none;
+      outline: none;
+      cursor: pointer;
+    }
+    .accordion button:hover {
+      background: #eee;
+    }
+    .accordion .panel {
+      display: none;
+      padding: 20px;
+      background: #fff;
+    }
+    form {
+      display: grid;
+      gap: 15px;
+    }
+    label {
+      font-weight: bold;
+    }
+    input, textarea {
+      padding: 10px;
+      width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+    button[type="submit"], .add-row {
+      background: #222;
+      color: #fff;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button[type="submit"]:hover, .add-row:hover {
+      background: #444;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    table th, table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+    }
+    table th {
+      background: #f5f5f5;
+    }
+    .total-display {
+      text-align: right;
+      font-size: 18px;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+    .remove-row {
+      color: red;
+      cursor: pointer;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
+  <header>
+    <h1>FleurDeVie Admin Panel</h1>
+  </header>
 
-  <header>Fleur De Vie Admin Dashboard</header>
+  <div class="container">
 
-  <!-- LOGIN FORM -->
-  <div class="container" id="loginContainer">
-    <h2>Admin Login</h2>
-    <form id="loginForm">
-      <label for="loginEmail">Email</label>
-      <input type="email" id="loginEmail" required>
-
-      <label for="loginPassword">Password</label>
-      <input type="password" id="loginPassword" required>
-
-      <button type="submit">Login</button>
-      <div class="message" id="loginMessage"></div>
-    </form>
-  </div>
-
-  <!-- DASHBOARD -->
-  <div class="container" id="dashboardContainer" style="display:none;">
-
-    <!-- Products Section -->
-    <div class="section">
-      <button class="toggle" onclick="toggleSection('productsSection')">📦 Manage Products</button>
-      <div id="productsSection" class="section-content">
+    <!-- Product Section -->
+    <div class="accordion">
+      <button onclick="togglePanel(this)">➕ Manage Products</button>
+      <div class="panel">
         <form id="productForm">
-          <input type="hidden" id="productId">
+          <label>Product Name</label>
+          <input type="text" required>
 
-          <label for="name">Product Name</label>
-          <input type="text" id="name" required>
+          <label>Price</label>
+          <input type="number" required>
 
-          <label for="description">Description</label>
-          <textarea id="description" required></textarea>
+          <label>Description</label>
+          <textarea rows="4"></textarea>
 
-          <label for="price">Price (NGN)</label>
-          <input type="number" id="price" step="0.01" required>
-
-          <label for="imageUrl">Image URL</label>
-          <input type="url" id="imageUrl" placeholder="https://example.com/image.jpg" required>
-
-          <label for="customizable">Customization Available?</label>
-          <select id="customizable">
-            <option value="true">Yes</option>
-            <option value="false">No</option>
-          </select>
-
-          <label for="published">Published</label>
-          <select id="published">
-            <option value="true">Yes</option>
-            <option value="false">No</option>
-          </select>
+          <label>Image Upload</label>
+          <input type="file" accept="image/*">
 
           <button type="submit">Save Product</button>
-          <div class="message" id="productMessage"></div>
         </form>
-
-        <h2>All Products</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Image</th>
-              <th>Name</th>
-              <th>Price</th>
-              <th>Description</th>
-              <th>Customizable</th>
-              <th>Published</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="productsBody"></tbody>
-        </table>
       </div>
     </div>
 
-    <!-- Quotes Section -->
-    <div class="section">
-      <button class="toggle" onclick="toggleSection('quotesSection')">💬 Manage Quotes</button>
-      <div id="quotesSection" class="section-content">
+    <!-- Quote Section -->
+    <div class="accordion">
+      <button onclick="togglePanel(this)">➕ Generate Quote</button>
+      <div class="panel">
         <form id="quoteForm">
-          <label for="quoteCustomer">Customer Name</label>
-          <input type="text" id="quoteCustomer" required>
+          <label>Customer Name</label>
+          <input type="text" id="customerName" required>
 
-          <label for="quotePhone">Customer Phone</label>
-          <input type="text" id="quotePhone" required>
+          <label>Phone Number</label>
+          <input type="text" id="customerPhone" required>
+
+          <label>Email</label>
+          <input type="email" id="customerEmail">
 
           <h3>Quote Items</h3>
-          <div id="quoteItems"></div>
-          <button type="button" onclick="addQuoteItem()">+ Add Item</button>
+          <table id="quoteTable">
+            <thead>
+              <tr>
+                <th>Item Name</th>
+                <th>Qty</th>
+                <th>Unit Price</th>
+                <th>Subtotal</th>
+                <th>Notes</th>
+                <th>Remove</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+          <button type="button" class="add-row" onclick="addRow()">+ Add Item</button>
 
-          <label for="quoteTotal">Total (NGN)</label>
-          <input type="number" id="quoteTotal" required>
+          <div class="total-display">TOTAL: ₦<span id="total">0</span></div>
 
           <button type="submit">Save Quote</button>
-          <div class="message" id="quoteMessage"></div>
         </form>
-
-        <h2>All Quotes</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Customer</th>
-              <th>Phone</th>
-              <th>Total</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="quotesBody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Orders Section -->
-    <div class="section">
-      <button class="toggle" onclick="toggleSection('ordersSection')">🛒 Manage Orders</button>
-      <div id="ordersSection" class="section-content">
-        <h2>All Orders</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Order ID</th>
-              <th>Customer</th>
-              <th>Total</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="ordersBody"></tbody>
-        </table>
       </div>
     </div>
 
   </div>
 
-  <!-- Firebase SDKs -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
-      authDomain: "brandisby.firebaseapp.com",
-      projectId: "brandisby",
-      storageBucket: "brandisby.firebasestorage.app",
-      messagingSenderId: "87213267039",
-      appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    const allowedAdmins = ["yourstruly.fleurdevie@gmail.com"];
-    const loginForm = document.getElementById("loginForm");
-    const loginMessage = document.getElementById("loginMessage");
-    const loginContainer = document.getElementById("loginContainer");
-    const dashboardContainer = document.getElementById("dashboardContainer");
-
-    loginForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const email = document.getElementById("loginEmail").value;
-      const password = document.getElementById("loginPassword").value;
-      try {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-        if (allowedAdmins.includes(user.email)) {
-          loginMessage.textContent = "✅ Login successful!";
-          loginContainer.style.display = "none";
-          dashboardContainer.style.display = "block";
-          loadProducts();
-          loadQuotes();
-          loadOrders();
-        } else {
-          loginMessage.textContent = "❌ Not authorized.";
-          await signOut(auth);
-        }
-      } catch (err) {
-        console.error(err);
-        loginMessage.textContent = `❌ ${err.code}: ${err.message}`;
+  <script>
+    // Accordion toggle
+    function togglePanel(button) {
+      const panel = button.nextElementSibling;
+      const isOpen = panel.style.display === "block";
+      document.querySelectorAll(".accordion .panel").forEach(p => p.style.display = "none");
+      document.querySelectorAll(".accordion button").forEach(b => b.textContent = b.textContent.replace("➖","➕"));
+      if (!isOpen) {
+        panel.style.display = "block";
+        button.textContent = button.textContent.replace("➕","➖");
       }
-    });
-
-    onAuthStateChanged(auth, user => {
-      if(user && allowedAdmins.includes(user.email)) {
-        loginContainer.style.display = "none";
-        dashboardContainer.style.display = "block";
-        loadProducts();
-        loadQuotes();
-        loadOrders();
-      } else {
-        loginContainer.style.display = "block";
-        dashboardContainer.style.display = "none";
-      }
-    });
-
-    /* Collapsible sections */
-    function toggleSection(id) {
-      const section = document.getElementById(id);
-      section.style.display = section.style.display === "block" ? "none" : "block";
     }
 
-    /* ========== PRODUCTS ========== */
-    const productForm = document.getElementById('productForm');
-    const productMessage = document.getElementById('productMessage');
-    const productsBody = document.getElementById('productsBody');
-    const productIdInput = document.getElementById('productId');
-
-    productForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const id = productIdInput.value;
-      const product = {
-        name: document.getElementById('name').value,
-        description: document.getElementById('description').value,
-        price: parseFloat(document.getElementById('price').value),
-        imageUrl: document.getElementById('imageUrl').value,
-        customizable: document.getElementById('customizable').value === "true",
-        published: document.getElementById('published').value === "true",
-        updatedAt: serverTimestamp()
-      };
-      try {
-        if(id) {
-          await updateDoc(doc(db, "brands", "fleurdevie", "products", id), product);
-          productMessage.textContent = "✅ Product updated!";
-        } else {
-          product.createdAt = serverTimestamp();
-          await addDoc(collection(db, "brands", "fleurdevie", "products"), product);
-          productMessage.textContent = "✅ Product added!";
-        }
-        productMessage.style.color = "green";
-        productForm.reset();
-        productIdInput.value = "";
-      } catch(err) {
-        console.error(err);
-        productMessage.textContent = "❌ Error saving product.";
-        productMessage.style.color = "red";
-      }
-    });
-
-    async function loadProducts() {
-      const q = query(collection(db, "brands", "fleurdevie", "products"), orderBy("createdAt", "desc"));
-      onSnapshot(q, snapshot => {
-        productsBody.innerHTML = "";
-        snapshot.forEach(docSnap => {
-          const p = docSnap.data();
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td><img src="${p.imageUrl}" alt="${p.name}"></td>
-            <td>${p.name}</td>
-            <td>₦${p.price.toFixed(2)}</td>
-            <td>${p.description}</td>
-            <td>${p.customizable ? "Yes" : "No"}</td>
-            <td>${p.published ? "Yes" : "No"}</td>
-            <td class="actions">
-              <button onclick="editProduct('${docSnap.id}', '${p.name}', '${p.description}', ${p.price}, '${p.imageUrl}', ${p.customizable}, ${p.published})">Edit</button>
-              <button onclick="deleteProduct('${docSnap.id}')">Delete</button>
-            </td>
-          `;
-          productsBody.appendChild(tr);
-        });
-      });
-    }
-
-    window.editProduct = (id, name, description, price, imageUrl, customizable, published) => {
-      productIdInput.value = id;
-      document.getElementById('name').value = name;
-      document.getElementById('description').value = description;
-      document.getElementById('price').value = price;
-      document.getElementById('imageUrl').value = imageUrl;
-      document.getElementById('customizable').value = customizable ? "true" : "false";
-      document.getElementById('published').value = published ? "true" : "false";
-      productMessage.textContent = "✏️ Editing product...";
-      productMessage.style.color = "blue";
-    };
-
-    window.deleteProduct = async (id) => {
-      if(confirm("Are you sure you want to delete this product?")) {
-        await deleteDoc(doc(db, "brands", "fleurdevie", "products", id));
-      }
-    };
-
-    /* ========== QUOTES ========== */
-    const quoteForm = document.getElementById('quoteForm');
-    const quoteMessage = document.getElementById('quoteMessage');
-    const quotesBody = document.getElementById('quotesBody');
-    let quoteItemsDiv = document.getElementById('quoteItems');
-
-    function addQuoteItem() {
-      const div = document.createElement("div");
-      div.innerHTML = `
-        <input type="text" placeholder="Item name" class="qItemName" required>
-        <input type="number" placeholder="Qty" class="qItemQty" required>
-        <input type="number" placeholder="Price" class="qItemPrice" required>
-        <input type="number" placeholder="Subtotal" class="qItemSubtotal" required>
+    // Add row in quote table
+    function addRow() {
+      const tbody = document.querySelector("#quoteTable tbody");
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td><input type="text" class="item-name" required></td>
+        <td><input type="number" class="qty" value="1" min="1"></td>
+        <td><input type="number" class="price" value="0" min="0"></td>
+        <td class="subtotal">0</td>
+        <td><input type="text" class="notes"></td>
+        <td><span class="remove-row" onclick="removeRow(this)">✖</span></td>
       `;
-      quoteItemsDiv.appendChild(div);
+      tbody.appendChild(row);
+      updateTotals();
+      row.querySelectorAll("input").forEach(input => input.addEventListener("input", updateTotals));
     }
 
-    quoteForm.addEventListener('submit', async (e) => {
+    // Remove row
+    function removeRow(el) {
+      el.closest("tr").remove();
+      updateTotals();
+    }
+
+    // Update totals
+    function updateTotals() {
+      let total = 0;
+      document.querySelectorAll("#quoteTable tbody tr").forEach(row => {
+        const qty = parseFloat(row.querySelector(".qty").value) || 0;
+        const price = parseFloat(row.querySelector(".price").value) || 0;
+        const subtotal = qty * price;
+        row.querySelector(".subtotal").textContent = subtotal;
+        total += subtotal;
+      });
+      document.getElementById("total").textContent = total;
+    }
+
+    // Handle form submit (demo)
+    document.getElementById("quoteForm").addEventListener("submit", function(e) {
       e.preventDefault();
-      const items = [];
-      document.querySelectorAll("#quoteItems div").forEach(div => {
-        items.push({
-          name: div.querySelector(".qItemName").value,
-          qty: parseInt(div.querySelector(".qItemQty").value),
-          price: parseFloat(div.querySelector(".qItemPrice").value),
-          subtotal: parseFloat(div.querySelector(".qItemSubtotal").value)
-        });
-      });
-      const quote = {
-        customer: document.getElementById('quoteCustomer').value,
-        phone: document.getElementById('quotePhone').value,
-        items,
-        total: parseFloat(document.getElementById('quoteTotal').value),
-        status: "Pending",
-        createdAt: serverTimestamp()
-      };
-      try {
-        await addDoc(collection(db, "brands", "fleurdevie", "quotes"), quote);
-        quoteMessage.textContent = "✅ Quote saved!";
-        quoteMessage.style.color = "green";
-        quoteForm.reset();
-        quoteItemsDiv.innerHTML = "";
-      } catch(err) {
-        console.error(err);
-        quoteMessage.textContent = "❌ Error saving quote.";
-        quoteMessage.style.color = "red";
-      }
+      alert("Quote saved successfully! (In real app: store to Firestore)");
     });
-
-    async function loadQuotes() {
-      const q = query(collection(db, "brands", "fleurdevie", "quotes"), orderBy("createdAt", "desc"));
-      onSnapshot(q, snapshot => {
-        quotesBody.innerHTML = "";
-        snapshot.forEach(docSnap => {
-          const qData = docSnap.data();
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td>${qData.customer}</td>
-            <td>${qData.phone}</td>
-            <td>₦${qData.total.toFixed(2)}</td>
-            <td>${qData.status}</td>
-            <td class="actions">
-              <button onclick="markQuotePaid('${docSnap.id}', '${qData.customer}', ${qData.total})">Mark Paid</button>
-              <button onclick="deleteQuote('${docSnap.id}')">Delete</button>
-            </td>
-          `;
-          quotesBody.appendChild(tr);
-        });
-      });
-    }
-
-    window.markQuotePaid = async (id, customer, total) => {
-      const order = {
-        customer,
-        total,
-        status: "Paid",
-        createdAt: serverTimestamp()
-      };
-      await addDoc(collection(db, "brands", "fleurdevie", "orders"), order);
-      await updateDoc(doc(db, "brands", "fleurdevie", "quotes", id), { status: "Paid" });
-    };
-
-    window.deleteQuote = async (id) => {
-      if(confirm("Delete this quote?")) {
-        await deleteDoc(doc(db, "brands", "fleurdevie", "quotes", id));
-      }
-    };
-
-    /* ========== ORDERS ========== */
-    const ordersBody = document.getElementById('ordersBody');
-
-    async function loadOrders() {
-      const q = query(collection(db, "brands", "fleurdevie", "orders"), orderBy("createdAt", "desc"));
-      onSnapshot(q, snapshot => {
-        ordersBody.innerHTML = "";
-        snapshot.forEach(docSnap => {
-          const o = docSnap.data();
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td>${docSnap.id}</td>
-            <td>${o.customer}</td>
-            <td>₦${o.total.toFixed(2)}</td>
-            <td>${o.status}</td>
-            <td class="actions">
-              ${o.status !== "Fulfilled" ? `<button onclick="markFulfilled('${docSnap.id}')">Mark Fulfilled</button>` : ""}
-              <button onclick="deleteOrder('${docSnap.id}')">Delete</button>
-            </td>
-          `;
-          ordersBody.appendChild(tr);
-        });
-      });
-    }
-
-    window.markFulfilled = async (id) => {
-      await updateDoc(doc(db, "brands", "fleurdevie", "orders", id), { status: "Fulfilled" });
-    };
-
-    window.deleteOrder = async (id) => {
-      if(confirm("Delete this order?")) {
-        await deleteDoc(doc(db, "brands", "fleurdevie", "orders", id));
-      }
-    };
-
   </script>
 </body>
 </html>
