@@ -37,7 +37,7 @@ a { text-decoration:none; color:inherit; }
 
 /* SEARCH + SORT + CURRENCY */
 .shop-controls { display:flex; justify-content:space-between; flex-wrap:wrap; margin-bottom:20px; gap:10px; align-items:center; }
-.shop-controls input, .shop-controls select { padding:8px; border-radius:6px; border:1px solid #112e1f; font-size:14px; }
+.shop-controls input { padding:8px; border-radius:6px; border:1px solid #112e1f; font-size:14px; flex:1; }
 .currency-filter-group { display:flex; gap:10px; align-items:center; }
 
 /* SHOP GRID */
@@ -163,6 +163,7 @@ footer { text-align:center; padding:20px; background:#112e1f; color:#F5E6CC; mar
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
 import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
   authDomain: "brandisby.firebaseapp.com",
@@ -171,7 +172,6 @@ const firebaseConfig = {
   messagingSenderId: "87213267039",
   appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
 };
-
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
@@ -182,17 +182,27 @@ const searchInput = document.getElementById('searchInput');
 const sortSelect = document.getElementById('sortSelect');
 const currencySelect = document.getElementById('currencySelect');
 
-let liveRates = { NGN:1, USD:1, EUR:1, GBP:1 }; // default
+let liveRates = { NGN:1, USD:450, EUR:500, GBP:580 };
 
+// Load live rates from API once
 async function fetchLiveRates(){
   try{
     const res = await fetch('https://api.exchangerate.host/latest?base=NGN&symbols=USD,EUR,GBP,NGN');
     const data = await res.json();
-    liveRates = { NGN:1, USD:data.rates.USD, EUR:data.rates.EUR, GBP:data.rates.GBP };
-  }catch(e){
-    console.error('Failed to fetch live rates, using default.');
-  }
+    liveRates = { NGN:1, USD:1/data.rates.USD, EUR:1/data.rates.EUR, GBP:1/data.rates.GBP };
+  }catch(e){ console.error('Failed to fetch rates, using default.'); }
 }
+
+// Sync currency across pages
+function syncCurrency(){
+  const stored = localStorage.getItem('currency');
+  if(stored) currencySelect.value = stored;
+  currencySelect.addEventListener('change', ()=>{
+    localStorage.setItem('currency', currencySelect.value);
+    loadProducts();
+  });
+}
+syncCurrency();
 
 function getCart(){ return JSON.parse(localStorage.getItem('cart')) || []; }
 function setCart(cart){ localStorage.setItem('cart', JSON.stringify(cart)); updateCartCount(); }
@@ -263,7 +273,7 @@ function displayProducts(products){
   filtered.forEach(p=>{
     const cartItem = cart.find(i=>i.id===p.id);
     const quantity = cartItem ? cartItem.quantity : 0;
-    const converted = p.price * liveRates[currency];
+    const converted = p.price / liveRates[currency]; // correct NGN → currency
     const priceFormatted = new Intl.NumberFormat(localeMap[currency], { style:'currency', currency, minimumFractionDigits: currency==='NGN'?0:2 }).format(converted);
 
     const div = document.createElement('div');
@@ -295,7 +305,6 @@ function truncateText(text, wordLimit){ return text.split(' ').slice(0,wordLimit
 
 searchInput.addEventListener('input',()=>loadProducts());
 sortSelect.addEventListener('change',()=>loadProducts());
-currencySelect.addEventListener('change',()=>loadProducts());
 
 document.getElementById('hamburger').addEventListener('click',()=>{
   document.querySelector('.header-right').classList.toggle('open');
@@ -310,15 +319,19 @@ updateCartCount();
 loadProducts();
 window.addEventListener('storage', updateCartCount);
 
-// Detect user country and set default currency
+// Detect user country and set default currency if not set
 fetch('https://ipapi.co/json/').then(res=>res.json()).then(data=>{
-  const country = data.country;
-  if(country==='US') currencySelect.value='USD';
-  else if(country==='GB') currencySelect.value='GBP';
-  else if(country==='NG') currencySelect.value='NGN';
-  else if(country==='DE' || country==='FR') currencySelect.value='EUR';
+  if(!localStorage.getItem('currency')){
+    const country = data.country;
+    if(country==='US') currencySelect.value='USD';
+    else if(country==='GB') currencySelect.value='GBP';
+    else if(country==='NG') currencySelect.value='NGN';
+    else if(country==='DE' || country==='FR') currencySelect.value='EUR';
+    localStorage.setItem('currency', currencySelect.value);
+  }
   loadProducts();
 }).catch(()=>{ loadProducts(); });
+
 </script>
 </body>
 </html>
