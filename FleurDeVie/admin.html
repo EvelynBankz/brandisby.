@@ -82,428 +82,266 @@
     <div class="section" id="productsSection">
       <h2>Manage Products</h2>
       <form id="productForm">
-        <input type="hidden" id="productId">
-        <label>Product Name</label><input type="text" id="name" required>
-        <label>Description</label><textarea id="description" required></textarea>
-        <label>Price (NGN)</label><input type="number" id="price" step="0.01" required>
-        <label>Image URL</label><input type="url" id="imageUrl" required>
-        <label>Published</label>
-        <select id="published"><option value="true">Yes</option><option value="false">No</option></select>
-        <button type="submit">Save Product</button>
-        <div class="message" id="message"></div>
+        <label>Name</label>
+        <input type="text" id="productName" required>
+        <label>Price</label>
+        <input type="number" id="productPrice" required>
+        <label>Description</label>
+        <textarea id="productDesc"></textarea>
+        <label>Image URL</label>
+        <input type="text" id="productImg">
+        <label>Customization Available</label>
+        <select id="productCustom">
+          <option value="false">No</option>
+          <option value="true">Yes</option>
+        </select>
+        <button type="submit">Add Product</button>
       </form>
-
-      <h2>All Products</h2>
-      <table><thead><tr><th>Image</th><th>Name</th><th>Price</th><th>Description</th><th>Published</th><th>Actions</th></tr></thead>
-      <tbody id="productsBody"></tbody></table>
+      <div id="productMessage" class="message"></div>
+      <table id="productsTable">
+        <thead>
+          <tr><th>Name</th><th>Price</th><th>Description</th><th>Image</th><th>Customization</th><th>Actions</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
     </div>
 
     <!-- QUOTES -->
     <div class="section" id="quotesSection">
       <h2>Generate Quote</h2>
       <form id="quoteForm">
-        <label>Customer Name</label><input type="text" id="customerName" required>
-        <label>Customer Email</label><input type="email" id="customerEmail" required>
+        <label>Customer Name</label>
+        <input type="text" id="quoteCustomer" required>
+        <label>Customer Email</label>
+        <input type="email" id="quoteEmail" required>
 
-        <h3>Items</h3>
-        <table id="quoteItems"><thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Subtotal</th><th></th></tr></thead><tbody></tbody></table>
-        <button type="button" onclick="addQuoteItem()">Add Item</button>
+        <h3>Quote Items</h3>
+        <div id="quoteItems"></div>
+        <button type="button" id="addQuoteItem">+ Add Item</button>
 
-        <h3>Total: ₦<span id="quoteTotal">0</span></h3>
-        <button type="submit">Generate Quote</button>
-        <div class="message" id="quoteMessage"></div>
+        <label>Total</label>
+        <input type="number" id="quoteTotal" required>
+
+        <button type="submit">Save Quote</button>
       </form>
-
-      <h2>All Quotes</h2>
-      <table><thead><tr><th>Customer</th><th>Email</th><th>Items</th><th>Total</th><th>Date</th></tr></thead>
-      <tbody id="quotesBody"></tbody></table>
+      <div id="quoteMessage" class="message"></div>
+      <table id="quotesTable">
+        <thead>
+          <tr><th>Customer</th><th>Email</th><th>Total</th><th>Status</th><th>Actions</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
     </div>
 
     <!-- ORDERS -->
     <div class="section" id="ordersSection">
-      <h2>Orders</h2>
-      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-        <button onclick="exportOrders()">⬇ Export Orders (CSV)</button>
-        <div class="small-note">Click <strong>Details</strong> to expand order items. Change the status and click <strong>Save</strong> to persist.</div>
-      </div>
-
-      <table>
+      <h2>Manage Orders</h2>
+      <table id="ordersTable">
         <thead>
-          <tr>
-            <th>ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Date</th><th>Actions</th>
-          </tr>
+          <tr><th>Order ID</th><th>Customer</th><th>Email</th><th>Total</th><th>Status</th><th>Actions</th></tr>
         </thead>
-        <tbody id="ordersBody"></tbody>
+        <tbody></tbody>
       </table>
+      <button id="exportOrders">Export Orders CSV</button>
     </div>
   </div>
 
   <!-- FIREBASE & LOGIC -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
-      apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
-      authDomain: "brandisby.firebaseapp.com",
-      projectId: "brandisby",
-      storageBucket: "brandisby.firebasestorage.app",
-      messagingSenderId: "87213267039",
-      appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_BUCKET",
+      messagingSenderId: "YOUR_SENDER",
+      appId: "YOUR_APP_ID"
     };
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    const allowedAdmins = ["yourstruly.fleurdevie@gmail.com"].map(e => e.toLowerCase().trim());
+    const allowedAdmins = ["admin@example.com"];
 
-    // DOM refs
     const loginForm = document.getElementById("loginForm");
     const loginMessage = document.getElementById("loginMessage");
     const loginContainer = document.getElementById("loginContainer");
     const dashboardContainer = document.getElementById("dashboardContainer");
 
-    // LOGIN
-    loginForm.addEventListener("submit", async e => {
+    loginForm.addEventListener("submit", async (e)=>{
       e.preventDefault();
-      const rawEmail = document.getElementById("loginEmail").value;
+      const email = document.getElementById("loginEmail").value;
       const password = document.getElementById("loginPassword").value;
-      loginMessage.textContent = "";
       try {
-        const userCredential = await signInWithEmailAndPassword(auth, rawEmail, password);
-        const user = userCredential.user;
-        const normalized = (user.email || "").toLowerCase().trim();
-        if (allowedAdmins.includes(normalized)) {
-          loginContainer.style.display = "none";
-          dashboardContainer.style.display = "block";
-          showSection("productsSection");
-          loadProducts(); loadQuotes(); loadOrders();
+        const userCred = await signInWithEmailAndPassword(auth,email,password);
+        if(allowedAdmins.includes(userCred.user.email)){
+          loginContainer.style.display="none";
+          dashboardContainer.style.display="block";
+          loadProducts();
+          loadQuotes();
+          loadOrders();
         } else {
-          loginMessage.textContent = "❌ Not authorized.";
-          loginMessage.style.color = "red";
-          await signOut(auth);
+          loginMessage.textContent="Not authorized.";
+          signOut(auth);
         }
-      } catch (err) {
-        loginMessage.textContent = `❌ ${err.code || ""}: ${err.message || err}`;
-        loginMessage.style.color = "red";
-      }
+      } catch(err){ loginMessage.textContent=err.message; }
     });
 
-    onAuthStateChanged(auth, user => {
-      if (user && allowedAdmins.includes((user.email || "").toLowerCase().trim())) {
-        loginContainer.style.display = "none";
-        dashboardContainer.style.display = "block";
-        showSection("productsSection");
-        loadProducts(); loadQuotes(); loadOrders();
-      } else {
-        loginContainer.style.display = "block";
-        dashboardContainer.style.display = "none";
-      }
-    });
-
-    // NAV
+    // Tabs
     document.querySelectorAll(".dashboard-nav button").forEach(btn=>{
-      btn.addEventListener("click", ()=> showSection(btn.dataset.target));
+      btn.addEventListener("click", ()=>{
+        document.querySelectorAll(".section").forEach(sec=>sec.classList.remove("active"));
+        document.getElementById(btn.dataset.target).classList.add("active");
+      });
     });
-    function showSection(id){
-      document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
-      document.getElementById(id).classList.add("active");
-    }
 
-    // === PRODUCTS CRUD ===
-    const productForm = document.getElementById('productForm');
-    const message = document.getElementById('message');
-    const productsBody = document.getElementById('productsBody');
-    const productIdInput = document.getElementById('productId');
-
-    productForm.addEventListener('submit', async (e) => {
+    /* ---------------- PRODUCTS ---------------- */
+    const productForm=document.getElementById("productForm");
+    const productMessage=document.getElementById("productMessage");
+    const productsTable=document.querySelector("#productsTable tbody");
+    productForm.addEventListener("submit", async(e)=>{
       e.preventDefault();
-      const id = productIdInput.value;
-      const product = {
-        name: document.getElementById('name').value,
-        description: document.getElementById('description').value,
-        price: parseFloat(document.getElementById('price').value),
-        imageUrl: document.getElementById('imageUrl').value,
-        published: document.getElementById('published').value === "true",
-        updatedAt: serverTimestamp()
+      const data={
+        name:document.getElementById("productName").value,
+        price:+document.getElementById("productPrice").value,
+        desc:document.getElementById("productDesc").value,
+        img:document.getElementById("productImg").value,
+        custom:document.getElementById("productCustom").value==="true"
       };
-
-      try {
-        if (id) {
-          await updateDoc(doc(db, "brands", "fleurdevie", "products", id), product);
-          message.textContent = "✅ Product updated!";
-        } else {
-          product.createdAt = serverTimestamp();
-          await addDoc(collection(db, "brands", "fleurdevie", "products"), product);
-          message.textContent = "✅ Product added!";
-        }
-        message.style.color = "green";
-        productForm.reset();
-        productIdInput.value = "";
-      } catch (err) {
-        message.textContent = "❌ Error saving product.";
-        message.style.color = "red";
-      }
+      await addDoc(collection(db,"products"),data);
+      productMessage.textContent="Product added.";
+      loadProducts();
+      productForm.reset();
     });
-
-    async function loadProducts() {
-      const productsCol = collection(db, "brands", "fleurdevie", "products");
-      const q = query(productsCol, orderBy("createdAt", "desc"));
-      onSnapshot(q, snapshot => {
-        productsBody.innerHTML = "";
-        snapshot.forEach(docSnap => {
-          const p = docSnap.data();
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td><img src="${p.imageUrl}" alt="${p.name}"></td>
-            <td>${p.name}</td>
-            <td>₦${p.price?.toFixed(2) ?? p.price}</td>
-            <td>${p.description}</td>
-            <td>${p.published ? "Yes" : "No"}</td>
-            <td class="actions">
-              <button onclick="editProduct('${docSnap.id}', ${JSON.stringify(p.name)}, ${JSON.stringify(p.description)}, ${p.price}, ${JSON.stringify(p.imageUrl)}, ${p.published})">Edit</button>
-              <button onclick="deleteProduct('${docSnap.id}')">Delete</button>
-            </td>
-          `;
-          productsBody.appendChild(tr);
-        });
+    async function loadProducts(){
+      productsTable.innerHTML="";
+      const snap=await getDocs(collection(db,"products"));
+      snap.forEach(docSnap=>{
+        const p=docSnap.data();
+        const row=document.createElement("tr");
+        row.innerHTML=`
+          <td>${p.name}</td>
+          <td>${p.price}</td>
+          <td>${p.desc}</td>
+          <td><img src="${p.img}"/></td>
+          <td>${p.custom?"Yes":"No"}</td>
+          <td class="actions">
+            <button onclick="deleteProduct('${docSnap.id}')">Delete</button>
+          </td>`;
+        productsTable.appendChild(row);
       });
     }
+    window.deleteProduct=async(id)=>{ await deleteDoc(doc(db,"products",id)); loadProducts(); };
 
-    window.editProduct = (id, name, description, price, imageUrl, published) => {
-      productIdInput.value = id;
-      document.getElementById('name').value = name;
-      document.getElementById('description').value = description;
-      document.getElementById('price').value = price;
-      document.getElementById('imageUrl').value = imageUrl;
-      document.getElementById('published').value = published ? "true" : "false";
-      message.textContent = "✏️ Editing product...";
-      message.style.color = "blue";
-    };
-
-    window.deleteProduct = async (id) => {
-      if (confirm("Are you sure you want to delete this product?")) {
-        await deleteDoc(doc(db, "brands", "fleurdevie", "products", id));
-      }
-    };
-
-    // === QUOTES ===
-    function addQuoteItem(){
-      const row = document.createElement("tr");
-      row.innerHTML = `<td><input type="text" placeholder="Item name"></td>
-        <td><input type="number" value="1" min="1" onchange="updateQuoteTotal()"></td>
-        <td><input type="number" value="0" min="0" onchange="updateQuoteTotal()"></td>
-        <td class="subtotal">0</td>
-        <td><button type="button" onclick="this.closest('tr').remove();updateQuoteTotal()">x</button></td>`;
-      document.querySelector("#quoteItems tbody").appendChild(row);
-    }
-    window.addQuoteItem = addQuoteItem;
-
-    function updateQuoteTotal(){
-      let t = 0;
-      document.querySelectorAll("#quoteItems tbody tr").forEach(r=>{
-        const q = +r.children[1].children[0].value || 0;
-        const p = +r.children[2].children[0].value || 0;
-        const s = q * p;
-        r.querySelector(".subtotal").textContent = s;
-        t += s;
-      });
-      document.getElementById("quoteTotal").textContent = t;
-    }
-    window.updateQuoteTotal = updateQuoteTotal;
-
-    const quoteForm = document.getElementById("quoteForm");
-    const quoteMessage = document.getElementById("quoteMessage");
-    const quotesBody = document.getElementById("quotesBody");
-
-    quoteForm.addEventListener("submit", async e => {
+    /* ---------------- QUOTES ---------------- */
+    const quoteForm=document.getElementById("quoteForm");
+    const quoteMessage=document.getElementById("quoteMessage");
+    const quotesTable=document.querySelector("#quotesTable tbody");
+    const quoteItemsDiv=document.getElementById("quoteItems");
+    document.getElementById("addQuoteItem").addEventListener("click",()=>{
+      const div=document.createElement("div");
+      div.innerHTML=`
+        <label>Item Name</label><input type="text" class="qi-name">
+        <label>Qty</label><input type="number" class="qi-qty">
+        <label>Price</label><input type="number" class="qi-price">
+        <label>Description</label><input type="text" class="qi-desc">`;
+      quoteItemsDiv.appendChild(div);
+    });
+    quoteForm.addEventListener("submit", async(e)=>{
       e.preventDefault();
-      const items = [...document.querySelectorAll("#quoteItems tbody tr")].map(r => ({
-        name: r.children[0].children[0].value,
-        qty: +r.children[1].children[0].value,
-        price: +r.children[2].children[0].value
+      const items=[...document.querySelectorAll("#quoteItems div")].map(div=>({
+        name:div.querySelector(".qi-name").value,
+        qty:+div.querySelector(".qi-qty").value,
+        price:+div.querySelector(".qi-price").value,
+        desc:div.querySelector(".qi-desc").value
       }));
-      const total = items.reduce((s,i)=>s + (i.qty * i.price), 0);
-      try {
-        await addDoc(collection(db, "brands", "fleurdevie", "quotes"), {
-          customerName: document.getElementById("customerName").value,
-          customerEmail: document.getElementById("customerEmail").value,
-          items,
-          total,
-          createdAt: serverTimestamp()
-        });
-        quoteForm.reset();
-        document.querySelector("#quoteItems tbody").innerHTML = "";
-        document.getElementById("quoteTotal").textContent = "0";
-        quoteMessage.textContent = "✅ Quote generated!";
-        quoteMessage.style.color = "green";
-      } catch (err) {
-        quoteMessage.textContent = "❌ Error generating quote.";
-        quoteMessage.style.color = "red";
-      }
+      const data={
+        customer:document.getElementById("quoteCustomer").value,
+        email:document.getElementById("quoteEmail").value,
+        items,
+        total:+document.getElementById("quoteTotal").value,
+        status:"Pending"
+      };
+      await addDoc(collection(db,"quotes"),data);
+      quoteMessage.textContent="Quote saved.";
+      loadQuotes();
+      quoteForm.reset(); quoteItemsDiv.innerHTML="";
     });
+    async function loadQuotes(){
+      quotesTable.innerHTML="";
+      const snap=await getDocs(collection(db,"quotes"));
+      snap.forEach(docSnap=>{
+        const q=docSnap.data();
+        const row=document.createElement("tr");
+        row.innerHTML=`<td>${q.customer}</td><td>${q.email}</td><td>${q.total}</td><td>${q.status}</td><td></td>`;
+        quotesTable.appendChild(row);
+      });
+    }
 
-    function loadQuotes(){
-      onSnapshot(query(collection(db, "brands", "fleurdevie", "quotes"), orderBy("createdAt", "desc")), snapshot=>{
-        quotesBody.innerHTML = "";
-        snapshot.forEach(docSnap=>{
-          const qd = docSnap.data();
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td>${qd.customerName}</td>
-            <td>${qd.customerEmail}</td>
-            <td>${(qd.items||[]).map(i=>`${i.name} x${i.qty}`).join(", ")}</td>
-            <td>₦${(qd.total || 0).toFixed ? qd.total.toFixed(2) : qd.total}</td>
-            <td>${qd.createdAt?.toDate?.().toLocaleString?.() || ""}</td>
-          `;
-          quotesBody.appendChild(tr);
+    /* ---------------- ORDERS ---------------- */
+    const ordersTable=document.querySelector("#ordersTable tbody");
+    document.getElementById("exportOrders").addEventListener("click", exportOrdersCSV);
+
+    async function loadOrders(){
+      ordersTable.innerHTML="";
+      const snap=await getDocs(collection(db,"orders"));
+      snap.forEach(docSnap=>{
+        const o=docSnap.data();
+        const row=document.createElement("tr");
+        row.innerHTML=`
+          <td>${docSnap.id}</td>
+          <td>${o.customer||""}</td>
+          <td>${o.email||""}</td>
+          <td>${o.total||0}</td>
+          <td>
+            <select onchange="updateOrderStatus('${docSnap.id}',this.value)">
+              <option ${o.status==="Pending"?"selected":""}>Pending</option>
+              <option ${o.status==="Paid"?"selected":""}>Paid</option>
+              <option ${o.status==="Processing"?"selected":""}>Processing</option>
+              <option ${o.status==="Shipped"?"selected":""}>Shipped</option>
+              <option ${o.status==="Completed"?"selected":""}>Completed</option>
+              <option ${o.status==="Cancelled"?"selected":""}>Cancelled</option>
+            </select>
+          </td>
+          <td><button onclick="toggleDetails(this)">Details</button></td>
+        `;
+        ordersTable.appendChild(row);
+        const details=document.createElement("tr");
+        details.classList.add("details-row");
+        details.style.display="none";
+        let itemsHTML="";
+        (o.items||[]).forEach(it=>{
+          itemsHTML+=`<div>${it.name} x${it.qty} @ ${it.price} = ${it.qty*it.price}</div>`;
         });
+        details.innerHTML=`<td colspan="6"><strong>Items:</strong><br>${itemsHTML}<br><strong>Address:</strong> ${o.address||""}</td>`;
+        ordersTable.appendChild(details);
       });
     }
-
-    // === ORDERS MANAGEMENT ===
-    const ordersBody = document.getElementById("ordersBody");
-
-    function createStatusSelect(current){
-      const statuses = ["Pending","Paid","Processing","Shipped","Completed","Cancelled"];
-      let html = `<select class="status-select">`;
-      statuses.forEach(s => {
-        html += `<option value="${s}" ${s === current ? "selected" : ""}>${s}</option>`;
-      });
-      html += `</select>`;
-      return html;
-    }
-
-    async function updateOrderStatus(orderId, newStatus, buttonEl){
-      try {
-        await updateDoc(doc(db, "brands", "fleurdevie", "orders", orderId), { status: newStatus, updatedAt: serverTimestamp() });
-        // visual feedback
-        if(buttonEl){
-          const old = buttonEl.textContent;
-          buttonEl.textContent = "Saved";
-          setTimeout(()=> buttonEl.textContent = old, 1200);
-        }
-      } catch(err) {
-        console.error("Failed to update order status:", err);
-        alert("Error updating status. Check console.");
-      }
-    }
-
-    function formatCurrency(n){ return `₦${(n||0).toFixed ? n.toFixed(2) : n}`; }
-
-    function toggleDetailsRow(afterTr, orderId, orderData){
-      // remove existing details if present
-      const next = afterTr.nextElementSibling;
-      if(next && next.classList.contains('details-row') && next.dataset.orderId === orderId){
-        next.remove();
-        return;
-      }
-
-      // create details row
-      const detailsTr = document.createElement('tr');
-      detailsTr.classList.add('details-row');
-      detailsTr.dataset.orderId = orderId;
-
-      const items = orderData.items || [];
-      const itemsHtml = items.length ? `
-        <table style="width:100%;border-collapse:collapse;">
-          <thead><tr style="background:#F5E6CC;"><th>Product</th><th>Qty</th><th>Price</th><th>Subtotal</th></tr></thead>
-          <tbody>
-            ${items.map(it => `<tr><td>${it.name}</td><td>${it.qty}</td><td>${formatCurrency(it.price)}</td><td>${formatCurrency(it.qty*it.price)}</td></tr>`).join('')}
-          </tbody>
-        </table>
-      ` : `<div>No items recorded for this order.</div>`;
-
-      const customerInfo = orderData.customerEmail ? `<div><strong>Email:</strong> ${orderData.customerEmail}</div>` : '';
-      const addressInfo = orderData.address ? `<div><strong>Address:</strong> ${orderData.address}</div>` : '';
-
-      detailsTr.innerHTML = `<td colspan="7">${itemsHtml}${customerInfo}${addressInfo}</td>`;
-      // insert after the main row
-      afterTr.parentNode.insertBefore(detailsTr, afterTr.nextSibling);
-    }
-
-    function loadOrders(){
-      onSnapshot(query(collection(db, "brands", "fleurdevie", "orders"), orderBy("createdAt", "desc")), snap=>{
-        ordersBody.innerHTML = "";
-        snap.forEach(docSnap=>{
-          const o = docSnap.data();
-          const orderId = docSnap.id;
-          const itemsSummary = (o.items||[]).map(i=>`${i.name} x${i.qty}`).join(", ");
-          const total = o.total || 0;
-          const dateStr = o.createdAt?.toDate?.().toLocaleString?.() || "";
-
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${orderId}</td>
-            <td>${o.customerName || o.customer || "-"}</td>
-            <td style="max-width:260px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${itemsSummary}</td>
-            <td>${formatCurrency(total)}</td>
-            <td>${createStatusSelect(o.status || "Pending")}</td>
-            <td>${dateStr}</td>
-            <td>
-              <button class="save-status">Save</button>
-              <button class="toggle-details">Details</button>
-            </td>
-          `;
-
-          // attach dataset (for CSV/export)
-          tr.setAttribute("data-items", JSON.stringify(o.items || []));
-          tr.setAttribute("data-customer", o.customerName || o.customer || "");
-          tr.setAttribute("data-total", total || 0);
-          tr.setAttribute("data-status", o.status || "Pending");
-          ordersBody.appendChild(tr);
-
-          // add event listeners
-          const saveBtn = tr.querySelector('.save-status');
-          const statusSelect = tr.querySelector('.status-select');
-          saveBtn.addEventListener('click', ()=> {
-            const newStatus = statusSelect.value;
-            updateOrderStatus(orderId, newStatus, saveBtn);
-            // update attribute for export
-            tr.setAttribute('data-status', newStatus);
-          });
-
-          const detailsBtn = tr.querySelector('.toggle-details');
-          detailsBtn.addEventListener('click', ()=> toggleDetailsRow(tr, orderId, o));
-        });
-      });
-    }
-
-    window.exportOrders = function(){
-      const rows = [];
-      rows.push(["Order ID","Customer","Product","Qty","Price","Subtotal","Order Total","Status","Date"].join(","));
-      document.querySelectorAll("#ordersBody tr").forEach(tr=>{
-        const orderId = tr.children[0].innerText;
-        const customer = tr.getAttribute("data-customer") || tr.children[1].innerText;
-        const total = tr.getAttribute("data-total") || tr.children[3].innerText.replace(/₦/g,"");
-        const status = tr.getAttribute("data-status") || tr.children[4].innerText;
-        const items = JSON.parse(tr.getAttribute("data-items") || "[]");
-        if(items.length){
-          items.forEach(item=>{
-            rows.push([orderId, `"${customer}"`, `"${item.name}"`, item.qty, item.price, item.qty * item.price, total, status, ""].join(","));
-          });
-        } else {
-          rows.push([orderId, `"${customer}"`, "-", "-", "-", "-", total, status, ""].join(","));
-        }
-      });
-      const csv = "data:text/csv;charset=utf-8," + rows.join("\n");
-      const link = document.createElement("a");
-      link.href = encodeURI(csv);
-      link.download = "orders.csv";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+    window.toggleDetails=(btn)=>{
+      const detailsRow=btn.parentElement.parentElement.nextElementSibling;
+      detailsRow.style.display=detailsRow.style.display==="none"?"table-row":"none";
     };
+    window.updateOrderStatus=async(id,status)=>{ await updateDoc(doc(db,"orders",id),{status}); loadOrders(); };
 
-    // Initialize small UI: show product section button behavior
-    document.querySelectorAll(".dashboard-nav button").forEach(btn=>btn.addEventListener("click", ()=>showSection(btn.dataset.target)));
-
-    // Expose load functions globally (for login)
-    window.loadProducts = loadProducts;
-    window.loadQuotes = loadQuotes;
-    window.loadOrders = loadOrders;
+    async function exportOrdersCSV(){
+      const snap=await getDocs(collection(db,"orders"));
+      let csv="OrderID,Customer,Email,Status,Item,Qty,Price,Subtotal\n";
+      snap.forEach(docSnap=>{
+        const o=docSnap.data();
+        (o.items||[]).forEach(it=>{
+          csv+=`${docSnap.id},${o.customer||""},${o.email||""},${o.status||""},${it.name},${it.qty},${it.price},${it.qty*it.price}\n`;
+        });
+      });
+      const blob=new Blob([csv],{type:"text/csv"});
+      const link=document.createElement("a");
+      link.href=URL.createObjectURL(blob);
+      link.download="orders.csv";
+      link.click();
+    }
   </script>
 </body>
 </html>
