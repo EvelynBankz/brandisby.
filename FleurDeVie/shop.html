@@ -37,8 +37,9 @@ a { text-decoration:none; color:inherit; }
 
 /* SEARCH + SORT + CURRENCY */
 .shop-controls { display:flex; justify-content:space-between; flex-wrap:wrap; margin-bottom:20px; gap:10px; align-items:center; }
-.shop-controls input { padding:8px; border-radius:6px; border:1px solid #112e1f; font-size:14px; flex:1; max-width:300px; }
-.currency-filter-group { display:flex; gap:10px; align-items:center; }
+.shop-controls input,
+.shop-controls select { padding:8px; border-radius:6px; border:1px solid #112e1f; font-size:14px; flex:1; max-width:300px; } 
+.currency-filter-group { display:flex; gap:10px; align-items:center; flex:1; max-width:300px; }
 
 /* SHOP GRID */
 section.shop { padding:80px 20px; background:#F5E6CC; }
@@ -58,25 +59,7 @@ h2 { text-align:center; font-size:24px; font-family:"Playfair Display", serif; m
 .quantity-badge { font-weight:600; }
 
 /* CUSTOMIZE BUTTON */
-.customize-badge {
-  position:absolute;
-  top:10px;
-  right:10px;
-  background:#FFD6BA;
-  color:#112e1f;
-  font-size:12px;
-  padding:6px 10px;
-  border-radius:8px;
-  font-weight:600;
-  cursor:pointer;
-  z-index:2;
-  display:flex;
-  align-items:center;
-  gap:4px;
-  box-shadow:0 2px 6px rgba(0,0,0,0.2);
-  border:2px solid #112e1f;
-  transition: 0.2s;
-}
+.customize-badge { position:absolute; top:10px; right:10px; background:#FFD6BA; color:#112e1f; font-size:12px; padding:6px 10px; border-radius:8px; font-weight:600; cursor:pointer; z-index:2; display:flex; align-items:center; gap:4px; box-shadow:0 2px 6px rgba(0,0,0,0.2); border:2px solid #112e1f; transition:0.2s; }
 .customize-badge:hover { background:#112e1f; color:#FFD6BA; }
 
 /* FOOTER */
@@ -163,7 +146,6 @@ footer { text-align:center; padding:20px; background:#112e1f; color:#F5E6CC; mar
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
 import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
   authDomain: "brandisby.firebaseapp.com",
@@ -182,9 +164,8 @@ const searchInput = document.getElementById('searchInput');
 const sortSelect = document.getElementById('sortSelect');
 const currencySelect = document.getElementById('currencySelect');
 
-let liveRates = { NGN:1, USD:450, EUR:500, GBP:580 };
+let liveRates = { NGN:1, USD:0.0022, EUR:0.002, GBP:0.0017 };
 
-// Load live rates
 async function fetchLiveRates(){
   try{
     const res = await fetch('https://api.exchangerate.host/latest?base=NGN&symbols=USD,EUR,GBP');
@@ -193,7 +174,6 @@ async function fetchLiveRates(){
   }catch(e){ console.error('Failed to fetch rates, using default.'); }
 }
 
-// Sync currency across pages
 function syncCurrency(){
   const stored = localStorage.getItem('currency');
   if(stored) currencySelect.value = stored;
@@ -273,7 +253,7 @@ function displayProducts(products){
   filtered.forEach(p=>{
     const cartItem = cart.find(i=>i.id===p.id);
     const quantity = cartItem ? cartItem.quantity : 0;
-    const converted = p.price * liveRates[currency]; // ✅ Corrected conversion
+    const converted = p.price * liveRates[currency]; // ✅ Correct conversion
     const priceFormatted = new Intl.NumberFormat(localeMap[currency], { style:'currency', currency, minimumFractionDigits: currency==='NGN'?0:2 }).format(converted);
 
     const div = document.createElement('div');
@@ -319,7 +299,6 @@ updateCartCount();
 loadProducts();
 window.addEventListener('storage', updateCartCount);
 
-// Detect user country and set default currency if not set
 fetch('https://ipapi.co/json/').then(res=>res.json()).then(data=>{
   if(!localStorage.getItem('currency')){
     const country = data.country;
