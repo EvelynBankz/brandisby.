@@ -6,8 +6,9 @@
   <title>Fleur De Vie Admin Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
   <style>
+    /* RESET & BASE */
     * { box-sizing:border-box; margin:0; padding:0; }
-    body { font-family:"Montserrat", sans-serif; background:#F5E6CC; color:#112e1f; line-height:1.6; }
+    body { font-family: "Montserrat", sans-serif; background:#F5E6CC; color:#112e1f; line-height:1.6; }
     a { text-decoration:none; color:inherit; }
 
     header { background:#112e1f; color:#FFD6BA; padding:16px; text-align:center; font-family:"Playfair Display", serif; font-size:24px; font-weight:700; }
@@ -32,18 +33,7 @@
     .actions button { margin-right:0.5rem; padding:0.4rem 0.6rem; font-size:0.9rem; }
     .actions button:hover { opacity:0.85; }
 
-    .section-toggle { 
-      width:100%; text-align:left; font-size:1.1rem; 
-      background:#112e1f; color:#FFD6BA; border:none; 
-      padding:0.8rem 1rem; margin-top:1rem; border-radius:6px; cursor:pointer;
-    }
-    .section { display:none; margin-top:1rem; }
-
-    @media(max-width:600px){
-      .container { padding:1rem; }
-      table, th, td { font-size:0.85rem; }
-      th, td { padding:0.5rem; }
-    }
+    .quote-link { color:#112e1f; font-weight:600; text-decoration:underline; }
   </style>
 </head>
 <body>
@@ -68,90 +58,87 @@
   <!-- DASHBOARD -->
   <div class="container" id="dashboardContainer" style="display:none;">
 
-    <!-- TOGGLE BUTTONS -->
-    <button class="section-toggle" onclick="toggleSection('productsSection')">📦 Manage Products</button>
-    <div class="section" id="productsSection">
-      <!-- Product Form -->
-      <form id="productForm">
-        <input type="hidden" id="productId">
+    <!-- Product Form -->
+    <form id="productForm">
+      <input type="hidden" id="productId">
 
-        <label for="name">Product Name</label>
-        <input type="text" id="name" required>
+      <label for="name">Product Name</label>
+      <input type="text" id="name" required>
 
-        <label for="description">Description</label>
-        <textarea id="description" required></textarea>
+      <label for="description">Description</label>
+      <textarea id="description" required></textarea>
 
-        <label for="price">Price (NGN)</label>
-        <input type="number" id="price" step="0.01" required>
+      <label for="price">Price (NGN)</label>
+      <input type="number" id="price" step="0.01" required>
 
-        <label for="imageUrl">Image URL</label>
-        <input type="url" id="imageUrl" placeholder="https://example.com/image.jpg" required>
+      <label for="imageUrl">Image URL</label>
+      <input type="url" id="imageUrl" placeholder="https://example.com/image.jpg" required>
 
-        <label for="published">Published</label>
-        <select id="published">
-          <option value="true">Yes</option>
-          <option value="false">No</option>
-        </select>
+      <label for="published">Published</label>
+      <select id="published">
+        <option value="true">Yes</option>
+        <option value="false">No</option>
+      </select>
 
-        <label for="customizable">Customizable</label>
-        <select id="customizable">
-          <option value="false">No</option>
-          <option value="true">Yes</option>
-        </select>
+      <label for="customizable">Customization Available?</label>
+      <select id="customizable">
+        <option value="false">No</option>
+        <option value="true">Yes</option>
+      </select>
 
-        <button type="submit">Save Product</button>
-        <div class="message" id="message"></div>
-      </form>
+      <button type="submit">Save Product</button>
+      <div class="message" id="message"></div>
+    </form>
 
-      <!-- Products Table -->
-      <h2>All Products</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Image</th>
-            <th>Name</th>
-            <th>Price</th>
-            <th>Description</th>
-            <th>Published</th>
-            <th>Customizable</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody id="productsBody"></tbody>
-      </table>
-    </div>
+    <!-- Products Table -->
+    <h2>All Products</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Image</th>
+          <th>Name</th>
+          <th>Price</th>
+          <th>Description</th>
+          <th>Published</th>
+          <th>Customizable</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="productsBody"></tbody>
+    </table>
 
-    <button class="section-toggle" onclick="toggleSection('quotesSection')">📝 Generate Quotes</button>
-    <div class="section" id="quotesSection">
-      <form id="quoteForm">
-        <label for="quoteCustomer">Customer Name</label>
-        <input type="text" id="quoteCustomer" required>
+    <!-- Quotes Section -->
+    <h2>Create Quote</h2>
+    <form id="quoteForm">
+      <label for="customerName">Customer Name</label>
+      <input type="text" id="customerName" required>
 
-        <label for="quoteEmail">Customer Email</label>
-        <input type="email" id="quoteEmail" required>
+      <label for="customerContact">Customer Contact (Phone/Email)</label>
+      <input type="text" id="customerContact" required>
 
-        <label for="quoteItems">Quote Items (JSON format)</label>
-        <textarea id="quoteItems" placeholder='[{"name":"Rose Bouquet","price":5000,"qty":2}]' required></textarea>
+      <label for="quoteDescription">Quote Description</label>
+      <textarea id="quoteDescription" required></textarea>
 
-        <button type="submit">Generate Quote</button>
-        <div class="message" id="quoteMessage"></div>
-      </form>
+      <label for="quoteAmount">Quote Amount (NGN)</label>
+      <input type="number" id="quoteAmount" step="0.01" required>
 
-      <h2>Quotes</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Customer</th>
-            <th>Email</th>
-            <th>Items</th>
-            <th>Total</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-        <tbody id="quotesBody"></tbody>
-      </table>
-    </div>
+      <button type="submit">Generate Quote</button>
+      <div class="message" id="quoteMessage"></div>
+    </form>
 
+    <h2>All Quotes</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Customer</th>
+          <th>Contact</th>
+          <th>Description</th>
+          <th>Amount</th>
+          <th>Payment Link</th>
+        </tr>
+      </thead>
+      <tbody id="quotesBody"></tbody>
+    </table>
   </div>
 
   <!-- Firebase SDKs -->
@@ -187,8 +174,6 @@
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
         if (allowedAdmins.includes(user.email)) {
-          loginMessage.textContent = "✅ Login successful!";
-          loginMessage.style.color = "green";
           loginContainer.style.display = "none";
           dashboardContainer.style.display = "block";
           loadProducts();
@@ -199,7 +184,6 @@
           await signOut(auth);
         }
       } catch (err) {
-        console.error(err);
         loginMessage.textContent = `❌ ${err.code}: ${err.message}`;
         loginMessage.style.color = "red";
       }
@@ -217,12 +201,7 @@
       }
     });
 
-    function toggleSection(id){
-      const section = document.getElementById(id);
-      section.style.display = section.style.display === "block" ? "none" : "block";
-    }
-
-    // =================== PRODUCTS ===================
+    // Product Management
     const form = document.getElementById('productForm');
     const message = document.getElementById('message');
     const productsBody = document.getElementById('productsBody');
@@ -256,7 +235,6 @@
         form.reset();
         productIdInput.value = "";
       } catch(err) {
-        console.error(err);
         message.textContent = "❌ Error saving product.";
         message.style.color = "red";
       }
@@ -306,48 +284,49 @@
       }
     };
 
-    // =================== QUOTES ===================
+    // Quotes Management
     const quoteForm = document.getElementById("quoteForm");
     const quoteMessage = document.getElementById("quoteMessage");
     const quotesBody = document.getElementById("quotesBody");
 
-    quoteForm.addEventListener("submit", async (e)=>{
+    quoteForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      try{
-        const customer = document.getElementById("quoteCustomer").value;
-        const email = document.getElementById("quoteEmail").value;
-        const items = JSON.parse(document.getElementById("quoteItems").value);
-        const total = items.reduce((sum, i)=> sum + (i.price * i.qty), 0);
+      const quote = {
+        customerName: document.getElementById("customerName").value,
+        customerContact: document.getElementById("customerContact").value,
+        description: document.getElementById("quoteDescription").value,
+        amount: parseFloat(document.getElementById("quoteAmount").value),
+        createdAt: serverTimestamp(),
+        status: "pending"
+      };
 
-        await addDoc(collection(db, "brands","fleurdevie","quotes"), {
-          customer, email, items, total,
-          createdAt: serverTimestamp()
-        });
-
-        quoteMessage.textContent = "✅ Quote saved!";
+      try {
+        const quotesCol = collection(db, "brands", "fleurdevie", "quotes");
+        await addDoc(quotesCol, quote);
+        quoteMessage.textContent = "✅ Quote created!";
         quoteMessage.style.color = "green";
         quoteForm.reset();
-      }catch(err){
-        console.error(err);
-        quoteMessage.textContent = "❌ Error saving quote.";
+      } catch(err) {
+        quoteMessage.textContent = "❌ Error creating quote.";
         quoteMessage.style.color = "red";
       }
     });
 
-    async function loadQuotes(){
-      const quotesCol = collection(db,"brands","fleurdevie","quotes");
-      const q = query(quotesCol, orderBy("createdAt","desc"));
-      onSnapshot(q, snapshot=>{
-        quotesBody.innerHTML="";
-        snapshot.forEach(docSnap=>{
+    async function loadQuotes() {
+      const quotesCol = collection(db, "brands", "fleurdevie", "quotes");
+      const q = query(quotesCol, orderBy("createdAt", "desc"));
+      onSnapshot(q, snapshot => {
+        quotesBody.innerHTML = "";
+        snapshot.forEach(docSnap => {
           const qData = docSnap.data();
+          const paymentLink = `checkout.html?quoteId=${docSnap.id}`;
           const tr = document.createElement("tr");
           tr.innerHTML = `
-            <td>${qData.customer}</td>
-            <td>${qData.email}</td>
-            <td>${qData.items.map(i=> `${i.name} x${i.qty}`).join(", ")}</td>
-            <td>₦${qData.total.toFixed(2)}</td>
-            <td>${qData.createdAt?.toDate().toLocaleString() || ""}</td>
+            <td>${qData.customerName}</td>
+            <td>${qData.customerContact}</td>
+            <td>${qData.description}</td>
+            <td>₦${qData.amount.toFixed(2)}</td>
+            <td><a class="quote-link" href="${paymentLink}" target="_blank">Payment Link</a></td>
           `;
           quotesBody.appendChild(tr);
         });
