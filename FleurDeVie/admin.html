@@ -105,7 +105,11 @@
         <option value="true">Yes</option>
       </select>
 
-      <label><input type="checkbox" id="productPublished"> Published</label>
+      <label>Published</label>
+      <select id="productPublished">
+        <option value="false">No</option>
+        <option value="true">Yes</option>
+      </select>
 
       <button type="submit">Add Product</button>
     </form>
@@ -192,16 +196,13 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// allowed admins
 const allowedAdmins = ["yourstruly.fleurdevie@gmail.com"].map(e => e.toLowerCase().trim());
 
-// DOM refs
 const loginForm = document.getElementById("loginForm");
 const loginMessage = document.getElementById("loginMessage");
 const loginContainer = document.getElementById("loginContainer");
 const dashboardContainer = document.getElementById("dashboardContainer");
 
-// Orders filter/search refs
 const ordersTable = document.querySelector("#ordersTable tbody");
 const searchInput = document.getElementById("orderSearch");
 const statusFilter = document.getElementById("orderStatusFilter");
@@ -209,7 +210,6 @@ const exportBtn = document.getElementById("exportOrders");
 
 let allOrders = [];
 
-// --- AUTH ---
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   loginMessage.textContent = "";
@@ -237,7 +237,6 @@ loginForm.addEventListener("submit", async (e) => {
   }
 });
 
-// Auto-handle persisted session
 onAuthStateChanged(auth, user => {
   if (user && allowedAdmins.includes((user.email || "").toLowerCase().trim())) {
     loginContainer.style.display = "none";
@@ -252,7 +251,6 @@ onAuthStateChanged(auth, user => {
   }
 });
 
-// Tab nav behavior
 document.querySelectorAll(".dashboard-nav button").forEach(btn => {
   btn.addEventListener("click", () => showSection(btn.dataset.target));
 });
@@ -266,7 +264,6 @@ const productForm = document.getElementById("productForm");
 const productMessage = document.getElementById("productMessage");
 const productsTable = document.querySelector("#productsTable tbody");
 
-// Save original form submit
 let productFormSubmit = productForm.onsubmit;
 
 productForm.addEventListener("submit", async (e) => {
@@ -277,7 +274,7 @@ productForm.addEventListener("submit", async (e) => {
     description: document.getElementById("productDesc").value,
     imageUrl: document.getElementById("productImg").value,
     customizationAvailable: document.getElementById("productCustom").value === "true",
-    published: document.getElementById("productPublished").checked
+    published: document.getElementById("productPublished").value === "true"
   };
   try {
     await addDoc(collection(db, "brands", "fleurdevie", "products"), data);
@@ -335,7 +332,7 @@ window.editProduct = async (id) => {
   document.getElementById("productDesc").value = docData.description || "";
   document.getElementById("productImg").value = docData.imageUrl || "";
   document.getElementById("productCustom").value = docData.customizationAvailable ? "true" : "false";
-  document.getElementById("productPublished").checked = !!docData.published;
+  document.getElementById("productPublished").value = docData.published ? "true" : "false";
 
   productForm.onsubmit = async (e) => {
     e.preventDefault();
@@ -345,7 +342,7 @@ window.editProduct = async (id) => {
       description: document.getElementById("productDesc").value,
       imageUrl: document.getElementById("productImg").value,
       customizationAvailable: document.getElementById("productCustom").value === "true",
-      published: document.getElementById("productPublished").checked
+      published: document.getElementById("productPublished").value === "true"
     };
     try {
       await updateDoc(docRef, updatedData);
