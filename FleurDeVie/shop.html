@@ -164,26 +164,6 @@ const searchInput = document.getElementById('searchInput');
 const sortSelect = document.getElementById('sortSelect');
 const currencySelect = document.getElementById('currencySelect');
 
-let liveRates = { NGN:1, USD:0.0022, EUR:0.002, GBP:0.0017 };
-
-async function fetchLiveRates(){
-  try{
-    const res = await fetch('https://api.exchangerate.host/latest?base=NGN&symbols=USD,EUR,GBP');
-    const data = await res.json();
-    liveRates = { NGN:1, USD:data.rates.USD, EUR:data.rates.EUR, GBP:data.rates.GBP };
-  }catch(e){ console.error('Failed to fetch rates, using default.'); }
-}
-
-function syncCurrency(){
-  const stored = localStorage.getItem('currency');
-  if(stored) currencySelect.value = stored;
-  currencySelect.addEventListener('change', ()=>{
-    localStorage.setItem('currency', currencySelect.value);
-    loadProducts();
-  });
-}
-syncCurrency();
-
 function getCart(){ return JSON.parse(localStorage.getItem('cart')) || []; }
 function setCart(cart){ localStorage.setItem('cart', JSON.stringify(cart)); updateCartCount(); }
 function updateCartCount(){
@@ -219,8 +199,15 @@ function updateProductUI(productId){
   if(item){ addBtn.style.display='none'; badge.textContent=item.quantity; } else { addBtn.style.display='block'; badge.textContent=''; }
 }
 
+async function convertAmount(amount, toCurrency){
+  try{
+    const res = await fetch(`https://api.exchangerate.host/convert?from=NGN&to=${toCurrency}&amount=${amount}`);
+    const data = await res.json();
+    return data.result || amount;
+  }catch(e){ console.error('Conversion failed:', e); return amount; }
+}
+
 async function loadProducts(){
-  await fetchLiveRates();
   try{
     const q = query(collection(db,"brands","fleurdevie","products"), where("published","==",true));
     const snapshot = await getDocs(q);
@@ -237,7 +224,7 @@ async function loadProducts(){
   }
 }
 
-function displayProducts(products){
+async function displayProducts(products){
   const term = searchInput.value.toLowerCase();
   let filtered = products.filter(p=>p.name.toLowerCase().includes(term));
   const sortVal = sortSelect.value;
@@ -250,10 +237,10 @@ function displayProducts(products){
   const currency = currencySelect.value;
   const localeMap = { NGN:'en-NG', USD:'en-US', EUR:'de-DE', GBP:'en-GB' };
 
-  filtered.forEach(p=>{
+  for(const p of filtered){
     const cartItem = cart.find(i=>i.id===p.id);
     const quantity = cartItem ? cartItem.quantity : 0;
-    const converted = p.price * liveRates[currency]; // ✅ Correct conversion
+    const converted = await convertAmount(p.price, currency);
     const priceFormatted = new Intl.NumberFormat(localeMap[currency], { style:'currency', currency, minimumFractionDigits: currency==='NGN'?0:2 }).format(converted);
 
     const div = document.createElement('div');
@@ -278,7 +265,7 @@ function displayProducts(products){
     div.querySelector('.add-cart').addEventListener('click', e=>{ e.stopPropagation(); addToCart(p); });
 
     productGrid.appendChild(div);
-  });
+  }
 }
 
 function truncateText(text, wordLimit){ return text.split(' ').slice(0,wordLimit).join(' '); }
@@ -311,6 +298,10 @@ fetch('https://ipapi.co/json/').then(res=>res.json()).then(data=>{
   loadProducts();
 }).catch(()=>{ loadProducts(); });
 
+currencySelect.addEventListener('change', ()=>{
+  localStorage.setItem('currency', currencySelect.value);
+  loadProducts();
+});
 </script>
 </body>
 </html>
