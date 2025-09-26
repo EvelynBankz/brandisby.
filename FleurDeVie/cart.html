@@ -66,34 +66,21 @@
 
     /* MOBILE STYLING */
     @media (max-width: 600px) {
-      /* Header adjustments */
       .header-right { display:none; flex-direction:column; background:#112e1f; position:absolute; top:70px; right:0; width:200px; padding:20px; }
       .header-right.open { display:flex; }
       .hamburger { display:block; }
 
-      /* CART: row layout preserved but smaller */
-      .cart-item {
-        flex-direction: row; /* keep desktop row layout */
-        align-items: center;
-        gap: 12px;
-        padding: 12px; /* smaller padding */
-      }
-      .cart-item img {
-        width: 80px;
-        height: 80px;
-        object-fit: cover;
-        border-radius: 6px;
-      }
-      .cart-item-details h3 { font-size: 16px; }
-      .cart-item-details .price { font-size: 14px; }
-      .quantity-controls button { padding: 4px 8px; font-size: 14px; }
-      .quantity-controls input { width: 40px; padding: 4px; font-size: 14px; }
+      .cart-item { flex-direction:row; align-items:center; gap:12px; padding:12px; }
+      .cart-item img { width:80px; height:80px; object-fit:cover; border-radius:6px; }
+      .cart-item-details h3 { font-size:16px; }
+      .cart-item-details .price { font-size:14px; }
+      .quantity-controls button { padding:4px 8px; font-size:14px; }
+      .quantity-controls input { width:40px; padding:4px; font-size:14px; }
 
-      /* HERO adjustments */
-      .hero { height: 30vh; margin-top: 80px; }
-      .hero::after { transform: scale(1.05); }
-      .hero-text h1 { font-size: clamp(28px, 5vw, 48px); }
-      .hero-text p { font-size: clamp(14px, 2vw, 18px); max-width: 90%; }
+      .hero { height:30vh; margin-top:80px; }
+      .hero::after { transform:scale(1.05); }
+      .hero-text h1 { font-size:clamp(28px,5vw,48px); }
+      .hero-text p { font-size:clamp(14px,2vw,18px); max-width:90%; }
     }
   </style>
 </head>
@@ -152,7 +139,7 @@
     <p>© 2025 Fleur De Vie</p>
   </footer>
 
-  <!-- FIREBASE + OPTIMIZED SCRIPT -->
+  <!-- FIREBASE + CART SCRIPT -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
     import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
@@ -185,7 +172,6 @@
       localStorage.setItem('cart', JSON.stringify(updatedCart));
       cart = updatedCart;
       updateCartCount();
-      renderCartItems();
     }
 
     function updateCartCount(){
@@ -203,13 +189,14 @@
       }, 150);
     }
 
-    async function fetchProductsData(){
+    async function fetchProductsData() {
       const tempData = {};
-      for(const item of cart){
-        const docRef = doc(db, "brands","fleurdevie","products", item.id);
+      const promises = cart.map(async (item) => {
+        const docRef = doc(db, "brands", "fleurdevie", "products", item.id);
         const docSnap = await getDoc(docRef);
-        if(docSnap.exists()) tempData[item.id] = docSnap.data();
-      }
+        if (docSnap.exists()) tempData[item.id] = docSnap.data();
+      });
+      await Promise.all(promises);
       productsData = tempData;
     }
 
@@ -268,14 +255,14 @@
           if(index > -1){
             if(newQty <= 0){
               cart.splice(index,1);
-              document.getElementById(`cart-item-${item.id}`).remove();
+              document.getElementById(`cart-item-${item.id}`)?.remove();
             } else {
               cart[index].quantity = newQty;
               qtyInput.value = newQty;
               animatePrice(document.getElementById(`price-${item.id}`), `${currencySelect.value} ${(pricePerUnit*newQty).toFixed(2)}`);
             }
-            saveCart(cart);
             calculateSubtotal();
+            saveCart(cart);
           }
         }
 
@@ -290,9 +277,14 @@
       calculateSubtotal();
     }
 
-    cart = getCart();
-    fetchProductsData().then(renderCartItems);
-    updateCartCount();
+    async function initializeCart() {
+      cart = getCart();
+      updateCartCount();
+      await fetchProductsData();
+      renderCartItems();
+    }
+
+    initializeCart();
 
     document.getElementById('hamburger').addEventListener('click', ()=>{
       document.querySelector('.header-right').classList.toggle('open');
@@ -304,9 +296,7 @@
     });
 
     window.addEventListener('storage', ()=>{
-      cart = getCart();
-      renderCartItems();
-      updateCartCount();
+      initializeCart();
     });
   </script>
 </body>
