@@ -37,7 +37,7 @@ a { text-decoration:none; color:inherit; }
 
 /* SEARCH + SORT + CURRENCY */
 .shop-controls { display:flex; justify-content:space-between; flex-wrap:wrap; margin-bottom:20px; gap:10px; align-items:center; }
-.shop-controls input { padding:8px; border-radius:6px; border:1px solid #112e1f; font-size:14px; flex:1; }
+.shop-controls input { padding:8px; border-radius:6px; border:1px solid #112e1f; font-size:14px; flex:1; max-width:300px; }
 .currency-filter-group { display:flex; gap:10px; align-items:center; }
 
 /* SHOP GRID */
@@ -184,12 +184,12 @@ const currencySelect = document.getElementById('currencySelect');
 
 let liveRates = { NGN:1, USD:450, EUR:500, GBP:580 };
 
-// Load live rates from API once
+// Load live rates
 async function fetchLiveRates(){
   try{
-    const res = await fetch('https://api.exchangerate.host/latest?base=NGN&symbols=USD,EUR,GBP,NGN');
+    const res = await fetch('https://api.exchangerate.host/latest?base=NGN&symbols=USD,EUR,GBP');
     const data = await res.json();
-    liveRates = { NGN:1, USD:1/data.rates.USD, EUR:1/data.rates.EUR, GBP:1/data.rates.GBP };
+    liveRates = { NGN:1, USD:data.rates.USD, EUR:data.rates.EUR, GBP:data.rates.GBP };
   }catch(e){ console.error('Failed to fetch rates, using default.'); }
 }
 
@@ -273,7 +273,7 @@ function displayProducts(products){
   filtered.forEach(p=>{
     const cartItem = cart.find(i=>i.id===p.id);
     const quantity = cartItem ? cartItem.quantity : 0;
-    const converted = p.price / liveRates[currency]; // correct NGN → currency
+    const converted = p.price * liveRates[currency]; // ✅ Corrected conversion
     const priceFormatted = new Intl.NumberFormat(localeMap[currency], { style:'currency', currency, minimumFractionDigits: currency==='NGN'?0:2 }).format(converted);
 
     const div = document.createElement('div');
