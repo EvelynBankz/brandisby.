@@ -89,14 +89,11 @@ footer { text-align:center; padding:20px; background:#112e1f; color:#F5E6CC; mar
   .header-right { display:none; flex-direction:column; background:#112e1f; position:absolute; top:70px; right:0; width:200px; padding:20px; }
   .header-right.open { display:flex; }
   .hamburger { display:block; }
-  /* MOBILE CART ICON */
   .mobile-cart { display:flex; align-items:center; margin-right:10px; }
   .mobile-cart a { color:#FFD6BA; font-size:20px; position:relative; }
   .mobile-cart .cart-count { position:absolute; top:-8px; right:-8px; }
-  /* LARGER CUSTOMIZE BADGE ON MOBILE */
   .customize-badge { font-size:14px; padding:8px 12px; }
 
-  /* ===== MOBILE HERO HEIGHT ADJUSTMENT ===== */
   .hero { height:30vh; margin-top:0; padding-top:80px; } 
   .hero-text h1 { font-size:clamp(24px,5vw,32px); line-height:1.2; margin:0; }
   .hero-text p { font-size:clamp(14px,2.5vw,18px); margin:0 auto; }
@@ -120,6 +117,14 @@ footer { text-align:center; padding:20px; background:#112e1f; color:#F5E6CC; mar
     <a href="cart.html">Cart <span class="cart-count" id="cartCount">0</span></a>
     <a href="customization.html">Customize</a>
     <a href="contact.html">Contact</a>
+    <div class="currency-selector">
+      <label for="currency">Currency:</label>
+      <select id="currency">
+        <option value="NGN">NGN</option>
+        <option value="USD">USD</option>
+        <option value="EUR">EUR</option>
+      </select>
+    </div>
   </nav>
   <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
 </header>
@@ -175,6 +180,9 @@ const cartCountElem = document.getElementById('cartCount');
 const cartCountMobileElem = document.getElementById('cartCountMobile');
 const searchInput = document.getElementById('searchInput');
 const sortSelect = document.getElementById('sortSelect');
+const currencySelect = document.getElementById('currency');
+
+const exchangeRates = { NGN:1, USD:450, EUR:500 }; // Example live rates
 
 function getCart(){ return JSON.parse(localStorage.getItem('cart')) || []; }
 function setCart(cart){ localStorage.setItem('cart', JSON.stringify(cart)); updateCartCount(); }
@@ -238,10 +246,12 @@ function displayProducts(products){
 
   productGrid.innerHTML='';
   const cart = getCart();
+  const currency = currencySelect.value;
 
   filtered.forEach(p=>{
     const cartItem = cart.find(i=>i.id===p.id);
     const quantity = cartItem ? cartItem.quantity : 0;
+    const convertedPrice = (p.price / exchangeRates.NGN * exchangeRates[currency]).toFixed(2);
 
     const div = document.createElement('div');
     div.className='product-card';
@@ -251,7 +261,7 @@ function displayProducts(products){
       <img src="${p.imageUrl}" alt="${p.name}">
       <h3>${p.name}</h3>
       <div class="description">${truncateText(p.description||'', 15)}</div>
-      <div class="price">₦${p.price.toFixed(2)}</div>
+      <div class="price">${currency} ${convertedPrice}</div>
       <div class="quantity-controls">
         <button class="minus">-</button>
         <span class="quantity-badge">${quantity>0 ? quantity : ''}</span>
@@ -300,6 +310,7 @@ function truncateText(text, wordLimit){ return text.split(' ').slice(0,wordLimit
 
 searchInput.addEventListener('input',()=>loadProducts());
 sortSelect.addEventListener('change',()=>loadProducts());
+currencySelect.addEventListener('change',()=>loadProducts());
 
 document.getElementById('hamburger').addEventListener('click',()=>{
   document.querySelector('.header-right').classList.toggle('open');
