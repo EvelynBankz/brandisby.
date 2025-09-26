@@ -35,9 +35,10 @@ a { text-decoration:none; color:inherit; }
 .hero-text h1 { font-family:"Playfair Display", serif; font-size:clamp(36px,5vw,64px); margin-bottom:12px; }
 .hero-text p { font-size:clamp(16px,2vw,24px); max-width:700px; }
 
-/* SEARCH + SORT */
+/* SEARCH + SORT + CURRENCY */
 .shop-controls { display:flex; justify-content:space-between; flex-wrap:wrap; margin-bottom:20px; gap:10px; align-items:center; }
 .shop-controls input, .shop-controls select { padding:8px; border-radius:6px; border:1px solid #112e1f; font-size:14px; }
+.currency-filter-group { display:flex; gap:10px; align-items:center; }
 
 /* SHOP GRID */
 section.shop { padding:80px 20px; background:#F5E6CC; }
@@ -133,23 +134,21 @@ footer { text-align:center; padding:20px; background:#112e1f; color:#F5E6CC; mar
   <div class="container">
     <h2>Our Products</h2>
     <div class="shop-controls">
-      <!-- CURRENCY SELECTOR -->
-      <div class="currency-selector">
-        <label for="currencySelect">Currency:</label>
+      <input type="text" id="searchInput" placeholder="Search products...">
+      <div class="currency-filter-group">
         <select id="currencySelect">
           <option value="NGN">NGN</option>
           <option value="USD">USD</option>
           <option value="EUR">EUR</option>
           <option value="GBP">GBP</option>
         </select>
+        <select id="sortSelect">
+          <option value="">Filter / Sort</option>
+          <option value="alphabet">Alphabet</option>
+          <option value="price-asc">Price: Low → High</option>
+          <option value="price-desc">Price: High → Low</option>
+        </select>
       </div>
-      <input type="text" id="searchInput" placeholder="Search products...">
-      <select id="sortSelect">
-        <option value="">Sort By</option>
-        <option value="alphabet">Alphabet</option>
-        <option value="price-asc">Price: Low → High</option>
-        <option value="price-desc">Price: High → Low</option>
-      </select>
     </div>
     <div class="product-grid" id="productGrid"></div>
   </div>
@@ -183,9 +182,17 @@ const searchInput = document.getElementById('searchInput');
 const sortSelect = document.getElementById('sortSelect');
 const currencySelect = document.getElementById('currencySelect');
 
-// Exchange rates relative to NGN
-const exchangeRates = { NGN:1, USD:450, EUR:500, GBP:580 };
-const currencyLocales = { NGN:'en-NG', USD:'en-US', EUR:'de-DE', GBP:'en-GB' };
+let liveRates = { NGN:1, USD:1, EUR:1, GBP:1 }; // default
+
+async function fetchLiveRates(){
+  try{
+    const res = await fetch('https://api.exchangerate.host/latest?base=NGN&symbols=USD,EUR,GBP,NGN');
+    const data = await res.json();
+    liveRates = { NGN:1, USD:data.rates.USD, EUR:data.rates.EUR, GBP:data.rates.GBP };
+  }catch(e){
+    console.error('Failed to fetch live rates, using default.');
+  }
+}
 
 function getCart(){ return JSON.parse(localStorage.getItem('cart')) || []; }
 function setCart(cart){ localStorage.setItem('cart', JSON.stringify(cart)); updateCartCount(); }
@@ -223,6 +230,7 @@ function updateProductUI(productId){
 }
 
 async function loadProducts(){
+  await fetchLiveRates();
   try{
     const q = query(collection(db,"brands","fleurdevie","products"), where("published","==",true));
     const snapshot = await getDocs(q);
@@ -250,13 +258,13 @@ function displayProducts(products){
   productGrid.innerHTML='';
   const cart = getCart();
   const currency = currencySelect.value;
-  const locale = currencyLocales[currency] || 'en-US';
+  const localeMap = { NGN:'en-NG', USD:'en-US', EUR:'de-DE', GBP:'en-GB' };
 
   filtered.forEach(p=>{
     const cartItem = cart.find(i=>i.id===p.id);
     const quantity = cartItem ? cartItem.quantity : 0;
-    const converted = (p.price/exchangeRates.NGN*exchangeRates[currency]);
-    const priceFormatted = new Intl.NumberFormat(locale, { style:'currency', currency }).format(converted);
+    const converted = p.price * liveRates[currency];
+    const priceFormatted = new Intl.NumberFormat(localeMap[currency], { style:'currency', currency, minimumFractionDigits: currency==='NGN'?0:2 }).format(converted);
 
     const div = document.createElement('div');
     div.className='product-card';
@@ -275,37 +283,9 @@ function displayProducts(products){
       <button class="add-cart" style="display:${quantity>0?'none':'block'};">Add to Cart</button>
     `;
 
-    div.addEventListener('click', e=>{
-      if(!e.target.closest('button') && !e.target.closest('.customize-badge')){
-        window.location.href=`product.html?id=${p.id}`;
-      }
-    });
-
-    if(p.customizationAvailable){
-      div.querySelector('.customize-badge').addEventListener('click', e=>{
-        e.stopPropagation();
-        window.location.href=`customization.html?id=${p.id}`;
-      });
-    }
-
     div.querySelector('.plus').addEventListener('click', e=>{ e.stopPropagation(); addToCart(p); });
     div.querySelector('.minus').addEventListener('click', e=>{ e.stopPropagation(); removeFromCart(p.id); });
     div.querySelector('.add-cart').addEventListener('click', e=>{ e.stopPropagation(); addToCart(p); });
-
-    const descDiv = div.querySelector('.description');
-    if(p.description && p.description.split(' ').length>15){
-      const fullText = p.description;
-      const shortText = truncateText(fullText, 15);
-      const toggleBtn = document.createElement('button');
-      toggleBtn.textContent='More';
-      toggleBtn.style.marginLeft='6px';
-      toggleBtn.style.background='none'; toggleBtn.style.color='#112e1f'; toggleBtn.style.border='none'; toggleBtn.style.cursor='pointer';
-      toggleBtn.addEventListener('click', ()=>{ 
-        if(descDiv.textContent===shortText){ descDiv.textContent=fullText; toggleBtn.textContent='Less'; } else { descDiv.textContent=shortText; toggleBtn.textContent='More'; }
-      });
-      descDiv.textContent=shortText;
-      descDiv.appendChild(toggleBtn);
-    }
 
     productGrid.appendChild(div);
   });
