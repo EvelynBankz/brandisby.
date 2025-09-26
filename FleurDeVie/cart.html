@@ -169,15 +169,8 @@
     let productsData = {};
 
     function formatPrice(value, currency){
-      let locale;
-      switch(currency){
-        case 'USD': locale='en-US'; break;
-        case 'EUR': locale='de-DE'; break;
-        case 'GBP': locale='en-GB'; break;
-        case 'NGN': locale='en-NG'; break;
-        default: locale='en-US';
-      }
-      return new Intl.NumberFormat(locale, { style:'currency', currency:currency }).format(value);
+      const localeMap = { USD:'en-US', EUR:'de-DE', GBP:'en-GB', NGN:'en-NG' };
+      return new Intl.NumberFormat(localeMap[currency]||'en-US', { style:'currency', currency:currency }).format(value);
     }
 
     function saveCart(updatedCart){
