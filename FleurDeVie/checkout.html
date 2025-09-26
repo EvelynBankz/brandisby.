@@ -67,20 +67,20 @@
  /* MOBILE HERO ADJUSTMENT */
 @media(max-width:600px){
   .hero {
-    height:30vh;               /* mobile hero height */
-    margin-top:0;              /* remove extra margin from desktop */
-    padding-top:80px;          /* offset for fixed header */
+    height:30vh;
+    margin-top:0;
+    padding-top:80px;
     display:flex;
-    justify-content:center;     /* horizontal centering */
-    align-items:center;         /* vertical centering */
+    justify-content:center;
+    align-items:center;
     text-align:center;
-    box-sizing:border-box;      /* include padding in height */
+    box-sizing:border-box;
   }
 
   .hero-text h1 {
-    font-size:clamp(24px,5vw,32px); /* scale text for mobile */
-    line-height:1.2;                /* tighter line height */
-    margin:0;                        /* remove default margin */
+    font-size:clamp(24px,5vw,32px);
+    line-height:1.2;
+    margin:0;
   }
 }
   </style>
@@ -138,6 +138,7 @@
             <option value="NGN">NGN</option>
             <option value="USD">USD</option>
             <option value="EUR">EUR</option>
+            <option value="GBP">GBP</option>
           </select>
         </div>
         <ul id="orderItems"></ul>
@@ -156,7 +157,7 @@
   <!-- FLUTTERWAVE SDK -->
   <script src="https://checkout.flutterwave.com/v3.js"></script>
 
-  <!-- FIREBASE + SCRIPT -->
+  <!-- FIREBASE + LIVE CURRENCY SCRIPT -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
     import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
@@ -179,28 +180,49 @@
     const currencySelect = document.getElementById('currency');
     const payBtn = document.getElementById('payBtn');
 
-    const exchangeRates = { NGN:1, USD:450, EUR:500 };
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    let exchangeRates = { NGN:1 }; // default
 
-    function getCart(){ return JSON.parse(localStorage.getItem('cart'))||[]; }
-    function updateCartCount(){
-      const cart=getCart();
-      const total=cart.reduce((s,i)=>s+i.quantity,0);
-      cartCountElem.textContent=total;
+    async function fetchExchangeRates(base='NGN'){
+      try{
+        const res = await fetch(`https://api.exchangerate.host/latest?base=${base}&symbols=USD,EUR,GBP,NGN`);
+        const data = await res.json();
+        exchangeRates = { ...exchangeRates, ...data.rates };
+      }catch(e){ console.warn("Exchange rate fetch failed", e); }
     }
 
-    function renderOrder(){
-      const cart=getCart();
+    function formatPrice(value, currency){
+      let locale;
+      switch(currency){
+        case 'USD': locale='en-US'; break;
+        case 'EUR': locale='de-DE'; break;
+        case 'GBP': locale='en-GB'; break;
+        case 'NGN': locale='en-NG'; break;
+        default: locale='en-US';
+      }
+      return new Intl.NumberFormat(locale, { style:'currency', currency }).format(value);
+    }
+
+    function updateCartCount(){
+      const total = cart.reduce((s,i)=>s+i.quantity,0);
+      cartCountElem.textContent = total;
+    }
+
+    async function renderOrder(){
+      const currency = currencySelect.value;
+      await fetchExchangeRates('NGN');
+
       orderItems.innerHTML='';
       let subtotal=0;
-      const currency=currencySelect.value;
       cart.forEach(item=>{
-        const priceConverted=item.price/exchangeRates.NGN*exchangeRates[currency];
-        subtotal+=priceConverted*item.quantity;
-        const li=document.createElement('li');
-        li.innerHTML=`${item.name} (x${item.quantity}) <span>${currency} ${priceConverted.toFixed(2)}</span>`;
+        const priceConverted = (item.price || 0) * (exchangeRates[currency] || 1);
+        subtotal += priceConverted * item.quantity;
+
+        const li = document.createElement('li');
+        li.innerHTML = `${item.name} (x${item.quantity}) <span>${formatPrice(priceConverted*item.quantity, currency)}</span>`;
         orderItems.appendChild(li);
       });
-      orderSubtotal.textContent=`Subtotal: ${currency} ${subtotal.toFixed(2)}`;
+      orderSubtotal.textContent = `Subtotal: ${formatPrice(subtotal, currency)}`;
     }
 
     document.getElementById('hamburger').addEventListener('click',()=>{
@@ -215,35 +237,28 @@
       const email=document.getElementById('email').value;
       const phone=document.getElementById('phone').value;
       const address=document.getElementById('address').value;
-      const currency=currencySelect.value;
+      const currency = currencySelect.value;
 
       if(!name||!email||!phone||!address){
         alert("Please fill in all billing details.");
         return;
       }
 
-      const cart=getCart();
+      await fetchExchangeRates('NGN');
       let subtotal=0;
       cart.forEach(item=>{
-        subtotal+=(item.price/exchangeRates.NGN*exchangeRates[currency])*item.quantity;
+        subtotal += (item.price || 0) * (exchangeRates[currency] || 1) * item.quantity;
       });
 
       FlutterwaveCheckout({
-        public_key: "FLWPUBK_TEST-xxxxxxxxxxxxxxxxxxxxx-X", // replace with your live/test key
+        public_key: "FLWPUBK_TEST-xxxxxxxxxxxxxxxxxxxxx-X", // replace with your key
         tx_ref: "fleurdevie-"+Date.now(),
         amount: subtotal.toFixed(2),
-        currency: currency,
+        currency,
         customer: { email, phonenumber: phone, name },
-        customizations: {
-          title: "Fleur De Vie",
-          description: "Order Payment",
-          logo: "logo.png"
-        },
-        callback: async function (data) {
-          console.log("Payment response:", data);
-
-          // Save order in Firestore
-          try {
+        customizations: { title:"Fleur De Vie", description:"Order Payment", logo:"logo.png" },
+        callback: async function(data){
+          try{
             await addDoc(collection(db,"orders"),{
               name,email,phone,address,
               currency,
@@ -255,8 +270,8 @@
             });
             localStorage.removeItem('cart');
             window.location.href="thankyou.html";
-          } catch(err){
-            console.error("Error saving order:", err);
+          }catch(err){
+            console.error("Order save failed", err);
             alert("Order save failed, but payment succeeded!");
           }
         },
