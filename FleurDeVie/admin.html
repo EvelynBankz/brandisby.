@@ -181,7 +181,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
@@ -263,8 +263,8 @@ function showSection(id) {
 const productForm = document.getElementById("productForm");
 const productMessage = document.getElementById("productMessage");
 const productsTable = document.querySelector("#productsTable tbody");
-
-let productFormSubmit = productForm.onsubmit;
+const productSubmitBtn = productForm.querySelector("button[type='submit']");
+let currentEditingProductId = null;
 
 productForm.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -277,13 +277,21 @@ productForm.addEventListener("submit", async (e) => {
     published: document.getElementById("productPublished").value === "true"
   };
   try {
-    await addDoc(collection(db, "brands", "fleurdevie", "products"), data);
-    productMessage.textContent = "✅ Product added.";
+    if (currentEditingProductId) {
+      const docRef = doc(db, "brands", "fleurdevie", "products", currentEditingProductId);
+      await updateDoc(docRef, data);
+      productMessage.textContent = "✅ Product updated.";
+      currentEditingProductId = null;
+      productSubmitBtn.textContent = "Add Product";
+    } else {
+      await addDoc(collection(db, "brands", "fleurdevie", "products"), data);
+      productMessage.textContent = "✅ Product added.";
+    }
     productMessage.style.color = "green";
     productForm.reset();
   } catch (err) {
-    console.error("Add product error:", err);
-    productMessage.textContent = "❌ Error adding product.";
+    console.error(err);
+    productMessage.textContent = "❌ Error saving product.";
     productMessage.style.color = "red";
   }
 });
@@ -313,49 +321,25 @@ function subscribeProducts() {
 
 window.deleteProduct = async (id) => {
   if (!confirm("Delete this product?")) return;
-  try {
-    await deleteDoc(doc(db, "brands", "fleurdevie", "products", id));
-  } catch (err) {
-    console.error("Delete product error:", err);
-    alert("Error deleting product - check console.");
-  }
+  try { await deleteDoc(doc(db, "brands", "fleurdevie", "products", id)); } 
+  catch(err){console.error(err); alert("Error deleting product");}
 }
 
 window.editProduct = async (id) => {
   const docRef = doc(db, "brands", "fleurdevie", "products", id);
-  const docSnap = await getDocs(collection(db, "brands", "fleurdevie", "products"));
-  const docData = docSnap.docs.find(d => d.id === id)?.data();
-  if (!docData) return alert("Product not found");
+  const docSnap = await getDoc(docRef);
+  if (!docSnap.exists()) return alert("Product not found");
+  const p = docSnap.data();
 
-  document.getElementById("productName").value = docData.name || "";
-  document.getElementById("productPrice").value = docData.price || 0;
-  document.getElementById("productDesc").value = docData.description || "";
-  document.getElementById("productImg").value = docData.imageUrl || "";
-  document.getElementById("productCustom").value = docData.customizationAvailable ? "true" : "false";
-  document.getElementById("productPublished").value = docData.published ? "true" : "false";
+  document.getElementById("productName").value = p.name || "";
+  document.getElementById("productPrice").value = p.price || 0;
+  document.getElementById("productDesc").value = p.description || "";
+  document.getElementById("productImg").value = p.imageUrl || "";
+  document.getElementById("productCustom").value = p.customizationAvailable ? "true" : "false";
+  document.getElementById("productPublished").value = p.published ? "true" : "false";
 
-  productForm.onsubmit = async (e) => {
-    e.preventDefault();
-    const updatedData = {
-      name: document.getElementById("productName").value,
-      price: +document.getElementById("productPrice").value,
-      description: document.getElementById("productDesc").value,
-      imageUrl: document.getElementById("productImg").value,
-      customizationAvailable: document.getElementById("productCustom").value === "true",
-      published: document.getElementById("productPublished").value === "true"
-    };
-    try {
-      await updateDoc(docRef, updatedData);
-      productMessage.textContent = "✅ Product updated.";
-      productMessage.style.color = "green";
-      productForm.reset();
-      productForm.onsubmit = productFormSubmit;
-    } catch (err) {
-      console.error("Update product error:", err);
-      productMessage.textContent = "❌ Error updating product.";
-      productMessage.style.color = "red";
-    }
-  }
+  currentEditingProductId = id;
+  productSubmitBtn.textContent = "Save Product";
 }
 
 /* ---------------- QUOTES ---------------- */
