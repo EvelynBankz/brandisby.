@@ -32,15 +32,20 @@
     .actions button { margin-right:0.5rem; padding:0.4rem 0.6rem; font-size:0.9rem; }
     .actions button:hover { opacity:0.85; }
 
+    .small-note { font-size:0.9rem; color:#334d3a; margin-top:8px; }
+
     /* Dashboard Navigation */
     .dashboard-nav { display:flex; gap:10px; margin-bottom:1.5rem; }
     .dashboard-nav button { flex:1; }
     .section { display:none; margin-top:1rem; }
     .section.active { display:block; }
 
+    .details-row { background:#fff6e8; }
+    .details-row td { padding:12px; }
+
     /* Orders filter/search */
     .order-filters { display:flex; gap:10px; margin-bottom:1rem; flex-wrap:wrap; }
-    .order-filters input, .order-filters select { flex:1; max-width: 220px; }
+    .order-filters input, .order-filters select { flex:1; max-width: 320px; }
 
     @media(max-width:600px){
       .container { padding:1rem; }
@@ -173,14 +178,6 @@
         <option>Completed</option>
         <option>Cancelled</option>
       </select>
-      <input type="date" id="orderFromDate">
-      <input type="date" id="orderToDate">
-      <select id="orderCurrency">
-        <option value="NGN">NGN</option>
-        <option value="USD">USD</option>
-        <option value="EUR">EUR</option>
-        <option value="GBP">GBP</option>
-      </select>
       <button id="exportOrders">Export Orders CSV</button>
     </div>
 
@@ -194,65 +191,297 @@
 </div>
 
 <script type="module">
-/* Keep your Firebase init & login logic exactly as before… */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-/* 🔹 ORDERS EXTENSION */
-const fromDateInput = document.getElementById("orderFromDate");
-const toDateInput = document.getElementById("orderToDate");
-const orderCurrencySelect = document.getElementById("orderCurrency");
+const firebaseConfig = {
+  apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
+  authDomain: "brandisby.firebaseapp.com",
+  projectId: "brandisby",
+  storageBucket: "brandisby.firebasestorage.app",
+  messagingSenderId: "87213267039",
+  appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const allowedAdmins = ["yourstruly.fleurdevie@gmail.com"].map(e => e.toLowerCase().trim());
+
+const loginForm = document.getElementById("loginForm");
+const loginMessage = document.getElementById("loginMessage");
+const loginContainer = document.getElementById("loginContainer");
+const dashboardContainer = document.getElementById("dashboardContainer");
+
+const ordersTable = document.querySelector("#ordersTable tbody");
+const searchInput = document.getElementById("orderSearch");
+const statusFilter = document.getElementById("orderStatusFilter");
+const exportBtn = document.getElementById("exportOrders");
+
+let allOrders = [];
+
+loginForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  loginMessage.textContent = "";
+  const email = document.getElementById("loginEmail").value;
+  const password = document.getElementById("loginPassword").value;
+  try {
+    const userCred = await signInWithEmailAndPassword(auth, email, password);
+    const normalized = (userCred.user.email || "").toLowerCase().trim();
+    if (allowedAdmins.includes(normalized)) {
+      loginContainer.style.display = "none";
+      dashboardContainer.style.display = "block";
+      subscribeProducts();
+      subscribeQuotes();
+      subscribeOrders();
+      showSection("productsSection");
+    } else {
+      loginMessage.textContent = "❌ Not authorized.";
+      loginMessage.style.color = "red";
+      await signOut(auth);
+    }
+  } catch (err) {
+    console.error("Login error:", err);
+    loginMessage.textContent = `❌ ${err.code || ""}: ${err.message || err}`;
+    loginMessage.style.color = "red";
+  }
+});
+
+onAuthStateChanged(auth, user => {
+  if (user && allowedAdmins.includes((user.email || "").toLowerCase().trim())) {
+    loginContainer.style.display = "none";
+    dashboardContainer.style.display = "block";
+    subscribeProducts();
+    subscribeQuotes();
+    subscribeOrders();
+    showSection("productsSection");
+  } else {
+    loginContainer.style.display = "block";
+    dashboardContainer.style.display = "none";
+  }
+});
+
+document.querySelectorAll(".dashboard-nav button").forEach(btn => {
+  btn.addEventListener("click", () => showSection(btn.dataset.target));
+});
+function showSection(id) {
+  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+/* ---------------- PRODUCTS ---------------- */
+const productForm = document.getElementById("productForm");
+const productMessage = document.getElementById("productMessage");
+const productsTable = document.querySelector("#productsTable tbody");
+const productSubmitBtn = productForm.querySelector("button[type='submit']");
+const tableCurrencySelect = document.getElementById("tableCurrency");
+let currentEditingProductId = null;
+
+productForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const data = {
+    name: document.getElementById("productName").value,
+    priceNGN: +document.getElementById("productPriceNGN").value,
+    priceUSD: +document.getElementById("productPriceUSD").value || 0,
+    priceEUR: +document.getElementById("productPriceEUR").value || 0,
+    priceGBP: +document.getElementById("productPriceGBP").value || 0,
+    description: document.getElementById("productDesc").value,
+    imageUrl: document.getElementById("productImg").value,
+    customizationAvailable: document.getElementById("productCustom").value === "true",
+    published: document.getElementById("productPublished").value === "true"
+  };
+  try {
+    if (currentEditingProductId) {
+      const docRef = doc(db, "brands", "fleurdevie", "products", currentEditingProductId);
+      await updateDoc(docRef, data);
+      productMessage.textContent = "✅ Product updated.";
+      currentEditingProductId = null;
+      productSubmitBtn.textContent = "Add Product";
+    } else {
+      await addDoc(collection(db, "brands", "fleurdevie", "products"), data);
+      productMessage.textContent = "✅ Product added.";
+    }
+    productMessage.style.color = "green";
+    productForm.reset();
+  } catch (err) {
+    console.error(err);
+    productMessage.textContent = "❌ Error saving product.";
+    productMessage.style.color = "red";
+  }
+});
+
+function subscribeProducts() {
+  const productsRef = collection(db, "brands", "fleurdevie", "products");
+  onSnapshot(productsRef, snap => {
+    renderProductsTable(snap);
+  });
+}
+
+function renderProductsTable(snap) {
+  const currency = tableCurrencySelect.value;
+  productsTable.innerHTML = "";
+  snap.forEach(docSnap => {
+    const p = docSnap.data();
+    let price = p.priceNGN || 0;
+    if (currency === "USD") price = p.priceUSD || 0;
+    if (currency === "EUR") price = p.priceEUR || 0;
+    if (currency === "GBP") price = p.priceGBP || 0;
+
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${p.name}</td>
+      <td>${price}</td>
+      <td>${p.imageUrl ? `<img src="${p.imageUrl}" alt="${p.name}">` : ""}</td>
+      <td>${p.customizationAvailable ? "Yes" : "No"}</td>
+      <td>${p.published ? "Yes" : "No"}</td>
+      <td class="actions">
+        <button onclick="deleteProduct('${docSnap.id}')">Delete</button>
+        <button onclick="editProduct('${docSnap.id}')">Edit</button>
+      </td>`;
+    productsTable.appendChild(row);
+  });
+}
+
+tableCurrencySelect.addEventListener("change", () => {
+  const productsRef = collection(db, "brands", "fleurdevie", "products");
+  onSnapshot(productsRef, snap => renderProductsTable(snap));
+});
+
+window.deleteProduct = async (id) => {
+  if (!confirm("Delete this product?")) return;
+  try { await deleteDoc(doc(db, "brands", "fleurdevie", "products", id)); } 
+  catch(err){console.error(err); alert("Error deleting product");}
+}
+
+window.editProduct = async (id) => {
+  const docRef = doc(db, "brands", "fleurdevie", "products", id);
+  const docSnap = await getDoc(docRef);
+  if (!docSnap.exists()) return alert("Product not found");
+  const p = docSnap.data();
+
+  document.getElementById("productName").value = p.name || "";
+  document.getElementById("productPriceNGN").value = p.priceNGN || 0;
+  document.getElementById("productPriceUSD").value = p.priceUSD || 0;
+  document.getElementById("productPriceEUR").value = p.priceEUR || 0;
+  document.getElementById("productPriceGBP").value = p.priceGBP || 0;
+  document.getElementById("productDesc").value = p.description || "";
+  document.getElementById("productImg").value = p.imageUrl || "";
+  document.getElementById("productCustom").value = p.customizationAvailable ? "true" : "false";
+  document.getElementById("productPublished").value = p.published ? "true" : "false";
+
+  currentEditingProductId = id;
+  productSubmitBtn.textContent = "Save Product";
+}
+
+/* ---------------- QUOTES ---------------- */
+const quoteForm = document.getElementById("quoteForm");
+const quoteMessage = document.getElementById("quoteMessage");
+const quotesTable = document.querySelector("#quotesTable tbody");
+const quoteItemsDiv = document.getElementById("quoteItems");
+const addQuoteItemBtn = document.getElementById("addQuoteItem");
+
+addQuoteItemBtn.addEventListener("click", () => {
+  const div = document.createElement("div");
+  div.style.border = "1px solid #eee";
+  div.style.padding = "8px";
+  div.style.marginTop = "8px";
+  div.innerHTML = `
+    <label>Item Name</label><input type="text" class="qi-name">
+    <label>Qty</label><input type="number" class="qi-qty" value="1" min="1">
+    <label>Price</label><input type="number" class="qi-price" value="0" min="0">
+    <label>Description</label><input type="text" class="qi-desc">
+    <div style="margin-top:6px;"><button type="button" class="remove-qi">Remove</button></div>
+  `;
+  quoteItemsDiv.appendChild(div);
+  div.querySelector(".remove-qi").addEventListener("click", () => { div.remove(); });
+});
+
+quoteForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const items = [...document.querySelectorAll("#quoteItems div")].map(div => ({
+    name: div.querySelector(".qi-name").value,
+    qty: +div.querySelector(".qi-qty").value || 0,
+    price: +div.querySelector(".qi-price").value || 0,
+    desc: div.querySelector(".qi-desc").value || ""
+  }));
+  const data = {
+    customer: document.getElementById("quoteCustomer").value,
+    email: document.getElementById("quoteEmail").value,
+    items,
+    total: +document.getElementById("quoteTotal").value || 0,
+    status: "Pending",
+    createdAt: new Date().toISOString()
+  };
+  try {
+    await addDoc(collection(db, "brands", "fleurdevie", "quotes"), data);
+    quoteMessage.textContent = "✅ Quote saved.";
+    quoteMessage.style.color = "green";
+    quoteForm.reset();
+    quoteItemsDiv.innerHTML = "";
+  } catch (err) {
+    console.error(err);
+    quoteMessage.textContent = "❌ Error saving quote.";
+    quoteMessage.style.color = "red";
+  }
+});
+
+function subscribeQuotes() {
+  const quotesRef = collection(db, "brands", "fleurdevie", "quotes");
+  onSnapshot(quotesRef, snap => {
+    quotesTable.innerHTML = "";
+    snap.forEach(docSnap => {
+      const q = docSnap.data();
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${q.customer}</td>
+        <td>${q.email}</td>
+        <td>${q.total}</td>
+        <td>${q.status}</td>
+        <td class="actions">
+          <button onclick="deleteQuote('${docSnap.id}')">Delete</button>
+        </td>`;
+      quotesTable.appendChild(row);
+    });
+  });
+}
+
+window.deleteQuote = async (id) => {
+  if (!confirm("Delete this quote?")) return;
+  try { await deleteDoc(doc(db, "brands", "fleurdevie", "quotes", id)); } 
+  catch(err){console.error(err); alert("Error deleting quote");}
+}
+
+/* ---------------- ORDERS ---------------- */
+function subscribeOrders() {
+  const ordersRef = collection(db, "brands", "fleurdevie", "orders");
+  onSnapshot(ordersRef, snap => {
+    allOrders = [];
+    ordersTable.innerHTML = "";
+    snap.forEach(docSnap => {
+      const o = docSnap.data(); o.id = docSnap.id;
+      allOrders.push(o);
+    });
+    renderOrders();
+  });
+}
 
 function renderOrders() {
   const term = searchInput.value.toLowerCase();
   const status = statusFilter.value;
-  const fromDate = fromDateInput.value ? new Date(fromDateInput.value) : null;
-  const toDate = toDateInput.value ? new Date(toDateInput.value) : null;
-  const currency = orderCurrencySelect.value;
-
   ordersTable.innerHTML = "";
   allOrders.filter(o => {
-    const created = o.createdAt ? new Date(o.createdAt) : null;
     return (!status || o.status === status) &&
-           (!term || o.customer.toLowerCase().includes(term) || o.email.toLowerCase().includes(term)) &&
-           (!fromDate || (created && created >= fromDate)) &&
-           (!toDate || (created && created <= toDate));
+           (!term || o.customer.toLowerCase().includes(term) || o.email.toLowerCase().includes(term));
   }).forEach(o => {
-    let total = o.totalNGN || 0;
-    if (currency === "USD") total = o.totalUSD || 0;
-    if (currency === "EUR") total = o.totalEUR || 0;
-    if (currency === "GBP") total = o.totalGBP || 0;
-
     const row = document.createElement("tr");
-    row.innerHTML = `<td>${o.id}</td><td>${o.customer}</td><td>${o.email}</td><td>${total} ${currency}</td><td>${o.status}</td><td></td>`;
+    row.innerHTML = `<td>${o.id}</td><td>${o.customer}</td><td>${o.email}</td><td>${o.total}</td><td>${o.status}</td><td></td>`;
     ordersTable.appendChild(row);
   });
 }
-[searchInput, statusFilter, fromDateInput, toDateInput, orderCurrencySelect].forEach(el => el.addEventListener("input", renderOrders));
+searchInput.addEventListener("input", renderOrders);
+statusFilter.addEventListener("change", renderOrders);
 
-exportBtn.addEventListener("click", () => {
-  const currency = orderCurrencySelect.value;
-  let rows = [["Order ID","Customer","Email","Total ("+currency+")","Status"]];
-  const fromDate = fromDateInput.value ? new Date(fromDateInput.value) : null;
-  const toDate = toDateInput.value ? new Date(toDateInput.value) : null;
-
-  allOrders.filter(o => {
-    const created = o.createdAt ? new Date(o.createdAt) : null;
-    return (!fromDate || (created && created >= fromDate)) &&
-           (!toDate || (created && created <= toDate));
-  }).forEach(o => {
-    let total = o.totalNGN || 0;
-    if (currency === "USD") total = o.totalUSD || 0;
-    if (currency === "EUR") total = o.totalEUR || 0;
-    if (currency === "GBP") total = o.totalGBP || 0;
-    rows.push([o.id, o.customer, o.email, total, o.status]);
-  });
-
-  const csv = rows.map(r => r.join(",")).join("\n");
-  const blob = new Blob([csv], { type:"text/csv" });
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = "orders.csv";
-  link.click();
-});
 </script>
 
 </body>
