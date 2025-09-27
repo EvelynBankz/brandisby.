@@ -49,6 +49,9 @@
 
     .quote-item { border:1px solid #eee; padding:8px; margin-top:8px; background:#fff; border-radius:6px; }
 
+    .copy-btn { background:none; border:none; cursor:pointer; margin-left:6px; font-size:1rem; }
+    .copy-btn:hover { opacity:0.7; }
+
     @media(max-width:600px){
       .container { padding:1rem; }
       table, th, td { font-size:0.85rem; }
@@ -56,6 +59,11 @@
       .dashboard-nav { flex-direction:column; }
       .order-filters { flex-direction: column; }
     }
+
+    /* Add Item panel styling (small) */
+    .add-item-panel { border:1px dashed rgba(17,46,31,0.12); padding:12px; margin-top:8px; background:#fff; border-radius:8px; }
+    .inline-grid { display:grid; grid-template-columns: repeat(4,1fr); gap:8px; }
+    @media(max-width:600px){ .inline-grid { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -157,10 +165,49 @@
       </select>
 
       <h3>Quote Items</h3>
+
+      <!-- Add item panel (hidden by default, toggled by + Add Item) -->
+      <div id="addItemPanel" class="add-item-panel" style="display:none;">
+        <label>Item Name</label>
+        <input type="text" id="ai_name" placeholder="Item name">
+
+        <label>Quantity</label>
+        <input type="number" id="ai_qty" min="1" value="1">
+
+        <label>Description</label>
+        <input type="text" id="ai_desc" placeholder="Description (optional)">
+
+        <div class="inline-grid" style="margin-top:8px;">
+          <div>
+            <label>Price NGN</label>
+            <input type="number" id="ai_price_ngn" step="0.01" inputmode="decimal">
+          </div>
+          <div>
+            <label>Price USD</label>
+            <input type="number" id="ai_price_usd" step="0.01" inputmode="decimal">
+          </div>
+          <div>
+            <label>Price EUR</label>
+            <input type="number" id="ai_price_eur" step="0.01" inputmode="decimal">
+          </div>
+          <div>
+            <label>Price GBP</label>
+            <input type="number" id="ai_price_gbp" step="0.01" inputmode="decimal">
+          </div>
+        </div>
+
+        <div style="display:flex; gap:8px; margin-top:8px;">
+          <button type="button" id="ai_add">Add</button>
+          <button type="button" id="ai_cancel" style="background:#fff;color:#112e1f;border:1px solid #112e1f;">Cancel</button>
+        </div>
+      </div>
+
+      <!-- Quote items list (rendered) -->
       <div id="quoteItems"></div>
+
       <button type="button" id="addQuoteItem">+ Add Item</button>
 
-      <label>Total (you can leave empty — totals will be computed from items)</label>
+      <label style="margin-top:12px;">Total (you can leave empty — totals will be computed on checkout)</label>
       <input type="number" id="quoteTotal" step="0.01" inputmode="decimal">
 
       <button type="submit">Save Quote</button>
@@ -169,7 +216,7 @@
 
     <table id="quotesTable">
       <thead>
-        <tr><th>Customer</th><th>Email</th><th>Currency</th><th>Items</th><th>Totals</th><th>Actions</th></tr>
+        <tr><th>Customer</th><th>Email</th><th>Currency</th><th>Items</th><th>Totals</th><th>Link</th><th>Actions</th></tr>
       </thead>
       <tbody></tbody>
     </table>
@@ -422,86 +469,130 @@ window.editProduct = async (id) => {
   productForm.querySelector("button[type='submit']").textContent = "Save Product";
 }
 
-/* ---------------- QUOTES (multi-currency per-item) ---------------- */
+/* ---------------- QUOTES (multi-currency per-item, with add-panel) ---------------- */
 
-function buildQuoteItemElement(item = {}) {
-  const div = document.createElement("div");
-  div.className = "quote-item";
+/* tiny escape helper */
+function escapeHtml(str){ if (!str && str !== 0) return ""; return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[s])); }
 
-  const name = item.name || "";
-  const qty = item.qty != null ? item.qty : 1;
-  const priceNGN = item.priceNGN != null ? item.priceNGN : 0;
-  const priceUSD = item.priceUSD != null ? item.priceUSD : 0;
-  const priceEUR = item.priceEUR != null ? item.priceEUR : 0;
-  const priceGBP = item.priceGBP != null ? item.priceGBP : 0;
-  const desc = item.desc || "";
+/* keep a local draft items array (admin adds items here) */
+let quoteDraftItems = [];
 
-  div.innerHTML = `
-    <label>Item Name</label><input type="text" class="qi-name" value="${escapeHtml(name)}">
-    <label>Qty</label><input type="number" class="qi-qty" value="${qty}" min="1">
-    <div style="display:grid; grid-template-columns: repeat(4,1fr); gap:8px; margin-top:8px;">
-      <div>
-        <label>Price NGN</label>
-        <input type="number" class="qi-price-ngn" step="0.01" inputmode="decimal" value="${priceNGN}">
+function renderDraftItems(){
+  quoteItemsDiv.innerHTML = "";
+  if (!quoteDraftItems.length) {
+    quoteItemsDiv.innerHTML = `<div class="small-note">No items added yet.</div>`;
+    return;
+  }
+  quoteDraftItems.forEach((it, idx) => {
+    const div = document.createElement("div");
+    div.className = "quote-item";
+    div.innerHTML = `
+      <div style="display:flex; justify-content:space-between; gap:12px; align-items:flex-start;">
+        <div style="flex:1;">
+          <strong>${escapeHtml(it.name)}</strong> &times; ${it.qty}<br>
+          <small>${escapeHtml(it.desc || '')}</small>
+          <div style="margin-top:8px; display:grid; grid-template-columns: repeat(4,1fr); gap:8px;">
+            <div>NGN: ${it.priceNGN != null && it.priceNGN !== "" ? formatCurrency(it.priceNGN, 'NGN') : "-"}</div>
+            <div>USD: ${it.priceUSD != null && it.priceUSD !== "" ? formatCurrency(it.priceUSD, 'USD') : "-"}</div>
+            <div>EUR: ${it.priceEUR != null && it.priceEUR !== "" ? formatCurrency(it.priceEUR, 'EUR') : "-"}</div>
+            <div>GBP: ${it.priceGBP != null && it.priceGBP !== "" ? formatCurrency(it.priceGBP, 'GBP') : "-"}</div>
+          </div>
+        </div>
+        <div style="min-width:90px; text-align:right;">
+          <button data-idx="${idx}" class="remove-draft">Remove</button>
+        </div>
       </div>
-      <div>
-        <label>Price USD</label>
-        <input type="number" class="qi-price-usd" step="0.01" inputmode="decimal" value="${priceUSD}">
-      </div>
-      <div>
-        <label>Price EUR</label>
-        <input type="number" class="qi-price-eur" step="0.01" inputmode="decimal" value="${priceEUR}">
-      </div>
-      <div>
-        <label>Price GBP</label>
-        <input type="number" class="qi-price-gbp" step="0.01" inputmode="decimal" value="${priceGBP}">
-      </div>
-    </div>
-    <label style="margin-top:8px;">Description</label>
-    <input type="text" class="qi-desc" value="${escapeHtml(desc)}">
-    <div style="margin-top:6px;"><button type="button" class="remove-qi">Remove</button></div>
-  `;
-  div.querySelector(".remove-qi").addEventListener("click", () => div.remove());
-  return div;
+    `;
+    quoteItemsDiv.appendChild(div);
+  });
+  document.querySelectorAll(".remove-draft").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      const idx = parseInt(btn.dataset.idx);
+      quoteDraftItems.splice(idx,1);
+      renderDraftItems();
+    });
+  });
 }
 
+/* wire add panel toggles */
+const addItemPanel = document.getElementById("addItemPanel");
+const ai_add = document.getElementById("ai_add");
+const ai_cancel = document.getElementById("ai_cancel");
+
 addQuoteItemBtn.addEventListener("click", () => {
-  const el = buildQuoteItemElement();
-  quoteItemsDiv.appendChild(el);
+  // toggle panel
+  addItemPanel.style.display = addItemPanel.style.display === "none" ? "block" : "none";
+  // focus first field
+  if (addItemPanel.style.display === "block") document.getElementById("ai_name").focus();
 });
 
+ai_cancel.addEventListener("click", () => {
+  addItemPanel.style.display = "none";
+  // clear panel
+  document.getElementById("ai_name").value = "";
+  document.getElementById("ai_qty").value = 1;
+  document.getElementById("ai_desc").value = "";
+  document.getElementById("ai_price_ngn").value = "";
+  document.getElementById("ai_price_usd").value = "";
+  document.getElementById("ai_price_eur").value = "";
+  document.getElementById("ai_price_gbp").value = "";
+});
+
+/* Add from panel into draft items */
+ai_add.addEventListener("click", () => {
+  const name = document.getElementById("ai_name").value.trim();
+  const qty = parseInt(document.getElementById("ai_qty").value) || 0;
+  if (!name || qty <= 0) {
+    alert("Please enter item name and quantity.");
+    return;
+  }
+  const item = {
+    name,
+    qty,
+    desc: document.getElementById("ai_desc").value || "",
+    priceNGN: document.getElementById("ai_price_ngn").value ? parseFloat(document.getElementById("ai_price_ngn").value) : null,
+    priceUSD: document.getElementById("ai_price_usd").value ? parseFloat(document.getElementById("ai_price_usd").value) : null,
+    priceEUR: document.getElementById("ai_price_eur").value ? parseFloat(document.getElementById("ai_price_eur").value) : null,
+    priceGBP: document.getElementById("ai_price_gbp").value ? parseFloat(document.getElementById("ai_price_gbp").value) : null
+  };
+  quoteDraftItems.push(item);
+  // clear panel & hide
+  document.getElementById("ai_name").value = "";
+  document.getElementById("ai_qty").value = 1;
+  document.getElementById("ai_desc").value = "";
+  document.getElementById("ai_price_ngn").value = "";
+  document.getElementById("ai_price_usd").value = "";
+  document.getElementById("ai_price_eur").value = "";
+  document.getElementById("ai_price_gbp").value = "";
+  addItemPanel.style.display = "none";
+  renderDraftItems();
+});
+
+/* Save quote (saves items and defaultCurrency; totals computed on checkout) */
 quoteForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const items = [...quoteItemsDiv.querySelectorAll(".quote-item")].map(div => {
-    return {
-      name: div.querySelector(".qi-name").value,
-      qty: parseInt(div.querySelector(".qi-qty").value) || 0,
-      priceNGN: parseFloat(div.querySelector(".qi-price-ngn").value) || 0,
-      priceUSD: parseFloat(div.querySelector(".qi-price-usd").value) || 0,
-      priceEUR: parseFloat(div.querySelector(".qi-price-eur").value) || 0,
-      priceGBP: parseFloat(div.querySelector(".qi-price-gbp").value) || 0,
-      desc: div.querySelector(".qi-desc").value || ""
-    };
-  });
+  const customer = document.getElementById("quoteCustomer").value.trim();
+  const email = document.getElementById("quoteEmail").value.trim();
+  const defaultCurrency = quoteCurrencySelect.value || 'NGN';
+  const explicitTotalRaw = document.getElementById("quoteTotal").value;
+  const totalExplicit = explicitTotalRaw ? parseFloat(explicitTotalRaw) : null;
 
-  // compute totals per currency from the item-level values
-  const totals = items.reduce((acc, it) => {
-    acc.NGN += (it.priceNGN || 0) * (it.qty || 0);
-    acc.USD += (it.priceUSD || 0) * (it.qty || 0);
-    acc.EUR += (it.priceEUR || 0) * (it.qty || 0);
-    acc.GBP += (it.priceGBP || 0) * (it.qty || 0);
-    return acc;
-  }, { NGN:0, USD:0, EUR:0, GBP:0 });
+  if (!customer || !email) {
+    alert("Customer name and email are required.");
+    return;
+  }
+  if (!quoteDraftItems.length) {
+    alert("Add at least one item to the quote.");
+    return;
+  }
 
-  const explicitTotal = parseFloat(document.getElementById("quoteTotal").value);
   const data = {
-    customer: document.getElementById("quoteCustomer").value,
-    email: document.getElementById("quoteEmail").value,
-    defaultCurrency: quoteCurrencySelect.value || 'NGN',
-    items,
-    totals,
-    totalExplicit: !isNaN(explicitTotal) ? explicitTotal : null,
+    customer,
+    email,
+    defaultCurrency,
+    items: quoteDraftItems,
+    totalExplicit: !isNaN(totalExplicit) ? totalExplicit : null,
     status: "Pending",
     createdAt: new Date().toISOString()
   };
@@ -510,8 +601,11 @@ quoteForm.addEventListener("submit", async (e) => {
     const docRef = await addDoc(collection(db, "brands", "fleurdevie", "quotes"), data);
     quoteMessage.textContent = "✅ Quote saved.";
     quoteMessage.style.color = "green";
+    // clear form
     quoteForm.reset();
-    quoteItemsDiv.innerHTML = "";
+    quoteDraftItems = [];
+    renderDraftItems();
+    // The subscribeQuotes function will update the quotes table with link
   } catch (err) {
     console.error(err);
     quoteMessage.textContent = "❌ Error saving quote.";
@@ -528,23 +622,42 @@ function subscribeQuotes() {
       const q = docSnap.data();
       const id = docSnap.id;
       const itemsCount = (q.items || []).length;
-      const totals = q.totals || {};
-      const displayTotal = formatCurrency(totals[q.defaultCurrency] || q.totalExplicit || 0, q.defaultCurrency || 'NGN');
+      // display total: show explicit total if admin set one; else show dash (checkout will compute)
+      const displayTotal = q.totalExplicit != null ? formatCurrency(q.totalExplicit, q.defaultCurrency || 'NGN') : "—";
+      const link = `${window.location.origin}/checkout.html?quoteId=${id}`;
 
       const row = document.createElement("tr");
       row.innerHTML = `
-        <td>${q.customer || ""}</td>
-        <td>${q.email || ""}</td>
+        <td>${escapeHtml(q.customer || "")}</td>
+        <td>${escapeHtml(q.email || "")}</td>
         <td>${q.defaultCurrency || 'NGN'}</td>
         <td>${itemsCount}</td>
         <td>${displayTotal}</td>
+        <td>
+          <a href="${link}" target="_blank">${link}</a>
+          <button class="copy-btn" data-link="${link}" title="Copy link">📋</button>
+        </td>
         <td class="actions">
           <button onclick="deleteQuote('${id}')">Delete</button>
           <button onclick="viewQuote('${id}')">View</button>
-          <button onclick="copyQuoteLink('${id}')">Copy Link</button>
         </td>
       `;
       quotesTableBody.appendChild(row);
+    });
+
+    // wire copy buttons
+    document.querySelectorAll(".copy-btn").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const l = btn.dataset.link;
+        try {
+          await navigator.clipboard.writeText(l);
+          btn.textContent = "✅";
+          setTimeout(()=> btn.textContent = "📋", 1000);
+        } catch(e){
+          console.warn("Copy failed", e);
+          alert("Copy failed. Link: " + l);
+        }
+      });
     });
   });
 }
@@ -556,21 +669,7 @@ window.deleteQuote = async (id) => {
 }
 
 window.viewQuote = async (id) => {
-  // Simple viewer modal-less: open a new window that could render the quote details,
-  // or you could implement a modal — for now we'll just open a detail URL if you have one.
-  // Placeholder: open Firestore doc details in new tab (not implemented server-side).
-  alert('Implement a quote viewer page or fetch the quote record by ID to view details.');
-}
-
-window.copyQuoteLink = async (id) => {
-  try {
-    const link = `${window.location.origin}/checkout.html?quoteId=${id}`;
-    await navigator.clipboard.writeText(link);
-    alert("Quote link copied to clipboard:\n" + link);
-  } catch(e){
-    console.warn('Copy failed', e);
-    prompt("Copy this link:", `${window.location.origin}/checkout.html?quoteId=${id}`);
-  }
+  alert("To view quote details, open the checkout page with the link in the Link column.");
 }
 
 /* ---------------- ORDERS ---------------- */
