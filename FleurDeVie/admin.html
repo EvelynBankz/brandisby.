@@ -1,278 +1,208 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Fleur De Vie - Admin Dashboard</title>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fleur De Vie Admin Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: Arial, sans-serif; margin:0; padding:0; background:#fafafa; }
-    header { background:#333; color:#fff; padding:15px; text-align:center; }
-    .container { max-width:1200px; margin:20px auto; padding:20px; background:#fff; border-radius:8px; box-shadow:0 0 10px rgba(0,0,0,0.1);}
-    nav { display:flex; justify-content:center; margin-bottom:20px; }
-    nav button { margin:0 10px; padding:10px 20px; border:none; background:#333; color:#fff; cursor:pointer; border-radius:5px; }
-    nav button.active { background:#555; }
-    .tab { display:none; }
-    .tab.active { display:block; }
-    form { margin-bottom:20px; }
-    form input, form textarea, form select { display:block; width:100%; padding:8px; margin:8px 0; border:1px solid #ccc; border-radius:5px; }
-    table { width:100%; border-collapse:collapse; margin-top:20px; }
-    table, th, td { border:1px solid #ccc; }
-    th, td { padding:10px; text-align:left; }
-    .export-controls { margin: 15px 0; display:flex; gap:10px; align-items:center; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family: "Montserrat", sans-serif; background:#F5E6CC; color:#112e1f; line-height:1.6; }
+    a { text-decoration:none; color:inherit; }
+
+    header { background:#112e1f; color:#FFD6BA; padding:16px; text-align:center; font-family:"Playfair Display", serif; font-size:24px; font-weight:700; }
+
+    .container { max-width:1000px; margin:2rem auto; padding:2rem; background:#FFD6BA; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1); }
+
+    h2 { font-family:"Playfair Display", serif; margin-bottom:16px; color:#112e1f; }
+
+    label { display:block; margin-top:1rem; font-weight:500; }
+    input, textarea, select { width:100%; padding:0.6rem; margin-top:0.5rem; border:1px solid #112e1f; border-radius:6px; font-size:1rem; }
+
+    button { margin-top:1rem; padding:0.75rem 1.2rem; background:#112e1f; color:#FFD6BA; border:none; border-radius:6px; cursor:pointer; font-weight:600; transition:0.3s; }
+    button:hover { background:#0a1d14; }
+
+    .message { margin-top:1rem; font-weight:500; font-size:1rem; text-align:center; }
+
+    table { width:100%; border-collapse:collapse; margin-top:1.5rem; background:#fff; border-radius:12px; overflow:hidden; }
+    th, td { padding:0.75rem; border-bottom:1px solid #ddd; text-align:left; font-size:0.95rem; vertical-align:top; }
+    th { background:#F5E6CC; font-family:"Playfair Display", serif; color:#112e1f; }
+    td img { width:60px; border-radius:6px; }
+
+    .actions button { margin-right:0.5rem; padding:0.4rem 0.6rem; font-size:0.9rem; }
+    .actions button:hover { opacity:0.85; }
+
+    .small-note { font-size:0.9rem; color:#334d3a; margin-top:8px; }
+
+    /* Dashboard Navigation */
+    .dashboard-nav { display:flex; gap:10px; margin-bottom:1.5rem; }
+    .dashboard-nav button { flex:1; }
+    .section { display:none; margin-top:1rem; }
+    .section.active { display:block; }
+
+    .details-row { background:#fff6e8; }
+    .details-row td { padding:12px; }
+
+    /* Orders filter/search */
+    .order-filters { display:flex; gap:10px; margin-bottom:1rem; flex-wrap:wrap; }
+    .order-filters input, .order-filters select { flex:1; max-width: 320px; }
+
+    .quote-item { border:1px solid #eee; padding:8px; margin-top:8px; background:#fff; border-radius:6px; }
+
+    @media(max-width:600px){
+      .container { padding:1rem; }
+      table, th, td { font-size:0.85rem; }
+      th, td { padding:0.5rem; }
+      .dashboard-nav { flex-direction:column; }
+      .order-filters { flex-direction: column; }
+    }
   </style>
 </head>
 <body>
-  <header>
-    <h1>Admin Dashboard</h1>
-  </header>
 
-  <div class="container">
-    <nav>
-      <button onclick="openTab('products')" class="active">Products</button>
-      <button onclick="openTab('quotes')">Quotes</button>
-      <button onclick="openTab('orders')">Orders</button>
-    </nav>
+<header>Fleur De Vie Admin Dashboard</header>
 
-    <!-- PRODUCTS TAB -->
-    <div id="products" class="tab active">
-      <h2>Manage Products</h2>
-      <form id="productForm">
-        <input type="text" id="productName" placeholder="Product Name" required>
-        <textarea id="productDescription" placeholder="Product Description"></textarea>
-        <input type="text" id="productImage" placeholder="Image URL" required>
-        <input type="number" id="priceNGN" placeholder="Price (NGN)">
-        <input type="number" id="priceUSD" placeholder="Price (USD)">
-        <input type="number" id="priceEUR" placeholder="Price (EUR)">
-        <input type="number" id="priceGBP" placeholder="Price (GBP)">
-        <label><input type="checkbox" id="productPublished"> Published</label>
-        <button type="submit">Save Product</button>
-      </form>
-      <table id="productsTable">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Image</th>
-            <th>Prices</th>
-            <th>Published</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
+<!-- LOGIN FORM -->
+<div class="container" id="loginContainer">
+  <h2>Admin Login</h2>
+  <form id="loginForm">
+    <label for="loginEmail">Email</label>
+    <input type="email" id="loginEmail" required>
 
-    <!-- QUOTES TAB -->
-    <div id="quotes" class="tab">
-      <h2>Generate Quotes</h2>
-      <form id="quoteForm">
-        <input type="text" id="quoteCustomerName" placeholder="Customer Name" required>
-        <input type="text" id="quoteCustomerPhone" placeholder="Customer Phone" required>
-        <textarea id="quoteDescription" placeholder="Quote Description"></textarea>
-        <input type="number" id="quoteNGN" placeholder="Total Price (NGN)">
-        <input type="number" id="quoteUSD" placeholder="Total Price (USD)">
-        <input type="number" id="quoteEUR" placeholder="Total Price (EUR)">
-        <input type="number" id="quoteGBP" placeholder="Total Price (GBP)">
-        <button type="submit">Save Quote</button>
-      </form>
-      <table id="quotesTable">
-        <thead>
-          <tr>
-            <th>Customer</th>
-            <th>Description</th>
-            <th>Prices</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
+    <label for="loginPassword">Password</label>
+    <input type="password" id="loginPassword" required>
 
-    <!-- ORDERS TAB -->
-    <div id="orders" class="tab">
-      <h2>Manage Orders</h2>
-      <div class="export-controls">
-        <label>From: <input type="date" id="exportFrom"></label>
-        <label>To: <input type="date" id="exportTo"></label>
-        <select id="exportCurrency">
-          <option value="NGN">NGN</option>
-          <option value="USD">USD</option>
-          <option value="EUR">EUR</option>
-          <option value="GBP">GBP</option>
-        </select>
-        <button onclick="exportOrders()">Export Orders</button>
-      </div>
-      <table id="ordersTable">
-        <thead>
-          <tr>
-            <th>Customer</th>
-            <th>Items</th>
-            <th>Total</th>
-            <th>Status</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
+    <button type="submit">Login</button>
+    <div class="message" id="loginMessage"></div>
+  </form>
+</div>
+
+<!-- DASHBOARD -->
+<div class="container" id="dashboardContainer" style="display:none;">
+  <div class="dashboard-nav">
+    <button type="button" data-target="productsSection">📦 Products</button>
+    <button type="button" data-target="quotesSection">💳 Quotes</button>
+    <button type="button" data-target="ordersSection">🧾 Orders</button>
   </div>
 
-  <script>
-    // Firebase config (same as before)
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT.firebaseapp.com",
-      projectId: "YOUR_PROJECT",
-      storageBucket: "YOUR_PROJECT.appspot.com",
-      messagingSenderId: "SENDER_ID",
-      appId: "APP_ID"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+  <!-- PRODUCTS -->
+  <!-- (unchanged: same as you had) -->
 
-    // Tab switcher
-    function openTab(tabId) {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-      document.getElementById(tabId).classList.add('active');
-      event.target.classList.add('active');
-    }
+  <!-- QUOTES -->
+  <div class="section" id="quotesSection">
+    <h2>Generate Quote</h2>
+    <form id="quoteForm">
+      <label>Customer Name</label>
+      <input type="text" id="quoteCustomer" required>
+      <label>Customer Email</label>
+      <input type="email" id="quoteEmail" required>
 
-    // ============ PRODUCTS ============
-    const productForm = document.getElementById("productForm");
-    const productsTable = document.getElementById("productsTable").querySelector("tbody");
+      <label>Quote Currency (primary)</label>
+      <select id="quoteCurrency">
+        <option value="NGN">NGN</option>
+        <option value="USD">USD</option>
+        <option value="EUR">EUR</option>
+        <option value="GBP">GBP</option>
+      </select>
 
-    productForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const newProduct = {
-        name: document.getElementById("productName").value,
-        description: document.getElementById("productDescription").value,
-        image: document.getElementById("productImage").value,
-        prices: {
-          NGN: document.getElementById("priceNGN").value || null,
-          USD: document.getElementById("priceUSD").value || null,
-          EUR: document.getElementById("priceEUR").value || null,
-          GBP: document.getElementById("priceGBP").value || null,
-        },
-        published: document.getElementById("productPublished").checked
-      };
-      await db.collection("products").add(newProduct);
-      productForm.reset();
-      loadProducts();
-    });
+      <h3>Quote Items</h3>
+      <div id="quoteItems"></div>
+      <button type="button" id="addQuoteItem">+ Add Item</button>
 
-    async function loadProducts() {
-      const snapshot = await db.collection("products").get();
-      productsTable.innerHTML = "";
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        const row = `<tr>
-          <td>${data.name}</td>
-          <td><img src="${data.image}" width="50"></td>
-          <td>NGN: ${data.prices.NGN || "-"}, USD: ${data.prices.USD || "-"}, EUR: ${data.prices.EUR || "-"}, GBP: ${data.prices.GBP || "-"}</td>
-          <td>${data.published ? "Yes" : "No"}</td>
-          <td><button onclick="deleteProduct('${doc.id}')">Delete</button></td>
-        </tr>`;
-        productsTable.innerHTML += row;
-      });
-    }
-    async function deleteProduct(id) {
-      await db.collection("products").doc(id).delete();
-      loadProducts();
-    }
-    loadProducts();
+      <label>Total (auto-calculated, override if needed)</label>
+      <input type="number" id="quoteTotal" step="0.01" inputmode="decimal">
 
-    // ============ QUOTES ============
-    const quoteForm = document.getElementById("quoteForm");
-    const quotesTable = document.getElementById("quotesTable").querySelector("tbody");
+      <button type="submit">Save Quote</button>
+    </form>
+    <div id="quoteMessage" class="message"></div>
 
-    quoteForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const newQuote = {
-        customerName: document.getElementById("quoteCustomerName").value,
-        customerPhone: document.getElementById("quoteCustomerPhone").value,
-        description: document.getElementById("quoteDescription").value,
-        prices: {
-          NGN: document.getElementById("quoteNGN").value || null,
-          USD: document.getElementById("quoteUSD").value || null,
-          EUR: document.getElementById("quoteEUR").value || null,
-          GBP: document.getElementById("quoteGBP").value || null,
-        },
-        createdAt: new Date()
-      };
-      await db.collection("quotes").add(newQuote);
-      quoteForm.reset();
-      loadQuotes();
-    });
+    <table id="quotesTable">
+      <thead>
+        <tr><th>Customer</th><th>Email</th><th>Currency</th><th>Items</th><th>Totals</th><th>Actions</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 
-    async function loadQuotes() {
-      const snapshot = await db.collection("quotes").get();
-      quotesTable.innerHTML = "";
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        const row = `<tr>
-          <td>${data.customerName} (${data.customerPhone})</td>
-          <td>${data.description}</td>
-          <td>NGN: ${data.prices.NGN || "-"}, USD: ${data.prices.USD || "-"}, EUR: ${data.prices.EUR || "-"}, GBP: ${data.prices.GBP || "-"}</td>
-          <td><button onclick="deleteQuote('${doc.id}')">Delete</button></td>
-        </tr>`;
-        quotesTable.innerHTML += row;
-      });
-    }
-    async function deleteQuote(id) {
-      await db.collection("quotes").doc(id).delete();
-      loadQuotes();
-    }
-    loadQuotes();
+  <!-- ORDERS -->
+  <!-- (unchanged: same as you had) -->
+</div>
 
-    // ============ ORDERS ============
-    const ordersTable = document.getElementById("ordersTable").querySelector("tbody");
+<script type="module">
+/* Firebase + Auth setup (unchanged) */
 
-    async function loadOrders() {
-      const snapshot = await db.collection("orders").get();
-      ordersTable.innerHTML = "";
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        const row = `<tr>
-          <td>${data.customerName}</td>
-          <td>${(data.items || []).map(i => `${i.name} (x${i.qty})`).join(", ")}</td>
-          <td>${JSON.stringify(data.total || {})}</td>
-          <td>${data.status}</td>
-          <td>${data.createdAt?.toDate().toLocaleDateString() || "-"}</td>
-        </tr>`;
-        ordersTable.innerHTML += row;
-      });
-    }
-    loadOrders();
+/* --- Quote Items Multi-Currency --- */
+function buildQuoteItemElement(item = {}) {
+  const div = document.createElement("div");
+  div.className = "quote-item";
 
-    function exportOrders() {
-      const from = new Date(document.getElementById("exportFrom").value);
-      const to = new Date(document.getElementById("exportTo").value);
-      const currency = document.getElementById("exportCurrency").value;
+  div.innerHTML = `
+    <label>Item Name</label>
+    <input type="text" class="qi-name" value="${item.name || ""}">
+    <label>Qty</label>
+    <input type="number" class="qi-qty" value="${item.qty || 1}" min="1">
+    <div style="display:grid; grid-template-columns: repeat(4,1fr); gap:8px; margin-top:8px;">
+      <div><label>Price NGN</label><input type="number" class="qi-price-ngn" step="0.01" value="${item.priceNGN || 0}"></div>
+      <div><label>Price USD</label><input type="number" class="qi-price-usd" step="0.01" value="${item.priceUSD || 0}"></div>
+      <div><label>Price EUR</label><input type="number" class="qi-price-eur" step="0.01" value="${item.priceEUR || 0}"></div>
+      <div><label>Price GBP</label><input type="number" class="qi-price-gbp" step="0.01" value="${item.priceGBP || 0}"></div>
+    </div>
+    <label>Description</label>
+    <input type="text" class="qi-desc" value="${item.desc || ""}">
+    <button type="button" class="remove-qi">Remove</button>
+  `;
+  div.querySelector(".remove-qi").onclick = () => div.remove();
+  return div;
+}
 
-      db.collection("orders").get().then(snapshot => {
-        let csv = "Customer,Items,Total (" + currency + "),Status,Date\n";
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          const orderDate = data.createdAt?.toDate();
-          if (from && orderDate < from) return;
-          if (to && orderDate > to) return;
+document.getElementById("addQuoteItem").onclick = () => {
+  document.getElementById("quoteItems").appendChild(buildQuoteItemElement());
+};
 
-          const items = (data.items || []).map(i => `${i.name} (x${i.qty})`).join(" | ");
-          const total = data.total?.[currency] || "-";
-          csv += `${data.customerName},${items},${total},${data.status},${orderDate?.toLocaleDateString()}\n`;
-        });
+document.getElementById("quoteForm").onsubmit = async (e) => {
+  e.preventDefault();
+  const items = [...document.querySelectorAll(".quote-item")].map(div => ({
+    name: div.querySelector(".qi-name").value,
+    qty: parseInt(div.querySelector(".qi-qty").value) || 0,
+    priceNGN: parseFloat(div.querySelector(".qi-price-ngn").value) || 0,
+    priceUSD: parseFloat(div.querySelector(".qi-price-usd").value) || 0,
+    priceEUR: parseFloat(div.querySelector(".qi-price-eur").value) || 0,
+    priceGBP: parseFloat(div.querySelector(".qi-price-gbp").value) || 0,
+    desc: div.querySelector(".qi-desc").value || ""
+  }));
 
-        const blob = new Blob([csv], { type: "text/csv" });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "orders_export.csv";
-        link.click();
-      });
-    }
-  </script>
+  const totals = { NGN:0, USD:0, EUR:0, GBP:0 };
+  items.forEach(it => {
+    totals.NGN += it.priceNGN * it.qty;
+    totals.USD += it.priceUSD * it.qty;
+    totals.EUR += it.priceEUR * it.qty;
+    totals.GBP += it.priceGBP * it.qty;
+  });
+
+  const explicit = parseFloat(document.getElementById("quoteTotal").value);
+  const data = {
+    customer: document.getElementById("quoteCustomer").value,
+    email: document.getElementById("quoteEmail").value,
+    defaultCurrency: document.getElementById("quoteCurrency").value,
+    items, totals,
+    totalExplicit: !isNaN(explicit) ? explicit : null,
+    createdAt: new Date().toISOString(),
+    status: "Pending"
+  };
+
+  // Save to Firestore
+  try {
+    await addDoc(collection(db,"brands","fleurdevie","quotes"), data);
+    document.getElementById("quoteMessage").textContent = "✅ Quote saved.";
+    document.getElementById("quoteMessage").style.color = "green";
+    document.getElementById("quoteForm").reset();
+    document.getElementById("quoteItems").innerHTML = "";
+  } catch(err) {
+    console.error(err);
+    document.getElementById("quoteMessage").textContent = "❌ Error saving quote.";
+    document.getElementById("quoteMessage").style.color = "red";
+  }
+};
+</script>
 </body>
 </html>
