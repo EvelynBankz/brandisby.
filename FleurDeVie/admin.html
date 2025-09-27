@@ -89,9 +89,18 @@
     <form id="productForm">
       <label>Name</label>
       <input type="text" id="productName" required>
-      
-      <label>Price</label>
-      <input type="number" id="productPrice" required>
+
+      <label>Price (NGN)</label>
+      <input type="number" id="priceNGN" required>
+
+      <label>Price (USD)</label>
+      <input type="number" id="priceUSD" required>
+
+      <label>Price (EUR)</label>
+      <input type="number" id="priceEUR" required>
+
+      <label>Price (GBP)</label>
+      <input type="number" id="priceGBP" required>
       
       <label>Description</label>
       <textarea id="productDesc"></textarea>
@@ -116,7 +125,7 @@
     <div id="productMessage" class="message"></div>
     <table id="productsTable">
       <thead>
-        <tr><th>Name</th><th>Price</th><th>Description</th><th>Image</th><th>Customization</th><th>Published</th><th>Actions</th></tr>
+        <tr><th>Name</th><th>Prices (NGN / USD / EUR / GBP)</th><th>Description</th><th>Image</th><th>Customization</th><th>Published</th><th>Actions</th></tr>
       </thead>
       <tbody></tbody>
     </table>
@@ -153,7 +162,6 @@
   <div class="section" id="ordersSection">
     <h2>Manage Orders</h2>
 
-    <!-- Filters -->
     <div class="order-filters">
       <input type="text" id="orderSearch" placeholder="Search by customer or email...">
       <select id="orderStatusFilter">
@@ -206,8 +214,6 @@ const dashboardContainer = document.getElementById("dashboardContainer");
 const ordersTable = document.querySelector("#ordersTable tbody");
 const searchInput = document.getElementById("orderSearch");
 const statusFilter = document.getElementById("orderStatusFilter");
-const exportBtn = document.getElementById("exportOrders");
-
 let allOrders = [];
 
 loginForm.addEventListener("submit", async (e) => {
@@ -270,7 +276,10 @@ productForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const data = {
     name: document.getElementById("productName").value,
-    price: +document.getElementById("productPrice").value,
+    priceNGN: +document.getElementById("priceNGN").value,
+    priceUSD: +document.getElementById("priceUSD").value,
+    priceEUR: +document.getElementById("priceEUR").value,
+    priceGBP: +document.getElementById("priceGBP").value,
     description: document.getElementById("productDesc").value,
     imageUrl: document.getElementById("productImg").value,
     customizationAvailable: document.getElementById("productCustom").value === "true",
@@ -305,7 +314,7 @@ function subscribeProducts() {
       const row = document.createElement("tr");
       row.innerHTML = `
         <td>${p.name}</td>
-        <td>${p.price}</td>
+        <td>${p.priceNGN || 0} / ${p.priceUSD || 0} / ${p.priceEUR || 0} / ${p.priceGBP || 0}</td>
         <td>${p.description || ""}</td>
         <td>${p.imageUrl ? `<img src="${p.imageUrl}" alt="${p.name}">` : ""}</td>
         <td>${p.customizationAvailable ? "Yes" : "No"}</td>
@@ -332,7 +341,10 @@ window.editProduct = async (id) => {
   const p = docSnap.data();
 
   document.getElementById("productName").value = p.name || "";
-  document.getElementById("productPrice").value = p.price || 0;
+  document.getElementById("priceNGN").value = p.priceNGN || 0;
+  document.getElementById("priceUSD").value = p.priceUSD || 0;
+  document.getElementById("priceEUR").value = p.priceEUR || 0;
+  document.getElementById("priceGBP").value = p.priceGBP || 0;
   document.getElementById("productDesc").value = p.description || "";
   document.getElementById("productImg").value = p.imageUrl || "";
   document.getElementById("productCustom").value = p.customizationAvailable ? "true" : "false";
@@ -371,27 +383,19 @@ quoteForm.addEventListener("submit", async (e) => {
     name: div.querySelector(".qi-name").value,
     qty: +div.querySelector(".qi-qty").value || 0,
     price: +div.querySelector(".qi-price").value || 0,
-    desc: div.querySelector(".qi-desc").value || ""
+    description: div.querySelector(".qi-desc").value || ""
   }));
+  const total = +document.getElementById("quoteTotal").value || 0;
   const data = {
-    customer: document.getElementById("quoteCustomer").value,
-    email: document.getElementById("quoteEmail").value,
+    customerName: document.getElementById("quoteCustomer").value,
+    customerEmail: document.getElementById("quoteEmail").value,
     items,
-    total: +document.getElementById("quoteTotal").value || 0,
+    total,
     status: "Pending",
-    createdAt: new Date().toISOString()
+    createdAt: new Date()
   };
-  try {
-    await addDoc(collection(db, "brands", "fleurdevie", "quotes"), data);
-    quoteMessage.textContent = "✅ Quote saved.";
-    quoteMessage.style.color = "green";
-    quoteForm.reset();
-    quoteItemsDiv.innerHTML = "";
-  } catch (err) {
-    console.error(err);
-    quoteMessage.textContent = "❌ Error saving quote.";
-    quoteMessage.style.color = "red";
-  }
+  try { await addDoc(collection(db, "brands", "fleurdevie", "quotes"), data); quoteMessage.textContent="✅ Quote saved."; quoteForm.reset(); quoteItemsDiv.innerHTML=""; } 
+  catch(err){console.error(err); quoteMessage.textContent="❌ Error saving quote."; }
 });
 
 function subscribeQuotes() {
@@ -402,8 +406,8 @@ function subscribeQuotes() {
       const q = docSnap.data();
       const row = document.createElement("tr");
       row.innerHTML = `
-        <td>${q.customer}</td>
-        <td>${q.email}</td>
+        <td>${q.customerName}</td>
+        <td>${q.customerEmail}</td>
         <td>${q.total}</td>
         <td>${q.status}</td>
         <td class="actions">
@@ -413,21 +417,17 @@ function subscribeQuotes() {
     });
   });
 }
-
-window.deleteQuote = async (id) => {
-  if (!confirm("Delete this quote?")) return;
-  try { await deleteDoc(doc(db, "brands", "fleurdevie", "quotes", id)); } 
-  catch(err){console.error(err); alert("Error deleting quote");}
-}
+window.deleteQuote = async (id) => { if(confirm("Delete this quote?")) await deleteDoc(doc(db,"brands","fleurdevie","quotes",id)); }
 
 /* ---------------- ORDERS ---------------- */
 function subscribeOrders() {
-  const ordersRef = collection(db, "brands", "fleurdevie", "orders");
-  onSnapshot(ordersRef, snap => {
-    allOrders = [];
-    ordersTable.innerHTML = "";
-    snap.forEach(docSnap => {
-      const o = docSnap.data(); o.id = docSnap.id;
+  const ordersRef = collection(db,"brands","fleurdevie","orders");
+  onSnapshot(ordersRef,snap=>{
+    allOrders=[];
+    ordersTable.innerHTML="";
+    snap.forEach(docSnap=>{
+      const o = docSnap.data();
+      o.id=docSnap.id;
       allOrders.push(o);
     });
     renderOrders();
@@ -435,22 +435,35 @@ function subscribeOrders() {
 }
 
 function renderOrders() {
-  const term = searchInput.value.toLowerCase();
-  const status = statusFilter.value;
-  ordersTable.innerHTML = "";
-  allOrders.filter(o => {
-    return (!status || o.status === status) &&
-           (!term || o.customer.toLowerCase().includes(term) || o.email.toLowerCase().includes(term));
-  }).forEach(o => {
-    const row = document.createElement("tr");
-    row.innerHTML = `<td>${o.id}</td><td>${o.customer}</td><td>${o.email}</td><td>${o.total}</td><td>${o.status}</td><td></td>`;
+  const searchVal = searchInput.value.toLowerCase();
+  const statusVal = statusFilter.value;
+  ordersTable.innerHTML="";
+  allOrders.filter(o=>{
+    return (!statusVal || o.status===statusVal) && 
+           (!searchVal || (o.customerName.toLowerCase().includes(searchVal) || o.customerEmail.toLowerCase().includes(searchVal)));
+  }).forEach(o=>{
+    const row=document.createElement("tr");
+    row.innerHTML=`
+      <td>${o.id}</td>
+      <td>${o.customerName}</td>
+      <td>${o.customerEmail}</td>
+      <td>${o.total}</td>
+      <td>${o.status}</td>
+      <td class="actions">
+        <button onclick="updateOrderStatus('${o.id}')">Update</button>
+      </td>`;
     ordersTable.appendChild(row);
   });
 }
+
 searchInput.addEventListener("input", renderOrders);
 statusFilter.addEventListener("change", renderOrders);
 
+window.updateOrderStatus = async (id) => {
+  const newStatus = prompt("Enter new status (Pending, Paid, Processing, Shipped, Completed, Cancelled):");
+  if(!newStatus) return;
+  await updateDoc(doc(db,"brands","fleurdevie","orders",id),{status:newStatus});
+}
 </script>
-
 </body>
 </html>
