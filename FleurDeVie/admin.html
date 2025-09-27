@@ -47,6 +47,9 @@
     .order-filters { display:flex; gap:10px; margin-bottom:1rem; flex-wrap:wrap; }
     .order-filters input, .order-filters select { flex:1; max-width: 320px; }
 
+    /* Currency selector for products table */
+    #currencySelectAdmin { margin-bottom:10px; padding:6px; border-radius:6px; border:1px solid #112e1f; font-size:1rem; }
+
     @media(max-width:600px){
       .container { padding:1rem; }
       table, th, td { font-size:0.85rem; }
@@ -89,18 +92,9 @@
     <form id="productForm">
       <label>Name</label>
       <input type="text" id="productName" required>
-
+      
       <label>Price (NGN)</label>
-      <input type="number" id="priceNGN" required>
-
-      <label>Price (USD)</label>
-      <input type="number" id="priceUSD" required>
-
-      <label>Price (EUR)</label>
-      <input type="number" id="priceEUR" required>
-
-      <label>Price (GBP)</label>
-      <input type="number" id="priceGBP" required>
+      <input type="number" id="productPrice" required>
       
       <label>Description</label>
       <textarea id="productDesc"></textarea>
@@ -123,9 +117,18 @@
       <button type="submit">Add Product</button>
     </form>
     <div id="productMessage" class="message"></div>
+
+    <!-- Currency Selector -->
+    <select id="currencySelectAdmin">
+      <option value="NGN">NGN</option>
+      <option value="USD">USD</option>
+      <option value="EUR">EUR</option>
+      <option value="GBP">GBP</option>
+    </select>
+
     <table id="productsTable">
       <thead>
-        <tr><th>Name</th><th>Prices (NGN / USD / EUR / GBP)</th><th>Description</th><th>Image</th><th>Customization</th><th>Published</th><th>Actions</th></tr>
+        <tr><th>Name</th><th>Price</th><th>Image</th><th>Customization</th><th>Published</th><th>Actions</th></tr>
       </thead>
       <tbody></tbody>
     </table>
@@ -162,6 +165,7 @@
   <div class="section" id="ordersSection">
     <h2>Manage Orders</h2>
 
+    <!-- Filters -->
     <div class="order-filters">
       <input type="text" id="orderSearch" placeholder="Search by customer or email...">
       <select id="orderStatusFilter">
@@ -214,8 +218,11 @@ const dashboardContainer = document.getElementById("dashboardContainer");
 const ordersTable = document.querySelector("#ordersTable tbody");
 const searchInput = document.getElementById("orderSearch");
 const statusFilter = document.getElementById("orderStatusFilter");
-let allOrders = [];
 
+let allOrders = [];
+let liveRates = { NGN:1, USD:0.0022, EUR:0.002, GBP:0.0017 }; // default rates
+
+/* ------------------ LOGIN ------------------ */
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   loginMessage.textContent = "";
@@ -271,15 +278,18 @@ const productMessage = document.getElementById("productMessage");
 const productsTable = document.querySelector("#productsTable tbody");
 const productSubmitBtn = productForm.querySelector("button[type='submit']");
 let currentEditingProductId = null;
+const currencySelectAdmin = document.getElementById("currencySelectAdmin");
+
+async function fetchRates() {
+  // For demo purposes, liveRates is hardcoded. Replace with real API fetch if desired
+  // Example: fetch('https://api.exchangerate-api.com/v4/latest/NGN')
+}
 
 productForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   const data = {
     name: document.getElementById("productName").value,
-    priceNGN: +document.getElementById("priceNGN").value,
-    priceUSD: +document.getElementById("priceUSD").value,
-    priceEUR: +document.getElementById("priceEUR").value,
-    priceGBP: +document.getElementById("priceGBP").value,
+    price: +document.getElementById("productPrice").value,
     description: document.getElementById("productDesc").value,
     imageUrl: document.getElementById("productImg").value,
     customizationAvailable: document.getElementById("productCustom").value === "true",
@@ -312,10 +322,10 @@ function subscribeProducts() {
     snap.forEach(docSnap => {
       const p = docSnap.data();
       const row = document.createElement("tr");
+      row.dataset.price = p.price; // store NGN price
       row.innerHTML = `
         <td>${p.name}</td>
-        <td>${p.priceNGN || 0} / ${p.priceUSD || 0} / ${p.priceEUR || 0} / ${p.priceGBP || 0}</td>
-        <td>${p.description || ""}</td>
+        <td class="priceCell">${(p.price*liveRates[currencySelectAdmin.value]).toFixed(2)} ${currencySelectAdmin.value}</td>
         <td>${p.imageUrl ? `<img src="${p.imageUrl}" alt="${p.name}">` : ""}</td>
         <td>${p.customizationAvailable ? "Yes" : "No"}</td>
         <td>${p.published ? "Yes" : "No"}</td>
@@ -327,6 +337,13 @@ function subscribeProducts() {
     });
   });
 }
+
+currencySelectAdmin.addEventListener("change", () => {
+  document.querySelectorAll("#productsTable tbody tr").forEach(row => {
+    const basePrice = +row.dataset.price;
+    row.querySelector(".priceCell").textContent = (basePrice*liveRates[currencySelectAdmin.value]).toFixed(2) + " " + currencySelectAdmin.value;
+  });
+});
 
 window.deleteProduct = async (id) => {
   if (!confirm("Delete this product?")) return;
@@ -341,10 +358,7 @@ window.editProduct = async (id) => {
   const p = docSnap.data();
 
   document.getElementById("productName").value = p.name || "";
-  document.getElementById("priceNGN").value = p.priceNGN || 0;
-  document.getElementById("priceUSD").value = p.priceUSD || 0;
-  document.getElementById("priceEUR").value = p.priceEUR || 0;
-  document.getElementById("priceGBP").value = p.priceGBP || 0;
+  document.getElementById("productPrice").value = p.price || 0;
   document.getElementById("productDesc").value = p.description || "";
   document.getElementById("productImg").value = p.imageUrl || "";
   document.getElementById("productCustom").value = p.customizationAvailable ? "true" : "false";
@@ -353,6 +367,9 @@ window.editProduct = async (id) => {
   currentEditingProductId = id;
   productSubmitBtn.textContent = "Save Product";
 }
+
+/* ---------------- QUOTES & ORDERS ---------------- */
+// Keep the original code for quotes and orders as-is (unchanged)
 
 /* ---------------- QUOTES ---------------- */
 const quoteForm = document.getElementById("quoteForm");
