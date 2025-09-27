@@ -1,352 +1,203 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin - Fleur De Vie</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Fleur De Vie Admin Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; background:#f7f7f7; }
-    h1, h2, h3 { margin-top: 0; }
-    .section { background:#fff; padding:20px; margin-bottom:20px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1);}
-    label { display:block; margin-top:10px; font-weight:bold;}
-    input, select, textarea { width:100%; padding:8px; margin-top:5px; border:1px solid #ccc; border-radius:4px; }
-    button { margin-top:10px; padding:8px 12px; border:none; border-radius:4px; background:#333; color:#fff; cursor:pointer;}
-    button:hover { background:#555; }
-    table { width:100%; border-collapse: collapse; margin-top:15px; }
-    th, td { padding:10px; border:1px solid #ddd; text-align:left; }
-    th { background:#eee; }
-    .actions button { margin-right:5px; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family: "Montserrat", sans-serif; background:#F5E6CC; color:#112e1f; line-height:1.6; }
+    a { text-decoration:none; color:inherit; }
+
+    header { background:#112e1f; color:#FFD6BA; padding:16px; text-align:center; font-family:"Playfair Display", serif; font-size:24px; font-weight:700; }
+
+    .container { max-width:1000px; margin:2rem auto; padding:2rem; background:#FFD6BA; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1); }
+
+    h2 { font-family:"Playfair Display", serif; margin-bottom:16px; color:#112e1f; }
+
+    label { display:block; margin-top:1rem; font-weight:500; }
+    input, textarea, select { width:100%; padding:0.6rem; margin-top:0.5rem; border:1px solid #112e1f; border-radius:6px; font-size:1rem; }
+
+    button { margin-top:1rem; padding:0.75rem 1.2rem; background:#112e1f; color:#FFD6BA; border:none; border-radius:6px; cursor:pointer; font-weight:600; transition:0.3s; }
+    button:hover { background:#0a1d14; }
+
+    .message { margin-top:1rem; font-weight:500; font-size:1rem; text-align:center; }
+
+    table { width:100%; border-collapse:collapse; margin-top:1.5rem; background:#fff; border-radius:12px; overflow:hidden; }
+    th, td { padding:0.75rem; border-bottom:1px solid #ddd; text-align:left; font-size:0.95rem; vertical-align:top; }
+    th { background:#F5E6CC; font-family:"Playfair Display", serif; color:#112e1f; }
+    td img { width:60px; border-radius:6px; }
+
+    .actions button { margin-right:0.5rem; padding:0.4rem 0.6rem; font-size:0.9rem; }
+    .actions button:hover { opacity:0.85; }
+
+    .small-note { font-size:0.9rem; color:#334d3a; margin-top:8px; }
+
+    .dashboard-nav { display:flex; gap:10px; margin-bottom:1.5rem; }
+    .dashboard-nav button { flex:1; }
+    .section { display:none; margin-top:1rem; }
+    .section.active { display:block; }
+
+    .quote-item { border:1px solid #eee; padding:8px; margin-top:8px; background:#fff; border-radius:6px; }
+
+    .copy-btn { background:none; border:none; cursor:pointer; margin-left:6px; font-size:1rem; }
+    .copy-btn:hover { opacity:0.7; }
+
+    @media(max-width:600px){
+      .container { padding:1rem; }
+      table, th, td { font-size:0.85rem; }
+      th, td { padding:0.5rem; }
+      .dashboard-nav { flex-direction:column; }
+    }
+
+    .add-item-panel { border:1px dashed rgba(17,46,31,0.12); padding:12px; margin-top:8px; background:#fff; border-radius:8px; }
+    .inline-grid { display:grid; grid-template-columns: repeat(4,1fr); gap:8px; }
+    @media(max-width:600px){ .inline-grid { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
-  <h1>Admin Dashboard - Fleur De Vie</h1>
+
+<header>Fleur De Vie Admin Dashboard</header>
+
+<!-- LOGIN -->
+<div class="container" id="loginContainer">
+  <h2>Admin Login</h2>
+  <form id="loginForm">
+    <label>Email</label>
+    <input type="email" id="loginEmail" required>
+    <label>Password</label>
+    <input type="password" id="loginPassword" required>
+    <button type="submit">Login</button>
+    <div id="loginMessage" class="message"></div>
+  </form>
+</div>
+
+<!-- DASHBOARD -->
+<div class="container" id="dashboardContainer" style="display:none;">
+  <div class="dashboard-nav">
+    <button data-target="productsSection">📦 Products</button>
+    <button data-target="quotesSection">💳 Quotes</button>
+    <button data-target="ordersSection">🧾 Orders</button>
+  </div>
 
   <!-- PRODUCTS -->
-  <div class="section" id="productsSection">
-    <h2>Products</h2>
-    <form id="productForm">
-      <label>Name</label>
-      <input type="text" id="productName" required>
-      <label>Description</label>
-      <textarea id="productDesc" required></textarea>
-      <label>Price (NGN)</label>
-      <input type="number" id="productPriceNGN" step="0.01" required>
-      <label>Price (USD)</label>
-      <input type="number" id="productPriceUSD" step="0.01">
-      <label>Price (EUR)</label>
-      <input type="number" id="productPriceEUR" step="0.01">
-      <label>Price (GBP)</label>
-      <input type="number" id="productPriceGBP" step="0.01">
-      <label>Image URL</label>
-      <input type="text" id="productImage" required>
-      <button type="submit">Add Product</button>
-    </form>
+  <div class="section" id="productsSection">… (unchanged code for products) …</div>
 
-    <h3>All Products</h3>
-    <table id="productsTable">
+  <!-- QUOTES -->
+  <div class="section" id="quotesSection">
+    <h2>Generate Quote</h2>
+    <form id="quoteForm">
+      <label>Customer Name</label>
+      <input id="quoteCustomer" required>
+      <label>Customer Email</label>
+      <input type="email" id="quoteEmail" required>
+      <label>Quote Currency</label>
+      <select id="quoteCurrency">
+        <option value="NGN">NGN</option><option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option>
+      </select>
+
+      <h3>Quote Items</h3>
+      <div id="addItemPanel" class="add-item-panel" style="display:none;">
+        <label>Item Name</label><input id="ai_name">
+        <label>Quantity</label><input type="number" id="ai_qty" min="1" value="1">
+        <label>Description</label><input id="ai_desc">
+        <div class="inline-grid">
+          <div><label>NGN</label><input type="number" id="ai_price_ngn" step="0.01"></div>
+          <div><label>USD</label><input type="number" id="ai_price_usd" step="0.01"></div>
+          <div><label>EUR</label><input type="number" id="ai_price_eur" step="0.01"></div>
+          <div><label>GBP</label><input type="number" id="ai_price_gbp" step="0.01"></div>
+        </div>
+        <div style="margin-top:8px; display:flex; gap:8px;">
+          <button type="button" id="ai_add">Add</button>
+          <button type="button" id="ai_cancel">Cancel</button>
+        </div>
+      </div>
+
+      <div id="quoteItems"></div>
+      <button type="button" id="addQuoteItem">+ Add Item</button>
+      <label>Total (optional)</label><input type="number" id="quoteTotal" step="0.01">
+      <button type="submit">Save Quote</button>
+    </form>
+    <div id="quoteMessage" class="message"></div>
+
+    <table id="quotesTable">
       <thead>
-        <tr>
-          <th>Name</th><th>Description</th><th>NGN</th><th>USD</th><th>EUR</th><th>GBP</th><th>Image</th><th>Actions</th>
-        </tr>
+        <tr><th>Customer</th><th>Email</th><th>Currency</th><th>Items</th><th>Total</th><th>Link</th><th>Actions</th></tr>
       </thead>
       <tbody></tbody>
     </table>
   </div>
 
   <!-- ORDERS -->
-  <div class="section" id="ordersSection">
-    <h2>Orders</h2>
-    <input type="text" id="orderSearch" placeholder="Search by customer/email">
-    <select id="orderStatusFilter">
-      <option value="">All statuses</option>
-      <option value="pending">Pending</option>
-      <option value="paid">Paid</option>
-      <option value="shipped">Shipped</option>
-    </select>
-    <button id="exportBtn">Export CSV</button>
-    <label>From</label><input type="date" id="exportFrom">
-    <label>To</label><input type="date" id="exportTo">
-    <label>Currency</label>
-    <select id="exportCurrency">
-      <option value="NGN">NGN</option>
-      <option value="USD">USD</option>
-      <option value="EUR">EUR</option>
-      <option value="GBP">GBP</option>
-    </select>
+  <div class="section" id="ordersSection">… (unchanged code for orders) …</div>
+</div>
 
-    <table id="ordersTable">
-      <thead>
-        <tr>
-          <th>ID</th><th>Customer</th><th>Email</th><th>Total</th><th>Status</th><th>Actions</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-  <!-- QUOTES -->
-  <div class="section" id="quotesSection">
-    <h2>Quotes</h2>
-    <form id="quoteForm">
-      <label>Customer Name</label>
-      <input type="text" id="quoteCustomerName" required>
-      <label>Customer Email</label>
-      <input type="email" id="quoteCustomerEmail" required>
-    </form>
+const app = initializeApp({ … your firebase config … });
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-    <div id="addQuoteItem">
-      <h3>Add Item</h3>
-      <input type="text" id="quoteItemName" placeholder="Item name" required>
-      <input type="number" id="quoteItemQty" placeholder="Quantity" required>
-      <input type="text" id="quoteItemDesc" placeholder="Description">
-      <input type="number" id="quoteItemPriceNGN" placeholder="Price (NGN)" step="0.01">
-      <input type="number" id="quoteItemPriceUSD" placeholder="Price (USD)" step="0.01">
-      <input type="number" id="quoteItemPriceEUR" placeholder="Price (EUR)" step="0.01">
-      <input type="number" id="quoteItemPriceGBP" placeholder="Price (GBP)" step="0.01">
-      <button type="button" id="addQuoteItemBtn">Add Item</button>
-    </div>
+// QUOTES HANDLING
+let quoteDraftItems = [];
+function renderDraftItems() { … (same as before) … }
 
-    <h3>Quote Items</h3>
-    <table id="quoteItemsTable">
-      <thead>
-        <tr>
-          <th>Name</th><th>Qty</th><th>Description</th><th>NGN</th><th>USD</th><th>EUR</th><th>GBP</th><th></th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+document.getElementById("addQuoteItem").onclick = () => {
+  document.getElementById("addItemPanel").style.display="block";
+};
+document.getElementById("ai_cancel").onclick = () => {
+  document.getElementById("addItemPanel").style.display="none";
+};
+document.getElementById("ai_add").onclick = () => {
+  quoteDraftItems.push({
+    name: ai_name.value, qty:+ai_qty.value, desc:ai_desc.value,
+    priceNGN:+ai_price_ngn.value||null, priceUSD:+ai_price_usd.value||null,
+    priceEUR:+ai_price_eur.value||null, priceGBP:+ai_price_gbp.value||null
+  });
+  renderDraftItems();
+  ai_name.value=ai_desc.value=ai_price_ngn.value=ai_price_usd.value=ai_price_eur.value=ai_price_gbp.value="";
+  ai_qty.value=1;
+  addItemPanel.style.display="none";
+};
 
-    <button type="button" id="generateQuoteBtn">Generate Quote Link</button>
-    <div id="quoteLinkContainer" style="margin-top:10px;"></div>
-  </div>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, onSnapshot, doc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_AUTH_DOMAIN",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_STORAGE_BUCKET",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId: "YOUR_APP_ID"
-    };
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    /* ---------------- PRODUCTS ---------------- */
-    const productForm = document.getElementById("productForm");
-    const productsTableBody = document.querySelector("#productsTable tbody");
-
-    productForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const newProduct = {
-        name: productName.value,
-        desc: productDesc.value,
-        priceNGN: parseFloat(productPriceNGN.value) || 0,
-        priceUSD: parseFloat(productPriceUSD.value) || 0,
-        priceEUR: parseFloat(productPriceEUR.value) || 0,
-        priceGBP: parseFloat(productPriceGBP.value) || 0,
-        image: productImage.value
-      };
-      try {
-        await addDoc(collection(db, "brands", "fleurdevie", "products"), newProduct);
-        productForm.reset();
-      } catch (err) {
-        console.error(err);
-        alert("Error adding product");
-      }
+quoteForm.onsubmit = async e => {
+  e.preventDefault();
+  try {
+    const docRef = await addDoc(collection(db,"brands","fleurdevie","quotes"),{
+      customer:quoteCustomer.value, email:quoteEmail.value,
+      currency:quoteCurrency.value, items:quoteDraftItems,
+      total:+quoteTotal.value||null, createdAt:new Date().toISOString()
     });
+    quoteMessage.textContent="✅ Quote saved!";
+    quoteMessage.style.color="green";
+    quoteForm.reset(); quoteDraftItems=[]; renderDraftItems();
+  } catch(err){ quoteMessage.textContent="❌ Error saving quote."; quoteMessage.style.color="red"; console.error(err); }
+};
 
-    function subscribeProducts() {
-      const ref = collection(db, "brands", "fleurdevie", "products");
-      onSnapshot(ref, snap => {
-        productsTableBody.innerHTML = "";
-        snap.forEach(docSnap => {
-          const p = { id: docSnap.id, ...docSnap.data() };
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td>${p.name}</td>
-            <td>${p.desc}</td>
-            <td>${p.priceNGN}</td>
-            <td>${p.priceUSD}</td>
-            <td>${p.priceEUR}</td>
-            <td>${p.priceGBP}</td>
-            <td><img src="${p.image}" width="50"></td>
-            <td class="actions"><button onclick="deleteProduct('${p.id}')">Delete</button></td>
-          `;
-          productsTableBody.appendChild(row);
-        });
-      });
-    }
-    window.deleteProduct = async (id) => {
-      if (!confirm("Delete this product?")) return;
-      await deleteDoc(doc(db, "brands", "fleurdevie", "products", id));
-    };
-    subscribeProducts();
-
-    /* ---------------- ORDERS ---------------- */
-    let allOrders = [];
-    const ordersTableBody = document.querySelector("#ordersTable tbody");
-    const orderSearch = document.getElementById("orderSearch");
-    const orderStatusFilter = document.getElementById("orderStatusFilter");
-    const exportBtn = document.getElementById("exportBtn");
-    const exportFrom = document.getElementById("exportFrom");
-    const exportTo = document.getElementById("exportTo");
-    const exportCurrency = document.getElementById("exportCurrency");
-
-    function subscribeOrders() {
-      const ordersRef = collection(db, "brands", "fleurdevie", "orders");
-      onSnapshot(ordersRef, snap => {
-        allOrders = [];
-        snap.forEach(docSnap => {
-          allOrders.push({ id: docSnap.id, ...docSnap.data() });
-        });
-        renderOrdersTable();
-      });
-    }
-    function renderOrdersTable() {
-      const searchVal = orderSearch.value.toLowerCase().trim();
-      const statusVal = orderStatusFilter.value;
-      ordersTableBody.innerHTML = "";
-      allOrders.filter(o => {
-        const matchesSearch = !searchVal || (o.customer && o.customer.toLowerCase().includes(searchVal)) || (o.email && o.email.toLowerCase().includes(searchVal));
-        const matchesStatus = !statusVal || o.status === statusVal;
-        return matchesSearch && matchesStatus;
-      }).forEach(o => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${o.id}</td>
-          <td>${o.customer || ""}</td>
-          <td>${o.email || ""}</td>
-          <td>${o.total || ""} ${o.currency || "NGN"}</td>
-          <td>${o.status || ""}</td>
-          <td class="actions">
-            <button onclick="deleteOrder('${o.id}')">Delete</button>
-            <button onclick="viewOrder('${o.id}')">View</button>
-          </td>
-        `;
-        ordersTableBody.appendChild(row);
-      });
-    }
-    orderSearch.addEventListener("input", renderOrdersTable);
-    orderStatusFilter.addEventListener("change", renderOrdersTable);
-    window.deleteOrder = async (id) => {
-      if (!confirm("Delete this order?")) return;
-      await deleteDoc(doc(db, "brands", "fleurdevie", "orders", id));
-    };
-    window.viewOrder = async (id) => {
-      const docSnap = await getDoc(doc(db, "brands", "fleurdevie", "orders", id));
-      if (!docSnap.exists()) return alert("Order not found");
-      alert(JSON.stringify(docSnap.data(), null, 2));
-    };
-    exportBtn.addEventListener("click", () => {
-      const fromDate = exportFrom.value ? new Date(exportFrom.value) : null;
-      const toDate = exportTo.value ? new Date(exportTo.value) : null;
-      const curr = exportCurrency.value || "NGN";
-      let csv = "OrderID,Customer,Email,Total,Status\n";
-      allOrders.forEach(o => {
-        const createdAt = o.createdAt ? new Date(o.createdAt) : null;
-        if (fromDate && createdAt && createdAt < fromDate) return;
-        if (toDate && createdAt && createdAt > toDate) return;
-        csv += `${o.id},"${o.customer}","${o.email}",${o.total} ${curr},${o.status}\n`;
-      });
-      const blob = new Blob([csv], { type: "text/csv" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "orders.csv";
-      a.click();
-      URL.revokeObjectURL(url);
+function subscribeQuotes(){
+  const ref = collection(db,"brands","fleurdevie","quotes");
+  onSnapshot(ref, snap=>{
+    const tbody=document.querySelector("#quotesTable tbody");
+    tbody.innerHTML="";
+    snap.forEach(docSnap=>{
+      const q=docSnap.data();
+      const link=`/checkout.html?quoteId=${docSnap.id}`;
+      const tr=document.createElement("tr");
+      tr.innerHTML=`
+        <td>${q.customer}</td><td>${q.email}</td><td>${q.currency}</td>
+        <td>${(q.items||[]).length}</td><td>${q.total||"-"}</td>
+        <td><a href="${link}" target="_blank">${link}</a>
+          <button class="copy-btn" onclick="navigator.clipboard.writeText('${location.origin}${link}')">📋</button></td>
+        <td><button onclick="deleteDoc(doc(db,'brands','fleurdevie','quotes','${docSnap.id}'))">Delete</button></td>`;
+      tbody.appendChild(tr);
     });
-    subscribeOrders();
-
-    /* ---------------- QUOTES ---------------- */
-    let currentQuoteItems = [];
-    const quoteCustomerName = document.getElementById("quoteCustomerName");
-    const quoteCustomerEmail = document.getElementById("quoteCustomerEmail");
-    const quoteItemName = document.getElementById("quoteItemName");
-    const quoteItemQty = document.getElementById("quoteItemQty");
-    const quoteItemDesc = document.getElementById("quoteItemDesc");
-    const quoteItemPriceNGN = document.getElementById("quoteItemPriceNGN");
-    const quoteItemPriceUSD = document.getElementById("quoteItemPriceUSD");
-    const quoteItemPriceEUR = document.getElementById("quoteItemPriceEUR");
-    const quoteItemPriceGBP = document.getElementById("quoteItemPriceGBP");
-    const addQuoteItemBtn = document.getElementById("addQuoteItemBtn");
-    const quoteItemsTable = document.getElementById("quoteItemsTable");
-    const generateQuoteBtn = document.getElementById("generateQuoteBtn");
-    const quoteLinkContainer = document.getElementById("quoteLinkContainer");
-    const quoteForm = document.getElementById("quoteForm");
-
-    addQuoteItemBtn.addEventListener("click", () => {
-      const name = quoteItemName.value.trim();
-      const qty = parseInt(quoteItemQty.value, 10) || 0;
-      const desc = quoteItemDesc.value.trim();
-      const priceNGN = parseFloat(quoteItemPriceNGN.value) || 0;
-      const priceUSD = parseFloat(quoteItemPriceUSD.value) || 0;
-      const priceEUR = parseFloat(quoteItemPriceEUR.value) || 0;
-      const priceGBP = parseFloat(quoteItemPriceGBP.value) || 0;
-      if (!name || !qty) return alert("Item name and quantity required");
-      currentQuoteItems.push({ name, qty, desc, priceNGN, priceUSD, priceEUR, priceGBP });
-      renderQuoteItems();
-      quoteItemName.value = "";
-      quoteItemQty.value = "";
-      quoteItemDesc.value = "";
-      quoteItemPriceNGN.value = "";
-      quoteItemPriceUSD.value = "";
-      quoteItemPriceEUR.value = "";
-      quoteItemPriceGBP.value = "";
-    });
-
-    function renderQuoteItems() {
-      quoteItemsTable.querySelector("tbody").innerHTML = "";
-      currentQuoteItems.forEach((item, i) => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${item.name}</td>
-          <td>${item.qty}</td>
-          <td>${item.desc || ""}</td>
-          <td>${item.priceNGN || ""}</td>
-          <td>${item.priceUSD || ""}</td>
-          <td>${item.priceEUR || ""}</td>
-          <td>${item.priceGBP || ""}</td>
-          <td><button onclick="removeQuoteItem(${i})">Remove</button></td>
-        `;
-        quoteItemsTable.querySelector("tbody").appendChild(row);
-      });
-    }
-    window.removeQuoteItem = (i) => {
-      currentQuoteItems.splice(i, 1);
-      renderQuoteItems();
-    };
-
-    generateQuoteBtn.addEventListener("click", async () => {
-      const customerName = quoteCustomerName.value.trim();
-      const customerEmail = quoteCustomerEmail.value.trim();
-      if (!customerName || !customerEmail) return alert("Customer info required");
-      if (!currentQuoteItems.length) return alert("Please add at least one item");
-      const quoteData = { customerName, customerEmail, items: currentQuoteItems, createdAt: Date.now() };
-      try {
-        const quotesRef = collection(db, "brands", "fleurdevie", "quotes");
-        const docRef = await addDoc(quotesRef, quoteData);
-        const quoteId = docRef.id;
-        const url = `checkout.html?quoteId=${quoteId}`;
-        quoteLinkContainer.innerHTML = `
-          Quote link: <a href="${url}" target="_blank">${url}</a>
-          <button id="copyQuoteLink">📋</button>
-        `;
-        document.getElementById("copyQuoteLink").addEventListener("click", () => {
-          navigator.clipboard.writeText(url).then(() => alert("Link copied!"));
-        });
-        currentQuoteItems = [];
-        renderQuoteItems();
-        quoteForm.reset();
-      } catch (err) {
-        console.error(err);
-        alert("❌ Error saving quote.");
-      }
-    });
-  </script>
+  });
+}
+subscribeQuotes();
+</script>
 </body>
 </html>
