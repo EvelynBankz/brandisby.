@@ -160,8 +160,8 @@
   <!-- FIREBASE + LIVE CURRENCY SCRIPT -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
-
+    import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+  
     const firebaseConfig = {
       apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
       authDomain: "brandisby.firebaseapp.com",
@@ -170,99 +170,128 @@
       messagingSenderId: "87213267039",
       appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
     };
-
+  
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-
+  
     const cartCountElem = document.getElementById('cartCount');
     const orderItems = document.getElementById('orderItems');
     const orderSubtotal = document.getElementById('orderSubtotal');
     const currencySelect = document.getElementById('currency');
     const payBtn = document.getElementById('payBtn');
-
+  
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
-    let exchangeRates = { NGN:1 }; // default
-
-    async function fetchExchangeRates(base='NGN'){
-      try{
-        const res = await fetch(`https://api.exchangerate.host/latest?base=${base}&symbols=USD,EUR,GBP,NGN`);
-        const data = await res.json();
-        exchangeRates = { ...exchangeRates, ...data.rates };
-      }catch(e){ console.warn("Exchange rate fetch failed", e); }
+    let quote = JSON.parse(localStorage.getItem('quote')) || null; // quote object if opened from link
+    let pricesByCurrency = {}; // prices from quote or cart
+    let selectedCurrency = 'NGN';
+  
+    // Determine checkout source
+    if (quote) {
+      // Checkout from quote
+      pricesByCurrency = quote.prices; // { NGN: 1000, USD: 2.5, EUR: 2.3, GBP: 2.0 }
+      selectedCurrency = quote.currency || Object.keys(pricesByCurrency)[0];
+      currencySelect.value = selectedCurrency;
+    } else {
+      // Checkout from cart/shop
+      selectedCurrency = localStorage.getItem('currency') || 'NGN';
+      currencySelect.value = selectedCurrency;
+  
+      // Build pricesByCurrency from cart products
+      cart.forEach(item => {
+        pricesByCurrency[item.id] = {
+          NGN: item.priceNGN || 0,
+          USD: item.priceUSD || 0,
+          EUR: item.priceEUR || 0,
+          GBP: item.priceGBP || 0
+        };
+      });
     }
-
+  
+    // Helper: format price
     function formatPrice(value, currency){
-      let locale;
-      switch(currency){
-        case 'USD': locale='en-US'; break;
-        case 'EUR': locale='de-DE'; break;
-        case 'GBP': locale='en-GB'; break;
-        case 'NGN': locale='en-NG'; break;
-        default: locale='en-US';
-      }
-      return new Intl.NumberFormat(locale, { style:'currency', currency }).format(value);
+      const localeMap = { USD:'en-US', EUR:'de-DE', GBP:'en-GB', NGN:'en-NG' };
+      return new Intl.NumberFormat(localeMap[currency]||'en-US', { style:'currency', currency:currency, minimumFractionDigits: currency==='NGN'?0:2 }).format(value);
     }
-
+  
+    // Update cart count badge
     function updateCartCount(){
-      const total = cart.reduce((s,i)=>s+i.quantity,0);
+      const total = cart.reduce((sum,i)=>sum+i.quantity,0);
       cartCountElem.textContent = total;
     }
-
-    async function renderOrder(){
-      const currency = currencySelect.value;
-      await fetchExchangeRates('NGN');
-
-      orderItems.innerHTML='';
-      let subtotal=0;
-      cart.forEach(item=>{
-        const priceConverted = (item.price || 0) * (exchangeRates[currency] || 1);
-        subtotal += priceConverted * item.quantity;
-
-        const li = document.createElement('li');
-        li.innerHTML = `${item.name} (x${item.quantity}) <span>${formatPrice(priceConverted*item.quantity, currency)}</span>`;
-        orderItems.appendChild(li);
-      });
-      orderSubtotal.textContent = `Subtotal: ${formatPrice(subtotal, currency)}`;
+  
+    // Render order summary
+    function renderOrder(){
+      orderItems.innerHTML = '';
+      let subtotal = 0;
+  
+      if (quote) {
+        // Quote checkout
+        Object.entries(quote.items).forEach(([id, item]) => {
+          const unitPrice = pricesByCurrency[currencySelect.value][id];
+          subtotal += unitPrice * item.quantity;
+  
+          const li = document.createElement('li');
+          li.innerHTML = `${item.name} (x${item.quantity}) <span>${formatPrice(unitPrice*item.quantity, currencySelect.value)}</span>`;
+          orderItems.appendChild(li);
+        });
+      } else {
+        // Cart checkout
+        cart.forEach(item => {
+          const unitPrice = pricesByCurrency[item.id][currencySelect.value];
+          subtotal += unitPrice * item.quantity;
+  
+          const li = document.createElement('li');
+          li.innerHTML = `${item.name} (x${item.quantity}) <span>${formatPrice(unitPrice*item.quantity, currencySelect.value)}</span>`;
+          orderItems.appendChild(li);
+        });
+      }
+  
+      orderSubtotal.textContent = `Subtotal: ${formatPrice(subtotal, currencySelect.value)}`;
     }
-
-    document.getElementById('hamburger').addEventListener('click',()=>{
-      document.querySelector('.header-right').classList.toggle('open');
-      document.getElementById('hamburger').classList.toggle('open');
+  
+    // Handle currency change
+    currencySelect.addEventListener('change', () => {
+      selectedCurrency = currencySelect.value;
+      localStorage.setItem('currency', selectedCurrency);
+      renderOrder();
     });
-
-    currencySelect.addEventListener('change', renderOrder);
-
-    payBtn.addEventListener('click', async ()=>{
+  
+    // Pay button
+    payBtn.addEventListener('click', async () => {
       const name=document.getElementById('name').value;
       const email=document.getElementById('email').value;
       const phone=document.getElementById('phone').value;
       const address=document.getElementById('address').value;
-      const currency = currencySelect.value;
-
+  
       if(!name||!email||!phone||!address){
         alert("Please fill in all billing details.");
         return;
       }
-
-      await fetchExchangeRates('NGN');
-      let subtotal=0;
-      cart.forEach(item=>{
-        subtotal += (item.price || 0) * (exchangeRates[currency] || 1) * item.quantity;
-      });
-
+  
+      let subtotal = 0;
+      if (quote) {
+        Object.entries(quote.items).forEach(([id,item])=>{
+          subtotal += pricesByCurrency[selectedCurrency][id] * item.quantity;
+        });
+      } else {
+        cart.forEach(item=>{
+          subtotal += pricesByCurrency[item.id][selectedCurrency] * item.quantity;
+        });
+      }
+  
       FlutterwaveCheckout({
-        public_key: "FLWPUBK_TEST-xxxxxxxxxxxxxxxxxxxxx-X", // replace with your key
+        public_key: "FLWPUBK_TEST-xxxxxxxxxxxxxxxxxxxxx-X",
         tx_ref: "fleurdevie-"+Date.now(),
         amount: subtotal.toFixed(2),
-        currency,
+        currency: selectedCurrency,
         customer: { email, phonenumber: phone, name },
         customizations: { title:"Fleur De Vie", description:"Order Payment", logo:"logo.png" },
         callback: async function(data){
           try{
             await addDoc(collection(db,"orders"),{
               name,email,phone,address,
-              currency,
-              items: cart,
+              currency:selectedCurrency,
+              items: quote? Object.values(quote.items):cart,
               total: subtotal.toFixed(2),
               paymentRef: data.tx_ref,
               status: "paid",
@@ -278,9 +307,9 @@
         onclose: function(){ console.log("Checkout closed"); }
       });
     });
-
+  
     updateCartCount();
     renderOrder();
-  </script>
+</script>
 </body>
 </html>
