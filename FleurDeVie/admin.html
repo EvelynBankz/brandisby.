@@ -1,357 +1,349 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Fleur De Vie Admin Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Fleur De Vie</title>
   <style>
-    * { box-sizing:border-box; margin:0; padding:0; }
-    body { font-family: "Montserrat", sans-serif; background:#F5E6CC; color:#112e1f; line-height:1.6; }
-    a { text-decoration:none; color:inherit; }
+    /* ====== General Styles ====== */
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f4f4f4; }
+    h2 { margin-top: 0; }
+    .hidden { display: none; }
 
-    header { background:#112e1f; color:#FFD6BA; padding:16px; text-align:center; font-family:"Playfair Display", serif; font-size:24px; font-weight:700; }
+    /* ====== Containers ====== */
+    #loginContainer, #dashboardContainer { padding: 20px; }
+    #dashboardContainer { display: none; }
 
-    .container { max-width:1000px; margin:2rem auto; padding:2rem; background:#FFD6BA; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1); }
+    /* ====== Dashboard Sections ====== */
+    .section { display: none; margin-top: 20px; }
+    .section.active { display: block; }
 
-    h2 { font-family:"Playfair Display", serif; margin-bottom:16px; color:#112e1f; }
+    /* ====== Forms ====== */
+    form { background: #fff; padding: 15px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+    form input, form select { padding: 8px; margin: 5px 0; width: 100%; box-sizing: border-box; border-radius: 4px; border: 1px solid #ccc; }
+    form button { padding: 10px 15px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    form button:hover { background: #0056b3; }
 
-    label { display:block; margin-top:1rem; font-weight:500; }
-    input, textarea, select { width:100%; padding:0.6rem; margin-top:0.5rem; border:1px solid #112e1f; border-radius:6px; font-size:1rem; }
+    /* ====== Tables ====== */
+    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; background: #fff; border-radius: 8px; overflow: hidden; }
+    table th, table td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+    table th { background: #f0f0f0; }
+    table tr:hover { background: #f9f9f9; }
 
-    button { margin-top:1rem; padding:0.75rem 1.2rem; background:#112e1f; color:#FFD6BA; border:none; border-radius:6px; cursor:pointer; font-weight:600; transition:0.3s; }
-    button:hover { background:#0a1d14; }
+    /* ====== Quote Item Inputs ====== */
+    .quote-item { display: flex; gap: 10px; margin-bottom: 5px; }
+    .quote-item input { flex: 1; }
 
-    .message { margin-top:1rem; font-weight:500; font-size:1rem; text-align:center; }
+    /* ====== Navigation ====== */
+    .dashboard-nav { display: flex; gap: 10px; margin-bottom: 20px; }
+    .dashboard-nav button { padding: 8px 12px; border: 1px solid #007bff; background: white; color: #007bff; border-radius: 4px; cursor: pointer; }
+    .dashboard-nav button:hover { background: #007bff; color: white; }
 
-    table { width:100%; border-collapse:collapse; margin-top:1.5rem; background:#fff; border-radius:12px; overflow:hidden; }
-    th, td { padding:0.75rem; border-bottom:1px solid #ddd; text-align:left; font-size:0.95rem; vertical-align:top; }
-    th { background:#F5E6CC; font-family:"Playfair Display", serif; color:#112e1f; }
-    td img { width:60px; border-radius:6px; }
-
-    .actions button { margin-right:0.5rem; padding:0.4rem 0.6rem; font-size:0.9rem; }
-    .actions button:hover { opacity:0.85; }
-
-    .small-note { font-size:0.9rem; color:#334d3a; margin-top:8px; }
-
-    /* Dashboard Navigation */
-    .dashboard-nav { display:flex; gap:10px; margin-bottom:1.5rem; }
-    .dashboard-nav button { flex:1; }
-    .section { display:none; margin-top:1rem; }
-    .section.active { display:block; }
-
-    .details-row { background:#fff6e8; }
-    .details-row td { padding:12px; }
-
-    /* Orders filter/search */
-    .order-filters { display:flex; gap:10px; margin-bottom:1rem; flex-wrap:wrap; }
-    .order-filters input, .order-filters select { flex:1; max-width: 320px; }
-
-    .quote-item { border:1px solid #eee; padding:8px; margin-top:8px; background:#fff; border-radius:6px; }
-
-    .copy-btn { background:none; border:none; cursor:pointer; margin-left:6px; font-size:1rem; }
-    .copy-btn:hover { opacity:0.7; }
-
-    @media(max-width:600px){
-      .container { padding:1rem; }
-      table, th, td { font-size:0.85rem; }
-      th, td { padding:0.5rem; }
-      .dashboard-nav { flex-direction:column; }
-      .order-filters { flex-direction: column; }
-    }
-
-    /* Add Item panel styling (small) */
-    .add-item-panel { border:1px dashed rgba(17,46,31,0.12); padding:12px; margin-top:8px; background:#fff; border-radius:8px; }
-    .inline-grid { display:grid; grid-template-columns: repeat(4,1fr); gap:8px; }
-    @media(max-width:600px){ .inline-grid { grid-template-columns: 1fr; } }
+    /* ====== Action Buttons ====== */
+    .btn { padding: 5px 8px; border-radius: 4px; border: none; cursor: pointer; }
+    .btn-edit { background: #ffc107; color: white; }
+    .btn-delete { background: #dc3545; color: white; }
   </style>
 </head>
 <body>
 
-<header>Fleur De Vie Admin Dashboard</header>
-
-<!-- LOGIN FORM -->
-<div class="container" id="loginContainer">
-  <h2>Admin Login</h2>
-  <form id="loginForm">
-    <label for="loginEmail">Email</label>
-    <input type="email" id="loginEmail" required>
-
-    <label for="loginPassword">Password</label>
-    <input type="password" id="loginPassword" required>
-
-    <button type="submit">Login</button>
-    <div class="message" id="loginMessage"></div>
-  </form>
-</div>
-
-<!-- DASHBOARD -->
-<div class="container" id="dashboardContainer" style="display:none;">
-  <div class="dashboard-nav">
-    <button type="button" data-target="productsSection">📦 Products</button>
-    <button type="button" data-target="quotesSection">💳 Quotes</button>
-    <button type="button" data-target="ordersSection">🧾 Orders</button>
-  </div>
-
-  <!-- PRODUCTS SECTION -->
-  <div class="section" id="productsSection">
-    <h2>Manage Products</h2>
-    <form id="productForm">
-      <label>Name</label>
-      <input type="text" id="productName" required>
-      <label>Price (NGN)</label>
-      <input type="number" id="productPriceNGN" step="0.01" inputmode="decimal" required>
-      <label>Price (USD)</label>
-      <input type="number" id="productPriceUSD" step="0.01" inputmode="decimal">
-      <label>Price (EUR)</label>
-      <input type="number" id="productPriceEUR" step="0.01" inputmode="decimal">
-      <label>Price (GBP)</label>
-      <input type="number" id="productPriceGBP" step="0.01" inputmode="decimal">
-      <label>Description</label>
-      <textarea id="productDesc"></textarea>
-      <label>Image URL</label>
-      <input type="text" id="productImg">
-      <label>Customization Available</label>
-      <select id="productCustom">
-        <option value="false">No</option>
-        <option value="true">Yes</option>
-      </select>
-      <label>Published</label>
-      <select id="productPublished">
-        <option value="false">No</option>
-        <option value="true">Yes</option>
-      </select>
-      <button type="submit">Add Product</button>
-    </form>
-    <div id="productMessage" class="message"></div>
-
-    <label style="margin-top:12px;">Table Currency:</label>
-    <select id="tableCurrency">
-      <option value="NGN">NGN</option>
-      <option value="USD">USD</option>
-      <option value="EUR">EUR</option>
-      <option value="GBP">GBP</option>
-    </select>
-
-    <table id="productsTable">
-      <thead>
-        <tr><th>Name</th><th>Price</th><th>Image</th><th>Customization</th><th>Published</th><th>Actions</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
-
-  <!-- QUOTES SECTION -->
-  <div class="section" id="quotesSection">
-    <h2>Generate Quote</h2>
-    <form id="quoteForm">
-      <label>Customer Name</label>
-      <input type="text" id="quoteCustomer" required>
-      <label>Customer Email</label>
-      <input type="email" id="quoteEmail" required>
-      <label>Quote Currency (primary)</label>
-      <select id="quoteCurrency">
-        <option value="NGN">NGN</option>
-        <option value="USD">USD</option>
-        <option value="EUR">EUR</option>
-        <option value="GBP">GBP</option>
-      </select>
-
-      <h3>Quote Items</h3>
-      <div id="addItemPanel" class="add-item-panel" style="display:none;">
-        <label>Item Name</label>
-        <input type="text" id="ai_name" placeholder="Item name">
-        <label>Quantity</label>
-        <input type="number" id="ai_qty" min="1" value="1">
-        <div class="inline-grid">
-          <div><label>NGN</label><input type="number" id="ai_ngn" step="0.01"></div>
-          <div><label>USD</label><input type="number" id="ai_usd" step="0.01"></div>
-          <div><label>EUR</label><input type="number" id="ai_eur" step="0.01"></div>
-          <div><label>GBP</label><input type="number" id="ai_gbp" step="0.01"></div>
-        </div>
-        <button type="button" id="ai_addItem">Add Item</button>
-      </div>
-      <button type="button" id="toggleAddItemPanel">➕ Add Custom Item</button>
-
-      <div id="quoteItemsList"></div>
-      <button type="submit">Generate Quote</button>
-      <div class="message" id="quoteMessage"></div>
+  <!-- ====== LOGIN ====== -->
+  <div id="loginContainer">
+    <h2>Admin Login</h2>
+    <form id="loginForm">
+      <input type="email" id="loginEmail" placeholder="Email" required>
+      <input type="password" id="loginPassword" placeholder="Password" required>
+      <button type="submit">Login</button>
+      <p id="loginMessage"></p>
     </form>
   </div>
 
-  <!-- ORDERS SECTION -->
-  <div class="section" id="ordersSection">
-    <h2>Orders</h2>
-    <div class="order-filters">
-      <input type="text" id="orderSearch" placeholder="Search orders by customer name/email">
+  <!-- ====== DASHBOARD ====== -->
+  <div id="dashboardContainer">
+
+    <div class="dashboard-nav">
+      <button data-target="productsSection">Products</button>
+      <button data-target="quotesSection">Quotes</button>
+      <button data-target="ordersSection">Orders</button>
+    </div>
+
+    <!-- ====== PRODUCTS SECTION ====== -->
+    <div class="section" id="productsSection">
+      <h2>Products</h2>
+      <form id="productForm">
+        <input type="text" id="productName" placeholder="Product Name" required>
+        <input type="number" id="productPrice" placeholder="Price" required>
+        <button type="submit">Add / Update Product</button>
+        <p id="productMessage"></p>
+      </form>
+      <table id="productsTable">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- ====== QUOTES SECTION ====== -->
+    <div class="section" id="quotesSection">
+      <h2>Quotes</h2>
+      <form id="quoteForm">
+        <div id="quoteItems"></div>
+        <button type="button" id="addQuoteItem">Add Item</button>
+        <select id="quoteCurrency">
+          <option value="USD">USD</option>
+          <option value="EUR">EUR</option>
+        </select>
+        <button type="submit">Save Quote</button>
+        <p id="quoteMessage"></p>
+      </form>
+      <button id="generateQuoteLinkBtn">Generate Quote Link</button>
+      <p><a href="#" id="generatedQuoteLink" target="_blank"></a></p>
+      <table id="quotesTable">
+        <thead>
+          <tr>
+            <th>Items</th>
+            <th>Currency</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- ====== ORDERS SECTION ====== -->
+    <div class="section" id="ordersSection">
+      <h2>Orders</h2>
+      <input type="text" id="orderSearch" placeholder="Search orders">
       <select id="orderStatusFilter">
         <option value="">All Status</option>
         <option value="pending">Pending</option>
         <option value="completed">Completed</option>
       </select>
+      <button id="exportBtn">Export Orders</button>
+      <select id="exportCurrency">
+        <option value="USD">USD</option>
+        <option value="EUR">EUR</option>
+      </select>
+      <input type="date" id="exportFrom">
+      <input type="date" id="exportTo">
+      <table id="ordersTable">
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Status</th>
+            <th>Total</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
     </div>
-    <table id="ordersTable">
-      <thead>
-        <tr><th>Customer</th><th>Email</th><th>Items</th><th>Total</th><th>Status</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+
   </div>
-</div>
 
-<!-- FIREBASE -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.1/firebase-app.js";
-  import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.6.1/firebase-auth.js";
-  import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.6.1/firebase-firestore.js";
+  <!-- ====== FIREBASE & DASHBOARD SCRIPT ====== -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, getDoc, query } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-  // === YOUR ORIGINAL CONFIG & AUTH ===
-  const firebaseConfig = {
-    apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
-    authDomain: "brandisby.firebaseapp.com",
-    projectId: "brandisby",
-    storageBucket: "brandisby.firebasestorage.app",
-    messagingSenderId: "87213267039",
-    appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
-  };
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
+    const firebaseConfig = {
+      apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
+      authDomain: "brandisby.firebaseapp.com",
+      projectId: "brandisby",
+      storageBucket: "brandisby.firebasestorage.app",
+      messagingSenderId: "87213267039",
+      appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
+    };
 
-  const allowedAdmins = ["yourstruly.fleurdevie@gmail.com"].map(e=>e.toLowerCase().trim());
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
 
-  // LOGIN
-  const loginForm = document.getElementById('loginForm');
-  const loginMessage = document.getElementById('loginMessage');
-  const loginContainer = document.getElementById('loginContainer');
-  const dashboardContainer = document.getElementById('dashboardContainer');
+    const allowedAdmins = ["yourstruly.fleurdevie@gmail.com"].map(e => e.toLowerCase().trim());
 
-  loginForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    loginMessage.textContent = "Logging in...";
-    const email = document.getElementById('loginEmail').value.trim();
-    const password = document.getElementById('loginPassword').value;
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const userEmail = userCredential.user.email.toLowerCase().trim();
-      if(!allowedAdmins.includes(userEmail)) throw new Error("Not allowed");
-      loginMessage.textContent = "Login successful!";
-    } catch(err) { loginMessage.textContent = "Login failed: "+err.message; }
-  });
+    /* --- UI refs --- */
+    const loginForm = document.getElementById("loginForm");
+    const loginMessage = document.getElementById("loginMessage");
+    const loginContainer = document.getElementById("loginContainer");
+    const dashboardContainer = document.getElementById("dashboardContainer");
+    const productForm = document.getElementById("productForm");
+    const productMessage = document.getElementById("productMessage");
+    const productsTableBody = document.querySelector("#productsTable tbody");
+    const quoteForm = document.getElementById("quoteForm");
+    const quoteItemsDiv = document.getElementById("quoteItems");
+    const addQuoteItemBtn = document.getElementById("addQuoteItem");
+    const quotesTableBody = document.querySelector("#quotesTable tbody");
+    const quoteMessage = document.getElementById("quoteMessage");
+    const quoteCurrencySelect = document.getElementById("quoteCurrency");
+    const generateQuoteLinkBtn = document.getElementById("generateQuoteLinkBtn");
+    const generatedQuoteLink = document.getElementById("generatedQuoteLink");
+    const ordersTableBody = document.querySelector("#ordersTable tbody");
 
-  onAuthStateChanged(auth, user => {
-    if(user && allowedAdmins.includes(user.email.toLowerCase().trim())){
-      loginContainer.style.display = "none";
-      dashboardContainer.style.display = "block";
-      initDashboard();
-    }
-  });
+    let currentEditingProductId = null;
 
-  // ===== DASHBOARD FUNCTIONALITY =====
-  function initDashboard(){
-    // NAV
-    document.querySelectorAll('.dashboard-nav button').forEach(btn=>{
-      btn.addEventListener('click',()=>{ 
-        document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-        document.getElementById(btn.dataset.target).classList.add('active');
-      });
-    });
-    document.getElementById('productsSection').classList.add('active');
-
-    // ADD PRODUCT
-    const products = [];
-    const productsTable = document.getElementById('productsTable').querySelector('tbody');
-    const tableCurrency = document.getElementById('tableCurrency');
-
-    document.getElementById('productForm').addEventListener('submit', e=>{
+    /* ---------------- AUTH (UNCHANGED) ---------------- */
+    loginForm.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const p = {
-        name: document.getElementById('productName').value,
-        price: {
-          NGN: Number(document.getElementById('productPriceNGN').value),
-          USD: Number(document.getElementById('productPriceUSD').value),
-          EUR: Number(document.getElementById('productPriceEUR').value),
-          GBP: Number(document.getElementById('productPriceGBP').value)
-        },
-        desc: document.getElementById('productDesc').value,
-        img: document.getElementById('productImg').value,
-        custom: document.getElementById('productCustom').value,
-        published: document.getElementById('productPublished').value
-      };
-      products.push(p);
-      renderProducts();
-      document.getElementById('productMessage').textContent = 'Product added!';
-      document.getElementById('productForm').reset();
-    });
-
-    tableCurrency.addEventListener('change', renderProducts);
-
-    function renderProducts(){
-      const cur = tableCurrency.value;
-      productsTable.innerHTML = '';
-      products.forEach((p,i)=>{
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${p.name}</td><td>${p.price[cur]}</td><td><img src="${p.img}"></td>
-                        <td>${p.custom}</td><td>${p.published}</td>
-                        <td class="actions"><button onclick="editProduct(${i})">Edit</button>
-                        <button onclick="deleteProduct(${i})">Delete</button></td>`;
-        productsTable.appendChild(tr);
-      });
-    }
-
-    window.editProduct = (i)=>{ alert('Edit feature to be implemented'); }
-    window.deleteProduct = (i)=>{ products.splice(i,1); renderProducts(); }
-
-    // QUOTE PANEL
-    const quoteItems = [];
-    const quoteItemsList = document.getElementById('quoteItemsList');
-    const addItemPanel = document.getElementById('addItemPanel');
-    document.getElementById('toggleAddItemPanel').addEventListener('click', ()=>addItemPanel.style.display = addItemPanel.style.display==='none'?'block':'none');
-    document.getElementById('ai_addItem').addEventListener('click', ()=>{
-      const item = {
-        name: document.getElementById('ai_name').value,
-        qty: Number(document.getElementById('ai_qty').value),
-        price: {
-          NGN:Number(document.getElementById('ai_ngn').value),
-          USD:Number(document.getElementById('ai_usd').value),
-          EUR:Number(document.getElementById('ai_eur').value),
-          GBP:Number(document.getElementById('ai_gbp').value)
+      loginMessage.textContent = "";
+      const email = document.getElementById("loginEmail").value;
+      const password = document.getElementById("loginPassword").value;
+      try {
+        const userCred = await signInWithEmailAndPassword(auth, email, password);
+        const normalized = (userCred.user.email || "").toLowerCase().trim();
+        if (allowedAdmins.includes(normalized)) {
+          loginContainer.style.display = "none";
+          dashboardContainer.style.display = "block";
+          subscribeProducts();
+          subscribeQuotes();
+          showSection("productsSection");
+        } else {
+          loginMessage.textContent = "❌ Not authorized.";
+          loginMessage.style.color = "red";
+          await signOut(auth);
         }
-      };
-      quoteItems.push(item);
-      renderQuoteItems();
-      document.getElementById('ai_name').value=''; document.getElementById('ai_qty').value=1;
+      } catch (err) {
+        console.error("Login error:", err);
+        loginMessage.textContent = `❌ ${err.code || ""}: ${err.message || err}`;
+        loginMessage.style.color = "red";
+      }
     });
 
-    function renderQuoteItems(){
-      quoteItemsList.innerHTML = '';
-      quoteItems.forEach((item,i)=>{
-        const div = document.createElement('div');
-        div.className = 'quote-item';
-        div.innerHTML = `<strong>${item.name}</strong> x ${item.qty} | NGN:${item.price.NGN} USD:${item.price.USD} EUR:${item.price.EUR} GBP:${item.price.GBP}
-                         <button onclick="quoteItems.splice(${i},1); renderQuoteItems();">❌ Remove</button>`;
-        quoteItemsList.appendChild(div);
+    onAuthStateChanged(auth, user => {
+      if (user && allowedAdmins.includes((user.email || "").toLowerCase().trim())) {
+        loginContainer.style.display = "none";
+        dashboardContainer.style.display = "block";
+        subscribeProducts();
+        subscribeQuotes();
+        showSection("productsSection");
+      } else {
+        loginContainer.style.display = "block";
+        dashboardContainer.style.display = "none";
+      }
+    });
+
+    document.querySelectorAll(".dashboard-nav button").forEach(btn => {
+      btn.addEventListener("click", () => showSection(btn.dataset.target));
+    });
+
+    function showSection(id) {
+      document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+      document.getElementById(id).classList.add("active");
+    }
+
+    /* ================= PRODUCTS ================= */
+    function subscribeProducts() {
+      const productsCol = collection(db, "products");
+      onSnapshot(productsCol, snapshot => {
+        productsTableBody.innerHTML = "";
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${data.name}</td>
+            <td>${data.price}</td>
+            <td>
+              <button class="btn btn-edit" data-id="${docSnap.id}">Edit</button>
+              <button class="btn btn-delete" data-id="${docSnap.id}">Delete</button>
+            </td>
+          `;
+          productsTableBody.appendChild(tr);
+        });
+
+        document.querySelectorAll(".btn-edit").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            const docSnap = await getDoc(doc(db, "products", btn.dataset.id));
+            const data = docSnap.data();
+            document.getElementById("productName").value = data.name;
+            document.getElementById("productPrice").value = data.price;
+            currentEditingProductId = btn.dataset.id;
+          });
+        });
+
+        document.querySelectorAll(".btn-delete").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            if(confirm("Delete product?")) await deleteDoc(doc(db, "products", btn.dataset.id));
+          });
+        });
       });
     }
 
-    document.getElementById('quoteForm').addEventListener('submit', async e=>{
+    productForm.addEventListener("submit", async e => {
       e.preventDefault();
-      const quoteData = {
-        customer: document.getElementById('quoteCustomer').value,
-        email: document.getElementById('quoteEmail').value,
-        currency: document.getElementById('quoteCurrency').value,
-        items: quoteItems
-      };
-      try{
-        await addDoc(collection(db,'quotes'),quoteData);
-        document.getElementById('quoteMessage').textContent = 'Quote generated successfully!';
-        document.getElementById('quoteForm').reset();
-        quoteItems.length=0;
-        renderQuoteItems();
-      }catch(err){ document.getElementById('quoteMessage').textContent='Error: '+err.message }
+      const name = document.getElementById("productName").value;
+      const price = Number(document.getElementById("productPrice").value);
+      if(currentEditingProductId) {
+        await updateDoc(doc(db, "products", currentEditingProductId), { name, price });
+        currentEditingProductId = null;
+      } else {
+        await addDoc(collection(db, "products"), { name, price });
+      }
+      productForm.reset();
     });
-  }
-</script>
 
+    /* ================= QUOTES ================= */
+    function addQuoteItem(name="", price="") {
+      const div = document.createElement("div");
+      div.className = "quote-item";
+      div.innerHTML = `
+        <input type="text" placeholder="Item Name" value="${name}" required>
+        <input type="number" placeholder="Price" value="${price}" required>
+        <button type="button">❌</button>
+      `;
+      const removeBtn = div.querySelector("button");
+      removeBtn.addEventListener("click", () => div.remove());
+      quoteItemsDiv.appendChild(div);
+    }
+
+    addQuoteItemBtn.addEventListener("click", () => addQuoteItem());
+
+    function subscribeQuotes() {
+      const quotesCol = collection(db, "quotes");
+      onSnapshot(quotesCol, snapshot => {
+        quotesTableBody.innerHTML = "";
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${data.items.map(i=>i.name+" ($"+i.price+")").join(", ")}</td>
+            <td>${data.currency}</td>
+            <td>
+              <button class="btn btn-delete" data-id="${docSnap.id}">Delete</button>
+            </td>
+          `;
+          quotesTableBody.appendChild(tr);
+        });
+
+        document.querySelectorAll(".btn-delete").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            if(confirm("Delete quote?")) await deleteDoc(doc(db, "quotes", btn.dataset.id));
+          });
+        });
+      });
+    }
+
+    quoteForm.addEventListener("submit", async e => {
+      e.preventDefault();
+      const items = Array.from(quoteItemsDiv.querySelectorAll(".quote-item")).map(div => {
+        const inputs = div.querySelectorAll("input");
+        return { name: inputs[0].value, price: Number(inputs[1].value) };
+      });
+      const currency = quoteCurrencySelect.value;
+      await addDoc(collection(db, "quotes"), { items, currency });
+      quoteItemsDiv.innerHTML = "";
+    });
+
+    generateQuoteLinkBtn.addEventListener("click", () => {
+      generatedQuoteLink.href = "/quotes.html"; // customize to your frontend quotes page
+      generatedQuoteLink.textContent = "View Generated Quote Link";
+    });
+
+  </script>
 </body>
 </html>
