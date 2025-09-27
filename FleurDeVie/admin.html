@@ -40,12 +40,13 @@
     .section { display:none; margin-top:1rem; }
     .section.active { display:block; }
 
-    .details-row { background:#fff6e8; }
-    .details-row td { padding:12px; }
-
     /* Orders filter/search */
-    .order-filters { display:flex; gap:10px; margin-bottom:1rem; flex-wrap:wrap; }
-    .order-filters input, .order-filters select { flex:1; max-width: 320px; }
+    .order-filters { display:flex; gap:10px; margin-bottom:1rem; flex-wrap:wrap; align-items:center; }
+    .order-filters input, .order-filters select { flex:1; max-width: 220px; }
+
+    .quote-item { border:1px solid #eee; padding:10px; margin-top:8px; background:#fff; border-radius:6px; }
+    .quote-item .row { display:flex; gap:8px; flex-wrap:wrap; }
+    .quote-item input[type="number"] { max-width:140px; }
 
     @media(max-width:600px){
       .container { padding:1rem; }
@@ -91,13 +92,13 @@
       <input type="text" id="productName" required>
       
       <label>Price (NGN)</label>
-      <input type="number" id="productPriceNGN" required>
+      <input type="number" id="productPriceNGN" step="0.01" min="0" required>
       <label>Price (USD)</label>
-      <input type="number" id="productPriceUSD">
+      <input type="number" id="productPriceUSD" step="0.01" min="0" placeholder="Optional">
       <label>Price (EUR)</label>
-      <input type="number" id="productPriceEUR">
+      <input type="number" id="productPriceEUR" step="0.01" min="0" placeholder="Optional">
       <label>Price (GBP)</label>
-      <input type="number" id="productPriceGBP">
+      <input type="number" id="productPriceGBP" step="0.01" min="0" placeholder="Optional">
       
       <label>Description</label>
       <textarea id="productDesc"></textarea>
@@ -120,13 +121,15 @@
       <button type="submit">Add Product</button>
     </form>
     <div id="productMessage" class="message"></div>
-    <label>Table Currency:</label>
-    <select id="tableCurrency">
+
+    <label style="margin-top:12px;">Table Currency:</label>
+    <select id="tableCurrency" style="max-width:160px;">
       <option value="NGN">NGN</option>
       <option value="USD">USD</option>
       <option value="EUR">EUR</option>
       <option value="GBP">GBP</option>
     </select>
+
     <table id="productsTable">
       <thead>
         <tr><th>Name</th><th>Price</th><th>Image</th><th>Customization</th><th>Published</th><th>Actions</th></tr>
@@ -148,12 +151,28 @@
       <div id="quoteItems"></div>
       <button type="button" id="addQuoteItem">+ Add Item</button>
 
-      <label>Total</label>
-      <input type="number" id="quoteTotal" required>
+      <h3 style="margin-top:12px;">Totals (computed from items)</h3>
+      <label>Total (NGN)</label>
+      <input type="number" id="quoteTotalNGN" step="0.01" readonly>
+      <label>Total (USD)</label>
+      <input type="number" id="quoteTotalUSD" step="0.01" readonly>
+      <label>Total (EUR)</label>
+      <input type="number" id="quoteTotalEUR" step="0.01" readonly>
+      <label>Total (GBP)</label>
+      <input type="number" id="quoteTotalGBP" step="0.01" readonly>
 
       <button type="submit">Save Quote</button>
     </form>
     <div id="quoteMessage" class="message"></div>
+
+    <label style="margin-top:12px;">Quotes Table Currency:</label>
+    <select id="quotesTableCurrency" style="max-width:160px;">
+      <option value="NGN">NGN</option>
+      <option value="USD">USD</option>
+      <option value="EUR">EUR</option>
+      <option value="GBP">GBP</option>
+    </select>
+
     <table id="quotesTable">
       <thead>
         <tr><th>Customer</th><th>Email</th><th>Total</th><th>Status</th><th>Actions</th></tr>
@@ -178,6 +197,14 @@
         <option>Completed</option>
         <option>Cancelled</option>
       </select>
+      <input type="date" id="orderFromDate">
+      <input type="date" id="orderToDate">
+      <select id="orderCurrency">
+        <option value="NGN">NGN</option>
+        <option value="USD">USD</option>
+        <option value="EUR">EUR</option>
+        <option value="GBP">GBP</option>
+      </select>
       <button id="exportOrders">Export Orders CSV</button>
     </div>
 
@@ -193,7 +220,9 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+import {
+  getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, getDoc, query, where, orderBy
+} from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
@@ -207,6 +236,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+/* ---------------- Setup & DOM refs ---------------- */
 const allowedAdmins = ["yourstruly.fleurdevie@gmail.com"].map(e => e.toLowerCase().trim());
 
 const loginForm = document.getElementById("loginForm");
@@ -214,13 +244,37 @@ const loginMessage = document.getElementById("loginMessage");
 const loginContainer = document.getElementById("loginContainer");
 const dashboardContainer = document.getElementById("dashboardContainer");
 
-const ordersTable = document.querySelector("#ordersTable tbody");
-const searchInput = document.getElementById("orderSearch");
-const statusFilter = document.getElementById("orderStatusFilter");
-const exportBtn = document.getElementById("exportOrders");
+const productForm = document.getElementById("productForm");
+const productMessage = document.getElementById("productMessage");
+const productsTableBody = document.querySelector("#productsTable tbody");
+const productSubmitBtn = productForm.querySelector("button[type='submit']");
+const tableCurrencySelect = document.getElementById("tableCurrency");
 
+const quoteForm = document.getElementById("quoteForm");
+const addQuoteItemBtn = document.getElementById("addQuoteItem");
+const quoteItemsDiv = document.getElementById("quoteItems");
+const quoteMessage = document.getElementById("quoteMessage");
+const quoteTotalNGN = document.getElementById("quoteTotalNGN");
+const quoteTotalUSD = document.getElementById("quoteTotalUSD");
+const quoteTotalEUR = document.getElementById("quoteTotalEUR");
+const quoteTotalGBP = document.getElementById("quoteTotalGBP");
+const quotesTableBody = document.querySelector("#quotesTable tbody");
+const quotesTableCurrency = document.getElementById("quotesTableCurrency");
+
+const ordersTableBody = document.querySelector("#ordersTable tbody");
+const orderSearch = document.getElementById("orderSearch");
+const orderStatusFilter = document.getElementById("orderStatusFilter");
+const orderFromDate = document.getElementById("orderFromDate");
+const orderToDate = document.getElementById("orderToDate");
+const orderCurrency = document.getElementById("orderCurrency");
+const exportOrdersBtn = document.getElementById("exportOrders");
+
+let currentEditingProductId = null;
+let latestProductsSnap = null;
+let latestQuotesSnap = null;
 let allOrders = [];
 
+/* ---------------- LOGIN / AUTH ---------------- */
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   loginMessage.textContent = "";
@@ -270,24 +324,27 @@ function showSection(id) {
   document.getElementById(id).classList.add("active");
 }
 
-/* ---------------- PRODUCTS ---------------- */
-const productForm = document.getElementById("productForm");
-const productMessage = document.getElementById("productMessage");
-const productsTable = document.querySelector("#productsTable tbody");
-const productSubmitBtn = productForm.querySelector("button[type='submit']");
-const tableCurrencySelect = document.getElementById("tableCurrency");
-let currentEditingProductId = null;
+/* ---------------- Helpers ---------------- */
+const localeMap = { NGN:'en-NG', USD:'en-US', EUR:'de-DE', GBP:'en-GB' };
+function formatCurrency(amount, currency) {
+  if (amount === undefined || amount === null || isNaN(amount)) amount = 0;
+  // NGN often displayed with 0 decimal digits, others with 2
+  const minFrac = currency === 'NGN' ? 0 : 2;
+  return new Intl.NumberFormat(localeMap[currency] || 'en-US', { style: 'currency', currency, minimumFractionDigits: minFrac }).format(Number(amount));
+}
 
+/* ---------------- PRODUCTS ---------------- */
 productForm.addEventListener("submit", async (e) => {
   e.preventDefault();
+  productMessage.textContent = "";
   const data = {
     name: document.getElementById("productName").value,
-    priceNGN: +document.getElementById("productPriceNGN").value,
-    priceUSD: +document.getElementById("productPriceUSD").value || 0,
-    priceEUR: +document.getElementById("productPriceEUR").value || 0,
-    priceGBP: +document.getElementById("productPriceGBP").value || 0,
-    description: document.getElementById("productDesc").value,
-    imageUrl: document.getElementById("productImg").value,
+    priceNGN: parseFloat(document.getElementById("productPriceNGN").value) || 0,
+    priceUSD: parseFloat(document.getElementById("productPriceUSD").value) || 0,
+    priceEUR: parseFloat(document.getElementById("productPriceEUR").value) || 0,
+    priceGBP: parseFloat(document.getElementById("productPriceGBP").value) || 0,
+    description: document.getElementById("productDesc").value || "",
+    imageUrl: document.getElementById("productImg").value || "",
     customizationAvailable: document.getElementById("productCustom").value === "true",
     published: document.getElementById("productPublished").value === "true"
   };
@@ -311,19 +368,22 @@ productForm.addEventListener("submit", async (e) => {
   }
 });
 
-function subscribeProducts() {
+function subscribeProducts(){
   const productsRef = collection(db, "brands", "fleurdevie", "products");
   onSnapshot(productsRef, snap => {
-    renderProductsTable(snap);
+    latestProductsSnap = snap;
+    renderProductsTable();
   });
 }
 
-function renderProductsTable(snap) {
+function renderProductsTable(){
   const currency = tableCurrencySelect.value;
-  productsTable.innerHTML = "";
-  snap.forEach(docSnap => {
+  productsTableBody.innerHTML = "";
+  if(!latestProductsSnap) return;
+  latestProductsSnap.forEach(docSnap => {
     const p = docSnap.data();
-    let price = p.priceNGN || 0;
+    let price = 0;
+    if (currency === "NGN") price = p.priceNGN || 0;
     if (currency === "USD") price = p.priceUSD || 0;
     if (currency === "EUR") price = p.priceEUR || 0;
     if (currency === "GBP") price = p.priceGBP || 0;
@@ -331,28 +391,31 @@ function renderProductsTable(snap) {
     const row = document.createElement("tr");
     row.innerHTML = `
       <td>${p.name}</td>
-      <td>${price}</td>
+      <td>${formatCurrency(price, currency)}</td>
       <td>${p.imageUrl ? `<img src="${p.imageUrl}" alt="${p.name}">` : ""}</td>
       <td>${p.customizationAvailable ? "Yes" : "No"}</td>
       <td>${p.published ? "Yes" : "No"}</td>
       <td class="actions">
-        <button onclick="deleteProduct('${docSnap.id}')">Delete</button>
-        <button onclick="editProduct('${docSnap.id}')">Edit</button>
+        <button data-id="${docSnap.id}" class="delete-product">Delete</button>
+        <button data-id="${docSnap.id}" class="edit-product">Edit</button>
       </td>`;
-    productsTable.appendChild(row);
+    productsTableBody.appendChild(row);
+  });
+
+  // wire up action buttons
+  document.querySelectorAll(".delete-product").forEach(btn=>{
+    btn.addEventListener("click", async ()=> {
+      const id = btn.dataset.id;
+      if(!confirm("Delete this product?")) return;
+      try { await deleteDoc(doc(db,"brands","fleurdevie","products", id)); } catch(e){ console.error(e); alert("Error deleting"); }
+    });
+  });
+  document.querySelectorAll(".edit-product").forEach(btn=>{
+    btn.addEventListener("click", ()=> editProduct(btn.dataset.id) );
   });
 }
 
-tableCurrencySelect.addEventListener("change", () => {
-  const productsRef = collection(db, "brands", "fleurdevie", "products");
-  onSnapshot(productsRef, snap => renderProductsTable(snap));
-});
-
-window.deleteProduct = async (id) => {
-  if (!confirm("Delete this product?")) return;
-  try { await deleteDoc(doc(db, "brands", "fleurdevie", "products", id)); } 
-  catch(err){console.error(err); alert("Error deleting product");}
-}
+tableCurrencySelect.addEventListener("change", renderProductsTable);
 
 window.editProduct = async (id) => {
   const docRef = doc(db, "brands", "fleurdevie", "products", id);
@@ -361,10 +424,10 @@ window.editProduct = async (id) => {
   const p = docSnap.data();
 
   document.getElementById("productName").value = p.name || "";
-  document.getElementById("productPriceNGN").value = p.priceNGN || 0;
-  document.getElementById("productPriceUSD").value = p.priceUSD || 0;
-  document.getElementById("productPriceEUR").value = p.priceEUR || 0;
-  document.getElementById("productPriceGBP").value = p.priceGBP || 0;
+  document.getElementById("productPriceNGN").value = p.priceNGN ?? "";
+  document.getElementById("productPriceUSD").value = p.priceUSD ?? "";
+  document.getElementById("productPriceEUR").value = p.priceEUR ?? "";
+  document.getElementById("productPriceGBP").value = p.priceGBP ?? "";
   document.getElementById("productDesc").value = p.description || "";
   document.getElementById("productImg").value = p.imageUrl || "";
   document.getElementById("productCustom").value = p.customizationAvailable ? "true" : "false";
@@ -375,50 +438,104 @@ window.editProduct = async (id) => {
 }
 
 /* ---------------- QUOTES ---------------- */
-const quoteForm = document.getElementById("quoteForm");
-const quoteMessage = document.getElementById("quoteMessage");
-const quotesTable = document.querySelector("#quotesTable tbody");
-const quoteItemsDiv = document.getElementById("quoteItems");
-const addQuoteItemBtn = document.getElementById("addQuoteItem");
-
-addQuoteItemBtn.addEventListener("click", () => {
+function createQuoteItemElement(prefill){
+  // prefill: optional object {name, qty, priceNGN, priceUSD, priceEUR, priceGBP, desc}
   const div = document.createElement("div");
-  div.style.border = "1px solid #eee";
-  div.style.padding = "8px";
-  div.style.marginTop = "8px";
+  div.className = "quote-item";
   div.innerHTML = `
-    <label>Item Name</label><input type="text" class="qi-name">
-    <label>Qty</label><input type="number" class="qi-qty" value="1" min="1">
-    <label>Price</label><input type="number" class="qi-price" value="0" min="0">
-    <label>Description</label><input type="text" class="qi-desc">
-    <div style="margin-top:6px;"><button type="button" class="remove-qi">Remove</button></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <strong>Item</strong>
+      <button type="button" class="remove-qi" style="background:#fff;color:#112e1f;border:1px solid #ddd;padding:6px;border-radius:6px;">Remove</button>
+    </div>
+    <div class="row" style="margin-top:8px;">
+      <input type="text" class="qi-name" placeholder="Item name" style="flex:2;" value="${(prefill&&prefill.name)?prefill.name:''}">
+      <input type="number" class="qi-qty" placeholder="Qty" min="1" step="1" value="${(prefill&&prefill.qty)?prefill.qty:1}" style="max-width:100px;">
+    </div>
+    <div class="row" style="margin-top:8px;">
+      <input type="number" class="qi-priceNGN" placeholder="Price NGN" step="0.01" min="0" value="${(prefill&&prefill.priceNGN)?prefill.priceNGN:''}">
+      <input type="number" class="qi-priceUSD" placeholder="Price USD" step="0.01" min="0" value="${(prefill&&prefill.priceUSD)?prefill.priceUSD:''}">
+      <input type="number" class="qi-priceEUR" placeholder="Price EUR" step="0.01" min="0" value="${(prefill&&prefill.priceEUR)?prefill.priceEUR:''}">
+      <input type="number" class="qi-priceGBP" placeholder="Price GBP" step="0.01" min="0" value="${(prefill&&prefill.priceGBP)?prefill.priceGBP:''}">
+    </div>
+    <div style="margin-top:8px;">
+      <input type="text" class="qi-desc" placeholder="Description (optional)" value="${(prefill&&prefill.desc)?prefill.desc:''}">
+    </div>
   `;
-  quoteItemsDiv.appendChild(div);
-  div.querySelector(".remove-qi").addEventListener("click", () => { div.remove(); });
+  // remove
+  div.querySelector(".remove-qi").addEventListener("click", ()=> { div.remove(); computeQuoteTotals(); });
+  // recompute on inputs change
+  ['.qi-priceNGN','.qi-priceUSD','.qi-priceEUR','.qi-priceGBP','.qi-qty'].forEach(sel=>{
+    div.querySelectorAll(sel)[0].addEventListener('input', computeQuoteTotals);
+  });
+  return div;
+}
+
+addQuoteItemBtn.addEventListener("click", ()=> {
+  const el = createQuoteItemElement();
+  quoteItemsDiv.appendChild(el);
 });
+
+function computeQuoteTotals(){
+  let tNGN = 0, tUSD = 0, tEUR = 0, tGBP = 0;
+  [...quoteItemsDiv.querySelectorAll(".quote-item")].forEach(div=>{
+    const qty = parseFloat(div.querySelector(".qi-qty").value) || 0;
+    const pNGN = parseFloat(div.querySelector(".qi-priceNGN").value) || 0;
+    const pUSD = parseFloat(div.querySelector(".qi-priceUSD").value) || 0;
+    const pEUR = parseFloat(div.querySelector(".qi-priceEUR").value) || 0;
+    const pGBP = parseFloat(div.querySelector(".qi-priceGBP").value) || 0;
+    tNGN += qty * pNGN;
+    tUSD += qty * pUSD;
+    tEUR += qty * pEUR;
+    tGBP += qty * pGBP;
+  });
+  quoteTotalNGN.value = tNGN ? Number(tNGN.toFixed(2)) : 0;
+  quoteTotalUSD.value = tUSD ? Number(tUSD.toFixed(2)) : 0;
+  quoteTotalEUR.value = tEUR ? Number(tEUR.toFixed(2)) : 0;
+  quoteTotalGBP.value = tGBP ? Number(tGBP.toFixed(2)) : 0;
+}
 
 quoteForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-  const items = [...document.querySelectorAll("#quoteItems div")].map(div => ({
-    name: div.querySelector(".qi-name").value,
-    qty: +div.querySelector(".qi-qty").value || 0,
-    price: +div.querySelector(".qi-price").value || 0,
+  quoteMessage.textContent = "";
+  const items = [...quoteItemsDiv.querySelectorAll(".quote-item")].map(div=>({
+    name: div.querySelector(".qi-name").value || "",
+    qty: parseInt(div.querySelector(".qi-qty").value) || 0,
+    priceNGN: parseFloat(div.querySelector(".qi-priceNGN").value) || 0,
+    priceUSD: parseFloat(div.querySelector(".qi-priceUSD").value) || 0,
+    priceEUR: parseFloat(div.querySelector(".qi-priceEUR").value) || 0,
+    priceGBP: parseFloat(div.querySelector(".qi-priceGBP").value) || 0,
     desc: div.querySelector(".qi-desc").value || ""
   }));
+
+  // compute totals (again for safety)
+  let totalNGN = 0, totalUSD = 0, totalEUR = 0, totalGBP = 0;
+  items.forEach(it=>{
+    totalNGN += it.qty * (it.priceNGN || 0);
+    totalUSD += it.qty * (it.priceUSD || 0);
+    totalEUR += it.qty * (it.priceEUR || 0);
+    totalGBP += it.qty * (it.priceGBP || 0);
+  });
+
   const data = {
     customer: document.getElementById("quoteCustomer").value,
     email: document.getElementById("quoteEmail").value,
     items,
-    total: +document.getElementById("quoteTotal").value || 0,
+    totalNGN: Number(totalNGN.toFixed(2)),
+    totalUSD: Number(totalUSD.toFixed(2)),
+    totalEUR: Number(totalEUR.toFixed(2)),
+    totalGBP: Number(totalGBP.toFixed(2)),
     status: "Pending",
     createdAt: new Date().toISOString()
   };
   try {
-    await addDoc(collection(db, "brands", "fleurdevie", "quotes"), data);
+    const ref = await addDoc(collection(db, "brands", "fleurdevie", "quotes"), data);
     quoteMessage.textContent = "✅ Quote saved.";
     quoteMessage.style.color = "green";
+    // reset UI
     quoteForm.reset();
     quoteItemsDiv.innerHTML = "";
+    quoteTotalNGN.value = quoteTotalUSD.value = quoteTotalEUR.value = quoteTotalGBP.value = 0;
+    // refresh quotes list via subscription
   } catch (err) {
     console.error(err);
     quoteMessage.textContent = "❌ Error saving quote.";
@@ -426,38 +543,62 @@ quoteForm.addEventListener("submit", async (e) => {
   }
 });
 
-function subscribeQuotes() {
+/* Subscribe and render quotes */
+function subscribeQuotes(){
   const quotesRef = collection(db, "brands", "fleurdevie", "quotes");
   onSnapshot(quotesRef, snap => {
-    quotesTable.innerHTML = "";
-    snap.forEach(docSnap => {
-      const q = docSnap.data();
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td>${q.customer}</td>
-        <td>${q.email}</td>
-        <td>${q.total}</td>
-        <td>${q.status}</td>
-        <td class="actions">
-          <button onclick="deleteQuote('${docSnap.id}')">Delete</button>
-        </td>`;
-      quotesTable.appendChild(row);
+    latestQuotesSnap = snap;
+    renderQuotesTable();
+  });
+}
+
+function renderQuotesTable(){
+  const currency = quotesTableCurrency.value;
+  quotesTableBody.innerHTML = "";
+  if(!latestQuotesSnap) return;
+  latestQuotesSnap.forEach(docSnap => {
+    const q = docSnap.data();
+    const total = currency === 'NGN' ? (q.totalNGN || 0) :
+                  currency === 'USD' ? (q.totalUSD || 0) :
+                  currency === 'EUR' ? (q.totalEUR || 0) :
+                  currency === 'GBP' ? (q.totalGBP || 0) : 0;
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${q.customer || ""}</td>
+      <td>${q.email || ""}</td>
+      <td>${formatCurrency(total, currency)}</td>
+      <td>${q.status || ""}</td>
+      <td class="actions">
+        <button data-id="${docSnap.id}" class="delete-quote">Delete</button>
+        <button data-id="${docSnap.id}" class="copy-quote-link">Copy Link</button>
+      </td>`;
+    quotesTableBody.appendChild(row);
+  });
+
+  // wire actions
+  document.querySelectorAll(".delete-quote").forEach(btn=>{
+    btn.addEventListener("click", async ()=> {
+      if(!confirm("Delete this quote?")) return;
+      try { await deleteDoc(doc(db,"brands","fleurdevie","quotes", btn.dataset.id)); } catch(e){ console.error(e); alert("Error deleting"); }
+    });
+  });
+
+  document.querySelectorAll(".copy-quote-link").forEach(btn=>{
+    btn.addEventListener("click", ()=> {
+      const quoteId = btn.dataset.id;
+      const link = `${location.origin}/checkout.html?quoteId=${quoteId}`;
+      navigator.clipboard?.writeText(link).then(()=> alert("Link copied to clipboard"), ()=> alert("Could not copy link"));
     });
   });
 }
 
-window.deleteQuote = async (id) => {
-  if (!confirm("Delete this quote?")) return;
-  try { await deleteDoc(doc(db, "brands", "fleurdevie", "quotes", id)); } 
-  catch(err){console.error(err); alert("Error deleting quote");}
-}
+quotesTableCurrency.addEventListener("change", renderQuotesTable);
 
 /* ---------------- ORDERS ---------------- */
-function subscribeOrders() {
+function subscribeOrders(){
   const ordersRef = collection(db, "brands", "fleurdevie", "orders");
   onSnapshot(ordersRef, snap => {
     allOrders = [];
-    ordersTable.innerHTML = "";
     snap.forEach(docSnap => {
       const o = docSnap.data(); o.id = docSnap.id;
       allOrders.push(o);
@@ -466,22 +607,93 @@ function subscribeOrders() {
   });
 }
 
-function renderOrders() {
-  const term = searchInput.value.toLowerCase();
-  const status = statusFilter.value;
-  ordersTable.innerHTML = "";
+function renderOrders(){
+  const term = (orderSearch.value || "").toLowerCase();
+  const status = orderStatusFilter.value;
+  const from = orderFromDate.value ? new Date(orderFromDate.value) : null;
+  const to = orderToDate.value ? new Date(orderToDate.value) : null;
+  const currency = orderCurrency.value;
+
+  ordersTableBody.innerHTML = "";
   allOrders.filter(o => {
-    return (!status || o.status === status) &&
-           (!term || o.customer.toLowerCase().includes(term) || o.email.toLowerCase().includes(term));
+    const created = o.createdAt ? new Date(o.createdAt) : null;
+    const matchesTerm = !term || (o.customer && o.customer.toLowerCase().includes(term)) || (o.email && o.email.toLowerCase().includes(term));
+    const matchesStatus = !status || o.status === status;
+    const matchesFrom = !from || (created && created >= from);
+    const matchesTo = !to || (created && created <= to);
+    return matchesTerm && matchesStatus && matchesFrom && matchesTo;
   }).forEach(o => {
+    // Try per-currency totals first, else fallback to total (assume NGN)
+    let total = o.totalNGN || o.total || 0;
+    if (currency === 'USD') total = o.totalUSD ?? o.total ?? 0;
+    if (currency === 'EUR') total = o.totalEUR ?? o.total ?? 0;
+    if (currency === 'GBP') total = o.totalGBP ?? o.total ?? 0;
+
     const row = document.createElement("tr");
-    row.innerHTML = `<td>${o.id}</td><td>${o.customer}</td><td>${o.email}</td><td>${o.total}</td><td>${o.status}</td><td></td>`;
-    ordersTable.appendChild(row);
+    row.innerHTML = `<td>${o.id}</td><td>${o.customer||''}</td><td>${o.email||''}</td><td>${formatCurrency(total, currency)}</td><td>${o.status||''}</td><td></td>`;
+    ordersTableBody.appendChild(row);
   });
 }
-searchInput.addEventListener("input", renderOrders);
-statusFilter.addEventListener("change", renderOrders);
 
+[orderSearch, orderStatusFilter, orderFromDate, orderToDate, orderCurrency].forEach(el => el.addEventListener("input", renderOrders));
+
+/* Export orders CSV using selected currency and date range */
+exportOrdersBtn.addEventListener("click", () => {
+  const currency = orderCurrency.value;
+  const from = orderFromDate.value ? new Date(orderFromDate.value) : null;
+  const to = orderToDate.value ? new Date(orderToDate.value) : null;
+
+  const rows = [["Order ID","Customer","Email","Total ("+currency+")","Status","Created At"]];
+  allOrders.filter(o => {
+    const created = o.createdAt ? new Date(o.createdAt) : null;
+    const matchesFrom = !from || (created && created >= from);
+    const matchesTo = !to || (created && created <= to);
+    return matchesFrom && matchesTo;
+  }).forEach(o => {
+    let total = o.totalNGN || o.total || 0;
+    if (currency === 'USD') total = o.totalUSD ?? o.total ?? 0;
+    if (currency === 'EUR') total = o.totalEUR ?? o.total ?? 0;
+    if (currency === 'GBP') total = o.totalGBP ?? o.total ?? 0;
+    rows.push([o.id, o.customer || "", o.email || "", total, o.status || "", o.createdAt || ""]);
+  });
+
+  const csv = rows.map(r => r.map(cell => {
+    if (typeof cell === 'string' && (cell.includes(',')||cell.includes('"')||cell.includes('\n'))) {
+      return `"${cell.replace(/"/g,'""')}"`;
+    }
+    return cell;
+  }).join(",")).join("\n");
+
+  const blob = new Blob([csv], { type:"text/csv" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `orders_${currency}_${new Date().toISOString().slice(0,10)}.csv`;
+  link.click();
+});
+
+/* ---------------- Misc & init ---------------- */
+document.querySelectorAll(".dashboard-nav button").forEach(btn => {
+  btn.addEventListener("click", () => showSection(btn.dataset.target));
+});
+function showSection(id) {
+  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+// initial subscriptions are registered after auth; also safe to call subscribe here if already authed
+// done inside auth handlers above
+
+// compute totals live if items added programmatically
+quoteItemsDiv.addEventListener("input", computeQuoteTotals);
+
+// Ensure quotes and products subscriptions are started if admin is already authed
+onAuthStateChanged(auth, user => {
+  if (user && allowedAdmins.includes((user.email || "").toLowerCase().trim())) {
+    subscribeProducts();
+    subscribeQuotes();
+    subscribeOrders();
+  }
+});
 </script>
 
 </body>
