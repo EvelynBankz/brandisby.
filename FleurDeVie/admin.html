@@ -86,7 +86,58 @@
   </div>
 
   <!-- PRODUCTS -->
-  <!-- (unchanged: same as you had) -->
+  <div class="section" id="productsSection">
+    <h2>Manage Products</h2>
+    <form id="productForm">
+      <label>Name</label>
+      <input type="text" id="productName" required>
+      
+      <label>Price (NGN)</label>
+      <input type="number" id="productPriceNGN" step="0.01" inputmode="decimal" required>
+      <label>Price (USD)</label>
+      <input type="number" id="productPriceUSD" step="0.01" inputmode="decimal">
+      <label>Price (EUR)</label>
+      <input type="number" id="productPriceEUR" step="0.01" inputmode="decimal">
+      <label>Price (GBP)</label>
+      <input type="number" id="productPriceGBP" step="0.01" inputmode="decimal">
+      
+      <label>Description</label>
+      <textarea id="productDesc"></textarea>
+      
+      <label>Image URL</label>
+      <input type="text" id="productImg">
+      
+      <label>Customization Available</label>
+      <select id="productCustom">
+        <option value="false">No</option>
+        <option value="true">Yes</option>
+      </select>
+
+      <label>Published</label>
+      <select id="productPublished">
+        <option value="false">No</option>
+        <option value="true">Yes</option>
+      </select>
+
+      <button type="submit">Add Product</button>
+    </form>
+    <div id="productMessage" class="message"></div>
+
+    <label style="margin-top:12px;">Table Currency:</label>
+    <select id="tableCurrency">
+      <option value="NGN">NGN</option>
+      <option value="USD">USD</option>
+      <option value="EUR">EUR</option>
+      <option value="GBP">GBP</option>
+    </select>
+
+    <table id="productsTable">
+      <thead>
+        <tr><th>Name</th><th>Price</th><th>Image</th><th>Customization</th><th>Published</th><th>Actions</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 
   <!-- QUOTES -->
   <div class="section" id="quotesSection">
@@ -109,7 +160,7 @@
       <div id="quoteItems"></div>
       <button type="button" id="addQuoteItem">+ Add Item</button>
 
-      <label>Total (auto-calculated, override if needed)</label>
+      <label>Total (you can leave empty — totals will be computed from items)</label>
       <input type="number" id="quoteTotal" step="0.01" inputmode="decimal">
 
       <button type="submit">Save Quote</button>
@@ -125,84 +176,556 @@
   </div>
 
   <!-- ORDERS -->
-  <!-- (unchanged: same as you had) -->
+  <div class="section" id="ordersSection">
+    <h2>Manage Orders</h2>
+
+    <!-- Filters + Export -->
+    <div class="order-filters">
+      <input type="text" id="orderSearch" placeholder="Search by customer or email...">
+      <select id="orderStatusFilter">
+        <option value="">All Status</option>
+        <option>Pending</option>
+        <option>Paid</option>
+        <option>Processing</option>
+        <option>Shipped</option>
+        <option>Completed</option>
+        <option>Cancelled</option>
+      </select>
+
+      <label style="width:100%; margin-top:8px;">Export options</label>
+      <select id="exportCurrency" style="max-width:200px;">
+        <option value="NGN">NGN</option>
+        <option value="USD">USD</option>
+        <option value="EUR">EUR</option>
+        <option value="GBP">GBP</option>
+      </select>
+      <input type="date" id="exportFrom">
+      <input type="date" id="exportTo">
+      <button id="exportOrders">Export Orders CSV</button>
+    </div>
+
+    <table id="ordersTable">
+      <thead>
+        <tr><th>Order ID</th><th>Customer</th><th>Email</th><th>Total</th><th>Status</th><th>Actions</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 </div>
 
 <script type="module">
-/* Firebase + Auth setup (unchanged) */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, getDoc, query } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-/* --- Quote Items Multi-Currency --- */
+const firebaseConfig = {
+  apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
+  authDomain: "brandisby.firebaseapp.com",
+  projectId: "brandisby",
+  storageBucket: "brandisby.firebasestorage.app",
+  messagingSenderId: "87213267039",
+  appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// Allowed admin(s)
+const allowedAdmins = ["yourstruly.fleurdevie@gmail.com"].map(e => e.toLowerCase().trim());
+
+/* --- UI refs --- */
+const loginForm = document.getElementById("loginForm");
+const loginMessage = document.getElementById("loginMessage");
+const loginContainer = document.getElementById("loginContainer");
+const dashboardContainer = document.getElementById("dashboardContainer");
+
+const productForm = document.getElementById("productForm");
+const productMessage = document.getElementById("productMessage");
+const productsTableBody = document.querySelector("#productsTable tbody");
+const tableCurrencySelect = document.getElementById("tableCurrency");
+
+const quoteForm = document.getElementById("quoteForm");
+const quoteItemsDiv = document.getElementById("quoteItems");
+const addQuoteItemBtn = document.getElementById("addQuoteItem");
+const quotesTableBody = document.querySelector("#quotesTable tbody");
+const quoteMessage = document.getElementById("quoteMessage");
+const quoteCurrencySelect = document.getElementById("quoteCurrency");
+
+const ordersTableBody = document.querySelector("#ordersTable tbody");
+const orderSearch = document.getElementById("orderSearch");
+const orderStatusFilter = document.getElementById("orderStatusFilter");
+const exportBtn = document.getElementById("exportOrders");
+const exportCurrency = document.getElementById("exportCurrency");
+const exportFrom = document.getElementById("exportFrom");
+const exportTo = document.getElementById("exportTo");
+
+let currentEditingProductId = null;
+let allOrders = [];
+
+/* ---------------- AUTH ---------------- */
+loginForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  loginMessage.textContent = "";
+  const email = document.getElementById("loginEmail").value;
+  const password = document.getElementById("loginPassword").value;
+  try {
+    const userCred = await signInWithEmailAndPassword(auth, email, password);
+    const normalized = (userCred.user.email || "").toLowerCase().trim();
+    if (allowedAdmins.includes(normalized)) {
+      loginContainer.style.display = "none";
+      dashboardContainer.style.display = "block";
+      subscribeProducts();
+      subscribeQuotes();
+      subscribeOrders();
+      showSection("productsSection");
+    } else {
+      loginMessage.textContent = "❌ Not authorized.";
+      loginMessage.style.color = "red";
+      await signOut(auth);
+    }
+  } catch (err) {
+    console.error("Login error:", err);
+    loginMessage.textContent = `❌ ${err.code || ""}: ${err.message || err}`;
+    loginMessage.style.color = "red";
+  }
+});
+
+onAuthStateChanged(auth, user => {
+  if (user && allowedAdmins.includes((user.email || "").toLowerCase().trim())) {
+    loginContainer.style.display = "none";
+    dashboardContainer.style.display = "block";
+    subscribeProducts();
+    subscribeQuotes();
+    subscribeOrders();
+    showSection("productsSection");
+  } else {
+    loginContainer.style.display = "block";
+    dashboardContainer.style.display = "none";
+  }
+});
+
+/* Navigation */
+document.querySelectorAll(".dashboard-nav button").forEach(btn => {
+  btn.addEventListener("click", () => showSection(btn.dataset.target));
+});
+function showSection(id) {
+  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+/* ---------------- PRODUCTS ---------------- */
+productForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const data = {
+    name: document.getElementById("productName").value,
+    priceNGN: parseFloat(document.getElementById("productPriceNGN").value) || 0,
+    priceUSD: parseFloat(document.getElementById("productPriceUSD").value) || 0,
+    priceEUR: parseFloat(document.getElementById("productPriceEUR").value) || 0,
+    priceGBP: parseFloat(document.getElementById("productPriceGBP").value) || 0,
+    description: document.getElementById("productDesc").value || "",
+    imageUrl: document.getElementById("productImg").value || "",
+    customizationAvailable: document.getElementById("productCustom").value === "true",
+    published: document.getElementById("productPublished").value === "true",
+    updatedAt: new Date().toISOString()
+  };
+  try {
+    if (currentEditingProductId) {
+      const docRef = doc(db, "brands", "fleurdevie", "products", currentEditingProductId);
+      await updateDoc(docRef, data);
+      productMessage.textContent = "✅ Product updated.";
+      currentEditingProductId = null;
+      productForm.querySelector("button[type='submit']").textContent = "Add Product";
+    } else {
+      await addDoc(collection(db, "brands", "fleurdevie", "products"), data);
+      productMessage.textContent = "✅ Product added.";
+    }
+    productMessage.style.color = "green";
+    productForm.reset();
+  } catch (err) {
+    console.error(err);
+    productMessage.textContent = "❌ Error saving product.";
+    productMessage.style.color = "red";
+  }
+});
+
+function subscribeProducts() {
+  const productsRef = collection(db, "brands", "fleurdevie", "products");
+  onSnapshot(productsRef, snap => {
+    renderProductsTable(snap);
+  });
+}
+
+function formatCurrency(value, currency){
+  const localeMap = { NGN:'en-NG', USD:'en-US', EUR:'de-DE', GBP:'en-GB' };
+  const minFrac = currency === 'NGN' ? 0 : 2;
+  try {
+    return new Intl.NumberFormat(localeMap[currency] || 'en-US', { style:'currency', currency, minimumFractionDigits: minFrac }).format(value);
+  } catch(e) {
+    return `${value} ${currency}`;
+  }
+}
+
+function renderProductsTable(snap) {
+  const currency = tableCurrencySelect.value || 'NGN';
+  productsTableBody.innerHTML = "";
+  snap.forEach(docSnap => {
+    const p = docSnap.data();
+    let priceVal = 0;
+    if (currency === "NGN") priceVal = p.priceNGN || 0;
+    if (currency === "USD") priceVal = p.priceUSD || 0;
+    if (currency === "EUR") priceVal = p.priceEUR || 0;
+    if (currency === "GBP") priceVal = p.priceGBP || 0;
+
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${p.name}</td>
+      <td>${formatCurrency(priceVal, currency)}</td>
+      <td>${p.imageUrl ? `<img src="${p.imageUrl}" alt="${p.name}">` : ""}</td>
+      <td>${p.customizationAvailable ? "Yes" : "No"}</td>
+      <td>${p.published ? "Yes" : "No"}</td>
+      <td class="actions">
+        <button onclick="deleteProduct('${docSnap.id}')">Delete</button>
+        <button onclick="editProduct('${docSnap.id}')">Edit</button>
+      </td>`;
+    productsTableBody.appendChild(row);
+  });
+}
+
+tableCurrencySelect.addEventListener("change", () => {
+  const productsRef = collection(db, "brands", "fleurdevie", "products");
+  onSnapshot(productsRef, snap => renderProductsTable(snap));
+});
+
+window.deleteProduct = async (id) => {
+  if (!confirm("Delete this product?")) return;
+  try { await deleteDoc(doc(db, "brands", "fleurdevie", "products", id)); } 
+  catch(err){console.error(err); alert("Error deleting product");}
+}
+
+window.editProduct = async (id) => {
+  const docRef = doc(db, "brands", "fleurdevie", "products", id);
+  const docSnap = await getDoc(docRef);
+  if (!docSnap.exists()) return alert("Product not found");
+  const p = docSnap.data();
+
+  document.getElementById("productName").value = p.name || "";
+  document.getElementById("productPriceNGN").value = p.priceNGN != null ? p.priceNGN : "";
+  document.getElementById("productPriceUSD").value = p.priceUSD != null ? p.priceUSD : "";
+  document.getElementById("productPriceEUR").value = p.priceEUR != null ? p.priceEUR : "";
+  document.getElementById("productPriceGBP").value = p.priceGBP != null ? p.priceGBP : "";
+  document.getElementById("productDesc").value = p.description || "";
+  document.getElementById("productImg").value = p.imageUrl || "";
+  document.getElementById("productCustom").value = p.customizationAvailable ? "true" : "false";
+  document.getElementById("productPublished").value = p.published ? "true" : "false";
+
+  currentEditingProductId = id;
+  productForm.querySelector("button[type='submit']").textContent = "Save Product";
+}
+
+/* ---------------- QUOTES (multi-currency per-item) ---------------- */
+
 function buildQuoteItemElement(item = {}) {
   const div = document.createElement("div");
   div.className = "quote-item";
 
+  const name = item.name || "";
+  const qty = item.qty != null ? item.qty : 1;
+  const priceNGN = item.priceNGN != null ? item.priceNGN : 0;
+  const priceUSD = item.priceUSD != null ? item.priceUSD : 0;
+  const priceEUR = item.priceEUR != null ? item.priceEUR : 0;
+  const priceGBP = item.priceGBP != null ? item.priceGBP : 0;
+  const desc = item.desc || "";
+
   div.innerHTML = `
-    <label>Item Name</label>
-    <input type="text" class="qi-name" value="${item.name || ""}">
-    <label>Qty</label>
-    <input type="number" class="qi-qty" value="${item.qty || 1}" min="1">
+    <label>Item Name</label><input type="text" class="qi-name" value="${escapeHtml(name)}">
+    <label>Qty</label><input type="number" class="qi-qty" value="${qty}" min="1">
     <div style="display:grid; grid-template-columns: repeat(4,1fr); gap:8px; margin-top:8px;">
-      <div><label>Price NGN</label><input type="number" class="qi-price-ngn" step="0.01" value="${item.priceNGN || 0}"></div>
-      <div><label>Price USD</label><input type="number" class="qi-price-usd" step="0.01" value="${item.priceUSD || 0}"></div>
-      <div><label>Price EUR</label><input type="number" class="qi-price-eur" step="0.01" value="${item.priceEUR || 0}"></div>
-      <div><label>Price GBP</label><input type="number" class="qi-price-gbp" step="0.01" value="${item.priceGBP || 0}"></div>
+      <div>
+        <label>Price NGN</label>
+        <input type="number" class="qi-price-ngn" step="0.01" inputmode="decimal" value="${priceNGN}">
+      </div>
+      <div>
+        <label>Price USD</label>
+        <input type="number" class="qi-price-usd" step="0.01" inputmode="decimal" value="${priceUSD}">
+      </div>
+      <div>
+        <label>Price EUR</label>
+        <input type="number" class="qi-price-eur" step="0.01" inputmode="decimal" value="${priceEUR}">
+      </div>
+      <div>
+        <label>Price GBP</label>
+        <input type="number" class="qi-price-gbp" step="0.01" inputmode="decimal" value="${priceGBP}">
+      </div>
     </div>
-    <label>Description</label>
-    <input type="text" class="qi-desc" value="${item.desc || ""}">
-    <button type="button" class="remove-qi">Remove</button>
+    <label style="margin-top:8px;">Description</label>
+    <input type="text" class="qi-desc" value="${escapeHtml(desc)}">
+    <div style="margin-top:6px;"><button type="button" class="remove-qi">Remove</button></div>
   `;
-  div.querySelector(".remove-qi").onclick = () => div.remove();
+  div.querySelector(".remove-qi").addEventListener("click", () => div.remove());
   return div;
 }
 
-document.getElementById("addQuoteItem").onclick = () => {
-  document.getElementById("quoteItems").appendChild(buildQuoteItemElement());
-};
+addQuoteItemBtn.addEventListener("click", () => {
+  const el = buildQuoteItemElement();
+  quoteItemsDiv.appendChild(el);
+});
 
-document.getElementById("quoteForm").onsubmit = async (e) => {
+quoteForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-  const items = [...document.querySelectorAll(".quote-item")].map(div => ({
-    name: div.querySelector(".qi-name").value,
-    qty: parseInt(div.querySelector(".qi-qty").value) || 0,
-    priceNGN: parseFloat(div.querySelector(".qi-price-ngn").value) || 0,
-    priceUSD: parseFloat(div.querySelector(".qi-price-usd").value) || 0,
-    priceEUR: parseFloat(div.querySelector(".qi-price-eur").value) || 0,
-    priceGBP: parseFloat(div.querySelector(".qi-price-gbp").value) || 0,
-    desc: div.querySelector(".qi-desc").value || ""
-  }));
 
-  const totals = { NGN:0, USD:0, EUR:0, GBP:0 };
-  items.forEach(it => {
-    totals.NGN += it.priceNGN * it.qty;
-    totals.USD += it.priceUSD * it.qty;
-    totals.EUR += it.priceEUR * it.qty;
-    totals.GBP += it.priceGBP * it.qty;
+  const items = [...quoteItemsDiv.querySelectorAll(".quote-item")].map(div => {
+    return {
+      name: div.querySelector(".qi-name").value,
+      qty: parseInt(div.querySelector(".qi-qty").value) || 0,
+      priceNGN: parseFloat(div.querySelector(".qi-price-ngn").value) || 0,
+      priceUSD: parseFloat(div.querySelector(".qi-price-usd").value) || 0,
+      priceEUR: parseFloat(div.querySelector(".qi-price-eur").value) || 0,
+      priceGBP: parseFloat(div.querySelector(".qi-price-gbp").value) || 0,
+      desc: div.querySelector(".qi-desc").value || ""
+    };
   });
 
-  const explicit = parseFloat(document.getElementById("quoteTotal").value);
+  // compute totals per currency from the item-level values
+  const totals = items.reduce((acc, it) => {
+    acc.NGN += (it.priceNGN || 0) * (it.qty || 0);
+    acc.USD += (it.priceUSD || 0) * (it.qty || 0);
+    acc.EUR += (it.priceEUR || 0) * (it.qty || 0);
+    acc.GBP += (it.priceGBP || 0) * (it.qty || 0);
+    return acc;
+  }, { NGN:0, USD:0, EUR:0, GBP:0 });
+
+  const explicitTotal = parseFloat(document.getElementById("quoteTotal").value);
   const data = {
     customer: document.getElementById("quoteCustomer").value,
     email: document.getElementById("quoteEmail").value,
-    defaultCurrency: document.getElementById("quoteCurrency").value,
-    items, totals,
-    totalExplicit: !isNaN(explicit) ? explicit : null,
-    createdAt: new Date().toISOString(),
-    status: "Pending"
+    defaultCurrency: quoteCurrencySelect.value || 'NGN',
+    items,
+    totals,
+    totalExplicit: !isNaN(explicitTotal) ? explicitTotal : null,
+    status: "Pending",
+    createdAt: new Date().toISOString()
   };
 
-  // Save to Firestore
   try {
-    await addDoc(collection(db,"brands","fleurdevie","quotes"), data);
-    document.getElementById("quoteMessage").textContent = "✅ Quote saved.";
-    document.getElementById("quoteMessage").style.color = "green";
-    document.getElementById("quoteForm").reset();
-    document.getElementById("quoteItems").innerHTML = "";
-  } catch(err) {
+    const docRef = await addDoc(collection(db, "brands", "fleurdevie", "quotes"), data);
+    quoteMessage.textContent = "✅ Quote saved.";
+    quoteMessage.style.color = "green";
+    quoteForm.reset();
+    quoteItemsDiv.innerHTML = "";
+  } catch (err) {
     console.error(err);
-    document.getElementById("quoteMessage").textContent = "❌ Error saving quote.";
-    document.getElementById("quoteMessage").style.color = "red";
+    quoteMessage.textContent = "❌ Error saving quote.";
+    quoteMessage.style.color = "red";
   }
-};
+});
+
+/* Render quotes table and include "Copy Link" (checkout.html?quoteId=...) */
+function subscribeQuotes() {
+  const quotesRef = collection(db, "brands", "fleurdevie", "quotes");
+  onSnapshot(quotesRef, snap => {
+    quotesTableBody.innerHTML = "";
+    snap.forEach(docSnap => {
+      const q = docSnap.data();
+      const id = docSnap.id;
+      const itemsCount = (q.items || []).length;
+      const totals = q.totals || {};
+      const displayTotal = formatCurrency(totals[q.defaultCurrency] || q.totalExplicit || 0, q.defaultCurrency || 'NGN');
+
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${q.customer || ""}</td>
+        <td>${q.email || ""}</td>
+        <td>${q.defaultCurrency || 'NGN'}</td>
+        <td>${itemsCount}</td>
+        <td>${displayTotal}</td>
+        <td class="actions">
+          <button onclick="deleteQuote('${id}')">Delete</button>
+          <button onclick="viewQuote('${id}')">View</button>
+          <button onclick="copyQuoteLink('${id}')">Copy Link</button>
+        </td>
+      `;
+      quotesTableBody.appendChild(row);
+    });
+  });
+}
+
+window.deleteQuote = async (id) => {
+  if (!confirm("Delete this quote?")) return;
+  try { await deleteDoc(doc(db, "brands", "fleurdevie", "quotes", id)); } 
+  catch(err){console.error(err); alert("Error deleting quote");}
+}
+
+window.viewQuote = async (id) => {
+  // Simple viewer modal-less: open a new window that could render the quote details,
+  // or you could implement a modal — for now we'll just open a detail URL if you have one.
+  // Placeholder: open Firestore doc details in new tab (not implemented server-side).
+  alert('Implement a quote viewer page or fetch the quote record by ID to view details.');
+}
+
+window.copyQuoteLink = async (id) => {
+  try {
+    const link = `${window.location.origin}/checkout.html?quoteId=${id}`;
+    await navigator.clipboard.writeText(link);
+    alert("Quote link copied to clipboard:\n" + link);
+  } catch(e){
+    console.warn('Copy failed', e);
+    prompt("Copy this link:", `${window.location.origin}/checkout.html?quoteId=${id}`);
+  }
+}
+
+/* ---------------- ORDERS ---------------- */
+function subscribeOrders() {
+  const ordersRef = collection(db, "brands", "fleurdevie", "orders");
+  onSnapshot(ordersRef, snap => {
+    allOrders = [];
+    ordersTableBody.innerHTML = "";
+    snap.forEach(docSnap => {
+      const o = docSnap.data(); o.id = docSnap.id;
+      allOrders.push(o);
+    });
+    renderOrders();
+  });
+}
+
+function renderOrders() {
+  const term = (orderSearch.value || "").toLowerCase();
+  const status = orderStatusFilter.value;
+  ordersTableBody.innerHTML = "";
+
+  const filtered = allOrders.filter(o => {
+    const matchesStatus = !status || o.status === status;
+    const matchesTerm = !term || (o.customer || "").toLowerCase().includes(term) || (o.email || "").toLowerCase().includes(term);
+    return matchesStatus && matchesTerm;
+  });
+
+  filtered.forEach(o => {
+    const row = document.createElement("tr");
+    row.innerHTML = `<td>${o.id}</td><td>${o.customer || ''}</td><td>${o.email || ''}</td><td>${formatCurrency(o.total || 0, o.currency || 'NGN')}</td><td>${o.status || ''}</td><td></td>`;
+    ordersTableBody.appendChild(row);
+  });
+}
+orderSearch.addEventListener("input", renderOrders);
+orderStatusFilter.addEventListener("change", renderOrders);
+
+/* Export CSV logic with date filtering and conversion to selected currency (assumes orders stored in NGN or have currency field) */
+exportBtn.addEventListener("click", exportOrdersCSV);
+
+async function fetchRates(base='NGN'){
+  try {
+    const symbols = 'USD,EUR,GBP,NGN';
+    const res = await fetch(`https://api.exchangerate.host/latest?base=${encodeURIComponent(base)}&symbols=${symbols}`);
+    const data = await res.json();
+    if (data && data.rates) return data.rates;
+  } catch (e) {
+    console.warn('Failed to fetch rates', e);
+  }
+  // fallback default (not ideal, but avoids crash)
+  return { NGN:1, USD:0.0022, EUR:0.0020, GBP:0.0018 };
+}
+
+function inDateRange(itemDateISO, fromISO, toISO) {
+  if (!itemDateISO) return true; // if no date stored, include
+  const d = new Date(itemDateISO);
+  if (isNaN(d)) return true;
+  if (fromISO) {
+    const fromD = new Date(fromISO);
+    if (d < fromD) return false;
+  }
+  if (toISO) {
+    const toD = new Date(toISO);
+    // include entire 'to' day by adding 1 day minus 1ms
+    toD.setHours(23,59,59,999);
+    if (d > toD) return false;
+  }
+  return true;
+}
+
+async function exportOrdersCSV(e){
+  e.preventDefault();
+  // get filters
+  const from = exportFrom.value || null;
+  const to = exportTo.value || null;
+  const targetCurrency = exportCurrency.value || 'NGN';
+
+  // get orders in date range
+  const toExport = allOrders.filter(o => inDateRange(o.createdAt, from, to));
+
+  // fetch rates relative to NGN (we'll convert using them)
+  const ratesFromNGN = await fetchRates('NGN'); // 1 NGN = ratesFromNGN[targetCurrency] target
+  // If orders are in other currency, compute cross conversion using base NGN as intermediary
+  // conversion logic: if orderCurrency === targetCurrency -> use as-is
+  // else if orderCurrency === 'NGN' -> converted = total * ratesFromNGN[target]
+  // else -> we need rates for orderCurrency relative to NGN and target relative to NGN:
+  //   total_in_target = total / ratesFromNGN[orderCurrency] * ratesFromNGN[targetCurrency]
+  // Note: this relies on ratesFromNGN having orderCurrency (if not, we attempt to fetch pair)
+
+  const rows = [];
+  // CSV header
+  rows.push(['orderId','customer','email','createdAt','status','originalCurrency','originalTotal', `total_${targetCurrency}`]);
+
+  for (const o of toExport) {
+    const origCurrency = o.currency || 'NGN';
+    const origTotal = parseFloat(o.total || 0);
+    let converted = origTotal;
+
+    if (origCurrency === targetCurrency) {
+      converted = origTotal;
+    } else {
+      // if origCurrency is NGN:
+      if (origCurrency === 'NGN') {
+        converted = origTotal * (ratesFromNGN[targetCurrency] || 1);
+      } else {
+        // orig currency not NGN, attempt conversion via NGN
+        const rateOrder = ratesFromNGN[origCurrency];
+        const rateTarget = ratesFromNGN[targetCurrency];
+        if (rateOrder && rateTarget) {
+          converted = (origTotal / rateOrder) * rateTarget;
+        } else {
+          // fallback: try direct convert endpoint
+          try {
+            const res = await fetch(`https://api.exchangerate.host/convert?from=${encodeURIComponent(origCurrency)}&to=${encodeURIComponent(targetCurrency)}&amount=${encodeURIComponent(origTotal)}`);
+            const d = await res.json();
+            if (d && typeof d.result === 'number') converted = d.result;
+          } catch(e){
+            console.warn('fallback convert failed', e);
+          }
+        }
+      }
+    }
+
+    rows.push([ o.id || '', o.customer || '', o.email || '', o.createdAt || '', o.status || '', origCurrency, origTotal, converted ]);
+  }
+
+  // Convert rows to CSV text
+  const csv = rows.map(r => r.map(cell => {
+    if (cell === null || cell === undefined) return '';
+    const s = String(cell);
+    // escape quotes
+    if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+      return `"${s.replace(/"/g, '""')}"`;
+    }
+    return s;
+  }).join(',')).join('\n');
+
+  // download
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const fileName = `orders_export_${targetCurrency}_${new Date().toISOString().slice(0,10)}.csv`;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+/* ---------------- SUBSCRIPTIONS ---------------- */
+subscribeProducts();
+subscribeQuotes();
+subscribeOrders();
+
 </script>
+
 </body>
 </html>
