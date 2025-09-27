@@ -199,14 +199,6 @@ function updateProductUI(productId){
   if(item){ addBtn.style.display='none'; badge.textContent=item.quantity; } else { addBtn.style.display='block'; badge.textContent=''; }
 }
 
-async function convertAmount(amount, toCurrency){
-  try{
-    const res = await fetch(`https://api.exchangerate.host/convert?from=NGN&to=${toCurrency}&amount=${amount}`);
-    const data = await res.json();
-    return data.result || amount;
-  }catch(e){ console.error('Conversion failed:', e); return amount; }
-}
-
 async function loadProducts(){
   try{
     const q = query(collection(db,"brands","fleurdevie","products"), where("published","==",true));
@@ -214,7 +206,7 @@ async function loadProducts(){
     const products = [];
     snapshot.forEach(doc=>{
       const data = doc.data();
-      if(!data.name || !data.price || !data.imageUrl) return;
+      if(!data.name || (!data.priceNGN && !data.priceUSD && !data.priceEUR && !data.priceGBP) || !data.imageUrl) return;
       products.push({id:doc.id,...data});
     });
     displayProducts(products);
@@ -224,24 +216,29 @@ async function loadProducts(){
   }
 }
 
-async function displayProducts(products){
+function displayProducts(products){
   const term = searchInput.value.toLowerCase();
   let filtered = products.filter(p=>p.name.toLowerCase().includes(term));
   const sortVal = sortSelect.value;
+
+  // Sorting
   if(sortVal==='alphabet') filtered.sort((a,b)=>a.name.localeCompare(b.name));
-  if(sortVal==='price-asc') filtered.sort((a,b)=>a.price-b.price);
-  if(sortVal==='price-desc') filtered.sort((a,b)=>b.price-a.price);
+  if(sortVal==='price-asc') filtered.sort((a,b)=>{
+    return getPriceForCurrency(a,currencySelect.value) - getPriceForCurrency(b,currencySelect.value);
+  });
+  if(sortVal==='price-desc') filtered.sort((a,b)=>{
+    return getPriceForCurrency(b,currencySelect.value) - getPriceForCurrency(a,currencySelect.value);
+  });
 
   productGrid.innerHTML='';
   const cart = getCart();
-  const currency = currencySelect.value;
   const localeMap = { NGN:'en-NG', USD:'en-US', EUR:'de-DE', GBP:'en-GB' };
 
   for(const p of filtered){
     const cartItem = cart.find(i=>i.id===p.id);
     const quantity = cartItem ? cartItem.quantity : 0;
-    const converted = await convertAmount(p.price, currency);
-    const priceFormatted = new Intl.NumberFormat(localeMap[currency], { style:'currency', currency, minimumFractionDigits: currency==='NGN'?0:2 }).format(converted);
+    const price = getPriceForCurrency(p, currencySelect.value);
+    const priceFormatted = new Intl.NumberFormat(localeMap[currencySelect.value], { style:'currency', currency:currencySelect.value, minimumFractionDigits: currencySelect.value==='NGN'?0:2 }).format(price);
 
     const div = document.createElement('div');
     div.className='product-card';
@@ -268,16 +265,25 @@ async function displayProducts(products){
   }
 }
 
+function getPriceForCurrency(product, currency){
+  if(currency==='NGN') return product.priceNGN||0;
+  if(currency==='USD') return product.priceUSD||0;
+  if(currency==='EUR') return product.priceEUR||0;
+  if(currency==='GBP') return product.priceGBP||0;
+  return product.priceNGN||0;
+}
+
 function truncateText(text, wordLimit){ return text.split(' ').slice(0,wordLimit).join(' '); }
 
 searchInput.addEventListener('input',()=>loadProducts());
 sortSelect.addEventListener('change',()=>loadProducts());
+currencySelect.addEventListener('change',()=>loadProducts());
 
+// Hamburger & mobile cart
 document.getElementById('hamburger').addEventListener('click',()=>{
   document.querySelector('.header-right').classList.toggle('open');
   document.getElementById('hamburger').classList.toggle('open');
 });
-
 function handleMobileCart(){ document.querySelector('.mobile-cart').style.display=window.innerWidth<=600?'flex':'none'; }
 window.addEventListener('resize', handleMobileCart);
 handleMobileCart();
@@ -286,22 +292,10 @@ updateCartCount();
 loadProducts();
 window.addEventListener('storage', updateCartCount);
 
-fetch('https://ipapi.co/json/').then(res=>res.json()).then(data=>{
-  if(!localStorage.getItem('currency')){
-    const country = data.country;
-    if(country==='US') currencySelect.value='USD';
-    else if(country==='GB') currencySelect.value='GBP';
-    else if(country==='NG') currencySelect.value='NGN';
-    else if(country==='DE' || country==='FR') currencySelect.value='EUR';
-    localStorage.setItem('currency', currencySelect.value);
-  }
-  loadProducts();
-}).catch(()=>{ loadProducts(); });
-
-currencySelect.addEventListener('change', ()=>{
-  localStorage.setItem('currency', currencySelect.value);
-  loadProducts();
-});
+// Optional: set default currency based on localStorage or IP
+const savedCurrency = localStorage.getItem('currency');
+if(savedCurrency) currencySelect.value = savedCurrency;
+currencySelect.addEventListener('change', ()=>localStorage.setItem('currency', currencySelect.value));
 </script>
 </body>
 </html>
