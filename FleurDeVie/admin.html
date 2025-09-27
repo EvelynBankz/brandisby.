@@ -958,445 +958,435 @@ window.editProduct = async (id) => {
 
 /* ---------------- QUOTES (multi-currency per-item, with add-panel) ---------------- */
 
-/* tiny escape helper */
-function escapeHtml(str){ if (!str && str !== 0) return ""; return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[s])); }
-
-/* keep a local draft items array (admin adds items here) */
-let quoteDraftItems = [];
-
-function renderDraftItems(){
-  quoteItemsDiv.innerHTML = "";
-  if (!quoteDraftItems.length) {
-    quoteItemsDiv.innerHTML = `<div class="small-note">No items added yet.</div>`;
-    return;
-  }
-  quoteDraftItems.forEach((it, idx) => {
-    const div = document.createElement("div");
-    div.className = "quote-item";
-    div.innerHTML = `
-      <div style="display:flex; justify-content:space-between; gap:12px; align-items:flex-start;">
-        <div style="flex:1;">
-          <strong>${escapeHtml(it.name)}</strong> &times; ${it.qty}<br>
-          <small>${escapeHtml(it.desc || '')}</small>
-          <div style="margin-top:8px; display:grid; grid-template-columns: repeat(4,1fr); gap:8px;">
-            <div>NGN: ${it.priceNGN != null && it.priceNGN !== "" ? formatCurrency(it.priceNGN, 'NGN') : "-"}</div>
-            <div>USD: ${it.priceUSD != null && it.priceUSD !== "" ? formatCurrency(it.priceUSD, 'USD') : "-"}</div>
-            <div>EUR: ${it.priceEUR != null && it.priceEUR !== "" ? formatCurrency(it.priceEUR, 'EUR') : "-"}</div>
-            <div>GBP: ${it.priceGBP != null && it.priceGBP !== "" ? formatCurrency(it.priceGBP, 'GBP') : "-"}</div>
+  /* tiny escape helper */
+  function escapeHtml(str){ if (!str && str !== 0) return ""; return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[s])); }
+  
+  /* keep a local draft items array (admin adds items here) */
+  let quoteDraftItems = [];
+  
+  function renderDraftItems(){
+    quoteItemsDiv.innerHTML = "";
+    if (!quoteDraftItems.length) {
+      quoteItemsDiv.innerHTML = `<div class="small-note">No items added yet.</div>`;
+      return;
+    }
+    quoteDraftItems.forEach((it, idx) => {
+      const div = document.createElement("div");
+      div.className = "quote-item";
+      div.innerHTML = `
+        <div style="display:flex; justify-content:space-between; gap:12px; align-items:flex-start;">
+          <div style="flex:1;">
+            <strong>${escapeHtml(it.name)}</strong> &times; ${it.qty}<br>
+            <small>${escapeHtml(it.desc || '')}</small>
+            <div style="margin-top:8px; display:grid; grid-template-columns: repeat(4,1fr); gap:8px;">
+              <div>NGN: ${it.priceNGN != null && it.priceNGN !== "" ? formatCurrency(it.priceNGN, 'NGN') : "-"}</div>
+              <div>USD: ${it.priceUSD != null && it.priceUSD !== "" ? formatCurrency(it.priceUSD, 'USD') : "-"}</div>
+              <div>EUR: ${it.priceEUR != null && it.priceEUR !== "" ? formatCurrency(it.priceEUR, 'EUR') : "-"}</div>
+              <div>GBP: ${it.priceGBP != null && it.priceGBP !== "" ? formatCurrency(it.priceGBP, 'GBP') : "-"}</div>
+            </div>
+          </div>
+          <div style="min-width:90px; text-align:right;">
+            <button data-idx="${idx}" class="remove-draft">Remove</button>
           </div>
         </div>
-        <div style="min-width:90px; text-align:right;">
-          <button data-idx="${idx}" class="remove-draft">Remove</button>
-        </div>
-      </div>
-    `;
-    quoteItemsDiv.appendChild(div);
-  });
-  document.querySelectorAll(".remove-draft").forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      const idx = parseInt(btn.dataset.idx);
-      quoteDraftItems.splice(idx,1);
-      renderDraftItems();
-    });
-  });
-}
-
-/* wire add panel toggles */
-const addItemPanel = document.getElementById("addItemPanel");
-const ai_add = document.getElementById("ai_add");
-const ai_cancel = document.getElementById("ai_cancel");
-
-addQuoteItemBtn.addEventListener("click", () => {
-  // toggle panel
-  addItemPanel.style.display = addItemPanel.style.display === "none" ? "block" : "none";
-  // focus first field
-  if (addItemPanel.style.display === "block") document.getElementById("ai_name").focus();
-});
-
-ai_cancel.addEventListener("click", () => {
-  addItemPanel.style.display = "none";
-  // clear panel
-  document.getElementById("ai_name").value = "";
-  document.getElementById("ai_qty").value = 1;
-  document.getElementById("ai_desc").value = "";
-  document.getElementById("ai_price_ngn").value = "";
-  document.getElementById("ai_price_usd").value = "";
-  document.getElementById("ai_price_eur").value = "";
-  document.getElementById("ai_price_gbp").value = "";
-});
-
-/* Add from panel into draft items */
-ai_add.addEventListener("click", () => {
-  const name = document.getElementById("ai_name").value.trim();
-  const qty = parseInt(document.getElementById("ai_qty").value) || 0;
-  if (!name || qty <= 0) {
-    alert("Please enter item name and quantity.");
-    return;
-  }
-  const item = {
-    name,
-    qty,
-    desc: document.getElementById("ai_desc").value || "",
-    priceNGN: document.getElementById("ai_price_ngn").value ? parseFloat(document.getElementById("ai_price_ngn").value) : null,
-    priceUSD: document.getElementById("ai_price_usd").value ? parseFloat(document.getElementById("ai_price_usd").value) : null,
-    priceEUR: document.getElementById("ai_price_eur").value ? parseFloat(document.getElementById("ai_price_eur").value) : null,
-    priceGBP: document.getElementById("ai_price_gbp").value ? parseFloat(document.getElementById("ai_price_gbp").value) : null
-  };
-  quoteDraftItems.push(item);
-  // clear panel & hide
-  document.getElementById("ai_name").value = "";
-  document.getElementById("ai_qty").value = 1;
-  document.getElementById("ai_desc").value = "";
-  document.getElementById("ai_price_ngn").value = "";
-  document.getElementById("ai_price_usd").value = "";
-  document.getElementById("ai_price_eur").value = "";
-  document.getElementById("ai_price_gbp").value = "";
-  addItemPanel.style.display = "none";
-  renderDraftItems();
-});
-
-/* Save quote (saves items and defaultCurrency; totals computed on checkout) */
-quoteForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const customer = document.getElementById("quoteCustomer").value.trim();
-  const email = document.getElementById("quoteEmail").value.trim();
-  const defaultCurrency = quoteCurrencySelect.value || 'NGN';
-  const explicitTotalRaw = document.getElementById("quoteTotal").value;
-  const totalExplicit = explicitTotalRaw ? parseFloat(explicitTotalRaw) : null;
-
-  if (!customer || !email) {
-    alert("Customer name and email are required.");
-    return;
-  }
-  if (!quoteDraftItems.length) {
-    alert("Add at least one item to the quote.");
-    return;
-  }
-
-  const data = {
-    customer,
-    email,
-    defaultCurrency,
-    items: quoteDraftItems,
-    totalExplicit: !isNaN(totalExplicit) ? totalExplicit : null,
-    status: "Pending",
-    createdAt: new Date().toISOString()
-  };
-
-  try {
-    const quotesRef = collection(db, "brands", "fleurdevie", "quotes");
-    const docRef = await addDoc(quotesRef, data);
-    quoteMessage.textContent = "✅ Quote saved.";
-    quoteMessage.style.color = "green";
-    // clear form
-    quoteForm.reset();
-    quoteDraftItems = [];
-    renderDraftItems();
-    // clear generated link UI (if any)
-    generatedQuoteLink.innerHTML = "";
-    // The subscribeQuotes function will update the quotes table with link
-  } catch (err) {
-    console.error(err);
-    quoteMessage.textContent = "❌ Error saving quote.";
-    quoteMessage.style.color = "red";
-  }
-});
-
-/* NEW: Generate link button — saves quote (if valid) and displays the checkout link with a copy icon */
-generateQuoteLinkBtn.addEventListener("click", async () => {
-  // same validation as save
-  const customer = document.getElementById("quoteCustomer").value.trim();
-  const email = document.getElementById("quoteEmail").value.trim();
-  const defaultCurrency = quoteCurrencySelect.value || 'NGN';
-  const explicitTotalRaw = document.getElementById("quoteTotal").value;
-  const totalExplicit = explicitTotalRaw ? parseFloat(explicitTotalRaw) : null;
-
-  if (!customer || !email) {
-    alert("Customer name and email are required.");
-    return;
-  }
-  if (!quoteDraftItems.length) {
-    alert("Add at least one item to the quote.");
-    return;
-  }
-
-  const data = {
-    customer,
-    email,
-    defaultCurrency,
-    items: quoteDraftItems,
-    totalExplicit: !isNaN(totalExplicit) ? totalExplicit : null,
-    status: "Pending",
-    createdAt: new Date().toISOString()
-  };
-
-  try {
-    const quotesRef = collection(db, "brands", "fleurdevie", "quotes");
-    const docRef = await addDoc(quotesRef, data);
-    const id = docRef.id;
-    const link = `${window.location.origin}/checkout.html?quoteId=${id}`;
-
-    // render link and copy button inline
-    generatedQuoteLink.innerHTML = `
-      <a href="${link}" target="_blank" id="gqlink">${link}</a>
-      <button class="copy-btn" id="copyGeneratedBtn" data-link="${link}" title="Copy link">📋</button>
-    `;
-
-    // wire copy button
-    const copyBtn = document.getElementById("copyGeneratedBtn");
-    if (copyBtn) {
-      copyBtn.addEventListener("click", async () => {
-        try {
-          await navigator.clipboard.writeText(copyBtn.dataset.link);
-          const prev = copyBtn.textContent;
-          copyBtn.textContent = "✅";
-          setTimeout(()=> copyBtn.textContent = "📋", 1000);
-        } catch (err) {
-          console.warn("Copy failed", err);
-          alert("Copy failed. Link: " + copyBtn.dataset.link);
-        }
-      });
-    }
-
-    // update message and reset form/drafts like Save does
-    quoteMessage.textContent = "✅ Quote saved and link generated.";
-    quoteMessage.style.color = "green";
-    quoteForm.reset();
-    quoteDraftItems = [];
-    renderDraftItems();
-  } catch (err) {
-    console.error(err);
-    quoteMessage.textContent = "❌ Error saving / generating link.";
-    quoteMessage.style.color = "red";
-  }
-});
-
-/* Render quotes table and include "Copy Link" (checkout.html?quoteId=...) */
-function subscribeQuotes() {
-  const quotesRef = collection(db, "brands", "fleurdevie", "quotes");
-  onSnapshot(quotesRef, snap => {
-    quotesTableBody.innerHTML = "";
-    snap.forEach(docSnap => {
-      const q = docSnap.data();
-      const id = docSnap.id;
-      const itemsCount = (q.items || []).length;
-      // display total: show explicit total if admin set one; else show dash (checkout will compute)
-      const displayTotal = q.totalExplicit != null ? formatCurrency(q.totalExplicit, q.defaultCurrency || 'NGN') : "—";
-      const link = `${window.location.origin}/checkout.html?quoteId=${id}`;
-
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td>${escapeHtml(q.customer || "")}</td>
-        <td>${escapeHtml(q.email || "")}</td>
-        <td>${q.defaultCurrency || 'NGN'}</td>
-        <td>${itemsCount}</td>
-        <td>${displayTotal}</td>
-        <td>
-          <a href="${link}" target="_blank">${link}</a>
-          <button class="copy-btn" data-link="${link}" title="Copy link">📋</button>
-        </td>
-        <td class="actions">
-          <button onclick="deleteQuote('${id}')">Delete</button>
-          <button onclick="viewQuote('${id}')">View</button>
-        </td>
       `;
-      quotesTableBody.appendChild(row);
+      quoteItemsDiv.appendChild(div);
     });
-
-    // wire copy buttons
-    document.querySelectorAll(".copy-btn").forEach(btn => {
-      // avoid doubling listeners by removing existing and then re-adding
-      btn.onclick = async () => {
-        const l = btn.dataset.link;
-        try {
-          await navigator.clipboard.writeText(l);
-          const prev = btn.textContent;
-          btn.textContent = "✅";
-          setTimeout(()=> btn.textContent = "📋", 1000);
-        } catch(e){
-          console.warn("Copy failed", e);
-          alert("Copy failed. Link: " + l);
-        }
-      };
+    document.querySelectorAll(".remove-draft").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        const idx = parseInt(btn.dataset.idx);
+        quoteDraftItems.splice(idx,1);
+        renderDraftItems();
+      });
     });
-  });
-}
-
-window.deleteQuote = async (id) => {
-  if (!confirm("Delete this quote?")) return;
-  try { await deleteDoc(doc(db, "brands", "fleurdevie", "quotes", id)); } 
-  catch(err){console.error(err); alert("Error deleting quote");}
-}
-
-window.viewQuote = async (id) => {
-  // Simple viewer modal-less: open a new window that could render the quote details,
-  // or you could implement a modal — for now we'll just open the checkout link.
-  const link = `${window.location.origin}/checkout.html?quoteId=${id}`;
-  window.open(link, "_blank");
-}
-
-/* ---------------- ORDERS ---------------- */
-function subscribeOrders() {
-  const ordersRef = collection(db, "brands", "fleurdevie", "orders");
-  onSnapshot(ordersRef, snap => {
-    allOrders = [];
-    ordersTableBody.innerHTML = "";
-    snap.forEach(docSnap => {
-      const o = docSnap.data(); o.id = docSnap.id;
-      allOrders.push(o);
-    });
-    renderOrders();
-  });
-}
-
-function renderOrders() {
-  const term = (orderSearch.value || "").toLowerCase();
-  const status = orderStatusFilter.value;
-  ordersTableBody.innerHTML = "";
-
-  const filtered = allOrders.filter(o => {
-    const matchesStatus = !status || o.status === status;
-    const matchesTerm = !term || (o.customer || "").toLowerCase().includes(term) || (o.email || "").toLowerCase().includes(term);
-    return matchesStatus && matchesTerm;
-  });
-
-  filtered.forEach(o => {
-    const row = document.createElement("tr");
-    row.innerHTML = `<td>${o.id}</td><td>${o.customer || ''}</td><td>${o.email || ''}</td><td>${formatCurrency(o.total || 0, o.currency || 'NGN')}</td><td>${o.status || ''}</td><td></td>`;
-    ordersTableBody.appendChild(row);
-  });
-}
-orderSearch.addEventListener("input", renderOrders);
-orderStatusFilter.addEventListener("change", renderOrders);
-
-/* Export CSV logic with date filtering and conversion to selected currency (assumes orders stored in NGN or have currency field) */
-exportBtn.addEventListener("click", exportOrdersCSV);
-
-async function fetchRates(base='NGN'){
-  try {
-    const symbols = 'USD,EUR,GBP,NGN';
-    const res = await fetch(`https://api.exchangerate.host/latest?base=${encodeURIComponent(base)}&symbols=${symbols}`);
-    const data = await res.json();
-    if (data && data.rates) return data.rates;
-  } catch (e) {
-    console.warn('Failed to fetch rates', e);
   }
-  // fallback default (not ideal, but avoids crash)
-  return { NGN:1, USD:0.0022, EUR:0.0020, GBP:0.0018 };
-}
-
-function inDateRange(itemDateISO, fromISO, toISO) {
-  if (!itemDateISO) return true; // if no date stored, include
-  const d = new Date(itemDateISO);
-  if (isNaN(d)) return true;
-  if (fromISO) {
-    const fromD = new Date(fromISO);
-    if (d < fromD) return false;
-  }
-  if (toISO) {
-    const toD = new Date(toISO);
-    // include entire 'to' day by adding 1 day minus 1ms
-    toD.setHours(23,59,59,999);
-    if (d > toD) return false;
-  }
-  return true;
-}
-
-async function exportOrdersCSV(e){
-  e.preventDefault();
-  // get filters
-  const from = exportFrom.value || null;
-  const to = exportTo.value || null;
-  const targetCurrency = exportCurrency.value || 'NGN';
-
-  // get orders in date range
-  const toExport = allOrders.filter(o => inDateRange(o.createdAt, from, to));
-
-  // fetch rates relative to NGN (we'll convert using them)
-  const ratesFromNGN = await fetchRates('NGN'); // 1 NGN = ratesFromNGN[targetCurrency] target
-  // If orders are in other currency, compute cross conversion using base NGN as intermediary
-  // conversion logic: if orderCurrency === targetCurrency -> use as-is
-  // else if orderCurrency === 'NGN' -> converted = total * ratesFromNGN[target]
-  // else -> we need rates for orderCurrency relative to NGN and target relative to NGN:
-  //   total_in_target = total / ratesFromNGN[orderCurrency] * ratesFromNGN[targetCurrency]
-  // Note: this relies on ratesFromNGN having orderCurrency (if not, we attempt to fetch pair)
-
-  const rows = [];
-  // CSV header
-  rows.push(['orderId','customer','email','createdAt','status','originalCurrency','originalTotal', `total_${targetCurrency}`]);
-
-  for (const o of toExport) {
-    const origCurrency = o.currency || 'NGN';
-    const origTotal = parseFloat(o.total || 0);
-    let converted = origTotal;
-
-    if (origCurrency === targetCurrency) {
-      converted = origTotal;
-    } else {
-      // if origCurrency is NGN:
-      if (origCurrency === 'NGN') {
-        converted = origTotal * (ratesFromNGN[targetCurrency] || 1);
-      } else {
-        // orig currency not NGN, attempt conversion via NGN
-        const rateOrder = ratesFromNGN[origCurrency];
-        const rateTarget = ratesFromNGN[targetCurrency];
-        if (rateOrder && rateTarget) {
-          converted = (origTotal / rateOrder) * rateTarget;
-        } else {
-          // fallback: try direct convert endpoint
+  
+  /* wire add panel toggles */
+  const addItemPanel = document.getElementById("addItemPanel");
+  const ai_add = document.getElementById("ai_add");
+  const ai_cancel = document.getElementById("ai_cancel");
+  
+  addQuoteItemBtn.addEventListener("click", () => {
+    // toggle panel
+    addItemPanel.style.display = addItemPanel.style.display === "none" ? "block" : "none";
+    // focus first field
+    if (addItemPanel.style.display === "block") document.getElementById("ai_name").focus();
+  });
+  
+  ai_cancel.addEventListener("click", () => {
+    addItemPanel.style.display = "none";
+    // clear panel
+    document.getElementById("ai_name").value = "";
+    document.getElementById("ai_qty").value = 1;
+    document.getElementById("ai_desc").value = "";
+    document.getElementById("ai_price_ngn").value = "";
+    document.getElementById("ai_price_usd").value = "";
+    document.getElementById("ai_price_eur").value = "";
+    document.getElementById("ai_price_gbp").value = "";
+  });
+  
+  /* Add from panel into draft items */
+  ai_add.addEventListener("click", () => {
+    const name = document.getElementById("ai_name").value.trim();
+    const qty = parseInt(document.getElementById("ai_qty").value) || 0;
+    if (!name || qty <= 0) {
+      alert("Please enter item name and quantity.");
+      return;
+    }
+    const item = {
+      name,
+      qty,
+      desc: document.getElementById("ai_desc").value || "",
+      priceNGN: document.getElementById("ai_price_ngn").value ? parseFloat(document.getElementById("ai_price_ngn").value) : null,
+      priceUSD: document.getElementById("ai_price_usd").value ? parseFloat(document.getElementById("ai_price_usd").value) : null,
+      priceEUR: document.getElementById("ai_price_eur").value ? parseFloat(document.getElementById("ai_price_eur").value) : null,
+      priceGBP: document.getElementById("ai_price_gbp").value ? parseFloat(document.getElementById("ai_price_gbp").value) : null
+    };
+    quoteDraftItems.push(item);
+    // clear panel & hide
+    document.getElementById("ai_name").value = "";
+    document.getElementById("ai_qty").value = 1;
+    document.getElementById("ai_desc").value = "";
+    document.getElementById("ai_price_ngn").value = "";
+    document.getElementById("ai_price_usd").value = "";
+    document.getElementById("ai_price_eur").value = "";
+    document.getElementById("ai_price_gbp").value = "";
+    addItemPanel.style.display = "none";
+    renderDraftItems();
+  });
+  
+  /* Save quote (saves items and defaultCurrency; totals computed on checkout) */
+  quoteForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+  
+    const customer = document.getElementById("quoteCustomer").value.trim();
+    const email = document.getElementById("quoteEmail").value.trim();
+    const defaultCurrency = quoteCurrencySelect.value || 'NGN';
+    const explicitTotalRaw = document.getElementById("quoteTotal").value;
+    const totalExplicit = explicitTotalRaw ? parseFloat(explicitTotalRaw) : null;
+  
+    if (!customer || !email) {
+      alert("Customer name and email are required.");
+      return;
+    }
+    if (!quoteDraftItems.length) {
+      alert("Add at least one item to the quote.");
+      return;
+    }
+  
+    const data = {
+      customer,
+      email,
+      defaultCurrency,
+      items: quoteDraftItems,
+      totalExplicit: !isNaN(totalExplicit) ? totalExplicit : null,
+      status: "Pending",
+      createdAt: new Date().toISOString()
+    };
+  
+    try {
+      const quotesRef = collection(db, "brands", "fleurdevie", "quotes");
+      const docRef = await addDoc(quotesRef, data);
+      quoteMessage.textContent = "✅ Quote saved.";
+      quoteMessage.style.color = "green";
+      // clear form
+      quoteForm.reset();
+      quoteDraftItems = [];
+      renderDraftItems();
+      // clear generated link UI (if any)
+      generatedQuoteLink.innerHTML = "";
+      // The subscribeQuotes function will update the quotes table with link
+    } catch (err) {
+      console.error(err);
+      quoteMessage.textContent = "❌ Error saving quote.";
+      quoteMessage.style.color = "red";
+    }
+  });
+  
+  /* NEW: Generate link button — saves quote (if valid) and displays the checkout link with a copy icon */
+  generateQuoteLinkBtn.addEventListener("click", async () => {
+    // same validation as save
+    const customer = document.getElementById("quoteCustomer").value.trim();
+    const email = document.getElementById("quoteEmail").value.trim();
+    const defaultCurrency = quoteCurrencySelect.value || 'NGN';
+    const explicitTotalRaw = document.getElementById("quoteTotal").value;
+    const totalExplicit = explicitTotalRaw ? parseFloat(explicitTotalRaw) : null;
+  
+    if (!customer || !email) {
+      alert("Customer name and email are required.");
+      return;
+    }
+    if (!quoteDraftItems.length) {
+      alert("Add at least one item to the quote.");
+      return;
+    }
+  
+    const data = {
+      customer,
+      email,
+      defaultCurrency,
+      items: quoteDraftItems,
+      totalExplicit: !isNaN(totalExplicit) ? totalExplicit : null,
+      status: "Pending",
+      createdAt: new Date().toISOString()
+    };
+  
+    try {
+      const quotesRef = collection(db, "brands", "fleurdevie", "quotes");
+      const docRef = await addDoc(quotesRef, data);
+      const id = docRef.id;
+      const link = `${window.location.origin}/checkout.html?quoteId=${id}`;
+  
+      // render link and copy button inline
+      generatedQuoteLink.innerHTML = `
+        <a href="${link}" target="_blank" id="gqlink">${link}</a>
+        <button class="copy-btn" id="copyGeneratedBtn" data-link="${link}" title="Copy link">📋</button>
+      `;
+  
+      // wire copy button
+      const copyBtn = document.getElementById("copyGeneratedBtn");
+      if (copyBtn) {
+        copyBtn.addEventListener("click", async () => {
           try {
-            const res = await fetch(`https://api.exchangerate.host/convert?from=${encodeURIComponent(origCurrency)}&to=${encodeURIComponent(targetCurrency)}&amount=${encodeURIComponent(origTotal)}`);
-            const d = await res.json();
-            if (d && typeof d.result === 'number') converted = d.result;
+            await navigator.clipboard.writeText(copyBtn.dataset.link);
+            const prev = copyBtn.textContent;
+            copyBtn.textContent = "✅";
+            setTimeout(()=> copyBtn.textContent = "📋", 1000);
+          } catch (err) {
+            console.warn("Copy failed", err);
+            alert("Copy failed. Link: " + copyBtn.dataset.link);
+          }
+        });
+      }
+  
+      // update message and reset form/drafts like Save does
+      quoteMessage.textContent = "✅ Quote saved and link generated.";
+      quoteMessage.style.color = "green";
+      quoteForm.reset();
+      quoteDraftItems = [];
+      renderDraftItems();
+    } catch (err) {
+      console.error(err);
+      quoteMessage.textContent = "❌ Error saving / generating link.";
+      quoteMessage.style.color = "red";
+    }
+  });
+  
+  /* Render quotes table and include "Copy Link" (checkout.html?quoteId=...) */
+  function subscribeQuotes() {
+    const quotesRef = collection(db, "brands", "fleurdevie", "quotes");
+    onSnapshot(quotesRef, snap => {
+      quotesTableBody.innerHTML = "";
+      snap.forEach(docSnap => {
+        const q = docSnap.data();
+        const id = docSnap.id;
+        const itemsCount = (q.items || []).length;
+        // display total: show explicit total if admin set one; else show dash (checkout will compute)
+        const displayTotal = q.totalExplicit != null ? formatCurrency(q.totalExplicit, q.defaultCurrency || 'NGN') : "—";
+        const link = `${window.location.origin}/checkout.html?quoteId=${id}`;
+  
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${escapeHtml(q.customer || "")}</td>
+          <td>${escapeHtml(q.email || "")}</td>
+          <td>${q.defaultCurrency || 'NGN'}</td>
+          <td>${itemsCount}</td>
+          <td>${displayTotal}</td>
+          <td>
+            <a href="${link}" target="_blank">${link}</a>
+            <button class="copy-btn" data-link="${link}" title="Copy link">📋</button>
+          </td>
+          <td class="actions">
+            <button onclick="deleteQuote('${id}')">Delete</button>
+            <button onclick="viewQuote('${id}')">View</button>
+          </td>
+        `;
+        quotesTableBody.appendChild(row);
+      });
+  
+      // wire copy buttons
+      document.querySelectorAll(".copy-btn").forEach(btn => {
+        // avoid doubling listeners by removing existing and then re-adding
+        btn.onclick = async () => {
+          const l = btn.dataset.link;
+          try {
+            await navigator.clipboard.writeText(l);
+            const prev = btn.textContent;
+            btn.textContent = "✅";
+            setTimeout(()=> btn.textContent = "📋", 1000);
           } catch(e){
-            console.warn('fallback convert failed', e);
+            console.warn("Copy failed", e);
+            alert("Copy failed. Link: " + l);
+          }
+        };
+      });
+    });
+  }
+  
+  window.deleteQuote = async (id) => {
+    if (!confirm("Delete this quote?")) return;
+    try { await deleteDoc(doc(db, "brands", "fleurdevie", "quotes", id)); } 
+    catch(err){console.error(err); alert("Error deleting quote");}
+  }
+  
+  window.viewQuote = async (id) => {
+    // Simple viewer modal-less: open a new window that could render the quote details,
+    // or you could implement a modal — for now we'll just open the checkout link.
+    const link = `${window.location.origin}/checkout.html?quoteId=${id}`;
+    window.open(link, "_blank");
+  }
+  
+  /* ---------------- ORDERS ---------------- */
+  function subscribeOrders() {
+    const ordersRef = collection(db, "brands", "fleurdevie", "orders");
+    onSnapshot(ordersRef, snap => {
+      allOrders = [];
+      ordersTableBody.innerHTML = "";
+      snap.forEach(docSnap => {
+        const o = docSnap.data(); o.id = docSnap.id;
+        allOrders.push(o);
+      });
+      renderOrders();
+    });
+  }
+  
+  function renderOrders() {
+    const term = (orderSearch.value || "").toLowerCase();
+    const status = orderStatusFilter.value;
+    ordersTableBody.innerHTML = "";
+  
+    const filtered = allOrders.filter(o => {
+      const matchesStatus = !status || o.status === status;
+      const matchesTerm = !term || (o.customer || "").toLowerCase().includes(term) || (o.email || "").toLowerCase().includes(term);
+      return matchesStatus && matchesTerm;
+    });
+  
+    filtered.forEach(o => {
+      const row = document.createElement("tr");
+      row.innerHTML = `<td>${o.id}</td><td>${o.customer || ''}</td><td>${o.email || ''}</td><td>${formatCurrency(o.total || 0, o.currency || 'NGN')}</td><td>${o.status || ''}</td><td></td>`;
+      ordersTableBody.appendChild(row);
+    });
+  }
+  orderSearch.addEventListener("input", renderOrders);
+  orderStatusFilter.addEventListener("change", renderOrders);
+  
+  /* Export CSV logic with date filtering and conversion to selected currency (assumes orders stored in NGN or have currency field) */
+  exportBtn.addEventListener("click", exportOrdersCSV);
+  
+  async function fetchRates(base='NGN'){
+    try {
+      const symbols = 'USD,EUR,GBP,NGN';
+      const res = await fetch(`https://api.exchangerate.host/latest?base=${encodeURIComponent(base)}&symbols=${symbols}`);
+      const data = await res.json();
+      if (data && data.rates) return data.rates;
+    } catch (e) {
+      console.warn('Failed to fetch rates', e);
+    }
+    // fallback default (not ideal, but avoids crash)
+    return { NGN:1, USD:0.0022, EUR:0.0020, GBP:0.0018 };
+  }
+  
+  function inDateRange(itemDateISO, fromISO, toISO) {
+    if (!itemDateISO) return true; // if no date stored, include
+    const d = new Date(itemDateISO);
+    if (isNaN(d)) return true;
+    if (fromISO) {
+      const fromD = new Date(fromISO);
+      if (d < fromD) return false;
+    }
+    if (toISO) {
+      const toD = new Date(toISO);
+      // include entire 'to' day by adding 1 day minus 1ms
+      toD.setHours(23,59,59,999);
+      if (d > toD) return false;
+    }
+    return true;
+  }
+  
+  async function exportOrdersCSV(e){
+    e.preventDefault();
+    // get filters
+    const from = exportFrom.value || null;
+    const to = exportTo.value || null;
+    const targetCurrency = exportCurrency.value || 'NGN';
+  
+    // get orders in date range
+    const toExport = allOrders.filter(o => inDateRange(o.createdAt, from, to));
+  
+    // fetch rates relative to NGN (we'll convert using them)
+    const ratesFromNGN = await fetchRates('NGN'); // 1 NGN = ratesFromNGN[targetCurrency] target
+    // If orders are in other currency, compute cross conversion using base NGN as intermediary
+    // conversion logic: if orderCurrency === targetCurrency -> use as-is
+    // else if orderCurrency === 'NGN' -> converted = total * ratesFromNGN[target]
+    // else -> we need rates for orderCurrency relative to NGN and target relative to NGN:
+    //   total_in_target = total / ratesFromNGN[orderCurrency] * ratesFromNGN[targetCurrency]
+    // Note: this relies on ratesFromNGN having orderCurrency (if not, we attempt to fetch pair)
+  
+    const rows = [];
+    // CSV header
+    rows.push(['orderId','customer','email','createdAt','status','originalCurrency','originalTotal', `total_${targetCurrency}`]);
+  
+    for (const o of toExport) {
+      const origCurrency = o.currency || 'NGN';
+      const origTotal = parseFloat(o.total || 0);
+      let converted = origTotal;
+  
+      if (origCurrency === targetCurrency) {
+        converted = origTotal;
+      } else {
+        // if origCurrency is NGN:
+        if (origCurrency === 'NGN') {
+          converted = origTotal * (ratesFromNGN[targetCurrency] || 1);
+        } else {
+          // orig currency not NGN, attempt conversion via NGN
+          const rateOrder = ratesFromNGN[origCurrency];
+          const rateTarget = ratesFromNGN[targetCurrency];
+          if (rateOrder && rateTarget) {
+            converted = (origTotal / rateOrder) * rateTarget;
+          } else {
+            // fallback: try direct convert endpoint
+            try {
+              const res = await fetch(`https://api.exchangerate.host/convert?from=${encodeURIComponent(origCurrency)}&to=${encodeURIComponent(targetCurrency)}&amount=${encodeURIComponent(origTotal)}`);
+              const d = await res.json();
+              if (d && typeof d.result === 'number') converted = d.result;
+            } catch(e){
+              console.warn('fallback convert failed', e);
+            }
           }
         }
       }
+  
+      rows.push([ o.id || '', o.customer || '', o.email || '', o.createdAt || '', o.status || '', origCurrency, origTotal, converted ]);
     }
-
-    rows.push([ o.id || '', o.customer || '', o.email || '', o.createdAt || '', o.status || '', origCurrency, origTotal, converted ]);
+  
+    // Convert rows to CSV text
+    const csv = rows.map(r => r.map(cell => {
+      if (cell === null || cell === undefined) return '';
+      const s = String(cell);
+      // escape quotes
+      if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+        return `"${s.replace(/"/g, '""')}"`;
+      }
+      return s;
+    }).join(',')).join('\n');
+  
+    // download
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    const fileName = `orders_export_${targetCurrency}_${new Date().toISOString().slice(0,10)}.csv`;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
   }
-
-  // Convert rows to CSV text
-  const csv = rows.map(r => r.map(cell => {
-    if (cell === null || cell === undefined) return '';
-    const s = String(cell);
-    // escape quotes
-    if (s.includes(',') || s.includes('"') || s.includes('\n')) {
-      return `"${s.replace(/"/g, '""')}"`;
-    }
-    return s;
-  }).join(',')).join('\n');
-
-  // download
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  const fileName = `orders_export_${targetCurrency}_${new Date().toISOString().slice(0,10)}.csv`;
-  a.download = fileName;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-}
-
-/* ---------------- SUBSCRIPTIONS ---------------- */
-subscribeProducts();
-subscribeQuotes();
-subscribeOrders();
-
-</script>
-</body>
-</html>
-
-/* ---------------- SUBSCRIPTIONS ---------------- */
-subscribeProducts();
-subscribeQuotes();
-subscribeOrders();
-
+  
+  /* ---------------- SUBSCRIPTIONS ---------------- */
+  subscribeProducts();
+  subscribeQuotes();
+  subscribeOrders();
 </script>
 </body>
 </html>
