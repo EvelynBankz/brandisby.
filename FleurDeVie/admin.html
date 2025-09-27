@@ -1,87 +1,70 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Fleur De Vie Admin Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
-  <style>
-    * { box-sizing:border-box; margin:0; padding:0; }
-    body { font-family: "Montserrat", sans-serif; background:#F5E6CC; color:#112e1f; line-height:1.6; }
-    a { text-decoration:none; color:inherit; }
-
-    header { background:#112e1f; color:#FFD6BA; padding:16px; text-align:center; font-family:"Playfair Display", serif; font-size:24px; font-weight:700; }
-
-    .container { max-width:1000px; margin:2rem auto; padding:2rem; background:#FFD6BA; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1); }
-
-    h2 { font-family:"Playfair Display", serif; margin-bottom:16px; color:#112e1f; }
-
-    label { display:block; margin-top:1rem; font-weight:500; }
-    input, textarea, select { width:100%; padding:0.6rem; margin-top:0.5rem; border:1px solid #112e1f; border-radius:6px; font-size:1rem; }
-
-    button { margin-top:1rem; padding:0.75rem 1.2rem; background:#112e1f; color:#FFD6BA; border:none; border-radius:6px; cursor:pointer; font-weight:600; transition:0.3s; }
-    button:hover { background:#0a1d14; }
-
-    .message { margin-top:1rem; font-weight:500; font-size:1rem; text-align:center; }
-
-    table { width:100%; border-collapse:collapse; margin-top:1.5rem; background:#fff; border-radius:12px; overflow:hidden; }
-    th, td { padding:0.75rem; border-bottom:1px solid #ddd; text-align:left; font-size:0.95rem; vertical-align:top; }
-    th { background:#F5E6CC; font-family:"Playfair Display", serif; color:#112e1f; }
-    td img { width:60px; border-radius:6px; }
-
-    .actions button { margin-right:0.5rem; padding:0.4rem 0.6rem; font-size:0.9rem; }
-    .actions button:hover { opacity:0.85; }
-
-    .small-note { font-size:0.9rem; color:#334d3a; margin-top:8px; }
-
-    /* Dashboard Navigation */
-    .dashboard-nav { display:flex; gap:10px; margin-bottom:1.5rem; }
-    .dashboard-nav button { flex:1; }
-    .section { display:none; margin-top:1rem; }
-    .section.active { display:block; }
-
-    .details-row { background:#fff6e8; }
-    .details-row td { padding:12px; }
-
-    /* Orders filter/search */
-    .order-filters { display:flex; gap:10px; margin-bottom:1rem; flex-wrap:wrap; }
-    .order-filters input, .order-filters select { flex:1; max-width: 320px; }
-
-    .quote-item { border:1px solid #eee; padding:8px; margin-top:8px; background:#fff; border-radius:6px; }
-
-    .copy-btn { background:none; border:none; cursor:pointer; margin-left:6px; font-size:1rem; }
-    .copy-btn:hover { opacity:0.7; }
-
-    @media(max-width:600px){
-      .container { padding:1rem; }
-      table, th, td { font-size:0.85rem; }
-      th, td { padding:0.5rem; }
-      .dashboard-nav { flex-direction:column; }
-      .order-filters { flex-direction: column; }
-    }
-
-    /* Add Item panel styling (small) */
-    .add-item-panel { border:1px dashed rgba(17,46,31,0.12); padding:12px; margin-top:8px; background:#fff; border-radius:8px; }
-    .inline-grid { display:grid; grid-template-columns: repeat(4,1fr); gap:8px; }
-    @media(max-width:600px){ .inline-grid { grid-template-columns: 1fr; } }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Fleur De Vie Admin Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family: "Montserrat", sans-serif; background:#F5E6CC; color:#112e1f; line-height:1.6; }
+a { text-decoration:none; color:inherit; }
+header { background:#112e1f; color:#FFD6BA; padding:16px; text-align:center; font-family:"Playfair Display", serif; font-size:24px; font-weight:700; }
+.container { max-width:1000px; margin:2rem auto; padding:2rem; background:#FFD6BA; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1); }
+h2 { font-family:"Playfair Display", serif; margin-bottom:16px; color:#112e1f; }
+label { display:block; margin-top:1rem; font-weight:500; }
+input, textarea, select { width:100%; padding:0.6rem; margin-top:0.5rem; border:1px solid #112e1f; border-radius:6px; font-size:1rem; }
+button { margin-top:1rem; padding:0.75rem 1.2rem; background:#112e1f; color:#FFD6BA; border:none; border-radius:6px; cursor:pointer; font-weight:600; transition:0.3s; }
+button:hover { background:#0a1d14; }
+.message { margin-top:1rem; font-weight:500; font-size:1rem; text-align:center; }
+table { width:100%; border-collapse:collapse; margin-top:1.5rem; background:#fff; border-radius:12px; overflow:hidden; }
+th, td { padding:0.75rem; border-bottom:1px solid #ddd; text-align:left; font-size:0.95rem; vertical-align:top; }
+th { background:#F5E6CC; font-family:"Playfair Display", serif; color:#112e1f; }
+td img { width:60px; border-radius:6px; }
+.actions button { margin-right:0.5rem; padding:0.4rem 0.6rem; font-size:0.9rem; }
+.actions button:hover { opacity:0.85; }
+.small-note { font-size:0.9rem; color:#334d3a; margin-top:8px; }
+.dashboard-nav { display:flex; gap:10px; margin-bottom:1.5rem; }
+.dashboard-nav button { flex:1; }
+.section { display:none; margin-top:1rem; }
+.section.active { display:block; }
+.details-row { background:#fff6e8; }
+.details-row td { padding:12px; }
+.order-filters { display:flex; gap:10px; margin-bottom:1rem; flex-wrap:wrap; }
+.order-filters input, .order-filters select { flex:1; max-width: 320px; }
+.quote-item { border:1px solid #eee; padding:8px; margin-top:8px; background:#fff; border-radius:6px; display:flex; justify-content:space-between; align-items:center; }
+.copy-btn { background:none; border:none; cursor:pointer; margin-left:6px; font-size:1rem; }
+.copy-btn:hover { opacity:0.7; }
+@media(max-width:600px){
+  .container { padding:1rem; }
+  table, th, td { font-size:0.85rem; }
+  th, td { padding:0.5rem; }
+  .dashboard-nav { flex-direction:column; }
+  .order-filters { flex-direction: column; }
+}
+.add-item-panel { border:1px dashed rgba(17,46,31,0.12); padding:12px; margin-top:8px; background:#fff; border-radius:8px; }
+.inline-grid { display:grid; grid-template-columns: repeat(4,1fr); gap:8px; }
+@media(max-width:600px){ .inline-grid { grid-template-columns: 1fr; } }
+</style>
 </head>
 <body>
 
 <header>Fleur De Vie Admin Dashboard</header>
 
+<!-- LOGIN FORM -->
 <div class="container" id="loginContainer">
-  <h2>Admin Login</h2>
-  <form id="loginForm">
-    <label for="loginEmail">Email</label>
-    <input type="email" id="loginEmail" required>
-    <label for="loginPassword">Password</label>
-    <input type="password" id="loginPassword" required>
-    <button type="submit">Login</button>
-    <div class="message" id="loginMessage"></div>
-  </form>
+<h2>Admin Login</h2>
+<form id="loginForm">
+  <label for="loginEmail">Email</label>
+  <input type="email" id="loginEmail" required>
+  <label for="loginPassword">Password</label>
+  <input type="password" id="loginPassword" required>
+  <button type="submit">Login</button>
+  <div class="message" id="loginMessage"></div>
+</form>
 </div>
 
+<!-- DASHBOARD -->
 <div class="container" id="dashboardContainer" style="display:none;">
   <div class="dashboard-nav">
     <button type="button" data-target="productsSection">📦 Products</button>
@@ -92,235 +75,247 @@
   <!-- PRODUCTS -->
   <div class="section" id="productsSection">
     <h2>Manage Products</h2>
-    <!-- Product form and table remain unchanged -->
-    <!-- ... existing products code ... -->
+    <form id="productForm">
+      <label>Name</label>
+      <input type="text" id="productName" required>
+      <label>Price (NGN)</label>
+      <input type="number" id="productPriceNGN" step="0.01" inputmode="decimal" required>
+      <label>Price (USD)</label>
+      <input type="number" id="productPriceUSD" step="0.01" inputmode="decimal">
+      <label>Price (EUR)</label>
+      <input type="number" id="productPriceEUR" step="0.01" inputmode="decimal">
+      <label>Price (GBP)</label>
+      <input type="number" id="productPriceGBP" step="0.01" inputmode="decimal">
+      <label>Description</label>
+      <textarea id="productDesc"></textarea>
+      <label>Image URL</label>
+      <input type="text" id="productImg">
+      <label>Customization Available</label>
+      <select id="productCustom"><option value="false">No</option><option value="true">Yes</option></select>
+      <label>Published</label>
+      <select id="productPublished"><option value="false">No</option><option value="true">Yes</option></select>
+      <button type="submit">Add / Update Product</button>
+    </form>
+    <div id="productMessage" class="message"></div>
+    <label style="margin-top:12px;">Table Currency:</label>
+    <select id="tableCurrency"><option value="NGN">NGN</option><option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option></select>
+    <table id="productsTable">
+      <thead><tr><th>Name</th><th>Price</th><th>Image</th><th>Customization</th><th>Published</th><th>Actions</th></tr></thead>
+      <tbody></tbody>
+    </table>
   </div>
 
   <!-- QUOTES -->
   <div class="section" id="quotesSection">
-    <h2>Generate Quote</h2>
+    <h2>Generate/Edit Quote</h2>
     <form id="quoteForm">
       <label>Customer Name</label>
       <input type="text" id="quoteCustomer" required>
       <label>Customer Email</label>
       <input type="email" id="quoteEmail" required>
-
-      <label>Quote Currency (primary)</label>
-      <select id="quoteCurrency">
-        <option value="NGN">NGN</option>
-        <option value="USD">USD</option>
-        <option value="EUR">EUR</option>
-        <option value="GBP">GBP</option>
-      </select>
-
+      <label>Quote Currency</label>
+      <select id="quoteCurrency"><option value="NGN">NGN</option><option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option></select>
       <h3>Quote Items</h3>
-      <div id="addItemPanel" class="add-item-panel" style="display:none;">
-        <label>Item Name</label>
-        <input type="text" id="ai_name" placeholder="Item name">
-        <label>Quantity</label>
-        <input type="number" id="ai_qty" min="1" value="1">
-        <label>Description</label>
-        <input type="text" id="ai_desc" placeholder="Description (optional)">
-        <div class="inline-grid" style="margin-top:8px;">
-          <div><label>Price NGN</label><input type="number" id="ai_price_ngn" step="0.01" inputmode="decimal"></div>
-          <div><label>Price USD</label><input type="number" id="ai_price_usd" step="0.01" inputmode="decimal"></div>
-          <div><label>Price EUR</label><input type="number" id="ai_price_eur" step="0.01" inputmode="decimal"></div>
-          <div><label>Price GBP</label><input type="number" id="ai_price_gbp" step="0.01" inputmode="decimal"></div>
-        </div>
-        <div style="display:flex; gap:8px; margin-top:8px;">
-          <button type="button" id="ai_add">Add</button>
-          <button type="button" id="ai_cancel" style="background:#fff;color:#112e1f;border:1px solid #112e1f;">Cancel</button>
-        </div>
+      <div id="addItemPanel" class="add-item-panel">
+        <label>Item Name</label><input type="text" id="ai_name" placeholder="Item name">
+        <label>Quantity</label><input type="number" id="ai_qty" min="1" value="1">
+        <label>Description</label><input type="text" id="ai_desc" placeholder="Optional">
+        <label>Price</label><input type="number" id="ai_price" step="0.01">
+        <button type="button" id="addItemBtn">Add Item</button>
       </div>
-
-      <div id="quoteItems"></div>
-      <button type="button" id="addQuoteItem">+ Add Item</button>
-
-      <label style="margin-top:12px;">Total (optional)</label>
-      <input type="number" id="quoteTotal" step="0.01" inputmode="decimal">
-
-      <div style="display:flex; gap:8px; align-items:center; margin-top:8px;">
-        <button type="button" id="generateQuoteLinkBtn" style="background:#0b6b4b;">Generate Link</button>
-        <div id="generatedQuoteLink" style="margin-left:8px;"></div>
-      </div>
+      <div id="quoteItemsContainer"></div>
+      <label>Status</label>
+      <select id="quoteStatus"><option value="pending">Pending</option><option value="paid">Paid</option><option value="completed">Completed</option></select>
+      <button type="submit">Save Quote</button>
     </form>
-    <div id="quoteMessage" class="message"></div>
-
+    <div class="message" id="quoteMessage"></div>
     <table id="quotesTable">
-      <thead>
-        <tr>
-          <th>Customer</th><th>Email</th><th>Currency</th><th>Items</th><th>Totals</th><th>Link</th><th>Status</th>
-        </tr>
-      </thead>
+      <thead><tr><th>Customer</th><th>Email</th><th>Items</th><th>Status</th><th>Actions</th></tr></thead>
       <tbody></tbody>
     </table>
   </div>
 
   <!-- ORDERS -->
   <div class="section" id="ordersSection">
-    <h2>Manage Orders</h2>
-    <!-- Orders table unchanged -->
-    <!-- ... existing orders code ... -->
+    <h2>Orders</h2>
+    <div class="order-filters">
+      <input type="text" id="orderSearch" placeholder="Search by name/email">
+      <select id="orderStatusFilter"><option value="">All Status</option><option value="pending">Pending</option><option value="paid">Paid</option><option value="completed">Completed</option></select>
+    </div>
+    <table id="ordersTable">
+      <thead><tr><th>Customer</th><th>Email</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody></tbody>
+    </table>
   </div>
-
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
 <script>
-  // ================== FIREBASE ==================
-  const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_BUCKET",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
+const firebaseConfig = { apiKey: "YOUR-EXISTING-KEY", authDomain: "YOUR-EXISTING-AUTHDOMAIN", projectId: "YOUR-EXISTING-PROJECTID", storageBucket: "YOUR-EXISTING-STORAGEBUCKET", messagingSenderId: "YOUR-EXISTING-MESSAGINGSENDERID", appId: "YOUR-EXISTING-APPID" };
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth(); const db = firebase.firestore();
 
-  // ================== LOGIN ==================
-  const loginContainer = document.getElementById("loginContainer");
-  const dashboardContainer = document.getElementById("dashboardContainer");
-  const loginForm = document.getElementById("loginForm");
-  const loginMessage = document.getElementById("loginMessage");
+const loginContainer=document.getElementById('loginContainer');
+const dashboardContainer=document.getElementById('dashboardContainer');
+const loginForm=document.getElementById('loginForm');
+const loginMessage=document.getElementById('loginMessage');
 
-  loginForm.addEventListener("submit", e => {
-    e.preventDefault();
-    const email = document.getElementById("loginEmail").value;
-    const password = document.getElementById("loginPassword").value;
-    auth.signInWithEmailAndPassword(email, password)
-      .then(() => {
-        loginContainer.style.display="none";
-        dashboardContainer.style.display="block";
-      })
-      .catch(err => { loginMessage.textContent = err.message; });
-  });
+auth.onAuthStateChanged(user=>{ if(user){ loginContainer.style.display='none'; dashboardContainer.style.display='block'; loadProducts(); loadQuotes(); loadOrders(); } else { loginContainer.style.display='block'; dashboardContainer.style.display='none'; } });
 
-  // ================== NAV ==================
-  document.querySelectorAll(".dashboard-nav button").forEach(btn=>{
-    btn.addEventListener("click",()=>{
-      document.querySelectorAll(".section").forEach(sec=>sec.classList.remove("active"));
-      document.getElementById(btn.dataset.target).classList.add("active");
+loginForm.addEventListener('submit', e=>{ e.preventDefault(); auth.signInWithEmailAndPassword(document.getElementById('loginEmail').value, document.getElementById('loginPassword').value).catch(err=>loginMessage.textContent=err.message); });
+
+// Dashboard nav
+document.querySelectorAll('.dashboard-nav button').forEach(btn=>{ btn.addEventListener('click', ()=>{ document.querySelectorAll('.section').forEach(sec=>sec.classList.remove('active')); document.getElementById(btn.dataset.target).classList.add('active'); }); });
+document.querySelector('[data-target="productsSection"]').click();
+
+// Products CRUD
+const productForm=document.getElementById('productForm');
+const productsTable=document.getElementById('productsTable').querySelector('tbody');
+const tableCurrency=document.getElementById('tableCurrency');
+let editProductId=null;
+
+productForm.addEventListener('submit', async e=>{
+  e.preventDefault();
+  const productData={ name:document.getElementById('productName').value,
+    price:{ NGN:parseFloat(document.getElementById('productPriceNGN').value)||0,
+            USD:parseFloat(document.getElementById('productPriceUSD').value)||0,
+            EUR:parseFloat(document.getElementById('productPriceEUR').value)||0,
+            GBP:parseFloat(document.getElementById('productPriceGBP').value)||0 },
+    description:document.getElementById('productDesc').value,
+    image:document.getElementById('productImg').value,
+    customizable:document.getElementById('productCustom').value==='true',
+    published:document.getElementById('productPublished').value==='true' };
+
+  try{
+    if(editProductId){ await db.collection('products').doc(editProductId).set(productData); editProductId=null; } 
+    else{ await db.collection('products').add(productData); }
+    productForm.reset(); loadProducts();
+  }catch(err){ console.error(err); }
+});
+
+function loadProducts(){
+  productsTable.innerHTML='';
+  db.collection('products').get().then(snapshot=>{
+    snapshot.forEach(doc=>{
+      const p=doc.data();
+      const row=document.createElement('tr');
+      row.innerHTML=`<td>${p.name}</td><td>${p.price[tableCurrency.value]}</td><td><img src="${p.image}"/></td><td>${p.customizable?'Yes':'No'}</td><td>${p.published?'Yes':'No'}</td>
+      <td class="actions">
+      <button onclick="editProduct('${doc.id}')">Edit</button>
+      <button onclick="deleteProduct('${doc.id}')">Delete</button></td>`;
+      productsTable.appendChild(row);
     });
   });
-
-  // ================== QUOTES ==================
-  let quoteItemsArray = [];
-  const quoteItemsDiv = document.getElementById("quoteItems");
-  const addQuoteItemBtn = document.getElementById("addQuoteItem");
-  const addItemPanel = document.getElementById("addItemPanel");
-  const ai_add = document.getElementById("ai_add");
-  const ai_cancel = document.getElementById("ai_cancel");
-  const generatedQuoteLinkDiv = document.getElementById("generatedQuoteLink");
-
-  addQuoteItemBtn.addEventListener("click",()=>{ addItemPanel.style.display="block"; });
-
-  ai_cancel.addEventListener("click",()=>{
-    addItemPanel.style.display="none";
-    clearItemInputs();
+}
+function editProduct(id){
+  db.collection('products').doc(id).get().then(doc=>{
+    const p=doc.data(); editProductId=id;
+    document.getElementById('productName').value=p.name;
+    document.getElementById('productPriceNGN').value=p.price.NGN;
+    document.getElementById('productPriceUSD').value=p.price.USD;
+    document.getElementById('productPriceEUR').value=p.price.EUR;
+    document.getElementById('productPriceGBP').value=p.price.GBP;
+    document.getElementById('productDesc').value=p.description;
+    document.getElementById('productImg').value=p.image;
+    document.getElementById('productCustom').value=p.customizable;
+    document.getElementById('productPublished').value=p.published;
   });
+}
+function deleteProduct(id){ db.collection('products').doc(id).delete().then(()=>loadProducts()); }
+tableCurrency.addEventListener('change', loadProducts);
 
-  ai_add.addEventListener("click",()=>{
-    const item = {
-      name: document.getElementById("ai_name").value,
-      qty: document.getElementById("ai_qty").value,
-      desc: document.getElementById("ai_desc").value,
-      prices: {
-        NGN: document.getElementById("ai_price_ngn").value,
-        USD: document.getElementById("ai_price_usd").value,
-        EUR: document.getElementById("ai_price_eur").value,
-        GBP: document.getElementById("ai_price_gbp").value
-      }
-    };
-    quoteItemsArray.push(item);
-    renderQuoteItems();
-    clearItemInputs();
-    addItemPanel.style.display="none";
+// Quotes CRUD
+const quoteForm=document.getElementById('quoteForm');
+const quoteItemsContainer=document.getElementById('quoteItemsContainer');
+const addItemPanel=document.getElementById('addItemPanel');
+const addItemBtn=document.getElementById('addItemBtn');
+const quotesTable=document.getElementById('quotesTable').querySelector('tbody');
+let currentItems=[]; let editQuoteId=null;
+
+addItemBtn.addEventListener('click', ()=>{
+  const name=document.getElementById('ai_name').value;
+  const qty=parseInt(document.getElementById('ai_qty').value)||1;
+  const desc=document.getElementById('ai_desc').value;
+  const price=parseFloat(document.getElementById('ai_price').value)||0;
+  if(!name)return; currentItems.push({name,qty,desc,price}); renderQuoteItems();
+});
+function renderQuoteItems(){
+  quoteItemsContainer.innerHTML='';
+  currentItems.forEach((i,idx)=>{
+    const div=document.createElement('div'); div.className='quote-item';
+    div.innerHTML=`${i.name} x${i.qty} - ${i.price} <button onclick="removeItem(${idx})" class="copy-btn">❌</button>`;
+    quoteItemsContainer.appendChild(div);
   });
+}
+window.removeItem=idx=>{ currentItems.splice(idx,1); renderQuoteItems(); }
 
-  function clearItemInputs(){
-    ["ai_name","ai_qty","ai_desc","ai_price_ngn","ai_price_usd","ai_price_eur","ai_price_gbp"].forEach(id=>{
-      document.getElementById(id).value="";
+quoteForm.addEventListener('submit', async e=>{
+  e.preventDefault();
+  const customer=document.getElementById('quoteCustomer').value;
+  const email=document.getElementById('quoteEmail').value;
+  const currency=document.getElementById('quoteCurrency').value;
+  const status=document.getElementById('quoteStatus').value;
+  const quoteData={customer,email,currency,status,items:currentItems,created:Date.now()};
+  try{
+    if(editQuoteId){ await db.collection('quotes').doc(editQuoteId).set(quoteData); editQuoteId=null; } 
+    else { await db.collection('quotes').add(quoteData); }
+    quoteForm.reset(); currentItems=[]; renderQuoteItems(); loadQuotes();
+  }catch(err){ console.error(err); }
+});
+
+function loadQuotes(){
+  quotesTable.innerHTML='';
+  db.collection('quotes').orderBy('created','desc').get().then(snap=>{
+    snap.forEach(doc=>{
+      const q=doc.data();
+      const row=document.createElement('tr');
+      row.innerHTML=`<td>${q.customer}</td><td>${q.email}</td><td>${q.items.map(i=>i.name+' x'+i.qty).join(', ')}</td><td>${q.status}</td>
+      <td class="actions">
+      <button onclick="editQuote('${doc.id}')">Edit</button>
+      <button onclick="deleteQuote('${doc.id}')">Delete</button></td>`;
+      quotesTable.appendChild(row);
     });
-  }
+  });
+}
+window.editQuote=id=>{ db.collection('quotes').doc(id).get().then(doc=>{ const q=doc.data(); editQuoteId=id; document.getElementById('quoteCustomer').value=q.customer; document.getElementById('quoteEmail').value=q.email; document.getElementById('quoteCurrency').value=q.currency; document.getElementById('quoteStatus').value=q.status; currentItems=q.items; renderQuoteItems(); }); }
+window.deleteQuote=id=>{ db.collection('quotes').doc(id).delete().then(()=>loadQuotes()); }
 
-  function renderQuoteItems(){
-    quoteItemsDiv.innerHTML="";
-    quoteItemsArray.forEach((it,i)=>{
-      const div = document.createElement("div");
-      div.className="quote-item";
-      div.innerHTML=`<strong>${it.name}</strong> (${it.qty})<br>${it.desc}<br>
-        NGN:${it.prices.NGN} USD:${it.prices.USD} EUR:${it.prices.EUR} GBP:${it.prices.GBP}
-        <button type="button" onclick="removeQuoteItem(${i})" style="background:none;border:none;color:red;cursor:pointer;">Remove</button>`;
-      quoteItemsDiv.appendChild(div);
+// Orders CRUD
+const ordersTable=document.getElementById('ordersTable').querySelector('tbody');
+function loadOrders(){
+  ordersTable.innerHTML='';
+  db.collection('orders').get().then(snap=>{
+    snap.forEach(doc=>{
+      const o=doc.data();
+      const row=document.createElement('tr');
+      row.innerHTML=`<td>${o.customer}</td><td>${o.email}</td><td>${o.amount}</td><td>
+      <select onchange="updateOrderStatus('${doc.id}',this.value)">
+      <option value="pending" ${o.status==='pending'?'selected':''}>Pending</option>
+      <option value="paid" ${o.status==='paid'?'selected':''}>Paid</option>
+      <option value="completed" ${o.status==='completed'?'selected':''}>Completed</option>
+      </select></td><td class="actions"><button onclick="deleteOrder('${doc.id}')">Delete</button></td>`;
+      ordersTable.appendChild(row);
     });
-  }
-
-  window.removeQuoteItem = function(i){
-    quoteItemsArray.splice(i,1);
-    renderQuoteItems();
-  };
-
-  document.getElementById("generateQuoteLinkBtn").addEventListener("click",()=>{
-    const customer = document.getElementById("quoteCustomer").value;
-    const email = document.getElementById("quoteEmail").value;
-    const currency = document.getElementById("quoteCurrency").value;
-    const total = document.getElementById("quoteTotal").value;
-
-    if(!customer || !email || quoteItemsArray.length===0){ alert("Fill all required fields and add at least one item"); return; }
-
-    const quoteData = { customer,email,currency,items:quoteItemsArray,total,status:"Pending",createdAt:new Date() };
-    db.collection("quotes").add(quoteData)
-      .then(docRef=>{
-        const link = `${window.location.origin}/quote.html?id=${docRef.id}`;
-        generatedQuoteLinkDiv.innerHTML=`<span>${link}</span> <button class="copy-btn" onclick="navigator.clipboard.writeText('${link}')">📋</button>`;
-        quoteItemsArray=[]; renderQuoteItems();
-        document.getElementById("quoteForm").reset();
-        loadQuotes();
-      })
-      .catch(err=>{ alert(err.message); });
   });
+}
+window.updateOrderStatus=(id,status)=>{ db.collection('orders').doc(id).update({status}).then(()=>loadOrders()); }
+window.deleteOrder=id=>{ db.collection('orders').doc(id).delete().then(()=>loadOrders()); }
 
-  function loadQuotes(){
-    const tbody = document.querySelector("#quotesTable tbody");
-    tbody.innerHTML="";
-    db.collection("quotes").orderBy("createdAt","desc").get()
-      .then(snapshot=>{
-        snapshot.forEach(doc=>{
-          const q = doc.data();
-          const tr = document.createElement("tr");
-          tr.innerHTML=`
-            <td>${q.customer}</td>
-            <td>${q.email}</td>
-            <td>${q.currency}</td>
-            <td>${q.items.map(it=>`${it.name}(${it.qty})`).join(", ")}</td>
-            <td>${q.total || "-"}</td>
-            <td><a href="/quote.html?id=${doc.id}" target="_blank">Link</a></td>
-            <td>
-              <select onchange="updateQuoteStatus('${doc.id}',this.value)">
-                <option ${q.status==="Pending"?"selected":""}>Pending</option>
-                <option ${q.status==="Paid"?"selected":""}>Paid</option>
-              </select>
-            </td>
-          `;
-          tbody.appendChild(tr);
-        });
-      });
-  }
-
-  window.updateQuoteStatus=function(id,status){
-    db.collection("quotes").doc(id).update({status});
-  };
-
-  auth.onAuthStateChanged(user=>{
-    if(user){ loginContainer.style.display="none"; dashboardContainer.style.display="block"; loadQuotes(); }
-  });
-
+document.getElementById('orderStatusFilter').addEventListener('change', ()=>{
+  const val=document.getElementById('orderStatusFilter').value;
+  ordersTable.innerHTML='';
+  let query=db.collection('orders');
+  if(val) query=query.where('status','==',val);
+  query.get().then(snap=>{ snap.forEach(doc=>{ const o=doc.data(); const row=document.createElement('tr'); row.innerHTML=`<td>${o.customer}</td><td>${o.email}</td><td>${o.amount}</td><td>
+  <select onchange="updateOrderStatus('${doc.id}',this.value)">
+  <option value="pending" ${o.status==='pending'?'selected':''}>Pending</option>
+  <option value="paid" ${o.status==='paid'?'selected':''}>Paid</option>
+  <option value="completed" ${o.status==='completed'?'selected':''}>Completed</option>
+  </select></td><td class="actions"><button onclick="deleteOrder('${doc.id}')">Delete</button></td>`; ordersTable.appendChild(row); }); });
+});
 </script>
-
 </body>
 </html>
