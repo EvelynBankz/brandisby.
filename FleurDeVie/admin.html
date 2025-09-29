@@ -1,97 +1,72 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Fleur De Vie Admin Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
-  <style>
-    * { box-sizing:border-box; margin:0; padding:0; }
-    body { font-family: "Montserrat", sans-serif; background:#F5E6CC; color:#112e1f; line-height:1.6; }
-    a { text-decoration:none; color:inherit; }
-
-    header { background:#112e1f; color:#FFD6BA; padding:16px; text-align:center; font-family:"Playfair Display", serif; font-size:24px; font-weight:700; }
-
-    .container { max-width:1000px; margin:2rem auto; padding:2rem; background:#FFD6BA; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1); }
-
-    h2 { font-family:"Playfair Display", serif; margin-bottom:16px; color:#112e1f; }
-
-    label { display:block; margin-top:1rem; font-weight:500; }
-    input, textarea, select { width:100%; padding:0.6rem; margin-top:0.5rem; border:1px solid #112e1f; border-radius:6px; font-size:1rem; }
-
-    button { margin-top:1rem; padding:0.75rem 1.2rem; background:#112e1f; color:#FFD6BA; border:none; border-radius:6px; cursor:pointer; font-weight:600; transition:0.3s; }
-    button:hover { background:#0a1d14; }
-
-    .message { margin-top:1rem; font-weight:500; font-size:1rem; text-align:center; }
-
-    table { width:100%; border-collapse:collapse; margin-top:1.5rem; background:#fff; border-radius:12px; overflow:hidden; }
-    th, td { padding:0.75rem; border-bottom:1px solid #ddd; text-align:left; font-size:0.95rem; vertical-align:top; }
-    th { background:#F5E6CC; font-family:"Playfair Display", serif; color:#112e1f; }
-    td img { width:60px; border-radius:6px; }
-
-    .actions button { margin-right:0.5rem; padding:0.4rem 0.6rem; font-size:0.9rem; }
-    .actions button:hover { opacity:0.85; }
-
-    .small-note { font-size:0.9rem; color:#334d3a; margin-top:8px; }
-
-    /* Dashboard Navigation */
-    .dashboard-nav { display:flex; gap:10px; margin-bottom:1.5rem; }
-    .dashboard-nav button { flex:1; }
-    .section { display:none; margin-top:1rem; }
-    .section.active { display:block; }
-
-    .details-row { background:#fff6e8; }
-    .details-row td { padding:12px; }
-
-    /* Orders filter/search */
-    .order-filters { display:flex; gap:10px; margin-bottom:1rem; flex-wrap:wrap; }
-    .order-filters input, .order-filters select { flex:1; max-width: 320px; }
-
-    .quote-item { border:1px solid #eee; padding:8px; margin-top:8px; background:#fff; border-radius:6px; }
-
-    .copy-btn { background:none; border:none; cursor:pointer; margin-left:6px; font-size:1rem; }
-    .copy-btn:hover { opacity:0.7; }
-
-    @media(max-width:600px){
-      .container { padding:1rem; }
-      table, th, td { font-size:0.85rem; }
-      th, td { padding:0.5rem; }
-      .dashboard-nav { flex-direction:column; }
-      .order-filters { flex-direction: column; }
-    }
-
-    /* Add Item panel styling (small) */
-    .add-item-panel { border:1px dashed rgba(17,46,31,0.12); padding:12px; margin-top:8px; background:#fff; border-radius:8px; }
-    .inline-grid { display:grid; grid-template-columns: repeat(4,1fr); gap:8px; }
-    @media(max-width:600px){ .inline-grid { grid-template-columns: 1fr; } }
-
-    /* Sizes and Colors inputs */
-    .multi-input-container { display:flex; flex-wrap:wrap; gap:8px; margin-top:4px; }
-    .multi-input-container input { flex:1 1 120px; }
-    .add-multi-btn { margin-top:4px; padding:4px 8px; font-size:0.9rem; background:#0b6b4b; color:#fff; border:none; border-radius:4px; cursor:pointer; }
-    .add-multi-btn:hover { opacity:0.85; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Fleur De Vie Admin Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing:border-box; margin:0; padding:0; }
+body { font-family: "Montserrat", sans-serif; background:#F5E6CC; color:#112e1f; line-height:1.6; }
+a { text-decoration:none; color:inherit; }
+header { background:#112e1f; color:#FFD6BA; padding:16px; text-align:center; font-family:"Playfair Display", serif; font-size:24px; font-weight:700; }
+.container { max-width:1000px; margin:2rem auto; padding:2rem; background:#FFD6BA; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1); }
+h2 { font-family:"Playfair Display", serif; margin-bottom:16px; color:#112e1f; }
+label { display:block; margin-top:1rem; font-weight:500; }
+input, textarea, select { width:100%; padding:0.6rem; margin-top:0.5rem; border:1px solid #112e1f; border-radius:6px; font-size:1rem; }
+button { margin-top:1rem; padding:0.75rem 1.2rem; background:#112e1f; color:#FFD6BA; border:none; border-radius:6px; cursor:pointer; font-weight:600; transition:0.3s; }
+button:hover { background:#0a1d14; }
+.message { margin-top:1rem; font-weight:500; font-size:1rem; text-align:center; }
+table { width:100%; border-collapse:collapse; margin-top:1.5rem; background:#fff; border-radius:12px; overflow:hidden; }
+th, td { padding:0.75rem; border-bottom:1px solid #ddd; text-align:left; font-size:0.95rem; vertical-align:top; }
+th { background:#F5E6CC; font-family:"Playfair Display", serif; color:#112e1f; }
+td img { width:60px; border-radius:6px; }
+.actions button { margin-right:0.5rem; padding:0.4rem 0.6rem; font-size:0.9rem; }
+.actions button:hover { opacity:0.85; }
+.small-note { font-size:0.9rem; color:#334d3a; margin-top:8px; }
+.dashboard-nav { display:flex; gap:10px; margin-bottom:1.5rem; }
+.dashboard-nav button { flex:1; }
+.section { display:none; margin-top:1rem; }
+.section.active { display:block; }
+.details-row { background:#fff6e8; }
+.details-row td { padding:12px; }
+.order-filters { display:flex; gap:10px; margin-bottom:1rem; flex-wrap:wrap; }
+.order-filters input, .order-filters select { flex:1; max-width: 320px; }
+.quote-item { border:1px solid #eee; padding:8px; margin-top:8px; background:#fff; border-radius:6px; }
+.copy-btn { background:none; border:none; cursor:pointer; margin-left:6px; font-size:1rem; }
+.copy-btn:hover { opacity:0.7; }
+@media(max-width:600px){
+  .container { padding:1rem; }
+  table, th, td { font-size:0.85rem; }
+  th, td { padding:0.5rem; }
+  .dashboard-nav { flex-direction:column; }
+  .order-filters { flex-direction: column; }
+}
+.add-item-panel { border:1px dashed rgba(17,46,31,0.12); padding:12px; margin-top:8px; background:#fff; border-radius:8px; }
+.inline-grid { display:grid; grid-template-columns: repeat(4,1fr); gap:8px; }
+@media(max-width:600px){ .inline-grid { grid-template-columns: 1fr; } }
+/* New multi-value input */
+.multi-input-container { display:flex; gap:6px; flex-wrap:wrap; margin-top:0.5rem; }
+.multi-input-container span { background:#112e1f;color:#FFD6BA;padding:4px 8px;border-radius:6px; display:flex; align-items:center; gap:4px; font-size:0.85rem; }
+.multi-input-container span button { background:none;border:none;color:#FFD6BA;cursor:pointer;font-weight:bold;padding:0; }
+</style>
 </head>
 <body>
 
 <header>Fleur De Vie Admin Dashboard</header>
 
-<!-- LOGIN FORM -->
 <div class="container" id="loginContainer">
   <h2>Admin Login</h2>
   <form id="loginForm">
     <label for="loginEmail">Email</label>
     <input type="email" id="loginEmail" required>
-
     <label for="loginPassword">Password</label>
     <input type="password" id="loginPassword" required>
-
     <button type="submit">Login</button>
     <div class="message" id="loginMessage"></div>
   </form>
 </div>
 
-<!-- DASHBOARD -->
 <div class="container" id="dashboardContainer" style="display:none;">
   <div class="dashboard-nav">
     <button type="button" data-target="productsSection">📦 Products</button>
@@ -99,13 +74,12 @@
     <button type="button" data-target="ordersSection">🧾 Orders</button>
   </div>
 
-  <!-- PRODUCTS -->
+  <!-- PRODUCTS SECTION -->
   <div class="section" id="productsSection">
     <h2>Manage Products</h2>
     <form id="productForm">
       <label>Name</label>
       <input type="text" id="productName" required>
-      
       <label>Price (NGN)</label>
       <input type="number" id="productPriceNGN" step="0.01" inputmode="decimal" required>
       <label>Price (USD)</label>
@@ -114,37 +88,35 @@
       <input type="number" id="productPriceEUR" step="0.01" inputmode="decimal">
       <label>Price (GBP)</label>
       <input type="number" id="productPriceGBP" step="0.01" inputmode="decimal">
-      
       <label>Description</label>
       <textarea id="productDesc"></textarea>
-      
       <label>Image URL</label>
-      <input type="text" id="productImg">
-
-      <label>Sizes</label>
-      <div id="sizesContainer" class="multi-input-container"></div>
-      <button type="button" class="add-multi-btn" id="addSizeBtn">+ Add Size</button>
-
-      <label>Colors</label>
-      <div id="colorsContainer" class="multi-input-container"></div>
-      <button type="button" class="add-multi-btn" id="addColorBtn">+ Add Color</button>
-      
+      <input type="text" id="productImg" placeholder="Add main image URL">
+      <label>Additional Images</label>
+      <input type="text" id="productImgsInput" placeholder="Add image URL & press Add">
+      <button type="button" id="addProductImgBtn">Add Image</button>
+      <div id="productImgsContainer" class="multi-input-container"></div>
+      <label>Available Sizes</label>
+      <input type="text" id="productSizesInput" placeholder="Add size & press Add">
+      <button type="button" id="addProductSizeBtn">Add Size</button>
+      <div id="productSizesContainer" class="multi-input-container"></div>
+      <label>Available Colors</label>
+      <input type="text" id="productColorsInput" placeholder="Add color & press Add">
+      <button type="button" id="addProductColorBtn">Add Color</button>
+      <div id="productColorsContainer" class="multi-input-container"></div>
       <label>Customization Available</label>
       <select id="productCustom">
         <option value="false">No</option>
         <option value="true">Yes</option>
       </select>
-
       <label>Published</label>
       <select id="productPublished">
         <option value="false">No</option>
         <option value="true">Yes</option>
       </select>
-
       <button type="submit">Add Product</button>
     </form>
     <div id="productMessage" class="message"></div>
-
     <label style="margin-top:12px;">Table Currency:</label>
     <select id="tableCurrency">
       <option value="NGN">NGN</option>
@@ -152,7 +124,6 @@
       <option value="EUR">EUR</option>
       <option value="GBP">GBP</option>
     </select>
-
     <table id="productsTable">
       <thead>
         <tr><th>Name</th><th>Price</th><th>Image</th><th>Customization</th><th>Published</th><th>Actions</th></tr>
@@ -160,227 +131,396 @@
       <tbody></tbody>
     </table>
   </div>
+<!-- ================= PRODUCT ENHANCEMENTS ================= -->
+<!-- Sizes, Colors, Multiple Images -->
+<form id="productExtrasForm" style="margin-top:16px;">
+  <h3>Optional Product Details</h3>
 
-  <!-- QUOTES -->
-  <div class="section" id="quotesSection">
-    <h2>Generate Quote</h2>
-    <form id="quoteForm">
-      <!-- ... existing quote form unchanged ... -->
-    </form>
-    <div id="quoteMessage" class="message"></div>
-
-    <table id="quotesTable">
-      <thead>
-        <tr><th>Customer</th><th>Email</th><th>Currency</th><th>Items</th><th>Total</th><th>Actions</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+  <label>Sizes (add multiple individually)</label>
+  <div style="display:flex; gap:8px; flex-wrap:wrap;">
+    <input type="text" id="sizeInput" placeholder="Enter size">
+    <button type="button" id="addSizeBtn">Add Size</button>
   </div>
+  <div id="sizesList" class="inline-grid"></div>
 
-  <!-- ORDERS -->
-  <div class="section" id="ordersSection">
-    <h2>Manage Orders</h2>
-    <div class="order-filters">
-      <input type="text" id="orderSearch" placeholder="Search by name/email">
-      <select id="orderStatus">
-        <option value="">All Status</option>
-        <option value="Pending">Pending</option>
-        <option value="Completed">Completed</option>
-        <option value="Cancelled">Cancelled</option>
-      </select>
-    </div>
-    <table id="ordersTable">
-      <thead>
-        <tr><th>Customer</th><th>Email</th><th>Status</th><th>Items</th><th>Total</th><th>Actions</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+  <label>Colors (add multiple individually)</label>
+  <div style="display:flex; gap:8px; flex-wrap:wrap;">
+    <input type="text" id="colorInput" placeholder="Enter color">
+    <button type="button" id="addColorBtn">Add Color</button>
   </div>
+  <div id="colorsList" class="inline-grid"></div>
 
-</div>
-
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <label>Additional Image URLs (add multiple individually)</label>
+  <div style="display:flex; gap:8px; flex-wrap:wrap;">
+    <input type="text" id="imageInput" placeholder="Enter image URL">
+    <button type="button" id="addImageBtn">Add Image</button>
+  </div>
+  <div id="imagesList" class="inline-grid"></div>
+</form>
 
 <script>
-  // Firebase config (keep your original config)
- const firebaseConfig = {
-  apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
-  authDomain: "brandisby.firebaseapp.com",
-  projectId: "brandisby",
-  storageBucket: "brandisby.firebasestorage.app",
-  messagingSenderId: "87213267039",
-  appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
-};
+/* ----- Product Extras Logic ----- */
+let sizesArr = [], colorsArr = [], imagesArr = [];
+
+function renderExtrasList(listArr, containerId){
+  const container = document.getElementById(containerId);
+  container.innerHTML = "";
+  listArr.forEach((val, idx) => {
+    const div = document.createElement("div");
+    div.style.display = "flex";
+    div.style.alignItems = "center";
+    div.style.gap = "4px";
+    div.innerHTML = `
+      <span>${val}</span>
+      <button type="button" style="background:#112e1f;color:#FFD6BA;border:none;border-radius:4px;padding:0 4px;" data-idx="${idx}" class="removeExtra">x</button>
+    `;
+    container.appendChild(div);
+  });
+
+  container.querySelectorAll(".removeExtra").forEach(btn => {
+    btn.onclick = () => {
+      listArr.splice(parseInt(btn.dataset.idx), 1);
+      renderExtrasList(listArr, containerId);
+    }
+  });
+}
+
+document.getElementById("addSizeBtn").onclick = () => {
+  const val = document.getElementById("sizeInput").value.trim();
+  if(val && !sizesArr.includes(val)){
+    sizesArr.push(val);
+    renderExtrasList(sizesArr, "sizesList");
+    document.getElementById("sizeInput").value = "";
+  }
+}
+
+document.getElementById("addColorBtn").onclick = () => {
+  const val = document.getElementById("colorInput").value.trim();
+  if(val && !colorsArr.includes(val)){
+    colorsArr.push(val);
+    renderExtrasList(colorsArr, "colorsList");
+    document.getElementById("colorInput").value = "";
+  }
+}
+
+document.getElementById("addImageBtn").onclick = () => {
+  const val = document.getElementById("imageInput").value.trim();
+  if(val && !imagesArr.includes(val)){
+    imagesArr.push(val);
+    renderExtrasList(imagesArr, "imagesList");
+    document.getElementById("imageInput").value = "";
+  }
+}
+
+/* ----- Integrate with Product Save ----- */
+productForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const data = {
+    name: document.getElementById("productName").value,
+    priceNGN: parseFloat(document.getElementById("productPriceNGN").value) || 0,
+    priceUSD: parseFloat(document.getElementById("productPriceUSD").value) || 0,
+    priceEUR: parseFloat(document.getElementById("productPriceEUR").value) || 0,
+    priceGBP: parseFloat(document.getElementById("productPriceGBP").value) || 0,
+    description: document.getElementById("productDesc").value || "",
+    imageUrl: document.getElementById("productImg").value || "",
+    sizes: sizesArr,
+    colors: colorsArr,
+    extraImages: imagesArr,
+    customizationAvailable: document.getElementById("productCustom").value === "true",
+    published: document.getElementById("productPublished").value === "true",
+    updatedAt: new Date().toISOString()
+  };
+  try {
+    if (currentEditingProductId) {
+      const docRef = doc(db, "brands", "fleurdevie", "products", currentEditingProductId);
+      await updateDoc(docRef, data);
+      productMessage.textContent = "✅ Product updated with extras.";
+      currentEditingProductId = null;
+      productForm.querySelector("button[type='submit']").textContent = "Add Product";
+    } else {
+      await addDoc(collection(db, "brands", "fleurdevie", "products"), data);
+      productMessage.textContent = "✅ Product added with extras.";
+    }
+    productMessage.style.color = "green";
+    productForm.reset();
+    sizesArr=[], colorsArr=[], imagesArr=[];
+    renderExtrasList(sizesArr, "sizesList");
+    renderExtrasList(colorsArr, "colorsList");
+    renderExtrasList(imagesArr, "imagesList");
+  } catch (err) {
+    console.error(err);
+    productMessage.textContent = "❌ Error saving product with extras.";
+    productMessage.style.color = "red";
+  }
+});
+
+/* ----- Display extras in product table ----- */
+function renderProductsTable(snap) {
+  const currency = tableCurrencySelect.value || 'NGN';
+  productsTableBody.innerHTML = "";
+  snap.forEach(docSnap => {
+    const p = docSnap.data();
+    let priceVal = 0;
+    if (currency === "NGN") priceVal = p.priceNGN || 0;
+    if (currency === "USD") priceVal = p.priceUSD || 0;
+    if (currency === "EUR") priceVal = p.priceEUR || 0;
+    if (currency === "GBP") priceVal = p.priceGBP || 0;
+
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>
+        ${p.name}
+        ${p.sizes?.length ? `<div style="font-size:0.8rem;color:#334d3a;">Sizes: ${p.sizes.join(", ")}</div>` : ""}
+        ${p.colors?.length ? `<div style="font-size:0.8rem;color:#334d3a;">Colors: ${p.colors.join(", ")}</div>` : ""}
+        ${p.extraImages?.length ? `<div style="display:flex; gap:4px; margin-top:4px;">${p.extraImages.map(img => `<img src="${img}" style="width:30px;height:30px;border-radius:4px;">`).join("")}</div>` : ""}
+      </td>
+      <td>${formatCurrency(priceVal, currency)}</td>
+      <td>${p.imageUrl ? `<img src="${p.imageUrl}" alt="${p.name}">` : ""}</td>
+      <td>${p.customizationAvailable ? "Yes" : "No"}</td>
+      <td>${p.published ? "Yes" : "No"}</td>
+      <td class="actions">
+        <button onclick="deleteProduct('${docSnap.id}')">Delete</button>
+        <button onclick="editProduct('${docSnap.id}')">Edit</button>
+      </td>`;
+    productsTableBody.appendChild(row);
+  });
+}
+<!-- ================= QUOTES TABLE ================= -->
+<h2>Quotes</h2>
+<label for="quoteCurrencySelect">Display currency:</label>
+<select id="quoteCurrencySelect">
+  <option value="NGN">NGN</option>
+  <option value="USD">USD</option>
+  <option value="EUR">EUR</option>
+  <option value="GBP">GBP</option>
+</select>
+
+<table id="quotesTable">
+  <thead>
+    <tr>
+      <th>Customer</th>
+      <th>Products</th>
+      <th>Total</th>
+      <th>Status</th>
+      <th>Link</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody id="quotesTableBody"></tbody>
+</table>
+
+<script>
+/* ----- QUOTES TABLE LOGIC ----- */
+const quoteCurrencySelect = document.getElementById("quoteCurrencySelect");
+const quotesTableBody = document.getElementById("quotesTableBody");
+
+/* Format currency */
+function formatCurrency(amount, currency){
+  return new Intl.NumberFormat("en-US", { style:"currency", currency }).format(amount || 0);
+}
+
+/* Render Quotes Table */
+function renderQuotesTable(snap) {
+  const currency = quoteCurrencySelect.value;
+  quotesTableBody.innerHTML = "";
+
+  snap.forEach(docSnap => {
+    const q = docSnap.data();
+    let total = 0;
+    const productsHtml = q.products.map(p => {
+      let price = 0;
+      if(currency === "NGN") price = p.priceNGN || 0;
+      if(currency === "USD") price = p.priceUSD || 0;
+      if(currency === "EUR") price = p.priceEUR || 0;
+      if(currency === "GBP") price = p.priceGBP || 0;
+      const subtotal = price * (p.quantity || 1);
+      total += subtotal;
+      return `<div style="margin-bottom:4px;">
+        ${p.name} x ${p.quantity || 1} = ${formatCurrency(subtotal, currency)}
+      </div>`;
+    }).join("");
+
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${q.customerName || "N/A"}<br>${q.customerEmail || ""}</td>
+      <td>${productsHtml}</td>
+      <td>${formatCurrency(total, currency)}</td>
+      <td>
+        <select onchange="updateQuoteStatus('${docSnap.id}', this.value)">
+          <option value="Pending" ${q.status === "Pending" ? "selected" : ""}>Pending</option>
+          <option value="Completed" ${q.status === "Completed" ? "selected" : ""}>Completed</option>
+          <option value="Cancelled" ${q.status === "Cancelled" ? "selected" : ""}>Cancelled</option>
+        </select>
+      </td>
+      <td>
+        <input type="text" readonly value="${q.link || ""}" style="width:150px;">
+        <button onclick="copyQuoteLink('${docSnap.id}')">Copy</button>
+      </td>
+      <td>
+        <button onclick="deleteQuote('${docSnap.id}')">Delete</button>
+      </td>
+    `;
+    quotesTableBody.appendChild(row);
+  });
+}
+
+/* ----- Copy Quote Link ----- */
+function copyQuoteLink(quoteId){
+  const row = quotesTableBody.querySelector(`tr:nth-child(${Array.from(quotesTableBody.children).findIndex(tr => tr.querySelector('button').onclick.toString().includes(quoteId))+1})`);
+  const input = row.querySelector('input');
+  input.select();
+  navigator.clipboard.writeText(input.value)
+    .then(() => alert("✅ Link copied to clipboard"))
+    .catch(err => alert("❌ Could not copy link"));
+}
+
+/* ----- Update Quote Status ----- */
+async function updateQuoteStatus(id, status){
+  try {
+    await updateDoc(doc(db, "brands", "fleurdevie", "quotes", id), { status });
+  } catch(err){
+    console.error(err);
+    alert("❌ Could not update status");
+  }
+}
+
+/* ----- Delete Quote ----- */
+async function deleteQuote(id){
+  if(confirm("Are you sure you want to delete this quote?")){
+    try {
+      await deleteDoc(doc(db, "brands", "fleurdevie", "quotes", id));
+    } catch(err){
+      console.error(err);
+      alert("❌ Could not delete quote");
+    }
+  }
+}
+
+/* ----- Load Quotes ----- */
+function loadQuotes(){
+  const qColl = collection(db, "brands", "fleurdevie", "quotes");
+  onSnapshot(qColl, snap => renderQuotesTable(snap));
+}
+
+quoteCurrencySelect.addEventListener("change", loadQuotes);
+loadQuotes();
+</script> 
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+
+<script>
+  // Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
+    authDomain: "brandisby.firebaseapp.com",
+    projectId: "brandisby",
+    storageBucket: "brandisby.firebasestorage.app",
+    messagingSenderId: "87213267039",
+    appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
+  };
+
+  // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
   const db = firebase.firestore();
+  const storage = firebase.storage();
 
-  // LOGIN
-  const loginContainer = document.getElementById("loginContainer");
-  const dashboardContainer = document.getElementById("dashboardContainer");
-  const loginForm = document.getElementById("loginForm");
-  const loginMessage = document.getElementById("loginMessage");
+  // Load products from Firestore
+  const productList = document.getElementById('product-list');
 
-  loginForm.addEventListener("submit", async (e)=>{
-    e.preventDefault();
-    const email = document.getElementById("loginEmail").value;
-    const password = document.getElementById("loginPassword").value;
-    try{
-      await auth.signInWithEmailAndPassword(email, password);
-      loginContainer.style.display = "none";
-      dashboardContainer.style.display = "block";
-    }catch(err){
-      loginMessage.textContent = err.message;
-    }
-  });
-
-  // DASHBOARD NAV
-  document.querySelectorAll(".dashboard-nav button").forEach(btn=>{
-    btn.addEventListener("click", ()=>{
-      const target = btn.getAttribute("data-target");
-      document.querySelectorAll(".section").forEach(sec=>sec.classList.remove("active"));
-      document.getElementById(target).classList.add("active");
-    });
-  });
-
-  // MULTI INPUT LOGIC
-  function createMultiInput(container){
-    const input = document.createElement("input");
-    input.type = "text";
-    container.appendChild(input);
-    return input;
-  }
-
-  const sizesContainer = document.getElementById("sizesContainer");
-  const colorsContainer = document.getElementById("colorsContainer");
-  document.getElementById("addSizeBtn").addEventListener("click", ()=>createMultiInput(sizesContainer));
-  document.getElementById("addColorBtn").addEventListener("click", ()=>createMultiInput(colorsContainer));
-
-  // PRODUCT FORM
-  const productForm = document.getElementById("productForm");
-  const productMessage = document.getElementById("productMessage");
-  const productsTableBody = document.querySelector("#productsTable tbody");
-  const tableCurrency = document.getElementById("tableCurrency");
-
-  async function renderProducts(){
-    productsTableBody.innerHTML="";
-    const snapshot = await db.collection("products").get();
-    snapshot.forEach(doc=>{
-      const data = doc.data();
-      const tr = document.createElement("tr");
-      tr.innerHTML=`
-        <td>${data.name}</td>
-        <td>${data["price"+tableCurrency.value] || data.priceNGN}</td>
-        <td><img src="${data.img}" alt="${data.name}"></td>
-        <td>${data.customization}</td>
-        <td>${data.published}</td>
-        <td class="actions">
-          <button onclick="editProduct('${doc.id}')">Edit</button>
-          <button onclick="deleteProduct('${doc.id}')">Delete</button>
-        </td>
-      `;
-      productsTableBody.appendChild(tr);
+  function loadProducts() {
+    productList.innerHTML = '';
+    db.collection('products').get().then(snapshot => {
+      snapshot.forEach(doc => {
+        const product = doc.data();
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${product.name}</td>
+          <td>${product.price}</td>
+          <td>${product.sizes.join(', ')}</td>
+          <td>${product.colors.join(', ')}</td>
+          <td>
+            <button onclick="editProduct('${doc.id}')">Edit</button>
+            <button onclick="deleteProduct('${doc.id}')">Delete</button>
+          </td>
+        `;
+        productList.appendChild(tr);
+      });
     });
   }
 
-  tableCurrency.addEventListener("change", renderProducts);
+  loadProducts();
 
-  productForm.addEventListener("submit", async e=>{
-    e.preventDefault();
-    const sizes = Array.from(sizesContainer.querySelectorAll("input")).map(i=>i.value).filter(v=>v);
-    const colors = Array.from(colorsContainer.querySelectorAll("input")).map(i=>i.value).filter(v=>v);
+  // Add/Edit/Delete product functions
+  function addProduct() {
+    const name = prompt('Product Name:');
+    const price = parseFloat(prompt('Price:'));
+    const sizes = prompt('Sizes (comma separated):').split(',');
+    const colors = prompt('Colors (comma separated):').split(',');
 
-    const newProduct = {
-      name: document.getElementById("productName").value,
-      priceNGN: parseFloat(document.getElementById("productPriceNGN").value) || 0,
-      priceUSD: parseFloat(document.getElementById("productPriceUSD").value) || 0,
-      priceEUR: parseFloat(document.getElementById("productPriceEUR").value) || 0,
-      priceGBP: parseFloat(document.getElementById("productPriceGBP").value) || 0,
-      desc: document.getElementById("productDesc").value,
-      img: document.getElementById("productImg").value,
-      customization: document.getElementById("productCustom").value,
-      published: document.getElementById("productPublished").value,
-      sizes,
-      colors
-    };
+    db.collection('products').add({ name, price, sizes, colors })
+      .then(() => loadProducts());
+  }
 
-    try{
-      await db.collection("products").add(newProduct);
-      productMessage.textContent="Product added successfully!";
-      productForm.reset();
-      sizesContainer.innerHTML="";
-      colorsContainer.innerHTML="";
-      renderProducts();
-    }catch(err){
-      productMessage.textContent = err.message;
-    }
-  });
+  function editProduct(id) {
+    db.collection('products').doc(id).get().then(doc => {
+      const product = doc.data();
+      const name = prompt('Product Name:', product.name);
+      const price = parseFloat(prompt('Price:', product.price));
+      const sizes = prompt('Sizes (comma separated):', product.sizes.join(',')).split(',');
+      const colors = prompt('Colors (comma separated):', product.colors.join(',')).split(',');
 
-  async function editProduct(id){
-    const doc = await db.collection("products").doc(id).get();
-    const data = doc.data();
-    document.getElementById("productName").value = data.name;
-    document.getElementById("productPriceNGN").value = data.priceNGN;
-    document.getElementById("productPriceUSD").value = data.priceUSD;
-    document.getElementById("productPriceEUR").value = data.priceEUR;
-    document.getElementById("productPriceGBP").value = data.priceGBP;
-    document.getElementById("productDesc").value = data.desc;
-    document.getElementById("productImg").value = data.img;
-    document.getElementById("productCustom").value = data.customization;
-    document.getElementById("productPublished").value = data.published;
-
-    sizesContainer.innerHTML="";
-    colorsContainer.innerHTML="";
-    if(data.sizes) data.sizes.forEach(s=>createMultiInput(sizesContainer).value=s);
-    if(data.colors) data.colors.forEach(c=>createMultiInput(colorsContainer).value=c);
-
-    productForm.removeEventListener("submit", productFormSubmitListener); // remove previous
-    productForm.addEventListener("submit", async function updateListener(e){
-      e.preventDefault();
-      const updatedSizes = Array.from(sizesContainer.querySelectorAll("input")).map(i=>i.value).filter(v=>v);
-      const updatedColors = Array.from(colorsContainer.querySelectorAll("input")).map(i=>i.value).filter(v=>v);
-
-      const updatedProduct = {
-        name: document.getElementById("productName").value,
-        priceNGN: parseFloat(document.getElementById("productPriceNGN").value) || 0,
-        priceUSD: parseFloat(document.getElementById("productPriceUSD").value) || 0,
-        priceEUR: parseFloat(document.getElementById("productPriceEUR").value) || 0,
-        priceGBP: parseFloat(document.getElementById("productPriceGBP").value) || 0,
-        desc: document.getElementById("productDesc").value,
-        img: document.getElementById("productImg").value,
-        customization: document.getElementById("productCustom").value,
-        published: document.getElementById("productPublished").value,
-        sizes: updatedSizes,
-        colors: updatedColors
-      };
-      try{
-        await db.collection("products").doc(id).set(updatedProduct);
-        productMessage.textContent="Product updated successfully!";
-        productForm.reset();
-        sizesContainer.innerHTML="";
-        colorsContainer.innerHTML="";
-        renderProducts();
-        productForm.removeEventListener("submit", updateListener);
-        productForm.addEventListener("submit", productFormSubmitListener);
-      }catch(err){
-        productMessage.textContent=err.message;
-      }
+      db.collection('products').doc(id).update({ name, price, sizes, colors })
+        .then(() => loadProducts());
     });
   }
 
-  async function deleteProduct(id){
-    if(confirm("Are you sure you want to delete this product?")){
-      await db.collection("products").doc(id).delete();
-      renderProducts();
+  function deleteProduct(id) {
+    if (confirm('Are you sure you want to delete this product?')) {
+      db.collection('products').doc(id).delete().then(() => loadProducts());
     }
   }
 
-  const productFormSubmitListener = productForm.onsubmit;
-  renderProducts();
+  // Load quotes
+  const quotesList = document.getElementById('quotes-list');
 
+  function loadQuotes() {
+    quotesList.innerHTML = '';
+    db.collection('quotes').get().then(snapshot => {
+      snapshot.forEach(doc => {
+        const quote = doc.data();
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${quote.customerName}</td>
+          <td>${quote.email}</td>
+          <td>${quote.currency}</td>
+          <td>${quote.total}</td>
+          <td>${quote.status}</td>
+          <td>
+            <button onclick="updateQuoteStatus('${doc.id}')">Toggle Status</button>
+            <button onclick="copyQuoteLink('${doc.id}')">Copy Link</button>
+          </td>
+        `;
+        quotesList.appendChild(tr);
+      });
+    });
+  }
+
+  loadQuotes();
+
+  function updateQuoteStatus(id) {
+    db.collection('quotes').doc(id).get().then(doc => {
+      const status = doc.data().status === 'pending' ? 'approved' : 'pending';
+      db.collection('quotes').doc(id).update({ status }).then(() => loadQuotes());
+    });
+  }
+
+  function copyQuoteLink(id) {
+    const link = `${window.location.origin}/quote.html?id=${id}`;
+    navigator.clipboard.writeText(link).then(() => alert('Quote link copied!'));
+  }
 </script>
 
 </body>
 </html>
+
