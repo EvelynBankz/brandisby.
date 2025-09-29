@@ -241,12 +241,6 @@ function displayProducts(products){
   const term = searchInput.value.toLowerCase();
   let filtered = products.filter(p=>p.name.toLowerCase().includes(term));
   const sortVal = sortSelect.value;
-  if(sortVal==='alphabet') filtered.sort((a,b)=>a.name.localeCompare(b.name));
-  if(sortVal==='price-asc') filtered.sort((a,b)=> (getPriceForCurrency(a) - getPriceForCurrency(b)) );
-  if(sortVal==='price-desc') filtered.sort((a,b)=> (getPriceForCurrency(b) - getPriceForCurrency(a)) );
-
-  productGrid.innerHTML='';
-  const cart = getCart();
   const currency = currencySelect.value;
 
   function getPriceForCurrency(product){
@@ -257,14 +251,24 @@ function displayProducts(products){
          : product.priceNGN;
   }
 
+  if(sortVal==='alphabet') filtered.sort((a,b)=>a.name.localeCompare(b.name));
+  if(sortVal==='price-asc') filtered.sort((a,b)=> (getPriceForCurrency(a) - getPriceForCurrency(b)) );
+  if(sortVal==='price-desc') filtered.sort((a,b)=> (getPriceForCurrency(b) - getPriceForCurrency(a)) );
+
+  productGrid.innerHTML='';
+  const cart = getCart();
+
   for(const p of filtered){
     const cartItem = cart.find(i=>i.id===p.id);
     const quantity = cartItem ? cartItem.quantity : 0;
+    const priceForCurrency = getPriceForCurrency(p);
 
     const div = document.createElement('a');
     div.className='product-card';
     div.id=`product-${p.id}`;
-    div.href=`product.html?productId=${p.id}`;
+    // ✅ Pass productId, price, and currency in URL
+    div.href=`product.html?productId=${p.id}&price=${priceForCurrency}&currency=${currency}`;
+
     div.innerHTML=`
       ${p.customizationAvailable ? `<a href="customization.html?productId=${p.id}" class="customize-badge"><i class="fa-solid fa-wand-magic-sparkles"></i> Customize</a>` : ''}
       <img src="${p.imageUrl}" alt="${p.name}">
@@ -283,7 +287,6 @@ function displayProducts(products){
     div.querySelector('.minus').addEventListener('click', e=>{ e.stopPropagation(); removeFromCart(p.id); });
     div.querySelector('.add-cart').addEventListener('click', e=>{ e.stopPropagation(); addToCart(p); });
 
-    // Prevent Customize badge click from navigating to product page
     const badge = div.querySelector('.customize-badge');
     if(badge) badge.addEventListener('click', e=>e.stopPropagation());
 
