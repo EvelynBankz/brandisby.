@@ -707,7 +707,6 @@ ai_add.addEventListener("click", () => {
 });
 
 /* Generate link button — saves quote (if valid) and displays the checkout link with a copy icon */
-/* Generate link button — saves quote (if valid) and displays the checkout link with a copy icon */
 generateQuoteLinkBtn.addEventListener("click", async () => {
   // same validation
   const customer = document.getElementById("quoteCustomer").value.trim();
@@ -740,43 +739,6 @@ generateQuoteLinkBtn.addEventListener("click", async () => {
     const docRef = await addDoc(quotesRef, data);
     const id = docRef.id;
     const link = `${window.location.origin}/checkout/index.html?quoteId=${id}`;
-
-    // ✅ Save this quote data locally for reference (keyed by its Firestore ID)
-    localStorage.setItem(`quote_${id}`, JSON.stringify(data));
-
-    // render link and copy button inline
-    generatedQuoteLink.innerHTML = `
-      <a href="${link}" target="_blank" id="gqlink">${link}</a>
-      <button class="copy-btn" id="copyGeneratedBtn" data-link="${link}" title="Copy link">📋</button>
-    `;
-
-    const copyBtn = document.getElementById("copyGeneratedBtn");
-    if (copyBtn) {
-      copyBtn.addEventListener("click", async () => {
-        try {
-          await navigator.clipboard.writeText(copyBtn.dataset.link);
-          const prev = copyBtn.textContent;
-          copyBtn.textContent = "✅";
-          setTimeout(()=> copyBtn.textContent = "📋", 1000);
-        } catch (err) {
-          console.warn("Copy failed", err);
-          alert("Copy failed. Link: " + copyBtn.dataset.link);
-        }
-      });
-    }
-
-    // update message and reset form/drafts
-    quoteMessage.textContent = "✅ Quote saved and link generated.";
-    quoteMessage.style.color = "green";
-    quoteForm.reset();
-    quoteDraftItems = [];
-    renderDraftItems();
-  } catch (err) {
-    console.error(err);
-    quoteMessage.textContent = "❌ Error saving / generating link.";
-    quoteMessage.style.color = "red";
-  }
-});
 
     // render link and copy button inline
     generatedQuoteLink.innerHTML = `
