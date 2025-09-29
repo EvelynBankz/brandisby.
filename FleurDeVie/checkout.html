@@ -110,7 +110,7 @@
     <!-- Order Summary -->
     <div class="order-summary">
       <h2>Order Summary</h2>
-      <div class="currency-selector">
+      <div class="currency-selector" id="currencySelectorWrapper">
         <label for="currency">Currency:</label>
         <select id="currency">
           <option value="NGN">NGN</option>
@@ -149,6 +149,7 @@
   const orderItems = document.getElementById('orderItems');
   const orderSubtotal = document.getElementById('orderSubtotal');
   const currencySelect = document.getElementById('currency');
+  const currencyWrapper = document.getElementById('currencySelectorWrapper');
   const payBtn = document.getElementById('payBtn');
 
   let cart = JSON.parse(localStorage.getItem('cart')) || [];
@@ -195,9 +196,11 @@
   if(quote){
     selectedCurrency = quote.currency || 'NGN';
     currencySelect.value = selectedCurrency;
+    currencyWrapper.style.display = 'block'; // visible for quotes
   }else{
     selectedCurrency = localStorage.getItem('currency') || 'NGN';
     currencySelect.value = selectedCurrency;
+    currencyWrapper.style.display = 'none'; // hidden in cart flow
   }
 
   currencySelect.addEventListener('change', ()=>{
