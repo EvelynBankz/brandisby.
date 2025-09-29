@@ -181,8 +181,11 @@ function removeFromCart(productId){
   }
 }
 
+// Get productId, price, currency from URL
 const urlParams = new URLSearchParams(window.location.search);
 const productId = urlParams.get('productId');
+const urlPrice = parseFloat(urlParams.get('price'));
+const urlCurrency = urlParams.get('currency');
 
 async function loadProduct(){
   if(!productId) return;
@@ -211,13 +214,21 @@ async function loadProduct(){
       productName.textContent = data.name;
       productDescription.textContent = data.description || '';
 
-      // currency & price display
-      const currency = data.currency || '₦';
-      const priceVal = data.price || 0;
-      productPrice.textContent = new Intl.NumberFormat('en-NG', { style:'currency', currency:'NGN', minimumFractionDigits:0 }).format(priceVal);
+      // Use URL price & currency if available
+      const displayPrice = !isNaN(urlPrice) ? urlPrice : data.price || 0;
+      const displayCurrency = urlCurrency || data.currency || 'NGN';
+
+      productPrice.textContent = new Intl.NumberFormat('en-NG', { style:'currency', currency: displayCurrency, minimumFractionDigits:0 }).format(displayPrice);
+
+      // Store in currentProductData for cart usage
+      currentProductData.price = displayPrice;
+      currentProductData.currency = displayCurrency;
 
       // customization
-      if(data.customizationAvailable) { customizeBtn.style.display='block'; customizeBtn.href=`customization.html?productId=${productId}`; }
+      if(data.customizationAvailable){ 
+        customizeBtn.style.display='block'; 
+        customizeBtn.href=`customization.html?productId=${productId}`;
+      }
 
       // color options
       colorOptions.innerHTML='';
@@ -299,11 +310,9 @@ thumbnailContainer.addEventListener('mousemove', e=>{
   if(!isDown) return;
   e.preventDefault();
   const x=e.pageX - thumbnailContainer.offsetLeft;
-  const walk=(x-startX)*2; //scroll-fast
+  const walk=(x-startX)*2;
   thumbnailContainer.scrollLeft=scrollLeft - walk;
 });
-
-// touch support
 thumbnailContainer.addEventListener('touchstart', e=>{
   startX=e.touches[0].pageX - thumbnailContainer.offsetLeft;
   scrollLeft=thumbnailContainer.scrollLeft;
