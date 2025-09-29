@@ -144,7 +144,7 @@ footer { text-align:center; padding:20px; background:#112e1f; color:#F5E6CC; mar
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-  import { getFirestore, collection, getDocs, query, where, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+  import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
   
   const firebaseConfig = {
     apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
@@ -266,7 +266,7 @@ footer { text-align:center; padding:20px; background:#112e1f; color:#F5E6CC; mar
       div.className='product-card';
       div.id=`product-${p.id}`;
       div.innerHTML=`
-        ${p.customizationAvailable ? `<div class="customize-badge"><i class="fa-solid fa-wand-magic-sparkles"></i> Customize</div>` : ''}
+        ${p.customizationAvailable ? `<a href="customization.html?productId=${p.id}" class="customize-badge"><i class="fa-solid fa-wand-magic-sparkles"></i> Customize</a>` : ''}
         <img src="${p.imageUrl}" alt="${p.name}">
         <h3>${p.name}</h3>
         <div class="description">${truncateText(p.description||'',15)}</div>
