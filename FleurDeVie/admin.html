@@ -188,14 +188,6 @@
       <label>Customer Email</label>
       <input type="email" id="quoteEmail" required>
 
-      <label>Quote Currency (primary)</label>
-      <select id="quoteCurrency">
-        <option value="NGN">NGN</option>
-        <option value="USD">USD</option>
-        <option value="EUR">EUR</option>
-        <option value="GBP">GBP</option>
-      </select>
-
       <h3>Quote Items</h3>
 
       <!-- Add item panel (hidden by default, toggled by + Add Item) -->
@@ -238,9 +230,6 @@
       <div id="quoteItems"></div>
 
       <button type="button" id="addQuoteItem">+ Add Item</button>
-
-      <label style="margin-top:12px;">Total (you can leave empty — totals will be computed on checkout)</label>
-      <input type="number" id="quoteTotal" step="0.01" inputmode="decimal">
 
       <div style="display:flex; gap:8px; align-items:center; margin-top:8px;">
         <button type="button" id="generateQuoteLinkBtn" style="background:#0b6b4b;">Generate Link</button>
@@ -354,7 +343,7 @@ const quoteItemsDiv = document.getElementById("quoteItems");
 const addQuoteItemBtn = document.getElementById("addQuoteItem");
 const quotesTableBody = document.querySelector("#quotesTable tbody");
 const quoteMessage = document.getElementById("quoteMessage");
-const quoteCurrencySelect = document.getElementById("quoteCurrency");
+/* quoteCurrencySelect removed (field removed from form) */
 const generateQuoteLinkBtn = document.getElementById("generateQuoteLinkBtn");
 const generatedQuoteLink = document.getElementById("generatedQuoteLink");
 const quotesDisplayCurrency = document.getElementById("quotesDisplayCurrency");
@@ -706,14 +695,15 @@ ai_add.addEventListener("click", () => {
   renderDraftItems();
 });
 
-/* Generate link button — saves quote (if valid) and displays the checkout link with a copy icon */
+/* Generate link button — saves quote (if valid) and displays the checkout link with a copy icon
+   NOTE: This version saves the quote to Firestore (as before) AND also stores the same quote object
+   into localStorage under the quoteId that Firestore returns. */
 generateQuoteLinkBtn.addEventListener("click", async () => {
-  // same validation
+  // validation
   const customer = document.getElementById("quoteCustomer").value.trim();
   const email = document.getElementById("quoteEmail").value.trim();
-  const defaultCurrency = quoteCurrencySelect.value || 'NGN';
-  const explicitTotalRaw = document.getElementById("quoteTotal").value;
-  const totalExplicit = explicitTotalRaw ? parseFloat(explicitTotalRaw) : null;
+  // removed quoteCurrencySelect (UI field removed)
+  // removed explicit total input (UI field removed)
 
   if (!customer || !email) {
     alert("Customer name and email are required.");
@@ -727,9 +717,8 @@ generateQuoteLinkBtn.addEventListener("click", async () => {
   const data = {
     customer,
     email,
-    defaultCurrency,
     items: quoteDraftItems,
-    totalExplicit: !isNaN(totalExplicit) ? totalExplicit : null,
+    // we intentionally do not include defaultCurrency or totalExplicit (those UI fields were removed)
     status: "Unpaid", // default
     createdAt: new Date().toISOString()
   };
@@ -739,6 +728,13 @@ generateQuoteLinkBtn.addEventListener("click", async () => {
     const docRef = await addDoc(quotesRef, data);
     const id = docRef.id;
     const link = `${window.location.origin}/checkout/index.html?quoteId=${id}`;
+
+    // also save to localStorage using the quoteId as requested
+    try {
+      localStorage.setItem(id, JSON.stringify(data));
+    } catch (lsErr) {
+      console.warn("localStorage save failed", lsErr);
+    }
 
     // render link and copy button inline
     generatedQuoteLink.innerHTML = `
