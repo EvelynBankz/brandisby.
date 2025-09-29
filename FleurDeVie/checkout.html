@@ -7,7 +7,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* RESET */
     *{margin:0;padding:0;box-sizing:border-box;}
     body{font-family:"Montserrat",sans-serif;background:#F5E6CC;color:#112e1f;line-height:1.6;}
     a{text-decoration:none;color:inherit;}
@@ -64,252 +63,190 @@
       .hamburger{display:block;}
     }
 
- /* MOBILE HERO ADJUSTMENT */
-@media(max-width:600px){
-  .hero {
-    height:30vh;
-    margin-top:0;
-    padding-top:80px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    text-align:center;
-    box-sizing:border-box;
-  }
-
-  .hero-text h1 {
-    font-size:clamp(24px,5vw,32px);
-    line-height:1.2;
-    margin:0;
-  }
-}
+    @media(max-width:600px){
+      .hero{height:30vh;margin-top:0;padding-top:80px;display:flex;justify-content:center;align-items:center;text-align:center;}
+      .hero-text h1{font-size:clamp(24px,5vw,32px);line-height:1.2;margin:0;}
+    }
   </style>
 </head>
 <body>
 
-  <!-- HEADER -->
-  <header class="site-header">
-    <div class="header-left">
-      <img src="logo.png" alt="Fleur De Vie Logo" class="brand-logo">
-      <div class="brand-title">Fleur De Vie</div>
+<header class="site-header">
+  <div class="header-left">
+    <img src="logo.png" alt="Fleur De Vie Logo" class="brand-logo">
+    <div class="brand-title">Fleur De Vie</div>
+  </div>
+  <nav class="header-right">
+    <a href="index.html">Home</a>
+    <a href="shop.html">Shop</a>
+    <a href="about.html">About</a>
+    <a href="contact.html">Contact</a>
+    <a href="cart.html">Cart <span class="cart-count" id="cartCount">0</span></a>
+  </nav>
+  <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+</header>
+
+<section class="hero">
+  <div class="hero-text"><h1>Checkout</h1></div>
+</section>
+
+<section class="checkout">
+  <div class="container">
+    <!-- Billing Form -->
+    <div class="checkout-form">
+      <h2>Billing Details</h2>
+      <form id="checkoutForm">
+        <label for="name">Full Name</label>
+        <input type="text" id="name" required>
+        <label for="email">Email</label>
+        <input type="email" id="email" required>
+        <label for="phone">Phone</label>
+        <input type="tel" id="phone" required>
+        <label for="address">Address</label>
+        <textarea id="address" required></textarea>
+      </form>
     </div>
-    <nav class="header-right">
-      <a href="index.html">Home</a>
-      <a href="shop.html">Shop</a>
-      <a href="about.html">About</a>
-      <a href="contact.html">Contact</a>
-      <a href="cart.html">Cart <span class="cart-count" id="cartCount">0</span></a>
-    </nav>
-    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
-  </header>
 
-  <!-- HERO -->
-  <section class="hero">
-    <div class="hero-text">
-      <h1>Checkout</h1>
-    </div>
-  </section>
-
-  <!-- CHECKOUT SECTION -->
-  <section class="checkout">
-    <div class="container">
-
-      <!-- FORM -->
-      <div class="checkout-form">
-        <h2>Billing Details</h2>
-        <form id="checkoutForm">
-          <label for="name">Full Name</label>
-          <input type="text" id="name" required>
-          <label for="email">Email</label>
-          <input type="email" id="email" required>
-          <label for="phone">Phone</label>
-          <input type="tel" id="phone" required>
-          <label for="address">Address</label>
-          <textarea id="address" required></textarea>
-        </form>
+    <!-- Order Summary -->
+    <div class="order-summary">
+      <h2>Order Summary</h2>
+      <div class="currency-selector">
+        <label for="currency">Currency:</label>
+        <select id="currency">
+          <option value="NGN">NGN</option>
+          <option value="USD">USD</option>
+          <option value="EUR">EUR</option>
+          <option value="GBP">GBP</option>
+        </select>
       </div>
-
-      <!-- ORDER SUMMARY -->
-      <div class="order-summary">
-        <h2>Order Summary</h2>
-        <div class="currency-selector">
-          <label for="currency">Currency:</label>
-          <select id="currency">
-            <option value="NGN">NGN</option>
-            <option value="USD">USD</option>
-            <option value="EUR">EUR</option>
-            <option value="GBP">GBP</option>
-          </select>
-        </div>
-        <ul id="orderItems"></ul>
-        <div class="subtotal" id="orderSubtotal"></div>
-        <button class="checkout-btn" id="payBtn">Proceed to Payment</button>
-      </div>
-
+      <ul id="orderItems"></ul>
+      <div class="subtotal" id="orderSubtotal"></div>
+      <button class="checkout-btn" id="payBtn">Proceed to Payment</button>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- FOOTER -->
-  <footer>
-    <p>© 2025 Fleur De Vie</p>
-  </footer>
+<footer><p>© 2025 Fleur De Vie</p></footer>
 
-  <!-- FLUTTERWAVE SDK -->
-  <script src="https://checkout.flutterwave.com/v3.js"></script>
+<script src="https://checkout.flutterwave.com/v3.js"></script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-  <!-- FIREBASE + LIVE CURRENCY SCRIPT -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-    import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
-  
-    const firebaseConfig = {
-      apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
-      authDomain: "brandisby.firebaseapp.com",
-      projectId: "brandisby",
-      storageBucket: "brandisby.firebasestorage.app",
-      messagingSenderId: "87213267039",
-      appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
-    };
-  
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-  
-    const cartCountElem = document.getElementById('cartCount');
-    const orderItems = document.getElementById('orderItems');
-    const orderSubtotal = document.getElementById('orderSubtotal');
-    const currencySelect = document.getElementById('currency');
-    const payBtn = document.getElementById('payBtn');
-  
-    let cart = JSON.parse(localStorage.getItem('cart')) || [];
-    let quote = JSON.parse(localStorage.getItem('quote')) || null; // quote object if opened from link
-    let pricesByCurrency = {}; // prices from quote or cart
-    let selectedCurrency = 'NGN';
-  
-    // Determine checkout source
-    if (quote) {
-      // Checkout from quote
-      pricesByCurrency = quote.prices; // { NGN: 1000, USD: 2.5, EUR: 2.3, GBP: 2.0 }
-      selectedCurrency = quote.currency || Object.keys(pricesByCurrency)[0];
-      currencySelect.value = selectedCurrency;
-    } else {
-      // Checkout from cart/shop
-      selectedCurrency = localStorage.getItem('currency') || 'NGN';
-      currencySelect.value = selectedCurrency;
-  
-      // Build pricesByCurrency from cart products
-      cart.forEach(item => {
-        pricesByCurrency[item.id] = {
-          NGN: item.priceNGN || 0,
-          USD: item.priceUSD || 0,
-          EUR: item.priceEUR || 0,
-          GBP: item.priceGBP || 0
-        };
+  const firebaseConfig = {
+    apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
+    authDomain: "brandisby.firebaseapp.com",
+    projectId: "brandisby",
+    storageBucket: "brandisby.firebasestorage.app",
+    messagingSenderId: "87213267039",
+    appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const cartCountElem = document.getElementById('cartCount');
+  const orderItems = document.getElementById('orderItems');
+  const orderSubtotal = document.getElementById('orderSubtotal');
+  const currencySelect = document.getElementById('currency');
+  const payBtn = document.getElementById('payBtn');
+
+  let cart = JSON.parse(localStorage.getItem('cart')) || [];
+  let quote = JSON.parse(localStorage.getItem('quote')) || null;
+  let selectedCurrency = 'NGN';
+
+  function formatPrice(value, currency){
+    const localeMap = { USD:'en-US', EUR:'de-DE', GBP:'en-GB', NGN:'en-NG' };
+    return new Intl.NumberFormat(localeMap[currency]||'en-US',{ style:'currency', currency, minimumFractionDigits: currency==='NGN'?0:2 }).format(value);
+  }
+
+  function updateCartCount(){
+    const total = cart.reduce((sum,i)=>sum+i.quantity,0);
+    cartCountElem.textContent = total;
+  }
+
+  function renderOrder(){
+    orderItems.innerHTML = '';
+    let subtotal = 0;
+
+    if(quote){
+      // Quote mode
+      Object.values(quote.items).forEach(item=>{
+        const unitPrice = item.prices[selectedCurrency];
+        subtotal += unitPrice * item.quantity;
+        const li=document.createElement('li');
+        li.innerHTML = `${item.name} (x${item.quantity}) <span>${formatPrice(unitPrice*item.quantity,selectedCurrency)}</span>`;
+        orderItems.appendChild(li);
+      });
+    }else{
+      // Cart mode
+      cart.forEach(item=>{
+        const unitPrice = item.prices[selectedCurrency];
+        subtotal += unitPrice * item.quantity;
+        const li=document.createElement('li');
+        li.innerHTML = `${item.name} (x${item.quantity}) <span>${formatPrice(unitPrice*item.quantity,selectedCurrency)}</span>`;
+        orderItems.appendChild(li);
       });
     }
-  
-    // Helper: format price
-    function formatPrice(value, currency){
-      const localeMap = { USD:'en-US', EUR:'de-DE', GBP:'en-GB', NGN:'en-NG' };
-      return new Intl.NumberFormat(localeMap[currency]||'en-US', { style:'currency', currency:currency, minimumFractionDigits: currency==='NGN'?0:2 }).format(value);
-    }
-  
-    // Update cart count badge
-    function updateCartCount(){
-      const total = cart.reduce((sum,i)=>sum+i.quantity,0);
-      cartCountElem.textContent = total;
-    }
-  
-    // Render order summary
-    function renderOrder(){
-      orderItems.innerHTML = '';
-      let subtotal = 0;
-  
-      if (quote) {
-        // Quote checkout
-        Object.entries(quote.items).forEach(([id, item]) => {
-          const unitPrice = pricesByCurrency[currencySelect.value][id];
-          subtotal += unitPrice * item.quantity;
-  
-          const li = document.createElement('li');
-          li.innerHTML = `${item.name} (x${item.quantity}) <span>${formatPrice(unitPrice*item.quantity, currencySelect.value)}</span>`;
-          orderItems.appendChild(li);
-        });
-      } else {
-        // Cart checkout
-        cart.forEach(item => {
-          const unitPrice = pricesByCurrency[item.id][currencySelect.value];
-          subtotal += unitPrice * item.quantity;
-  
-          const li = document.createElement('li');
-          li.innerHTML = `${item.name} (x${item.quantity}) <span>${formatPrice(unitPrice*item.quantity, currencySelect.value)}</span>`;
-          orderItems.appendChild(li);
-        });
-      }
-  
-      orderSubtotal.textContent = `Subtotal: ${formatPrice(subtotal, currencySelect.value)}`;
-    }
-  
-    // Handle currency change
-    currencySelect.addEventListener('change', () => {
-      selectedCurrency = currencySelect.value;
-      localStorage.setItem('currency', selectedCurrency);
-      renderOrder();
-    });
-  
-    // Pay button
-    payBtn.addEventListener('click', async () => {
-      const name=document.getElementById('name').value;
-      const email=document.getElementById('email').value;
-      const phone=document.getElementById('phone').value;
-      const address=document.getElementById('address').value;
-  
-      if(!name||!email||!phone||!address){
-        alert("Please fill in all billing details.");
-        return;
-      }
-  
-      let subtotal = 0;
-      if (quote) {
-        Object.entries(quote.items).forEach(([id,item])=>{
-          subtotal += pricesByCurrency[selectedCurrency][id] * item.quantity;
-        });
-      } else {
-        cart.forEach(item=>{
-          subtotal += pricesByCurrency[item.id][selectedCurrency] * item.quantity;
-        });
-      }
-  
-      FlutterwaveCheckout({
-        public_key: "FLWPUBK_TEST-xxxxxxxxxxxxxxxxxxxxx-X",
-        tx_ref: "fleurdevie-"+Date.now(),
-        amount: subtotal.toFixed(2),
-        currency: selectedCurrency,
-        customer: { email, phonenumber: phone, name },
-        customizations: { title:"Fleur De Vie", description:"Order Payment", logo:"logo.png" },
-        callback: async function(data){
-          try{
-            await addDoc(collection(db,"orders"),{
-              name,email,phone,address,
-              currency:selectedCurrency,
-              items: quote? Object.values(quote.items):cart,
-              total: subtotal.toFixed(2),
-              paymentRef: data.tx_ref,
-              status: "paid",
-              createdAt: serverTimestamp()
-            });
-            localStorage.removeItem('cart');
-            window.location.href="thankyou.html";
-          }catch(err){
-            console.error("Order save failed", err);
-            alert("Order save failed, but payment succeeded!");
-          }
-        },
-        onclose: function(){ console.log("Checkout closed"); }
-      });
-    });
-  
-    updateCartCount();
+    orderSubtotal.textContent = `Subtotal: ${formatPrice(subtotal,selectedCurrency)}`;
+  }
+
+  // Initialize currency
+  if(quote){
+    selectedCurrency = quote.currency || 'NGN';
+    currencySelect.value = selectedCurrency;
+  }else{
+    selectedCurrency = localStorage.getItem('currency') || 'NGN';
+    currencySelect.value = selectedCurrency;
+  }
+
+  currencySelect.addEventListener('change', ()=>{
+    selectedCurrency = currencySelect.value;
+    localStorage.setItem('currency',selectedCurrency);
     renderOrder();
+  });
+
+  payBtn.addEventListener('click', async ()=>{
+    const name=document.getElementById('name').value;
+    const email=document.getElementById('email').value;
+    const phone=document.getElementById('phone').value;
+    const address=document.getElementById('address').value;
+    if(!name||!email||!phone||!address){ alert("Please fill in all billing details."); return; }
+
+    let subtotal=0, items=[];
+    if(quote){
+      items = Object.values(quote.items);
+      items.forEach(item=> subtotal += item.prices[selectedCurrency]*item.quantity );
+    }else{
+      items = cart;
+      items.forEach(item=> subtotal += item.prices[selectedCurrency]*item.quantity );
+    }
+
+    FlutterwaveCheckout({
+      public_key:"FLWPUBK_TEST-xxxxxxxxxxxxxxxxxxxxx-X",
+      tx_ref:"fleurdevie-"+Date.now(),
+      amount: subtotal.toFixed(2),
+      currency: selectedCurrency,
+      customer:{ email, phonenumber:phone, name },
+      customizations:{ title:"Fleur De Vie", description:"Order Payment", logo:"logo.png" },
+      callback: async function(data){
+        try{
+          await addDoc(collection(db,"orders"),{
+            name,email,phone,address,
+            currency:selectedCurrency,
+            items, total:subtotal.toFixed(2),
+            paymentRef:data.tx_ref, status:"paid", createdAt:serverTimestamp()
+          });
+          localStorage.removeItem('cart');
+          localStorage.removeItem('quote');
+          window.location.href="thankyou.html";
+        }catch(err){ console.error("Order save failed",err); alert("Order save failed, but payment succeeded!"); }
+      }
+    });
+  });
+
+  updateCartCount();
+  renderOrder();
 </script>
 </body>
 </html>
