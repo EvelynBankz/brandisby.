@@ -738,7 +738,7 @@ generateQuoteLinkBtn.addEventListener("click", async () => {
     const quotesRef = collection(db, "brands", "fleurdevie", "quotes");
     const docRef = await addDoc(quotesRef, data);
     const id = docRef.id;
-    const link = `${window.location.origin}/checkout.html?quoteId=${id}`;
+    const link = `${window.location.origin}/checkout/index.html?quoteId=${id}`;
 
     // render link and copy button inline
     generatedQuoteLink.innerHTML = `
@@ -824,7 +824,7 @@ function renderQuotesTable() {
       displayTotal = `${formatCurrency(q.totalExplicit, q.defaultCurrency || displayCurrency)} (${q.defaultCurrency || displayCurrency})`;
     }
 
-    const link = `${window.location.origin}/checkout.html?quoteId=${id}`;
+    const link = `${window.location.origin}/checkout/index.html?quoteId=${id}`;
     const status = q.status || "Unpaid";
 
     const row = document.createElement("tr");
@@ -916,12 +916,12 @@ quoteModalBackdrop.addEventListener('click', (ev) => { if (ev.target === quoteMo
 openCheckoutBtn.addEventListener('click', () => {
   const id = quoteModalBackdrop.dataset.currentId;
   if (id) {
-    const link = `${window.location.origin}/checkout.html?quoteId=${id}`;
+    const link = `${window.location.origin}/checkout/index.html?quoteId=${id}`;
     window.open(link, '_blank');
   }
 });
 
-/* populate modal with quote details (uses cached quote where possible) */
+/* populate quote modal with quote details (uses cached quote where possible) */
 async function populateQuoteModal(id) {
   const displayCurrency = quotesDisplayCurrency.value || 'NGN';
   // try to find in cache
@@ -937,7 +937,7 @@ async function populateQuoteModal(id) {
   }
 
   // build html
-  const link = `${window.location.origin}/checkout.html?quoteId=${id}`;
+  const link = `${window.location.origin}/checkout/index.html?quoteId=${id}`;
   let html = `
     <div style="display:flex; justify-content:space-between; gap:12px; align-items:center;">
       <div>
