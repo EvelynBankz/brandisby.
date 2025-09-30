@@ -39,12 +39,27 @@
     input,textarea,select{width:100%;padding:10px;margin-bottom:14px;border-radius:6px;border:1px solid #112e1f;font-family:"Montserrat",sans-serif;}
     textarea{resize:vertical;min-height:80px;}
     .order-summary ul{list-style:none;margin:0;padding:0;}
-    .order-summary li{display:flex;justify-content:space-between;margin-bottom:10px;}
+    .order-summary li{display:flex;justify-content:space-between;margin-bottom:10px;flex-direction:column;}
     .order-summary .subtotal{font-weight:600;margin-top:10px;text-align:right;}
     .currency-selector{text-align:right;margin-bottom:10px;}
     .currency-selector select{padding:5px 10px;border-radius:6px;border:1px solid #112e1f;}
     .checkout-btn{display:block;width:100%;background:#112e1f;color:#F5E6CC;text-align:center;padding:14px;font-weight:600;border-radius:6px;cursor:pointer;transition:0.3s;border:none;}
     .checkout-btn:hover{background:#0a1d14;}
+    .variant-view-btn{
+      background:#FFD6BA;
+      color:#112e1f;
+      border:1px solid #112e1f;
+      border-radius:6px;
+      padding:4px 8px;
+      cursor:pointer;
+      font-weight:600;
+      margin-top:4px;
+      font-size:14px;
+      width:auto;
+      display:inline-block;
+      text-align:center;
+    }
+    .variants-container{display:none;margin-top:4px;padding-left:12px;border-left:2px solid #112e1f; font-size:0.9rem; color:#334d3a;}
     footer{text-align:center;padding:20px;background:#112e1f;color:#F5E6CC;margin-top:60px;}
     @media(max-width:800px){
       .container{grid-template-columns:1fr;}
@@ -120,9 +135,8 @@
 <script src="https://checkout.flutterwave.com/v3.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-import { getFirestore, collection, doc, getDoc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
   authDomain: "brandisby.firebaseapp.com",
@@ -134,7 +148,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// DOM elements
 const cartCountElem = document.getElementById('cartCount');
 const orderItems = document.getElementById('orderItems');
 const orderSubtotal = document.getElementById('orderSubtotal');
@@ -146,101 +159,112 @@ let cart = JSON.parse(localStorage.getItem('cart')) || [];
 let quote = null;
 let selectedCurrency = 'NGN';
 
-// Format price helper
-function formatPrice(value, currency){
+function formatPrice(value,currency){
   const localeMap = { USD:'en-US', EUR:'de-DE', GBP:'en-GB', NGN:'en-NG' };
   return new Intl.NumberFormat(localeMap[currency]||'en-US',{ style:'currency', currency, minimumFractionDigits: currency==='NGN'?0:2 }).format(value);
 }
 
-// Update cart count
-function updateCartCount(){
-  const total = cart.reduce((sum,i)=>sum+i.quantity,0);
-  cartCountElem.textContent = total;
-}
+function updateCartCount(){ cartCountElem.textContent = cart.reduce((sum,i)=>sum+i.quantity,0); }
 
-// Render order summary
-function renderOrder() {
+function renderOrder(){
   orderItems.innerHTML = '';
-  let subtotal = 0;
+  let subtotal=0;
 
   const sourceItems = quote && Array.isArray(quote.items) ? quote.items : [];
 
-  sourceItems.forEach(item => {
-    const unitPrice = item.prices[selectedCurrency] ?? 0;
+  sourceItems.forEach(item=>{
+    const unitPrice = item.prices[selectedCurrency] || 0;
     subtotal += unitPrice * item.quantity;
 
     const li = document.createElement('li');
-    li.innerHTML = `${item.name} (x${item.quantity}) <span>${formatPrice(unitPrice * item.quantity, selectedCurrency)}</span>`;
+    if(item.variants && item.variants.length>0){
+      li.innerHTML = `
+        <div>
+          ${item.name} (x${item.quantity}) <span>${formatPrice(unitPrice*item.quantity, selectedCurrency)}</span>
+          <button class="variant-view-btn">View Variants</button>
+          <div class="variants-container">
+            ${item.variants.map(v=>`<div>${v.color?`Color: ${v.color} `:''}${v.size?`Size: ${v.size}`:''} - ${formatPrice(v.prices[selectedCurrency]*v.quantity, selectedCurrency)} (x${v.quantity})</div>`).join('')}
+          </div>
+        </div>
+      `;
+    } else {
+      li.innerHTML = `${item.name} (x${item.quantity}) <span>${formatPrice(unitPrice*item.quantity, selectedCurrency)}</span>`;
+    }
     orderItems.appendChild(li);
   });
 
   orderSubtotal.textContent = `Subtotal: ${formatPrice(subtotal, selectedCurrency)}`;
+
+  document.querySelectorAll('.variant-view-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=> {
+      const container = btn.nextElementSibling;
+      container.style.display = container.style.display==='block'?'none':'block';
+    });
+  });
 }
 
-// Load quote or cart
 const urlParams = new URLSearchParams(window.location.search);
 const quoteId = urlParams.get("quoteId");
 
-async function loadCheckout() {
+async function loadCheckout(){
+  selectedCurrency = localStorage.getItem('currency') || 'NGN';
+  currencySelect.value = selectedCurrency;
+
   if(quoteId){
-    // --- Load from quote ---
-    try {
-      const docRef = doc(db, "brands", "fleurdevie", "quotes", quoteId);
+    try{
+      const docRef = doc(db,"brands","fleurdevie","quotes",quoteId);
       const docSnap = await getDoc(docRef);
-
-      if (docSnap.exists()) {
+      if(docSnap.exists()){
         const rawQuote = docSnap.data();
-        if (rawQuote.customer) document.getElementById('name').value = rawQuote.customer;
-        if (rawQuote.email) document.getElementById('email').value = rawQuote.email;
+        if(rawQuote.customer) document.getElementById('name').value = rawQuote.customer;
+        if(rawQuote.email) document.getElementById('email').value = rawQuote.email;
 
-        selectedCurrency = localStorage.getItem('currency') || rawQuote.currency || 'NGN';
-        currencySelect.value = selectedCurrency;
-        currencyWrapper.style.display = 'block';
+        currencyWrapper.style.display='block';
 
         quote = { items: [] };
-        if (Array.isArray(rawQuote.items)) {
-          quote.items = rawQuote.items.map(item => ({
-            name: item.name || '',
-            desc: item.desc || '',
-            quantity: item.qty || 1,
+        if(Array.isArray(rawQuote.items)){
+          quote.items = rawQuote.items.map(item=>({
+            name: item.name||'',
+            quantity: item.qty||1,
             prices: {
-              NGN: Number(item.priceNGN) || 0,
-              USD: Number(item.priceUSD) || 0,
-              EUR: Number(item.priceEUR) || 0,
-              GBP: Number(item.priceGBP) || 0
-            }
+              NGN:Number(item.priceNGN)||0,
+              USD:Number(item.priceUSD)||0,
+              EUR:Number(item.priceEUR)||0,
+              GBP:Number(item.priceGBP)||0
+            },
+            variants: item.variants ? item.variants.map(v=>({
+              color: v.color||'',
+              size: v.size||'',
+              quantity: v.qty||1,
+              prices: {
+                NGN:Number(v.priceNGN)||0,
+                USD:Number(v.priceUSD)||0,
+                EUR:Number(v.priceEUR)||0,
+                GBP:Number(v.priceGBP)||0
+              }
+            })) : []
           }));
         }
         renderOrder();
-      } else {
-        alert("Quote not found.");
-      }
-    } catch (err) {
-      console.error("Failed to fetch quote", err);
-      alert("Error loading quote. Please try again.");
-    }
+      } else { alert("Quote not found."); }
+    } catch(err){ console.error(err); alert("Error loading quote."); }
   } else {
-    // --- Load from cart ---
-    selectedCurrency = localStorage.getItem('currency') || 'NGN';
-    currencySelect.value = selectedCurrency;
-    currencyWrapper.style.display = 'none'; // Hide currency selector
-
-    quote = { items: cart.map(item => ({
-      name: item.name || '',
-      desc: item.desc || '',
-      quantity: item.quantity || item.qty || 1,
+    currencyWrapper.style.display='none';
+    quote = { items: cart.map(item=>({
+      name: item.name||'',
+      quantity: item.quantity||1,
       prices: {
-        NGN: Number(item.priceNGN) || 0,
-        USD: Number(item.priceUSD) || 0,
-        EUR: Number(item.priceEUR) || 0,
-        GBP: Number(item.priceGBP) || 0
-      }
+        NGN:Number(item.priceNGN)||0,
+        USD:Number(item.priceUSD)||0,
+        EUR:Number(item.priceEUR)||0,
+        GBP:Number(item.priceGBP)||0
+      },
+      variants: item.variants || []
     }))};
     renderOrder();
   }
 }
 
-// Proceed to payment
 payBtn.addEventListener('click', async ()=>{
   const name=document.getElementById('name').value;
   const email=document.getElementById('email').value;
@@ -251,19 +275,19 @@ payBtn.addEventListener('click', async ()=>{
   let subtotal=0, items=[];
   if(quote){
     items = quote.items;
-    items.forEach(item=> subtotal += (item.prices[selectedCurrency] ?? 0) * item.quantity );
+    items.forEach(item=> subtotal += (item.prices[selectedCurrency]||0)*item.quantity );
   }
 
   FlutterwaveCheckout({
     public_key:"FLWPUBK_TEST-xxxxxxxxxxxxxxxxxxxxx-X",
     tx_ref:"fleurdevie-"+Date.now(),
     amount: subtotal.toFixed(2),
-    currency: selectedCurrency,
+    currency:selectedCurrency,
     customer:{ email, phonenumber:phone, name },
     customizations:{ title:"Fleur De Vie", description:"Order Payment", logo:"../fleurdevie/logo.png" },
     callback: async function(data){
       try{
-        await addDoc(collection(db,"orders"),{
+        await addDoc(doc(db,"orders"),{
           name,email,phone,address,
           currency:selectedCurrency,
           items, total:subtotal.toFixed(2),
@@ -271,20 +295,23 @@ payBtn.addEventListener('click', async ()=>{
         });
         localStorage.removeItem('cart');
         window.location.href="../fleurdevie/thankyou.html";
-      }catch(err){ console.error("Order save failed",err); alert("Order save failed, but payment succeeded!"); }
+      }catch(err){ console.error(err); alert("Order save failed, but payment succeeded!"); }
     }
   });
 });
 
-// Initialize
 updateCartCount();
 loadCheckout();
 
-// Currency change handler
 currencySelect.addEventListener('change', ()=>{
   selectedCurrency = currencySelect.value;
   localStorage.setItem('currency', selectedCurrency);
   renderOrder();
+});
+
+document.getElementById('hamburger').addEventListener('click', ()=>{
+  document.querySelector('.header-right').classList.toggle('open');
+  document.getElementById('hamburger').classList.toggle('open');
 });
 </script>
 </body>
