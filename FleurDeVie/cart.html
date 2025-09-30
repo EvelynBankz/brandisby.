@@ -235,7 +235,7 @@ async function renderCart(){
           <h3>${product?.name||''}</h3>
           <div class="variant-summary">Total Quantity: ${totalQty}</div>
           <div class="price">${formatPrice(lineTotal, currency)}</div>
-          ${variants.length>1?'<button class="show-variants-btn">Show Variants</button>':''}
+          ${variants.length>1?'<button class="show-variants-btn">Show Choices</button>':''}
           <div class="variants-container"></div>
         </div>
       </div>
