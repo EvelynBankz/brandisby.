@@ -17,7 +17,12 @@
     .header-right a{font-weight:500;transition:color .2s}
     .header-right a:hover{color:#FFD6BA}
     .cart-count{background:#FFD6BA;color:#112e1f;border-radius:50%;padding:2px 6px;font-weight:600;font-size:12px;margin-left:6px}
-    .hamburger{display:none}
+    ./* Hamburger */
+    .hamburger { display:none; background:none; border:none; width:44px; height:40px; cursor:pointer; position: relative; z-index: 1300; }
+    .hamburger span { display:block; height:2.5px; width:22px; background:#F5E6CC; margin:6px auto; border-radius:2px; transition: all 0.3s ease;}
+    .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+    .hamburger.open span:nth-child(2) { opacity:0; }
+    .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
     .hero{position:relative;height:40vh;display:flex;align-items:center;justify-content:center;margin-top:80px;text-align:center}
     .hero::after{content:"";position:absolute;inset:0;background:url('../bg.jpg') center/cover no-repeat;transform:scale(1.08);z-index:-1;border-radius:12px;box-shadow:inset 0 0 0 2000px rgba(17,46,31,0.18)}
     .hero-text h1{font-family:"Playfair Display",serif;color:#FFD6BA;font-size:clamp(28px,5vw,48px)}
@@ -64,33 +69,42 @@
 
     @media(max-width:900px){ .container{grid-template-columns:1fr} }
  
-   @media(max-width: 768px) {
-  .header-right {
-    display: none;
-    flex-direction: column;
-    background: #fff;
-    position: absolute;
-    top: 60px;
-    right: 20px;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    z-index: 1000;
-  }
-
-  .header-right.active {
-    display: flex;
-  }
-
-  .hamburger {
-    display: block;
-    font-size: 24px;
-    background: none;
-    border: none;
-    cursor: pointer;
-  }
+ @media(max-width:900px){ 
+  .header-right { 
+    gap:12px; 
+    flex-wrap: wrap; 
+    justify-content:center; 
+  } 
 }
 
+@media(max-width:600px){
+  .hero-about { 
+    margin-top: 40px; 
+    height: 40vh; /* reduced hero height on mobile */
+  }
+  .header-right { 
+    position:absolute;
+    top:70px;
+    right:0;
+    background: rgba(17,46,31,0.95);
+    flex-direction: column;
+    width:200px;
+    padding:20px;
+    display:none;
+    border-radius:0 0 0 10px;
+  }
+  .header-right.open { display:flex; }
+  .hamburger { display:block; }
+  section{ padding:60px 20px; }
+}
+
+@media(max-width:420px){ 
+  .brand-logo { height:clamp(40px,15vw,80px); } 
+  .brand-title{ font-size: clamp(16px,7vw,22px); } 
+  .hero-about { 
+    height: 35vh; /* further reduce for very small screens */
+  }
+}
   </style>
 </head>
 <body>
