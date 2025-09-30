@@ -135,7 +135,6 @@ footer { text-align:center; padding:20px; background:#112e1f; color:#F5E6CC; mar
       <a href="shop.html" class="back-btn" id="backBtnDesktop">← Back to Shop</a>
     </div>
 
-    <!-- Mobile sticky back button -->
     <div class="mobile-actions" id="mobileActions" aria-hidden="true">
       <a href="shop.html" class="back-btn">← Back to Shop</a>
     </div>
@@ -185,13 +184,12 @@ function updateCartCount(){
   cartCountElem.textContent = cart.reduce((sum,item)=>sum+Number(item.quantity||0),0);
 }
 
-/* update quantity UI */
+/* Sum all variants for this product */
 function updateQuantityUI(productId){
   const cart = getCart();
-  const sel = getSelectedOptions();
-  const item = cart.find(i=>i.id===productId && (i.color || '') === (sel.color || '') && (i.size || '') === (sel.size || ''));
-  quantityBadge.textContent = item ? item.quantity : 0;
-  addCartBtn.style.display = item ? 'none' : 'block';
+  const totalQuantity = cart.filter(i=>i.id===productId).reduce((sum,i)=>sum+Number(i.quantity||0),0);
+  quantityBadge.textContent = totalQuantity;
+  addCartBtn.style.display = totalQuantity > 0 ? 'none' : 'block';
 }
 
 /* add and remove */
