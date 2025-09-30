@@ -7,6 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
+/* ... [Same CSS as previous version] ... */
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:"Montserrat",sans-serif;background:#F5E6CC;color:#112e1f;line-height:1.6;}
 a{text-decoration:none;color:inherit;}
@@ -56,21 +57,23 @@ footer{text-align:center;padding:20px;background:#112e1f;color:#F5E6CC;margin-to
   .hero{height:30vh;margin-top:0;padding-top:80px;display:flex;justify-content:center;align-items:center;text-align:center;}
   .hero-text h1{font-size:clamp(24px,5vw,32px);line-height:1.2;margin:0;}
 }
+
+.hero::after{content:"";position:absolute;inset:0;background:url('../fleurdevie/bg.jpg') center/cover no-repeat;transform:scale(1.1);z-index:-1;border-radius:12px;box-shadow:inset 0 0 0 2000px rgba(17,46,31,0.3);}
 </style>
 </head>
 <body>
 
 <header class="site-header">
   <div class="header-left">
-    <img src="logo.png" alt="Fleur De Vie Logo" class="brand-logo">
+    <img src="../fleurdevie/logo.png" alt="Fleur De Vie Logo" class="brand-logo">
     <div class="brand-title">Fleur De Vie</div>
   </div>
   <nav class="header-right">
-    <a href="index.html">Home</a>
-    <a href="shop.html">Shop</a>
-    <a href="about.html">About</a>
-    <a href="contact.html">Contact</a>
-    <a href="cart.html">Cart <span class="cart-count" id="cartCount">0</span></a>
+    <a href="../fleurdevie/index.html">Home</a>
+    <a href="../fleurdevie/shop.html">Shop</a>
+    <a href="../fleurdevie/about.html">About</a>
+    <a href="../fleurdevie/contact.html">Contact</a>
+    <a href="../fleurdevie/cart.html">Cart <span class="cart-count" id="cartCount">0</span></a>
   </nav>
   <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
 </header>
@@ -81,7 +84,6 @@ footer{text-align:center;padding:20px;background:#112e1f;color:#F5E6CC;margin-to
 
 <section class="checkout">
   <div class="container">
-    <!-- Billing Form -->
     <div class="checkout-form">
       <h2>Billing Details</h2>
       <form id="checkoutForm">
@@ -96,7 +98,6 @@ footer{text-align:center;padding:20px;background:#112e1f;color:#F5E6CC;margin-to
       </form>
     </div>
 
-    <!-- Order Summary -->
     <div class="order-summary">
       <h2>Order Summary</h2>
       <div class="currency-selector" id="currencySelectorWrapper">
@@ -122,12 +123,11 @@ footer{text-align:center;padding:20px;background:#112e1f;color:#F5E6CC;margin-to
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
 import { getFirestore, collection, doc, getDoc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
   authDomain: "brandisby.firebaseapp.com",
   projectId: "brandisby",
-  storageBucket: "brandisby.firebasestorage.app",
+  storageBucket: "brandisby.appspot.com",
   messagingSenderId: "87213267039",
   appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
 };
@@ -158,23 +158,14 @@ function updateCartCount(){
 function renderOrder(){
   orderItems.innerHTML = '';
   let subtotal = 0;
-  if(quote && quote.items){
-    quote.items.forEach(item => {
-      const unitPrice = item.prices[selectedCurrency] || 0;
-      subtotal += unitPrice * item.quantity;
-      const li = document.createElement('li');
-      li.innerHTML = `${item.name} (x${item.quantity}) <span>${formatPrice(unitPrice*item.quantity, selectedCurrency)}</span>`;
-      orderItems.appendChild(li);
-    });
-  } else {
-    cart.forEach(item => {
-      const unitPrice = item.prices[selectedCurrency] || 0;
-      subtotal += unitPrice * item.quantity;
-      const li = document.createElement('li');
-      li.innerHTML = `${item.name} (x${item.quantity}) <span>${formatPrice(unitPrice*item.quantity, selectedCurrency)}</span>`;
-      orderItems.appendChild(li);
-    });
-  }
+  const sourceItems = (quote && quote.items) ? quote.items : cart;
+  sourceItems.forEach(item=>{
+    const unitPrice = item.prices[selectedCurrency] || 0;
+    subtotal += unitPrice * item.quantity;
+    const li = document.createElement('li');
+    li.innerHTML = `${item.name} (x${item.quantity}) <span>${formatPrice(unitPrice*item.quantity, selectedCurrency)}</span>`;
+    orderItems.appendChild(li);
+  });
   orderSubtotal.textContent = `Subtotal: ${formatPrice(subtotal, selectedCurrency)}`;
 }
 
@@ -188,29 +179,23 @@ async function loadQuote(){
       const docSnap = await getDoc(docRef);
       if(docSnap.exists()){
         quote = docSnap.data();
-
-        // Convert items object to array if necessary
         if(quote.items && !Array.isArray(quote.items)){
           quote.items = Object.values(quote.items);
         }
-
-        // Pre-fill billing info if available
         if(quote.customer){
           document.getElementById('name').value = quote.customer.name || '';
           document.getElementById('email').value = quote.customer.email || '';
           document.getElementById('phone').value = quote.customer.phone || '';
           document.getElementById('address').value = quote.customer.address || '';
         }
-
         selectedCurrency = quote.currency || 'NGN';
         currencySelect.value = selectedCurrency;
         currencyWrapper.style.display = 'block';
       } else {
-        alert("Quote not found. Loading from cart instead.");
+        console.warn("Quote not found, loading cart instead.");
       }
     } catch(err){
-      console.error("Failed to fetch quote", err);
-      alert("Error loading quote. Loading from cart instead.");
+      console.error("Failed to fetch quote:", err);
     }
   } else {
     selectedCurrency = localStorage.getItem('currency') || 'NGN';
@@ -233,14 +218,8 @@ payBtn.addEventListener('click', async ()=>{
   const address=document.getElementById('address').value;
   if(!name||!email||!phone||!address){ alert("Please fill in all billing details."); return; }
 
-  let subtotal=0, items=[];
-  if(quote && quote.items){
-    items = quote.items;
-    items.forEach(item=> subtotal += (item.prices[selectedCurrency] || 0) * item.quantity );
-  } else {
-    items = cart;
-    items.forEach(item=> subtotal += (item.prices[selectedCurrency] || 0) * item.quantity );
-  }
+  let subtotal=0, items = (quote && quote.items) ? quote.items : cart;
+  items.forEach(item=> subtotal += (item.prices[selectedCurrency] || 0)*item.quantity );
 
   FlutterwaveCheckout({
     public_key:"FLWPUBK_TEST-xxxxxxxxxxxxxxxxxxxxx-X",
@@ -248,7 +227,7 @@ payBtn.addEventListener('click', async ()=>{
     amount: subtotal.toFixed(2),
     currency: selectedCurrency,
     customer:{ email, phonenumber:phone, name },
-    customizations:{ title:"Fleur De Vie", description:"Order Payment", logo:"logo.png" },
+    customizations:{ title:"Fleur De Vie", description:"Order Payment", logo:"../fleurdevie/logo.png" },
     callback: async function(data){
       try{
         await addDoc(collection(db,"orders"),{
@@ -258,7 +237,7 @@ payBtn.addEventListener('click', async ()=>{
           paymentRef:data.tx_ref, status:"paid", createdAt:serverTimestamp()
         });
         localStorage.removeItem('cart');
-        window.location.href="thankyou.html";
+        window.location.href="../fleurdevie/thankyou.html";
       } catch(err){
         console.error("Order save failed",err);
         alert("Order save failed, but payment succeeded!");
