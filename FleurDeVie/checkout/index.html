@@ -159,52 +159,73 @@ function updateCartCount(){
 }
 
 // Render order summary
-function renderOrder(){
+function renderOrder() {
   orderItems.innerHTML = '';
   let subtotal = 0;
-  const sourceItems = (quote && Array.isArray(quote.items)) ? quote.items : cart;
-  sourceItems.forEach(item=>{
-    const unitPrice = item.prices[selectedCurrency] ?? 0;
-    subtotal += unitPrice * item.quantity;
-    const li = document.createElement('li');
-    li.innerHTML = `${item.name} (x${item.quantity}) <span>${formatPrice(unitPrice*item.quantity, selectedCurrency)}</span>`;
-    orderItems.appendChild(li);
-  });
+
+  if (quote && Array.isArray(quote.items)) {
+    quote.items.forEach(item => {
+      subtotal += item.price * item.quantity;
+      const li = document.createElement('li');
+      li.innerHTML = `${item.name} (x${item.quantity}) <span>${formatPrice(item.price * item.quantity, selectedCurrency)}</span>`;
+      orderItems.appendChild(li);
+    });
+  } else {
+    orderItems.innerHTML = '<li>No items found in this quote.</li>';
+  }
+
   orderSubtotal.textContent = `Subtotal: ${formatPrice(subtotal, selectedCurrency)}`;
 }
+
 
 // Load quote if exists
 const urlParams = new URLSearchParams(window.location.search);
 const quoteId = urlParams.get("quoteId");
 
-async function loadQuote(){
-  if(quoteId){
-    try{
+async function loadQuote() {
+  if (quoteId) {
+    try {
       const docRef = doc(db, "brands", "fleurdevie", "quotes", quoteId);
       const docSnap = await getDoc(docRef);
-      if(docSnap.exists()){
-        quote = docSnap.data();
-        // Ensure items is an array
-        if(!Array.isArray(quote.items)){
-          quote.items = Object.values(quote.items || {});
-        }
-        selectedCurrency = quote.currency || 'NGN';
+
+      if (docSnap.exists()) {
+        const rawQuote = docSnap.data();
+        selectedCurrency = rawQuote.currency || 'NGN';
         currencySelect.value = selectedCurrency;
         currencyWrapper.style.display = 'block';
-      }else{
-        alert("Quote not found. Falling back to cart.");
+
+        // Normalize items for rendering
+        quote = rawQuote;
+        if (Array.isArray(rawQuote.items)) {
+          quote.items = rawQuote.items.map(item => {
+            const priceMap = {
+              NGN: item.priceNGN ?? 0,
+              USD: item.priceUSD ?? 0,
+              EUR: item.priceEUR ?? 0,
+              GBP: item.priceGBP ?? 0
+            };
+            return {
+              name: item.name,
+              desc: item.desc,
+              price: priceMap[selectedCurrency],
+              quantity: item.qty
+            };
+          });
+        } else {
+          quote.items = [];
+        }
+
+        renderOrder();
+      } else {
+        alert("Quote not found.");
       }
-    }catch(err){
+    } catch (err) {
       console.error("Failed to fetch quote", err);
       alert("Error loading quote. Please try again.");
     }
-  }else{
-    selectedCurrency = localStorage.getItem('currency') || 'NGN';
-    currencySelect.value = selectedCurrency;
-    currencyWrapper.style.display = 'none';
   }
-  renderOrder();
 }
+
 
 // Proceed to payment
 payBtn.addEventListener('click', async ()=>{
