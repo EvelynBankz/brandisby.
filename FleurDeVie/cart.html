@@ -7,6 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
+    /* RESET & HEADER */
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family: "Montserrat", sans-serif; background: #F5E6CC; color:#112e1f; line-height:1.6; }
     a { text-decoration:none; color:inherit; }
@@ -27,12 +28,14 @@
     .hamburger.open span:nth-child(2){ opacity:0; }
     .hamburger.open span:nth-child(3){ transform:rotate(-45deg); top:10px; }
 
+    /* HERO */
     .hero { position: relative; height:50vh; display:flex; justify-content:center; align-items:center; text-align:center; margin-top:80px; overflow:hidden; }
     .hero::after { content:""; position:absolute; inset:0; background:url('bg.jpg') center/cover no-repeat; transform:scale(1.1); z-index:-1; border-radius:12px; box-shadow: inset 0 0 0 2000px rgba(17,46,31,0.3); }
     .hero-text { position:relative; display:inline-block; color:#FFD6BA; margin-bottom:12px; animation: shimmer 3s infinite linear; }
     .hero-text h1 { font-family:"Playfair Display", serif; font-size:clamp(36px,5vw,64px); margin-bottom:12px; }
     .hero-text p { font-size:clamp(16px,2vw,24px); max-width:700px; }
 
+    /* CART */
     section.cart { padding:60px 20px; background:#F5E6CC; }
     .container { max-width:1100px; margin:auto; }
     h2 { text-align:center; font-size:24px; font-family:"Playfair Display", serif; margin-bottom:20px; }
@@ -40,11 +43,17 @@
     .currency-selector select { padding:5px 10px; border-radius:6px; border:1px solid #112e1f; }
 
     .cart-grid { display:grid; gap:20px; transition: opacity 0.3s ease-in-out; }
-    .cart-item { display:flex; flex-direction:column; background:#FFD6BA; padding:16px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.1); opacity:0; transition: opacity 0.4s ease-in-out; }
-    .product-header { display:flex; align-items:center; justify-content:space-between; }
-    .product-info { display:flex; align-items:center; gap:12px; }
-    .variants-container { overflow:hidden; transition: max-height 0.4s ease; }
-    .variant-item { margin-bottom:6px; display:flex; align-items:center; justify-content:space-between; gap:6px; }
+    .cart-item { display:flex; gap:16px; background:#FFD6BA; padding:16px; border-radius:12px; align-items:center; box-shadow:0 4px 10px rgba(0,0,0,0.1); opacity:0; transition: opacity 0.4s ease-in-out; }
+    .cart-item img { width:120px; height:120px; object-fit:cover; border-radius:8px; }
+    .cart-item-details { flex:1; display:flex; flex-direction:column; }
+    .cart-item-details h3 { font-family:"Playfair Display", serif; margin-bottom:8px; }
+    .variant-meta { font-size:0.95rem; color:#334d3a; margin-bottom:6px; }
+    .variant-meta span { margin-right:8px; padding:4px 8px; border-radius:6px; background:rgba(17,46,31,0.06); border:1px solid rgba(17,46,31,0.06); }
+    .cart-item-details .price { font-weight:600; margin-bottom:8px; transition: all 0.3s ease-in-out; }
+    .quantity-controls { display:flex; align-items:center; gap:6px; margin-bottom:8px; }
+    .quantity-controls button { background:#112e1f; color:#F5E6CC; border:none; border-radius:6px; padding:4px 10px; cursor:pointer; font-weight:600; transition:0.3s; }
+    .quantity-controls button:hover { background:#0a1d14; }
+    .quantity-controls input { width:50px; text-align:center; padding:4px; border-radius:6px; border:1px solid #112e1f; }
 
     .cart-subtotal { text-align:right; font-weight:600; margin-top:10px; transition: all 0.3s ease-in-out; }
     .cart-empty { text-align:center; font-size:18px; margin-top:20px; color:#112e1f; display:none; }
@@ -57,11 +66,19 @@
 
     footer { text-align:center; padding:20px; background:#112e1f; color:#F5E6CC; margin-top:60px; }
 
+    /* MOBILE STYLING */
     @media (max-width: 600px) {
       .header-right { display:none; flex-direction:column; background:#112e1f; position:absolute; top:70px; right:0; width:200px; padding:20px; }
       .header-right.open { display:flex; }
       .hamburger { display:block; }
+
+      .cart-item { flex-direction: row; align-items: center; gap: 12px; padding: 12px; }
       .cart-item img { width: 80px; height: 80px; object-fit: cover; border-radius: 6px; }
+      .cart-item-details h3 { font-size: 16px; }
+      .cart-item-details .price { font-size: 14px; }
+      .quantity-controls button { padding: 4px 8px; font-size: 14px; }
+      .quantity-controls input { width: 40px; padding: 4px; font-size: 14px; }
+
       .hero { height: 30vh; margin-top: 80px; }
       .hero::after { transform: scale(1.05); }
       .hero-text h1 { font-size: clamp(28px, 5vw, 48px); }
@@ -71,265 +88,335 @@
 </head>
 <body>
 
-<header class="site-header">
-  <div class="header-left">
-    <img src="logo.png" alt="Fleur De Vie Logo" class="brand-logo">
-    <div class="brand-title">Fleur De Vie</div>
-  </div>
-  <nav class="header-right">
-    <a href="index.html">Home</a>
-    <a href="shop.html">Shop</a>
-    <a href="about.html">About</a>
-    <a href="cart.html">Cart <span class="cart-count" id="cartCount">0</span></a>
-    <a href="customization.html">Customize</a>
-    <a href="contact.html">Contact</a>
-  </nav>
-  <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
-</header>
-
-<section class="hero">
-  <div class="hero-text">
-    <h1>Your Cart</h1>
-    <p>Review your items before checkout</p>
-  </div>
-</section>
-
-<section class="cart">
-  <div class="container">
-    <h2>Shopping Cart</h2>
-    <div class="currency-selector">
-      <label for="currency">Currency: </label>
-      <select id="currency">
-        <option value="NGN">NGN</option>
-        <option value="USD">USD</option>
-        <option value="EUR">EUR</option>
-        <option value="GBP">GBP</option>
-      </select>
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="header-left">
+      <img src="logo.png" alt="Fleur De Vie Logo" class="brand-logo">
+      <div class="brand-title">Fleur De Vie</div>
     </div>
-    <div class="cart-grid" id="cartGrid"></div>
-    <div class="cart-empty" id="cartEmpty">Your cart is empty.</div>
-    <div class="cart-subtotal" id="cartSubtotal"></div>
-    <div class="cart-buttons">
-      <a href="shop.html" class="continue-btn">Continue Shopping</a>
-      <a href="checkout/index.html" class="checkout-btn" id="checkoutBtn">Proceed to Checkout</a>
+    <nav class="header-right">
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="about.html">About</a>
+      <a href="cart.html">Cart <span class="cart-count" id="cartCount">0</span></a>
+      <a href="customization.html">Customize</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-text">
+      <h1>Your Cart</h1>
+      <p>Review your items before checkout</p>
     </div>
-  </div>
-</section>
+  </section>
 
-<footer>
-  <p>© 2025 Fleur De Vie</p>
-</footer>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
-  authDomain: "brandisby.firebaseapp.com",
-  projectId: "brandisby",
-  storageBucket: "brandisby.firebasestorage.app",
-  messagingSenderId: "87213267039",
-  appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
-};
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-const cartGrid = document.getElementById('cartGrid');
-const cartEmpty = document.getElementById('cartEmpty');
-const cartCountElem = document.getElementById('cartCount');
-const cartSubtotalElem = document.getElementById('cartSubtotal');
-const checkoutBtn = document.getElementById('checkoutBtn');
-const currencySelect = document.getElementById('currency');
-
-let cart = JSON.parse(localStorage.getItem('cart')) || [];
-let productsData = {};
-if(localStorage.getItem('currency')) currencySelect.value = localStorage.getItem('currency');
-
-currencySelect.addEventListener('change', async () => {
-  localStorage.setItem('currency', currencySelect.value);
-  await fetchProductsData();
-  renderCartItems();
-});
-
-function formatPrice(value, currency){
-  const localeMap = { USD:'en-US', EUR:'de-DE', GBP:'en-GB', NGN:'en-NG' };
-  const minFrac = currency==='NGN'?0:2;
-  try { return new Intl.NumberFormat(localeMap[currency]||'en-US',{style:'currency',currency,minimumFractionDigits:minFrac}).format(Number(value||0)); } 
-  catch(e){ return `${currency} ${Number(value||0).toFixed(minFrac)}`; }
-}
-
-function uniqueProductIdsFromCart(){ const ids=new Set(); cart.forEach(i=>{if(i&&i.id) ids.add(i.id)}); return Array.from(ids); }
-
-async function fetchProductsData(){
-  const ids = uniqueProductIdsFromCart();
-  const temp = {};
-  await Promise.all(ids.map(async id=>{
-    try{
-      const snap = await getDoc(doc(db,"brands","fleurdevie","products",id));
-      if(snap.exists()) temp[id] = snap.data();
-    }catch(e){ console.warn("Failed to fetch product",id,e); }
-  }));
-  productsData = temp;
-}
-
-function getUnitPriceForCurrency(product, cartItem, currency){
-  if(product){
-    if(currency==='NGN' && product.priceNGN!=null) return Number(product.priceNGN);
-    if(currency==='USD' && product.priceUSD!=null) return Number(product.priceUSD);
-    if(currency==='EUR' && product.priceEUR!=null) return Number(product.priceEUR);
-    if(currency==='GBP' && product.priceGBP!=null) return Number(product.priceGBP);
-    if(product.price!=null) return Number(product.price);
-  }
-  if(cartItem && cartItem.price!=null) return Number(cartItem.price);
-  return 0;
-}
-
-async function saveCartAndRerender(newCart){
-  localStorage.setItem('cart', JSON.stringify(newCart));
-  cart = newCart;
-  updateCartCount();
-  await fetchProductsData();
-  renderCartItems();
-}
-
-function updateCartCount(){
-  const total = cart.reduce((sum,it)=>sum+(Number(it.quantity)||0),0);
-  cartCountElem.textContent = total;
-  cartCountElem.style.transform='scale(1.2)';
-  setTimeout(()=>cartCountElem.style.transform='scale(1)',150);
-}
-
-function findCartIndexByVariant(id,color,size){ return cart.findIndex(i=>i.id===id && (i.color||'')===(color||'') && (i.size||'')===(size||'')); }
-
-async function updateQuantityForVariant(id,color,size,newQty){
-  const idx=findCartIndexByVariant(id,color,size);
-  if(idx===-1) return;
-  if(newQty<=0) cart.splice(idx,1);
-  else cart[idx].quantity = Number(newQty);
-  await saveCartAndRerender(cart);
-}
-
-function escapeHtml(str){ if(str===null||str===undefined) return ''; return String(str).replace(/[&<>"']/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[s])); }
-
-function debounce(fn, wait){ let t; return function(...args){ clearTimeout(t); t=setTimeout(()=>fn.apply(this,args),wait); }; }
-
-async function renderCartItems(){
-  cartGrid.innerHTML='';
-  if(!cart||cart.length===0){ cartEmpty.style.display='block'; cartSubtotalElem.textContent=''; checkoutBtn.style.display='none'; return; }
-  cartEmpty.style.display='none'; checkoutBtn.style.display='inline-block';
-  const displayCurrency = currencySelect.value || 'NGN';
-  let subtotal=0;
-
-  cart.forEach(item=>{
-    const product = productsData[item.id]||null;
-    const unitPrice = getUnitPriceForCurrency(product,item,displayCurrency);
-    const lineTotal = unitPrice * (Number(item.quantity)||0);
-    subtotal += lineTotal;
-    const thumbnail = product?.images?.[0] || item.imageUrl || 'placeholder.jpg';
-    const hasVariant = item.color || item.size;
-
-    const div = document.createElement('div');
-    div.className='cart-item';
-
-    if(hasVariant){
-      div.innerHTML=`
-      <div class="product-header" style="cursor:pointer;">
-        <div class="product-info">
-          <img src="${escapeHtml(thumbnail)}" style="width:80px;height:80px;object-fit:cover;border-radius:6px;">
-          <div>
-            <h3>${escapeHtml(product?.name||item.name||'')}</h3>
-          </div>
-        </div>
-        <div class="arrow" style="font-size:20px; transition:0.3s;">&#x25BC;</div>
+  <!-- CART -->
+  <section class="cart">
+    <div class="container">
+      <h2>Shopping Cart</h2>
+      <div class="currency-selector">
+        <label for="currency">Currency: </label>
+        <select id="currency">
+          <option value="NGN">NGN</option>
+          <option value="USD">USD</option>
+          <option value="EUR">EUR</option>
+          <option value="GBP">GBP</option>
+        </select>
       </div>
-      <div class="variants-container" style="max-height:0;">
-        <div class="variant-item">
-          <div>${item.color?`Color: ${escapeHtml(item.color)}`:''} ${item.size?`Size: ${escapeHtml(item.size)}`:''}</div>
-          <div style="display:flex;align-items:center;gap:4px;">
-            <button class="minus" data-id="${escapeHtml(item.id)}" data-color="${escapeHtml(item.color||'')}" data-size="${escapeHtml(item.size||'')}">–</button>
-            <input type="number" min="0" value="${item.quantity}" class="qty-input" data-id="${escapeHtml(item.id)}" data-color="${escapeHtml(item.color||'')}" data-size="${escapeHtml(item.size||'')}">
-            <button class="plus" data-id="${escapeHtml(item.id)}" data-color="${escapeHtml(item.color||'')}" data-size="${escapeHtml(item.size||'')}">+</button>
-            <button class="remove" style="margin-left:8px;background:#fff;color:#112e1f;border:1px solid #112e1f;padding:6px 8px;border-radius:6px;" data-id="${escapeHtml(item.id)}" data-color="${escapeHtml(item.color||'')}" data-size="${escapeHtml(item.size||'')}">Remove</button>
-            <span>${formatPrice(lineTotal,displayCurrency)}</span>
-          </div>
-        </div>
-      </div>`;
-    } else {
-      div.innerHTML=`
-      <div class="product-info">
-        <img src="${escapeHtml(thumbnail)}" style="width:80px;height:80px;object-fit:cover;border-radius:6px;">
-        <div>
-          <h3>${escapeHtml(product?.name||item.name||'')}</h3>
-          <div style="display:flex;align-items:center;gap:4px;margin-top:6px;">
-            <button class="minus" data-id="${escapeHtml(item.id)}" data-color="" data-size="">–</button>
-            <input type="number" min="0" value="${item.quantity}" class="qty-input" data-id="${escapeHtml(item.id)}" data-color="" data-size="">
-            <button class="plus" data-id="${escapeHtml(item.id)}" data-color="" data-size="">+</button>
-            <button class="remove" style="margin-left:8px;background:#fff;color:#112e1f;border:1px solid #112e1f;padding:6px 8px;border-radius:6px;" data-id="${escapeHtml(item.id)}" data-color="" data-size="">Remove</button>
-            <span>${formatPrice(lineTotal,displayCurrency)}</span>
-          </div>
-        </div>
-      </div>`;
+
+      <div class="cart-grid" id="cartGrid"></div>
+      <div class="cart-empty" id="cartEmpty">Your cart is empty.</div>
+      <div class="cart-subtotal" id="cartSubtotal"></div>
+
+      <div class="cart-buttons">
+        <a href="shop.html" class="continue-btn">Continue Shopping</a>
+        <a href="checkout/index.html" class="checkout-btn" id="checkoutBtn">Proceed to Checkout</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2025 Fleur De Vie</p>
+  </footer>
+
+  <!-- FIREBASE + CART SCRIPT -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
+      authDomain: "brandisby.firebaseapp.com",
+      projectId: "brandisby",
+      storageBucket: "brandisby.firebasestorage.app",
+      messagingSenderId: "87213267039",
+      appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const cartGrid = document.getElementById('cartGrid');
+    const cartEmpty = document.getElementById('cartEmpty');
+    const cartCountElem = document.getElementById('cartCount');
+    const cartSubtotalElem = document.getElementById('cartSubtotal');
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    const currencySelect = document.getElementById('currency');
+
+    // read + keep cart local var
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    // product data cache keyed by productId
+    let productsData = {};
+
+    // restore currency selection (persist)
+    if (localStorage.getItem('currency')) currencySelect.value = localStorage.getItem('currency');
+
+    currencySelect.addEventListener('change', async () => {
+      localStorage.setItem('currency', currencySelect.value);
+      // re-fetch product data isn't strictly necessary for currency, but keeps data fresh
+      await fetchProductsData();
+      renderCartItems();
+    });
+
+    // price formatting
+    function formatPrice(value, currency){
+      const localeMap = { USD:'en-US', EUR:'de-DE', GBP:'en-GB', NGN:'en-NG' };
+      const minFrac = currency === 'NGN' ? 0 : 2;
+      try {
+        return new Intl.NumberFormat(localeMap[currency] || 'en-US', { style:'currency', currency, minimumFractionDigits: minFrac }).format(Number(value || 0));
+      } catch(e) {
+        return `${currency} ${Number(value || 0).toFixed(minFrac)}`;
+      }
     }
 
-    cartGrid.appendChild(div);
+    // helper: unique product ids from cart
+    function uniqueProductIdsFromCart() {
+      const ids = new Set();
+      cart.forEach(i => { if (i && i.id) ids.add(i.id); });
+      return Array.from(ids);
+    }
 
-    // Expandable variants
-    if(hasVariant){
-      const header = div.querySelector('.product-header');
-      const variantsContainer = div.querySelector('.variants-container');
-      const arrow = div.querySelector('.arrow');
-      header.addEventListener('click', ()=>{
-        if(!variantsContainer.style.maxHeight || variantsContainer.style.maxHeight==='0px'){
-          variantsContainer.style.maxHeight = variantsContainer.scrollHeight+'px';
-          arrow.style.transform='rotate(180deg)';
-        } else {
-          variantsContainer.style.maxHeight='0';
-          arrow.style.transform='rotate(0deg)';
+    // fetch product docs only for distinct ids in cart
+    async function fetchProductsData(){
+      const ids = uniqueProductIdsFromCart();
+      const temp = {};
+      const promises = ids.map(async id => {
+        try {
+          const dref = doc(db, "brands", "fleurdevie", "products", id);
+          const snap = await getDoc(dref);
+          if (snap.exists()) temp[id] = snap.data();
+        } catch (e) {
+          console.warn("Failed to fetch product", id, e);
         }
+      });
+      await Promise.all(promises);
+      productsData = temp;
+    }
+
+    // get unit price for product object (product may be undefined) for a currency
+    function getUnitPriceForCurrency(product, cartItem, currency) {
+      // product could be Firestore doc data (like priceNGN etc)
+      if (product) {
+        if (currency === 'NGN' && product.priceNGN != null) return Number(product.priceNGN);
+        if (currency === 'USD' && product.priceUSD != null) return Number(product.priceUSD);
+        if (currency === 'EUR' && product.priceEUR != null) return Number(product.priceEUR);
+        if (currency === 'GBP' && product.priceGBP != null) return Number(product.priceGBP);
+        // fallback to generic fields
+        if (product.price != null) return Number(product.price);
+      }
+      // fallback to price saved on cart item (if the product wasn't fetched)
+      if (cartItem && cartItem.price != null) return Number(cartItem.price);
+      // default zero
+      return 0;
+    }
+
+    // Save cart and re-render (calls fetchProductsData to keep cache fresh)
+    async function saveCartAndRerender(newCart) {
+      localStorage.setItem('cart', JSON.stringify(newCart));
+      cart = newCart;
+      updateCartCount();
+      await fetchProductsData();
+      renderCartItems();
+    }
+
+    // update cart count badge
+    function updateCartCount(){
+      const total = cart.reduce((sum, it) => sum + (Number(it.quantity) || 0), 0);
+      cartCountElem.textContent = total;
+      // small pulse
+      cartCountElem.style.transform = 'scale(1.2)';
+      setTimeout(()=> cartCountElem.style.transform = 'scale(1)', 150);
+    }
+
+    // helper to find cart index for a variant (id + color + size)
+    function findCartIndexByVariant(id, color, size){
+      return cart.findIndex(i => i.id === id && (i.color || '') === (color || '') && (i.size || '') === (size || ''));
+    }
+
+    // update quantity for a variant (removes if <= 0)
+    async function updateQuantityForVariant(id, color, size, newQty){
+      const idx = findCartIndexByVariant(id, color, size);
+      if (idx === -1) return;
+      if (newQty <= 0) {
+        cart.splice(idx, 1);
+      } else {
+        cart[idx].quantity = Number(newQty);
+      }
+      await saveCartAndRerender(cart);
+    }
+
+    // render UI
+    function renderCartItems(){
+      cartGrid.innerHTML = '';
+      if (!cart || cart.length === 0) {
+        cartEmpty.style.display = 'block';
+        cartSubtotalElem.textContent = '';
+        checkoutBtn.style.display = 'none';
+        return;
+      }
+      cartEmpty.style.display = 'none';
+      checkoutBtn.style.display = 'inline-block';
+
+      const displayCurrency = currencySelect.value || 'NGN';
+      let subtotal = 0;
+
+      cart.forEach(item => {
+        const product = productsData[item.id] || null;
+        // prefer first image from product.images, fallback to product.imageUrl, else saved cart item image
+        let thumbnail = '';
+        if (product) {
+          if (Array.isArray(product.images) && product.images.length) thumbnail = product.images[0];
+          else if (product.imageUrl) thumbnail = product.imageUrl;
+        }
+        if (!thumbnail) thumbnail = item.imageUrl || 'placeholder.jpg';
+
+        const unitPrice = getUnitPriceForCurrency(product, item, displayCurrency);
+        const lineTotal = unitPrice * (Number(item.quantity) || 0);
+        subtotal += lineTotal;
+
+        // build item element
+        const div = document.createElement('div');
+        div.className = 'cart-item';
+
+        // show variant meta (size/color) if present
+        const variantHtml = `
+          <div class="variant-meta">
+            ${item.color ? `<span>Color: ${escapeHtml(item.color)}</span>` : ''}
+            ${item.size ? `<span>Size: ${escapeHtml(item.size)}</span>` : ''}
+          </div>
+        `;
+
+        div.innerHTML = `
+          <img src="${escapeHtml(thumbnail)}" alt="${escapeHtml(product?.name || item.name || 'Product')}">
+          <div class="cart-item-details">
+            <h3>${escapeHtml(product?.name || item.name || '')}</h3>
+            ${variantHtml}
+            <div class="price" id="price-${escapeHtml(item.id)}-${escapeHtml(item.color || '')}-${escapeHtml(item.size || '')}">
+              ${formatPrice(lineTotal, displayCurrency)}
+            </div>
+
+            <div class="quantity-controls">
+              <button class="minus" data-id="${escapeHtml(item.id)}" data-color="${escapeHtml(item.color || '')}" data-size="${escapeHtml(item.size || '')}">–</button>
+              <input type="number" min="0" value="${escapeHtml(String(item.quantity || 0))}" class="qty-input" data-id="${escapeHtml(item.id)}" data-color="${escapeHtml(item.color || '')}" data-size="${escapeHtml(item.size || '')}">
+              <button class="plus" data-id="${escapeHtml(item.id)}" data-color="${escapeHtml(item.color || '')}" data-size="${escapeHtml(item.size || '')}">+</button>
+              <button class="remove" style="margin-left:8px;background:#fff;color:#112e1f;border:1px solid #112e1f;padding:6px 8px;border-radius:6px;" data-id="${escapeHtml(item.id)}" data-color="${escapeHtml(item.color || '')}" data-size="${escapeHtml(item.size || '')}">Remove</button>
+            </div>
+          </div>
+        `;
+
+        cartGrid.appendChild(div);
+        // fade in
+        setTimeout(()=> div.style.opacity = '1', 50);
+      });
+
+      cartSubtotalElem.textContent = `Subtotal: ${formatPrice(subtotal, displayCurrency)}`;
+
+      // wire controls after DOM nodes exist
+      cartGrid.querySelectorAll('.plus').forEach(btn => {
+        btn.addEventListener('click', async (ev) => {
+          const id = btn.dataset.id;
+          const color = btn.dataset.color || '';
+          const size = btn.dataset.size || '';
+          const idx = findCartIndexByVariant(id, color, size);
+          if (idx === -1) return;
+          const newQty = (Number(cart[idx].quantity) || 0) + 1;
+          await updateQuantityForVariant(id, color, size, newQty);
+        });
+      });
+
+      cartGrid.querySelectorAll('.minus').forEach(btn => {
+        btn.addEventListener('click', async (ev) => {
+          const id = btn.dataset.id;
+          const color = btn.dataset.color || '';
+          const size = btn.dataset.size || '';
+          const idx = findCartIndexByVariant(id, color, size);
+          if (idx === -1) return;
+          const newQty = (Number(cart[idx].quantity) || 0) - 1;
+          await updateQuantityForVariant(id, color, size, newQty);
+        });
+      });
+
+      cartGrid.querySelectorAll('.qty-input').forEach(input => {
+        input.addEventListener('input', debounce(async (ev) => {
+          const id = input.dataset.id;
+          const color = input.dataset.color || '';
+          const size = input.dataset.size || '';
+          const val = parseInt(input.value, 10);
+          if (isNaN(val)) return;
+          await updateQuantityForVariant(id, color, size, val);
+        }, 300));
+      });
+
+      cartGrid.querySelectorAll('.remove').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const id = btn.dataset.id;
+          const color = btn.dataset.color || '';
+          const size = btn.dataset.size || '';
+          await updateQuantityForVariant(id, color, size, 0);
+        });
       });
     }
 
-    // Quantity and remove events
-    div.querySelectorAll('.plus').forEach(btn=>btn.addEventListener('click',async()=>{ 
-      const id=btn.dataset.id; const color=btn.dataset.color||''; const size=btn.dataset.size||''; 
-      const idx=findCartIndexByVariant(id,color,size); if(idx===-1)return; 
-      const newQty=(Number(cart[idx].quantity)||0)+1; await updateQuantityForVariant(id,color,size,newQty); 
-    }));
-    div.querySelectorAll('.minus').forEach(btn=>btn.addEventListener('click',async()=>{ 
-      const id=btn.dataset.id; const color=btn.dataset.color||''; const size=btn.dataset.size||''; 
-      const idx=findCartIndexByVariant(id,color,size); if(idx===-1)return; 
-      const newQty=(Number(cart[idx].quantity)||0)-1; await updateQuantityForVariant(id,color,size,newQty); 
-    }));
-    div.querySelectorAll('.qty-input').forEach(input=>input.addEventListener('input',debounce(async()=>{ 
-      const id=input.dataset.id; const color=input.dataset.color||''; const size=input.dataset.size||''; 
-      const val=parseInt(input.value,10); if(isNaN(val)) return; 
-      await updateQuantityForVariant(id,color,size,val); 
-    },300)));
-    div.querySelectorAll('.remove').forEach(btn=>btn.addEventListener('click',async()=>{ 
-      const id=btn.dataset.id; const color=btn.dataset.color||''; const size=btn.dataset.size||''; 
-      await updateQuantityForVariant(id,color,size,0); 
-    }));
+    // small escape helper to avoid injecting raw strings into HTML attributes
+    function escapeHtml(str){
+      if (str === null || str === undefined) return '';
+      return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[s]));
+    }
 
-    setTimeout(()=>div.style.opacity='1',50);
-  });
+    // simple debounce
+    function debounce(fn, wait){
+      let t;
+      return function(...args){ clearTimeout(t); t = setTimeout(()=> fn.apply(this, args), wait); };
+    }
 
-  cartSubtotalElem.textContent=`Subtotal: ${formatPrice(subtotal,displayCurrency)}`;
-}
+    // initial flow: fetch product data and render
+    (async function init(){
+      await fetchProductsData();
+      renderCartItems();
+      updateCartCount();
+    })();
 
-document.addEventListener('DOMContentLoaded', async ()=>{
-  await fetchProductsData();
-  renderCartItems();
-});
+    // hamburger menu
+    document.getElementById('hamburger').addEventListener('click', ()=>{
+      document.querySelector('.header-right').classList.toggle('open');
+      document.getElementById('hamburger').classList.toggle('open');
+    });
 
-// Hamburger menu toggle
-const hamburger = document.getElementById('hamburger');
-const headerRight = document.querySelector('.header-right');
-hamburger.addEventListener('click', ()=>{ 
-  hamburger.classList.toggle('open'); 
-  headerRight.classList.toggle('open'); 
-});
-</script>
+    // listen for storage changes (cart changed in another tab)
+    window.addEventListener('storage', async () => {
+      cart = JSON.parse(localStorage.getItem('cart')) || [];
+      await fetchProductsData();
+      renderCartItems();
+      updateCartCount();
+    });
 
+    // when checkout is clicked: keep default behavior (checkout page should read cart from localStorage)
+    // (no changes here)
+
+  </script>
 </body>
 </html>
