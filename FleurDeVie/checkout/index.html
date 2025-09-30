@@ -10,8 +10,6 @@
     *{margin:0;padding:0;box-sizing:border-box;}
     body{font-family:"Montserrat",sans-serif;background:#F5E6CC;color:#112e1f;line-height:1.6;}
     a{text-decoration:none;color:inherit;}
-
-    /* HEADER */
     .site-header{background:#112e1f;color:#F5E6CC;display:flex;justify-content:space-between;align-items:center;padding:16px 28px;position:fixed;top:0;left:0;right:0;z-index:1000;}
     .header-left{display:flex;align-items:center;gap:12px;}
     .brand-logo{height:60px;}
@@ -28,14 +26,10 @@
     .hamburger.open span:nth-child(1){transform:rotate(45deg);top:10px;}
     .hamburger.open span:nth-child(2){opacity:0;}
     .hamburger.open span:nth-child(3){transform:rotate(-45deg);top:10px;}
-
-    /* HERO */
     .hero{position:relative;height:40vh;display:flex;justify-content:center;align-items:center;text-align:center;margin-top:80px;overflow:hidden;}
     .hero::after{content:"";position:absolute;inset:0;background:url('bg.jpg') center/cover no-repeat;transform:scale(1.1);z-index:-1;border-radius:12px;box-shadow:inset 0 0 0 2000px rgba(17,46,31,0.3);}
     .hero-text{position:relative;display:inline-block;color:#FFD6BA;}
     .hero-text h1{font-family:"Playfair Display",serif;font-size:clamp(32px,5vw,56px);}
-
-    /* CHECKOUT */
     section.checkout{padding:60px 20px;}
     .container{max-width:1100px;margin:auto;display:grid;grid-template-columns:2fr 1fr;gap:30px;}
     .checkout-form{background:#FFD6BA;padding:20px;border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,0.1);}
@@ -44,25 +38,20 @@
     label{display:block;margin-bottom:6px;font-weight:500;}
     input,textarea,select{width:100%;padding:10px;margin-bottom:14px;border-radius:6px;border:1px solid #112e1f;font-family:"Montserrat",sans-serif;}
     textarea{resize:vertical;min-height:80px;}
-
     .order-summary ul{list-style:none;margin:0;padding:0;}
     .order-summary li{display:flex;justify-content:space-between;margin-bottom:10px;}
     .order-summary .subtotal{font-weight:600;margin-top:10px;text-align:right;}
     .currency-selector{text-align:right;margin-bottom:10px;}
     .currency-selector select{padding:5px 10px;border-radius:6px;border:1px solid #112e1f;}
-
     .checkout-btn{display:block;width:100%;background:#112e1f;color:#F5E6CC;text-align:center;padding:14px;font-weight:600;border-radius:6px;cursor:pointer;transition:0.3s;border:none;}
     .checkout-btn:hover{background:#0a1d14;}
-
     footer{text-align:center;padding:20px;background:#112e1f;color:#F5E6CC;margin-top:60px;}
-
     @media(max-width:800px){
       .container{grid-template-columns:1fr;}
       .header-right{display:none;flex-direction:column;position:absolute;top:70px;right:0;background:#112e1f;width:200px;padding:20px;}
       .header-right.open{display:flex;}
       .hamburger{display:block;}
     }
-
     @media(max-width:600px){
       .hero{height:30vh;margin-top:0;padding-top:80px;display:flex;justify-content:center;align-items:center;text-align:center;}
       .hero-text h1{font-size:clamp(24px,5vw,32px);line-height:1.2;margin:0;}
@@ -130,126 +119,139 @@
 
 <script src="https://checkout.flutterwave.com/v3.js"></script>
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+import { getFirestore, collection, doc, getDoc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
-    authDomain: "brandisby.firebaseapp.com",
-    projectId: "brandisby",
-    storageBucket: "brandisby.firebasestorage.app",
-    messagingSenderId: "87213267039",
-    appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
+  authDomain: "brandisby.firebaseapp.com",
+  projectId: "brandisby",
+  storageBucket: "brandisby.firebasestorage.app",
+  messagingSenderId: "87213267039",
+  appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
+};
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-  const cartCountElem = document.getElementById('cartCount');
-  const orderItems = document.getElementById('orderItems');
-  const orderSubtotal = document.getElementById('orderSubtotal');
-  const currencySelect = document.getElementById('currency');
-  const currencyWrapper = document.getElementById('currencySelectorWrapper');
-  const payBtn = document.getElementById('payBtn');
+const cartCountElem = document.getElementById('cartCount');
+const orderItems = document.getElementById('orderItems');
+const orderSubtotal = document.getElementById('orderSubtotal');
+const currencySelect = document.getElementById('currency');
+const currencyWrapper = document.getElementById('currencySelectorWrapper');
+const payBtn = document.getElementById('payBtn');
 
-  let cart = JSON.parse(localStorage.getItem('cart')) || [];
-  let quote = JSON.parse(localStorage.getItem('quote')) || null;
-  let selectedCurrency = 'NGN';
+let cart = JSON.parse(localStorage.getItem('cart')) || [];
+let quote = null;
+let selectedCurrency = 'NGN';
 
-  function formatPrice(value, currency){
-    const localeMap = { USD:'en-US', EUR:'de-DE', GBP:'en-GB', NGN:'en-NG' };
-    return new Intl.NumberFormat(localeMap[currency]||'en-US',{ style:'currency', currency, minimumFractionDigits: currency==='NGN'?0:2 }).format(value);
-  }
+function formatPrice(value, currency){
+  const localeMap = { USD:'en-US', EUR:'de-DE', GBP:'en-GB', NGN:'en-NG' };
+  return new Intl.NumberFormat(localeMap[currency]||'en-US',{ style:'currency', currency, minimumFractionDigits: currency==='NGN'?0:2 }).format(value);
+}
 
-  function updateCartCount(){
-    const total = cart.reduce((sum,i)=>sum+i.quantity,0);
-    cartCountElem.textContent = total;
-  }
+function updateCartCount(){
+  const total = cart.reduce((sum,i)=>sum+i.quantity,0);
+  cartCountElem.textContent = total;
+}
 
-  function renderOrder(){
-    orderItems.innerHTML = '';
-    let subtotal = 0;
-
-    if(quote){
-      // Quote mode
-      Object.values(quote.items).forEach(item=>{
-        const unitPrice = item.prices[selectedCurrency];
-        subtotal += unitPrice * item.quantity;
-        const li=document.createElement('li');
-        li.innerHTML = `${item.name} (x${item.quantity}) <span>${formatPrice(unitPrice*item.quantity,selectedCurrency)}</span>`;
-        orderItems.appendChild(li);
-      });
-    }else{
-      // Cart mode
-      cart.forEach(item=>{
-        const unitPrice = item.prices[selectedCurrency];
-        subtotal += unitPrice * item.quantity;
-        const li=document.createElement('li');
-        li.innerHTML = `${item.name} (x${item.quantity}) <span>${formatPrice(unitPrice*item.quantity,selectedCurrency)}</span>`;
-        orderItems.appendChild(li);
-      });
-    }
-    orderSubtotal.textContent = `Subtotal: ${formatPrice(subtotal,selectedCurrency)}`;
-  }
-
-  // Initialize currency
+function renderOrder(){
+  orderItems.innerHTML = '';
+  let subtotal = 0;
   if(quote){
-    selectedCurrency = quote.currency || 'NGN';
-    currencySelect.value = selectedCurrency;
-    currencyWrapper.style.display = 'block'; // visible for quotes
+    Object.values(quote.items).forEach(item=>{
+      const unitPrice = item.prices[selectedCurrency];
+      subtotal += unitPrice * item.quantity;
+      const li=document.createElement('li');
+      li.innerHTML = `${item.name} (x${item.quantity}) <span>${formatPrice(unitPrice*item.quantity,selectedCurrency)}</span>`;
+      orderItems.appendChild(li);
+    });
+  }else{
+    cart.forEach(item=>{
+      const unitPrice = item.prices[selectedCurrency];
+      subtotal += unitPrice * item.quantity;
+      const li=document.createElement('li');
+      li.innerHTML = `${item.name} (x${item.quantity}) <span>${formatPrice(unitPrice*item.quantity,selectedCurrency)}</span>`;
+      orderItems.appendChild(li);
+    });
+  }
+  orderSubtotal.textContent = `Subtotal: ${formatPrice(subtotal,selectedCurrency)}`;
+}
+
+const urlParams = new URLSearchParams(window.location.search);
+const quoteId = urlParams.get("quoteId");
+
+async function loadQuote(){
+  if(quoteId){
+    try{
+      const docRef = doc(db, "brands", "fleurdevie", "quotes", quoteId);
+      const docSnap = await getDoc(docRef);
+      if(docSnap.exists()){
+        quote = docSnap.data();
+        selectedCurrency = quote.currency || 'NGN';
+        currencySelect.value = selectedCurrency;
+        currencyWrapper.style.display = 'block';
+      }else{
+        alert("Quote not found. Falling back to cart.");
+      }
+    }catch(err){
+      console.error("Failed to fetch quote", err);
+      alert("Error loading quote. Please try again.");
+    }
   }else{
     selectedCurrency = localStorage.getItem('currency') || 'NGN';
     currencySelect.value = selectedCurrency;
-    currencyWrapper.style.display = 'none'; // hidden in cart flow
+    currencyWrapper.style.display = 'none';
+  }
+  renderOrder();
+}
+
+currencySelect.addEventListener('change', ()=>{
+  selectedCurrency = currencySelect.value;
+  localStorage.setItem('currency',selectedCurrency);
+  renderOrder();
+});
+
+payBtn.addEventListener('click', async ()=>{
+  const name=document.getElementById('name').value;
+  const email=document.getElementById('email').value;
+  const phone=document.getElementById('phone').value;
+  const address=document.getElementById('address').value;
+  if(!name||!email||!phone||!address){ alert("Please fill in all billing details."); return; }
+
+  let subtotal=0, items=[];
+  if(quote){
+    items = Object.values(quote.items);
+    items.forEach(item=> subtotal += item.prices[selectedCurrency]*item.quantity );
+  }else{
+    items = cart;
+    items.forEach(item=> subtotal += item.prices[selectedCurrency]*item.quantity );
   }
 
-  currencySelect.addEventListener('change', ()=>{
-    selectedCurrency = currencySelect.value;
-    localStorage.setItem('currency',selectedCurrency);
-    renderOrder();
-  });
-
-  payBtn.addEventListener('click', async ()=>{
-    const name=document.getElementById('name').value;
-    const email=document.getElementById('email').value;
-    const phone=document.getElementById('phone').value;
-    const address=document.getElementById('address').value;
-    if(!name||!email||!phone||!address){ alert("Please fill in all billing details."); return; }
-
-    let subtotal=0, items=[];
-    if(quote){
-      items = Object.values(quote.items);
-      items.forEach(item=> subtotal += item.prices[selectedCurrency]*item.quantity );
-    }else{
-      items = cart;
-      items.forEach(item=> subtotal += item.prices[selectedCurrency]*item.quantity );
+  FlutterwaveCheckout({
+    public_key:"FLWPUBK_TEST-xxxxxxxxxxxxxxxxxxxxx-X",
+    tx_ref:"fleurdevie-"+Date.now(),
+    amount: subtotal.toFixed(2),
+    currency: selectedCurrency,
+    customer:{ email, phonenumber:phone, name },
+    customizations:{ title:"Fleur De Vie", description:"Order Payment", logo:"logo.png" },
+    callback: async function(data){
+      try{
+        await addDoc(collection(db,"orders"),{
+          name,email,phone,address,
+          currency:selectedCurrency,
+          items, total:subtotal.toFixed(2),
+          paymentRef:data.tx_ref, status:"paid", createdAt:serverTimestamp()
+        });
+        localStorage.removeItem('cart');
+        window.location.href="thankyou.html";
+      }catch(err){ console.error("Order save failed",err); alert("Order save failed, but payment succeeded!"); }
     }
-
-    FlutterwaveCheckout({
-      public_key:"FLWPUBK_TEST-xxxxxxxxxxxxxxxxxxxxx-X",
-      tx_ref:"fleurdevie-"+Date.now(),
-      amount: subtotal.toFixed(2),
-      currency: selectedCurrency,
-      customer:{ email, phonenumber:phone, name },
-      customizations:{ title:"Fleur De Vie", description:"Order Payment", logo:"logo.png" },
-      callback: async function(data){
-        try{
-          await addDoc(collection(db,"orders"),{
-            name,email,phone,address,
-            currency:selectedCurrency,
-            items, total:subtotal.toFixed(2),
-            paymentRef:data.tx_ref, status:"paid", createdAt:serverTimestamp()
-          });
-          localStorage.removeItem('cart');
-          localStorage.removeItem('quote');
-          window.location.href="thankyou.html";
-        }catch(err){ console.error("Order save failed",err); alert("Order save failed, but payment succeeded!"); }
-      }
-    });
   });
+});
 
-  updateCartCount();
-  renderOrder();
+updateCartCount();
+loadQuote();
 </script>
 </body>
 </html>
