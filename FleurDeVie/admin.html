@@ -648,27 +648,64 @@ ai_add.addEventListener("click", () => {
   renderDraftItems();
 });
 /* Generate Quote Link */
-generateQuoteLinkBtn.addEventListener("click",async()=>{
-  const customer=document.getElementById("quoteCustomer").value.trim();
-  const email=document.getElementById("quoteEmail").value.trim();
-  if(!customer||!email){ alert("Customer name and email required."); return; }
-  if(!quoteDraftItems.length){ alert("Add at least one item."); return; }
-  const data={customer,email,items:quoteDraftItems,status:"Unpaid",createdAt:new Date().toISOString()};
-  try{
-    const docRef=await addDoc(collection(db,"brands","fleurdevie","quotes"),data);
-    const id=docRef.id;
-    const link=`${window.location.origin}brandisby./FleurDeVie/checkout/index.html?quoteId=${id}`;
-    try{ localStorage.setItem(id,JSON.stringify(data)); }catch(e){ console.warn(e); }
-    generatedQuoteLink.innerHTML=`<a href="${link}" target="_blank" id="gqlink">${link}</a><button class="copy-btn" id="copyGeneratedBtn" data-link="${link}">📋</button>`;
-    document.getElementById("copyGeneratedBtn").addEventListener("click",async()=>{
+generateQuoteLinkBtn.addEventListener("click", async () => {
+  const customer = document.getElementById("quoteCustomer").value.trim();
+  const email = document.getElementById("quoteEmail").value.trim();
+  if (!customer || !email) { 
+    alert("Customer name and email required."); 
+    return; 
+  }
+  if (!quoteDraftItems.length) { 
+    alert("Add at least one item."); 
+    return; 
+  }
+
+  const data = {
+    customer,
+    email,
+    items: quoteDraftItems,
+    status: "Unpaid",
+    createdAt: new Date().toISOString()
+  };
+
+  try {
+    const docRef = await addDoc(collection(db, "brands", "fleurdevie", "quotes"), data);
+    const id = docRef.id;
+
+    // ✅ Use relative path here instead of window.location.origin
+    const link = `FleurDeVie/checkout/index.html?quoteId=${id}`;
+
+    try { 
+      localStorage.setItem(id, JSON.stringify(data)); 
+    } catch (e) { 
+      console.warn(e); 
+    }
+
+    generatedQuoteLink.innerHTML = `
+      <a href="${link}" target="_blank" id="gqlink">${link}</a>
+      <button class="copy-btn" id="copyGeneratedBtn" data-link="${link}">📋</button>
+    `;
+
+    document.getElementById("copyGeneratedBtn").addEventListener("click", async () => {
       await navigator.clipboard.writeText(link);
-      const btn=document.getElementById("copyGeneratedBtn");
-      btn.textContent="✅"; setTimeout(()=>btn.textContent="📋",1000);
+      const btn = document.getElementById("copyGeneratedBtn");
+      btn.textContent = "✅"; 
+      setTimeout(() => btn.textContent = "📋", 1000);
     });
-    quoteMessage.textContent="✅ Quote saved and link generated."; quoteMessage.style.color="green";
-    quoteForm.reset(); quoteDraftItems=[]; renderDraftItems();
-  }catch(err){ console.error(err); quoteMessage.textContent="❌ Error saving quote."; quoteMessage.style.color="red"; }
+
+    quoteMessage.textContent = "✅ Quote saved and link generated."; 
+    quoteMessage.style.color = "green";
+    quoteForm.reset(); 
+    quoteDraftItems = []; 
+    renderDraftItems();
+
+  } catch (err) { 
+    console.error(err); 
+    quoteMessage.textContent = "❌ Error saving quote."; 
+    quoteMessage.style.color = "red"; 
+  }
 });
+
   /* compute total from items in a given currency */
 function computeTotalFromItems(items = [], currency = 'NGN') {
   let total = 0;
@@ -719,7 +756,7 @@ function renderQuotesTable() {
       displayTotal = `${formatCurrency(q.totalExplicit, q.defaultCurrency || displayCurrency)} (${q.defaultCurrency || displayCurrency})`;
     }
 
-    const link = `${window.location.origin}brandisby./FleurDeVie/checkout/index.html?quoteId=${id}`;
+    const link = `FleurDeVie/checkout/index.html?quoteId=${id}`;
     const status = q.status || "Unpaid";
 
     const row = document.createElement("tr");
@@ -811,7 +848,7 @@ quoteModalBackdrop.addEventListener('click', (ev) => { if (ev.target === quoteMo
 openCheckoutBtn.addEventListener('click', () => {
   const id = quoteModalBackdrop.dataset.currentId;
   if (id) {
-    const link = `${window.location.origin}brandisby./FleurDeVie/checkout/index.html?quoteId=${id}`;
+    const link = `FleurDeVie/checkout/index.html?quoteId=${id}`;
     window.open(link, '_blank');
   }
 });
@@ -832,7 +869,7 @@ async function populateQuoteModal(id) {
   }
 
   // build html
-  const link = `${window.location.origin}brandisby./FleurDeVie/checkout/index.html?quoteId=${id}`;
+  const link = `FleurDeVie/checkout/index.html?quoteId=${id}`;
   let html = `
     <div style="display:flex; justify-content:space-between; gap:12px; align-items:center;">
       <div>
