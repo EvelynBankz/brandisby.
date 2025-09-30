@@ -167,22 +167,17 @@
     const checkoutBtn = document.getElementById('checkoutBtn');
     const currencySelect = document.getElementById('currency');
 
-    // read + keep cart local var
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
-    // product data cache keyed by productId
     let productsData = {};
 
-    // restore currency selection (persist)
     if (localStorage.getItem('currency')) currencySelect.value = localStorage.getItem('currency');
 
     currencySelect.addEventListener('change', async () => {
       localStorage.setItem('currency', currencySelect.value);
-      // re-fetch product data isn't strictly necessary for currency, but keeps data fresh
       await fetchProductsData();
       renderCartItems();
     });
 
-    // price formatting
     function formatPrice(value, currency){
       const localeMap = { USD:'en-US', EUR:'de-DE', GBP:'en-GB', NGN:'en-NG' };
       const minFrac = currency === 'NGN' ? 0 : 2;
@@ -193,14 +188,12 @@
       }
     }
 
-    // helper: unique product ids from cart
     function uniqueProductIdsFromCart() {
       const ids = new Set();
       cart.forEach(i => { if (i && i.id) ids.add(i.id); });
       return Array.from(ids);
     }
 
-    // fetch product docs only for distinct ids in cart
     async function fetchProductsData(){
       const ids = uniqueProductIdsFromCart();
       const temp = {};
@@ -217,24 +210,18 @@
       productsData = temp;
     }
 
-    // get unit price for product object (product may be undefined) for a currency
     function getUnitPriceForCurrency(product, cartItem, currency) {
-      // product could be Firestore doc data (like priceNGN etc)
       if (product) {
         if (currency === 'NGN' && product.priceNGN != null) return Number(product.priceNGN);
         if (currency === 'USD' && product.priceUSD != null) return Number(product.priceUSD);
         if (currency === 'EUR' && product.priceEUR != null) return Number(product.priceEUR);
         if (currency === 'GBP' && product.priceGBP != null) return Number(product.priceGBP);
-        // fallback to generic fields
         if (product.price != null) return Number(product.price);
       }
-      // fallback to price saved on cart item (if the product wasn't fetched)
       if (cartItem && cartItem.price != null) return Number(cartItem.price);
-      // default zero
       return 0;
     }
 
-    // Save cart and re-render (calls fetchProductsData to keep cache fresh)
     async function saveCartAndRerender(newCart) {
       localStorage.setItem('cart', JSON.stringify(newCart));
       cart = newCart;
@@ -243,293 +230,94 @@
       renderCartItems();
     }
 
-    // update cart count badge
     function updateCartCount(){
       const total = cart.reduce((sum, it) => sum + (Number(it.quantity) || 0), 0);
       cartCountElem.textContent = total;
-      // small pulse
       cartCountElem.style.transform = 'scale(1.2)';
       setTimeout(()=> cartCountElem.style.transform = 'scale(1)', 150);
     }
 
-    // helper to find cart index for a variant (id + color + size)
     function findCartIndexByVariant(id, color, size){
       return cart.findIndex(i => i.id === id && (i.color || '') === (color || '') && (i.size || '') === (size || ''));
     }
 
-    // update quantity for a variant (removes if <= 0)
     async function updateQuantityForVariant(id, color, size, newQty){
       const idx = findCartIndexByVariant(id, color, size);
       if (idx === -1) return;
-      if (newQty <= 0) {
-        cart.splice(idx, 1);
-      } else {
-        cart[idx].quantity = Number(newQty);
-      }
+      if (newQty <= 0) cart.splice(idx,1);
+      else cart[idx].quantity = Number(newQty);
       await saveCartAndRerender(cart);
     }
 
-    // render UI
-    // render grouped cart items
-function renderCartItems(){
-  cartGrid.innerHTML = '';
-  if (!cart || cart.length === 0) {
-    cartEmpty.style.display = 'block';
-    cartSubtotalElem.textContent = '';
-    checkoutBtn.style.display = 'none';
-    return;
-  }
-  cartEmpty.style.display = 'none';
-  checkoutBtn.style.display = 'inline-block';
+    function escapeHtml(str){ if (str===null||str===undefined) return ''; return String(str).replace(/[&<>"']/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[s])); }
+    function debounce(fn, wait){ let t; return function(...args){ clearTimeout(t); t=setTimeout(()=>fn.apply(this,args),wait); }; }
 
-  const displayCurrency = currencySelect.value || 'NGN';
-  let subtotal = 0;
-
-  // group items by product id
-  const grouped = {};
-  cart.forEach(item => {
-    if (!grouped[item.id]) grouped[item.id] = [];
-    grouped[item.id].push(item);
-  });
-
-  Object.keys(grouped).forEach(productId => {
-    const items = grouped[productId];
-    const product = productsData[productId] || null;
-
-    let thumbnail = '';
-    if (product) {
-      if (Array.isArray(product.images) && product.images.length) thumbnail = product.images[0];
-      else if (product.imageUrl) thumbnail = product.imageUrl;
-    }
-    if (!thumbnail) thumbnail = items[0].imageUrl || 'placeholder.jpg';
-
-    let productTotalQty = 0;
-    let productLineTotal = 0;
-    items.forEach(it => {
-      const unitPrice = getUnitPriceForCurrency(product, it, displayCurrency);
-      productTotalQty += Number(it.quantity) || 0;
-      productLineTotal += (Number(it.quantity) || 0) * unitPrice;
-    });
-    subtotal += productLineTotal;
-
-    // build variant list html
-    const variantsHtml = items.map(it => {
-      const unitPrice = getUnitPriceForCurrency(product, it, displayCurrency);
-      const lineTotal = unitPrice * (Number(it.quantity) || 0);
-      return `
-        <div class="variant-item" style="margin-bottom:6px; display:flex; align-items:center; justify-content:space-between; gap:6px;">
-          <div>
-            ${it.color ? `<span>Color: ${escapeHtml(it.color)}</span>` : ''}
-            ${it.size ? `<span>Size: ${escapeHtml(it.size)}</span>` : ''}
-          </div>
-          <div style="display:flex; align-items:center; gap:4px;">
-            <button class="minus" data-id="${escapeHtml(it.id)}" data-color="${escapeHtml(it.color || '')}" data-size="${escapeHtml(it.size || '')}">–</button>
-            <input type="number" min="0" value="${escapeHtml(String(it.quantity || 0))}" class="qty-input" data-id="${escapeHtml(it.id)}" data-color="${escapeHtml(it.color || '')}" data-size="${escapeHtml(it.size || '')}" style="width:50px;text-align:center;">
-            <button class="plus" data-id="${escapeHtml(it.id)}" data-color="${escapeHtml(it.color || '')}" data-size="${escapeHtml(it.size || '')}">+</button>
-            <button class="remove" style="margin-left:4px;background:#fff;color:#112e1f;border:1px solid #112e1f;padding:4px 6px;border-radius:6px;" data-id="${escapeHtml(it.id)}" data-color="${escapeHtml(it.color || '')}" data-size="${escapeHtml(it.size || '')}">Remove</button>
-            <span style="margin-left:6px; font-weight:600;">${formatPrice(lineTotal, displayCurrency)}</span>
-          </div>
-        </div>
-      `;
-    }).join('');
-
-    const div = document.createElement('div');
-    div.className = 'cart-item';
-    div.innerHTML = `
-      <img src="${escapeHtml(thumbnail)}" alt="${escapeHtml(product?.name || items[0].name || 'Product')}">
-      <div class="cart-item-details">
-        <h3>${escapeHtml(product?.name || items[0].name || '')}</h3>
-        <button class="toggle-variants" style="margin-bottom:6px;padding:4px 8px;background:#112e1f;color:#FFD6BA;border:none;border-radius:4px;cursor:pointer;">
-          Show Variants (${items.length})
-        </button>
-        <div class="variant-meta" style="display:none;">${variantsHtml}</div>
-        <div style="font-weight:600; margin-top:6px;">Total Quantity: ${productTotalQty} | Total: ${formatPrice(productLineTotal, displayCurrency)}</div>
-      </div>
-    `;
-
-    cartGrid.appendChild(div);
-    setTimeout(()=> div.style.opacity = '1', 50);
-
-    // toggle variants
-    const toggleBtn = div.querySelector('.toggle-variants');
-    const variantDiv = div.querySelector('.variant-meta');
-    toggleBtn.addEventListener('click', ()=>{
-      if(variantDiv.style.display === 'none'){
-        variantDiv.style.display = 'block';
-        toggleBtn.textContent = `Hide Variants (${items.length})`;
-      } else {
-        variantDiv.style.display = 'none';
-        toggleBtn.textContent = `Show Variants (${items.length})`;
-      }
-    });
-  });
-
-  cartSubtotalElem.textContent = `Subtotal: ${formatPrice(subtotal, displayCurrency)}`;
-
-  // attach all variant controls
-  cartGrid.querySelectorAll('.plus').forEach(btn => btn.addEventListener('click', async () => {
-    const { id, color, size } = btn.dataset;
-    const idx = findCartIndexByVariant(id, color, size);
-    if (idx === -1) return;
-    await updateQuantityForVariant(id, color, size, (Number(cart[idx].quantity)||0)+1);
-  }));
-  cartGrid.querySelectorAll('.minus').forEach(btn => btn.addEventListener('click', async () => {
-    const { id, color, size } = btn.dataset;
-    const idx = findCartIndexByVariant(id, color, size);
-    if (idx === -1) return;
-    await updateQuantityForVariant(id, color, size, (Number(cart[idx].quantity)||0)-1);
-  }));
-  cartGrid.querySelectorAll('.qty-input').forEach(input => input.addEventListener('input', debounce(async ()=>{
-    const { id, color, size } = input.dataset;
-    const val = parseInt(input.value,10);
-    if (isNaN(val)) return;
-    await updateQuantityForVariant(id,color,size,val);
-  },300)));
-  cartGrid.querySelectorAll('.remove').forEach(btn => btn.addEventListener('click', async ()=>{
-    const { id, color, size } = btn.dataset;
-    await updateQuantityForVariant(id,color,size,0);
-  }));
-}
-
-      cartEmpty.style.display = 'none';
-      checkoutBtn.style.display = 'inline-block';
-
+    function renderCartItems(){
+      cartGrid.innerHTML = '';
+      if (!cart || cart.length === 0) { cartEmpty.style.display='block'; cartSubtotalElem.textContent=''; checkoutBtn.style.display='none'; return; }
+      cartEmpty.style.display='none'; checkoutBtn.style.display='inline-block';
       const displayCurrency = currencySelect.value || 'NGN';
       let subtotal = 0;
 
-      cart.forEach(item => {
-        const product = productsData[item.id] || null;
-        // prefer first image from product.images, fallback to product.imageUrl, else saved cart item image
+      const grouped = {};
+      cart.forEach(item => { if(!grouped[item.id]) grouped[item.id]=[]; grouped[item.id].push(item); });
+
+      Object.keys(grouped).forEach(pid=>{
+        const items = grouped[pid];
+        const product = productsData[pid] || null;
         let thumbnail = '';
-        if (product) {
-          if (Array.isArray(product.images) && product.images.length) thumbnail = product.images[0];
-          else if (product.imageUrl) thumbnail = product.imageUrl;
-        }
-        if (!thumbnail) thumbnail = item.imageUrl || 'placeholder.jpg';
+        if(product){ if(Array.isArray(product.images)&&product.images.length) thumbnail=product.images[0]; else if(product.imageUrl) thumbnail=product.imageUrl; }
+        if(!thumbnail) thumbnail=items[0].imageUrl||'placeholder.jpg';
 
-        const unitPrice = getUnitPriceForCurrency(product, item, displayCurrency);
-        const lineTotal = unitPrice * (Number(item.quantity) || 0);
-        subtotal += lineTotal;
+        let productTotalQty = 0;
+        let productLineTotal = 0;
+        items.forEach(it=>{ const unitPrice=getUnitPriceForCurrency(product,it,displayCurrency); productTotalQty+=(Number(it.quantity)||0); productLineTotal+=unitPrice*(Number(it.quantity)||0); });
+        subtotal += productLineTotal;
 
-        // build item element
-        const div = document.createElement('div');
-        div.className = 'cart-item';
+        const variantsHtml = items.map(it=>{
+          const unitPrice=getUnitPriceForCurrency(product,it,displayCurrency);
+          const lineTotal=unitPrice*(Number(it.quantity)||0);
+          return `
+            <div class="variant-item" style="margin-bottom:6px; display:flex; align-items:center; justify-content:space-between; gap:6px;">
+              <div>${it.color?`<span>Color: ${escapeHtml(it.color)}</span>`:''}${it.size?`<span>Size: ${escapeHtml(it.size)}</span>`:''}</div>
+              <div style="display:flex; align-items:center; gap:4px;">
+                <button class="minus" data-id="${escapeHtml(it.id)}" data-color="${escapeHtml(it.color||'')}" data-size="${escapeHtml(it.size||'')}">–</button>
+                <input type="number" min="0" value="${escapeHtml(String(it.quantity||0))}" class="qty-input" data-id="${escapeHtml(it.id)}" data-color="${escapeHtml(it.color||'')}" data-size="${escapeHtml(it.size||'')}">
+                <button class="plus" data-id="${escapeHtml(it.id)}" data-color="${escapeHtml(it.color||'')}" data-size="${escapeHtml(it.size||'')}">+</button>
+                <button class="remove" style="margin-left:8px;background:#fff;color:#112e1f;border:1px solid #112e1f;padding:6px 8px;border-radius:6px;" data-id="${escapeHtml(it.id)}" data-color="${escapeHtml(it.color||'')}" data-size="${escapeHtml(it.size||'')}">Remove</button>
+                <span>${formatPrice(lineTotal,displayCurrency)}</span>
+              </div>
+            </div>
+          `;
+        }).join('');
 
-        // show variant meta (size/color) if present
-        const variantHtml = `
-          <div class="variant-meta">
-            ${item.color ? `<span>Color: ${escapeHtml(item.color)}</span>` : ''}
-            ${item.size ? `<span>Size: ${escapeHtml(item.size)}</span>` : ''}
-          </div>
-        `;
-
-        div.innerHTML = `
-          <img src="${escapeHtml(thumbnail)}" alt="${escapeHtml(product?.name || item.name || 'Product')}">
+        const div=document.createElement('div');
+        div.className='cart-item';
+        div.innerHTML=`
+          <img src="${escapeHtml(thumbnail)}" alt="${escapeHtml(product?.name||items[0].name||'Product')}">
           <div class="cart-item-details">
-            <h3>${escapeHtml(product?.name || item.name || '')}</h3>
-            ${variantHtml}
-            <div class="price" id="price-${escapeHtml(item.id)}-${escapeHtml(item.color || '')}-${escapeHtml(item.size || '')}">
-              ${formatPrice(lineTotal, displayCurrency)}
-            </div>
-
-            <div class="quantity-controls">
-              <button class="minus" data-id="${escapeHtml(item.id)}" data-color="${escapeHtml(item.color || '')}" data-size="${escapeHtml(item.size || '')}">–</button>
-              <input type="number" min="0" value="${escapeHtml(String(item.quantity || 0))}" class="qty-input" data-id="${escapeHtml(item.id)}" data-color="${escapeHtml(item.color || '')}" data-size="${escapeHtml(item.size || '')}">
-              <button class="plus" data-id="${escapeHtml(item.id)}" data-color="${escapeHtml(item.color || '')}" data-size="${escapeHtml(item.size || '')}">+</button>
-              <button class="remove" style="margin-left:8px;background:#fff;color:#112e1f;border:1px solid #112e1f;padding:6px 8px;border-radius:6px;" data-id="${escapeHtml(item.id)}" data-color="${escapeHtml(item.color || '')}" data-size="${escapeHtml(item.size || '')}">Remove</button>
-            </div>
+            <h3>${escapeHtml(product?.name||items[0].name||'')}</h3>
+            <div class="price">${formatPrice(productLineTotal,displayCurrency)}</div>
+            ${variantsHtml}
           </div>
         `;
-
         cartGrid.appendChild(div);
-        // fade in
-        setTimeout(()=> div.style.opacity = '1', 50);
+
+        setTimeout(()=>div.style.opacity='1',50);
       });
 
-      cartSubtotalElem.textContent = `Subtotal: ${formatPrice(subtotal, displayCurrency)}`;
+      cartSubtotalElem.textContent=`Subtotal: ${formatPrice(subtotal,displayCurrency)}`;
 
-      // wire controls after DOM nodes exist
-      cartGrid.querySelectorAll('.plus').forEach(btn => {
-        btn.addEventListener('click', async (ev) => {
-          const id = btn.dataset.id;
-          const color = btn.dataset.color || '';
-          const size = btn.dataset.size || '';
-          const idx = findCartIndexByVariant(id, color, size);
-          if (idx === -1) return;
-          const newQty = (Number(cart[idx].quantity) || 0) + 1;
-          await updateQuantityForVariant(id, color, size, newQty);
-        });
-      });
-
-      cartGrid.querySelectorAll('.minus').forEach(btn => {
-        btn.addEventListener('click', async (ev) => {
-          const id = btn.dataset.id;
-          const color = btn.dataset.color || '';
-          const size = btn.dataset.size || '';
-          const idx = findCartIndexByVariant(id, color, size);
-          if (idx === -1) return;
-          const newQty = (Number(cart[idx].quantity) || 0) - 1;
-          await updateQuantityForVariant(id, color, size, newQty);
-        });
-      });
-
-      cartGrid.querySelectorAll('.qty-input').forEach(input => {
-        input.addEventListener('input', debounce(async (ev) => {
-          const id = input.dataset.id;
-          const color = input.dataset.color || '';
-          const size = input.dataset.size || '';
-          const val = parseInt(input.value, 10);
-          if (isNaN(val)) return;
-          await updateQuantityForVariant(id, color, size, val);
-        }, 300));
-      });
-
-      cartGrid.querySelectorAll('.remove').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          const id = btn.dataset.id;
-          const color = btn.dataset.color || '';
-          const size = btn.dataset.size || '';
-          await updateQuantityForVariant(id, color, size, 0);
-        });
-      });
+      cartGrid.querySelectorAll('.plus').forEach(btn=>btn.addEventListener('click',async()=>{ const id=btn.dataset.id; const color=btn.dataset.color||''; const size=btn.dataset.size||''; const idx=findCartIndexByVariant(id,color,size); if(idx===-1)return; const newQty=(Number(cart[idx].quantity)||0)+1; await updateQuantityForVariant(id,color,size,newQty); }));
+      cartGrid.querySelectorAll('.minus').forEach(btn=>btn.addEventListener('click',async()=>{ const id=btn.dataset.id; const color=btn.dataset.color||''; const size=btn.dataset.size||''; const idx=findCartIndexByVariant(id,color,size); if(idx===-1)return; const newQty=(Number(cart[idx].quantity)||0)-1; await updateQuantityForVariant(id,color,size,newQty); }));
+      cartGrid.querySelectorAll('.qty-input').forEach(input=>input.addEventListener('input',debounce(async()=>{ const id=input.dataset.id; const color=input.dataset.color||''; const size=input.dataset.size||''; const val=parseInt(input.value,10); if(isNaN(val)) return; await updateQuantityForVariant(id,color,size,val); },300)));
+      cartGrid.querySelectorAll('.remove').forEach(btn=>btn.addEventListener('click',async()=>{ const id=btn.dataset.id; const color=btn.dataset.color||''; const size=btn.dataset.size||''; await updateQuantityForVariant(id,color,size,0); }));
     }
 
-    // small escape helper to avoid injecting raw strings into HTML attributes
-    function escapeHtml(str){
-      if (str === null || str === undefined) return '';
-      return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[s]));
-    }
+    (async function init(){ await fetchProductsData(); renderCartItems(); updateCartCount(); })();
 
-    // simple debounce
-    function debounce(fn, wait){
-      let t;
-      return function(...args){ clearTimeout(t); t = setTimeout(()=> fn.apply(this, args), wait); };
-    }
-
-    // initial flow: fetch product data and render
-    (async function init(){
-      await fetchProductsData();
-      renderCartItems();
-      updateCartCount();
-    })();
-
-    // hamburger menu
-    document.getElementById('hamburger').addEventListener('click', ()=>{
-      document.querySelector('.header-right').classList.toggle('open');
-      document.getElementById('hamburger').classList.toggle('open');
-    });
-
-    // listen for storage changes (cart changed in another tab)
-    window.addEventListener('storage', async () => {
-      cart = JSON.parse(localStorage.getItem('cart')) || [];
-      await fetchProductsData();
-      renderCartItems();
-      updateCartCount();
-    });
-
-    // when checkout is clicked: keep default behavior (checkout page should read cart from localStorage)
-    // (no changes here)
-
+    document.getElementById('hamburger').addEventListener('click',()=>{ document.querySelector('.header-right').classList.toggle('open'); document.getElementById('hamburger').classList.toggle('open'); });
+    window.addEventListener('storage',async()=>{ cart=JSON.parse(localStorage.getItem('cart'))||[]; await fetchProductsData(); renderCartItems(); updateCartCount(); });
   </script>
 </body>
 </html>
