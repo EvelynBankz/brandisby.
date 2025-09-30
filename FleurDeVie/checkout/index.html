@@ -22,10 +22,11 @@
     .hero::after{content:"";position:absolute;inset:0;background:url('../bg.jpg') center/cover no-repeat;transform:scale(1.08);z-index:-1;border-radius:12px;box-shadow:inset 0 0 0 2000px rgba(17,46,31,0.18)}
     .hero-text h1{font-family:"Playfair Display",serif;color:#FFD6BA;font-size:clamp(28px,5vw,48px)}
     section.checkout{padding:60px 20px}
-    .container{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr;gap:28px}
+    /* REDUCED billing form width, INCREASED order summary width */
+    .container{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1.6fr;gap:28px}
     .checkout-form,.order-summary{border-radius:12px;padding:18px;box-shadow:0 4px 10px rgba(0,0,0,0.08)}
     .checkout-form{background:#FFD6BA}
-    .order-summary{background:#fff}
+    .order-summary{background:#C9E4FF} /* requested bg color */
     h2{font-family:"Playfair Display",serif;margin-bottom:12px;font-size:20px}
     label{display:block;margin-bottom:6px;font-weight:500}
     input,textarea,select{width:100%;padding:10px;border-radius:6px;border:1px solid #112e1f;margin-bottom:12px;font-family:inherit}
@@ -34,51 +35,25 @@
     .checkout-btn{display:block;width:100%;background:#112e1f;color:#F5E6CC;padding:14px;border-radius:6px;border:none;font-weight:700;cursor:pointer}
     .checkout-btn:hover{background:#0a1d14}
 
-    /* order summary list */
+    /* order summary / items */
     .order-summary ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px}
-    .order-item{display:flex;gap:12px;align-items:flex-start;justify-content:space-between}
-    .order-item .left{flex:1 1 60%}
-    .order-item .right{flex:0 0 auto;text-align:right;min-width:120px}
+    .order-item{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;padding:10px;border-radius:8px;background:rgba(255,255,255,0.6)}
+    .order-item .left{flex:1 1 70%}
+    .order-item .right{flex:0 0 150px;text-align:right}
     .order-item .title{font-weight:600}
-    .order-item .meta{font-size:0.95rem;color:#4b5b50;margin-top:6px}
-    .order-item .small-img{width:56px;height:56px;object-fit:cover;border-radius:6px;background:#fff;border:1px solid #eee;margin-right:8px}
+    .order-item .meta{font-size:0.95rem;color:#334d3a;margin-top:6px}
 
-    /* variant toggle/button (small V icon) */
+    /* chevron toggle */
     .variant-toggle{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      width:30px;
-      height:30px;
-      border-radius:6px;
-      border:1px solid #112e1f;
-      background:#FFD6BA;
-      color:#112e1f;
-      font-weight:700;
-      cursor:pointer;
-      font-size:14px;
-      margin-left:8px;
-      line-height:1;
-      padding:0;
-      box-shadow:0 1px 0 rgba(0,0,0,0.05);
-      align-self:flex-start;
+      display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:6px;border:1px solid #112e1f;background:#FFD6BA;color:#112e1f;cursor:pointer;padding:0;margin-left:8px
     }
+    .variant-toggle svg{width:14px;height:14px;transition:transform .25s ease}
+    .variant-toggle[aria-expanded="true"] svg{transform:rotate(180deg)}
 
-    /* variants details container (sliding) */
-    .variants-container{
-      max-height:0;
-      overflow:hidden;
-      transition:max-height .28s ease, padding .28s ease;
-      padding-left:12px;
-      border-left:2px solid #e6e6e6;
-      margin-top:8px;
-      color:#334d3a;
-      font-size:0.95rem;
-    }
-    .variants-container.show{max-height:400px;padding-top:8px;padding-bottom:8px}
-
-    .variant-row{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:6px 0;border-bottom:1px dashed rgba(0,0,0,0.04)}
-    .variant-left{display:flex;align-items:center;gap:10px}
+    /* variants dropdown (read-only) */
+    .variants-container{max-height:0;overflow:hidden;transition:max-height .28s ease,padding .28s ease;padding-left:12px;border-left:2px solid rgba(17,46,31,0.08);margin-top:8px}
+    .variants-container.show{max-height:500px;padding-top:8px;padding-bottom:8px}
+    .variant-row{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:6px 0;border-bottom:1px dashed rgba(0,0,0,0.06)}
     .variant-attrs{font-size:0.95rem;color:#334d3a}
     .variant-price{font-weight:600;min-width:110px;text-align:right}
 
@@ -87,21 +62,20 @@
 
     footer{text-align:center;padding:20px;background:#112e1f;color:#F5E6CC;margin-top:36px}
 
-    @media(max-width:900px){
-      .container{grid-template-columns:1fr}
-    }
+    @media(max-width:900px){ .container{grid-template-columns:1fr} }
   </style>
 </head>
 <body>
   <header class="site-header">
     <div style="display:flex;align-items:center;gap:14px">
-      <img src="../logo.png" alt="logo" class="brand-logo">
+      <img src="../logo.png" alt="Fleur De Vie Logo" class="brand-logo">
       <div class="brand-title">Fleur De Vie</div>
     </div>
     <nav class="header-right">
       <a href="../index.html">Home</a>
       <a href="../shop.html">Shop</a>
       <a href="../about.html">About</a>
+      <a href="../contact.html">Contact</a>
       <a href="../cart.html">Cart <span class="cart-count" id="cartCount">0</span></a>
     </nav>
   </header>
@@ -110,25 +84,26 @@
 
   <section class="checkout">
     <div class="container">
+      <!-- Billing Form -->
       <div class="checkout-form">
         <h2>Billing Details</h2>
         <form id="checkoutForm">
-          <label for="name">Full name</label>
-          <input id="name" type="text" required>
+          <label for="name">Full Name</label>
+          <input type="text" id="name" required>
           <label for="email">Email</label>
-          <input id="email" type="email" required>
+          <input type="email" id="email" required>
           <label for="phone">Phone</label>
-          <input id="phone" type="tel" required>
+          <input type="tel" id="phone" required>
           <label for="address">Address</label>
           <textarea id="address" required></textarea>
         </form>
       </div>
 
+      <!-- Order Summary -->
       <div class="order-summary">
         <h2>Order Summary</h2>
-
         <div class="currency-selector" id="currencySelectorWrapper" style="display:none">
-          <label for="currency">Currency</label>
+          <label for="currency">Currency:</label>
           <select id="currency">
             <option value="NGN">NGN</option>
             <option value="USD">USD</option>
@@ -163,7 +138,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    /* DOM */
+    // DOM
     const cartCountElem = document.getElementById('cartCount');
     const orderItemsEl = document.getElementById('orderItems');
     const orderSubtotalEl = document.getElementById('orderSubtotal');
@@ -171,9 +146,9 @@
     const currencyWrapper = document.getElementById('currencySelectorWrapper');
     const payBtn = document.getElementById('payBtn');
 
-    /* load cart and helpers */
-    let rawCart = JSON.parse(localStorage.getItem('cart')) || []; // raw cart may contain variant rows
-    // ensure merged by identical variant keys (so duplicates consolidate)
+    // cart & quote
+    let rawCart = JSON.parse(localStorage.getItem('cart')) || [];
+    // ensure merged (in case duplicates)
     function mergeCartItems(cartArray){
       const merged=[];
       cartArray.forEach(item=>{
@@ -187,18 +162,23 @@
 
     const urlParams = new URLSearchParams(window.location.search);
     const quoteId = urlParams.get('quoteId');
-    let quote = null; // normalized items for checkout UI (will contain aggregated totals + variants)
+    let quote = null;
     let selectedCurrency = localStorage.getItem('currency') || 'NGN';
     currencySelect.value = selectedCurrency;
 
+    // formatting
     function formatPrice(value, currency){
       const localeMap = { USD:'en-US', EUR:'de-DE', GBP:'en-GB', NGN:'en-NG' };
       const minFrac = currency === 'NGN' ? 0 : 2;
-      return new Intl.NumberFormat(localeMap[currency]||'en-US',{ style:'currency', currency, minimumFractionDigits:minFrac }).format(Number(value||0));
+      try {
+        return new Intl.NumberFormat(localeMap[currency] || 'en-US', { style:'currency', currency, minimumFractionDigits: minFrac }).format(Number(value || 0));
+      } catch(e) {
+        return `${currency} ${Number(value || 0).toFixed(minFrac)}`;
+      }
     }
 
-    // choose unit price given product doc (if available) or cart item stored price
-    function getUnitPriceForCurrency(productDoc, cartItem, currency){
+    // get authoritative unit price (from product doc or cart item)
+    function getUnitPriceForCurrency(productDoc, cartItem, currency) {
       if(productDoc){
         if(currency === 'NGN' && productDoc.priceNGN != null) return Number(productDoc.priceNGN);
         if(currency === 'USD' && productDoc.priceUSD != null) return Number(productDoc.priceUSD);
@@ -207,22 +187,20 @@
         if(productDoc.price != null) return Number(productDoc.price);
       }
       if(cartItem && cartItem.price != null) return Number(cartItem.price);
-      // fallback 0
       return 0;
     }
 
-    // group variants by product id
-    function groupCartByProduct(mergedCart){
+    // group cart rows by product id
+    function groupCartByProduct(cartArr){
       const map = new Map();
-      mergedCart.forEach(item=>{
-        const id = item.id;
-        if(!map.has(id)) map.set(id, []);
-        map.get(id).push(item);
+      cartArr.forEach(row=>{
+        if(!map.has(row.id)) map.set(row.id, []);
+        map.get(row.id).push(row);
       });
-      return map; // Map<productId, Array<cartVariantRows>>
+      return map; // Map<id, [rows...]>
     }
 
-    // fetch product docs for all product ids in cart
+    // fetch product docs for ids
     async function fetchProducts(productIds){
       const out = {};
       const promises = productIds.map(async id=>{
@@ -235,10 +213,10 @@
         }
       });
       await Promise.all(promises);
-      return out; // object keyed by id
+      return out;
     }
 
-    // build normalized checkout quote structure from either server quote or local cart
+    // build a normalized quote structure from local cart (used when no quoteId)
     async function buildQuoteFromCart(){
       const merged = mergeCartItems(rawCart);
       const byProduct = groupCartByProduct(merged);
@@ -248,41 +226,42 @@
       const items = [];
 
       for(const pid of productIds){
-        const variants = byProduct.get(pid) || [];
+        const rows = byProduct.get(pid) || [];
         const productDoc = productsData[pid] || null;
-        const image = productDoc?.images?.[0] || productDoc?.imageUrl || variants[0]?.imageUrl || '';
-        const name = productDoc?.name || variants[0]?.name || 'Product';
-        // For each variant compute unitPrice and line price per currency
-        const variantDetails = variants.map(v=>{
+        const image = productDoc?.images?.[0] || productDoc?.imageUrl || rows[0]?.imageUrl || '';
+        const name = productDoc?.name || rows[0]?.name || 'Product';
+
+        // build variant detail rows with unitPrices & linePrices
+        const variantDetails = rows.map(r => {
           const unitPrices = {
-            NGN: getUnitPriceForCurrency(productDoc, v, 'NGN'),
-            USD: getUnitPriceForCurrency(productDoc, v, 'USD'),
-            EUR: getUnitPriceForCurrency(productDoc, v, 'EUR'),
-            GBP: getUnitPriceForCurrency(productDoc, v, 'GBP')
+            NGN: getUnitPriceForCurrency(productDoc, r, 'NGN'),
+            USD: getUnitPriceForCurrency(productDoc, r, 'USD'),
+            EUR: getUnitPriceForCurrency(productDoc, r, 'EUR'),
+            GBP: getUnitPriceForCurrency(productDoc, r, 'GBP')
           };
+          const quantity = Number(r.quantity) || 0;
           const linePrices = {
-            NGN: (unitPrices.NGN || 0) * (Number(v.quantity)||0),
-            USD: (unitPrices.USD || 0) * (Number(v.quantity)||0),
-            EUR: (unitPrices.EUR || 0) * (Number(v.quantity)||0),
-            GBP: (unitPrices.GBP || 0) * (Number(v.quantity)||0)
+            NGN: (unitPrices.NGN || 0) * quantity,
+            USD: (unitPrices.USD || 0) * quantity,
+            EUR: (unitPrices.EUR || 0) * quantity,
+            GBP: (unitPrices.GBP || 0) * quantity
           };
           return {
-            id: v.id,
-            color: v.color || '',
-            size: v.size || '',
-            quantity: Number(v.quantity)||0,
+            id: r.id,
+            color: r.color || '',
+            size: r.size || '',
+            quantity,
             unitPrices,
             linePrices
           };
         });
 
-        // compute totals across variants
-        const totalQty = variantDetails.reduce((s, a)=> s + a.quantity, 0);
+        const totalQty = variantDetails.reduce((s,a)=>s + a.quantity, 0);
         const totalPrices = {
-          NGN: variantDetails.reduce((s,a)=> s + (a.linePrices.NGN||0), 0),
-          USD: variantDetails.reduce((s,a)=> s + (a.linePrices.USD||0), 0),
-          EUR: variantDetails.reduce((s,a)=> s + (a.linePrices.EUR||0), 0),
-          GBP: variantDetails.reduce((s,a)=> s + (a.linePrices.GBP||0), 0)
+          NGN: variantDetails.reduce((s,a) => s + (a.linePrices.NGN||0), 0),
+          USD: variantDetails.reduce((s,a) => s + (a.linePrices.USD||0), 0),
+          EUR: variantDetails.reduce((s,a) => s + (a.linePrices.EUR||0), 0),
+          GBP: variantDetails.reduce((s,a) => s + (a.linePrices.GBP||0), 0)
         };
 
         items.push({
@@ -298,15 +277,15 @@
       return { items };
     }
 
-    // if quoteId present -> load server quote; else build from cart
+    // load checkout: either from quoteId (server) or cart
     async function loadCheckout(){
-      // defaults
-      currencyWrapper.style.display = 'none';
+      // default currency
       selectedCurrency = localStorage.getItem('currency') || 'NGN';
       currencySelect.value = selectedCurrency;
+      currencyWrapper.style.display = 'none';
 
       if(quoteId){
-        // fetch quote from firestore and normalize to our structure (quote may already include variants)
+        // fetch quote and normalize
         try{
           const qRef = doc(db, "brands", "fleurdevie", "quotes", quoteId);
           const snap = await getDoc(qRef);
@@ -318,76 +297,77 @@
           if(rawQuote.customer) document.getElementById('name').value = rawQuote.customer;
           if(rawQuote.email) document.getElementById('email').value = rawQuote.email;
 
-          // show currency selector for quotes
           currencyWrapper.style.display = 'block';
           selectedCurrency = localStorage.getItem('currency') || rawQuote.currency || 'NGN';
           currencySelect.value = selectedCurrency;
 
-          // normalize quote items
+          // Normalize quote items to same structure we use above
           const items = (Array.isArray(rawQuote.items) ? rawQuote.items : []).map(ci=>{
-            // ci may have variants or not; we convert to same shape as cart-built items
-            if(Array.isArray(ci.variants) && ci.variants.length>0){
-              const variants = ci.variants.map(v=>({
+            // if ci has variants (server-side quote), map accordingly
+            if(Array.isArray(ci.variants) && ci.variants.length){
+              const variants = ci.variants.map(v => ({
                 id: v.id || ci.id || '',
                 color: v.color || '',
                 size: v.size || '',
-                quantity: Number(v.qty)||1,
-                unitPrices:{
-                  NGN:Number(v.priceNGN)||0,
-                  USD:Number(v.priceUSD)||0,
-                  EUR:Number(v.priceEUR)||0,
-                  GBP:Number(v.priceGBP)||0
+                quantity: Number(v.qty) || 0,
+                unitPrices: {
+                  NGN: Number(v.priceNGN) || 0,
+                  USD: Number(v.priceUSD) || 0,
+                  EUR: Number(v.priceEUR) || 0,
+                  GBP: Number(v.priceGBP) || 0
                 },
-                linePrices:{
-                  NGN:(Number(v.priceNGN)||0) * (Number(v.qty)||1),
-                  USD:(Number(v.priceUSD)||0) * (Number(v.qty)||1),
-                  EUR:(Number(v.priceEUR)||0) * (Number(v.qty)||1),
-                  GBP:(Number(v.priceGBP)||0) * (Number(v.qty)||1)
+                linePrices: {
+                  NGN: (Number(v.priceNGN) || 0) * (Number(v.qty) || 0),
+                  USD: (Number(v.priceUSD) || 0) * (Number(v.qty) || 0),
+                  EUR: (Number(v.priceEUR) || 0) * (Number(v.qty) || 0),
+                  GBP: (Number(v.priceGBP) || 0) * (Number(v.qty) || 0)
                 }
               }));
-              const totalQty = variants.reduce((s,a)=>s+a.quantity,0);
-              const totalPrices = {
-                NGN: variants.reduce((s,a)=>s + (a.linePrices.NGN||0),0),
-                USD: variants.reduce((s,a)=>s + (a.linePrices.USD||0),0),
-                EUR: variants.reduce((s,a)=>s + (a.linePrices.EUR||0),0),
-                GBP: variants.reduce((s,a)=>s + (a.linePrices.GBP||0),0)
-              };
               return {
                 productId: ci.id || '',
                 name: ci.name || '',
                 image: ci.image || '',
-                totalQuantity: totalQty,
-                totalPrices,
+                totalQuantity: variants.reduce((s,a)=>s+a.quantity,0),
+                totalPrices: {
+                  NGN: variants.reduce((s,a)=>s + (a.linePrices.NGN||0),0),
+                  USD: variants.reduce((s,a)=>s + (a.linePrices.USD||0),0),
+                  EUR: variants.reduce((s,a)=>s + (a.linePrices.EUR||0),0),
+                  GBP: variants.reduce((s,a)=>s + (a.linePrices.GBP||0),0)
+                },
                 variants
               };
             } else {
-              // no variants, single line
+              // single-line item
+              const qty = Number(ci.qty) || 1;
               const unitPrices = {
-                NGN:Number(ci.priceNGN)||0,
-                USD:Number(ci.priceUSD)||0,
-                EUR:Number(ci.priceEUR)||0,
-                GBP:Number(ci.priceGBP)||0
-              };
-              const qty = Number(ci.qty)||1;
-              const totalPrices = {
-                NGN: unitPrices.NGN * qty,
-                USD: unitPrices.USD * qty,
-                EUR: unitPrices.EUR * qty,
-                GBP: unitPrices.GBP * qty
+                NGN: Number(ci.priceNGN) || 0,
+                USD: Number(ci.priceUSD) || 0,
+                EUR: Number(ci.priceEUR) || 0,
+                GBP: Number(ci.priceGBP) || 0
               };
               return {
                 productId: ci.id || '',
                 name: ci.name || '',
                 image: ci.image || '',
                 totalQuantity: qty,
-                totalPrices,
+                totalPrices: {
+                  NGN: (unitPrices.NGN || 0) * qty,
+                  USD: (unitPrices.USD || 0) * qty,
+                  EUR: (unitPrices.EUR || 0) * qty,
+                  GBP: (unitPrices.GBP || 0) * qty
+                },
                 variants: [{
                   id: ci.id || '',
                   color: '',
                   size: '',
                   quantity: qty,
                   unitPrices,
-                  linePrices: totalPrices
+                  linePrices: {
+                    NGN: (unitPrices.NGN || 0) * qty,
+                    USD: (unitPrices.USD || 0) * qty,
+                    EUR: (unitPrices.EUR || 0) * qty,
+                    GBP: (unitPrices.GBP || 0) * qty
+                  }
                 }]
               };
             }
@@ -397,15 +377,17 @@
           renderOrder();
         } catch(err){
           console.error("Failed to load quote", err);
-          alert("Error loading quote.");
+          alert("Error loading quote. Please try again.");
         }
-
       } else {
-        // build from the cart (group by product & compute totals per currency)
-        currencyWrapper.style.display = 'none';
-        const built = await buildQuoteFromCart();
-        quote = built;
-        renderOrder();
+        // build from client cart
+        try {
+          const built = await buildQuoteFromCart();
+          quote = built;
+          renderOrder();
+        } catch(err){
+          console.error("Failed to build quote from cart", err);
+        }
       }
 
       updateCartCount();
@@ -416,70 +398,103 @@
       cartCountElem.textContent = total;
     }
 
-    // RENDER order summary: NOTE: quote.items already contains aggregated totals (per currency)
+    // render order: grouped product lines and per-variant rows in dropdown
     function renderOrder(){
       orderItemsEl.innerHTML = '';
       let subtotal = 0;
       const items = (quote && Array.isArray(quote.items)) ? quote.items : [];
 
       items.forEach(item=>{
-        const totalPriceForCurrency = (item.totalPrices && (item.totalPrices[selectedCurrency] ?? 0)) || 0;
-        subtotal += totalPriceForCurrency;
+        const lineTotal = (item.totalPrices && (item.totalPrices[selectedCurrency] ?? 0)) || 0;
+        subtotal += lineTotal;
 
         const li = document.createElement('li');
         li.className = 'order-item';
 
         const left = document.createElement('div');
         left.className = 'left';
-        // title + small image
-        const titleWrap = document.createElement('div');
-        titleWrap.style.display = 'flex';
-        titleWrap.style.alignItems = 'center';
+
+        // title + qty
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'title';
+        titleDiv.textContent = `${item.name} (x${item.totalQuantity})`;
+
+        // meta & toggle
+        const metaDiv = document.createElement('div');
+        metaDiv.className = 'meta';
+
+        // build the header area with optional image + title + toggle
+        const headerWrapper = document.createElement('div');
+        headerWrapper.style.display = 'flex';
+        headerWrapper.style.alignItems = 'center';
+        headerWrapper.style.gap = '10px';
 
         if(item.image){
           const img = document.createElement('img');
           img.src = item.image;
           img.alt = item.name;
-          img.className = 'small-img';
-          titleWrap.appendChild(img);
+          img.style.width = '56px';
+          img.style.height = '56px';
+          img.style.objectFit = 'cover';
+          img.style.borderRadius = '6px';
+          img.style.border = '1px solid rgba(0,0,0,0.06)';
+          headerWrapper.appendChild(img);
         }
 
-        const titleMeta = document.createElement('div');
-        const title = document.createElement('div');
-        title.className = 'title';
-        title.textContent = `${item.name} (x${item.totalQuantity})`;
-        titleMeta.appendChild(title);
+        const textWrap = document.createElement('div');
+        textWrap.appendChild(titleDiv);
 
-        // If product has more than one variant, show attributes summary and variant toggle
         if(Array.isArray(item.variants) && item.variants.length > 1){
-          const meta = document.createElement('div');
-          meta.className = 'meta';
-          meta.textContent = `Multiple options selected`;
-          titleMeta.appendChild(meta);
+          const info = document.createElement('div');
+          info.className = 'meta';
+          info.textContent = 'Multiple options selected';
+          textWrap.appendChild(info);
+        } else {
+          const singleV = item.variants && item.variants[0];
+          if(singleV && (singleV.color || singleV.size)){
+            const info = document.createElement('div');
+            info.className = 'meta';
+            info.textContent = `${singleV.color ? 'Color: ' + singleV.color : ''}${singleV.color && singleV.size ? ' · ' : ''}${singleV.size ? 'Size: ' + singleV.size : ''}`;
+            textWrap.appendChild(info);
+          }
+        }
 
-          // variant toggle "V"
+        headerWrapper.appendChild(textWrap);
+
+        // right column price
+        const right = document.createElement('div');
+        right.className = 'right';
+        right.style.minWidth = '120px';
+        right.style.textAlign = 'right';
+        right.innerHTML = `<div style="font-weight:600">${formatPrice(lineTotal, selectedCurrency)}</div>`;
+
+        // if more than one variant, add chevron toggle to show variant rows
+        if(Array.isArray(item.variants) && item.variants.length > 1){
           const toggle = document.createElement('button');
           toggle.className = 'variant-toggle';
           toggle.type = 'button';
+          toggle.setAttribute('aria-expanded','false');
           toggle.title = 'View variants';
-          toggle.innerHTML = 'V';
+          // chevron svg
+          toggle.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>`;
 
-          // append toggle to titleWrap (to the right of text)
-          titleWrap.appendChild(titleMeta);
-          titleWrap.appendChild(toggle);
+          headerWrapper.appendChild(toggle);
 
-          // variants container
+          // assembly
+          left.appendChild(headerWrapper);
+
           const variantsContainer = document.createElement('div');
           variantsContainer.className = 'variants-container';
-          // populate variant rows
           item.variants.forEach(v=>{
             const row = document.createElement('div');
             row.className = 'variant-row';
             const leftRow = document.createElement('div');
-            leftRow.className = 'variant-left';
+            leftRow.style.display = 'flex';
+            leftRow.style.gap = '8px';
+            leftRow.style.alignItems = 'center';
             const attrs = document.createElement('div');
             attrs.className = 'variant-attrs';
-            attrs.innerHTML = `${v.color ? `Color: ${v.color} ` : ''}${v.size ? `Size: ${v.size}` : ''} <span style="color:#556b59"> &middot; qty: ${v.quantity}</span>`;
+            attrs.innerHTML = `${v.color ? `Color: ${v.color}` : ''}${v.color && v.size ? ' · ' : ''}${v.size ? `Size: ${v.size}` : ''} <span style="color:#556b59"> · qty: ${v.quantity}</span>`;
             leftRow.appendChild(attrs);
             const rightPrice = document.createElement('div');
             rightPrice.className = 'variant-price';
@@ -490,36 +505,18 @@
             variantsContainer.appendChild(row);
           });
 
-          // assemble left column
-          titleWrap.style.gap = '10px';
-          left.appendChild(titleWrap);
           left.appendChild(variantsContainer);
 
-          // wire toggle
+          // toggle wiring
           toggle.addEventListener('click', () => {
-            variantsContainer.classList.toggle('show');
-            // toggle aria-expanded for accessibility
-            const expanded = variantsContainer.classList.contains('show');
-            toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+            const isShown = variantsContainer.classList.toggle('show');
+            toggle.setAttribute('aria-expanded', isShown ? 'true' : 'false');
           });
 
         } else {
-          // single variant (or product without variant) - show attributes inline (if present)
-          const attrs = document.createElement('div');
-          attrs.className = 'meta';
-          const v = item.variants && item.variants[0];
-          if(v && (v.color || v.size)){
-            attrs.textContent = `${v.color ? 'Color: ' + v.color : ''}${v.color && v.size ? ' · ' : ''}${v.size ? 'Size: ' + v.size : ''}`;
-            titleMeta.appendChild(attrs);
-          }
-          titleWrap.appendChild(titleMeta);
-          left.appendChild(titleWrap);
+          // single variant or no variants
+          left.appendChild(headerWrapper);
         }
-
-        // right column (line total)
-        const right = document.createElement('div');
-        right.className = 'right';
-        right.innerHTML = `<div style="font-weight:600">${formatPrice(totalPriceForCurrency, selectedCurrency)}</div>`;
 
         li.appendChild(left);
         li.appendChild(right);
@@ -529,8 +526,8 @@
       orderSubtotalEl.textContent = `Subtotal: ${formatPrice(subtotal, selectedCurrency)}`;
     }
 
-    // PAYMENT: prepare items (we keep quote.items structure for storage)
-    payBtn.addEventListener('click', async () => {
+    // payment flow
+    payBtn.addEventListener('click', async function(){
       const name = document.getElementById('name').value.trim();
       const email = document.getElementById('email').value.trim();
       const phone = document.getElementById('phone').value.trim();
@@ -540,9 +537,10 @@
         return;
       }
 
+      // prepare items and subtotal using quote structure
       const itemsToSubmit = (quote && Array.isArray(quote.items)) ? quote.items : [];
       let subtotal = 0;
-      itemsToSubmit.forEach(it => {
+      itemsToSubmit.forEach(it=>{
         subtotal += (it.totalPrices && (it.totalPrices[selectedCurrency] ?? 0)) || 0;
       });
 
@@ -551,7 +549,7 @@
         return;
       }
 
-      // NOTE: Replace FLWPUBK_TEST... with your real key when ready
+      // Flutterwave checkout (replace PUBLIC KEY with real key when ready)
       FlutterwaveCheckout({
         public_key: "FLWPUBK_TEST-xxxxxxxxxxxxxxxxxxxxx-X",
         tx_ref: "fleurdevie-" + Date.now(),
@@ -559,9 +557,8 @@
         currency: selectedCurrency,
         customer: { email, phonenumber: phone, name },
         customizations: { title: "Fleur De Vie", description: "Order Payment", logo: "../fleurdevie/logo.png" },
-        callback: async function (data) {
-          try {
-            // Save order document
+        callback: async function(data){
+          try{
             await addDoc(collection(db, "orders"), {
               name, email, phone, address,
               currency: selectedCurrency,
@@ -573,9 +570,9 @@
             });
             localStorage.removeItem('cart');
             window.location.href = "../fleurdevie/thankyou.html";
-          } catch (err) {
+          }catch(err){
             console.error("Order save failed", err);
-            alert("Order saved failed, but payment succeeded.");
+            alert("Order save failed, but payment succeeded!");
             localStorage.removeItem('cart');
             window.location.href = "../fleurdevie/thankyou.html";
           }
@@ -583,17 +580,24 @@
       });
     });
 
-    /* init */
+    // Initialization
     (async function init(){
       updateCartCount();
       await loadCheckout();
     })();
 
-    // Currency selector handler
+    // currency change
     currencySelect.addEventListener('change', ()=>{
       selectedCurrency = currencySelect.value;
       localStorage.setItem('currency', selectedCurrency);
       renderOrder();
+    });
+
+    // listen for storage changes (cart updated in another tab)
+    window.addEventListener('storage', async () => {
+      rawCart = JSON.parse(localStorage.getItem('cart')) || [];
+      rawCart = mergeCartItems(rawCart);
+      await loadCheckout();
     });
   </script>
 </body>
