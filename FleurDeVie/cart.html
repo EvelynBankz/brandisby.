@@ -7,7 +7,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* RESET & HEADER */
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family: "Montserrat", sans-serif; background: #F5E6CC; color:#112e1f; line-height:1.6; }
     a { text-decoration:none; color:inherit; }
@@ -28,14 +27,12 @@
     .hamburger.open span:nth-child(2){ opacity:0; }
     .hamburger.open span:nth-child(3){ transform:rotate(-45deg); top:10px; }
 
-    /* HERO */
     .hero { position: relative; height:50vh; display:flex; justify-content:center; align-items:center; text-align:center; margin-top:80px; overflow:hidden; }
     .hero::after { content:""; position:absolute; inset:0; background:url('bg.jpg') center/cover no-repeat; transform:scale(1.1); z-index:-1; border-radius:12px; box-shadow: inset 0 0 0 2000px rgba(17,46,31,0.3); }
     .hero-text { position:relative; display:inline-block; color:#FFD6BA; margin-bottom:12px; animation: shimmer 3s infinite linear; }
     .hero-text h1 { font-family:"Playfair Display", serif; font-size:clamp(36px,5vw,64px); margin-bottom:12px; }
     .hero-text p { font-size:clamp(16px,2vw,24px); max-width:700px; }
 
-    /* CART */
     section.cart { padding:60px 20px; background:#F5E6CC; }
     .container { max-width:1100px; margin:auto; }
     h2 { text-align:center; font-size:24px; font-family:"Playfair Display", serif; margin-bottom:20px; }
@@ -44,8 +41,9 @@
 
     .cart-grid { display:grid; gap:20px; transition: opacity 0.3s ease-in-out; }
     .cart-item { display:flex; flex-direction:column; background:#FFD6BA; padding:16px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,0.1); opacity:0; transition: opacity 0.4s ease-in-out; }
-    .cart-item .product-header { display:flex; align-items:center; justify-content:space-between; cursor:pointer; }
-    .cart-item .variants-container { overflow:hidden; transition: max-height 0.4s ease; }
+    .product-header { display:flex; align-items:center; justify-content:space-between; }
+    .product-info { display:flex; align-items:center; gap:12px; }
+    .variants-container { overflow:hidden; transition: max-height 0.4s ease; }
     .variant-item { margin-bottom:6px; display:flex; align-items:center; justify-content:space-between; gap:6px; }
 
     .cart-subtotal { text-align:right; font-weight:600; margin-top:10px; transition: all 0.3s ease-in-out; }
@@ -59,7 +57,6 @@
 
     footer { text-align:center; padding:20px; background:#112e1f; color:#F5E6CC; margin-top:60px; }
 
-    /* MOBILE STYLING */
     @media (max-width: 600px) {
       .header-right { display:none; flex-direction:column; background:#112e1f; position:absolute; top:70px; right:0; width:200px; padding:20px; }
       .header-right.open { display:flex; }
@@ -74,254 +71,265 @@
 </head>
 <body>
 
-  <!-- HEADER -->
-  <header class="site-header">
-    <div class="header-left">
-      <img src="logo.png" alt="Fleur De Vie Logo" class="brand-logo">
-      <div class="brand-title">Fleur De Vie</div>
+<header class="site-header">
+  <div class="header-left">
+    <img src="logo.png" alt="Fleur De Vie Logo" class="brand-logo">
+    <div class="brand-title">Fleur De Vie</div>
+  </div>
+  <nav class="header-right">
+    <a href="index.html">Home</a>
+    <a href="shop.html">Shop</a>
+    <a href="about.html">About</a>
+    <a href="cart.html">Cart <span class="cart-count" id="cartCount">0</span></a>
+    <a href="customization.html">Customize</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+  <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+</header>
+
+<section class="hero">
+  <div class="hero-text">
+    <h1>Your Cart</h1>
+    <p>Review your items before checkout</p>
+  </div>
+</section>
+
+<section class="cart">
+  <div class="container">
+    <h2>Shopping Cart</h2>
+    <div class="currency-selector">
+      <label for="currency">Currency: </label>
+      <select id="currency">
+        <option value="NGN">NGN</option>
+        <option value="USD">USD</option>
+        <option value="EUR">EUR</option>
+        <option value="GBP">GBP</option>
+      </select>
     </div>
-    <nav class="header-right">
-      <a href="index.html">Home</a>
-      <a href="shop.html">Shop</a>
-      <a href="about.html">About</a>
-      <a href="cart.html">Cart <span class="cart-count" id="cartCount">0</span></a>
-      <a href="customization.html">Customize</a>
-      <a href="contact.html">Contact</a>
-    </nav>
-    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
-  </header>
-
-  <!-- HERO -->
-  <section class="hero">
-    <div class="hero-text">
-      <h1>Your Cart</h1>
-      <p>Review your items before checkout</p>
+    <div class="cart-grid" id="cartGrid"></div>
+    <div class="cart-empty" id="cartEmpty">Your cart is empty.</div>
+    <div class="cart-subtotal" id="cartSubtotal"></div>
+    <div class="cart-buttons">
+      <a href="shop.html" class="continue-btn">Continue Shopping</a>
+      <a href="checkout/index.html" class="checkout-btn" id="checkoutBtn">Proceed to Checkout</a>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- CART -->
-  <section class="cart">
-    <div class="container">
-      <h2>Shopping Cart</h2>
-      <div class="currency-selector">
-        <label for="currency">Currency: </label>
-        <select id="currency">
-          <option value="NGN">NGN</option>
-          <option value="USD">USD</option>
-          <option value="EUR">EUR</option>
-          <option value="GBP">GBP</option>
-        </select>
-      </div>
+<footer>
+  <p>© 2025 Fleur De Vie</p>
+</footer>
 
-      <div class="cart-grid" id="cartGrid"></div>
-      <div class="cart-empty" id="cartEmpty">Your cart is empty.</div>
-      <div class="cart-subtotal" id="cartSubtotal"></div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-      <div class="cart-buttons">
-        <a href="shop.html" class="continue-btn">Continue Shopping</a>
-        <a href="checkout/index.html" class="checkout-btn" id="checkoutBtn">Proceed to Checkout</a>
-      </div>
-    </div>
-  </section>
+const firebaseConfig = {
+  apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
+  authDomain: "brandisby.firebaseapp.com",
+  projectId: "brandisby",
+  storageBucket: "brandisby.firebasestorage.app",
+  messagingSenderId: "87213267039",
+  appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-  <!-- FOOTER -->
-  <footer>
-    <p>© 2025 Fleur De Vie</p>
-  </footer>
+const cartGrid = document.getElementById('cartGrid');
+const cartEmpty = document.getElementById('cartEmpty');
+const cartCountElem = document.getElementById('cartCount');
+const cartSubtotalElem = document.getElementById('cartSubtotal');
+const checkoutBtn = document.getElementById('checkoutBtn');
+const currencySelect = document.getElementById('currency');
 
-  <!-- FIREBASE + CART SCRIPT -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+let cart = JSON.parse(localStorage.getItem('cart')) || [];
+let productsData = {};
+if(localStorage.getItem('currency')) currencySelect.value = localStorage.getItem('currency');
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
-      authDomain: "brandisby.firebaseapp.com",
-      projectId: "brandisby",
-      storageBucket: "brandisby.firebasestorage.app",
-      messagingSenderId: "87213267039",
-      appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
-    };
+currencySelect.addEventListener('change', async () => {
+  localStorage.setItem('currency', currencySelect.value);
+  await fetchProductsData();
+  renderCartItems();
+});
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+function formatPrice(value, currency){
+  const localeMap = { USD:'en-US', EUR:'de-DE', GBP:'en-GB', NGN:'en-NG' };
+  const minFrac = currency==='NGN'?0:2;
+  try { return new Intl.NumberFormat(localeMap[currency]||'en-US',{style:'currency',currency,minimumFractionDigits:minFrac}).format(Number(value||0)); } 
+  catch(e){ return `${currency} ${Number(value||0).toFixed(minFrac)}`; }
+}
 
-    const cartGrid = document.getElementById('cartGrid');
-    const cartEmpty = document.getElementById('cartEmpty');
-    const cartCountElem = document.getElementById('cartCount');
-    const cartSubtotalElem = document.getElementById('cartSubtotal');
-    const checkoutBtn = document.getElementById('checkoutBtn');
-    const currencySelect = document.getElementById('currency');
+function uniqueProductIdsFromCart(){ const ids=new Set(); cart.forEach(i=>{if(i&&i.id) ids.add(i.id)}); return Array.from(ids); }
 
-    let cart = JSON.parse(localStorage.getItem('cart')) || [];
-    let productsData = {};
-    if (localStorage.getItem('currency')) currencySelect.value = localStorage.getItem('currency');
+async function fetchProductsData(){
+  const ids = uniqueProductIdsFromCart();
+  const temp = {};
+  await Promise.all(ids.map(async id=>{
+    try{
+      const snap = await getDoc(doc(db,"brands","fleurdevie","products",id));
+      if(snap.exists()) temp[id] = snap.data();
+    }catch(e){ console.warn("Failed to fetch product",id,e); }
+  }));
+  productsData = temp;
+}
 
-    currencySelect.addEventListener('change', async () => {
-      localStorage.setItem('currency', currencySelect.value);
-      await fetchProductsData();
-      renderCartItems();
-    });
+function getUnitPriceForCurrency(product, cartItem, currency){
+  if(product){
+    if(currency==='NGN' && product.priceNGN!=null) return Number(product.priceNGN);
+    if(currency==='USD' && product.priceUSD!=null) return Number(product.priceUSD);
+    if(currency==='EUR' && product.priceEUR!=null) return Number(product.priceEUR);
+    if(currency==='GBP' && product.priceGBP!=null) return Number(product.priceGBP);
+    if(product.price!=null) return Number(product.price);
+  }
+  if(cartItem && cartItem.price!=null) return Number(cartItem.price);
+  return 0;
+}
 
-    function formatPrice(value, currency){
-      const localeMap = { USD:'en-US', EUR:'de-DE', GBP:'en-GB', NGN:'en-NG' };
-      const minFrac = currency === 'NGN' ? 0 : 2;
-      try { return new Intl.NumberFormat(localeMap[currency] || 'en-US', { style:'currency', currency, minimumFractionDigits: minFrac }).format(Number(value || 0)); } 
-      catch(e) { return `${currency} ${Number(value||0).toFixed(minFrac)}`; }
-    }
+async function saveCartAndRerender(newCart){
+  localStorage.setItem('cart', JSON.stringify(newCart));
+  cart = newCart;
+  updateCartCount();
+  await fetchProductsData();
+  renderCartItems();
+}
 
-    function uniqueProductIdsFromCart(){ const ids=new Set(); cart.forEach(i=>{if(i&&i.id) ids.add(i.id)}); return Array.from(ids); }
+function updateCartCount(){
+  const total = cart.reduce((sum,it)=>sum+(Number(it.quantity)||0),0);
+  cartCountElem.textContent = total;
+  cartCountElem.style.transform='scale(1.2)';
+  setTimeout(()=>cartCountElem.style.transform='scale(1)',150);
+}
 
-    async function fetchProductsData(){
-      const ids = uniqueProductIdsFromCart();
-      const temp = {};
-      await Promise.all(ids.map(async id=>{
-        try{
-          const snap = await getDoc(doc(db,"brands","fleurdevie","products",id));
-          if(snap.exists()) temp[id] = snap.data();
-        }catch(e){ console.warn("Failed to fetch product",id,e); }
-      }));
-      productsData = temp;
-    }
+function findCartIndexByVariant(id,color,size){ return cart.findIndex(i=>i.id===id && (i.color||'')===(color||'') && (i.size||'')===(size||'')); }
 
-    function getUnitPriceForCurrency(product, cartItem, currency){
-      if(product){
-        if(currency==='NGN' && product.priceNGN!=null) return Number(product.priceNGN);
-        if(currency==='USD' && product.priceUSD!=null) return Number(product.priceUSD);
-        if(currency==='EUR' && product.priceEUR!=null) return Number(product.priceEUR);
-        if(currency==='GBP' && product.priceGBP!=null) return Number(product.priceGBP);
-        if(product.price!=null) return Number(product.price);
-      }
-      if(cartItem && cartItem.price!=null) return Number(cartItem.price);
-      return 0;
-    }
+async function updateQuantityForVariant(id,color,size,newQty){
+  const idx=findCartIndexByVariant(id,color,size);
+  if(idx===-1) return;
+  if(newQty<=0) cart.splice(idx,1);
+  else cart[idx].quantity = Number(newQty);
+  await saveCartAndRerender(cart);
+}
 
-    async function saveCartAndRerender(newCart){
-      localStorage.setItem('cart', JSON.stringify(newCart));
-      cart = newCart;
-      updateCartCount();
-      await fetchProductsData();
-      renderCartItems();
-    }
+function escapeHtml(str){ if(str===null||str===undefined) return ''; return String(str).replace(/[&<>"']/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[s])); }
 
-    function updateCartCount(){
-      const total = cart.reduce((sum,it)=>sum+(Number(it.quantity)||0),0);
-      cartCountElem.textContent = total;
-      cartCountElem.style.transform='scale(1.2)';
-      setTimeout(()=>cartCountElem.style.transform='scale(1)',150);
-    }
+function debounce(fn, wait){ let t; return function(...args){ clearTimeout(t); t=setTimeout(()=>fn.apply(this,args),wait); }; }
 
-    function findCartIndexByVariant(id,color,size){ return cart.findIndex(i=>i.id===id && (i.color||'')===(color||'') && (i.size||'')===(size||'')); }
+async function renderCartItems(){
+  cartGrid.innerHTML='';
+  if(!cart||cart.length===0){ cartEmpty.style.display='block'; cartSubtotalElem.textContent=''; checkoutBtn.style.display='none'; return; }
+  cartEmpty.style.display='none'; checkoutBtn.style.display='inline-block';
+  const displayCurrency = currencySelect.value || 'NGN';
+  let subtotal=0;
 
-    async function updateQuantityForVariant(id,color,size,newQty){
-      const idx=findCartIndexByVariant(id,color,size);
-      if(idx===-1) return;
-      if(newQty<=0) cart.splice(idx,1);
-      else cart[idx].quantity = Number(newQty);
-      await saveCartAndRerender(cart);
-    }
+  cart.forEach(item=>{
+    const product = productsData[item.id]||null;
+    const unitPrice = getUnitPriceForCurrency(product,item,displayCurrency);
+    const lineTotal = unitPrice * (Number(item.quantity)||0);
+    subtotal += lineTotal;
+    const thumbnail = product?.images?.[0] || item.imageUrl || 'placeholder.jpg';
+    const hasVariant = item.color || item.size;
 
-    function escapeHtml(str){ if(str===null||str===undefined) return ''; return String(str).replace(/[&<>"']/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[s])); }
+    const div = document.createElement('div');
+    div.className='cart-item';
 
-    function debounce(fn, wait){ let t; return function(...args){ clearTimeout(t); t=setTimeout(()=>fn.apply(this,args),wait); }; }
-
-    function renderCartItems(){
-      cartGrid.innerHTML=''; 
-      if(!cart||cart.length===0){ cartEmpty.style.display='block'; cartSubtotalElem.textContent=''; checkoutBtn.style.display='none'; return; }
-      cartEmpty.style.display='none'; checkoutBtn.style.display='inline-block';
-      const displayCurrency = currencySelect.value || 'NGN';
-      let subtotal=0;
-      const grouped={}; cart.forEach(i=>{ if(!grouped[i.id]) grouped[i.id]=[]; grouped[i.id].push(i); });
-      Object.keys(grouped).forEach(pid=>{
-        const items = grouped[pid];
-        const product = productsData[pid] || null;
-        let thumbnail='';
-        if(product){ if(Array.isArray(product.images)&&product.images.length) thumbnail=product.images[0]; else if(product.imageUrl) thumbnail=product.imageUrl; }
-        if(!thumbnail) thumbnail = items[0].imageUrl || 'placeholder.jpg';
-        let productTotalQty=0, productLineTotal=0;
-        items.forEach(it=>{ const unitPrice=getUnitPriceForCurrency(product,it,displayCurrency); productTotalQty+=(Number(it.quantity)||0); productLineTotal+=unitPrice*(Number(it.quantity)||0); });
-        subtotal+=productLineTotal;
-        const variantsHtml = items.map(it=>{ const unitPrice=getUnitPriceForCurrency(product,it,displayCurrency); const lineTotal=unitPrice*(Number(it.quantity)||0); return `
-          <div class="variant-item">
-            <div>${it.color?`<span>Color: ${escapeHtml(it.color)}</span>`:''}${it.size?`<span>Size: ${escapeHtml(it.size)}</span>`:''}</div>
-            <div style="display:flex; align-items:center; gap:4px;">
-              <button class="minus" data-id="${escapeHtml(it.id)}" data-color="${escapeHtml(it.color||'')}" data-size="${escapeHtml(it.size||'')}">–</button>
-              <input type="number" min="0" value="${escapeHtml(it.quantity||0)}" class="qty-input" data-id="${escapeHtml(it.id)}" data-color="${escapeHtml(it.color||'')}" data-size="${escapeHtml(it.size||'')}">
-              <button class="plus" data-id="${escapeHtml(it.id)}" data-color="${escapeHtml(it.color||'')}" data-size="${escapeHtml(it.size||'')}">+</button>
-              <button class="remove" style="margin-left:8px;background:#fff;color:#112e1f;border:1px solid #112e1f;padding:6px 8px;border-radius:6px;" data-id="${escapeHtml(it.id)}" data-color="${escapeHtml(it.color||'')}" data-size="${escapeHtml(it.size||'')}">Remove</button>
-              <span>${formatPrice(lineTotal,displayCurrency)}</span>
-            </div>
+    if(hasVariant){
+      div.innerHTML=`
+      <div class="product-header" style="cursor:pointer;">
+        <div class="product-info">
+          <img src="${escapeHtml(thumbnail)}" style="width:80px;height:80px;object-fit:cover;border-radius:6px;">
+          <div>
+            <h3>${escapeHtml(product?.name||item.name||'')}</h3>
           </div>
-        `}).join('');
-        const div=document.createElement('div'); div.className='cart-item';
-        div.innerHTML=`
-          <div class="product-header">
-            <div style="display:flex; align-items:center; gap:12px;">
-              <img src="${escapeHtml(thumbnail)}" alt="${escapeHtml(product?.name||items[0].name||'Product')}" style="width:80px;height:80px;object-fit:cover;border-radius:6px;">
-              <div>
-                <h3>${escapeHtml(product?.name||items[0].name||'')}</h3>
-                <div class="price">${formatPrice(productLineTotal,displayCurrency)}</div>
-                <div>Total quantity: ${productTotalQty}</div>
-              </div>
-            </div>
-            <div style="font-size:20px; transform:rotate(0deg); transition:0.3s;">&#x25BC;</div>
+        </div>
+        <div class="arrow" style="font-size:20px; transition:0.3s;">&#x25BC;</div>
+      </div>
+      <div class="variants-container" style="max-height:0;">
+        <div class="variant-item">
+          <div>${item.color?`Color: ${escapeHtml(item.color)}`:''} ${item.size?`Size: ${escapeHtml(item.size)}`:''}</div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <button class="minus" data-id="${escapeHtml(item.id)}" data-color="${escapeHtml(item.color||'')}" data-size="${escapeHtml(item.size||'')}">–</button>
+            <input type="number" min="0" value="${item.quantity}" class="qty-input" data-id="${escapeHtml(item.id)}" data-color="${escapeHtml(item.color||'')}" data-size="${escapeHtml(item.size||'')}">
+            <button class="plus" data-id="${escapeHtml(item.id)}" data-color="${escapeHtml(item.color||'')}" data-size="${escapeHtml(item.size||'')}">+</button>
+            <button class="remove" style="margin-left:8px;background:#fff;color:#112e1f;border:1px solid #112e1f;padding:6px 8px;border-radius:6px;" data-id="${escapeHtml(item.id)}" data-color="${escapeHtml(item.color||'')}" data-size="${escapeHtml(item.size||'')}">Remove</button>
+            <span>${formatPrice(lineTotal,displayCurrency)}</span>
           </div>
-          <div class="variants-container" style="max-height:0;">${variantsHtml}</div>
-        `;
-        cartGrid.appendChild(div);
-        const header = div.querySelector('.product-header');
-        const variantsContainer = div.querySelector('.variants-container');
-        const arrow = header.querySelector('div:last-child');
+        </div>
+      </div>`;
+    } else {
+      div.innerHTML=`
+      <div class="product-info">
+        <img src="${escapeHtml(thumbnail)}" style="width:80px;height:80px;object-fit:cover;border-radius:6px;">
+        <div>
+          <h3>${escapeHtml(product?.name||item.name||'')}</h3>
+          <div style="display:flex;align-items:center;gap:4px;margin-top:6px;">
+            <button class="minus" data-id="${escapeHtml(item.id)}" data-color="" data-size="">–</button>
+            <input type="number" min="0" value="${item.quantity}" class="qty-input" data-id="${escapeHtml(item.id)}" data-color="" data-size="">
+            <button class="plus" data-id="${escapeHtml(item.id)}" data-color="" data-size="">+</button>
+            <button class="remove" style="margin-left:8px;background:#fff;color:#112e1f;border:1px solid #112e1f;padding:6px 8px;border-radius:6px;" data-id="${escapeHtml(item.id)}" data-color="" data-size="">Remove</button>
+            <span>${formatPrice(lineTotal,displayCurrency)}</span>
+          </div>
+        </div>
+      </div>`;
+    }
 
-        header.addEventListener('click', ()=>{
-          if(variantsContainer.style.maxHeight==='0px'||!variantsContainer.style.maxHeight){
-            variantsContainer.style.maxHeight = variantsContainer.scrollHeight+'px';
-            arrow.style.transform='rotate(180deg)';
-          }else{
-            variantsContainer.style.maxHeight='0';
-            arrow.style.transform='rotate(0deg)';
-          }
-        });
+    cartGrid.appendChild(div);
 
-        setTimeout(()=>div.style.opacity='1',50);
+    // Expandable variants
+    if(hasVariant){
+      const header = div.querySelector('.product-header');
+      const variantsContainer = div.querySelector('.variants-container');
+      const arrow = div.querySelector('.arrow');
+      header.addEventListener('click', ()=>{
+        if(!variantsContainer.style.maxHeight || variantsContainer.style.maxHeight==='0px'){
+          variantsContainer.style.maxHeight = variantsContainer.scrollHeight+'px';
+          arrow.style.transform='rotate(180deg)';
+        } else {
+          variantsContainer.style.maxHeight='0';
+          arrow.style.transform='rotate(0deg)';
+        }
       });
-      cartSubtotalElem.textContent=`Subtotal: ${formatPrice(subtotal,displayCurrency)}`;
-
-      // Quantity + remove events
-      cartGrid.querySelectorAll('.plus').forEach(btn=>btn.addEventListener('click',async()=>{ 
-        const id=btn.dataset.id; const color=btn.dataset.color||''; const size=btn.dataset.size||''; 
-        const idx=findCartIndexByVariant(id,color,size); if(idx===-1)return; 
-        const newQty=(Number(cart[idx].quantity)||0)+1; await updateQuantityForVariant(id,color,size,newQty); 
-      }));
-      cartGrid.querySelectorAll('.minus').forEach(btn=>btn.addEventListener('click',async()=>{ 
-        const id=btn.dataset.id; const color=btn.dataset.color||''; const size=btn.dataset.size||''; 
-        const idx=findCartIndexByVariant(id,color,size); if(idx===-1)return; 
-        const newQty=(Number(cart[idx].quantity)||0)-1; await updateQuantityForVariant(id,color,size,newQty); 
-      }));
-      cartGrid.querySelectorAll('.qty-input').forEach(input=>input.addEventListener('input',debounce(async()=>{ 
-        const id=input.dataset.id; const color=input.dataset.color||''; const size=input.dataset.size||''; 
-        const val=parseInt(input.value,10); if(isNaN(val)) return; 
-        await updateQuantityForVariant(id,color,size,val); 
-      },300)));
-      cartGrid.querySelectorAll('.remove').forEach(btn=>btn.addEventListener('click',async()=>{ 
-        const id=btn.dataset.id; const color=btn.dataset.color||''; const size=btn.dataset.size||''; 
-        await updateQuantityForVariant(id,color,size,0); 
-      }));
     }
 
-    document.addEventListener('DOMContentLoaded', async ()=>{
-      await fetchProductsData();
-      updateCartCount();
-      renderCartItems();
-    });
+    // Quantity and remove events
+    div.querySelectorAll('.plus').forEach(btn=>btn.addEventListener('click',async()=>{ 
+      const id=btn.dataset.id; const color=btn.dataset.color||''; const size=btn.dataset.size||''; 
+      const idx=findCartIndexByVariant(id,color,size); if(idx===-1)return; 
+      const newQty=(Number(cart[idx].quantity)||0)+1; await updateQuantityForVariant(id,color,size,newQty); 
+    }));
+    div.querySelectorAll('.minus').forEach(btn=>btn.addEventListener('click',async()=>{ 
+      const id=btn.dataset.id; const color=btn.dataset.color||''; const size=btn.dataset.size||''; 
+      const idx=findCartIndexByVariant(id,color,size); if(idx===-1)return; 
+      const newQty=(Number(cart[idx].quantity)||0)-1; await updateQuantityForVariant(id,color,size,newQty); 
+    }));
+    div.querySelectorAll('.qty-input').forEach(input=>input.addEventListener('input',debounce(async()=>{ 
+      const id=input.dataset.id; const color=input.dataset.color||''; const size=input.dataset.size||''; 
+      const val=parseInt(input.value,10); if(isNaN(val)) return; 
+      await updateQuantityForVariant(id,color,size,val); 
+    },300)));
+    div.querySelectorAll('.remove').forEach(btn=>btn.addEventListener('click',async()=>{ 
+      const id=btn.dataset.id; const color=btn.dataset.color||''; const size=btn.dataset.size||''; 
+      await updateQuantityForVariant(id,color,size,0); 
+    }));
 
-    // Hamburger menu toggle
-    const hamburger = document.getElementById('hamburger');
-    const headerRight = document.querySelector('.header-right');
-    hamburger.addEventListener('click', ()=>{ 
-      hamburger.classList.toggle('open'); 
-      headerRight.classList.toggle('open'); 
-    });
-  </script>
+    setTimeout(()=>div.style.opacity='1',50);
+  });
+
+  cartSubtotalElem.textContent=`Subtotal: ${formatPrice(subtotal,displayCurrency)}`;
+}
+
+document.addEventListener('DOMContentLoaded', async ()=>{
+  await fetchProductsData();
+  renderCartItems();
+});
+
+// Hamburger menu toggle
+const hamburger = document.getElementById('hamburger');
+const headerRight = document.querySelector('.header-right');
+hamburger.addEventListener('click', ()=>{ 
+  hamburger.classList.toggle('open'); 
+  headerRight.classList.toggle('open'); 
+});
+</script>
+
 </body>
 </html>
