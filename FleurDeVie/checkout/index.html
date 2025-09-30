@@ -10,28 +10,36 @@
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:"Montserrat",sans-serif;background:#F5E6CC;color:#112e1f;line-height:1.6}
     a{text-decoration:none;color:inherit}
+
+    /* header */
     .site-header{background:#112e1f;color:#F5E6CC;display:flex;justify-content:space-between;align-items:center;padding:16px 28px;position:fixed;top:0;left:0;right:0;z-index:1000}
     .brand-logo{height:60px}
     .brand-title{font-family:"Playfair Display",serif;font-weight:700;font-size:24px}
+
+    /* nav */
     .header-right{display:flex;gap:18px;align-items:center}
     .header-right a{font-weight:500;transition:color .2s}
     .header-right a:hover{color:#FFD6BA}
     .cart-count{background:#FFD6BA;color:#112e1f;border-radius:50%;padding:2px 6px;font-weight:600;font-size:12px;margin-left:6px}
-    ./* Hamburger */
-    .hamburger { display:none; background:none; border:none; width:44px; height:40px; cursor:pointer; position: relative; z-index: 1300; }
-    .hamburger span { display:block; height:2.5px; width:22px; background:#F5E6CC; margin:6px auto; border-radius:2px; transition: all 0.3s ease;}
-    .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
-    .hamburger.open span:nth-child(2) { opacity:0; }
-    .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+    /* hamburger */
+    .hamburger{display:none;background:none;border:none;width:44px;height:40px;cursor:pointer;position:relative;z-index:1300}
+    .hamburger span{display:block;height:2.5px;width:22px;background:#F5E6CC;margin:6px auto;border-radius:2px;transition:all 0.3s ease}
+    .hamburger.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+    .hamburger.open span:nth-child(2){opacity:0}
+    .hamburger.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+
+    /* hero */
     .hero{position:relative;height:40vh;display:flex;align-items:center;justify-content:center;margin-top:80px;text-align:center}
     .hero::after{content:"";position:absolute;inset:0;background:url('../bg.jpg') center/cover no-repeat;transform:scale(1.08);z-index:-1;border-radius:12px;box-shadow:inset 0 0 0 2000px rgba(17,46,31,0.18)}
     .hero-text h1{font-family:"Playfair Display",serif;color:#FFD6BA;font-size:clamp(28px,5vw,48px)}
+
+    /* checkout grid */
     section.checkout{padding:60px 20px}
-    /* REDUCED billing form width, INCREASED order summary width */
     .container{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1.6fr;gap:28px}
     .checkout-form,.order-summary{border-radius:12px;padding:18px;box-shadow:0 4px 10px rgba(0,0,0,0.08)}
     .checkout-form{background:#FFD6BA}
-    .order-summary{background:#C9E4FF} /* requested bg color */
+    .order-summary{background:#C9E4FF}
     h2{font-family:"Playfair Display",serif;margin-bottom:12px;font-size:20px}
     label{display:block;margin-bottom:6px;font-weight:500}
     input,textarea,select{width:100%;padding:10px;border-radius:6px;border:1px solid #112e1f;margin-bottom:12px;font-family:inherit}
@@ -40,7 +48,7 @@
     .checkout-btn{display:block;width:100%;background:#112e1f;color:#F5E6CC;padding:14px;border-radius:6px;border:none;font-weight:700;cursor:pointer}
     .checkout-btn:hover{background:#0a1d14}
 
-    /* order summary / items */
+    /* order summary */
     .order-summary ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px}
     .order-item{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;padding:10px;border-radius:8px;background:rgba(255,255,255,0.6)}
     .order-item .left{flex:1 1 70%}
@@ -48,14 +56,10 @@
     .order-item .title{font-weight:600}
     .order-item .meta{font-size:0.95rem;color:#334d3a;margin-top:6px}
 
-    /* chevron toggle */
-    .variant-toggle{
-      display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:6px;border:1px solid #112e1f;background:#FFD6BA;color:#112e1f;cursor:pointer;padding:0;margin-left:8px
-    }
+    /* variant toggle */
+    .variant-toggle{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:6px;border:1px solid #112e1f;background:#FFD6BA;color:#112e1f;cursor:pointer;padding:0;margin-left:8px}
     .variant-toggle svg{width:14px;height:14px;transition:transform .25s ease}
     .variant-toggle[aria-expanded="true"] svg{transform:rotate(180deg)}
-
-    /* variants dropdown (read-only) */
     .variants-container{max-height:0;overflow:hidden;transition:max-height .28s ease,padding .28s ease;padding-left:12px;border-left:2px solid rgba(17,46,31,0.08);margin-top:8px}
     .variants-container.show{max-height:500px;padding-top:8px;padding-bottom:8px}
     .variant-row{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:6px 0;border-bottom:1px dashed rgba(0,0,0,0.06)}
@@ -67,44 +71,32 @@
 
     footer{text-align:center;padding:20px;background:#112e1f;color:#F5E6CC;margin-top:36px}
 
-    @media(max-width:900px){ .container{grid-template-columns:1fr} }
- 
- @media(max-width:900px){ 
-  .header-right { 
-    gap:12px; 
-    flex-wrap: wrap; 
-    justify-content:center; 
-  } 
-}
+    /* responsive */
+    @media(max-width:900px){.container{grid-template-columns:1fr}}
 
-@media(max-width:600px){
-  .hero-about { 
-    margin-top: 40px; 
-    height: 40vh; /* reduced hero height on mobile */
-  }
-  .header-right { 
-    position:absolute;
-    top:70px;
-    right:0;
-    background: rgba(17,46,31,0.95);
-    flex-direction: column;
-    width:200px;
-    padding:20px;
-    display:none;
-    border-radius:0 0 0 10px;
-  }
-  .header-right.open { display:flex; }
-  .hamburger { display:block; }
-  section{ padding:60px 20px; }
-}
+    @media(max-width:600px){
+      .header-right{
+        position:absolute;
+        top:70px;
+        right:0;
+        background:rgba(17,46,31,0.95);
+        flex-direction:column;
+        width:200px;
+        padding:20px;
+        display:none;
+        border-radius:0 0 0 10px;
+      }
+      .header-right.open{display:flex}
+      .hamburger{display:block}
+      section{padding:60px 20px}
+      .hero{height:35vh}
+    }
 
-@media(max-width:420px){ 
-  .brand-logo { height:clamp(40px,15vw,80px); } 
-  .brand-title{ font-size: clamp(16px,7vw,22px); } 
-  .hero-about { 
-    height: 35vh; /* further reduce for very small screens */
-  }
-}
+    @media(max-width:420px){
+      .brand-logo{height:clamp(40px,15vw,80px)}
+      .brand-title{font-size:clamp(16px,7vw,22px)}
+      .hero{height:30vh}
+    }
   </style>
 </head>
 <body>
@@ -113,9 +105,11 @@
       <img src="../logo.png" alt="Fleur De Vie Logo" class="brand-logo">
       <div class="brand-title">Fleur De Vie</div>
     </div>
- <!-- Hamburger -->
-    <button class="hamburger" id="hamburger-btn">☰</button>
-    <nav class="header-right">
+    <!-- Hamburger -->
+    <button class="hamburger" id="hamburger-btn">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="header-right" id="nav-menu">
       <a href="../index.html">Home</a>
       <a href="../shop.html">Shop</a>
       <a href="../about.html">About</a>
@@ -155,7 +149,6 @@
             <option value="GBP">GBP</option>
           </select>
         </div>
-
         <ul id="orderItems"></ul>
         <div class="subtotal" id="orderSubtotal"></div>
         <div class="note">You will be redirected to payment after clicking Proceed to Payment.</div>
@@ -167,6 +160,9 @@
   <footer><p>© 2025 Fleur De Vie</p></footer>
 
   <script src="https://checkout.flutterwave.com/v3.js"></script>
+  <script type="module">
+    /* your firebase + checkout logic remains unchanged, omitted here for brevity */
+    <script src="https://checkout.flutterwave.com/v3.js"></script>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
     import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
@@ -645,99 +641,13 @@
     });
   </script>
   <script>
-  // Hamburger menu toggle
-  <script>
-(function() {
-  // Robust selector: check common ids/classes used in your pages
-  const hamburger = document.querySelector('#hamburger, #hamburger-btn, .hamburger');
-  const navMenu = document.querySelector('.header-right, #nav-menu');
-
-  if (!hamburger || !navMenu) {
-    console.warn('Hamburger or nav menu not found. Selector used: #hamburger, #hamburger-btn, .hamburger / .header-right, #nav-menu');
-    return;
-  }
-
-  // Ensure accessible initial state
-  hamburger.setAttribute('aria-controls', navMenu.id || 'site-nav');
-  if (!navMenu.id) navMenu.id = navMenu.id || 'site-nav';
-  hamburger.setAttribute('aria-expanded', 'false');
-  // Default icon to hamburger (preserve existing if it already contains a bar-icon structure)
-  function setIconOpenState(isOpen) {
-    // If the button contains inner <span>s for styling, prefer swapping a data-attribute instead of overwriting markup.
-    // But in most cases simple text toggle is fine:
-    try {
-      hamburger.textContent = isOpen ? '✖' : '☰';
-    } catch (e) {
-      // fallback: set innerHTML
-      hamburger.innerHTML = isOpen ? '✖' : '☰';
-    }
-  }
-  setIconOpenState(false);
-
-  // open / close helpers - add multiple classes so it works with different CSS rules
-  function openMenu() {
-    navMenu.classList.add('show', 'active', 'open');
-    hamburger.classList.add('open');
-    hamburger.setAttribute('aria-expanded', 'true');
-    setIconOpenState(true);
-    // trap a few listeners while open
-    document.addEventListener('click', onDocClick);
-    document.addEventListener('keydown', onKeyDown);
-  }
-  function closeMenu() {
-    navMenu.classList.remove('show', 'active', 'open');
-    hamburger.classList.remove('open');
-    hamburger.setAttribute('aria-expanded', 'false');
-    setIconOpenState(false);
-    document.removeEventListener('click', onDocClick);
-    document.removeEventListener('keydown', onKeyDown);
-  }
-
-  // toggle
-  function toggleMenu(e) {
-    e.stopPropagation();
-    const isOpen = hamburger.getAttribute('aria-expanded') === 'true';
-    if (isOpen) closeMenu(); else openMenu();
-  }
-
-  // click outside to close
-  function onDocClick(e) {
-    if (!navMenu.contains(e.target) && !hamburger.contains(e.target)) closeMenu();
-  }
-  // ESC to close
-  function onKeyDown(e) {
-    if (e.key === 'Escape' || e.key === 'Esc') closeMenu();
-  }
-
-  // make sure menu is closed on desktop resizes (prevent sticky-open behavior)
-  function onResize() {
-    if (window.innerWidth > 768) {
-      // ensure nav is visible via CSS on desktop; remove mobile-only classes
-      navMenu.classList.remove('show', 'active', 'open');
-      hamburger.classList.remove('open');
-      hamburger.setAttribute('aria-expanded', 'false');
-      setIconOpenState(false);
-      document.removeEventListener('click', onDocClick);
-      document.removeEventListener('keydown', onKeyDown);
-    }
-  }
-
-  // wire events
-  hamburger.addEventListener('click', toggleMenu);
-  window.addEventListener('resize', onResize);
-
-  // defensive: if some other code replaces the button element, rebind automatically
-  const observer = new MutationObserver(() => {
-    if (!document.body.contains(hamburger)) {
-      observer.disconnect();
-      // try to find replacements and re-run script by reloading the page (safer approach)
-      console.warn('Hamburger element was removed from DOM; reload may be required.');
-    }
-  });
-  observer.observe(document.documentElement, { childList: true, subtree: true });
-})();
-</script>
-
-</script>
+    // hamburger toggle
+    const hamburgerBtn = document.getElementById('hamburger-btn');
+    const navMenu = document.getElementById('nav-menu');
+    hamburgerBtn.addEventListener('click', ()=>{
+      hamburgerBtn.classList.toggle('open');
+      navMenu.classList.toggle('open');
+    });
+  </script>
 </body>
 </html>
