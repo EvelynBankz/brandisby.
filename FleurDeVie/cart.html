@@ -53,12 +53,25 @@ h2 { text-align:center; font-size:24px; font-family:"Playfair Display", serif; m
 .quantity-controls button { background:#112e1f; color:#F5E6CC; border:none; border-radius:6px; padding:4px 10px; cursor:pointer; font-weight:600; transition:0.3s; }
 .quantity-controls button:hover { background:#0a1d14; }
 .quantity-controls input { width:50px; text-align:center; padding:4px; border-radius:6px; border:1px solid #112e1f; }
-.show-variants-btn { background:#FFD6BA; color:#112e1f; border:1px solid #112e1f; border-radius:6px; padding:6px 10px; cursor:pointer; font-weight:600; margin-top:6px; }
+
+/* Show Variants Button */
+.show-variants-btn {
+  background:#FFD6BA;
+  color:#112e1f;
+  border:1px solid #112e1f;
+  border-radius:6px;
+  padding:4px 8px;
+  cursor:pointer;
+  font-weight:600;
+  margin-top:6px;
+  width:auto;
+  font-size:14px;
+}
 .variants-container { display:none; flex-direction:column; gap:8px; margin-top:8px; padding-left:8px; border-left:2px solid #112e1f; }
 
+/* Cart Subtotal */
 .cart-subtotal { text-align:right; font-weight:600; margin-top:10px; }
 .cart-empty { text-align:center; font-size:18px; margin-top:20px; color:#112e1f; display:none; }
-
 .cart-buttons { margin-top:20px; display:flex; justify-content:flex-end; gap:10px; }
 .cart-buttons a { padding:10px 20px; border-radius:6px; font-weight:600; text-decoration:none; transition:0.3s; display:inline-block; }
 .cart-buttons a:hover { opacity:0.8; }
@@ -226,18 +239,19 @@ async function renderCart(){
     const variantsContainer = div.querySelector('.variants-container');
     if(variants.length>1){
       variants.forEach(v=>{
-        const vDiv = document.createElement('div'); vDiv.style.display='flex'; vDiv.style.alignItems='center'; vDiv.style.gap='6px';
+        const vDiv = document.createElement('div'); 
+        vDiv.className='quantity-controls'; // Use same styling as main cart
+        vDiv.style.flexWrap='wrap';
         vDiv.innerHTML=`
           ${v.color?`<span>Color:${v.color}</span>`:''}
           ${v.size?`<span>Size:${v.size}</span>`:''}
           <button class="minus" data-id="${v.id}" data-color="${v.color||''}" data-size="${v.size||''}">–</button>
-          <input type="number" value="${v.quantity}" style="width:40px;" data-id="${v.id}" data-color="${v.color||''}" data-size="${v.size||''}">
+          <input type="number" value="${v.quantity}" data-id="${v.id}" data-color="${v.color||''}" data-size="${v.size||''}">
           <button class="plus" data-id="${v.id}" data-color="${v.color||''}" data-size="${v.size||''}">+</button>
         `;
         variantsContainer.appendChild(vDiv);
       });
     } else if(variants.length===1){
-      // single variant or no variant
       const v = variants[0];
       const qDiv = div.querySelector('.cart-item-details');
       qDiv.innerHTML+=`
