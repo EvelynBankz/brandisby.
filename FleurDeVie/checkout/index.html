@@ -27,7 +27,16 @@
     .hamburger.open span:nth-child(2){opacity:0;}
     .hamburger.open span:nth-child(3){transform:rotate(-45deg);top:10px;}
     .hero{position:relative;height:40vh;display:flex;justify-content:center;align-items:center;text-align:center;margin-top:80px;overflow:hidden;}
-    .hero::after{content:"";position:absolute;inset:0;background:url('bg.jpg') center/cover no-repeat;transform:scale(1.1);z-index:-1;border-radius:12px;box-shadow:inset 0 0 0 2000px rgba(17,46,31,0.3);}
+    .hero::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:url('hero-bg.jpg') center/cover no-repeat;
+      transform:scale(1.1);
+      z-index:-1;
+      border-radius:12px;
+      box-shadow:inset 0 0 0 2000px rgba(17,46,31,0.3);
+    }
     .hero-text{position:relative;display:inline-block;color:#FFD6BA;}
     .hero-text h1{font-family:"Playfair Display",serif;font-size:clamp(32px,5vw,56px);}
     section.checkout{padding:60px 20px;}
@@ -122,6 +131,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
 import { getFirestore, collection, doc, getDoc, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
+// Firebase setup
 const firebaseConfig = {
   apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
   authDomain: "brandisby.firebaseapp.com",
@@ -134,6 +144,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// DOM elements
 const cartCountElem = document.getElementById('cartCount');
 const orderItems = document.getElementById('orderItems');
 const orderSubtotal = document.getElementById('orderSubtotal');
@@ -145,42 +156,44 @@ let cart = JSON.parse(localStorage.getItem('cart')) || [];
 let quote = null;
 let selectedCurrency = 'NGN';
 
+// Format price
 function formatPrice(value, currency){
   const localeMap = { USD:'en-US', EUR:'de-DE', GBP:'en-GB', NGN:'en-NG' };
   return new Intl.NumberFormat(localeMap[currency]||'en-US',{ style:'currency', currency, minimumFractionDigits: currency==='NGN'?0:2 }).format(value);
 }
 
+// Update cart count
 function updateCartCount(){
   const total = cart.reduce((sum,i)=>sum+i.quantity,0);
   cartCountElem.textContent = total;
 }
 
+// Render order summary
 function renderOrder(){
   orderItems.innerHTML = '';
   let subtotal = 0;
-  if(quote){
-    quote.items.forEach(item => {
-      const unitPrice = item.prices[selectedCurrency];
-      subtotal += unitPrice * item.quantity;
-      const li = document.createElement('li');
-      li.innerHTML = `${item.name} (x${item.quantity}) <span>${formatPrice(unitPrice * item.quantity, selectedCurrency)}</span>`;
-      orderItems.appendChild(li);
-    });
-  } else {
-    cart.forEach(item => {
-      const unitPrice = item.prices[selectedCurrency];
-      subtotal += unitPrice * item.quantity;
-      const li = document.createElement('li');
-      li.innerHTML = `${item.name} (x${item.quantity}) <span>${formatPrice(unitPrice * item.quantity, selectedCurrency)}</span>`;
-      orderItems.appendChild(li);
-    });
+  const items = quote?.items || cart;
+  if(!items || items.length === 0){
+    orderSubtotal.textContent = "Subtotal: " + formatPrice(0, selectedCurrency);
+    return;
   }
+
+  items.forEach(item => {
+    const unitPrice = item.prices[selectedCurrency] || 0;
+    subtotal += unitPrice * item.quantity;
+    const li = document.createElement('li');
+    li.innerHTML = `${item.name} (x${item.quantity}) <span>${formatPrice(unitPrice * item.quantity, selectedCurrency)}</span>`;
+    orderItems.appendChild(li);
+  });
+
   orderSubtotal.textContent = `Subtotal: ${formatPrice(subtotal, selectedCurrency)}`;
 }
 
+// Get quoteId from URL
 const urlParams = new URLSearchParams(window.location.search);
 const quoteId = urlParams.get("quoteId");
 
+// Load quote and prefill billing
 async function loadQuote(){
   if(quoteId){
     try{
@@ -188,23 +201,27 @@ async function loadQuote(){
       const docSnap = await getDoc(docRef);
       if(docSnap.exists()){
         quote = docSnap.data();
-
-        // Ensure items is an array
-        if(!Array.isArray(quote.items)){
-          quote.items = Object.values(quote.items || {});
-        }
-
+        if(!Array.isArray(quote.items)) quote.items = Object.values(quote.items || {});
         selectedCurrency = quote.currency || 'NGN';
         currencySelect.value = selectedCurrency;
         currencyWrapper.style.display = 'block';
+
+        // Prefill billing info if available
+        if(quote.customer){
+          document.getElementById('name').value = quote.customer.name || '';
+          document.getElementById('email').value = quote.customer.email || '';
+          document.getElementById('phone').value = quote.customer.phone || '';
+          document.getElementById('address').value = quote.customer.address || '';
+        }
+
       }else{
-        alert("Quote not found. Falling back to cart.");
+        console.warn("Quote not found, falling back to cart");
       }
     }catch(err){
       console.error("Failed to fetch quote", err);
-      alert("Error loading quote. Please try again.");
+      alert("Error loading quote. Using cart instead.");
     }
-  }else{
+  } else {
     selectedCurrency = localStorage.getItem('currency') || 'NGN';
     currencySelect.value = selectedCurrency;
     currencyWrapper.style.display = 'none';
@@ -212,21 +229,25 @@ async function loadQuote(){
   renderOrder();
 }
 
-payBtn.addEventListener('click', async ()=>{
-  const name=document.getElementById('name').value;
-  const email=document.getElementById('email').value;
-  const phone=document.getElementById('phone').value;
-  const address=document.getElementById('address').value;
-  if(!name||!email||!phone||!address){ alert("Please fill in all billing details."); return; }
+// Currency selector
+currencySelect.addEventListener('change', ()=>{
+  selectedCurrency = currencySelect.value;
+  localStorage.setItem('currency', selectedCurrency);
+  renderOrder();
+});
 
-  let subtotal=0, items=[];
-  if(quote){
-    items = Object.values(quote.items);
-    items.forEach(item=> subtotal += item.prices[selectedCurrency]*item.quantity );
-  }else{
-    items = cart;
-    items.forEach(item=> subtotal += item.prices[selectedCurrency]*item.quantity );
-  }
+// Payment
+payBtn.addEventListener('click', async ()=>{
+  const name = document.getElementById('name').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const address = document.getElementById('address').value.trim();
+  if(!name || !email || !phone || !address){ alert("Please fill in all billing details."); return; }
+
+  const items = quote?.items || cart;
+  if(!items || items.length === 0){ alert("No items to checkout."); return; }
+
+  let subtotal = items.reduce((sum,item)=>sum+(item.prices[selectedCurrency]||0)*item.quantity,0);
 
   FlutterwaveCheckout({
     public_key:"FLWPUBK_TEST-xxxxxxxxxxxxxxxxxxxxx-X",
@@ -245,7 +266,10 @@ payBtn.addEventListener('click', async ()=>{
         });
         localStorage.removeItem('cart');
         window.location.href="thankyou.html";
-      }catch(err){ console.error("Order save failed",err); alert("Order save failed, but payment succeeded!"); }
+      }catch(err){
+        console.error("Order save failed",err);
+        alert("Order save failed, but payment succeeded!");
+      }
     }
   });
 });
