@@ -646,15 +646,98 @@
   </script>
   <script>
   // Hamburger menu toggle
-   // HAMBURGER TOGGLE
-  const hamburger = document.getElementById('hamburger');
-  const headerRight = document.querySelector('.header-right');
-  if (hamburger && headerRight) {
-    hamburger.addEventListener('click', () => {
-      headerRight.classList.toggle('open');
-      hamburger.classList.toggle('open');
-    });
+  <script>
+(function() {
+  // Robust selector: check common ids/classes used in your pages
+  const hamburger = document.querySelector('#hamburger, #hamburger-btn, .hamburger');
+  const navMenu = document.querySelector('.header-right, #nav-menu');
+
+  if (!hamburger || !navMenu) {
+    console.warn('Hamburger or nav menu not found. Selector used: #hamburger, #hamburger-btn, .hamburger / .header-right, #nav-menu');
+    return;
   }
+
+  // Ensure accessible initial state
+  hamburger.setAttribute('aria-controls', navMenu.id || 'site-nav');
+  if (!navMenu.id) navMenu.id = navMenu.id || 'site-nav';
+  hamburger.setAttribute('aria-expanded', 'false');
+  // Default icon to hamburger (preserve existing if it already contains a bar-icon structure)
+  function setIconOpenState(isOpen) {
+    // If the button contains inner <span>s for styling, prefer swapping a data-attribute instead of overwriting markup.
+    // But in most cases simple text toggle is fine:
+    try {
+      hamburger.textContent = isOpen ? '✖' : '☰';
+    } catch (e) {
+      // fallback: set innerHTML
+      hamburger.innerHTML = isOpen ? '✖' : '☰';
+    }
+  }
+  setIconOpenState(false);
+
+  // open / close helpers - add multiple classes so it works with different CSS rules
+  function openMenu() {
+    navMenu.classList.add('show', 'active', 'open');
+    hamburger.classList.add('open');
+    hamburger.setAttribute('aria-expanded', 'true');
+    setIconOpenState(true);
+    // trap a few listeners while open
+    document.addEventListener('click', onDocClick);
+    document.addEventListener('keydown', onKeyDown);
+  }
+  function closeMenu() {
+    navMenu.classList.remove('show', 'active', 'open');
+    hamburger.classList.remove('open');
+    hamburger.setAttribute('aria-expanded', 'false');
+    setIconOpenState(false);
+    document.removeEventListener('click', onDocClick);
+    document.removeEventListener('keydown', onKeyDown);
+  }
+
+  // toggle
+  function toggleMenu(e) {
+    e.stopPropagation();
+    const isOpen = hamburger.getAttribute('aria-expanded') === 'true';
+    if (isOpen) closeMenu(); else openMenu();
+  }
+
+  // click outside to close
+  function onDocClick(e) {
+    if (!navMenu.contains(e.target) && !hamburger.contains(e.target)) closeMenu();
+  }
+  // ESC to close
+  function onKeyDown(e) {
+    if (e.key === 'Escape' || e.key === 'Esc') closeMenu();
+  }
+
+  // make sure menu is closed on desktop resizes (prevent sticky-open behavior)
+  function onResize() {
+    if (window.innerWidth > 768) {
+      // ensure nav is visible via CSS on desktop; remove mobile-only classes
+      navMenu.classList.remove('show', 'active', 'open');
+      hamburger.classList.remove('open');
+      hamburger.setAttribute('aria-expanded', 'false');
+      setIconOpenState(false);
+      document.removeEventListener('click', onDocClick);
+      document.removeEventListener('keydown', onKeyDown);
+    }
+  }
+
+  // wire events
+  hamburger.addEventListener('click', toggleMenu);
+  window.addEventListener('resize', onResize);
+
+  // defensive: if some other code replaces the button element, rebind automatically
+  const observer = new MutationObserver(() => {
+    if (!document.body.contains(hamburger)) {
+      observer.disconnect();
+      // try to find replacements and re-run script by reloading the page (safer approach)
+      console.warn('Hamburger element was removed from DOM; reload may be required.');
+    }
+  });
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+})();
+</script>
+
 </script>
 </body>
 </html>
