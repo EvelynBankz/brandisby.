@@ -657,7 +657,7 @@ generateQuoteLinkBtn.addEventListener("click",async()=>{
   try{
     const docRef=await addDoc(collection(db,"brands","fleurdevie","quotes"),data);
     const id=docRef.id;
-    const link=`${window.location.origin}/FleurDeVie/checkout/index.html?quoteId=${id}`;
+    const link=`${window.location.origin}brandisby./FleurDeVie/checkout/index.html?quoteId=${id}`;
     try{ localStorage.setItem(id,JSON.stringify(data)); }catch(e){ console.warn(e); }
     generatedQuoteLink.innerHTML=`<a href="${link}" target="_blank" id="gqlink">${link}</a><button class="copy-btn" id="copyGeneratedBtn" data-link="${link}">📋</button>`;
     document.getElementById("copyGeneratedBtn").addEventListener("click",async()=>{
@@ -719,7 +719,7 @@ function renderQuotesTable() {
       displayTotal = `${formatCurrency(q.totalExplicit, q.defaultCurrency || displayCurrency)} (${q.defaultCurrency || displayCurrency})`;
     }
 
-    const link = `${window.location.origin}/checkout/index.html?quoteId=${id}`;
+    const link = `${window.location.origin}brandisby./FleurDeVie/checkout/index.html?quoteId=${id}`;
     const status = q.status || "Unpaid";
 
     const row = document.createElement("tr");
@@ -811,7 +811,7 @@ quoteModalBackdrop.addEventListener('click', (ev) => { if (ev.target === quoteMo
 openCheckoutBtn.addEventListener('click', () => {
   const id = quoteModalBackdrop.dataset.currentId;
   if (id) {
-    const link = `${window.location.origin}/checkout/index.html?quoteId=${id}`;
+    const link = `${window.location.origin}brandisby./FleurDeVie/checkout/index.html?quoteId=${id}`;
     window.open(link, '_blank');
   }
 });
@@ -832,7 +832,7 @@ async function populateQuoteModal(id) {
   }
 
   // build html
-  const link = `${window.location.origin}/checkout/index.html?quoteId=${id}`;
+  const link = `${window.location.origin}brandisby./FleurDeVie/checkout/index.html?quoteId=${id}`;
   let html = `
     <div style="display:flex; justify-content:space-between; gap:12px; align-items:center;">
       <div>
