@@ -628,17 +628,20 @@
     });
   </script>
   <script>
-    // Hamburger toggle
-    const hamburgerBtn = document.getElementById('hamburger-btn');
-    const navMenu = document.getElementById('nav-menu');
-    hamburgerBtn.addEventListener('click', () => {
-      navMenu.classList.toggle('show');
-      if (navMenu.classList.contains('show')) {
-        hamburgerBtn.innerHTML = '✖'; // Close icon
-      } else {
-        hamburgerBtn.innerHTML = '☰'; // Hamburger
-      }
-    });
-  </script>
+  // Hamburger menu toggle
+  const hamburger = document.getElementById("hamburger");
+  const navMenu = document.querySelector(".header-right");
+
+  hamburger.addEventListener("click", () => {
+    navMenu.classList.toggle("active");
+
+    // Switch icon between ☰ and ✖
+    if (hamburger.textContent === "☰") {
+      hamburger.textContent = "✖";
+    } else {
+      hamburger.textContent = "☰";
+    }
+  });
+</script>
 </body>
 </html>
