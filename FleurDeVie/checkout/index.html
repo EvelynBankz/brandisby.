@@ -64,30 +64,33 @@
 
     @media(max-width:900px){ .container{grid-template-columns:1fr} }
  
-    .hamburger {
-      display:none;
-      font-size:26px;
-      background:none;
-      border:none;
-      cursor:pointer;
-      color:#FFD6BA;
-    }
+   @media(max-width: 768px) {
+  .header-right {
+    display: none;
+    flex-direction: column;
+    background: #fff;
+    position: absolute;
+    top: 60px;
+    right: 20px;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    z-index: 1000;
+  }
 
- @media(max-width:768px){
-      .header-right {
-        display:none;
-        flex-direction:column;
-        background:#fff;
-        position:absolute;
-        top:70px;
-        right:20px;
-        width:200px;
-        border:1px solid #ddd;
-        padding:10px;
-      }
-      .header-right.show {display:flex;}
-      .hamburger {display:block;}
-    }
+  .header-right.active {
+    display: flex;
+  }
+
+  .hamburger {
+    display: block;
+    font-size: 24px;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+}
+
   </style>
 </head>
 <body>
