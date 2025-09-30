@@ -34,6 +34,7 @@
 
     .small-note { font-size:0.9rem; color:#334d3a; margin-top:8px; }
 
+    /* Dashboard Navigation */
     .dashboard-nav { display:flex; gap:10px; margin-bottom:1.5rem; }
     .dashboard-nav button { flex:1; }
     .section { display:none; margin-top:1rem; }
@@ -42,6 +43,7 @@
     .details-row { background:#fff6e8; }
     .details-row td { padding:12px; }
 
+    /* Orders filter/search */
     .order-filters { display:flex; gap:10px; margin-bottom:1rem; flex-wrap:wrap; }
     .order-filters input, .order-filters select { flex:1; max-width: 320px; }
 
@@ -58,15 +60,18 @@
       .order-filters { flex-direction: column; }
     }
 
+    /* Add Item panel styling (small) */
     .add-item-panel { border:1px dashed rgba(17,46,31,0.12); padding:12px; margin-top:8px; background:#fff; border-radius:8px; }
     .inline-grid { display:grid; grid-template-columns: repeat(4,1fr); gap:8px; }
     @media(max-width:600px){ .inline-grid { grid-template-columns: 1fr; } }
 
+    /* Repeatable product fields */
     .repeatable { margin-top:8px; }
     .repeatable .row { display:flex; gap:8px; margin-top:8px; }
     .repeatable .row input { flex:1; }
     .repeatable .row button { flex-shrink:0; padding:0.4rem 0.6rem; }
 
+    /* Modal for quote view */
     .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.45); display:none; align-items:center; justify-content:center; z-index:9999; }
     .modal { background:#fff; padding:16px; border-radius:10px; max-width:800px; width:95%; max-height:90vh; overflow:auto; }
     .modal .modal-header { display:flex; justify-content:space-between; align-items:center; gap:12px; }
@@ -100,13 +105,13 @@
     <button type="button" data-target="quotesSection">💳 Quotes</button>
     <button type="button" data-target="ordersSection">🧾 Orders</button>
   </div>
-
-  <!-- PRODUCTS -->
+ <!-- PRODUCTS -->
   <div class="section" id="productsSection">
     <h2>Manage Products</h2>
     <form id="productForm">
       <label>Name</label>
       <input type="text" id="productName" required>
+      
       <label>Price (NGN)</label>
       <input type="number" id="productPriceNGN" step="0.01" inputmode="decimal" required>
       <label>Price (USD)</label>
@@ -119,18 +124,21 @@
       <label>Description</label>
       <textarea id="productDesc"></textarea>
 
+      <!-- Repeatable Sizes -->
       <label>Sizes</label>
       <div id="sizesRepeat" class="repeatable"></div>
       <div style="margin-top:6px;">
         <button type="button" id="addSizeBtn" style="background:#fff;color:#112e1f;border:1px solid #112e1f;">+ Add Size</button>
       </div>
 
+      <!-- Repeatable Colors -->
       <label>Colors</label>
       <div id="colorsRepeat" class="repeatable"></div>
       <div style="margin-top:6px;">
         <button type="button" id="addColorBtn" style="background:#fff;color:#112e1f;border:1px solid #112e1f;">+ Add Color</button>
       </div>
 
+      <!-- Repeatable Images -->
       <label>Images (URLs)</label>
       <div id="imagesRepeat" class="repeatable"></div>
       <div style="margin-top:6px;">
@@ -169,8 +177,7 @@
       <tbody></tbody>
     </table>
   </div>
-
-  <!-- QUOTES -->
+<!-- QUOTES -->
   <div class="section" id="quotesSection">
     <h2>Generate Quote</h2>
     <form id="quoteForm">
@@ -239,10 +246,11 @@
       <div class="modal-body" id="quoteModalBody"></div>
     </div>
   </div>
-
-  <!-- ORDERS -->
+<!-- ORDERS -->
   <div class="section" id="ordersSection">
     <h2>Manage Orders</h2>
+
+    <!-- Filters + Export -->
     <div class="order-filters">
       <input type="text" id="orderSearch" placeholder="Search by customer or email...">
       <select id="orderStatusFilter">
@@ -254,6 +262,7 @@
         <option>Completed</option>
         <option>Cancelled</option>
       </select>
+
       <label style="width:100%; margin-top:8px;">Export options</label>
       <select id="exportCurrency" style="max-width:200px;">
         <option value="NGN">NGN</option>
@@ -265,6 +274,7 @@
       <input type="date" id="exportTo">
       <button id="exportOrders">Export Orders CSV</button>
     </div>
+
     <table id="ordersTable">
       <thead>
         <tr><th>Order ID</th><th>Customer</th><th>Email</th><th>Total</th><th>Status</th><th>Actions</th></tr>
@@ -294,7 +304,7 @@ const db = getFirestore(app);
 // Allowed admin(s)
 const allowedAdmins = ["yourstruly.fleurdevie@gmail.com"].map(e => e.toLowerCase().trim());
 
-/* UI references */
+/* --- UI refs --- */
 const loginForm = document.getElementById("loginForm");
 const loginMessage = document.getElementById("loginMessage");
 const loginContainer = document.getElementById("loginContainer");
@@ -310,11 +320,20 @@ const quoteItemsDiv = document.getElementById("quoteItems");
 const addQuoteItemBtn = document.getElementById("addQuoteItem");
 const quotesTableBody = document.querySelector("#quotesTable tbody");
 const quoteMessage = document.getElementById("quoteMessage");
+/* quoteCurrencySelect removed (field removed from form) */
 const generateQuoteLinkBtn = document.getElementById("generateQuoteLinkBtn");
 const generatedQuoteLink = document.getElementById("generatedQuoteLink");
 const quotesDisplayCurrency = document.getElementById("quotesDisplayCurrency");
 
-/* Repeatable product fields */
+const ordersTableBody = document.querySelector("#ordersTable tbody");
+const orderSearch = document.getElementById("orderSearch");
+const orderStatusFilter = document.getElementById("orderStatusFilter");
+const exportBtn = document.getElementById("exportOrders");
+const exportCurrency = document.getElementById("exportCurrency");
+const exportFrom = document.getElementById("exportFrom");
+const exportTo = document.getElementById("exportTo");
+
+/* Repeatable product fields UI */
 const sizesRepeat = document.getElementById("sizesRepeat");
 const colorsRepeat = document.getElementById("colorsRepeat");
 const imagesRepeat = document.getElementById("imagesRepeat");
@@ -323,26 +342,11 @@ const addColorBtn = document.getElementById("addColorBtn");
 const addImageBtn = document.getElementById("addImageBtn");
 
 let currentEditingProductId = null;
-let productsCache = [];
-let quotesCache = [];
+let allOrders = [];
 
-/* Repeatable input helpers */
-function createRepeatRow(value='', placeholder=''){
-  const row = document.createElement('div');
-  row.className='row';
-  row.innerHTML=`<input type="text" value="${value}" placeholder="${placeholder}" /><button type="button" class="remove-row">Remove</button>`;
-  row.querySelector('.remove-row').addEventListener('click', ()=>row.remove());
-  return row;
-}
-function addSizeInput(v=''){ sizesRepeat.appendChild(createRepeatRow(v,'Size e.g. S, M, L')); }
-function addColorInput(v=''){ colorsRepeat.appendChild(createRepeatRow(v,'Color e.g. Olive')); }
-function addImageInput(v=''){ imagesRepeat.appendChild(createRepeatRow(v,'https://.../image.jpg')); }
-addSizeBtn.addEventListener('click',()=>addSizeInput());
-addColorBtn.addEventListener('click',()=>addColorInput());
-addImageBtn.addEventListener('click',()=>addImageInput());
-addSizeInput(); addColorInput(); addImageInput();
+let productsCache = []; // array of {id, data}
+let quotesCache = []; // array of {id, data}
 
-/* Auth */
 /* ---------------- AUTH ---------------- */
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -393,16 +397,20 @@ function showSection(id) {
   document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
 }
+/* ---------------- UTILS ---------------- */
+function formatCurrency(value, currency){
+  const localeMap = { NGN:'en-NG', USD:'en-US', EUR:'de-DE', GBP:'en-GB' };
+  const minFrac = currency === 'NGN' ? 0 : 2;
+  try {
+    return new Intl.NumberFormat(localeMap[currency] || 'en-US', { style:'currency', currency, minimumFractionDigits: minFrac }).format(value);
+  } catch(e) {
+    return `${value} ${currency}`;
+  }
+}
+function escapeHtml(str){ if (!str && str !== 0) return ""; return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[s])); }
 
-/* Navigation */
-document.querySelectorAll(".dashboard-nav button").forEach(btn=>btn.addEventListener('click',()=>showSection(btn.dataset.target)));
-function showSection(id){ document.querySelectorAll(".section").forEach(s=>s.classList.remove("active")); document.getElementById(id).classList.add("active"); }
-
-/* Currency formatting */
-function formatCurrency(value,c){ const l={NGN:'en-NG',USD:'en-US',EUR:'de-DE',GBP:'en-GB'}; const f=c==='NGN'?0:2; return new Intl.NumberFormat(l[c]||'en-US',{style:'currency',currency:c,minimumFractionDigits:f}).format(value||0); }
-
-/* Products CRUD omitted for brevity — same as current admin.html */
 /* ---------------- PRODUCTS (repeatable inputs) ---------------- */
+
 /* helper to create a repeatable row */
 function createRepeatRow(value='', placeholder='') {
   const row = document.createElement('div');
@@ -568,9 +576,7 @@ window.editProduct = async (id) => {
 
   currentEditingProductId = id;
   productForm.querySelector("button[type='submit']").textContent = "Save Product";
-}
-
-/* Quotes draft items */
+}/* Quotes draft items */
 let quoteDraftItems=[];
 function renderDraftItems(){
   quoteItemsDiv.innerHTML='';
@@ -591,8 +597,6 @@ function renderDraftItems(){
   });
   document.querySelectorAll(".remove-draft").forEach(btn=>btn.addEventListener("click",()=>{ quoteDraftItems.splice(parseInt(btn.dataset.idx),1); renderDraftItems(); }));
 }
-
-/* Add quote item panel toggles omitted for brevity — same as current admin.html */
 /* Add Item panel toggles */
 const addItemPanel = document.getElementById("addItemPanel");
 const ai_add = document.getElementById("ai_add");
@@ -665,9 +669,7 @@ generateQuoteLinkBtn.addEventListener("click",async()=>{
     quoteForm.reset(); quoteDraftItems=[]; renderDraftItems();
   }catch(err){ console.error(err); quoteMessage.textContent="❌ Error saving quote."; quoteMessage.style.color="red"; }
 });
-
-/* computeTotalFromItems, subscribeQuotes, renderQuotesTable — same logic as above, with checkout link pointing to /FleurDeVie/checkout/index.html?quoteId=... */
-/* compute total from items in a given currency */
+  /* compute total from items in a given currency */
 function computeTotalFromItems(items = [], currency = 'NGN') {
   let total = 0;
   if (!items || !items.length) return 0;
@@ -904,8 +906,8 @@ async function populateQuoteModal(id) {
 window.viewQuoteModal = (id) => {
   populateQuoteModal(id);
 }
-/* Orders subscription omitted for brevity */
-  /* ---------------- ORDERS ---------------- */
+
+/* ---------------- ORDERS ---------------- */
 function subscribeOrders() {
   const ordersRef = collection(db, "brands", "fleurdevie", "orders");
   onSnapshot(ordersRef, snap => {
