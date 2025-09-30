@@ -163,19 +163,20 @@ function renderOrder() {
   orderItems.innerHTML = '';
   let subtotal = 0;
 
-  if (quote && Array.isArray(quote.items)) {
-    quote.items.forEach(item => {
-      subtotal += item.price * item.quantity;
-      const li = document.createElement('li');
-      li.innerHTML = `${item.name} (x${item.quantity}) <span>${formatPrice(item.price * item.quantity, selectedCurrency)}</span>`;
-      orderItems.appendChild(li);
-    });
-  } else {
-    orderItems.innerHTML = '<li>No items found in this quote.</li>';
-  }
+  const sourceItems = quote && Array.isArray(quote.items) ? quote.items : cart;
+
+  sourceItems.forEach(item => {
+    const unitPrice = item.prices[selectedCurrency] ?? 0;
+    subtotal += unitPrice * item.quantity;
+
+    const li = document.createElement('li');
+    li.innerHTML = `${item.name} (x${item.quantity}) <span>${formatPrice(unitPrice * item.quantity, selectedCurrency)}</span>`;
+    orderItems.appendChild(li);
+  });
 
   orderSubtotal.textContent = `Subtotal: ${formatPrice(subtotal, selectedCurrency)}`;
 }
+
 
 
 // Load quote if exists
