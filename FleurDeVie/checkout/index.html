@@ -188,6 +188,12 @@ async function loadQuote(){
       const docSnap = await getDoc(docRef);
       if(docSnap.exists()){
         quote = docSnap.data();
+
+        // Ensure items is an array
+        if(!Array.isArray(quote.items)){
+          quote.items = Object.values(quote.items || {});
+        }
+
         selectedCurrency = quote.currency || 'NGN';
         currencySelect.value = selectedCurrency;
         currencyWrapper.style.display = 'block';
@@ -205,12 +211,6 @@ async function loadQuote(){
   }
   renderOrder();
 }
-
-currencySelect.addEventListener('change', ()=>{
-  selectedCurrency = currencySelect.value;
-  localStorage.setItem('currency',selectedCurrency);
-  renderOrder();
-});
 
 payBtn.addEventListener('click', async ()=>{
   const name=document.getElementById('name').value;
