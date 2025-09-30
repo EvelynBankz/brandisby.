@@ -142,7 +142,7 @@ const currencySelect = document.getElementById('currency');
 const currencyWrapper = document.getElementById('currencySelectorWrapper');
 const payBtn = document.getElementById('payBtn');
 
-let cart = [];
+let cart = JSON.parse(localStorage.getItem('cart')) || [];
 let quote = null;
 let selectedCurrency = 'NGN';
 
@@ -156,25 +156,6 @@ function formatPrice(value, currency){
 function updateCartCount(){
   const total = cart.reduce((sum,i)=>sum+i.quantity,0);
   cartCountElem.textContent = total;
-}
-
-// Load and normalize cart items
-function loadCart() {
-  cart = JSON.parse(localStorage.getItem('cart')) || [];
-
-  // Normalize cart items to have 'prices' object
-  cart = cart.map(item => ({
-    ...item,
-    quantity: item.quantity || 1,
-    prices: {
-      NGN: Number(item.priceNGN) || 0,
-      USD: Number(item.priceUSD) || 0,
-      EUR: Number(item.priceEUR) || 0,
-      GBP: Number(item.priceGBP) || 0
-    }
-  }));
-
-  updateCartCount();
 }
 
 // Render order summary
@@ -196,12 +177,13 @@ function renderOrder() {
   orderSubtotal.textContent = `Subtotal: ${formatPrice(subtotal, selectedCurrency)}`;
 }
 
-// Load quote if exists
+// Load quote or cart
 const urlParams = new URLSearchParams(window.location.search);
 const quoteId = urlParams.get("quoteId");
 
 async function loadQuote() {
   if (quoteId) {
+    // --- Load quote ---
     try {
       const docRef = doc(db, "brands", "fleurdevie", "quotes", quoteId);
       const docSnap = await getDoc(docRef);
@@ -242,7 +224,11 @@ async function loadQuote() {
       alert("Error loading quote. Please try again.");
     }
   } else {
-    renderOrder(); // If no quote, render cart
+    // --- Loaded from cart ---
+    selectedCurrency = localStorage.getItem('currency') || 'NGN';
+    currencySelect.value = selectedCurrency;
+    currencyWrapper.style.display = 'none'; // Hide currency switcher
+    renderOrder(); // Render cart items
   }
 }
 
@@ -293,7 +279,6 @@ currencySelect.addEventListener('change', ()=>{
 });
 
 // Initialize
-loadCart();
 updateCartCount();
 loadQuote();
 </script>
