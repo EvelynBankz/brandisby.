@@ -270,14 +270,118 @@
     }
 
     // render UI
-    function renderCartItems(){
-      cartGrid.innerHTML = '';
-      if (!cart || cart.length === 0) {
-        cartEmpty.style.display = 'block';
-        cartSubtotalElem.textContent = '';
-        checkoutBtn.style.display = 'none';
-        return;
+    // render grouped cart items
+function renderCartItems() {
+  cartGrid.innerHTML = '';
+  if (!cart || cart.length === 0) {
+    cartEmpty.style.display = 'block';
+    cartSubtotalElem.textContent = '';
+    checkoutBtn.style.display = 'none';
+    return;
+  }
+  cartEmpty.style.display = 'none';
+  checkoutBtn.style.display = 'inline-block';
+
+  const displayCurrency = currencySelect.value || 'NGN';
+  let subtotal = 0;
+
+  // group by product id
+  const grouped = {};
+  cart.forEach(item => {
+    if (!grouped[item.id]) grouped[item.id] = [];
+    grouped[item.id].push(item);
+  });
+
+  for (const productId in grouped) {
+    const variants = grouped[productId];
+    const product = productsData[productId] || null;
+    const productName = product?.name || variants[0].name || '';
+    const thumbnail = product?.images?.[0] || product?.imageUrl || variants[0].imageUrl || 'placeholder.jpg';
+    
+    const totalQty = variants.reduce((sum,v) => sum + (Number(v.quantity)||0), 0);
+    const productDiv = document.createElement('div');
+    productDiv.className = 'cart-item';
+
+    productDiv.innerHTML = `
+      <img src="${escapeHtml(thumbnail)}" alt="${escapeHtml(productName)}">
+      <div class="cart-item-details">
+        <h3>${escapeHtml(productName)} (Total: ${totalQty}) 
+          <button class="toggle-variants" style="float:right;">Show Variants ▼</button>
+        </h3>
+        <div class="variants-container" style="display:none; margin-top:10px;"></div>
+      </div>
+    `;
+
+    const variantsContainer = productDiv.querySelector('.variants-container');
+
+    variants.forEach(item => {
+      const unitPrice = getUnitPriceForCurrency(product, item, displayCurrency);
+      const lineTotal = unitPrice * (Number(item.quantity)||0);
+      subtotal += lineTotal;
+
+      const variantDiv = document.createElement('div');
+      variantDiv.style.marginBottom = '8px';
+      variantDiv.innerHTML = `
+        ${item.color ? `<span>Color: ${escapeHtml(item.color)}</span>` : ''}
+        ${item.size ? `<span>Size: ${escapeHtml(item.size)}</span>` : ''}
+        <span>Qty: </span>
+        <button class="minus" data-id="${escapeHtml(item.id)}" data-color="${escapeHtml(item.color||'')}" data-size="${escapeHtml(item.size||'')}">–</button>
+        <input type="number" min="0" value="${item.quantity}" class="qty-input" data-id="${escapeHtml(item.id)}" data-color="${escapeHtml(item.color||'')}" data-size="${escapeHtml(item.size||'')}">
+        <button class="plus" data-id="${escapeHtml(item.id)}" data-color="${escapeHtml(item.color||'')}" data-size="${escapeHtml(item.size||'')}">+</button>
+        <button class="remove" data-id="${escapeHtml(item.id)}" data-color="${escapeHtml(item.color||'')}" data-size="${escapeHtml(item.size||'')}" style="margin-left:6px;">Remove</button>
+        <span style="float:right;">${formatPrice(lineTotal, displayCurrency)}</span>
+      `;
+      variantsContainer.appendChild(variantDiv);
+    });
+
+    // toggle variants display
+    const toggleBtn = productDiv.querySelector('.toggle-variants');
+    toggleBtn.addEventListener('click', () => {
+      if (variantsContainer.style.display === 'none') {
+        variantsContainer.style.display = 'block';
+        toggleBtn.textContent = 'Hide Variants ▲';
+      } else {
+        variantsContainer.style.display = 'none';
+        toggleBtn.textContent = 'Show Variants ▼';
       }
+    });
+
+    cartGrid.appendChild(productDiv);
+    setTimeout(() => productDiv.style.opacity = '1', 50);
+  }
+
+  cartSubtotalElem.textContent = `Subtotal: ${formatPrice(subtotal, displayCurrency)}`;
+
+  // wire controls for all variants
+  cartGrid.querySelectorAll('.plus').forEach(btn => btn.addEventListener('click', async ()=>{
+    const {id,color,size} = btn.dataset;
+    const idx = findCartIndexByVariant(id,color,size);
+    if(idx>-1){
+      await updateQuantityForVariant(id,color,size, Number(cart[idx].quantity||0)+1);
+    }
+  }));
+
+  cartGrid.querySelectorAll('.minus').forEach(btn => btn.addEventListener('click', async ()=>{
+    const {id,color,size} = btn.dataset;
+    const idx = findCartIndexByVariant(id,color,size);
+    if(idx>-1){
+      await updateQuantityForVariant(id,color,size, Number(cart[idx].quantity||0)-1);
+    }
+  }));
+
+  cartGrid.querySelectorAll('.qty-input').forEach(input => input.addEventListener('input', debounce(async ()=>{
+    const {id,color,size} = input.dataset;
+    const val = parseInt(input.value,10);
+    if(isNaN(val)) return;
+    await updateQuantityForVariant(id,color,size,val);
+  },300)));
+
+  cartGrid.querySelectorAll('.remove').forEach(btn => btn.addEventListener('click', async ()=>{
+    const {id,color,size} = btn.dataset;
+    await updateQuantityForVariant(id,color,size,0);
+  }));
+}
+
       cartEmpty.style.display = 'none';
       checkoutBtn.style.display = 'inline-block';
 
