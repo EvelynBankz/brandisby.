@@ -190,27 +190,29 @@ async function loadQuote() {
 
       if (docSnap.exists()) {
         const rawQuote = docSnap.data();
-        selectedCurrency = rawQuote.currency || 'NGN';
+
+        // Pre-fill customer details
+        if (rawQuote.customer) document.getElementById('name').value = rawQuote.customer;
+        if (rawQuote.email) document.getElementById('email').value = rawQuote.email;
+
+        selectedCurrency = localStorage.getItem('currency') || rawQuote.currency || 'NGN';
         currencySelect.value = selectedCurrency;
         currencyWrapper.style.display = 'block';
 
         // Normalize items for rendering
         quote = rawQuote;
         if (Array.isArray(rawQuote.items)) {
-          quote.items = rawQuote.items.map(item => {
-            const priceMap = {
+          quote.items = rawQuote.items.map(item => ({
+            name: item.name,
+            desc: item.desc,
+            quantity: item.qty,
+            prices: {
               NGN: item.priceNGN ?? 0,
               USD: item.priceUSD ?? 0,
               EUR: item.priceEUR ?? 0,
               GBP: item.priceGBP ?? 0
-            };
-            return {
-              name: item.name,
-              desc: item.desc,
-              price: priceMap[selectedCurrency],
-              quantity: item.qty
-            };
-          });
+            }
+          }));
         } else {
           quote.items = [];
         }
@@ -225,6 +227,7 @@ async function loadQuote() {
     }
   }
 }
+
 
 
 // Proceed to payment
