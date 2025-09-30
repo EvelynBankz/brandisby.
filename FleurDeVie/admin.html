@@ -34,7 +34,6 @@
 
     .small-note { font-size:0.9rem; color:#334d3a; margin-top:8px; }
 
-    /* Dashboard Navigation */
     .dashboard-nav { display:flex; gap:10px; margin-bottom:1.5rem; }
     .dashboard-nav button { flex:1; }
     .section { display:none; margin-top:1rem; }
@@ -43,7 +42,6 @@
     .details-row { background:#fff6e8; }
     .details-row td { padding:12px; }
 
-    /* Orders filter/search */
     .order-filters { display:flex; gap:10px; margin-bottom:1rem; flex-wrap:wrap; }
     .order-filters input, .order-filters select { flex:1; max-width: 320px; }
 
@@ -60,18 +58,15 @@
       .order-filters { flex-direction: column; }
     }
 
-    /* Add Item panel styling (small) */
     .add-item-panel { border:1px dashed rgba(17,46,31,0.12); padding:12px; margin-top:8px; background:#fff; border-radius:8px; }
     .inline-grid { display:grid; grid-template-columns: repeat(4,1fr); gap:8px; }
     @media(max-width:600px){ .inline-grid { grid-template-columns: 1fr; } }
 
-    /* Repeatable product fields */
     .repeatable { margin-top:8px; }
     .repeatable .row { display:flex; gap:8px; margin-top:8px; }
     .repeatable .row input { flex:1; }
     .repeatable .row button { flex-shrink:0; padding:0.4rem 0.6rem; }
 
-    /* Modal for quote view */
     .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.45); display:none; align-items:center; justify-content:center; z-index:9999; }
     .modal { background:#fff; padding:16px; border-radius:10px; max-width:800px; width:95%; max-height:90vh; overflow:auto; }
     .modal .modal-header { display:flex; justify-content:space-between; align-items:center; gap:12px; }
@@ -112,7 +107,6 @@
     <form id="productForm">
       <label>Name</label>
       <input type="text" id="productName" required>
-      
       <label>Price (NGN)</label>
       <input type="number" id="productPriceNGN" step="0.01" inputmode="decimal" required>
       <label>Price (USD)</label>
@@ -125,21 +119,18 @@
       <label>Description</label>
       <textarea id="productDesc"></textarea>
 
-      <!-- Repeatable Sizes -->
       <label>Sizes</label>
       <div id="sizesRepeat" class="repeatable"></div>
       <div style="margin-top:6px;">
         <button type="button" id="addSizeBtn" style="background:#fff;color:#112e1f;border:1px solid #112e1f;">+ Add Size</button>
       </div>
 
-      <!-- Repeatable Colors -->
       <label>Colors</label>
       <div id="colorsRepeat" class="repeatable"></div>
       <div style="margin-top:6px;">
         <button type="button" id="addColorBtn" style="background:#fff;color:#112e1f;border:1px solid #112e1f;">+ Add Color</button>
       </div>
 
-      <!-- Repeatable Images -->
       <label>Images (URLs)</label>
       <div id="imagesRepeat" class="repeatable"></div>
       <div style="margin-top:6px;">
@@ -190,45 +181,26 @@
 
       <h3>Quote Items</h3>
 
-      <!-- Add item panel (hidden by default, toggled by + Add Item) -->
       <div id="addItemPanel" class="add-item-panel" style="display:none;">
         <label>Item Name</label>
         <input type="text" id="ai_name" placeholder="Item name">
-
         <label>Quantity</label>
         <input type="number" id="ai_qty" min="1" value="1">
-
         <label>Description</label>
         <input type="text" id="ai_desc" placeholder="Description (optional)">
-
         <div class="inline-grid" style="margin-top:8px;">
-          <div>
-            <label>Price NGN</label>
-            <input type="number" id="ai_price_ngn" step="0.01" inputmode="decimal">
-          </div>
-          <div>
-            <label>Price USD</label>
-            <input type="number" id="ai_price_usd" step="0.01" inputmode="decimal">
-          </div>
-          <div>
-            <label>Price EUR</label>
-            <input type="number" id="ai_price_eur" step="0.01" inputmode="decimal">
-          </div>
-          <div>
-            <label>Price GBP</label>
-            <input type="number" id="ai_price_gbp" step="0.01" inputmode="decimal">
-          </div>
+          <div><label>Price NGN</label><input type="number" id="ai_price_ngn" step="0.01" inputmode="decimal"></div>
+          <div><label>Price USD</label><input type="number" id="ai_price_usd" step="0.01" inputmode="decimal"></div>
+          <div><label>Price EUR</label><input type="number" id="ai_price_eur" step="0.01" inputmode="decimal"></div>
+          <div><label>Price GBP</label><input type="number" id="ai_price_gbp" step="0.01" inputmode="decimal"></div>
         </div>
-
         <div style="display:flex; gap:8px; margin-top:8px;">
           <button type="button" id="ai_add">Add</button>
           <button type="button" id="ai_cancel" style="background:#fff;color:#112e1f;border:1px solid #112e1f;">Cancel</button>
         </div>
       </div>
 
-      <!-- Quote items list (rendered) -->
       <div id="quoteItems"></div>
-
       <button type="button" id="addQuoteItem">+ Add Item</button>
 
       <div style="display:flex; gap:8px; align-items:center; margin-top:8px;">
@@ -238,7 +210,6 @@
     </form>
     <div id="quoteMessage" class="message"></div>
 
-    <!-- Currency display selector for quotes -->
     <label style="margin-top:12px;">Display Currency for Quotes</label>
     <select id="quotesDisplayCurrency">
       <option value="NGN">NGN</option>
@@ -255,7 +226,7 @@
     </table>
   </div>
 
-  <!-- Modal for viewing quote details -->
+  <!-- Modal -->
   <div id="quoteModalBackdrop" class="modal-backdrop">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="quoteModalTitle">
       <div class="modal-header">
@@ -272,8 +243,6 @@
   <!-- ORDERS -->
   <div class="section" id="ordersSection">
     <h2>Manage Orders</h2>
-
-    <!-- Filters + Export -->
     <div class="order-filters">
       <input type="text" id="orderSearch" placeholder="Search by customer or email...">
       <select id="orderStatusFilter">
@@ -285,7 +254,6 @@
         <option>Completed</option>
         <option>Cancelled</option>
       </select>
-
       <label style="width:100%; margin-top:8px;">Export options</label>
       <select id="exportCurrency" style="max-width:200px;">
         <option value="NGN">NGN</option>
@@ -297,7 +265,6 @@
       <input type="date" id="exportTo">
       <button id="exportOrders">Export Orders CSV</button>
     </div>
-
     <table id="ordersTable">
       <thead>
         <tr><th>Order ID</th><th>Customer</th><th>Email</th><th>Total</th><th>Status</th><th>Actions</th></tr>
@@ -310,7 +277,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, getDoc, query } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
@@ -324,10 +291,9 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Allowed admin(s)
 const allowedAdmins = ["yourstruly.fleurdevie@gmail.com"].map(e => e.toLowerCase().trim());
 
-/* --- UI refs --- */
+/* UI references */
 const loginForm = document.getElementById("loginForm");
 const loginMessage = document.getElementById("loginMessage");
 const loginContainer = document.getElementById("loginContainer");
@@ -343,20 +309,11 @@ const quoteItemsDiv = document.getElementById("quoteItems");
 const addQuoteItemBtn = document.getElementById("addQuoteItem");
 const quotesTableBody = document.querySelector("#quotesTable tbody");
 const quoteMessage = document.getElementById("quoteMessage");
-/* quoteCurrencySelect removed (field removed from form) */
 const generateQuoteLinkBtn = document.getElementById("generateQuoteLinkBtn");
 const generatedQuoteLink = document.getElementById("generatedQuoteLink");
 const quotesDisplayCurrency = document.getElementById("quotesDisplayCurrency");
 
-const ordersTableBody = document.querySelector("#ordersTable tbody");
-const orderSearch = document.getElementById("orderSearch");
-const orderStatusFilter = document.getElementById("orderStatusFilter");
-const exportBtn = document.getElementById("exportOrders");
-const exportCurrency = document.getElementById("exportCurrency");
-const exportFrom = document.getElementById("exportFrom");
-const exportTo = document.getElementById("exportTo");
-
-/* Repeatable product fields UI */
+/* Repeatable product fields */
 const sizesRepeat = document.getElementById("sizesRepeat");
 const colorsRepeat = document.getElementById("colorsRepeat");
 const imagesRepeat = document.getElementById("imagesRepeat");
@@ -365,76 +322,64 @@ const addColorBtn = document.getElementById("addColorBtn");
 const addImageBtn = document.getElementById("addImageBtn");
 
 let currentEditingProductId = null;
-let allOrders = [];
+let productsCache = [];
+let quotesCache = [];
 
-let productsCache = []; // array of {id, data}
-let quotesCache = []; // array of {id, data}
+/* Repeatable input helpers */
+function createRepeatRow(value='', placeholder=''){
+  const row = document.createElement('div');
+  row.className='row';
+  row.innerHTML=`<input type="text" value="${value}" placeholder="${placeholder}" /><button type="button" class="remove-row">Remove</button>`;
+  row.querySelector('.remove-row').addEventListener('click', ()=>row.remove());
+  return row;
+}
+function addSizeInput(v=''){ sizesRepeat.appendChild(createRepeatRow(v,'Size e.g. S, M, L')); }
+function addColorInput(v=''){ colorsRepeat.appendChild(createRepeatRow(v,'Color e.g. Olive')); }
+function addImageInput(v=''){ imagesRepeat.appendChild(createRepeatRow(v,'https://.../image.jpg')); }
+addSizeBtn.addEventListener('click',()=>addSizeInput());
+addColorBtn.addEventListener('click',()=>addColorInput());
+addImageBtn.addEventListener('click',()=>addImageInput());
+addSizeInput(); addColorInput(); addImageInput();
 
-/* ---------------- AUTH ---------------- */
-loginForm.addEventListener("submit", async (e) => {
+/* Auth */
+loginForm.addEventListener('submit',async e=>{
   e.preventDefault();
-  loginMessage.textContent = "";
-  const email = document.getElementById("loginEmail").value;
-  const password = document.getElementById("loginPassword").value;
-  try {
-    const userCred = await signInWithEmailAndPassword(auth, email, password);
-    const normalized = (userCred.user.email || "").toLowerCase().trim();
-    if (allowedAdmins.includes(normalized)) {
-      loginContainer.style.display = "none";
-      dashboardContainer.style.display = "block";
-      subscribeProducts();
-      subscribeQuotes();
-      subscribeOrders();
-      showSection("productsSection");
-    } else {
-      loginMessage.textContent = "❌ Not authorized.";
-      loginMessage.style.color = "red";
+  const email=document.getElementById("loginEmail").value;
+  const password=document.getElementById("loginPassword").value;
+  try{
+    const userCred=await signInWithEmailAndPassword(auth,email,password);
+    if(!allowedAdmins.includes((userCred.user.email||'').toLowerCase().trim())){
+      loginMessage.textContent="❌ Not authorized.";
       await signOut(auth);
+      return;
     }
-  } catch (err) {
-    console.error("Login error:", err);
-    loginMessage.textContent = `❌ ${err.code || ""}: ${err.message || err}`;
-    loginMessage.style.color = "red";
+    loginContainer.style.display='none';
+    dashboardContainer.style.display='block';
+    subscribeProducts(); subscribeQuotes(); subscribeOrders(); showSection('productsSection');
+  }catch(err){
+    loginMessage.textContent=`❌ ${err.message||err}`;
   }
 });
-
-onAuthStateChanged(auth, user => {
-  if (user && allowedAdmins.includes((user.email || "").toLowerCase().trim())) {
-    loginContainer.style.display = "none";
-    dashboardContainer.style.display = "block";
-    subscribeProducts();
-    subscribeQuotes();
-    subscribeOrders();
-    showSection("productsSection");
-  } else {
-    loginContainer.style.display = "block";
-    dashboardContainer.style.display = "none";
+onAuthStateChanged(auth,user=>{
+  if(user && allowedAdmins.includes((user.email||'').toLowerCase().trim())){
+    loginContainer.style.display='none';
+    dashboardContainer.style.display='block';
+    subscribeProducts(); subscribeQuotes(); subscribeOrders(); showSection('productsSection');
+  }else{
+    loginContainer.style.display='block';
+    dashboardContainer.style.display='none';
   }
 });
 
 /* Navigation */
-document.querySelectorAll(".dashboard-nav button").forEach(btn => {
-  btn.addEventListener("click", () => showSection(btn.dataset.target));
-});
-function showSection(id) {
-  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-}
+document.querySelectorAll(".dashboard-nav button").forEach(btn=>btn.addEventListener('click',()=>showSection(btn.dataset.target)));
+function showSection(id){ document.querySelectorAll(".section").forEach(s=>s.classList.remove("active")); document.getElementById(id).classList.add("active"); }
 
-/* ---------------- UTILS ---------------- */
-function formatCurrency(value, currency){
-  const localeMap = { NGN:'en-NG', USD:'en-US', EUR:'de-DE', GBP:'en-GB' };
-  const minFrac = currency === 'NGN' ? 0 : 2;
-  try {
-    return new Intl.NumberFormat(localeMap[currency] || 'en-US', { style:'currency', currency, minimumFractionDigits: minFrac }).format(value);
-  } catch(e) {
-    return `${value} ${currency}`;
-  }
-}
-function escapeHtml(str){ if (!str && str !== 0) return ""; return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[s])); }
+/* Currency formatting */
+function formatCurrency(value,c){ const l={NGN:'en-NG',USD:'en-US',EUR:'de-DE',GBP:'en-GB'}; const f=c==='NGN'?0:2; return new Intl.NumberFormat(l[c]||'en-US',{style:'currency',currency:c,minimumFractionDigits:f}).format(value||0); }
 
+/* Products CRUD omitted for brevity — same as current admin.html */
 /* ---------------- PRODUCTS (repeatable inputs) ---------------- */
-
 /* helper to create a repeatable row */
 function createRepeatRow(value='', placeholder='') {
   const row = document.createElement('div');
@@ -602,48 +547,29 @@ window.editProduct = async (id) => {
   productForm.querySelector("button[type='submit']").textContent = "Save Product";
 }
 
-/* ---------------- QUOTES (multi-currency per-item, currency switching, expanded view) ---------------- */
-
-/* local draft items for creating a quote */
-let quoteDraftItems = [];
-
+/* Quotes draft items */
+let quoteDraftItems=[];
 function renderDraftItems(){
-  quoteItemsDiv.innerHTML = "";
-  if (!quoteDraftItems.length) {
-    quoteItemsDiv.innerHTML = `<div class="small-note">No items added yet.</div>`;
-    return;
-  }
-  quoteDraftItems.forEach((it, idx) => {
-    const div = document.createElement("div");
-    div.className = "quote-item";
-    div.innerHTML = `
-      <div style="display:flex; justify-content:space-between; gap:12px; align-items:flex-start;">
-        <div style="flex:1;">
-          <strong>${escapeHtml(it.name)}</strong> &times; ${it.qty}<br>
-          <small>${escapeHtml(it.desc || '')}</small>
-          <div style="margin-top:8px; display:grid; grid-template-columns: repeat(4,1fr); gap:8px;">
-            <div>NGN: ${it.priceNGN != null && it.priceNGN !== "" ? formatCurrency(it.priceNGN, 'NGN') : "-"}</div>
-            <div>USD: ${it.priceUSD != null && it.priceUSD !== "" ? formatCurrency(it.priceUSD, 'USD') : "-"}</div>
-            <div>EUR: ${it.priceEUR != null && it.priceEUR !== "" ? formatCurrency(it.priceEUR, 'EUR') : "-"}</div>
-            <div>GBP: ${it.priceGBP != null && it.priceGBP !== "" ? formatCurrency(it.priceGBP, 'GBP') : "-"}</div>
-          </div>
-        </div>
-        <div style="min-width:90px; text-align:right;">
-          <button data-idx="${idx}" class="remove-draft">Remove</button>
-        </div>
-      </div>
-    `;
+  quoteItemsDiv.innerHTML='';
+  if(!quoteDraftItems.length){ quoteItemsDiv.innerHTML='<div class="small-note">No items added yet.</div>'; return; }
+  quoteDraftItems.forEach((it,idx)=>{
+    const div=document.createElement("div"); div.className="quote-item";
+    div.innerHTML=`<div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;">
+      <div style="flex:1;"><strong>${it.name}</strong> × ${it.qty}<br><small>${it.desc||''}</small>
+      <div style="margin-top:8px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+        <div>NGN: ${it.priceNGN!=null?formatCurrency(it.priceNGN,'NGN'):'-'}</div>
+        <div>USD: ${it.priceUSD!=null?formatCurrency(it.priceUSD,'USD'):'-'}</div>
+        <div>EUR: ${it.priceEUR!=null?formatCurrency(it.priceEUR,'EUR'):'-'}</div>
+        <div>GBP: ${it.priceGBP!=null?formatCurrency(it.priceGBP,'GBP'):'-'}</div>
+      </div></div>
+      <div style="min-width:90px;text-align:right;"><button data-idx="${idx}" class="remove-draft">Remove</button></div>
+    </div>`;
     quoteItemsDiv.appendChild(div);
   });
-  document.querySelectorAll(".remove-draft").forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      const idx = parseInt(btn.dataset.idx);
-      quoteDraftItems.splice(idx,1);
-      renderDraftItems();
-    });
-  });
+  document.querySelectorAll(".remove-draft").forEach(btn=>btn.addEventListener("click",()=>{ quoteDraftItems.splice(parseInt(btn.dataset.idx),1); renderDraftItems(); }));
 }
 
+/* Add quote item panel toggles omitted for brevity — same as current admin.html */
 /* Add Item panel toggles */
 const addItemPanel = document.getElementById("addItemPanel");
 const ai_add = document.getElementById("ai_add");
@@ -694,82 +620,30 @@ ai_add.addEventListener("click", () => {
   addItemPanel.style.display = "none";
   renderDraftItems();
 });
-
-/* Generate link button — saves quote (if valid) and displays the checkout link with a copy icon
-   NOTE: This version saves the quote to Firestore (as before) AND also stores the same quote object
-   into localStorage under the quoteId that Firestore returns. */
-generateQuoteLinkBtn.addEventListener("click", async () => {
-  // validation
-  const customer = document.getElementById("quoteCustomer").value.trim();
-  const email = document.getElementById("quoteEmail").value.trim();
-  // removed quoteCurrencySelect (UI field removed)
-  // removed explicit total input (UI field removed)
-
-  if (!customer || !email) {
-    alert("Customer name and email are required.");
-    return;
-  }
-  if (!quoteDraftItems.length) {
-    alert("Add at least one item to the quote.");
-    return;
-  }
-
-  const data = {
-    customer,
-    email,
-    items: quoteDraftItems,
-    // we intentionally do not include defaultCurrency or totalExplicit (those UI fields were removed)
-    status: "Unpaid", // default
-    createdAt: new Date().toISOString()
-  };
-
-  try {
-    const quotesRef = collection(db, "brands", "fleurdevie", "quotes");
-    const docRef = await addDoc(quotesRef, data);
-    const id = docRef.id;
-    const link = `${window.location.origin}/FleurDeVie/checkout/index.html?quoteId=${id}`;
-
-    // also save to localStorage using the quoteId as requested
-    try {
-      localStorage.setItem(id, JSON.stringify(data));
-    } catch (lsErr) {
-      console.warn("localStorage save failed", lsErr);
-    }
-
-    // render link and copy button inline
-    generatedQuoteLink.innerHTML = `
-      <a href="${link}" target="_blank" id="gqlink">${link}</a>
-      <button class="copy-btn" id="copyGeneratedBtn" data-link="${link}" title="Copy link">📋</button>
-    `;
-
-    const copyBtn = document.getElementById("copyGeneratedBtn");
-    if (copyBtn) {
-      copyBtn.addEventListener("click", async () => {
-        try {
-          await navigator.clipboard.writeText(copyBtn.dataset.link);
-          const prev = copyBtn.textContent;
-          copyBtn.textContent = "✅";
-          setTimeout(()=> copyBtn.textContent = "📋", 1000);
-        } catch (err) {
-          console.warn("Copy failed", err);
-          alert("Copy failed. Link: " + copyBtn.dataset.link);
-        }
-      });
-    }
-
-    // update message and reset form/drafts
-    quoteMessage.textContent = "✅ Quote saved and link generated.";
-    quoteMessage.style.color = "green";
-    quoteForm.reset();
-    quoteDraftItems = [];
-    renderDraftItems();
-  } catch (err) {
-    console.error(err);
-    quoteMessage.textContent = "❌ Error saving / generating link.";
-    quoteMessage.style.color = "red";
-  }
+/* Generate Quote Link */
+generateQuoteLinkBtn.addEventListener("click",async()=>{
+  const customer=document.getElementById("quoteCustomer").value.trim();
+  const email=document.getElementById("quoteEmail").value.trim();
+  if(!customer||!email){ alert("Customer name and email required."); return; }
+  if(!quoteDraftItems.length){ alert("Add at least one item."); return; }
+  const data={customer,email,items:quoteDraftItems,status:"Unpaid",createdAt:new Date().toISOString()};
+  try{
+    const docRef=await addDoc(collection(db,"brands","fleurdevie","quotes"),data);
+    const id=docRef.id;
+    const link=`${window.location.origin}/FleurDeVie/checkout/index.html?quoteId=${id}`;
+    try{ localStorage.setItem(id,JSON.stringify(data)); }catch(e){ console.warn(e); }
+    generatedQuoteLink.innerHTML=`<a href="${link}" target="_blank" id="gqlink">${link}</a><button class="copy-btn" id="copyGeneratedBtn" data-link="${link}">📋</button>`;
+    document.getElementById("copyGeneratedBtn").addEventListener("click",async()=>{
+      await navigator.clipboard.writeText(link);
+      const btn=document.getElementById("copyGeneratedBtn");
+      btn.textContent="✅"; setTimeout(()=>btn.textContent="📋",1000);
+    });
+    quoteMessage.textContent="✅ Quote saved and link generated."; quoteMessage.style.color="green";
+    quoteForm.reset(); quoteDraftItems=[]; renderDraftItems();
+  }catch(err){ console.error(err); quoteMessage.textContent="❌ Error saving quote."; quoteMessage.style.color="red"; }
 });
 
+/* computeTotalFromItems, subscribeQuotes, renderQuotesTable — same logic as above, with checkout link pointing to /FleurDeVie/checkout/index.html?quoteId=... */
 /* compute total from items in a given currency */
 function computeTotalFromItems(items = [], currency = 'NGN') {
   let total = 0;
@@ -1007,8 +881,8 @@ async function populateQuoteModal(id) {
 window.viewQuoteModal = (id) => {
   populateQuoteModal(id);
 }
-
-/* ---------------- ORDERS ---------------- */
+/* Orders subscription omitted for brevity */
+  /* ---------------- ORDERS ---------------- */
 function subscribeOrders() {
   const ordersRef = collection(db, "brands", "fleurdevie", "orders");
   onSnapshot(ordersRef, snap => {
