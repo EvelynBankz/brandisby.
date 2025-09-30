@@ -277,7 +277,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, getDoc, query } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
@@ -291,6 +291,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
+// Allowed admin(s)
 const allowedAdmins = ["yourstruly.fleurdevie@gmail.com"].map(e => e.toLowerCase().trim());
 
 /* UI references */
@@ -342,34 +343,56 @@ addImageBtn.addEventListener('click',()=>addImageInput());
 addSizeInput(); addColorInput(); addImageInput();
 
 /* Auth */
-loginForm.addEventListener('submit',async e=>{
+/* ---------------- AUTH ---------------- */
+loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-  const email=document.getElementById("loginEmail").value;
-  const password=document.getElementById("loginPassword").value;
-  try{
-    const userCred=await signInWithEmailAndPassword(auth,email,password);
-    if(!allowedAdmins.includes((userCred.user.email||'').toLowerCase().trim())){
-      loginMessage.textContent="❌ Not authorized.";
+  loginMessage.textContent = "";
+  const email = document.getElementById("loginEmail").value;
+  const password = document.getElementById("loginPassword").value;
+  try {
+    const userCred = await signInWithEmailAndPassword(auth, email, password);
+    const normalized = (userCred.user.email || "").toLowerCase().trim();
+    if (allowedAdmins.includes(normalized)) {
+      loginContainer.style.display = "none";
+      dashboardContainer.style.display = "block";
+      subscribeProducts();
+      subscribeQuotes();
+      subscribeOrders();
+      showSection("productsSection");
+    } else {
+      loginMessage.textContent = "❌ Not authorized.";
+      loginMessage.style.color = "red";
       await signOut(auth);
-      return;
     }
-    loginContainer.style.display='none';
-    dashboardContainer.style.display='block';
-    subscribeProducts(); subscribeQuotes(); subscribeOrders(); showSection('productsSection');
-  }catch(err){
-    loginMessage.textContent=`❌ ${err.message||err}`;
+  } catch (err) {
+    console.error("Login error:", err);
+    loginMessage.textContent = `❌ ${err.code || ""}: ${err.message || err}`;
+    loginMessage.style.color = "red";
   }
 });
-onAuthStateChanged(auth,user=>{
-  if(user && allowedAdmins.includes((user.email||'').toLowerCase().trim())){
-    loginContainer.style.display='none';
-    dashboardContainer.style.display='block';
-    subscribeProducts(); subscribeQuotes(); subscribeOrders(); showSection('productsSection');
-  }else{
-    loginContainer.style.display='block';
-    dashboardContainer.style.display='none';
+
+onAuthStateChanged(auth, user => {
+  if (user && allowedAdmins.includes((user.email || "").toLowerCase().trim())) {
+    loginContainer.style.display = "none";
+    dashboardContainer.style.display = "block";
+    subscribeProducts();
+    subscribeQuotes();
+    subscribeOrders();
+    showSection("productsSection");
+  } else {
+    loginContainer.style.display = "block";
+    dashboardContainer.style.display = "none";
   }
 });
+
+/* Navigation */
+document.querySelectorAll(".dashboard-nav button").forEach(btn => {
+  btn.addEventListener("click", () => showSection(btn.dataset.target));
+});
+function showSection(id) {
+  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
 
 /* Navigation */
 document.querySelectorAll(".dashboard-nav button").forEach(btn=>btn.addEventListener('click',()=>showSection(btn.dataset.target)));
