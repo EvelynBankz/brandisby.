@@ -271,7 +271,7 @@
 
     // render UI
     // render grouped cart items
-function renderCartItems() {
+function renderCartItems(){
   cartGrid.innerHTML = '';
   if (!cart || cart.length === 0) {
     cartEmpty.style.display = 'block';
@@ -285,99 +285,108 @@ function renderCartItems() {
   const displayCurrency = currencySelect.value || 'NGN';
   let subtotal = 0;
 
-  // group by product id
+  // group items by product id
   const grouped = {};
   cart.forEach(item => {
     if (!grouped[item.id]) grouped[item.id] = [];
     grouped[item.id].push(item);
   });
 
-  for (const productId in grouped) {
-    const variants = grouped[productId];
+  Object.keys(grouped).forEach(productId => {
+    const items = grouped[productId];
     const product = productsData[productId] || null;
-    const productName = product?.name || variants[0].name || '';
-    const thumbnail = product?.images?.[0] || product?.imageUrl || variants[0].imageUrl || 'placeholder.jpg';
-    
-    const totalQty = variants.reduce((sum,v) => sum + (Number(v.quantity)||0), 0);
-    const productDiv = document.createElement('div');
-    productDiv.className = 'cart-item';
 
-    productDiv.innerHTML = `
-      <img src="${escapeHtml(thumbnail)}" alt="${escapeHtml(productName)}">
+    let thumbnail = '';
+    if (product) {
+      if (Array.isArray(product.images) && product.images.length) thumbnail = product.images[0];
+      else if (product.imageUrl) thumbnail = product.imageUrl;
+    }
+    if (!thumbnail) thumbnail = items[0].imageUrl || 'placeholder.jpg';
+
+    let productTotalQty = 0;
+    let productLineTotal = 0;
+    items.forEach(it => {
+      const unitPrice = getUnitPriceForCurrency(product, it, displayCurrency);
+      productTotalQty += Number(it.quantity) || 0;
+      productLineTotal += (Number(it.quantity) || 0) * unitPrice;
+    });
+    subtotal += productLineTotal;
+
+    // build variant list html
+    const variantsHtml = items.map(it => {
+      const unitPrice = getUnitPriceForCurrency(product, it, displayCurrency);
+      const lineTotal = unitPrice * (Number(it.quantity) || 0);
+      return `
+        <div class="variant-item" style="margin-bottom:6px; display:flex; align-items:center; justify-content:space-between; gap:6px;">
+          <div>
+            ${it.color ? `<span>Color: ${escapeHtml(it.color)}</span>` : ''}
+            ${it.size ? `<span>Size: ${escapeHtml(it.size)}</span>` : ''}
+          </div>
+          <div style="display:flex; align-items:center; gap:4px;">
+            <button class="minus" data-id="${escapeHtml(it.id)}" data-color="${escapeHtml(it.color || '')}" data-size="${escapeHtml(it.size || '')}">–</button>
+            <input type="number" min="0" value="${escapeHtml(String(it.quantity || 0))}" class="qty-input" data-id="${escapeHtml(it.id)}" data-color="${escapeHtml(it.color || '')}" data-size="${escapeHtml(it.size || '')}" style="width:50px;text-align:center;">
+            <button class="plus" data-id="${escapeHtml(it.id)}" data-color="${escapeHtml(it.color || '')}" data-size="${escapeHtml(it.size || '')}">+</button>
+            <button class="remove" style="margin-left:4px;background:#fff;color:#112e1f;border:1px solid #112e1f;padding:4px 6px;border-radius:6px;" data-id="${escapeHtml(it.id)}" data-color="${escapeHtml(it.color || '')}" data-size="${escapeHtml(it.size || '')}">Remove</button>
+            <span style="margin-left:6px; font-weight:600;">${formatPrice(lineTotal, displayCurrency)}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    const div = document.createElement('div');
+    div.className = 'cart-item';
+    div.innerHTML = `
+      <img src="${escapeHtml(thumbnail)}" alt="${escapeHtml(product?.name || items[0].name || 'Product')}">
       <div class="cart-item-details">
-        <h3>${escapeHtml(productName)} (Total: ${totalQty}) 
-          <button class="toggle-variants" style="float:right;">Show Variants ▼</button>
-        </h3>
-        <div class="variants-container" style="display:none; margin-top:10px;"></div>
+        <h3>${escapeHtml(product?.name || items[0].name || '')}</h3>
+        <button class="toggle-variants" style="margin-bottom:6px;padding:4px 8px;background:#112e1f;color:#FFD6BA;border:none;border-radius:4px;cursor:pointer;">
+          Show Variants (${items.length})
+        </button>
+        <div class="variant-meta" style="display:none;">${variantsHtml}</div>
+        <div style="font-weight:600; margin-top:6px;">Total Quantity: ${productTotalQty} | Total: ${formatPrice(productLineTotal, displayCurrency)}</div>
       </div>
     `;
 
-    const variantsContainer = productDiv.querySelector('.variants-container');
+    cartGrid.appendChild(div);
+    setTimeout(()=> div.style.opacity = '1', 50);
 
-    variants.forEach(item => {
-      const unitPrice = getUnitPriceForCurrency(product, item, displayCurrency);
-      const lineTotal = unitPrice * (Number(item.quantity)||0);
-      subtotal += lineTotal;
-
-      const variantDiv = document.createElement('div');
-      variantDiv.style.marginBottom = '8px';
-      variantDiv.innerHTML = `
-        ${item.color ? `<span>Color: ${escapeHtml(item.color)}</span>` : ''}
-        ${item.size ? `<span>Size: ${escapeHtml(item.size)}</span>` : ''}
-        <span>Qty: </span>
-        <button class="minus" data-id="${escapeHtml(item.id)}" data-color="${escapeHtml(item.color||'')}" data-size="${escapeHtml(item.size||'')}">–</button>
-        <input type="number" min="0" value="${item.quantity}" class="qty-input" data-id="${escapeHtml(item.id)}" data-color="${escapeHtml(item.color||'')}" data-size="${escapeHtml(item.size||'')}">
-        <button class="plus" data-id="${escapeHtml(item.id)}" data-color="${escapeHtml(item.color||'')}" data-size="${escapeHtml(item.size||'')}">+</button>
-        <button class="remove" data-id="${escapeHtml(item.id)}" data-color="${escapeHtml(item.color||'')}" data-size="${escapeHtml(item.size||'')}" style="margin-left:6px;">Remove</button>
-        <span style="float:right;">${formatPrice(lineTotal, displayCurrency)}</span>
-      `;
-      variantsContainer.appendChild(variantDiv);
-    });
-
-    // toggle variants display
-    const toggleBtn = productDiv.querySelector('.toggle-variants');
-    toggleBtn.addEventListener('click', () => {
-      if (variantsContainer.style.display === 'none') {
-        variantsContainer.style.display = 'block';
-        toggleBtn.textContent = 'Hide Variants ▲';
+    // toggle variants
+    const toggleBtn = div.querySelector('.toggle-variants');
+    const variantDiv = div.querySelector('.variant-meta');
+    toggleBtn.addEventListener('click', ()=>{
+      if(variantDiv.style.display === 'none'){
+        variantDiv.style.display = 'block';
+        toggleBtn.textContent = `Hide Variants (${items.length})`;
       } else {
-        variantsContainer.style.display = 'none';
-        toggleBtn.textContent = 'Show Variants ▼';
+        variantDiv.style.display = 'none';
+        toggleBtn.textContent = `Show Variants (${items.length})`;
       }
     });
-
-    cartGrid.appendChild(productDiv);
-    setTimeout(() => productDiv.style.opacity = '1', 50);
-  }
+  });
 
   cartSubtotalElem.textContent = `Subtotal: ${formatPrice(subtotal, displayCurrency)}`;
 
-  // wire controls for all variants
-  cartGrid.querySelectorAll('.plus').forEach(btn => btn.addEventListener('click', async ()=>{
-    const {id,color,size} = btn.dataset;
-    const idx = findCartIndexByVariant(id,color,size);
-    if(idx>-1){
-      await updateQuantityForVariant(id,color,size, Number(cart[idx].quantity||0)+1);
-    }
+  // attach all variant controls
+  cartGrid.querySelectorAll('.plus').forEach(btn => btn.addEventListener('click', async () => {
+    const { id, color, size } = btn.dataset;
+    const idx = findCartIndexByVariant(id, color, size);
+    if (idx === -1) return;
+    await updateQuantityForVariant(id, color, size, (Number(cart[idx].quantity)||0)+1);
   }));
-
-  cartGrid.querySelectorAll('.minus').forEach(btn => btn.addEventListener('click', async ()=>{
-    const {id,color,size} = btn.dataset;
-    const idx = findCartIndexByVariant(id,color,size);
-    if(idx>-1){
-      await updateQuantityForVariant(id,color,size, Number(cart[idx].quantity||0)-1);
-    }
+  cartGrid.querySelectorAll('.minus').forEach(btn => btn.addEventListener('click', async () => {
+    const { id, color, size } = btn.dataset;
+    const idx = findCartIndexByVariant(id, color, size);
+    if (idx === -1) return;
+    await updateQuantityForVariant(id, color, size, (Number(cart[idx].quantity)||0)-1);
   }));
-
   cartGrid.querySelectorAll('.qty-input').forEach(input => input.addEventListener('input', debounce(async ()=>{
-    const {id,color,size} = input.dataset;
+    const { id, color, size } = input.dataset;
     const val = parseInt(input.value,10);
-    if(isNaN(val)) return;
+    if (isNaN(val)) return;
     await updateQuantityForVariant(id,color,size,val);
   },300)));
-
   cartGrid.querySelectorAll('.remove').forEach(btn => btn.addEventListener('click', async ()=>{
-    const {id,color,size} = btn.dataset;
+    const { id, color, size } = btn.dataset;
     await updateQuantityForVariant(id,color,size,0);
   }));
 }
