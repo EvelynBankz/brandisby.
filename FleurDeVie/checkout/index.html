@@ -163,7 +163,7 @@ function renderOrder() {
   orderItems.innerHTML = '';
   let subtotal = 0;
 
-  const sourceItems = quote && Array.isArray(quote.items) ? quote.items : cart;
+  const sourceItems = quote && Array.isArray(quote.items) ? quote.items : [];
 
   sourceItems.forEach(item => {
     const unitPrice = item.prices[selectedCurrency] ?? 0;
@@ -181,17 +181,15 @@ function renderOrder() {
 const urlParams = new URLSearchParams(window.location.search);
 const quoteId = urlParams.get("quoteId");
 
-async function loadQuote() {
-  if (quoteId) {
-    // --- Load quote ---
+async function loadCheckout() {
+  if(quoteId){
+    // --- Load from quote ---
     try {
       const docRef = doc(db, "brands", "fleurdevie", "quotes", quoteId);
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
         const rawQuote = docSnap.data();
-
-        // Pre-fill customer details
         if (rawQuote.customer) document.getElementById('name').value = rawQuote.customer;
         if (rawQuote.email) document.getElementById('email').value = rawQuote.email;
 
@@ -199,7 +197,6 @@ async function loadQuote() {
         currencySelect.value = selectedCurrency;
         currencyWrapper.style.display = 'block';
 
-        // Normalize items
         quote = { items: [] };
         if (Array.isArray(rawQuote.items)) {
           quote.items = rawQuote.items.map(item => ({
@@ -214,7 +211,6 @@ async function loadQuote() {
             }
           }));
         }
-
         renderOrder();
       } else {
         alert("Quote not found.");
@@ -224,11 +220,23 @@ async function loadQuote() {
       alert("Error loading quote. Please try again.");
     }
   } else {
-    // --- Loaded from cart ---
+    // --- Load from cart ---
     selectedCurrency = localStorage.getItem('currency') || 'NGN';
     currencySelect.value = selectedCurrency;
-    currencyWrapper.style.display = 'none'; // Hide currency switcher
-    renderOrder(); // Render cart items
+    currencyWrapper.style.display = 'none'; // Hide currency selector
+
+    quote = { items: cart.map(item => ({
+      name: item.name || '',
+      desc: item.desc || '',
+      quantity: item.quantity || item.qty || 1,
+      prices: {
+        NGN: Number(item.priceNGN) || 0,
+        USD: Number(item.priceUSD) || 0,
+        EUR: Number(item.priceEUR) || 0,
+        GBP: Number(item.priceGBP) || 0
+      }
+    }))};
+    renderOrder();
   }
 }
 
@@ -243,9 +251,6 @@ payBtn.addEventListener('click', async ()=>{
   let subtotal=0, items=[];
   if(quote){
     items = quote.items;
-    items.forEach(item=> subtotal += (item.prices[selectedCurrency] ?? 0) * item.quantity );
-  }else{
-    items = cart;
     items.forEach(item=> subtotal += (item.prices[selectedCurrency] ?? 0) * item.quantity );
   }
 
@@ -271,16 +276,16 @@ payBtn.addEventListener('click', async ()=>{
   });
 });
 
+// Initialize
+updateCartCount();
+loadCheckout();
+
 // Currency change handler
 currencySelect.addEventListener('change', ()=>{
   selectedCurrency = currencySelect.value;
   localStorage.setItem('currency', selectedCurrency);
   renderOrder();
 });
-
-// Initialize
-updateCartCount();
-loadQuote();
 </script>
 </body>
 </html>
