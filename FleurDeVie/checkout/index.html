@@ -159,23 +159,23 @@ function renderOrder(){
   orderItems.innerHTML = '';
   let subtotal = 0;
   if(quote){
-    Object.values(quote.items).forEach(item=>{
+    quote.items.forEach(item => {
       const unitPrice = item.prices[selectedCurrency];
       subtotal += unitPrice * item.quantity;
-      const li=document.createElement('li');
-      li.innerHTML = `${item.name} (x${item.quantity}) <span>${formatPrice(unitPrice*item.quantity,selectedCurrency)}</span>`;
+      const li = document.createElement('li');
+      li.innerHTML = `${item.name} (x${item.quantity}) <span>${formatPrice(unitPrice * item.quantity, selectedCurrency)}</span>`;
       orderItems.appendChild(li);
     });
-  }else{
-    cart.forEach(item=>{
+  } else {
+    cart.forEach(item => {
       const unitPrice = item.prices[selectedCurrency];
       subtotal += unitPrice * item.quantity;
-      const li=document.createElement('li');
-      li.innerHTML = `${item.name} (x${item.quantity}) <span>${formatPrice(unitPrice*item.quantity,selectedCurrency)}</span>`;
+      const li = document.createElement('li');
+      li.innerHTML = `${item.name} (x${item.quantity}) <span>${formatPrice(unitPrice * item.quantity, selectedCurrency)}</span>`;
       orderItems.appendChild(li);
     });
   }
-  orderSubtotal.textContent = `Subtotal: ${formatPrice(subtotal,selectedCurrency)}`;
+  orderSubtotal.textContent = `Subtotal: ${formatPrice(subtotal, selectedCurrency)}`;
 }
 
 const urlParams = new URLSearchParams(window.location.search);
