@@ -673,7 +673,8 @@ generateQuoteLinkBtn.addEventListener("click", async () => {
     const id = docRef.id;
 
     // ✅ Use relative path here instead of window.location.origin
-    const link = `FleurDeVie/checkout/index.html?quoteId=${id}`;
+    const link = `./checkout/index.html?quoteId=${id}`;
+
 
     try { 
       localStorage.setItem(id, JSON.stringify(data)); 
@@ -756,7 +757,7 @@ function renderQuotesTable() {
       displayTotal = `${formatCurrency(q.totalExplicit, q.defaultCurrency || displayCurrency)} (${q.defaultCurrency || displayCurrency})`;
     }
 
-    const link = `FleurDeVie/checkout/index.html?quoteId=${id}`;
+    const link = `./checkout/index.html?quoteId=${id}`;
     const status = q.status || "Unpaid";
 
     const row = document.createElement("tr");
@@ -848,7 +849,7 @@ quoteModalBackdrop.addEventListener('click', (ev) => { if (ev.target === quoteMo
 openCheckoutBtn.addEventListener('click', () => {
   const id = quoteModalBackdrop.dataset.currentId;
   if (id) {
-    const link = `FleurDeVie/checkout/index.html?quoteId=${id}`;
+    const link = `./checkout/index.html?quoteId=${id}`;
     window.open(link, '_blank');
   }
 });
@@ -869,7 +870,7 @@ async function populateQuoteModal(id) {
   }
 
   // build html
-  const link = `FleurDeVie/checkout/index.html?quoteId=${id}`;
+  const link = `./checkout/index.html?quoteId=${id}`;
   let html = `
     <div style="display:flex; justify-content:space-between; gap:12px; align-items:center;">
       <div>
