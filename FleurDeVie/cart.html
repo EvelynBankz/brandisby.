@@ -56,17 +56,20 @@ h2 { text-align:center; font-size:24px; font-family:"Playfair Display", serif; m
 
 /* Show Variants Button */
 .show-variants-btn {
-  background:#FFD6BA;
-  color:#112e1f;
-  border:1px solid #112e1f;
-  border-radius:6px;
-  padding:4px 8px;
-  cursor:pointer;
-  font-weight:600;
-  margin-top:6px;
-  width:auto;
-  font-size:14px;
+  background: #FFD6BA;
+  color: #112e1f;
+  border: 1px solid #112e1f;
+  border-radius: 6px;
+  padding: 4px 8px;    /* small padding */
+  cursor: pointer;
+  font-weight: 600;
+  margin-top: 6px;
+  width: auto;          /* shrink to content */
+  display: inline-block; /* ensure it doesn't stretch */
+  font-size: 14px;
+  text-align: center;
 }
+
 .variants-container { display:none; flex-direction:column; gap:8px; margin-top:8px; padding-left:8px; border-left:2px solid #112e1f; }
 
 /* Cart Subtotal */
