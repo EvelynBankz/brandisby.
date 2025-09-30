@@ -176,9 +176,14 @@ function setCart(cartArray){
   localStorage.setItem('cart', JSON.stringify(cart)); 
   updateCartCount(); 
 }
-function updateCartCount(){ const total = cart.reduce((sum,i)=>sum+(i.quantity||0),0); cartCountElem.textContent=total; cartCountMobileElem.textContent=total; }
 
-// Merge cart items by id + variant (future-proof)
+function updateCartCount(){ 
+  const total = cart.reduce((sum,i)=>sum+(i.quantity||0),0); 
+  cartCountElem.textContent=total; 
+  cartCountMobileElem.textContent=total;
+}
+
+// Merge cart items by id + variant
 function mergeCartItems(cartArray){
   const merged = [];
   cartArray.forEach(item=>{
@@ -187,6 +192,11 @@ function mergeCartItems(cartArray){
     else merged[idx].quantity = (merged[idx].quantity||0) + (item.quantity||0);
   });
   return merged;
+}
+
+// Calculate total quantity for product across all variants
+function getTotalQuantity(productId){
+  return cart.filter(i=>i.id===productId).reduce((sum,i)=>sum+(i.quantity||0),0);
 }
 
 function addToCart(product){
@@ -206,13 +216,14 @@ function removeFromCart(productId){
   updateProductUI(productId);
 }
 
+// Update product card UI based on total quantity across all variants
 function updateProductUI(productId){
-  const item = cart.find(i=>i.id===productId);
   const card = document.getElementById(`product-${productId}`);
   if(!card) return;
   const addBtn = card.querySelector('.add-cart');
   const badge = card.querySelector('.quantity-badge');
-  if(item){ addBtn.style.display='none'; badge.textContent=item.quantity; } 
+  const totalQty = getTotalQuantity(productId);
+  if(totalQty>0){ addBtn.style.display='none'; badge.textContent=totalQty; } 
   else { addBtn.style.display='block'; badge.textContent=''; }
 }
 
@@ -250,8 +261,7 @@ function displayProducts(products){
 
   productGrid.innerHTML='';
   for(const p of filtered){
-    const cartItem = cart.find(i=>i.id===p.id);
-    const quantity = cartItem?cartItem.quantity:0;
+    const quantity = getTotalQuantity(p.id);
     const priceForCurrency = getPriceForCurrency(p);
 
     const div = document.createElement('div');
