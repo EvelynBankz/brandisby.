@@ -727,7 +727,7 @@ generateQuoteLinkBtn.addEventListener("click", async () => {
     const quotesRef = collection(db, "brands", "fleurdevie", "quotes");
     const docRef = await addDoc(quotesRef, data);
     const id = docRef.id;
-    const link = `${window.location.origin}/checkout/index.html?quoteId=${id}`;
+    const link = `${window.location.origin}/FleurDeVie/checkout/index.html?quoteId=${id}`;
 
     // also save to localStorage using the quoteId as requested
     try {
