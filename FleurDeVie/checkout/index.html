@@ -200,21 +200,22 @@ async function loadQuote() {
         currencyWrapper.style.display = 'block';
 
         // Normalize items for rendering
-        quote = rawQuote;
+        quote = {
+          items: []
+        };
+
         if (Array.isArray(rawQuote.items)) {
           quote.items = rawQuote.items.map(item => ({
-            name: item.name,
-            desc: item.desc,
-            quantity: item.qty,
+            name: item.name || '',
+            desc: item.desc || '',
+            quantity: item.qty || 1,
             prices: {
-              NGN: item.priceNGN ?? 0,
-              USD: item.priceUSD ?? 0,
-              EUR: item.priceEUR ?? 0,
-              GBP: item.priceGBP ?? 0
+              NGN: Number(item.priceNGN) || 0,
+              USD: Number(item.priceUSD) || 0,
+              EUR: Number(item.priceEUR) || 0,
+              GBP: Number(item.priceGBP) || 0
             }
           }));
-        } else {
-          quote.items = [];
         }
 
         renderOrder();
@@ -227,6 +228,7 @@ async function loadQuote() {
     }
   }
 }
+
 
 
 
