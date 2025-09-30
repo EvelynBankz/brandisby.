@@ -142,7 +142,7 @@ const currencySelect = document.getElementById('currency');
 const currencyWrapper = document.getElementById('currencySelectorWrapper');
 const payBtn = document.getElementById('payBtn');
 
-let cart = JSON.parse(localStorage.getItem('cart')) || [];
+let cart = [];
 let quote = null;
 let selectedCurrency = 'NGN';
 
@@ -156,6 +156,25 @@ function formatPrice(value, currency){
 function updateCartCount(){
   const total = cart.reduce((sum,i)=>sum+i.quantity,0);
   cartCountElem.textContent = total;
+}
+
+// Load and normalize cart items
+function loadCart() {
+  cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+  // Normalize cart items to have 'prices' object
+  cart = cart.map(item => ({
+    ...item,
+    quantity: item.quantity || 1,
+    prices: {
+      NGN: Number(item.priceNGN) || 0,
+      USD: Number(item.priceUSD) || 0,
+      EUR: Number(item.priceEUR) || 0,
+      GBP: Number(item.priceGBP) || 0
+    }
+  }));
+
+  updateCartCount();
 }
 
 // Render order summary
@@ -176,8 +195,6 @@ function renderOrder() {
 
   orderSubtotal.textContent = `Subtotal: ${formatPrice(subtotal, selectedCurrency)}`;
 }
-
-
 
 // Load quote if exists
 const urlParams = new URLSearchParams(window.location.search);
@@ -200,11 +217,8 @@ async function loadQuote() {
         currencySelect.value = selectedCurrency;
         currencyWrapper.style.display = 'block';
 
-        // Normalize items for rendering
-        quote = {
-          items: []
-        };
-
+        // Normalize items
+        quote = { items: [] };
         if (Array.isArray(rawQuote.items)) {
           quote.items = rawQuote.items.map(item => ({
             name: item.name || '',
@@ -227,11 +241,10 @@ async function loadQuote() {
       console.error("Failed to fetch quote", err);
       alert("Error loading quote. Please try again.");
     }
+  } else {
+    renderOrder(); // If no quote, render cart
   }
 }
-
-
-
 
 // Proceed to payment
 payBtn.addEventListener('click', async ()=>{
@@ -280,6 +293,7 @@ currencySelect.addEventListener('change', ()=>{
 });
 
 // Initialize
+loadCart();
 updateCartCount();
 loadQuote();
 </script>
