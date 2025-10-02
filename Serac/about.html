@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Serac - About Us</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     /* ========= BASE ========= */
@@ -21,13 +21,20 @@
     .header-right a:hover{color:#C6A26F;}
 
     /* ========= HERO ========= */
-    .hero{height:70vh;background:url("bg.jpg") center/cover no-repeat;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 20px;color:#fff;position:relative;}
-    .hero::after{content:"";position:absolute;inset:0;background:rgba(20,21,23,0.6);}
+    .hero{height:80vh;background:url("bg.jpg") center/cover no-repeat;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 20px;color:#fff;position:relative;}
+    .hero::after{content:"";position:absolute;inset:0;background:rgba(20,21,23,0.7);}
     .hero-content{position:relative;z-index:2;}
-    .hero-content h1{font-size:64px;margin-bottom:15px;color:#fff;animation:fadeInDown 1s ease;}
-    .hero-content p{font-size:20px;max-width:700px;margin:auto;animation:fadeInUp 1.2s ease;}
-    @keyframes fadeInDown{0%{opacity:0;transform:translateY(-30px);}100%{opacity:1;transform:translateY(0);}}
-    @keyframes fadeInUp{0%{opacity:0;transform:translateY(30px);}100%{opacity:1;transform:translateY(0);}}
+    .hero-content h1{font-size:72px;margin-bottom:20px;color:#fff;font-weight:700;}
+    .hero-content p{font-size:22px;max-width:700px;margin:auto;color:#ccc;}
+    .animated-words{display:inline-block;overflow:hidden;vertical-align:bottom;height:60px;}
+    .animated-words span{display:block;animation:slideWords 9s infinite;}
+    @keyframes slideWords {
+      0%,20%{transform:translateY(0%);}
+      25%,45%{transform:translateY(-100%);}
+      50%,70%{transform:translateY(-200%);}
+      75%,95%{transform:translateY(-300%);}
+      100%{transform:translateY(0%);}
+    }
 
     /* ========= SECTION WRAPPER ========= */
     section{padding:100px 20px;}
@@ -49,13 +56,13 @@
     /* ========= TESTIMONIALS ========= */
     .testimonial-section{position:relative;overflow:hidden;}
     .testimonial-slider{display:flex;transition:transform .6s ease;}
-    .testimonial-card{min-width:100%;background:#1c1d21;padding:40px;border-radius:12px;text-align:center;opacity:0;transform:translateY(30px);transition:all .6s;}
+    .testimonial-card{min-width:100%;background:#1c1d21;padding:50px;border-radius:12px;text-align:center;opacity:0;transform:translateY(30px);transition:all .6s;}
     .testimonial-card.active{opacity:1;transform:translateY(0);}
     .testimonial-stars{color:#FFD700;margin-bottom:15px;}
-    .testimonial-text{font-style:italic;font-size:18px;margin-bottom:15px;}
+    .testimonial-text{font-style:italic;font-size:20px;margin-bottom:15px;}
     .testimonial-author{font-weight:600;color:#C6A26F;}
     .testimonial-controls{margin-top:30px;text-align:center;}
-    .testimonial-controls button{background:none;border:2px solid #C6A26F;color:#C6A26F;padding:8px 15px;margin:0 5px;border-radius:50%;cursor:pointer;transition:.3s;}
+    .testimonial-controls button{background:none;border:2px solid #C6A26F;color:#C6A26F;padding:10px 18px;margin:0 5px;border-radius:50%;cursor:pointer;transition:.3s;}
     .testimonial-controls button:hover{background:#C6A26F;color:#fff;}
 
     /* ========= FAQ ========= */
@@ -88,9 +95,17 @@
   </nav>
 </header>
 
+<!-- HERO WITH BECKO-STYLE ANIMATION -->
 <section class="hero">
   <div class="hero-content">
-    <h1>About Serac</h1>
+    <h1>
+      We Build <span class="animated-words">
+        <span>Confidence</span>
+        <span>Style</span>
+        <span>Quality</span>
+        <span>Legacy</span>
+      </span>
+    </h1>
     <p>Discover our story, vision, and the passion behind everything we deliver.</p>
   </div>
 </section>
@@ -126,6 +141,7 @@
   </div>
 </section>
 
+<!-- TESTIMONIALS SLIDER -->
 <section class="container testimonial-section">
   <h2 style="text-align:center; margin-bottom:50px;">What Clients Say</h2>
   <div class="testimonial-slider">
