@@ -4,151 +4,112 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Serac - About Us</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
   <style>
-    /* ================= RESET & BASE ================= */
-    * { box-sizing: border-box; margin:0; padding:0; }
-    html, body { height: 100%; font-family: "Montserrat", Arial, sans-serif; color:#F5F5F3; background:#141517; scroll-behavior:smooth; }
-    a { text-decoration:none; color: inherit; }
+    /* ================= BASE RESET ================= */
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:"Montserrat", sans-serif; background:#141517; color:#eee; line-height:1.7; }
+    a { color:inherit; text-decoration:none; }
+    img { max-width:100%; display:block; }
 
     /* ================= HEADER ================= */
     .site-header {
-      position: fixed;
-      top:0; left:0; right:0;
-      display:flex;
-      align-items:center;
-      justify-content: space-between;
-      padding:14px 28px;
-      z-index: 1200;
-      background: rgba(20,21,23,0.95);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+      position: fixed; top:0; left:0; right:0;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:16px 40px; background:#0e0f11; z-index:1200;
+      border-bottom:1px solid rgba(255,255,255,0.08);
     }
-    .header-left { display:flex; align-items:center; gap:12px; }
-    .brand-logo { height: clamp(80px, 10vw, 150px); width:auto; }
-    .brand-title { font-family:"Playfair Display", serif; font-weight:700; font-size: clamp(20px, 3vw, 44px); color:#B66E41; text-align:center; }
-    .header-right { display:flex; gap:16px; }
-    .header-right a { color:#F5F5F3; font-weight:500; transition: opacity 0.3s; }
-    .header-right a:hover { color:#B66E41; }
+    .brand-logo { height:60px; }
+    .brand-title { font-family:"Playfair Display", serif; font-size:28px; color:#B66E41; margin-left:8px; }
+    .header-right { display:flex; gap:24px; font-weight:500; }
+    .header-right a { color:#fff; position:relative; }
+    .header-right a::after {
+      content:""; position:absolute; left:0; bottom:-4px;
+      width:0%; height:2px; background:#B66E41; transition:0.3s;
+    }
+    .header-right a:hover::after { width:100%; }
 
     /* ================= HAMBURGER ================= */
-    .hamburger { 
-      display:none; 
-      background:none; 
-      border:none; 
-      width:44px; 
-      height:40px; 
-      cursor:pointer; 
-      position: relative; 
-      z-index:1300; 
-    }
-    .hamburger span {
-      display:block;
-      height:3px;
-      width:24px;
-      background:#F5F5F3;
-      margin:5px auto;
-      border-radius:2px;
-      transition: all 0.3s ease;
-    }
-    .hamburger.open span:nth-child(1) {
-      transform: rotate(45deg) translate(5px, 6px);
-    }
-    .hamburger.open span:nth-child(2) {
-      opacity: 0;
-    }
-    .hamburger.open span:nth-child(3) {
-      transform: rotate(-45deg) translate(6px, -6px);
-    }
+    .hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; }
+    .hamburger span { display:block; width:25px; height:3px; background:#fff; border-radius:2px; transition:0.3s; }
+    .hamburger.open span:nth-child(1) { transform:rotate(45deg) translate(5px, 6px); }
+    .hamburger.open span:nth-child(2) { opacity:0; }
+    .hamburger.open span:nth-child(3) { transform:rotate(-45deg) translate(6px, -6px); }
 
     /* ================= HERO ================= */
     .hero-about {
-      height: 60vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      background: url("bg.jpg") center center / cover no-repeat;
-      margin-top: 100px;
-      border-radius: 12px;
-      box-shadow: inset 0 0 0 2000px rgba(20,21,23,0.3);
+      height:70vh; background:url("bg.jpg") center/cover no-repeat;
+      display:flex; align-items:center; justify-content:center; text-align:center;
+      position:relative; margin-top:90px;
     }
-    .hero-about .hero-text h1 { font-family:"Playfair Display", serif; font-size: clamp(36px,5vw,64px); margin-bottom:12px; color:#F5F5F3; }
-    .hero-about .hero-text p { font-family:"Montserrat", sans-serif; font-size: clamp(16px,2vw,24px); max-width:700px; color:#F5F5F3; }
+    .hero-about::before {
+      content:""; position:absolute; inset:0; background:rgba(0,0,0,0.6);
+    }
+    .hero-text { position:relative; color:#fff; max-width:700px; }
+    .hero-text h1 { font-family:"Playfair Display", serif; font-size:54px; margin-bottom:16px; }
+    .hero-text p { font-size:18px; color:#ddd; }
 
-    /* ================= SECTIONS ================= */
+    /* ================= SECTION WRAPPER ================= */
     section { padding:100px 20px; }
     .container { max-width:1200px; margin:0 auto; text-align:center; }
-    section h2 { font-family:"Playfair Display", serif; font-size: clamp(28px,3vw,40px); margin-bottom:24px; color:#B66E41; }
-    section p { font-size: clamp(16px,1.5vw,20px); line-height:1.7; margin-bottom:16px; color:#F5F5F3; }
+    section h2 {
+      font-family:"Playfair Display", serif; font-size:36px; color:#fff; margin-bottom:16px; position:relative;
+    }
+    section h2::after {
+      content:""; width:60px; height:3px; background:#B66E41;
+      display:block; margin:14px auto 0;
+    }
+    section p { max-width:900px; margin:0 auto 20px; font-size:18px; color:#ccc; }
 
-    /* Section backgrounds */
-    #vision { background-color: #141517; }
-    #faq { background-color: #4B4E54; }
-    #testimonials { background-color: #141517; }
-    #how-to-shop { background-color: #4B4E54; }
-    #affiliate { background-color: #141517; }
-    #working-hours { background-color: #4B4E54; }
-    #partnerships { background-color: #141517; }
+    /* ALTERNATING BACKGROUNDS */
+    #vision, #testimonials, #affiliate, #partnerships { background:#141517; }
+    #faq, #how-to-shop, #working-hours { background:#1d1f22; }
 
     /* ================= FAQ ================= */
-    .faq-item { background: #141517; margin-bottom:12px; border-radius:6px; overflow:hidden; cursor:pointer; transition: background 0.3s; }
-    .faq-item:hover { background: #B66E41; color:#F5F5F3; }
-    .faq-question { padding:16px; font-weight:500; display:flex; justify-content: space-between; align-items:center; }
-    .faq-answer { padding:0 16px 16px 16px; display:none; font-size:16px; line-height:1.6; color:#F5F5F3; }
+    .faq-item {
+      background:#1a1b1d; margin:12px auto; border-radius:6px; overflow:hidden;
+      max-width:800px; text-align:left; transition:0.3s;
+    }
+    .faq-question {
+      padding:18px 20px; cursor:pointer; font-weight:600; color:#fff; display:flex; justify-content:space-between; align-items:center;
+    }
+    .faq-answer { display:none; padding:0 20px 20px; color:#aaa; }
+    .faq-item.open { background:#B66E41; }
+    .faq-item.open .faq-question { color:#fff; }
 
     /* ================= TESTIMONIALS ================= */
-    .testimonials { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:24px; margin-top:32px; }
-    .testimonial-card {
-      background: #4B4E54;
-      padding:24px;
-      border-radius:12px;
-      min-height:180px;
-      display:flex;
-      flex-direction: column;
-      justify-content: space-between;
-      transition: transform 0.3s, background 0.3s;
+    .testimonials {
+      display:grid; grid-template-columns:repeat(auto-fit, minmax(300px,1fr));
+      gap:24px; margin-top:40px;
     }
-    .testimonial-card:hover { transform: translateY(-6px); background: #B66E41; color:#F5F5F3; }
-    .testimonial-stars { color: #FFD700; margin-bottom:8px; }
-    .testimonial-text { font-size:16px; line-height:1.6; margin-bottom:12px; }
-    .testimonial-author { font-weight:500; font-size: 0.95rem; color:#F5F5F3; }
+    .testimonial-card {
+      background:#1a1b1d; border-radius:10px; padding:30px; transition:0.3s;
+    }
+    .testimonial-card:hover { background:#B66E41; transform:translateY(-6px); }
+    .testimonial-text { font-size:16px; margin-bottom:12px; color:#ccc; }
+    .testimonial-stars { color:#FFD700; margin-bottom:8px; }
+    .testimonial-author { font-weight:600; color:#fff; }
 
+    /* ================= BUTTON ================= */
     .toggle-btn {
-      margin-top:20px;
-      background:#B66E41;
-      color:#fff;
-      border:none;
-      padding:10px 18px;
-      border-radius:6px;
-      cursor:pointer;
-      font-weight:500;
+      margin-top:30px; background:#B66E41; color:#fff; border:none;
+      padding:12px 26px; border-radius:30px; font-weight:600; cursor:pointer; transition:0.3s;
     }
     .toggle-btn:hover { background:#8d522f; }
 
     /* ================= FOOTER ================= */
-    .site-footer { text-align:center; padding:20px; background: #141517; color:#F5F5F3; }
+    .site-footer { background:#0e0f11; padding:40px 20px; color:#777; text-align:center; font-size:14px; }
 
     /* ================= RESPONSIVE ================= */
-    @media(max-width:900px){ .header-right { gap:12px; flex-wrap: wrap; justify-content:center; } }
-    @media(max-width:600px){
-      .hero-about { margin-top: 80px; }
-      .header-right { 
-        position: absolute;
-        top: 70px;
-        right: 0;
-        background: rgba(20,21,23,0.95);
-        flex-direction: column;
-        width: 200px;
-        padding: 20px;
-        display: none;
-        border-radius: 0 0 0 10px;
-      }
-      .header-right.open { display: flex; }
-      .hamburger { display: block; }
-      section{ padding:60px 20px; }
+    @media(max-width:768px){
+      .header-right { display:none; flex-direction:column; position:absolute; top:80px; right:20px; background:#0e0f11; padding:20px; border-radius:8px; }
+      .header-right.open { display:flex; }
+      .hamburger { display:flex; }
+      .hero-text h1 { font-size:38px; }
+      section { padding:70px 20px; }
     }
-    @media(max-width:420px){ .brand-logo { height:clamp(50px,15vw,120px); } .brand-title{ font-size: clamp(16px,7vw,22px); } }
   </style>
 </head>
 <body class="serac">
@@ -165,7 +126,7 @@
       <a href="#faq">FAQ</a>
       <a href="contact.html">Contact</a>
     </nav>
-    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
   </header>
 
   <!-- HERO -->
@@ -210,23 +171,17 @@
       <h2>Testimonials</h2>
       <div class="testimonials">
         <div class="testimonial-card">
-          <div class="testimonial-stars">
-            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
-          </div>
-          <div class="testimonial-text">Serac’s service was exceptional, and the product quality exceeded my expectations. Highly recommend!</div>
+          <div class="testimonial-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
+          <div class="testimonial-text">Serac’s service was exceptional, and the product quality exceeded my expectations.</div>
           <div class="testimonial-author">— Jane Doe</div>
         </div>
         <div class="testimonial-card">
-          <div class="testimonial-stars">
-            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-          </div>
+          <div class="testimonial-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
           <div class="testimonial-text">Amazing experience! The team was very professional and responsive throughout.</div>
           <div class="testimonial-author">— John Smith</div>
         </div>
         <div class="testimonial-card">
-          <div class="testimonial-stars">
-            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-          </div>
+          <div class="testimonial-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
           <div class="testimonial-text">I love Serac! Their attention to detail and customer care is top-notch.</div>
           <div class="testimonial-author">— Emily R.</div>
         </div>
@@ -243,7 +198,7 @@
     </div>
   </section>
 
-  <!-- AFFILIATE PROGRAM -->
+  <!-- AFFILIATE -->
   <section id="affiliate">
     <div class="container">
       <h2>Affiliate Program</h2>
@@ -272,84 +227,22 @@
     <p>© 2025 Serac</p>
   </footer>
 
-  <!-- SCRIPTS -->
+  <!-- SCRIPT -->
   <script>
-    // HAMBURGER TOGGLE
-    const hamburger = document.getElementById('hamburger');
-    const headerRight = document.querySelector('.header-right');
-    if (hamburger && headerRight) {
-      hamburger.addEventListener('click', () => {
-        headerRight.classList.toggle('open');
-        hamburger.classList.toggle('open');
-      });
-    }
+    // Hamburger toggle
+    const hamburger = document.getElementById("hamburger");
+    const headerRight = document.querySelector(".header-right");
+    hamburger.addEventListener("click",()=>{headerRight.classList.toggle("open");hamburger.classList.toggle("open");});
 
-    // FAQ ACCORDION
-    document.querySelectorAll('.faq-item').forEach(item => {
-      const question = item.querySelector('.faq-question');
-      const answer = item.querySelector('.faq-answer');
-      const icon = item.querySelector('i');
-
-      if (answer) answer.style.display = 'none';
-
-      if (question) {
-        question.addEventListener('click', () => {
-          if (answer.style.display === 'block') {
-            answer.style.display = 'none';
-            if (icon) { icon.classList.add('fa-plus'); icon.classList.remove('fa-minus'); }
-          } else {
-            answer.style.display = 'block';
-            if (icon) { icon.classList.remove('fa-plus'); icon.classList.add('fa-minus'); }
-          }
-        });
-      }
-    });
-
-    // FAQ SHOW MORE/LESS
-    const faqItems = document.querySelectorAll('.faq-item');
-    const faqToggle = document.getElementById('faq-toggle');
-    if (faqItems.length > 2) {
-      faqItems.forEach((item, index) => { if (index > 1) item.style.display = 'none'; });
-      if (faqToggle) {
-        faqToggle.addEventListener('click', () => {
-          const isExpanded = faqToggle.textContent.trim() === 'Less';
-          faqItems.forEach((item, index) => { if (index > 1) item.style.display = isExpanded ? 'none' : 'block'; });
-          faqToggle.textContent = isExpanded ? 'More' : 'Less';
-        });
-      }
-    }
-
-    // TESTIMONIAL SHOW MORE/LESS
-    const testimonialCards = document.querySelectorAll('.testimonial-card');
-    const testimonialToggle = document.getElementById('testimonial-toggle');
-    if (testimonialCards.length > 2) {
-      testimonialCards.forEach((card, index) => { if (index > 1) card.style.display = 'none'; });
-      if (testimonialToggle) {
-        testimonialToggle.addEventListener('click', () => {
-          const isExpanded = testimonialToggle.textContent.trim() === 'Less';
-          testimonialCards.forEach((card, index) => { if (index > 1) card.style.display = isExpanded ? 'none' : 'flex'; });
-          testimonialToggle.textContent = isExpanded ? 'More' : 'Less';
-        });
-      }
-    }
-
-    // SMOOTH SCROLL
-    document.querySelectorAll('.header-right a').forEach(link => {
-      link.addEventListener('click', (e) => {
-        const href = link.getAttribute('href');
-        if (href.startsWith('#')) {
-          e.preventDefault();
-          const targetId = href.substring(1);
-          const targetSection = document.getElementById(targetId);
-          if (targetSection) {
-            window.scrollTo({ top: targetSection.offsetTop - 80, behavior: 'smooth' });
-          }
-          headerRight.classList.remove('open');
-          hamburger.classList.remove('open');
-        }
+    // FAQ toggle
+    document.querySelectorAll(".faq-item").forEach(item=>{
+      const q=item.querySelector(".faq-question"),a=item.querySelector(".faq-answer"),icon=item.querySelector("i");
+      q.addEventListener("click",()=>{
+        item.classList.toggle("open");
+        a.style.display=a.style.display==="block"?"none":"block";
+        icon.classList.toggle("fa-plus");icon.classList.toggle("fa-minus");
       });
     });
   </script>
-
 </body>
 </html>
