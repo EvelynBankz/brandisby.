@@ -142,30 +142,47 @@
     section h2 { font-family:"Playfair Display", serif; font-size: clamp(30px,3vw,44px); margin-bottom:24px; color:#B66E41; letter-spacing:1px; }
     section p { font-size: clamp(16px,1.6vw,20px); line-height:1.8; margin-bottom:16px; color:#EDEDED; }
 
-    #vision, #affiliate, #partnerships { background:#111111; }
     #faq, #testimonials, #how-to-shop, #working-hours { background:#1C1C1C; }
 
-    /* Vision / Affiliate / Partnerships with images (Becko style) */
-    #vision .container, #affiliate .container, #partnerships .container {
-      display:flex;
-      flex-wrap:wrap;
-      align-items:center;
-      justify-content:space-between;
-      gap:40px;
-      text-align:left;
-    }
-    #vision img, #affiliate img, #partnerships img {
-      flex:1 1 45%;
-      border-radius:16px;
-      box-shadow:0 6px 18px rgba(0,0,0,0.6);
-      transition: transform 0.4s ease;
-    }
-    #vision img:hover, #affiliate img:hover, #partnerships img:hover {
-      transform: scale(1.05);
-    }
-    #vision .text, #affiliate .text, #partnerships .text {
-      flex:1 1 45%;
-    }
+/* Vision / Affiliate / Partnerships with images (Becko style) */
+  #vision, #affiliate, #partnerships {
+    background: linear-gradient(180deg, #0a0a0a 0%, #111111 100%);
+    border: 1px solid rgba(212, 175, 55, 0.2); /* soft golden outline */
+    border-radius: 16px;
+    padding: 80px 40px; 
+    margin: 60px auto; 
+    max-width: 1200px;  /* keeps it centered and not too wide */
+    box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+  }
+  
+  /* Keep inner container flex layout */
+  #vision .container, 
+  #affiliate .container, 
+  #partnerships .container {
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:space-between;
+    gap:40px;
+    text-align:left;
+  }
+  
+  /* Section images */
+  #vision img, #affiliate img, #partnerships img {
+    flex:1 1 45%;
+    border-radius:16px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.6);
+    transition: transform 0.4s ease;
+  }
+  #vision img:hover, #affiliate img:hover, #partnerships img:hover {
+    transform: scale(1.05);
+  }
+  
+  /* Section text */
+  #vision .text, #affiliate .text, #partnerships .text {
+    flex:1 1 45%;
+  }
+
 
     /* ================= FAQ ================= */
     .faq-item { background:#121212; margin-bottom:12px; border-radius:6px; overflow:hidden; cursor:pointer; border:1px solid rgba(255,255,255,0.08); transition: all 0.3s; }
