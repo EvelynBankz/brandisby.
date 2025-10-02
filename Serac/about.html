@@ -3,22 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>About Us - Brandisby</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+  <title>About Us - Serac</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    body {
-      margin: 0;
-      font-family: 'Montserrat', sans-serif;
-      background: #111;
-      color: #eee;
-      line-height: 1.6;
-    }
+    /* General Reset */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Poppins', sans-serif; line-height: 1.6; background: #111; color: #fff; }
 
-    /* Navbar */
     header {
       background: #000;
       color: #fff;
-      padding: 15px 25px;
+      padding: 1.2rem 2rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -26,312 +21,253 @@
       top: 0;
       z-index: 1000;
     }
-    header h1 {
-      font-size: 1.5rem;
-      margin: 0;
-      font-weight: 800;
-    }
-    nav {
-      display: none;
-      flex-direction: column;
-      background: #000;
-      position: absolute;
-      top: 60px;
-      right: 0;
-      width: 200px;
-    }
-    nav a {
-      padding: 12px;
-      color: #fff;
-      text-decoration: none;
-      border-top: 1px solid #222;
-    }
-    nav.show { display: flex; }
-    #hamburger-btn {
-      cursor: pointer;
-      font-size: 1.4rem;
-      background: none;
-      border: none;
-      color: #fff;
-    }
+    header .logo { font-size: 1.5rem; font-weight: 700; letter-spacing: 1px; }
+    nav ul { display: flex; gap: 1.5rem; list-style: none; }
+    nav ul li a { color: #fff; text-decoration: none; font-weight: 500; }
+    nav ul li a:hover { color: #f4a261; }
 
-    /* Hero */
+    /* Hero Section */
     .hero {
-      height: 90vh;
-      background: url('https://images.unsplash.com/photo-1602810318383-e3aa128bb7a0?auto=format&fit=crop&w=1600&q=80') no-repeat center/cover;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
+      background: url('https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1500&q=80') center/cover no-repeat;
       color: #fff;
+      text-align: center;
+      padding: 8rem 2rem;
       position: relative;
     }
     .hero::after {
       content: "";
-      position: absolute;
-      top:0;left:0;width:100%;height:100%;
-      background: rgba(0,0,0,0.6);
+      position: absolute; top:0; left:0; right:0; bottom:0;
+      background: rgba(0,0,0,0.65);
     }
     .hero-content {
-      position: relative;
-      z-index: 2;
+      position: relative; z-index: 1; max-width: 800px; margin: auto;
     }
-    .hero h2 {
+    .hero h1 {
       font-size: 3rem;
-      margin: 0 0 10px;
-      font-weight: 800;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      animation: slideIn 1s ease-out forwards;
     }
-    .hero .animated-words {
-      display: inline-block;
+    .animated-text {
+      font-size: 1.3rem;
+      color: #f4a261;
+      white-space: nowrap;
       overflow: hidden;
-      height: 3rem;
-      vertical-align: bottom;
+      border-right: 3px solid #f4a261;
+      width: 0;
+      animation: typing 4s steps(30, end) infinite alternate, blink 0.75s step-end infinite;
     }
-    .hero .animated-words span {
-      display: block;
-      animation: slideWords 9s infinite;
-    }
-    @keyframes slideWords {
-      0% { transform: translateY(0); }
-      20% { transform: translateY(-100%); }
-      40% { transform: translateY(-200%); }
-      60% { transform: translateY(-300%); }
-      80% { transform: translateY(-400%); }
-      100% { transform: translateY(0); }
-    }
-    .hero p {
-      font-size: 1.2rem;
-      margin-bottom: 20px;
-    }
-    .hero button {
-      padding: 12px 30px;
-      border: none;
-      background: #e50914;
-      color: #fff;
-      font-weight: 600;
-      cursor: pointer;
-      border-radius: 30px;
-      transition: background 0.3s;
-    }
-    .hero button:hover { background: #ff303b; }
+    @keyframes typing { from { width: 0 } to { width: 100% } }
+    @keyframes blink { 50% { border-color: transparent } }
+    @keyframes slideIn { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-    /* Sections */
-    section {
-      padding: 60px 20px;
-      max-width: 1100px;
-      margin: auto;
-    }
-    h2.section-title {
-      text-align: center;
-      font-size: 2rem;
-      margin-bottom: 40px;
-      font-weight: 800;
-      color: #fff;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 25px;
-    }
-    .card {
-      background: #1a1a1a;
-      padding: 25px;
-      border-radius: 12px;
-      text-align: center;
-      transition: transform 0.3s;
-    }
-    .card:hover { transform: translateY(-5px); }
+    section { padding: 5rem 2rem; max-width: 1100px; margin: auto; }
+    h2 { font-size: 2.2rem; margin-bottom: 2rem; text-align: center; color: #f4a261; }
+
+    /* Features (Why Choose Us) */
+    .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; }
+    .feature { background: #1a1a1a; padding: 2rem; border-radius: 12px; text-align: center; transition: transform 0.3s; }
+    .feature:hover { transform: translateY(-8px); }
+    .feature h3 { margin-bottom: 1rem; font-size: 1.2rem; color: #f4a261; }
 
     /* Testimonials Slider */
-    .testimonials {
-      position: relative;
-      overflow: hidden;
+    .testimonial-slider { position: relative; overflow: hidden; }
+    .testimonial-container {
+      display: flex; transition: transform 0.5s ease-in-out;
     }
-    .testimonial-slide {
-      display: none;
+    .testimonial {
+      min-width: 100%; flex: 0 0 100%;
+      padding: 2rem;
+      background: #1a1a1a; border-radius: 12px;
       text-align: center;
-      padding: 20px;
-      background: #1c1c1c;
-      border-radius: 12px;
     }
-    .testimonial-slide.active { display: block; }
-    .testimonial-slide p {
-      font-style: italic;
-      margin-bottom: 10px;
+    .testimonial p { font-style: italic; margin-bottom: 1rem; }
+    .testimonial h4 { color: #f4a261; }
+    .slider-buttons {
+      margin-top: 1rem; text-align: center;
     }
-    .testimonial-slide h4 {
-      margin: 0;
-      font-weight: 600;
-      color: #e50914;
+    .slider-buttons button {
+      background: #f4a261; border: none; margin: 0 5px;
+      padding: 8px 14px; border-radius: 6px; cursor: pointer;
     }
 
     /* FAQ */
-    .faq-item {
-      margin-bottom: 15px;
-    }
-    .faq-question {
-      background: #222;
-      padding: 15px;
-      cursor: pointer;
-      border-radius: 8px;
-      font-weight: 600;
-    }
-    .faq-answer {
-      display: none;
-      padding: 15px;
-      background: #333;
-      border-radius: 8px;
-      margin-top: 5px;
-    }
+    .faq-item { background: #1a1a1a; margin-bottom: 1rem; padding: 1rem; border-radius: 8px; cursor: pointer; }
+    .faq-item h3 { font-size: 1.1rem; }
+    .faq-answer { display: none; margin-top: 0.5rem; font-size: 0.95rem; color: #ddd; }
+    .faq-item.active .faq-answer { display: block; }
 
     /* Footer */
     footer {
       background: #000;
-      color: #bbb;
+      color: #aaa;
       text-align: center;
-      padding: 30px 20px;
-      margin-top: 50px;
+      padding: 2rem 1rem;
+      margin-top: 3rem;
     }
-    footer a { color: #e50914; text-decoration: none; }
+    footer a { color: #f4a261; text-decoration: none; }
   </style>
 </head>
 <body>
-
   <!-- Header -->
   <header>
-    <h1>Brandisby</h1>
-    <button id="hamburger-btn">☰</button>
-    <nav id="nav-menu">
-      <a href="index.html">Home</a>
-      <a href="shop.html">Shop</a>
-      <a href="about.html">About</a>
-      <a href="contact.html">Contact</a>
+    <div class="logo">Serac</div>
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="shop.html">Shop</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
     </nav>
   </header>
 
   <!-- Hero -->
   <section class="hero">
     <div class="hero-content">
-      <h2>
-        Built for <span class="animated-words">
-          <span>Confidence</span>
-          <span>Strength</span>
-          <span>Style</span>
-          <span>Performance</span>
-          <span>You</span>
-        </span>
-      </h2>
-      <p>Discover the perfect balance of quality, design, and lifestyle.</p>
-      <button>Explore Now</button>
+      <h1>About Serac</h1>
+      <div class="animated-text">Confidence. Quality. You.</div>
     </div>
   </section>
 
-  <!-- Vision -->
+  <!-- Our Vision -->
   <section>
-    <h2 class="section-title">Our Vision</h2>
-    <div class="grid">
-      <div class="card">
-        <p>At Brandisby, our vision is to create timeless designs that embody confidence, strength, and individuality.</p>
-      </div>
-    </div>
+    <h2>Our Vision</h2>
+    <p style="text-align:center; max-width:800px; margin:auto;">
+      At Serac, our vision is to create high-quality, timeless pieces that empower men to express confidence effortlessly.
+      We blend premium design with functionality to make everyday life bold, stylish, and authentic.
+    </p>
   </section>
 
   <!-- Why Choose Us -->
   <section>
-    <h2 class="section-title">Why Choose Us</h2>
-    <div class="grid">
-      <div class="card">Premium Quality</div>
-      <div class="card">Unique Designs</div>
-      <div class="card">Customer Satisfaction</div>
-      <div class="card">Fast Delivery</div>
+    <h2>Why Choose Us</h2>
+    <div class="features">
+      <div class="feature"><h3>Premium Quality</h3><p>Only the best materials make it into our products.</p></div>
+      <div class="feature"><h3>Designed for Men</h3><p>Every detail crafted to match your lifestyle and strength.</p></div>
+      <div class="feature"><h3>Confidence Built-In</h3><p>Our designs are bold, timeless, and assertive.</p></div>
     </div>
   </section>
 
   <!-- Testimonials -->
   <section>
-    <h2 class="section-title">What Our Customers Say</h2>
-    <div class="testimonials">
-      <div class="testimonial-slide active">
-        <p>"Solid quality. Fits my style perfectly."</p>
-        <h4>- James K.</h4>
+    <h2>Testimonials</h2>
+    <div class="testimonial-slider">
+      <div class="testimonial-container">
+        <div class="testimonial">
+          <p>“Solid quality. Fits my style perfectly.”</p>
+          <h4>- Michael K.</h4>
+        </div>
+        <div class="testimonial">
+          <p>“Finally, something that feels premium without trying too hard.”</p>
+          <h4>- Daniel R.</h4>
+        </div>
+        <div class="testimonial">
+          <p>“Every detail speaks confidence. Serac nailed it.”</p>
+          <h4>- James L.</h4>
+        </div>
       </div>
-      <div class="testimonial-slide">
-        <p>"Finally, something that feels premium without trying too hard."</p>
-        <h4>- Michael O.</h4>
-      </div>
-      <div class="testimonial-slide">
-        <p>"Great customer service and fast delivery!"</p>
-        <h4>- Daniel M.</h4>
+      <div class="slider-buttons">
+        <button onclick="moveSlide(-1)">‹</button>
+        <button onclick="moveSlide(1)">›</button>
       </div>
     </div>
   </section>
 
   <!-- FAQ -->
   <section>
-    <h2 class="section-title">FAQs</h2>
+    <h2>Frequently Asked Questions</h2>
     <div class="faq-item">
-      <div class="faq-question">How do I shop?</div>
-      <div class="faq-answer">Browse our shop, add items to your cart, and proceed to checkout.</div>
+      <h3>What makes Serac different?</h3>
+      <div class="faq-answer">We focus on blending bold masculine aesthetics with premium quality and timeless functionality.</div>
     </div>
     <div class="faq-item">
-      <div class="faq-question">Do you ship internationally?</div>
-      <div class="faq-answer">Yes, we ship worldwide with reliable delivery partners.</div>
+      <h3>Do you offer worldwide shipping?</h3>
+      <div class="faq-answer">Yes, we ship globally with reliable partners.</div>
     </div>
-  </section>
-
-  <!-- Extra Sections -->
-  <section>
-    <h2 class="section-title">How to Shop</h2>
-    <p>Simply select your items, add them to cart, and checkout securely.</p>
-  </section>
-
-  <section>
-    <h2 class="section-title">Affiliate Program</h2>
-    <p>Join our affiliate program and earn rewards for sharing Brandisby with others.</p>
-  </section>
-
-  <section>
-    <h2 class="section-title">Working Hours</h2>
-    <p>Mon - Fri: 9am - 6pm | Sat: 10am - 4pm | Sun: Closed</p>
-  </section>
-
-  <section>
-    <h2 class="section-title">Partnerships</h2>
-    <p>We collaborate with brands and individuals who share our values. Reach out to partner with us.</p>
+    <div class="faq-item">
+      <h3>How can I become an affiliate?</h3>
+      <div class="faq-answer">Join our affiliate program via the Partnerships page and start earning with Serac.</div>
+    </div>
   </section>
 
   <!-- Footer -->
   <footer>
-    <p>&copy; 2025 Brandisby. All rights reserved. | <a href="#">Privacy Policy</a></p>
+    <p>&copy; 2025 Serac. All Rights Reserved.</p>
+    <p><a href="#">Privacy Policy</a> | <a href="#">Terms</a></p>
   </footer>
 
   <script>
-    // Hamburger toggle
-    const hamburgerBtn = document.getElementById('hamburger-btn');
-    const navMenu = document.getElementById('nav-menu');
-    hamburgerBtn.addEventListener('click', () => {
-      navMenu.classList.toggle('show');
-      hamburgerBtn.innerHTML = navMenu.classList.contains('show') ? '✖' : '☰';
+    // Testimonial Slider
+    let currentSlide = 0;
+    const container = document.querySelector('.testimonial-container');
+    const totalSlides = document.querySelectorAll('.testimonial').length;
+
+    function moveSlide(direction) {
+      currentSlide = (currentSlide + direction + totalSlides) % totalSlides;
+      container.style.transform = `translateX(-${currentSlide * 100}%)`;
+    }
+
+    // FAQ Toggle
+    document.querySelectorAll('.faq-item').forEach(item => {
+      item.addEventListener('click', () => item.classList.toggle('active'));
     });
+  
+  // Mobile Hamburger Toggle
+  const hamburgerBtn = document.createElement('div');
+  hamburgerBtn.id = "hamburger-btn";
+  hamburgerBtn.innerHTML = "☰";
+  hamburgerBtn.style.fontSize = "1.5rem";
+  hamburgerBtn.style.cursor = "pointer";
+  document.querySelector("header").prepend(hamburgerBtn);
 
-    // FAQ toggle
-    document.querySelectorAll('.faq-question').forEach(q => {
-      q.addEventListener('click', () => {
-        const answer = q.nextElementSibling;
-        answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
-      });
+  const navMenu = document.querySelector("nav ul");
+  hamburgerBtn.addEventListener("click", () => {
+    navMenu.classList.toggle("show");
+    if (navMenu.classList.contains("show")) {
+      hamburgerBtn.innerHTML = "✖"; // close icon
+    } else {
+      hamburgerBtn.innerHTML = "☰"; // hamburger icon
+    }
+  });
+
+  // Add styles for mobile nav
+  const style = document.createElement("style");
+  style.innerHTML = `
+    @media (max-width: 768px) {
+      nav ul { 
+        flex-direction: column; 
+        display: none; 
+        background:#000; 
+        position:absolute; 
+        top:70px; 
+        right:0; 
+        width:200px; 
+        padding:1rem; 
+      }
+      nav ul.show { display:block; }
+    }
+  `;
+  document.head.appendChild(style);
+
+
+  // Testimonial Slider (already included, but repeat for completeness)
+  let currentSlide = 0;
+  const container = document.querySelector('.testimonial-container');
+  const totalSlides = document.querySelectorAll('.testimonial').length;
+
+  function moveSlide(direction) {
+    currentSlide = (currentSlide + direction + totalSlides) % totalSlides;
+    container.style.transform = `translateX(-${currentSlide * 100}%)`;
+  }
+
+  // FAQ Toggle (already included, but repeat for completeness)
+  document.querySelectorAll('.faq-item').forEach(item => {
+    item.addEventListener('click', () => {
+      item.classList.toggle('active');
     });
-
-    // Testimonial slider
-    let slides = document.querySelectorAll('.testimonial-slide');
-    let current = 0;
-    setInterval(() => {
-      slides[current].classList.remove('active');
-      current = (current + 1) % slides.length;
-      slides[current].classList.add('active');
-    }, 4000);
-  </script>
-
+  });
+</script>
+  
 </body>
 </html>
