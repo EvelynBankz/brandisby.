@@ -1,244 +1,244 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Serac - About Us</title>
-
-  <!-- Fonts & icons (same as original) -->
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
   <style>
-    /* ================= RESET & BASE ================= */
-    * { box-sizing: border-box; margin:0; padding:0; }
-    html, body { height: 100%; font-family: "Montserrat", Arial, sans-serif; color:#F5F5F3; background:#141517; scroll-behavior:smooth; }
-    a { text-decoration:none; color: inherit; }
-    img { max-width:100%; display:block; }
+  /* ================= RESET & BASE ================= */
+* { box-sizing: border-box; margin:0; padding:0; }
+html, body { 
+  height: 100%; 
+  font-family: "Montserrat", Arial, sans-serif; 
+  color:#F5F5F3; 
+  background:#111113; 
+  scroll-behavior:smooth; 
+}
+a { text-decoration:none; color: inherit; transition:color 0.3s; }
 
-    /* ================= HEADER ================= */
-    .site-header {
-      position: fixed;
-      top:0; left:0; right:0;
-      display:flex;
-      align-items:center;
-      justify-content: space-between;
-      padding:14px 28px;
-      z-index: 1200;
-      background: rgba(20,21,23,0.95);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.5);
-    }
-    .header-left { display:flex; align-items:center; gap:12px; }
-    .brand-logo { height: clamp(50px, 6vw, 110px); width:auto; }
-    .brand-title { font-family:"Playfair Display", serif; font-weight:700; font-size: clamp(20px, 3vw, 36px); color:#B66E41; text-align:center; }
-    .header-right { display:flex; gap:16px; align-items:center; }
-    .header-right a { color:#F5F5F3; font-weight:500; transition: color 0.25s; }
-    .header-right a:hover { color:#B66E41; }
+/* ================= HEADER ================= */
+.site-header {
+  position: fixed;
+  top:0; left:0; right:0;
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  padding:14px 28px;
+  z-index: 1200;
+  background: rgba(17,17,19,0.96);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(6px);
+}
+.header-left { display:flex; align-items:center; gap:12px; }
+.brand-logo { height: clamp(80px, 10vw, 150px); width:auto; }
+.brand-title { 
+  font-family:"Playfair Display", serif; 
+  font-weight:700; 
+  font-size: clamp(20px, 3vw, 44px); 
+  color:#B68C4A; 
+  letter-spacing:1px;
+}
+.header-right { display:flex; gap:24px; }
+.header-right a { 
+  color:#F5F5F3; 
+  font-weight:500; 
+  position:relative; 
+}
+.header-right a::after {
+  content:""; 
+  position:absolute; 
+  left:0; bottom:-4px; 
+  width:0; height:2px; 
+  background:#B68C4A; 
+  transition: width 0.3s;
+}
+.header-right a:hover { color:#B68C4A; }
+.header-right a:hover::after { width:100%; }
 
-    /* ================= HAMBURGER ================= */
-    .hamburger {
-      display:none;
-      background:none;
-      border:none;
-      width:44px;
-      height:40px;
-      cursor:pointer;
-      position: relative;
-      z-index:1300;
-    }
-    .hamburger span {
-      display:block;
-      height:3px;
-      width:24px;
-      background:#F5F5F3;
-      margin:5px auto;
-      border-radius:2px;
-      transition: all 0.3s ease;
-    }
-    .hamburger.open span:nth-child(1) {
-      transform: rotate(45deg) translate(5px, 6px);
-    }
-    .hamburger.open span:nth-child(2) {
-      opacity: 0;
-    }
-    .hamburger.open span:nth-child(3) {
-      transform: rotate(-45deg) translate(6px, -6px);
-    }
+/* ================= HAMBURGER ================= */
+.hamburger { 
+  display:none; 
+  background:none; 
+  border:none; 
+  width:44px; 
+  height:40px; 
+  cursor:pointer; 
+  position: relative; 
+  z-index:1300; 
+}
+.hamburger span {
+  display:block;
+  height:3px;
+  width:24px;
+  background:#F5F5F3;
+  margin:5px auto;
+  border-radius:2px;
+  transition: all 0.3s ease;
+}
+.hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 6px); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(6px, -6px); }
 
-    /* ================= HERO (original layout preserved, + Becko-like animation) ================= */
-    .hero-about {
-      height: 60vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      background: url("bg.jpg") center center / cover no-repeat;
-      margin-top: 100px; /* keeps space for fixed header exactly like original */
-      border-radius: 12px;
-      box-shadow: inset 0 0 0 2000px rgba(20,21,23,0.3);
-      position: relative;
-    }
-    .hero-about .hero-text { position: relative; z-index: 2; max-width:1000px; padding: 0 18px; }
-    .hero-about .hero-text h1 {
-      font-family:"Playfair Display", serif;
-      font-size: clamp(36px,5vw,64px);
-      margin-bottom:8px;
-      color:#F5F5F3;
-      font-weight:700;
-      line-height:1;
-    }
-    .hero-about .hero-text p {
-      font-family:"Montserrat", sans-serif;
-      font-size: clamp(16px,2vw,20px);
-      max-width:760px;
-      margin: 12px auto 0;
-      color:#D7D7D5;
-    }
+/* ================= HERO ================= */
+.hero-about {
+  height: 60vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  background: url("bg.jpg") center center / cover no-repeat;
+  margin-top: 100px;
+  border-radius: 14px;
+  box-shadow: inset 0 0 0 2000px rgba(17,17,19,0.55);
+}
+.hero-about .hero-text h1 { 
+  font-family:"Playfair Display", serif; 
+  font-size: clamp(40px,6vw,68px); 
+  margin-bottom:12px; 
+  color:#F5F5F3; 
+  letter-spacing:1px;
+}
+.hero-about .hero-text p { 
+  font-family:"Montserrat", sans-serif; 
+  font-size: clamp(16px,2vw,22px); 
+  max-width:700px; 
+  margin:0 auto;
+  color:#ddd; 
+}
 
-    /* Becko-style rotating/stacked words (keeps original h1 content but adds rotating words beneath) */
-    .hero-rotator { display:block; margin-top:8px; height: clamp(34px,4vw,56px); overflow:hidden; }
-    .hero-rotator .words { display:block; animation: rotateWords 10s linear infinite; }
-    .hero-rotator .words span { display:block; height: clamp(34px,4vw,56px); font-family:"Playfair Display", serif; font-size: clamp(28px,3.5vw,44px); color:#B66E41; line-height: clamp(34px,4vw,56px); }
-    @keyframes rotateWords {
-      0%   { transform: translateY(0%); }
-      20%  { transform: translateY(0%); }
-      25%  { transform: translateY(-100%); }
-      45%  { transform: translateY(-100%); }
-      50%  { transform: translateY(-200%); }
-      70%  { transform: translateY(-200%); }
-      75%  { transform: translateY(-300%); }
-      95%  { transform: translateY(-300%); }
-      100% { transform: translateY(0%); }
-    }
+/* ================= SECTIONS ================= */
+section { padding:100px 20px; }
+.container { max-width:1200px; margin:0 auto; text-align:center; }
+section h2 { 
+  font-family:"Playfair Display", serif; 
+  font-size: clamp(28px,3vw,40px); 
+  margin-bottom:24px; 
+  color:#B68C4A; 
+  position:relative;
+}
+section h2::after {
+  content:""; 
+  display:block; 
+  width:60px; height:3px; 
+  margin:12px auto 0; 
+  background:#B68C4A;
+}
+section p { font-size: clamp(16px,1.5vw,20px); line-height:1.7; margin-bottom:16px; color:#F5F5F3; }
 
-    /* overlay (same feel as original shadow) */
-    .hero-about::before{
-      content:""; position:absolute; inset:0; background: linear-gradient(180deg, rgba(20,21,23,0.55), rgba(20,21,23,0.55));
-      border-radius: 12px;
-    }
+/* Section alternating backgrounds */
+#vision, #testimonials, #affiliate, #partnerships, .site-footer { background:#111113; }
+#faq, #how-to-shop, #working-hours { background:#1b1c1f; }
 
-    /* ================= SECTIONS ================= */
-    section { padding:100px 20px; }
-    .container { max-width:1200px; margin:0 auto; text-align:center; }
-    section h2 { font-family:"Playfair Display", serif; font-size: clamp(28px,3vw,40px); margin-bottom:24px; color:#B66E41; }
-    section p { font-size: clamp(16px,1.5vw,20px); line-height:1.7; margin-bottom:16px; color:#F5F5F3; }
+/* ================= FAQ ================= */
+.faq-item { 
+  background: #1b1c1f; 
+  margin-bottom:14px; 
+  border-radius:8px; 
+  overflow:hidden; 
+  cursor:pointer; 
+  transition: transform 0.3s, background 0.3s;
+}
+.faq-item:hover { transform: translateY(-3px); background:#B68C4A; color:#fff; }
+.faq-question { padding:18px; font-weight:500; display:flex; justify-content: space-between; align-items:center; }
+.faq-answer { padding:0 18px 18px; display:none; font-size:16px; line-height:1.6; color:#eee; }
 
-    /* Section backgrounds (preserve original alternation) */
-    #vision { background-color: #141517; }
-    #faq { background-color: #4B4E54; }
-    #testimonials { background-color: #141517; }
-    #how-to-shop { background-color: #4B4E54; }
-    #affiliate { background-color: #141517; }
-    #working-hours { background-color: #4B4E54; }
-    #partnerships { background-color: #141517; }
+/* ================= TESTIMONIALS ================= */
+.testimonials { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:24px; margin-top:32px; }
+.testimonial-card {
+  background: #1b1c1f;
+  padding:28px;
+  border-radius:12px;
+  min-height:180px;
+  display:flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.testimonial-card:hover { 
+  transform: translateY(-6px); 
+  box-shadow:0 8px 18px rgba(0,0,0,0.6); 
+}
+.testimonial-stars { color: #FFD700; margin-bottom:8px; }
+.testimonial-text { font-size:16px; line-height:1.6; margin-bottom:12px; }
+.testimonial-author { font-weight:600; font-size: 0.95rem; color:#B68C4A; }
 
-    /* ================= FAQ (original look + icons + hover) ================= */
-    .faq-item { background: #141517; margin-bottom:12px; border-radius:6px; overflow:hidden; cursor:pointer; transition: background 0.3s, color 0.25s; }
-    .faq-item:hover { background: #B66E41; color:#F5F5F3; }
-    .faq-question { padding:16px; font-weight:500; display:flex; justify-content: space-between; align-items:center; color:inherit; }
-    .faq-question i { margin-left: 12px; }
-    .faq-answer { padding:0 16px 16px 16px; display:none; font-size:16px; line-height:1.6; color:#F5F5F3; }
+.toggle-btn {
+  margin-top:24px;
+  background:#B68C4A;
+  color:#fff;
+  border:none;
+  padding:12px 22px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:500;
+  transition: background 0.3s, transform 0.2s;
+}
+.toggle-btn:hover { background:#946d31; transform:scale(1.05); }
 
-    /* ================= TESTIMONIALS (restyled to be stronger but keep original grid & More button functionality) ================= */
-    .testimonials { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:24px; margin-top:32px; }
-    .testimonial-card {
-      background: #1a1b1f; /* darker, masculine */
-      padding:28px;
-      border-radius:10px;
-      min-height:180px;
-      display:flex;
-      flex-direction: column;
-      justify-content: space-between;
-      transition: transform 0.3s, background 0.3s, color 0.25s;
-      border-left: 4px solid rgba(182,110,65,0.14);
-    }
-    .testimonial-card:hover { transform: translateY(-6px); background: #B66E41; color:#F5F5F3; border-left-color: rgba(182,110,65,0.4); }
-    .testimonial-stars { color: #FFD700; margin-bottom:8px; }
-    .testimonial-text { font-size:16px; line-height:1.6; margin-bottom:12px; color:inherit; }
-    .testimonial-author { font-weight:600; font-size: 0.95rem; color:#F5F5F3; letter-spacing:1px; }
+/* ================= FOOTER ================= */
+.site-footer { 
+  text-align:center; 
+  padding:20px; 
+  background: #111113; 
+  color:#888; 
+  font-size:14px; 
+  border-top:1px solid rgba(255,255,255,0.05);
+}
+.site-footer p { margin:0; }
 
-    .toggle-btn {
-      margin-top:20px;
-      background:#B66E41;
-      color:#fff;
-      border:none;
-      padding:10px 18px;
-      border-radius:6px;
-      cursor:pointer;
-      font-weight:500;
-    }
-    .toggle-btn:hover { background:#8d522f; }
-
-    /* ================= INFO SECTIONS (affiliate etc) ================= */
-    .info-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:24px; margin-top:24px; }
-    .info-card { background:#1a1b1f; padding:24px; border-radius:10px; text-align:left; color:#ddd; }
-
-    /* ================= FOOTER ================= */
-    .site-footer { text-align:center; padding:20px; background: #141517; color:#F5F5F3; }
-
-    /* ================= RESPONSIVE ================= */
-    @media(max-width:900px){ .header-right { gap:12px; flex-wrap: wrap; justify-content:center; } }
-    @media(max-width:600px){
-      .hero-about { margin-top: 80px; }
-      .header-right {
-        position: absolute;
-        top: 70px;
-        right: 0;
-        background: rgba(20,21,23,0.95);
-        flex-direction: column;
-        width: 220px;
-        padding: 20px;
-        display: none;
-        border-radius: 0 0 0 10px;
-      }
-      .header-right.open { display: flex; }
-      .hamburger { display: block; }
-      section{ padding:60px 16px; }
-      .hero-about { border-radius:8px; }
-    }
-    @media(max-width:420px){ .brand-logo { height:clamp(40px,12vw,90px); } .brand-title{ font-size: clamp(16px,7vw,22px); } }
+/* ================= RESPONSIVE ================= */
+@media(max-width:900px){ .header-right { gap:12px; flex-wrap: wrap; justify-content:center; } }
+@media(max-width:600px){
+  .hero-about { margin-top: 80px; }
+  .header-right { 
+    position: absolute;
+    top: 70px;
+    right: 0;
+    background: rgba(17,17,19,0.96);
+    flex-direction: column;
+    width: 220px;
+    padding: 20px;
+    display: none;
+    border-radius: 0 0 0 10px;
+  }
+  .header-right.open { display: flex; }
+  .hamburger { display: block; }
+  section{ padding:60px 20px; }
+}
+@media(max-width:420px){ 
+  .brand-logo { height:clamp(50px,15vw,120px); } 
+  .brand-title{ font-size: clamp(16px,7vw,22px); } 
+}
   </style>
 </head>
 <body class="serac">
 
-  <!-- HEADER (keeps original markup + hamburger) -->
+  <!-- HEADER -->
   <header class="site-header">
     <div class="header-left">
       <img src="logo.png" alt="Serac Logo" class="brand-logo">
       <div class="brand-title">Serac</div>
     </div>
-
     <nav class="header-right">
       <a href="index.html">Home</a>
       <a href="shop.html">Shop</a>
       <a href="#faq">FAQ</a>
       <a href="contact.html">Contact</a>
     </nav>
-
-    <!-- original hamburger button preserved -->
-    <button class="hamburger" id="hamburger" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
   </header>
 
-  <!-- HERO (original structure preserved; added Becko-style rotating words below the headline) -->
+  <!-- HERO -->
   <section class="hero-about">
     <div class="hero-text">
       <h1>About Serac</h1>
-
-      <!-- rotating words (Becko-style) -->
-      <div class="hero-rotator" aria-hidden="true">
-        <div class="words">
-          <span>Confidence</span>
-          <span>Style</span>
-          <span>Quality</span>
-          <span>Legacy</span>
-        </div>
-      </div>
-
       <p>Discover our vision, values, and how we deliver excellence in every experience.</p>
     </div>
   </section>
 
-  <!-- VISION (original content) -->
+  <!-- VISION -->
   <section id="vision">
     <div class="container">
       <h2>Our Vision</h2>
@@ -246,35 +246,30 @@
     </div>
   </section>
 
-  <!-- FAQ (original content & structure: kept exactly; styling updated above) -->
+  <!-- FAQ -->
   <section id="faq">
     <div class="container">
       <h2>Frequently Asked Questions</h2>
-
       <div class="faq-item">
         <div class="faq-question">What products/services does Serac offer? <i class="fas fa-plus"></i></div>
         <div class="faq-answer"><p>We offer a wide range of products and services designed to meet diverse needs, from premium items to specialized solutions.</p></div>
       </div>
-
       <div class="faq-item">
         <div class="faq-question">How can I contact support? <i class="fas fa-plus"></i></div>
         <div class="faq-answer"><p>You can reach us via the Contact page or email support@serac.com. Our team is available Monday to Friday.</p></div>
       </div>
-
       <div class="faq-item">
         <div class="faq-question">Where does Serac operate? <i class="fas fa-plus"></i></div>
         <div class="faq-answer"><p>We operate globally, offering products and services to customers worldwide.</p></div>
       </div>
-
-      <button id="faq-toggle" class="toggle-btn">More <i class="fas fa-chevron-down" style="margin-left:8px"></i></button>
+      <button id="faq-toggle" class="toggle-btn">More</button>
     </div>
   </section>
 
-  <!-- TESTIMONIALS (restyled look; original grid + More button functionality preserved) -->
+  <!-- TESTIMONIALS -->
   <section id="testimonials">
     <div class="container">
       <h2>Testimonials</h2>
-
       <div class="testimonials">
         <div class="testimonial-card">
           <div class="testimonial-stars">
@@ -283,7 +278,6 @@
           <div class="testimonial-text">Serac’s service was exceptional, and the product quality exceeded my expectations. Highly recommend!</div>
           <div class="testimonial-author">— Jane Doe</div>
         </div>
-
         <div class="testimonial-card">
           <div class="testimonial-stars">
             <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
@@ -291,7 +285,6 @@
           <div class="testimonial-text">Amazing experience! The team was very professional and responsive throughout.</div>
           <div class="testimonial-author">— John Smith</div>
         </div>
-
         <div class="testimonial-card">
           <div class="testimonial-stars">
             <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
@@ -300,12 +293,11 @@
           <div class="testimonial-author">— Emily R.</div>
         </div>
       </div>
-
-      <button id="testimonial-toggle" class="toggle-btn">More <i class="fas fa-chevron-down" style="margin-left:8px"></i></button>
+      <button id="testimonial-toggle" class="toggle-btn">More</button>
     </div>
   </section>
 
-  <!-- HOW TO SHOP (original content) -->
+  <!-- HOW TO SHOP -->
   <section id="how-to-shop">
     <div class="container">
       <h2>How to Shop</h2>
@@ -313,7 +305,7 @@
     </div>
   </section>
 
-  <!-- AFFILIATE PROGRAM (original content) -->
+  <!-- AFFILIATE PROGRAM -->
   <section id="affiliate">
     <div class="container">
       <h2>Affiliate Program</h2>
@@ -321,7 +313,7 @@
     </div>
   </section>
 
-  <!-- WORKING HOURS (original content) -->
+  <!-- WORKING HOURS -->
   <section id="working-hours">
     <div class="container">
       <h2>Working Hours</h2>
@@ -329,7 +321,7 @@
     </div>
   </section>
 
-  <!-- PARTNERSHIPS (original content) -->
+  <!-- PARTNERSHIPS -->
   <section id="partnerships">
     <div class="container">
       <h2>Partnerships</h2>
@@ -337,14 +329,14 @@
     </div>
   </section>
 
-  <!-- FOOTER (original content) -->
+  <!-- FOOTER -->
   <footer class="site-footer">
     <p>© 2025 Serac</p>
   </footer>
 
-  <!-- ================= SCRIPTS (all original functionality restored + icon toggles + rotator) ================= -->
+  <!-- SCRIPTS -->
   <script>
-    // HAMBURGER TOGGLE (original behavior preserved)
+    // HAMBURGER TOGGLE
     const hamburger = document.getElementById('hamburger');
     const headerRight = document.querySelector('.header-right');
     if (hamburger && headerRight) {
@@ -354,13 +346,12 @@
       });
     }
 
-    // FAQ ACCORDION (original logic restored; plus/minus icon toggle)
+    // FAQ ACCORDION
     document.querySelectorAll('.faq-item').forEach(item => {
       const question = item.querySelector('.faq-question');
       const answer = item.querySelector('.faq-answer');
       const icon = item.querySelector('i');
 
-      // ensure answers start closed (like original)
       if (answer) answer.style.display = 'none';
 
       if (question) {
@@ -376,68 +367,51 @@
       }
     });
 
-    // FAQ SHOW MORE/LESS (keeps original "show only first 2" behaviour)
+    // FAQ SHOW MORE/LESS
     const faqItems = document.querySelectorAll('.faq-item');
     const faqToggle = document.getElementById('faq-toggle');
-    if (faqItems.length > 2 && faqToggle) {
+    if (faqItems.length > 2) {
       faqItems.forEach((item, index) => { if (index > 1) item.style.display = 'none'; });
-      faqToggle.addEventListener('click', () => {
-        const isExpanded = faqToggle.textContent.trim().startsWith('Less');
-        faqItems.forEach((item, index) => { if (index > 1) item.style.display = isExpanded ? 'none' : 'block'; });
-        // toggle text + icon
-        if (isExpanded) {
-          faqToggle.innerHTML = 'More <i class="fas fa-chevron-down" style="margin-left:8px"></i>';
-        } else {
-          faqToggle.innerHTML = 'Less <i class="fas fa-chevron-up" style="margin-left:8px"></i>';
-        }
-      });
+      if (faqToggle) {
+        faqToggle.addEventListener('click', () => {
+          const isExpanded = faqToggle.textContent.trim() === 'Less';
+          faqItems.forEach((item, index) => { if (index > 1) item.style.display = isExpanded ? 'none' : 'block'; });
+          faqToggle.textContent = isExpanded ? 'More' : 'Less';
+        });
+      }
     }
 
-    // TESTIMONIAL SHOW MORE/LESS (original behaviour preserved)
+    // TESTIMONIAL SHOW MORE/LESS
     const testimonialCards = document.querySelectorAll('.testimonial-card');
     const testimonialToggle = document.getElementById('testimonial-toggle');
-    if (testimonialCards.length > 2 && testimonialToggle) {
-      // hide after-first-2 (original)
+    if (testimonialCards.length > 2) {
       testimonialCards.forEach((card, index) => { if (index > 1) card.style.display = 'none'; });
-      testimonialToggle.addEventListener('click', () => {
-        const isExpanded = testimonialToggle.textContent.trim().startsWith('Less');
-        testimonialCards.forEach((card, index) => {
-          if (index > 1) {
-            // restore to flex (matches original layout which used flex for testimonial-card)
-            card.style.display = isExpanded ? 'none' : 'flex';
-          }
+      if (testimonialToggle) {
+        testimonialToggle.addEventListener('click', () => {
+          const isExpanded = testimonialToggle.textContent.trim() === 'Less';
+          testimonialCards.forEach((card, index) => { if (index > 1) card.style.display = isExpanded ? 'none' : 'flex'; });
+          testimonialToggle.textContent = isExpanded ? 'More' : 'Less';
         });
-        if (isExpanded) {
-          testimonialToggle.innerHTML = 'More <i class="fas fa-chevron-down" style="margin-left:8px"></i>';
-        } else {
-          testimonialToggle.innerHTML = 'Less <i class="fas fa-chevron-up" style="margin-left:8px"></i>';
-        }
-      });
+      }
     }
 
-    // SMOOTH SCROLL (preserve original behavior and close mobile nav)
+    // SMOOTH SCROLL
     document.querySelectorAll('.header-right a').forEach(link => {
       link.addEventListener('click', (e) => {
         const href = link.getAttribute('href');
-        if (href && href.startsWith('#')) {
+        if (href.startsWith('#')) {
           e.preventDefault();
           const targetId = href.substring(1);
           const targetSection = document.getElementById(targetId);
           if (targetSection) {
-            // offset equals header height (approx)
-            const offset = 80;
-            const top = targetSection.getBoundingClientRect().top + window.pageYOffset - offset;
-            window.scrollTo({ top, behavior: 'smooth' });
+            window.scrollTo({ top: targetSection.offsetTop - 80, behavior: 'smooth' });
           }
-          // ensure mobile nav closes after clicking
           headerRight.classList.remove('open');
-          if (hamburger) hamburger.classList.remove('open');
+          hamburger.classList.remove('open');
         }
       });
     });
-
-    // OPTIONAL: ensure hero rotator visibility for reduced-motion users
-    // (no JS required for animation — CSS handles it — but we leave this placeholder)
   </script>
+
 </body>
 </html>
