@@ -12,76 +12,75 @@
     * { box-sizing: border-box; margin:0; padding:0; }
     html, body { height: 100%; font-family: "Montserrat", Arial, sans-serif; color:#EDEDED; background:#121212; scroll-behavior:smooth; }
     a { text-decoration:none; color: inherit; transition: color 0.3s ease; }
-    a:hover { color:#D4AF37; }
-
-    /* ================= HEADER ================= */
-   /* ================= HEADER ================= */
-.site-header {
-  position: fixed;
-  top: 0; 
-  left: 0; 
-  right: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 4px 20px;        /* reduced vertical padding */
-  padding-left: 15px;       /* keep your left spacing */
-  z-index: 1200;
-  background: transparent;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-  transition: background 0.4s ease, box-shadow 0.4s ease;
-  height: 70px;             /* explicitly control header height */
-}
-
-.site-header.scrolled {
-  background: rgba(18,18,18,0.95);
-  box-shadow: 0 2px 10px rgba(0,0,0,0.6);
-}
-
-.header-left { 
-  display: flex; 
-  align-items: center; 
-  gap: 10px;                /* smaller gap between logo + text */
-}
-
-.brand-logo { 
-  height: 50px;             /* smaller logo height */
-  width: auto; 
-}
-
-.brand-title { 
-  font-family: "Playfair Display", serif; 
-  font-weight: 700; 
-  font-size: 1.4rem;        /* smaller title */
-  color: #D4AF37; 
-  letter-spacing: 1px;
-  margin: 0;                /* remove any default margin */
-}
-
-.header-right { 
-  display: flex; 
-  gap: 20px;                /* tighter nav links */
-  font-weight: 500; 
-}
-
-.header-right a { 
-  color: #F5F5F5; 
-  position: relative; 
-  padding: 4px 0;           /* reduce top/bottom space inside links */
-}
-
-.header-right a::after {
-  content: "";
-  position: absolute;
-  bottom: -3px;             /* move line closer to text */
-  left: 0;
-  width: 0; 
-  height: 2px;
-  background: #D4AF37;
-  transition: width 0.3s ease;
-}
-
-.header-right a:hover::after { width: 100%; }
+    a:hover { color:#B66E41; }
+  
+  /* ================= HEADER ================= */
+  .site-header {
+    position: fixed;
+    top: 0; 
+    left: 0; 
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 20px;        /* reduced vertical padding */
+    padding-left: 15px;       /* keep your left spacing */
+    z-index: 1200;
+    background: transparent;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    transition: background 0.4s ease, box-shadow 0.4s ease;
+    height: 80px;             /* explicitly control header height */
+  }
+  
+  .site-header.scrolled {
+    background: rgba(18,18,18,0.95);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.6);
+  }
+  
+  .header-left { 
+    display: flex; 
+    align-items: center; 
+    gap: 20px;                /* smaller gap between logo + text */
+  }
+  
+  .brand-logo { 
+    height: 60px;             /* smaller logo height */
+    width: auto; 
+  }
+  
+  .brand-title { 
+    font-family: "Playfair Display", serif; 
+    font-weight: 700; 
+    font-size: 1.8rem;        /* smaller title */
+    color: #B66E41; 
+    letter-spacing: 1px;
+    margin: 0;                /* remove any default margin */
+  }
+  
+  .header-right { 
+    display: flex; 
+    gap: 20px;                /* tighter nav links */
+    font-weight: 500; 
+  }
+  
+  .header-right a { 
+    color: #F5F5F5; 
+    position: relative; 
+    padding: 4px 0;           /* reduce top/bottom space inside links */
+  }
+  
+  .header-right a::after {
+    content: "";
+    position: absolute;
+    bottom: -3px;             /* move line closer to text */
+    left: 0;
+    width: 0; 
+    height: 2px;
+    background: #D4AF37;
+    transition: width 0.3s ease;
+  }
+  
+  .header-right a:hover::after { width: 100%; }
 
     /* ================= HAMBURGER ================= */
     .hamburger { 
