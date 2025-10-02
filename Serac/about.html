@@ -3,271 +3,231 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>About Us - Serac</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <title>Serac - About Us</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* General Reset */
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: 'Poppins', sans-serif; line-height: 1.6; background: #111; color: #fff; }
+    /* ========= BASE ========= */
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:"Montserrat",sans-serif;background:#141517;color:#eee;line-height:1.7;}
+    a{text-decoration:none;color:inherit;}
+    img{max-width:100%;border-radius:10px;}
+    h1,h2,h3{font-family:"Playfair Display",serif;}
 
-    header {
-      background: #000;
-      color: #fff;
-      padding: 1.2rem 2rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-    }
-    header .logo { font-size: 1.5rem; font-weight: 700; letter-spacing: 1px; }
-    nav ul { display: flex; gap: 1.5rem; list-style: none; }
-    nav ul li a { color: #fff; text-decoration: none; font-weight: 500; }
-    nav ul li a:hover { color: #f4a261; }
+    /* ========= HEADER ========= */
+    .site-header{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:20px 60px;background:rgba(20,21,23,0.95);z-index:1000;}
+    .brand-title{font-size:32px;font-weight:700;color:#C6A26F;}
+    .header-right a{margin:0 15px;font-weight:500;}
+    .header-right a:hover{color:#C6A26F;}
 
-    /* Hero Section */
-    .hero {
-      background: url('https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1500&q=80') center/cover no-repeat;
-      color: #fff;
-      text-align: center;
-      padding: 8rem 2rem;
-      position: relative;
+    /* ========= HERO ========= */
+    .hero{height:70vh;background:url("bg.jpg") center/cover no-repeat;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 20px;color:#fff;position:relative;}
+    .hero::after{content:"";position:absolute;inset:0;background:rgba(20,21,23,0.6);}
+    .hero-content{position:relative;z-index:2;}
+    .hero-content h1{font-size:64px;margin-bottom:20px;color:#fff;font-weight:700;}
+    .hero-words{display:inline-block;overflow:hidden;height:70px;vertical-align:bottom;}
+    .hero-words span{display:block;animation:slideWords 9s infinite;}
+    @keyframes slideWords {
+      0%, 20% {transform: translateY(0%);}
+      25%, 45% {transform: translateY(-100%);}
+      50%, 70% {transform: translateY(-200%);}
+      75%, 95% {transform: translateY(-300%);}
+      100% {transform: translateY(0%);}
     }
-    .hero::after {
-      content: "";
-      position: absolute; top:0; left:0; right:0; bottom:0;
-      background: rgba(0,0,0,0.65);
-    }
-    .hero-content {
-      position: relative; z-index: 1; max-width: 800px; margin: auto;
-    }
-    .hero h1 {
-      font-size: 3rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
-      animation: slideIn 1s ease-out forwards;
-    }
-    .animated-text {
-      font-size: 1.3rem;
-      color: #f4a261;
-      white-space: nowrap;
-      overflow: hidden;
-      border-right: 3px solid #f4a261;
-      width: 0;
-      animation: typing 4s steps(30, end) infinite alternate, blink 0.75s step-end infinite;
-    }
-    @keyframes typing { from { width: 0 } to { width: 100% } }
-    @keyframes blink { 50% { border-color: transparent } }
-    @keyframes slideIn { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .hero-content p{font-size:20px;max-width:700px;margin:auto;margin-top:15px;}
 
-    section { padding: 5rem 2rem; max-width: 1100px; margin: auto; }
-    h2 { font-size: 2.2rem; margin-bottom: 2rem; text-align: center; color: #f4a261; }
+    /* ========= SECTION WRAPPER ========= */
+    section{padding:100px 20px;}
+    .container{max-width:1200px;margin:auto;}
 
-    /* Features (Why Choose Us) */
-    .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; }
-    .feature { background: #1a1a1a; padding: 2rem; border-radius: 12px; text-align: center; transition: transform 0.3s; }
-    .feature:hover { transform: translateY(-8px); }
-    .feature h3 { margin-bottom: 1rem; font-size: 1.2rem; color: #f4a261; }
+    /* ========= ABOUT ========= */
+    .about-grid{display:grid;grid-template-columns: repeat(auto-fit,minmax(320px,1fr));gap:40px;align-items:center;}
+    .about-grid h2{font-size:36px;margin-bottom:20px;color:#C6A26F;}
+    .about-grid p{color:#ddd;}
 
-    /* Testimonials Slider */
-    .testimonial-slider { position: relative; overflow: hidden; }
-    .testimonial-container {
-      display: flex; transition: transform 0.5s ease-in-out;
-    }
-    .testimonial {
-      min-width: 100%; flex: 0 0 100%;
-      padding: 2rem;
-      background: #1a1a1a; border-radius: 12px;
-      text-align: center;
-    }
-    .testimonial p { font-style: italic; margin-bottom: 1rem; }
-    .testimonial h4 { color: #f4a261; }
-    .slider-buttons {
-      margin-top: 1rem; text-align: center;
-    }
-    .slider-buttons button {
-      background: #f4a261; border: none; margin: 0 5px;
-      padding: 8px 14px; border-radius: 6px; cursor: pointer;
-    }
+    /* ========= FEATURES ========= */
+    .features{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:30px;text-align:center;}
+    .feature-box{background:#1c1d21;padding:40px 20px;border-radius:12px;transition:.3s;}
+    .feature-box:hover{background:#C6A26F;color:#fff;}
+    .feature-box i{font-size:40px;margin-bottom:15px;color:#C6A26F;}
+    .feature-box:hover i{color:#fff;}
+    .feature-box h3{margin-bottom:10px;}
 
-    /* FAQ */
-    .faq-item { background: #1a1a1a; margin-bottom: 1rem; padding: 1rem; border-radius: 8px; cursor: pointer; }
-    .faq-item h3 { font-size: 1.1rem; }
-    .faq-answer { display: none; margin-top: 0.5rem; font-size: 0.95rem; color: #ddd; }
-    .faq-item.active .faq-answer { display: block; }
+    /* ========= TESTIMONIALS ========= */
+    .testimonial-section{position:relative;overflow:hidden;}
+    .testimonial-slider{display:flex;transition:transform .6s ease;}
+    .testimonial-card{min-width:100%;background:#1c1d21;padding:50px;border-radius:12px;text-align:center;opacity:0;transform:translateY(30px);transition:all .6s;}
+    .testimonial-card.active{opacity:1;transform:translateY(0);}
+    .testimonial-stars{color:#FFD700;margin-bottom:20px;font-size:20px;}
+    .testimonial-text{font-style:italic;font-size:22px;font-weight:500;margin-bottom:20px;color:#f1f1f1;}
+    .testimonial-author{font-weight:700;font-size:18px;color:#C6A26F;letter-spacing:1px;}
+    .testimonial-controls{margin-top:30px;text-align:center;}
+    .testimonial-controls button{background:none;border:2px solid #C6A26F;color:#C6A26F;padding:10px 15px;margin:0 8px;border-radius:50%;cursor:pointer;transition:.3s;font-size:18px;}
+    .testimonial-controls button:hover{background:#C6A26F;color:#fff;}
 
-    /* Footer */
-    footer {
-      background: #000;
-      color: #aaa;
-      text-align: center;
-      padding: 2rem 1rem;
-      margin-top: 3rem;
-    }
-    footer a { color: #f4a261; text-decoration: none; }
+    /* ========= FAQ ========= */
+    .faq-section{max-width:900px;margin:auto;}
+    .faq{background:#1c1d21;margin-bottom:15px;padding:20px;border-radius:10px;}
+    .faq h3{cursor:pointer;color:#C6A26F;margin-bottom:10px;}
+    .faq p{display:none;color:#ccc;}
+
+    /* ========= PARTNERS ========= */
+    .partners{text-align:center;}
+    .partners-logos{display:flex;justify-content:center;flex-wrap:wrap;gap:40px;margin-top:40px;}
+    .partners-logos img{height:60px;opacity:.8;transition:.3s;}
+    .partners-logos img:hover{opacity:1;}
+
+    /* ========= FOOTER ========= */
+    .site-footer{background:#0f0f10;padding:50px 20px;text-align:center;color:#aaa;}
+    .site-footer p{margin-top:15px;}
+    .footer-social a{margin:0 10px;color:#C6A26F;font-size:20px;}
   </style>
 </head>
 <body>
-  <!-- Header -->
-  <header>
-    <div class="logo">Serac</div>
-    <nav>
-      <ul>
-        <li><a href="index.html">Home</a></li>
-        <li><a href="about.html">About</a></li>
-        <li><a href="shop.html">Shop</a></li>
-        <li><a href="contact.html">Contact</a></li>
-      </ul>
-    </nav>
-  </header>
 
-  <!-- Hero -->
-  <section class="hero">
-    <div class="hero-content">
-      <h1>About Serac</h1>
-      <div class="animated-text">Confidence. Quality. You.</div>
-    </div>
-  </section>
+<header class="site-header">
+  <div class="brand-title">Serac</div>
+  <nav class="header-right">
+    <a href="index.html">Home</a>
+    <a href="shop.html">Shop</a>
+    <a href="about.html">About</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+</header>
 
-  <!-- Our Vision -->
-  <section>
+<section class="hero">
+  <div class="hero-content">
+    <h1>
+      <span class="hero-words">
+        <span>About Serac</span>
+        <span>Confidence.</span>
+        <span>Quality.</span>
+        <span>For Men Who Move.</span>
+      </span>
+    </h1>
+    <p>Discover our story, vision, and the passion behind everything we deliver.</p>
+  </div>
+</section>
+
+<section class="container about-grid">
+  <div>
     <h2>Our Vision</h2>
-    <p style="text-align:center; max-width:800px; margin:auto;">
-      At Serac, our vision is to create high-quality, timeless pieces that empower men to express confidence effortlessly.
-      We blend premium design with functionality to make everyday life bold, stylish, and authentic.
-    </p>
-  </section>
+    <p>At Serac, our vision is to create innovative solutions and experiences that inspire and connect people worldwide. We believe in combining craftsmanship, creativity, and technology to deliver outstanding results.</p>
+  </div>
+  <div>
+    <img src="about-img.jpg" alt="Our Story">
+  </div>
+</section>
 
-  <!-- Why Choose Us -->
-  <section>
-    <h2>Why Choose Us</h2>
-    <div class="features">
-      <div class="feature"><h3>Premium Quality</h3><p>Only the best materials make it into our products.</p></div>
-      <div class="feature"><h3>Designed for Men</h3><p>Every detail crafted to match your lifestyle and strength.</p></div>
-      <div class="feature"><h3>Confidence Built-In</h3><p>Our designs are bold, timeless, and assertive.</p></div>
+<section class="container">
+  <h2 style="text-align:center; margin-bottom:50px;">Why Choose Us</h2>
+  <div class="features">
+    <div class="feature-box">
+      <i class="fas fa-gem"></i>
+      <h3>Premium Quality</h3>
+      <p>Only the best materials and products, crafted with excellence.</p>
     </div>
-  </section>
-
-  <!-- Testimonials -->
-  <section>
-    <h2>Testimonials</h2>
-    <div class="testimonial-slider">
-      <div class="testimonial-container">
-        <div class="testimonial">
-          <p>“Solid quality. Fits my style perfectly.”</p>
-          <h4>- Michael K.</h4>
-        </div>
-        <div class="testimonial">
-          <p>“Finally, something that feels premium without trying too hard.”</p>
-          <h4>- Daniel R.</h4>
-        </div>
-        <div class="testimonial">
-          <p>“Every detail speaks confidence. Serac nailed it.”</p>
-          <h4>- James L.</h4>
-        </div>
-      </div>
-      <div class="slider-buttons">
-        <button onclick="moveSlide(-1)">‹</button>
-        <button onclick="moveSlide(1)">›</button>
-      </div>
+    <div class="feature-box">
+      <i class="fas fa-users"></i>
+      <h3>Customer Care</h3>
+      <p>We put you first, always ensuring your satisfaction.</p>
     </div>
-  </section>
-
-  <!-- FAQ -->
-  <section>
-    <h2>Frequently Asked Questions</h2>
-    <div class="faq-item">
-      <h3>What makes Serac different?</h3>
-      <div class="faq-answer">We focus on blending bold masculine aesthetics with premium quality and timeless functionality.</div>
+    <div class="feature-box">
+      <i class="fas fa-globe"></i>
+      <h3>Worldwide Service</h3>
+      <p>We bring our offerings to clients across the globe.</p>
     </div>
-    <div class="faq-item">
-      <h3>Do you offer worldwide shipping?</h3>
-      <div class="faq-answer">Yes, we ship globally with reliable partners.</div>
+  </div>
+</section>
+
+<section class="container testimonial-section">
+  <h2 style="text-align:center; margin-bottom:50px;">What Clients Say</h2>
+  <div class="testimonial-slider">
+    <div class="testimonial-card active">
+      <div class="testimonial-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
+      <p class="testimonial-text">“Serac’s service was exceptional, and the product quality exceeded expectations.”</p>
+      <div class="testimonial-author">— Jane Doe</div>
     </div>
-    <div class="faq-item">
-      <h3>How can I become an affiliate?</h3>
-      <div class="faq-answer">Join our affiliate program via the Partnerships page and start earning with Serac.</div>
+    <div class="testimonial-card">
+      <div class="testimonial-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+      <p class="testimonial-text">“Amazing experience! The team was professional and responsive.”</p>
+      <div class="testimonial-author">— John Smith</div>
     </div>
-  </section>
+    <div class="testimonial-card">
+      <div class="testimonial-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+      <p class="testimonial-text">“Highly recommend Serac. They went above and beyond our expectations.”</p>
+      <div class="testimonial-author">— Alex Green</div>
+    </div>
+  </div>
+  <div class="testimonial-controls">
+    <button id="prev">&#10094;</button>
+    <button id="next">&#10095;</button>
+  </div>
+</section>
 
-  <!-- Footer -->
-  <footer>
-    <p>&copy; 2025 Serac. All Rights Reserved.</p>
-    <p><a href="#">Privacy Policy</a> | <a href="#">Terms</a></p>
-  </footer>
+<section class="container faq-section">
+  <h2 style="text-align:center; margin-bottom:50px;">Frequently Asked Questions</h2>
+  <div class="faq">
+    <h3>What does Serac do?</h3>
+    <p>We specialize in delivering premium solutions, experiences, and products tailored to our clients’ needs.</p>
+  </div>
+  <div class="faq">
+    <h3>Where are you located?</h3>
+    <p>We operate globally, serving clients from different parts of the world.</p>
+  </div>
+  <div class="faq">
+    <h3>How can I contact you?</h3>
+    <p>You can reach us via our contact page or email for any inquiries.</p>
+  </div>
+</section>
 
-  <script>
-    // Testimonial Slider
-    let currentSlide = 0;
-    const container = document.querySelector('.testimonial-container');
-    const totalSlides = document.querySelectorAll('.testimonial').length;
+<section class="container partners">
+  <h2>Our Partners</h2>
+  <div class="partners-logos">
+    <img src="partner1.png" alt="Partner 1">
+    <img src="partner2.png" alt="Partner 2">
+    <img src="partner3.png" alt="Partner 3">
+  </div>
+</section>
 
-    function moveSlide(direction) {
-      currentSlide = (currentSlide + direction + totalSlides) % totalSlides;
-      container.style.transform = `translateX(-${currentSlide * 100}%)`;
-    }
+<footer class="site-footer">
+  <div class="footer-social">
+    <a href="#"><i class="fab fa-facebook-f"></i></a>
+    <a href="#"><i class="fab fa-instagram"></i></a>
+    <a href="#"><i class="fab fa-twitter"></i></a>
+  </div>
+  <p>© 2025 Serac. All Rights Reserved.</p>
+</footer>
 
-    // FAQ Toggle
-    document.querySelectorAll('.faq-item').forEach(item => {
-      item.addEventListener('click', () => item.classList.toggle('active'));
+<script>
+  // FAQ toggle
+  document.querySelectorAll(".faq h3").forEach(q => {
+    q.addEventListener("click", () => {
+      const p = q.nextElementSibling;
+      p.style.display = p.style.display === "block" ? "none" : "block";
     });
-  
-  // Mobile Hamburger Toggle
-  const hamburgerBtn = document.createElement('div');
-  hamburgerBtn.id = "hamburger-btn";
-  hamburgerBtn.innerHTML = "☰";
-  hamburgerBtn.style.fontSize = "1.5rem";
-  hamburgerBtn.style.cursor = "pointer";
-  document.querySelector("header").prepend(hamburgerBtn);
-
-  const navMenu = document.querySelector("nav ul");
-  hamburgerBtn.addEventListener("click", () => {
-    navMenu.classList.toggle("show");
-    if (navMenu.classList.contains("show")) {
-      hamburgerBtn.innerHTML = "✖"; // close icon
-    } else {
-      hamburgerBtn.innerHTML = "☰"; // hamburger icon
-    }
   });
 
-  // Add styles for mobile nav
-  const style = document.createElement("style");
-  style.innerHTML = `
-    @media (max-width: 768px) {
-      nav ul { 
-        flex-direction: column; 
-        display: none; 
-        background:#000; 
-        position:absolute; 
-        top:70px; 
-        right:0; 
-        width:200px; 
-        padding:1rem; 
-      }
-      nav ul.show { display:block; }
-    }
-  `;
-  document.head.appendChild(style);
-
-
-  // Testimonial Slider (already included, but repeat for completeness)
-  let currentSlide = 0;
-  const container = document.querySelector('.testimonial-container');
-  const totalSlides = document.querySelectorAll('.testimonial').length;
-
-  function moveSlide(direction) {
-    currentSlide = (currentSlide + direction + totalSlides) % totalSlides;
-    container.style.transform = `translateX(-${currentSlide * 100}%)`;
+  // Testimonial slider
+  const cards = document.querySelectorAll(".testimonial-card");
+  let current = 0;
+  function showSlide(index){
+    cards.forEach((c,i)=>{c.classList.remove("active");});
+    cards[index].classList.add("active");
   }
-
-  // FAQ Toggle (already included, but repeat for completeness)
-  document.querySelectorAll('.faq-item').forEach(item => {
-    item.addEventListener('click', () => {
-      item.classList.toggle('active');
-    });
+  document.getElementById("prev").addEventListener("click",()=>{
+    current = (current-1+cards.length)%cards.length;
+    showSlide(current);
   });
+  document.getElementById("next").addEventListener("click",()=>{
+    current = (current+1)%cards.length;
+    showSlide(current);
+  });
+  setInterval(()=>{
+    current = (current+1)%cards.length;
+    showSlide(current);
+  },5000);
 </script>
-  
+
 </body>
 </html>
