@@ -3,233 +3,335 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Serac - About Us</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <title>About Us - Brandisby</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
   <style>
-    /* ========= BASE ========= */
-    *{margin:0;padding:0;box-sizing:border-box;}
-    body{font-family:"Montserrat",sans-serif;background:#141517;color:#eee;line-height:1.7;}
-    a{text-decoration:none;color:inherit;}
-    img{max-width:100%;border-radius:10px;}
-    h1,h2,h3{font-family:"Playfair Display",serif;}
-
-    /* ========= HEADER ========= */
-    .site-header{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:20px 60px;background:rgba(20,21,23,0.95);z-index:1000;}
-    .brand-title{font-size:32px;font-weight:700;color:#C6A26F;}
-    .header-right a{margin:0 15px;font-weight:500;}
-    .header-right a:hover{color:#C6A26F;}
-
-    /* ========= HERO ========= */
-    .hero{height:80vh;background:url("bg.jpg") center/cover no-repeat;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 20px;color:#fff;position:relative;}
-    .hero::after{content:"";position:absolute;inset:0;background:rgba(20,21,23,0.7);}
-    .hero-content{position:relative;z-index:2;}
-    .hero-content h1{font-size:72px;margin-bottom:20px;color:#fff;font-weight:700;}
-    .hero-content p{font-size:22px;max-width:700px;margin:auto;color:#ccc;}
-    .animated-words{display:inline-block;overflow:hidden;vertical-align:bottom;height:60px;}
-    .animated-words span{display:block;animation:slideWords 9s infinite;}
-    @keyframes slideWords {
-      0%,20%{transform:translateY(0%);}
-      25%,45%{transform:translateY(-100%);}
-      50%,70%{transform:translateY(-200%);}
-      75%,95%{transform:translateY(-300%);}
-      100%{transform:translateY(0%);}
+    body {
+      margin: 0;
+      font-family: 'Montserrat', sans-serif;
+      background: #111;
+      color: #eee;
+      line-height: 1.6;
     }
 
-    /* ========= SECTION WRAPPER ========= */
-    section{padding:100px 20px;}
-    .container{max-width:1200px;margin:auto;}
+    /* Navbar */
+    header {
+      background: #000;
+      color: #fff;
+      padding: 15px 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    header h1 {
+      font-size: 1.5rem;
+      margin: 0;
+      font-weight: 800;
+    }
+    nav {
+      display: none;
+      flex-direction: column;
+      background: #000;
+      position: absolute;
+      top: 60px;
+      right: 0;
+      width: 200px;
+    }
+    nav a {
+      padding: 12px;
+      color: #fff;
+      text-decoration: none;
+      border-top: 1px solid #222;
+    }
+    nav.show { display: flex; }
+    #hamburger-btn {
+      cursor: pointer;
+      font-size: 1.4rem;
+      background: none;
+      border: none;
+      color: #fff;
+    }
 
-    /* ========= ABOUT ========= */
-    .about-grid{display:grid;grid-template-columns: repeat(auto-fit,minmax(320px,1fr));gap:40px;align-items:center;}
-    .about-grid h2{font-size:36px;margin-bottom:20px;color:#C6A26F;}
-    .about-grid p{color:#ddd;}
+    /* Hero */
+    .hero {
+      height: 90vh;
+      background: url('https://images.unsplash.com/photo-1602810318383-e3aa128bb7a0?auto=format&fit=crop&w=1600&q=80') no-repeat center/cover;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      color: #fff;
+      position: relative;
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      top:0;left:0;width:100%;height:100%;
+      background: rgba(0,0,0,0.6);
+    }
+    .hero-content {
+      position: relative;
+      z-index: 2;
+    }
+    .hero h2 {
+      font-size: 3rem;
+      margin: 0 0 10px;
+      font-weight: 800;
+    }
+    .hero .animated-words {
+      display: inline-block;
+      overflow: hidden;
+      height: 3rem;
+      vertical-align: bottom;
+    }
+    .hero .animated-words span {
+      display: block;
+      animation: slideWords 9s infinite;
+    }
+    @keyframes slideWords {
+      0% { transform: translateY(0); }
+      20% { transform: translateY(-100%); }
+      40% { transform: translateY(-200%); }
+      60% { transform: translateY(-300%); }
+      80% { transform: translateY(-400%); }
+      100% { transform: translateY(0); }
+    }
+    .hero p {
+      font-size: 1.2rem;
+      margin-bottom: 20px;
+    }
+    .hero button {
+      padding: 12px 30px;
+      border: none;
+      background: #e50914;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 30px;
+      transition: background 0.3s;
+    }
+    .hero button:hover { background: #ff303b; }
 
-    /* ========= FEATURES ========= */
-    .features{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:30px;text-align:center;}
-    .feature-box{background:#1c1d21;padding:40px 20px;border-radius:12px;transition:.3s;}
-    .feature-box:hover{background:#C6A26F;color:#fff;}
-    .feature-box i{font-size:40px;margin-bottom:15px;color:#C6A26F;}
-    .feature-box:hover i{color:#fff;}
-    .feature-box h3{margin-bottom:10px;}
+    /* Sections */
+    section {
+      padding: 60px 20px;
+      max-width: 1100px;
+      margin: auto;
+    }
+    h2.section-title {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 40px;
+      font-weight: 800;
+      color: #fff;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 25px;
+    }
+    .card {
+      background: #1a1a1a;
+      padding: 25px;
+      border-radius: 12px;
+      text-align: center;
+      transition: transform 0.3s;
+    }
+    .card:hover { transform: translateY(-5px); }
 
-    /* ========= TESTIMONIALS ========= */
-    .testimonial-section{position:relative;overflow:hidden;}
-    .testimonial-slider{display:flex;transition:transform .6s ease;}
-    .testimonial-card{min-width:100%;background:#1c1d21;padding:50px;border-radius:12px;text-align:center;opacity:0;transform:translateY(30px);transition:all .6s;}
-    .testimonial-card.active{opacity:1;transform:translateY(0);}
-    .testimonial-stars{color:#FFD700;margin-bottom:15px;}
-    .testimonial-text{font-style:italic;font-size:20px;margin-bottom:15px;}
-    .testimonial-author{font-weight:600;color:#C6A26F;}
-    .testimonial-controls{margin-top:30px;text-align:center;}
-    .testimonial-controls button{background:none;border:2px solid #C6A26F;color:#C6A26F;padding:10px 18px;margin:0 5px;border-radius:50%;cursor:pointer;transition:.3s;}
-    .testimonial-controls button:hover{background:#C6A26F;color:#fff;}
+    /* Testimonials Slider */
+    .testimonials {
+      position: relative;
+      overflow: hidden;
+    }
+    .testimonial-slide {
+      display: none;
+      text-align: center;
+      padding: 20px;
+      background: #1c1c1c;
+      border-radius: 12px;
+    }
+    .testimonial-slide.active { display: block; }
+    .testimonial-slide p {
+      font-style: italic;
+      margin-bottom: 10px;
+    }
+    .testimonial-slide h4 {
+      margin: 0;
+      font-weight: 600;
+      color: #e50914;
+    }
 
-    /* ========= FAQ ========= */
-    .faq-section{max-width:900px;margin:auto;}
-    .faq{background:#1c1d21;margin-bottom:15px;padding:20px;border-radius:10px;}
-    .faq h3{cursor:pointer;color:#C6A26F;margin-bottom:10px;}
-    .faq p{display:none;color:#ccc;}
+    /* FAQ */
+    .faq-item {
+      margin-bottom: 15px;
+    }
+    .faq-question {
+      background: #222;
+      padding: 15px;
+      cursor: pointer;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+    .faq-answer {
+      display: none;
+      padding: 15px;
+      background: #333;
+      border-radius: 8px;
+      margin-top: 5px;
+    }
 
-    /* ========= PARTNERS ========= */
-    .partners{text-align:center;}
-    .partners-logos{display:flex;justify-content:center;flex-wrap:wrap;gap:40px;margin-top:40px;}
-    .partners-logos img{height:60px;opacity:.8;transition:.3s;}
-    .partners-logos img:hover{opacity:1;}
-
-    /* ========= FOOTER ========= */
-    .site-footer{background:#0f0f10;padding:50px 20px;text-align:center;color:#aaa;}
-    .site-footer p{margin-top:15px;}
-    .footer-social a{margin:0 10px;color:#C6A26F;font-size:20px;}
+    /* Footer */
+    footer {
+      background: #000;
+      color: #bbb;
+      text-align: center;
+      padding: 30px 20px;
+      margin-top: 50px;
+    }
+    footer a { color: #e50914; text-decoration: none; }
   </style>
 </head>
 <body>
 
-<header class="site-header">
-  <div class="brand-title">Serac</div>
-  <nav class="header-right">
-    <a href="index.html">Home</a>
-    <a href="shop.html">Shop</a>
-    <a href="about.html">About</a>
-    <a href="contact.html">Contact</a>
-  </nav>
-</header>
+  <!-- Header -->
+  <header>
+    <h1>Brandisby</h1>
+    <button id="hamburger-btn">☰</button>
+    <nav id="nav-menu">
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+  </header>
 
-<!-- HERO WITH BECKO-STYLE ANIMATION -->
-<section class="hero">
-  <div class="hero-content">
-    <h1>
-      We Build <span class="animated-words">
-        <span>Confidence</span>
-        <span>Style</span>
-        <span>Quality</span>
-        <span>Legacy</span>
-      </span>
-    </h1>
-    <p>Discover our story, vision, and the passion behind everything we deliver.</p>
-  </div>
-</section>
-
-<section class="container about-grid">
-  <div>
-    <h2>Our Vision</h2>
-    <p>At Serac, our vision is to create innovative solutions and experiences that inspire and connect people worldwide. We believe in combining craftsmanship, creativity, and technology to deliver outstanding results.</p>
-  </div>
-  <div>
-    <img src="about-img.jpg" alt="Our Story">
-  </div>
-</section>
-
-<section class="container">
-  <h2 style="text-align:center; margin-bottom:50px;">Why Choose Us</h2>
-  <div class="features">
-    <div class="feature-box">
-      <i class="fas fa-gem"></i>
-      <h3>Premium Quality</h3>
-      <p>Only the best materials and products, crafted with excellence.</p>
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-content">
+      <h2>
+        Built for <span class="animated-words">
+          <span>Confidence</span>
+          <span>Strength</span>
+          <span>Style</span>
+          <span>Performance</span>
+          <span>You</span>
+        </span>
+      </h2>
+      <p>Discover the perfect balance of quality, design, and lifestyle.</p>
+      <button>Explore Now</button>
     </div>
-    <div class="feature-box">
-      <i class="fas fa-users"></i>
-      <h3>Customer Care</h3>
-      <p>We put you first, always ensuring your satisfaction.</p>
-    </div>
-    <div class="feature-box">
-      <i class="fas fa-globe"></i>
-      <h3>Worldwide Service</h3>
-      <p>We bring our offerings to clients across the globe.</p>
-    </div>
-  </div>
-</section>
+  </section>
 
-<!-- TESTIMONIALS SLIDER -->
-<section class="container testimonial-section">
-  <h2 style="text-align:center; margin-bottom:50px;">What Clients Say</h2>
-  <div class="testimonial-slider">
-    <div class="testimonial-card active">
-      <div class="testimonial-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i></div>
-      <p class="testimonial-text">“Serac’s service was exceptional, and the product quality exceeded expectations.”</p>
-      <div class="testimonial-author">— Jane Doe</div>
+  <!-- Vision -->
+  <section>
+    <h2 class="section-title">Our Vision</h2>
+    <div class="grid">
+      <div class="card">
+        <p>At Brandisby, our vision is to create timeless designs that embody confidence, strength, and individuality.</p>
+      </div>
     </div>
-    <div class="testimonial-card">
-      <div class="testimonial-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-      <p class="testimonial-text">“Amazing experience! The team was professional and responsive.”</p>
-      <div class="testimonial-author">— John Smith</div>
+  </section>
+
+  <!-- Why Choose Us -->
+  <section>
+    <h2 class="section-title">Why Choose Us</h2>
+    <div class="grid">
+      <div class="card">Premium Quality</div>
+      <div class="card">Unique Designs</div>
+      <div class="card">Customer Satisfaction</div>
+      <div class="card">Fast Delivery</div>
     </div>
-    <div class="testimonial-card">
-      <div class="testimonial-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-      <p class="testimonial-text">“Highly recommend Serac. They went above and beyond our expectations.”</p>
-      <div class="testimonial-author">— Alex Green</div>
+  </section>
+
+  <!-- Testimonials -->
+  <section>
+    <h2 class="section-title">What Our Customers Say</h2>
+    <div class="testimonials">
+      <div class="testimonial-slide active">
+        <p>"Solid quality. Fits my style perfectly."</p>
+        <h4>- James K.</h4>
+      </div>
+      <div class="testimonial-slide">
+        <p>"Finally, something that feels premium without trying too hard."</p>
+        <h4>- Michael O.</h4>
+      </div>
+      <div class="testimonial-slide">
+        <p>"Great customer service and fast delivery!"</p>
+        <h4>- Daniel M.</h4>
+      </div>
     </div>
-  </div>
-  <div class="testimonial-controls">
-    <button id="prev">&#10094;</button>
-    <button id="next">&#10095;</button>
-  </div>
-</section>
+  </section>
 
-<section class="container faq-section">
-  <h2 style="text-align:center; margin-bottom:50px;">Frequently Asked Questions</h2>
-  <div class="faq">
-    <h3>What does Serac do?</h3>
-    <p>We specialize in delivering premium solutions, experiences, and products tailored to our clients’ needs.</p>
-  </div>
-  <div class="faq">
-    <h3>Where are you located?</h3>
-    <p>We operate globally, serving clients from different parts of the world.</p>
-  </div>
-  <div class="faq">
-    <h3>How can I contact you?</h3>
-    <p>You can reach us via our contact page or email for any inquiries.</p>
-  </div>
-</section>
+  <!-- FAQ -->
+  <section>
+    <h2 class="section-title">FAQs</h2>
+    <div class="faq-item">
+      <div class="faq-question">How do I shop?</div>
+      <div class="faq-answer">Browse our shop, add items to your cart, and proceed to checkout.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-question">Do you ship internationally?</div>
+      <div class="faq-answer">Yes, we ship worldwide with reliable delivery partners.</div>
+    </div>
+  </section>
 
-<section class="container partners">
-  <h2>Our Partners</h2>
-  <div class="partners-logos">
-    <img src="partner1.png" alt="Partner 1">
-    <img src="partner2.png" alt="Partner 2">
-    <img src="partner3.png" alt="Partner 3">
-  </div>
-</section>
+  <!-- Extra Sections -->
+  <section>
+    <h2 class="section-title">How to Shop</h2>
+    <p>Simply select your items, add them to cart, and checkout securely.</p>
+  </section>
 
-<footer class="site-footer">
-  <div class="footer-social">
-    <a href="#"><i class="fab fa-facebook-f"></i></a>
-    <a href="#"><i class="fab fa-instagram"></i></a>
-    <a href="#"><i class="fab fa-twitter"></i></a>
-  </div>
-  <p>© 2025 Serac. All Rights Reserved.</p>
-</footer>
+  <section>
+    <h2 class="section-title">Affiliate Program</h2>
+    <p>Join our affiliate program and earn rewards for sharing Brandisby with others.</p>
+  </section>
 
-<script>
-  // FAQ toggle
-  document.querySelectorAll(".faq h3").forEach(q => {
-    q.addEventListener("click", () => {
-      const p = q.nextElementSibling;
-      p.style.display = p.style.display === "block" ? "none" : "block";
+  <section>
+    <h2 class="section-title">Working Hours</h2>
+    <p>Mon - Fri: 9am - 6pm | Sat: 10am - 4pm | Sun: Closed</p>
+  </section>
+
+  <section>
+    <h2 class="section-title">Partnerships</h2>
+    <p>We collaborate with brands and individuals who share our values. Reach out to partner with us.</p>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2025 Brandisby. All rights reserved. | <a href="#">Privacy Policy</a></p>
+  </footer>
+
+  <script>
+    // Hamburger toggle
+    const hamburgerBtn = document.getElementById('hamburger-btn');
+    const navMenu = document.getElementById('nav-menu');
+    hamburgerBtn.addEventListener('click', () => {
+      navMenu.classList.toggle('show');
+      hamburgerBtn.innerHTML = navMenu.classList.contains('show') ? '✖' : '☰';
     });
-  });
 
-  // Testimonial slider
-  const cards = document.querySelectorAll(".testimonial-card");
-  let current = 0;
-  function showSlide(index){
-    cards.forEach((c,i)=>{c.classList.remove("active");});
-    cards[index].classList.add("active");
-  }
-  document.getElementById("prev").addEventListener("click",()=>{
-    current = (current-1+cards.length)%cards.length;
-    showSlide(current);
-  });
-  document.getElementById("next").addEventListener("click",()=>{
-    current = (current+1)%cards.length;
-    showSlide(current);
-  });
-  setInterval(()=>{
-    current = (current+1)%cards.length;
-    showSlide(current);
-  },5000);
-</script>
+    // FAQ toggle
+    document.querySelectorAll('.faq-question').forEach(q => {
+      q.addEventListener('click', () => {
+        const answer = q.nextElementSibling;
+        answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
+      });
+    });
+
+    // Testimonial slider
+    let slides = document.querySelectorAll('.testimonial-slide');
+    let current = 0;
+    setInterval(() => {
+      slides[current].classList.remove('active');
+      current = (current + 1) % slides.length;
+      slides[current].classList.add('active');
+    }, 4000);
+  </script>
 
 </body>
 </html>
