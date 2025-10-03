@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sérac - Customization</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* ========== RESET ========== */
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: "Montserrat", sans-serif; background:#141517; color:#f5f5f5; line-height:1.6; }
+    a { text-decoration:none; color:inherit; transition:color 0.3s ease; }
+
+    /* ========== HEADER ========== */
+    .site-header {
+      background:#141517;
+      color:#f5f5f5;
+      display:flex; justify-content:space-between; align-items:center;
+      padding:16px 28px;
+      position:fixed; top:0; left:0; right:0;
+      z-index:1000;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+    }
+    .header-left { display:flex; align-items:center; gap:12px; }
+    .brand-logo { height:60px; }
+    .brand-title { font-family:"Playfair Display", serif; font-size:24px; font-weight:700; color:#B66E41; }
+    .header-right { display:flex; gap:20px; }
+    .header-right a { font-weight:500; }
+    .header-right a:hover { color:#B66E41; }
+
+    /* Hamburger */
+    .hamburger { 
+      display:none; background:none; border:none; cursor:pointer; width:30px; height:24px; position:relative;
+    }
+    .hamburger span {
+      display:block; width:100%; height:3px; background:#f5f5f5; border-radius:2px; position:absolute; left:0; transition:0.3s;
+    }
+    .hamburger span:nth-child(1){ top:0; }
+    .hamburger span:nth-child(2){ top:10px; }
+    .hamburger span:nth-child(3){ top:20px; }
+    .hamburger.open span:nth-child(1){ transform:rotate(45deg); top:10px; background:#B66E41; }
+    .hamburger.open span:nth-child(2){ opacity:0; }
+    .hamburger.open span:nth-child(3){ transform:rotate(-45deg); top:10px; background:#B66E41; }
+
+    /* ========== HERO ========== */
+    .hero {
+      position: relative;
+      height: 90vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      margin-top: 80px;
+      overflow: hidden;
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: url("asset/bg16.jpg") center/cover no-repeat;
+      transform: scale(1.1);
+      z-index: -1;
+      border-radius: 12px;
+      box-shadow: inset 0 0 0 2000px rgba(20,21,23,0.55); 
+    }
+    .hero-text { position: relative; display: inline-block; color:#B66E41; margin-bottom:12px; }
+    .hero-text h1 { font-family:"Playfair Display", serif; font-size: clamp(36px,5vw,64px); margin-bottom:12px; }
+    .hero-text p { font-size: clamp(16px,2vw,22px); max-width:700px; }
+
+    /* ========== CUSTOMIZATION SECTION ========== */
+    section.customization { padding:80px 20px; background:#1d1f22; color:#f5f5f5; }
+    .container { max-width:1100px; margin:auto; }
+    .customization h2 { text-align:center; font-size:28px; margin-bottom:20px; font-family:"Playfair Display", serif; color:#B66E41; }
+    .custom-intro { text-align:center; max-width:700px; margin:0 auto 40px auto; font-size:18px; color:#d3d3d3; }
+
+    .custom-grid { display:grid; grid-template-columns:1fr 1fr; gap:40px; }
+    .custom-info {
+      background:#2a2d32;
+      padding:30px;
+      border-radius:12px;
+      box-shadow:0 4px 14px rgba(0,0,0,0.3);
+      transition:transform 0.3s ease;
+    }
+    .custom-info:hover { transform:translateY(-6px); }
+    .custom-info h3 { font-family:"Playfair Display", serif; font-size:24px; margin-bottom:20px; color:#B66E41; }
+    .custom-info ul { list-style:none; }
+    .custom-info li { margin-bottom:12px; font-size:16px; display:flex; align-items:center; gap:10px; color:#f5f5f5; }
+    .custom-info li i { color:#B66E41; }
+
+    .custom-form {
+      background:#2a2d32;
+      padding:30px;
+      border-radius:12px;
+      box-shadow:0 4px 14px rgba(0,0,0,0.3);
+      transition:transform 0.3s ease;
+    }
+    .custom-form:hover { transform:translateY(-6px); }
+    .custom-form h3 { font-family:"Playfair Display", serif; font-size:24px; margin-bottom:20px; color:#B66E41; }
+    .custom-form form { display:flex; flex-direction:column; gap:15px; }
+    .custom-form input, .custom-form textarea {
+      padding:12px 15px; border:none; border-radius:8px;
+      font-size:16px; outline:none;
+      background:#1d1f22; color:#f5f5f5;
+    }
+    .custom-form textarea { min-height:120px; resize:vertical; }
+    .custom-form button {
+      background:#B66E41; color:#fff; border:none; padding:14px;
+      border-radius:8px; font-size:16px; font-weight:600;
+      cursor:pointer; transition: all 0.3s;
+    }
+    .custom-form button:hover { background:#8a4d2b; transform:scale(1.05); }
+
+    /* ========== FOOTER ========== */
+    footer { text-align:center; padding:20px; background:#141517; color:#f5f5f5; margin-top:60px; border-top:1px solid rgba(255,255,255,0.08); }
+    footer p { color:#aaa; }
+
+    /* ========== RESPONSIVE ========== */
+    @media(max-width:900px){ .custom-grid { grid-template-columns:1fr; } }
+    @media(max-width:600px){
+      .header-right { display:none; flex-direction:column; background:#1d1f22; position:absolute; top:70px; right:0; width:200px; padding:20px; }
+      .header-right.open { display:flex; }
+      .hamburger { display:block; }
+      .hero-text h1 { font-size:32px; }
+    }
+    @media(max-width:600px){
+      .hero { height:40vh; margin-top:0; padding-top:80px; }
+      .hero-text h1 { font-size:clamp(24px,5vw,32px); line-height:1.2; margin:0; }
+      .hero-text p { font-size:clamp(14px,2.5vw,18px); margin:0 auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="header-left">
+      <img src="logo.png" alt="Sérac Logo" class="brand-logo">
+      <div class="brand-title">Sérac</div>
+    </div>
+    <nav class="header-right">
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="about.html">About</a>
+      <a href="customization.html">Customize</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-text">
+      <h1>Customize</h1>
+      <p>Send us your requests</p> 
+      <p>We’ll respond in less than a Day</p>
+    </div>
+  </section>
+
+  <!-- CUSTOMIZATION -->
+  <section class="customization">
+    <div class="container">
+      <h2>Request Your Customization</h2>
+      <p class="custom-intro">
+        Fill out the form below with your details and a brief description of your request. Our team will contact you to finalize details and provide a quote.
+      </p>
+
+      <div class="custom-grid">
+        <!-- INFO -->
+        <div class="custom-info">
+          <h3>How It Works</h3>
+          <ul>
+            <li><i class="fas fa-clock"></i> Response time: Less than a Day</li>
+            <li><i class="fas fa-envelope"></i> We’ll message you via WhatsApp</li>
+            <li><i class="fas fa-check-circle"></i> Finalize customization details</li>
+            <li><i class="fas fa-money-check"></i> Quote generated and payment link provided</li>
+          </ul>
+        </div>
+
+        <!-- FORM -->
+        <div class="custom-form">
+          <h3>Send Your Request</h3>
+          <form id="customForm">
+            <input type="text" id="name" placeholder="Your Name" required>
+            <input type="tel" id="phone" placeholder="Phone Number" required>
+            <textarea id="request" placeholder="Brief description of your request" required></textarea>
+            <button type="submit">Submit Request</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2025 Sérac</p>
+  </footer>
+
+  <!-- SCRIPT -->
+  <script>
+    // Hamburger toggle
+    const hamburger = document.getElementById('hamburger');
+    const navMenu = document.querySelector('.header-right');
+    hamburger.addEventListener('click', () => {
+      navMenu.classList.toggle('open');
+      hamburger.classList.toggle('open');
+    });
+
+    // Customization form submission → WhatsApp
+    const customForm = document.getElementById('customForm');
+    customForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = document.getElementById('name').value;
+      const phone = document.getElementById('phone').value;
+      const request = document.getElementById('request').value;
+
+      const message = encodeURIComponent(
+        `Customization Request (Sérac):%0AName: ${name}%0APhone: ${phone}%0ARequest: ${request}`
+      );
+
+      // WhatsApp link to Sérac brand number
+      const whatsappNumber = "2348110690932"; // Sérac WhatsApp
+      window.open(`https://wa.me/${whatsappNumber}?text=${message}`, "_blank");
+
+      alert("Thank you! Your request has been sent. We will contact you via WhatsApp within 24 hours.");
+      customForm.reset();
+    });
+
+    // Firebase path (updated for Sérac)
+    const firebaseBrand = "serac";
+  </script>
+</body>
+</html>
