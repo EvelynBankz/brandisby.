@@ -63,7 +63,7 @@ a { text-decoration:none; color:inherit; transition: color var(--transition); }
 }
 .hero::after {
   content:""; position:absolute; inset:0;
-  background:url('asset/bg25.jpg') center/cover no-repeat;
+  background:url("asset/bg25.jpg") center/cover no-repeat;
   transform: scale(1.05); z-index:-1; mix-blend-mode: multiply;
   border-radius:14px; box-shadow: inset 0 0 0 1200px rgba(20,21,23,0.55);
   filter: contrast(0.95) saturate(0.85);
@@ -144,7 +144,7 @@ button:focus, a:focus, input:focus, select:focus { outline: 3px solid rgba(182,1
 
 <header class="site-header">
   <div class="header-left">
-    <img src="logo.png" alt="Sérac Logo" class="brand-logo">
+    <img src="asset/logo.png" alt="Sérac Logo" class="brand-logo">
     <div class="brand-title">Sérac</div>
   </div>
   <div class="mobile-cart" style="display:none;">
