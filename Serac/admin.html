@@ -1,81 +1,79 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sérac Admin Dashboard</title>
-  <!-- Becko or equivalent Google font -->
-  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    * { box-sizing:border-box; margin:0; padding:0; }
-    body { font-family:"Be Vietnam Pro", sans-serif; background:#000; color:#fff; line-height:1.6; }
-    a { text-decoration:none; color:inherit; }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sérac Admin Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:"Be Vietnam Pro", sans-serif; background:#000; color:#fff; line-height:1.6; }
+  a { text-decoration:none; color:inherit; }
 
-    header { background:#8A4D2B; color:#fff; padding:16px; text-align:center; font-size:24px; font-weight:700; letter-spacing:1px; border-bottom:2px solid #fff; }
+  header { background:#8A4D2B; color:#fff; padding:16px; text-align:center; font-size:24px; font-weight:700; letter-spacing:1px; border-bottom:2px solid #fff; }
 
-    .container { max-width:1000px; margin:2rem auto; padding:2rem; background:#B66E41; border-radius:12px; box-shadow:0 4px 16px rgba(255,255,255,0.05); }
+  .container { max-width:1000px; margin:2rem auto; padding:2rem; background:#B66E41; border-radius:12px; box-shadow:0 4px 16px rgba(255,255,255,0.05); }
 
-    h2 { font-weight:700; margin-bottom:16px; color:#fff; letter-spacing:0.5px; }
+  h2 { font-weight:700; margin-bottom:16px; color:#fff; letter-spacing:0.5px; }
 
-    label { display:block; margin-top:1rem; font-weight:600; }
-    input, textarea, select { width:100%; padding:0.6rem; margin-top:0.5rem; border:1px solid #444; border-radius:6px; font-size:1rem; background:#000; color:#fff; }
+  label { display:block; margin-top:1rem; font-weight:600; }
+  input, textarea, select { width:100%; padding:0.6rem; margin-top:0.5rem; border:1px solid #444; border-radius:6px; font-size:1rem; background:#000; color:#fff; }
 
-    button { margin-top:1rem; padding:0.75rem 1.2rem; background:#fff; color:#000; border:none; border-radius:6px; cursor:pointer; font-weight:700; transition:0.3s; }
-    button:hover { background:#ccc; }
+  button { margin-top:1rem; padding:0.75rem 1.2rem; background:#fff; color:#000; border:none; border-radius:6px; cursor:pointer; font-weight:700; transition:0.3s; }
+  button:hover { background:#ccc; }
 
-    .message { margin-top:1rem; font-weight:500; font-size:1rem; text-align:center; }
+  .message { margin-top:1rem; font-weight:500; font-size:1rem; text-align:center; }
 
-    table { width:100%; border-collapse:collapse; margin-top:1.5rem; background:#000; border:1px solid #333; border-radius:12px; overflow:hidden; }
-    th, td { padding:0.75rem; border-bottom:1px solid #222; text-align:left; font-size:0.95rem; vertical-align:top; }
-    th { background:#8A4D2B; color:#fff; font-weight:700; }
-    td img { width:60px; border-radius:6px; }
+  table { width:100%; border-collapse:collapse; margin-top:1.5rem; background:#000; border:1px solid #333; border-radius:12px; overflow:hidden; }
+  th, td { padding:0.75rem; border-bottom:1px solid #222; text-align:left; font-size:0.95rem; vertical-align:top; }
+  th { background:#8A4D2B; color:#fff; font-weight:700; }
+  td img { width:60px; border-radius:6px; }
 
-    .actions button { margin-right:0.5rem; padding:0.4rem 0.6rem; font-size:0.9rem; }
-    .actions button:hover { opacity:0.85; }
+  .actions button { margin-right:0.5rem; padding:0.4rem 0.6rem; font-size:0.9rem; }
+  .actions button:hover { opacity:0.85; }
 
-    .small-note { font-size:0.9rem; color:#bbb; margin-top:8px; }
+  .small-note { font-size:0.9rem; color:#bbb; margin-top:8px; }
 
-    /* Dashboard Navigation */
-    .dashboard-nav { display:flex; gap:10px; margin-bottom:1.5rem; }
-    .dashboard-nav button { flex:1; background:#111; color:#fff; border:1px solid #444; }
-    .dashboard-nav button:hover { background:#222; }
-    .section { display:none; margin-top:1rem; }
-    .section.active { display:block; }
+  .dashboard-nav { display:flex; gap:10px; margin-bottom:1.5rem; }
+  .dashboard-nav button { flex:1; background:#111; color:#fff; border:1px solid #444; }
+  .dashboard-nav button:hover { background:#222; }
+  .section { display:none; margin-top:1rem; }
+  .section.active { display:block; }
 
-    .details-row { background:#111; }
-    .details-row td { padding:12px; }
+  .details-row { background:#111; }
+  .details-row td { padding:12px; }
 
-    .order-filters { display:flex; gap:10px; margin-bottom:1rem; flex-wrap:wrap; }
-    .order-filters input, .order-filters select { flex:1; max-width:320px; }
+  .order-filters { display:flex; gap:10px; margin-bottom:1rem; flex-wrap:wrap; }
+  .order-filters input, .order-filters select { flex:1; max-width:320px; }
 
-    .quote-item { border:1px solid #444; padding:8px; margin-top:8px; background:#000; border-radius:6px; }
+  .quote-item { border:1px solid #444; padding:8px; margin-top:8px; background:#000; border-radius:6px; }
 
-    .copy-btn { background:none; border:none; cursor:pointer; margin-left:6px; font-size:1rem; color:#fff; }
-    .copy-btn:hover { opacity:0.7; }
+  .copy-btn { background:none; border:none; cursor:pointer; margin-left:6px; font-size:1rem; color:#fff; }
+  .copy-btn:hover { opacity:0.7; }
 
-    @media(max-width:600px){
-      .container { padding:1rem; }
-      table, th, td { font-size:0.85rem; }
-      th, td { padding:0.5rem; }
-      .dashboard-nav { flex-direction:column; }
-      .order-filters { flex-direction:column; }
-    }
+  @media(max-width:600px){
+    .container { padding:1rem; }
+    table, th, td { font-size:0.85rem; }
+    th, td { padding:0.5rem; }
+    .dashboard-nav { flex-direction:column; }
+    .order-filters { flex-direction:column; }
+  }
 
-    .add-item-panel { border:1px dashed #444; padding:12px; margin-top:8px; background:#000; border-radius:8px; }
-    .inline-grid { display:grid; grid-template-columns: repeat(4,1fr); gap:8px; }
-    @media(max-width:600px){ .inline-grid { grid-template-columns: 1fr; } }
+  .add-item-panel { border:1px dashed #444; padding:12px; margin-top:8px; background:#000; border-radius:8px; }
+  .inline-grid { display:grid; grid-template-columns: repeat(4,1fr); gap:8px; }
+  @media(max-width:600px){ .inline-grid { grid-template-columns: 1fr; } }
 
-    .repeatable { margin-top:8px; }
-    .repeatable .row { display:flex; gap:8px; margin-top:8px; }
-    .repeatable .row input { flex:1; }
-    .repeatable .row button { flex-shrink:0; padding:0.4rem 0.6rem; background:#fff; color:#000; }
+  .repeatable { margin-top:8px; }
+  .repeatable .row { display:flex; gap:8px; margin-top:8px; }
+  .repeatable .row input { flex:1; }
+  .repeatable .row button { flex-shrink:0; padding:0.4rem 0.6rem; background:#fff; color:#000; }
 
-    .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.7); display:none; align-items:center; justify-content:center; z-index:9999; }
-    .modal { background:#111; color:#fff; padding:16px; border-radius:10px; max-width:800px; width:95%; max-height:90vh; overflow:auto; }
-    .modal .modal-header { display:flex; justify-content:space-between; align-items:center; gap:12px; }
-    .modal .modal-body { margin-top:12px; }
-    .modal .close { background:#000; border:1px solid #fff; color:#fff; padding:6px 10px; border-radius:6px; cursor:pointer; }
-  </style>
+  .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.7); display:none; align-items:center; justify-content:center; z-index:9999; }
+  .modal { background:#111; color:#fff; padding:16px; border-radius:10px; max-width:800px; width:95%; max-height:90vh; overflow:auto; }
+  .modal .modal-header { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+  .modal .modal-body { margin-top:12px; }
+  .modal .close { background:#000; border:1px solid #fff; color:#fff; padding:6px 10px; border-radius:6px; cursor:pointer; }
+</style>
 </head>
 <body>
 
@@ -87,10 +85,8 @@
   <form id="loginForm">
     <label for="loginEmail">Email</label>
     <input type="email" id="loginEmail" required>
-
     <label for="loginPassword">Password</label>
     <input type="password" id="loginPassword" required>
-
     <button type="submit">Login</button>
     <div class="message" id="loginMessage"></div>
   </form>
@@ -107,8 +103,6 @@
   <!-- PRODUCTS -->
   <div class="section" id="productsSection">
     <h2>Manage Products</h2>
-    <!-- same structure and functionality as original -->
-    <!-- ... -->
     <form id="productForm">
       <label>Name</label>
       <input type="text" id="productName" required>
@@ -125,27 +119,18 @@
       <label>Description</label>
       <textarea id="productDesc"></textarea>
 
-      <!-- Repeatable Sizes -->
       <label>Sizes</label>
       <div id="sizesRepeat" class="repeatable"></div>
-      <div style="margin-top:6px;">
-        <button type="button" id="addSizeBtn" style="background:#fff;color:#112e1f;border:1px solid #112e1f;">+ Add Size</button>
-      </div>
+      <button type="button" id="addSizeBtn">+ Add Size</button>
 
-      <!-- Repeatable Colors -->
       <label>Colors</label>
       <div id="colorsRepeat" class="repeatable"></div>
-      <div style="margin-top:6px;">
-        <button type="button" id="addColorBtn" style="background:#fff;color:#112e1f;border:1px solid #112e1f;">+ Add Color</button>
-      </div>
+      <button type="button" id="addColorBtn">+ Add Color</button>
 
-      <!-- Repeatable Images -->
       <label>Images (URLs)</label>
       <div id="imagesRepeat" class="repeatable"></div>
-      <div style="margin-top:6px;">
-        <button type="button" id="addImageBtn" style="background:#fff;color:#112e1f;border:1px solid #112e1f;">+ Add Image</button>
-        <div class="small-note">Add multiple image URLs. First image will be used as thumbnail in the products table.</div>
-      </div>
+      <button type="button" id="addImageBtn">+ Add Image</button>
+      <div class="small-note">Add multiple image URLs. First image will be used as thumbnail.</div>
       
       <label>Customization Available</label>
       <select id="productCustom">
@@ -163,7 +148,7 @@
     </form>
     <div id="productMessage" class="message"></div>
 
-    <label style="margin-top:12px;">Table Currency:</label>
+    <label>Table Currency:</label>
     <select id="tableCurrency">
       <option value="NGN">NGN</option>
       <option value="USD">USD</option>
@@ -182,8 +167,6 @@
   <!-- QUOTES -->
   <div class="section" id="quotesSection">
     <h2>Generate Quote</h2>
-    <!-- same structure as original -->
-    <!-- ... -->
     <form id="quoteForm">
       <label>Customer Name</label>
       <input type="text" id="quoteCustomer" required>
@@ -191,7 +174,6 @@
       <input type="email" id="quoteEmail" required>
 
       <h3>Quote Items</h3>
-
       <div id="addItemPanel" class="add-item-panel" style="display:none;">
         <label>Item Name</label>
         <input type="text" id="ai_name" placeholder="Item name">
@@ -207,7 +189,7 @@
         </div>
         <div style="display:flex; gap:8px; margin-top:8px;">
           <button type="button" id="ai_add">Add</button>
-          <button type="button" id="ai_cancel" style="background:#fff;color:#112e1f;border:1px solid #112e1f;">Cancel</button>
+          <button type="button" id="ai_cancel">Cancel</button>
         </div>
       </div>
 
@@ -215,13 +197,13 @@
       <button type="button" id="addQuoteItem">+ Add Item</button>
 
       <div style="display:flex; gap:8px; align-items:center; margin-top:8px;">
-        <button type="button" id="generateQuoteLinkBtn" style="background:#0b6b4b;">Generate Link</button>
+        <button type="button" id="generateQuoteLinkBtn">Generate Link</button>
         <div id="generatedQuoteLink" style="margin-left:8px;"></div>
       </div>
     </form>
     <div id="quoteMessage" class="message"></div>
 
-    <label style="margin-top:12px;">Display Currency for Quotes</label>
+    <label>Display Currency for Quotes</label>
     <select id="quotesDisplayCurrency">
       <option value="NGN">NGN</option>
       <option value="USD">USD</option>
@@ -254,10 +236,6 @@
   <!-- ORDERS -->
   <div class="section" id="ordersSection">
     <h2>Manage Orders</h2>
-    <!-- same structure as original -->
-    <!-- ... -->
-    
-    <!-- Filters + Export -->
     <div class="order-filters">
       <input type="text" id="orderSearch" placeholder="Search by customer or email...">
       <select id="orderStatusFilter">
@@ -294,7 +272,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, getDoc, query } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
@@ -311,293 +289,130 @@ const db = getFirestore(app);
 // Allowed admins
 const allowedAdmins = ["stonecold.serac@gmail.com"].map(e => e.toLowerCase().trim());
 
-// Firestore paths should now use "brands/serac/..."
-function productsCollection() {
-  return collection(db, "brands", "serac", "products");
-}
-function quotesCollection() {
-  return collection(db, "brands", "serac", "quotes");
-}
-function ordersCollection() {
-  return collection(db, "brands", "serac", "orders");
-}
+function productsCollection() { return collection(db, "brands","serac","products"); }
+function quotesCollection() { return collection(db, "brands","serac","quotes"); }
+function ordersCollection() { return collection(db, "brands","serac","orders"); }
 
-/* All existing JS logic from fleurdevie stays the same,
-   just replace occurrences of "brands/fleurdevie" with "brands/serac" */
-  /* --- UI refs --- */
+/* ------------------ LOCAL STORAGE KEY ------------------ */
+const STORAGE_KEY = 'seracCart';
+const CURRENCY_KEY = 'seracCurrency';
+
+/* ------------------ COMMON UTILS ------------------ */
+function formatCurrency(value, currency){
+  const localeMap = { NGN:'en-NG', USD:'en-US', EUR:'de-DE', GBP:'en-GB' };
+  const minFrac = currency==='NGN'?0:2;
+  try { return new Intl.NumberFormat(localeMap[currency]||'en-US',{style:'currency',currency,minimumFractionDigits:minFrac}).format(value); }
+  catch(e){return `${value} ${currency}`;}
+}
+function escapeHtml(str){ if (!str && str!==0) return ""; return String(str).replace(/[&<>"']/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[s])); }
+
+/* ------------------ LOGIN / DASHBOARD ------------------ */
 const loginForm = document.getElementById("loginForm");
 const loginMessage = document.getElementById("loginMessage");
 const loginContainer = document.getElementById("loginContainer");
 const dashboardContainer = document.getElementById("dashboardContainer");
 
-const productForm = document.getElementById("productForm");
-const productMessage = document.getElementById("productMessage");
-const productsTableBody = document.querySelector("#productsTable tbody");
-const tableCurrencySelect = document.getElementById("tableCurrency");
-
-const quoteForm = document.getElementById("quoteForm");
-const quoteItemsDiv = document.getElementById("quoteItems");
-const addQuoteItemBtn = document.getElementById("addQuoteItem");
-const quotesTableBody = document.querySelector("#quotesTable tbody");
-const quoteMessage = document.getElementById("quoteMessage");
-/* quoteCurrencySelect removed (field removed from form) */
-const generateQuoteLinkBtn = document.getElementById("generateQuoteLinkBtn");
-const generatedQuoteLink = document.getElementById("generatedQuoteLink");
-const quotesDisplayCurrency = document.getElementById("quotesDisplayCurrency");
-
-const ordersTableBody = document.querySelector("#ordersTable tbody");
-const orderSearch = document.getElementById("orderSearch");
-const orderStatusFilter = document.getElementById("orderStatusFilter");
-const exportBtn = document.getElementById("exportOrders");
-const exportCurrency = document.getElementById("exportCurrency");
-const exportFrom = document.getElementById("exportFrom");
-const exportTo = document.getElementById("exportTo");
-
-/* Repeatable product fields UI */
-const sizesRepeat = document.getElementById("sizesRepeat");
-const colorsRepeat = document.getElementById("colorsRepeat");
-const imagesRepeat = document.getElementById("imagesRepeat");
-const addSizeBtn = document.getElementById("addSizeBtn");
-const addColorBtn = document.getElementById("addColorBtn");
-const addImageBtn = document.getElementById("addImageBtn");
-
-let currentEditingProductId = null;
-let allOrders = [];
-
-let productsCache = []; // array of {id, data}
-let quotesCache = []; // array of {id, data}
-
-/* ---------------- AUTH ---------------- */
-loginForm.addEventListener("submit", async (e) => {
+loginForm.addEventListener("submit", async e=>{
   e.preventDefault();
-  loginMessage.textContent = "";
-  const email = document.getElementById("loginEmail").value;
-  const password = document.getElementById("loginPassword").value;
-  try {
-    const userCred = await signInWithEmailAndPassword(auth, email, password);
-    const normalized = (userCred.user.email || "").toLowerCase().trim();
-    if (allowedAdmins.includes(normalized)) {
-      loginContainer.style.display = "none";
-      dashboardContainer.style.display = "block";
-      subscribeProducts();
-      subscribeQuotes();
-      subscribeOrders();
+  loginMessage.textContent="";
+  const email=document.getElementById("loginEmail").value;
+  const password=document.getElementById("loginPassword").value;
+  try{
+    const userCred=await signInWithEmailAndPassword(auth,email,password);
+    const normalized=(userCred.user.email||"").toLowerCase().trim();
+    if(allowedAdmins.includes(normalized)){
+      loginContainer.style.display="none";
+      dashboardContainer.style.display="block";
+      subscribeProducts(); subscribeQuotes(); subscribeOrders();
       showSection("productsSection");
-    } else {
-      loginMessage.textContent = "❌ Not authorized.";
-      loginMessage.style.color = "red";
-      await signOut(auth);
-    }
-  } catch (err) {
-    console.error("Login error:", err);
-    loginMessage.textContent = `❌ ${err.code || ""}: ${err.message || err}`;
-    loginMessage.style.color = "red";
-  }
+    } else { loginMessage.textContent="❌ Not authorized."; loginMessage.style.color="red"; await signOut(auth);}
+  } catch(err){ console.error(err); loginMessage.textContent=`❌ ${err.code||""}: ${err.message||err}`; loginMessage.style.color="red"; }
 });
 
-onAuthStateChanged(auth, user => {
-  if (user && allowedAdmins.includes((user.email || "").toLowerCase().trim())) {
-    loginContainer.style.display = "none";
-    dashboardContainer.style.display = "block";
-    subscribeProducts();
-    subscribeQuotes();
-    subscribeOrders();
+onAuthStateChanged(auth,user=>{
+  if(user && allowedAdmins.includes((user.email||"").toLowerCase().trim())){
+    loginContainer.style.display="none";
+    dashboardContainer.style.display="block";
+    subscribeProducts(); subscribeQuotes(); subscribeOrders();
     showSection("productsSection");
-  } else {
-    loginContainer.style.display = "block";
-    dashboardContainer.style.display = "none";
-  }
+  } else { loginContainer.style.display="block"; dashboardContainer.style.display="none"; }
 });
 
-/* Navigation */
-document.querySelectorAll(".dashboard-nav button").forEach(btn => {
-  btn.addEventListener("click", () => showSection(btn.dataset.target));
-});
-function showSection(id) {
-  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-}
-/* ---------------- UTILS ---------------- */
-function formatCurrency(value, currency){
-  const localeMap = { NGN:'en-NG', USD:'en-US', EUR:'de-DE', GBP:'en-GB' };
-  const minFrac = currency === 'NGN' ? 0 : 2;
-  try {
-    return new Intl.NumberFormat(localeMap[currency] || 'en-US', { style:'currency', currency, minimumFractionDigits: minFrac }).format(value);
-  } catch(e) {
-    return `${value} ${currency}`;
-  }
-}
-function escapeHtml(str){ if (!str && str !== 0) return ""; return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[s])); }
+document.querySelectorAll(".dashboard-nav button").forEach(btn=>btn.addEventListener("click",()=>showSection(btn.dataset.target)));
+function showSection(id){ document.querySelectorAll(".section").forEach(s=>s.classList.remove("active")); document.getElementById(id).classList.add("active"); }
 
-/* ---------------- PRODUCTS (repeatable inputs) ---------------- */
+/* ------------------ REPEATABLE INPUTS ------------------ */
+const sizesRepeat=document.getElementById("sizesRepeat");
+const colorsRepeat=document.getElementById("colorsRepeat");
+const imagesRepeat=document.getElementById("imagesRepeat");
+const addSizeBtn=document.getElementById("addSizeBtn");
+const addColorBtn=document.getElementById("addColorBtn");
+const addImageBtn=document.getElementById("addImageBtn");
 
-/* helper to create a repeatable row */
-function createRepeatRow(value='', placeholder='') {
-  const row = document.createElement('div');
-  row.className = 'row';
-  row.innerHTML = `
-    <input type="text" value="${escapeHtml(value)}" placeholder="${escapeHtml(placeholder)}" />
-    <button type="button" class="remove-row" title="Remove">Remove</button>
-  `;
-  row.querySelector('.remove-row').addEventListener('click', () => row.remove());
+function createRepeatRow(value='', placeholder=''){
+  const row=document.createElement('div'); row.className='row';
+  row.innerHTML=`<input type="text" value="${escapeHtml(value)}" placeholder="${escapeHtml(placeholder)}"/><button type="button" class="remove-row">Remove</button>`;
+  row.querySelector('.remove-row').addEventListener('click',()=>row.remove());
   return row;
 }
-
 function addSizeInput(val=''){ sizesRepeat.appendChild(createRepeatRow(val,'Size e.g. S, M, L')); }
 function addColorInput(val=''){ colorsRepeat.appendChild(createRepeatRow(val,'Color e.g. Olive')); }
 function addImageInput(val=''){ imagesRepeat.appendChild(createRepeatRow(val,'https://.../image.jpg')); }
+addSizeBtn.addEventListener('click',()=>addSizeInput());
+addColorBtn.addEventListener('click',()=>addColorInput());
+addImageBtn.addEventListener('click',()=>addImageInput());
+addSizeInput(); addColorInput(); addImageInput();
 
-addSizeBtn.addEventListener('click', () => addSizeInput());
-addColorBtn.addEventListener('click', () => addColorInput());
-addImageBtn.addEventListener('click', () => addImageInput());
+/* ------------------ PRODUCTS FORM ------------------ */
+const productForm=document.getElementById("productForm");
+const productMessage=document.getElementById("productMessage");
+const productsTableBody=document.querySelector("#productsTable tbody");
+const tableCurrencySelect=document.getElementById("tableCurrency");
+let currentEditingProductId=null;
+let productsCache=[];
 
-/* ensure at least one field initially */
-addSizeInput();
-addColorInput();
-addImageInput();
-
-/* Product form submit */
-productForm.addEventListener("submit", async (e) => {
+productForm.addEventListener("submit",async e=>{
   e.preventDefault();
-  const data = {
+  const data={
     name: document.getElementById("productName").value,
-    priceNGN: parseFloat(document.getElementById("productPriceNGN").value) || 0,
-    priceUSD: parseFloat(document.getElementById("productPriceUSD").value) || 0,
-    priceEUR: parseFloat(document.getElementById("productPriceEUR").value) || 0,
-    priceGBP: parseFloat(document.getElementById("productPriceGBP").value) || 0,
-    description: document.getElementById("productDesc").value || "",
-    customizationAvailable: document.getElementById("productCustom").value === "true",
-    published: document.getElementById("productPublished").value === "true",
+    priceNGN: parseFloat(document.getElementById("productPriceNGN").value)||0,
+    priceUSD: parseFloat(document.getElementById("productPriceUSD").value)||0,
+    priceEUR: parseFloat(document.getElementById("productPriceEUR").value)||0,
+    priceGBP: parseFloat(document.getElementById("productPriceGBP").value)||0,
+    description: document.getElementById("productDesc").value||"",
+    customizationAvailable: document.getElementById("productCustom").value==="true",
+    published: document.getElementById("productPublished").value==="true",
     updatedAt: new Date().toISOString()
   };
-
-  // collect sizes, colors, images arrays (trim, remove empty)
-  const sizes = Array.from(sizesRepeat.querySelectorAll('input')).map(i => i.value.trim()).filter(Boolean);
-  const colors = Array.from(colorsRepeat.querySelectorAll('input')).map(i => i.value.trim()).filter(Boolean);
-  const images = Array.from(imagesRepeat.querySelectorAll('input')).map(i => i.value.trim()).filter(Boolean);
-
-  if (sizes.length) data.sizes = sizes;
-  else data.sizes = [];
-
-  if (colors.length) data.colors = colors;
-  else data.colors = [];
-
-  if (images.length) data.images = images;
-  else data.images = [];
-
-  try {
-    if (currentEditingProductId) {
-      const docRef = doc(db, "brands", "serac", "products", currentEditingProductId);
-      await updateDoc(docRef, data);
-      productMessage.textContent = "✅ Product updated.";
-      currentEditingProductId = null;
-      productForm.querySelector("button[type='submit']").textContent = "Add Product";
-    } else {
-      await addDoc(collection(db, "brands", "serac", "products"), data);
-      productMessage.textContent = "✅ Product added.";
-    }
-    productMessage.style.color = "green";
-    // reset form and repeatable fields
-    productForm.reset();
-    // clear repeatable containers then add one blank each
-    sizesRepeat.innerHTML = ""; colorsRepeat.innerHTML = ""; imagesRepeat.innerHTML = "";
-    addSizeInput(); addColorInput(); addImageInput();
-  } catch (err) {
-    console.error(err);
-    productMessage.textContent = "❌ Error saving product.";
-    productMessage.style.color = "red";
-  }
+  data.sizes=Array.from(sizesRepeat.querySelectorAll('input')).map(i=>i.value.trim()).filter(Boolean);
+  data.colors=Array.from(colorsRepeat.querySelectorAll('input')).map(i=>i.value.trim()).filter(Boolean);
+  data.images=Array.from(imagesRepeat.querySelectorAll('input')).map(i=>i.value.trim()).filter(Boolean);
+  try{
+    if(currentEditingProductId){ await updateDoc(doc(db,"brands","serac","products",currentEditingProductId),data); productMessage.textContent="✅ Product updated."; currentEditingProductId=null; productForm.querySelector("button[type='submit']").textContent="Add Product"; }
+    else{ await addDoc(collection(db,"brands","serac","products"),data); productMessage.textContent="✅ Product added."; }
+    productMessage.style.color="green"; productForm.reset(); sizesRepeat.innerHTML=''; colorsRepeat.innerHTML=''; imagesRepeat.innerHTML=''; addSizeInput(); addColorInput(); addImageInput();
+  } catch(err){ console.error(err); productMessage.textContent="❌ Error saving product."; productMessage.style.color="red"; }
 });
 
-/* subscribe products and cache snapshot results */
-function subscribeProducts() {
-  const productsRef = collection(db, "brands", "serac", "products");
-  onSnapshot(productsRef, snap => {
-    productsCache = [];
-    snap.forEach(docSnap => productsCache.push({ id: docSnap.id, data: docSnap.data() }));
-    renderProductsTable();
-  }, err => {
-    console.error("Products snapshot error:", err);
-    productMessage.textContent = `❌ ${err.code || ""}: ${err.message || err}`;
-    productMessage.style.color = "red";
-  });
-}
+function subscribeProducts(){ onSnapshot(collection(db,"brands","serac","products"),snap=>{ productsCache=[]; snap.forEach(d=>productsCache.push({id:d.id,data:d.data()})); renderProductsTable(); },err=>{ console.error(err); productMessage.textContent=`❌ ${err.code||""}: ${err.message||err}`; productMessage.style.color="red"; }); }
 
-/* render products using cached data and chosen currency */
-function renderProductsTable() {
-  const currency = tableCurrencySelect.value || 'NGN';
-  productsTableBody.innerHTML = "";
-  productsCache.forEach(docObj => {
-    const p = docObj.data;
-    let priceVal = 0;
-    if (currency === "NGN") priceVal = p.priceNGN || 0;
-    if (currency === "USD") priceVal = p.priceUSD || 0;
-    if (currency === "EUR") priceVal = p.priceEUR || 0;
-    if (currency === "GBP") priceVal = p.priceGBP || 0;
-
-    const firstImg = (p.images && p.images.length) ? p.images[0] : (p.imageUrl || "");
-    const imgHtml = firstImg ? `<img src="${firstImg}" alt="${escapeHtml(p.name)}">` : "";
-
-    const imagesCount = (p.images && p.images.length) ? ` (${p.images.length})` : "";
-
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${escapeHtml(p.name)}</td>
-      <td>${formatCurrency(priceVal, currency)}</td>
-      <td>${imgHtml}${imagesCount}</td>
-      <td>${p.customizationAvailable ? "Yes" : "No"}</td>
-      <td>${p.published ? "Yes" : "No"}</td>
-      <td class="actions">
-        <button onclick="deleteProduct('${docObj.id}')">Delete</button>
-        <button onclick="editProduct('${docObj.id}')">Edit</button>
-      </td>`;
+function renderProductsTable(){
+  const currency=tableCurrencySelect.value||'NGN';
+  productsTableBody.innerHTML="";
+  productsCache.forEach(pObj=>{
+    const p=pObj.data;
+    let priceVal=(currency==="NGN"?p.priceNGN:currency==="USD"?p.priceUSD:currency==="EUR"?p.priceEUR:p.priceGBP)||0;
+    const firstImg=(p.images&&p.images.length)?p.images[0]:"";
+    const row=document.createElement("tr");
+    row.innerHTML=`<td>${escapeHtml(p.name)}</td><td>${formatCurrency(priceVal,currency)}</td><td>${firstImg?`<img src="${firstImg}" alt="${escapeHtml(p.name)}"> (${p.images.length})`:''}</td><td>${p.customizationAvailable?"Yes":"No"}</td><td>${p.published?"Yes":"No"}</td><td class="actions"><button onclick="deleteProduct('${pObj.id}')">Delete</button><button onclick="editProduct('${pObj.id}')">Edit</button></td>`;
     productsTableBody.appendChild(row);
   });
 }
 
-/* react to currency change simply by re-rendering using cached data */
-tableCurrencySelect.addEventListener("change", () => {
-  renderProductsTable();
-});
+tableCurrencySelect.addEventListener("change",()=>renderProductsTable());
 
-window.deleteProduct = async (id) => {
-  if (!confirm("Delete this product?")) return;
-  try { await deleteDoc(doc(db, "brands", "serac", "products", id)); } 
-  catch(err){console.error(err); alert("Error deleting product");}
-}
-
-window.editProduct = async (id) => {
-  const docRef = doc(db, "brands", "serac", "products", id);
-  const docSnap = await getDoc(docRef);
-  if (!docSnap.exists()) return alert("Product not found");
-  const p = docSnap.data();
-
-  document.getElementById("productName").value = p.name || "";
-  document.getElementById("productPriceNGN").value = p.priceNGN != null ? p.priceNGN : "";
-  document.getElementById("productPriceUSD").value = p.priceUSD != null ? p.priceUSD : "";
-  document.getElementById("productPriceEUR").value = p.priceEUR != null ? p.priceEUR : "";
-  document.getElementById("productPriceGBP").value = p.priceGBP != null ? p.priceGBP : "";
-  document.getElementById("productDesc").value = p.description || "";
-  document.getElementById("productCustom").value = p.customizationAvailable ? "true" : "false";
-  document.getElementById("productPublished").value = p.published ? "true" : "false";
-
-  // populate repeatable fields
-  sizesRepeat.innerHTML = "";
-  (p.sizes || []).forEach(s => addSizeInput(s));
-  if ((p.sizes || []).length === 0) addSizeInput();
-
-  colorsRepeat.innerHTML = "";
-  (p.colors || []).forEach(c => addColorInput(c));
-  if ((p.colors || []).length === 0) addColorInput();
-
-  imagesRepeat.innerHTML = "";
-  (p.images || []).forEach(i => addImageInput(i));
-  if ((p.images || []).length === 0) addImageInput();
-
-  currentEditingProductId = id;
-  productForm.querySelector("button[type='submit']").textContent = "Save Product";
-}
-  
+window.deleteProduct=async id=>{ if(!confirm("Delete this product?")) return; try{ await deleteDoc(doc(db,"brands","serac","products",id)); }catch(err){console.error(err); alert("Error deleting product");} }
+window.editProduct=async id=>{ const d=await getDoc(doc(db,"brands","serac","products",id)); if(!d.exists()) return alert("Product not found"); const p=d.data(); document.getElementById("productName").value=p.name||""; document.getElementById("productPriceNGN").value=p.priceNGN!=null?p.priceNGN:""; document.getElementById("productPriceUSD").value=p.priceUSD!=null?p.priceUSD:""; document.getElementById("productPriceEUR").value=p.priceEUR!=null?p.priceEUR:""; document.getElementById("productPriceGBP").value=p.priceGBP!=null?p.priceGBP:""; document.getElementById("productDesc").value=p.description||""; document.getElementById("productCustom").value=p.customizationAvailable?"true":"false"; document.getElementById("productPublished").value=p.published?"true":"false"; sizesRepeat.innerHTML=""; (p.sizes||[]).forEach(s=>addSizeInput(s)); if(!(p.sizes||[]).length) addSizeInput(); colorsRepeat.innerHTML=""; (p.colors||[]).forEach(c=>addColorInput(c)); if(!(p.colors||[]).length) addColorInput(); imagesRepeat.innerHTML=""; (p.images||[]).forEach(i=>addImageInput(i)); if(!(p.images||[]).length) addImageInput(); currentEditingProductId=id; productForm.querySelector("button[type='submit']").textContent="Save Product"; }
 </script>
 </body>
 </html>
