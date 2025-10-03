@@ -7,12 +7,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* ========== RESET ========== */
+    /* RESET */
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family: "Montserrat", sans-serif; background:#141517; color:#f5f5f5; line-height:1.6; }
     a { text-decoration:none; color:inherit; transition:color 0.3s ease; }
 
-    /* ========== HEADER ========== */
+    /* HEADER */
     .site-header {
       background:#141517;
       color:#f5f5f5;
@@ -30,9 +30,7 @@
     .header-right a:hover { color:#B66E41; }
 
     /* Hamburger */
-    .hamburger { 
-      display:none; background:none; border:none; cursor:pointer; width:30px; height:24px; position:relative;
-    }
+    .hamburger { display:none; background:none; border:none; cursor:pointer; width:30px; height:24px; position:relative; }
     .hamburger span {
       display:block; width:100%; height:3px; background:#f5f5f5; border-radius:2px; position:absolute; left:0; transition:0.3s;
     }
@@ -43,10 +41,10 @@
     .hamburger.open span:nth-child(2){ opacity:0; }
     .hamburger.open span:nth-child(3){ transform:rotate(-45deg); top:10px; background:#B66E41; }
 
-    /* ========== HERO ========== */
+    /* HERO */
     .hero {
       position: relative;
-      height: 90vh;
+      height: 80vh;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -68,35 +66,27 @@
     .hero-text h1 { font-family:"Playfair Display", serif; font-size: clamp(36px,5vw,64px); margin-bottom:12px; }
     .hero-text p { font-size: clamp(16px,2vw,22px); max-width:700px; }
 
-    /* ========== CUSTOMIZATION SECTION ========== */
+    /* CUSTOMIZATION SECTION */
     section.customization { padding:80px 20px; background:#1d1f22; color:#f5f5f5; }
     .container { max-width:1100px; margin:auto; }
     .customization h2 { text-align:center; font-size:28px; margin-bottom:20px; font-family:"Playfair Display", serif; color:#B66E41; }
     .custom-intro { text-align:center; max-width:700px; margin:0 auto 40px auto; font-size:18px; color:#d3d3d3; }
 
     .custom-grid { display:grid; grid-template-columns:1fr 1fr; gap:40px; }
-    .custom-info {
+    .custom-info, .custom-form {
       background:#2a2d32;
       padding:30px;
       border-radius:12px;
       box-shadow:0 4px 14px rgba(0,0,0,0.3);
       transition:transform 0.3s ease;
     }
-    .custom-info:hover { transform:translateY(-6px); }
-    .custom-info h3 { font-family:"Playfair Display", serif; font-size:24px; margin-bottom:20px; color:#B66E41; }
+    .custom-info:hover, .custom-form:hover { transform:translateY(-6px); }
+    .custom-info h3, .custom-form h3 { font-family:"Playfair Display", serif; font-size:24px; margin-bottom:20px; color:#B66E41; }
+
     .custom-info ul { list-style:none; }
     .custom-info li { margin-bottom:12px; font-size:16px; display:flex; align-items:center; gap:10px; color:#f5f5f5; }
     .custom-info li i { color:#B66E41; }
 
-    .custom-form {
-      background:#2a2d32;
-      padding:30px;
-      border-radius:12px;
-      box-shadow:0 4px 14px rgba(0,0,0,0.3);
-      transition:transform 0.3s ease;
-    }
-    .custom-form:hover { transform:translateY(-6px); }
-    .custom-form h3 { font-family:"Playfair Display", serif; font-size:24px; margin-bottom:20px; color:#B66E41; }
     .custom-form form { display:flex; flex-direction:column; gap:15px; }
     .custom-form input, .custom-form textarea {
       padding:12px 15px; border:none; border-radius:8px;
@@ -111,11 +101,11 @@
     }
     .custom-form button:hover { background:#8a4d2b; transform:scale(1.05); }
 
-    /* ========== FOOTER ========== */
+    /* FOOTER */
     footer { text-align:center; padding:20px; background:#141517; color:#f5f5f5; margin-top:60px; border-top:1px solid rgba(255,255,255,0.08); }
     footer p { color:#aaa; }
 
-    /* ========== RESPONSIVE ========== */
+    /* RESPONSIVE */
     @media(max-width:900px){ .custom-grid { grid-template-columns:1fr; } }
     @media(max-width:600px){
       .header-right { display:none; flex-direction:column; background:#1d1f22; position:absolute; top:70px; right:0; width:200px; padding:20px; }
@@ -219,14 +209,14 @@
       );
 
       // WhatsApp link to Sérac brand number
-      const whatsappNumber = "2348110690932"; // Sérac WhatsApp
+      const whatsappNumber = "08085578326"; // Sérac WhatsApp
       window.open(`https://wa.me/${whatsappNumber}?text=${message}`, "_blank");
 
       alert("Thank you! Your request has been sent. We will contact you via WhatsApp within 24 hours.");
       customForm.reset();
     });
 
-    // Firebase path (updated for Sérac)
+    // Firebase brand context
     const firebaseBrand = "serac";
   </script>
 </body>
