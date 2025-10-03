@@ -58,67 +58,27 @@ a { text-decoration:none; color:inherit; transition: var(--transition); }
 .hamburger.open span:nth-child(2){ opacity:0; }
 .hamburger.open span:nth-child(3){ transform:rotate(-45deg); top:11px; background:var(--gold); }
 
-/* HERO */<!-- HERO -->
-<section class="hero">
-  <div class="hero-text">
-    <h1>Shop</h1>
-    <p>Explore our collection of products</p>
-  </div>
-</section>
-
-<style>
+/* HERO */
 .hero {
-  position: relative;
-  height:90vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  text-align:center;
-  margin-top:82px;
-  padding:20px;
-  /* Corrected background: image + dark overlay together */
-  background: linear-gradient(rgba(20,21,23,0.65), rgba(20,21,23,0.65)), 
-              url('asset/bg25.jpg') center/cover no-repeat;
-  border-radius:14px; /* optional, matches other pages */
+  position: relative; height:85vh; display:flex;
+  justify-content:center; align-items:center; text-align:center;
+  margin-top:90px; overflow:hidden; padding:20px;
 }
-
+.hero::after {
+  content:""; position:absolute; inset:0;
+  background: url('asset/bg25.jpg') center/cover no-repeat;
+  transform: scale(1.05); z-index:-1; mix-blend-mode: multiply;
+  box-shadow: inset 0 0 0 2000px rgba(20,21,23,0.6);
+}
 .hero-text {
-  position: relative;
-  color: #B66E41;
-  padding:18px 26px;
-  border-radius:10px;
-  background: linear-gradient(90deg, rgba(182,110,65,0.06), rgba(255,255,255,0.01));
-  backdrop-filter: blur(2px);
-  box-shadow: 0 10px 40px rgba(11,12,13,0.6);
-  animation: shimmer 6s ease-in-out infinite;
+  position:relative; display:inline-block; color:var(--gold);
+  padding:20px 28px; border-radius:12px;
+  background: rgba(182,110,65,0.05); backdrop-filter: blur(3px);
+  box-shadow: 0 12px 40px rgba(11,12,13,0.6); transition: transform var(--transition);
 }
-
-.hero-text h1 {
-  font-family:"Playfair Display", serif;
-  font-size:clamp(36px,5vw,64px);
-  margin-bottom:12px;
-}
-
-.hero-text p {
-  font-size:clamp(16px,2vw,22px);
-  color:#eee;
-  max-width:760px;
-  margin:auto;
-}
-
-@keyframes shimmer {
-  0% {filter: brightness(1); transform: translateY(0);}
-  50% {filter: brightness(1.02); transform: translateY(-2px);}
-  100% {filter: brightness(1); transform: translateY(0);}
-}
-
-@media(max-width:600px){
-  .hero { height:50vh; }
-  .hero-text h1 { font-size:28px; }
-  .hero-text p { font-size:16px; }
-}
-</style>
-
+.hero-text:hover { transform: translateY(-6px); }
+.hero-text h1 { font-family:"Playfair Display", serif; font-size:clamp(36px,5vw,64px); color:var(--gold); margin-bottom:10px; text-shadow:0 6px 30px rgba(182,110,65,0.1);}
+.hero-text p { font-size:clamp(16px,2vw,22px); color:#dcd6cd; max-width:720px; margin:auto; }
 
 /* SHOP SECTION */
 section.shop { padding:100px 20px; background: var(--bg-dark); }
@@ -185,7 +145,7 @@ button:focus, a:focus, input:focus, select:focus { outline: 3px solid rgba(182,1
 
 <header class="site-header">
   <div class="header-left">
-    <img src="asset/logo.png" alt="Sérac Logo" class="brand-logo">
+    <img src="logo.png" alt="Sérac Logo" class="brand-logo">
     <div class="brand-title">Sérac</div>
   </div>
   <div class="mobile-cart" style="display:none;">
