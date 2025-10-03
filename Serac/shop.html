@@ -58,59 +58,28 @@ a { text-decoration:none; color:inherit; transition: color var(--transition); }
 
 /* HERO *//* HERO */
 .hero {
-  position: relative;
-  height: 90vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  margin-top: 82px;
-  overflow: hidden;
-  padding: 20px;
-}
-
-.hero::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: url('./assets/bg25.jpg') center/cover no-repeat; /* make sure path is correct */
-  z-index: -1;
-  border-radius: 14px;
-  /* subtle dark overlay to maintain readability */
-  background-color: rgba(20, 21, 23, 0.35);
-  background-blend-mode: darken;
-}
-
-.hero-text {
-  position: relative;
-  display: inline-block;
-  color: var(--gold);
-  margin-bottom: 12px;
-  padding: 18px 26px;
-  border-radius: 10px;
-  background: rgba(182,110,65,0.06);
-  backdrop-filter: blur(2px);
-  box-shadow: 0 10px 40px rgba(11,12,13,0.6);
-  transition: transform var(--transition);
-}
-
-.hero-text:hover {
-  transform: translateY(-6px);
-}
-
-.hero-text h1 {
-  font-family: "Playfair Display", serif;
-  font-size: clamp(36px,5vw,64px);
-  margin-bottom: 10px;
-  color: var(--gold);
-  text-shadow: 0 6px 30px rgba(182,110,65,0.08);
-}
-
-.hero-text p {
-  font-size: clamp(15px,2vw,20px);
-  max-width: 760px;
-  color: #d0c8c2;
-}
+    position: relative;
+    height: 90vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    margin-top: 80px;
+    overflow: hidden;
+  }
+  .hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: url("asset/bg25.jpg") center/cover no-repeat;
+    transform: scale(1.1);
+    z-index: -1;
+    border-radius: 12px;
+    box-shadow: inset 0 0 0 2000px rgba(20,21,23,0.55); 
+  }
+  .hero-text { position: relative; display: inline-block; margin-bottom:12px; }
+  .hero-text h1 { font-family:"Playfair Display", serif; font-size: clamp(36px,5vw,64px); margin-bottom:12px; color:#B66E41; }
+  .hero-text p { font-size: clamp(16px,2vw,22px); max-width:700px; color:#F5F5F3}
 
 
 /* SHOP CONTROLS */
