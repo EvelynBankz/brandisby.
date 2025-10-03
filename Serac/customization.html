@@ -1,16 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sérac - Customization</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Customization - Sérac</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <style>
-    /* RESET */
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family: "Montserrat", sans-serif; background:#141517; color:#f5f5f5; line-height:1.6; }
-    a { text-decoration:none; color:inherit; transition:color 0.3s ease; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:"Montserrat", sans-serif; background:#000; color:#f5f5f5; line-height:1.6; }
+    a { text-decoration:none; color:inherit; }
 
     /* HEADER */
     .site-header {
@@ -21,108 +19,79 @@
       padding:16px 28px;
       position:fixed; top:0; left:0; right:0;
       z-index:1000;
-      border-bottom: none; /* no border until scroll */
+      border-bottom:none; /* no border until scroll */
     }
-    
     .site-header.scrolled {
       background:#141517;
       border-bottom:1px solid rgba(255,255,255,0.08);
     }
-
-    .brand-logo { height:60px; }
-    .brand-title { font-family:"Playfair Display", serif; font-size:24px; font-weight:700; color:#B66E41; }
-    .header-right { display:flex; gap:20px; }
-    .header-right a { font-weight:500; }
-    .header-right a:hover { color:#B66E41; }
-
-    /* Hamburger */
-    .hamburger { display:none; background:none; border:none; cursor:pointer; width:30px; height:24px; position:relative; }
-    .hamburger span {
-      display:block; width:100%; height:3px; background:#B66E41; border-radius:2px; position:absolute; left:0; transition:0.3s;
-    }
-    .hamburger span:nth-child(1){ top:0; }
-    .hamburger span:nth-child(2){ top:10px; }
-    .hamburger span:nth-child(3){ top:20px; }
-    .hamburger.open span:nth-child(1){ transform:rotate(45deg); top:10px; background:#B66E41; }
-    .hamburger.open span:nth-child(2){ opacity:0; }
-    .hamburger.open span:nth-child(3){ transform:rotate(-45deg); top:10px; background:#B66E41; }
+    .logo { font-size:1.5rem; font-weight:bold; }
+    nav ul { list-style:none; display:flex; gap:24px; }
+    nav li { display:inline; }
+    nav a:hover { color:#B66E41; }
+    .hamburger { display:none; font-size:1.5rem; cursor:pointer; }
 
     /* HERO */
     .hero {
-      position: relative;
-      height: 90vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      margin-top: 80px;
-      overflow: hidden;
+      height:100vh;
+      background:url('images/customization-hero.jpg') center/cover no-repeat;
+      display:flex; align-items:center; justify-content:center;
+      text-align:center; position:relative;
     }
     .hero::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: url("asset/bg25.jpg") center/cover no-repeat;
-      transform: scale(1.1);
-      z-index: -1;
-      border-radius: 12px;
-      box-shadow: inset 0 0 0 2000px rgba(20,21,23,0.55); 
+      content:""; position:absolute; top:0; left:0; right:0; bottom:0;
+      background:rgba(0,0,0,0.55);
     }
-    .hero-text { position: relative; display: inline-block; margin-bottom:12px; }
-    .hero-text h1 { font-family:"Playfair Display", serif; font-size: clamp(36px,5vw,64px); margin-bottom:12px; color:#B66E41; }
-    .hero-text p { font-size: clamp(16px,2vw,22px); max-width:700px; color:#F5F5F3}
+    .hero-content { position:relative; z-index:1; }
+    .hero h1 { font-size:3rem; margin-bottom:12px; }
+    .hero p { font-size:1.25rem; }
 
-    /* CUSTOMIZATION SECTION */
-    section.customization { padding:80px 20px; background:#1d1f22; color:#f5f5f5; }
-    .container { max-width:1100px; margin:auto; }
-    .customization h2 { text-align:center; font-size:28px; margin-bottom:20px; font-family:"Playfair Display", serif; color:#F5F5F3; }
-    .custom-intro { text-align:center; max-width:700px; margin:0 auto 40px auto; font-size:18px; color:#d3d3d3; }
+    /* SECTIONS */
+    section { padding:80px 20px; max-width:1200px; margin:auto; }
+    section h2 { font-size:2rem; margin-bottom:20px; color:#B66E41; }
+    section p { margin-bottom:18px; color:#ddd; }
 
-    .custom-grid { display:grid; grid-template-columns:1fr 1fr; gap:40px; }
-    .custom-info, .custom-form {
-      background:#2a2d32;
-      padding:30px;
+    .flex-row { display:flex; flex-wrap:wrap; gap:40px; align-items:center; }
+    .flex-row img {
+      flex:1 1 40%;
+      max-width:400px;
       border-radius:12px;
-      box-shadow:0 4px 14px rgba(0,0,0,0.3);
-      transition:transform 0.3s ease;
+      box-shadow:0 6px 20px rgba(0,0,0,0.6);
+      transition: transform 0.4s ease;
     }
-    .custom-info:hover, .custom-form:hover { transform:translateY(-6px); }
-    .custom-info h3, .custom-form h3 { font-family:"Playfair Display", serif; font-size:24px; margin-bottom:20px; color:#B66E41; }
+    .flex-row img:hover { transform:scale(1.05); }
+    .flex-row .text { flex:1 1 55%; }
 
-    .custom-info ul { list-style:none; }
-    .custom-info li { margin-bottom:12px; font-size:16px; display:flex; align-items:center; gap:10px; color:#f5f5f5; }
-    .custom-info li i { color:#B66E41; }
-
-    .custom-form form { display:flex; flex-direction:column; gap:15px; }
-    .custom-form input, .custom-form textarea {
-      padding:12px 15px; border:none; border-radius:8px;
-      font-size:16px; outline:none;
-      background:#1d1f22; color:#f5f5f5;
+    /* FORM */
+    form { display:flex; flex-direction:column; gap:16px; max-width:600px; }
+    input, textarea {
+      padding:12px; border:1px solid #444; border-radius:8px;
+      background:#1a1a1a; color:#f5f5f5;
     }
-    .custom-form textarea { min-height:120px; resize:vertical; }
-    .custom-form button {
-      background:#B66E41; color:#fff; border:none; padding:14px;
-      border-radius:8px; font-size:16px; font-weight:600;
-      cursor:pointer; transition: all 0.3s;
+    input:focus, textarea:focus { border-color:#B66E41; outline:none; }
+    button {
+      background:#B66E41; color:#fff; padding:12px;
+      border:none; border-radius:8px; cursor:pointer;
+      transition: background 0.3s ease, color 0.3s ease;
     }
-    .custom-form button:hover { background:#8a4d2b; transform:scale(1.05); }
+    button:hover { background:#f5f5f3; color:#141517; }
 
     /* FOOTER */
-    footer { text-align:center; padding:20px; background:#141517; color:#f5f5f5; margin-top:60px; border-top:1px solid rgba(255,255,255,0.08); }
-    footer p { color:#aaa; }
+    footer {
+      background:#111; padding:40px 20px; text-align:center; font-size:0.9rem; color:#aaa;
+    }
 
     /* RESPONSIVE */
-    @media(max-width:900px){ .custom-grid { grid-template-columns:1fr; } }
-    @media(max-width:600px){
-      .header-right { display:none; flex-direction:column; background:#1d1f22; position:absolute; top:70px; right:0; width:200px; padding:20px; }
-      .header-right.open { display:flex; }
+    @media(max-width:900px) {
+      nav ul {
+        flex-direction:column; background:#141517;
+        position:absolute; top:60px; right:0;
+        width:200px; padding:20px; display:none;
+      }
+      nav ul.active { display:flex; }
       .hamburger { display:block; }
-      .hero-text h1 { font-size:32px; }
-    }
-    @media(max-width:600px){
-      .hero { height:40vh; margin-top:0; padding-top:80px; }
-      .hero-text h1 { font-size:clamp(24px,5vw,32px); line-height:1.2; margin:0; }
-      .hero-text p { font-size:clamp(14px,2.5vw,18px); margin:0 auto; }
+      .flex-row { flex-direction:column; text-align:center; }
+      .flex-row img { max-width:100%; }
     }
   </style>
 </head>
@@ -130,78 +99,82 @@
 
   <!-- HEADER -->
   <header class="site-header">
-    <div class="header-left">
-      <img src="asset/logo.png" alt="Sérac Logo" class="brand-logo">
-      <div class="brand-title">Sérac</div>
-    </div>
-    <nav class="header-right">
-      <a href="index.html">Home</a>
-      <a href="shop.html">Shop</a>
-      <a href="about.html">About</a>
-      <a href="contact.html">Contact</a>
+    <div class="logo">SÉRAC</div>
+    <nav>
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="about.html">About Us</a></li>
+        <li><a href="shop.html">Shop</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
     </nav>
-    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+    <div class="hamburger"><i class="fas fa-bars"></i></div>
   </header>
 
   <!-- HERO -->
   <section class="hero">
-    <div class="hero-text">
-      <h1>Customize</h1>
-      <p>Send us your requests</p> 
-      <p>We’ll respond in less than a Day</p>
+    <div class="hero-content">
+      <h1>Customization</h1>
+      <p>Craft your style. Define your edge.</p>
     </div>
   </section>
 
-  <!-- CUSTOMIZATION -->
-  <section class="customization">
-    <div class="container">
-      <h2>Request Your Customization</h2>
-      <p class="custom-intro">
-        Fill out the form below with your details and a brief description of your request. Our team will contact you to finalize details and provide a quote.
-      </p>
+  <!-- CUSTOMIZATION OPTIONS -->
+  <section>
+    <h2>Personalized Options</h2>
+    <div class="flex-row">
+      <div class="text">
+        <p>Sérac offers tailored customization to bring your ideas to life. Choose unique materials, select finishes, and engrave personal statements into every piece.</p>
+      </div>
+      <img src="images/customization-options.jpg" alt="Customization Options"/>
+    </div>
+  </section>
 
-      <div class="custom-grid">
-        <!-- INFO -->
-        <div class="custom-info">
-          <h3>How It Works</h3>
-          <ul>
-            <li><i class="fas fa-clock"></i> Response time: Less than a Day</li>
-            <li><i class="fas fa-envelope"></i> We’ll message you via WhatsApp</li>
-            <li><i class="fas fa-check-circle"></i> Finalize customization details</li>
-            <li><i class="fas fa-money-check"></i> Quote generated and payment link provided</li>
-          </ul>
-        </div>
-
-        <!-- FORM -->
-        <div class="custom-form">
-          <h3>Send Your Request</h3>
-          <form id="customForm">
-            <input type="text" id="name" placeholder="Your Name" required>
-            <input type="tel" id="phone" placeholder="Phone Number" required>
-            <textarea id="request" placeholder="Brief description of your request" required></textarea>
-            <button type="submit">Submit Request</button>
-          </form>
-        </div>
+  <!-- ORDER PROCESS -->
+  <section>
+    <h2>Simple Process</h2>
+    <div class="flex-row">
+      <img src="images/customization-process.jpg" alt="Order Process"/>
+      <div class="text">
+        <p>Our streamlined order process ensures your customization is handled with precision and speed. From consultation to final delivery, you remain in control.</p>
       </div>
     </div>
   </section>
 
+  <!-- CONTACT FORM -->
+  <section>
+    <h2>Start Customizing</h2>
+    <form>
+      <input type="text" placeholder="Your Name" required/>
+      <input type="email" placeholder="Your Email" required/>
+      <textarea rows="5" placeholder="Your Message" required></textarea>
+      <button type="submit">Send Request</button>
+    </form>
+  </section>
+
   <!-- FOOTER -->
   <footer>
-    <p>© 2025 Sérac</p>
+    <p>&copy; 2025 Sérac. All rights reserved.</p>
   </footer>
 
   <!-- SCRIPT -->
   <script>
     // Hamburger toggle
-    const hamburger = document.getElementById('hamburger');
-    const navMenu = document.querySelector('.header-right');
-    hamburger.addEventListener('click', () => {
-      navMenu.classList.toggle('open');
-      hamburger.classList.toggle('open');
-    });
+    const hamburger=document.querySelector('.hamburger');
+    const navLinks=document.querySelector('nav ul');
+    hamburger.addEventListener('click',()=>{ navLinks.classList.toggle('active'); });
 
-    // Customization form submission → WhatsApp
+    // Change header background on scroll
+    window.addEventListener("scroll", () => {
+      const header = document.querySelector(".site-header");
+      if (window.scrollY > 50) {
+        header.classList.add("scrolled");
+      } else {
+        header.classList.remove("scrolled");
+      }
+    });
+    
+ // Customization form submission → WhatsApp
     const customForm = document.getElementById('customForm');
     customForm.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -223,16 +196,6 @@
 
     // Firebase brand context
     const firebaseBrand = "serac";
-
-    // Change header background on scroll
-window.addEventListener("scroll", () => {
-  const header = document.querySelector(".site-header");
-  if (window.scrollY > 50) {
-    header.classList.add("scrolled");
-  } else {
-    header.classList.remove("scrolled");
-  }
-});
 
   </script>
 </body>
