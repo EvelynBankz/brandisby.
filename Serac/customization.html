@@ -1,202 +1,140 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Customization - Sérac</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Serac - Customization</title>
+  <!-- Becko-style Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    * { box-sizing:border-box; margin:0; padding:0; }
-    body { font-family:"Montserrat", sans-serif; background:#000; color:#f5f5f5; line-height:1.6; }
-    a { text-decoration:none; color:inherit; }
+    /* ============ RESET & BASE ============ */
+    * { box-sizing: border-box; margin:0; padding:0; }
+    html, body { height: 100%; font-family: "Montserrat", Arial, sans-serif; color:#F5F5F3; background:#141517; scroll-behavior:smooth; }
+    a { text-decoration:none; color: inherit; transition: color 0.3s ease; }
+    a:hover { color:#B66E41; }
 
-    /* HEADER */
+    /* ============ HEADER ============ */
     .site-header {
+      position: fixed; top: 0; left: 0; right: 0;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 20px;
+      z-index: 1200;
       background: transparent;
-      transition: background 0.3s ease, border-bottom 0.3s ease;
-      color:#f5f5f5;
-      display:flex; justify-content:space-between; align-items:center;
-      padding:16px 28px;
-      position:fixed; top:0; left:0; right:0;
-      z-index:1000;
-      border-bottom:none; /* no border until scroll */
+      border-bottom: 1px solid rgba(245,245,243,0.1);
+      transition: background 0.4s ease, box-shadow 0.4s ease;
+      height: 80px;
     }
-    .site-header.scrolled {
-      background:#141517;
-      border-bottom:1px solid rgba(255,255,255,0.08);
+    .site-header.scrolled { background: rgba(20,21,23,0.95); box-shadow: 0 4px 20px rgba(0,0,0,0.6); }
+    .header-left { display:flex; align-items:center; gap:18px; }
+    .brand-logo { height: 80px; width:auto; }
+    .brand-title { font-family: "Playfair Display", serif; font-weight:700; font-size:1.9rem; color:#B66E41; }
+    .header-right { display:flex; gap:24px; font-weight:500; }
+    .header-right a { color:#F5F5F3; position:relative; padding:6px 0; font-size:1rem; }
+    .header-right a::after {
+      content:""; position:absolute; bottom:-4px; left:0; width:0; height:2px;
+      background:#B66E41; transition: width 0.3s ease;
     }
-    .logo { font-size:1.5rem; font-weight:bold; }
-    nav ul { list-style:none; display:flex; gap:24px; }
-    nav li { display:inline; }
-    nav a:hover { color:#B66E41; }
-    .hamburger { display:none; font-size:1.5rem; cursor:pointer; }
+    .header-right a:hover::after { width:100%; }
 
-    /* HERO */
-    .hero {
-      height:100vh;
-      background:url('images/customization-hero.jpg') center/cover no-repeat;
-      display:flex; align-items:center; justify-content:center;
-      text-align:center; position:relative;
+    /* ============ HAMBURGER ============ */
+    .hamburger { display:none; background:none; border:none; width:44px; height:40px; cursor:pointer; }
+    .hamburger span { display:block; height:3px; width:26px; background:#B66E41; margin:6px auto; border-radius:2px; transition: all 0.3s ease; }
+    .hamburger.open span:nth-child(1){ transform: rotate(45deg) translate(5px,6px); }
+    .hamburger.open span:nth-child(2){ opacity:0; }
+    .hamburger.open span:nth-child(3){ transform: rotate(-45deg) translate(6px,-6px); }
+
+    /* ============ HERO ============ */
+    .hero-customization {
+      height: 90vh; display:flex; align-items:center; justify-content:center; text-align:center;
+      background: url("asset/custom-bg.jpg") center center / cover no-repeat;
+      position:relative;
     }
-    .hero::after {
+    .hero-customization::after {
       content:""; position:absolute; top:0; left:0; right:0; bottom:0;
-      background:rgba(0,0,0,0.55);
+      background:rgba(20,21,23,0.6);
     }
-    .hero-content { position:relative; z-index:1; }
-    .hero h1 { font-size:3rem; margin-bottom:12px; }
-    .hero p { font-size:1.25rem; }
-
-    /* SECTIONS */
-    section { padding:80px 20px; max-width:1200px; margin:auto; }
-    section h2 { font-size:2rem; margin-bottom:20px; color:#B66E41; }
-    section p { margin-bottom:18px; color:#ddd; }
-
-    .flex-row { display:flex; flex-wrap:wrap; gap:40px; align-items:center; }
-    .flex-row img {
-      flex:1 1 40%;
-      max-width:400px;
-      border-radius:12px;
-      box-shadow:0 6px 20px rgba(0,0,0,0.6);
-      transition: transform 0.4s ease;
+    .hero-customization .hero-text { position:relative; z-index:2; max-width:800px; padding:0 15px; }
+    .hero-customization .hero-text h1 {
+      font-family:"Playfair Display", serif;
+      font-size: clamp(42px,6vw,72px);
+      margin-bottom:18px; color:#B66E41; line-height:1.2;
     }
-    .flex-row img:hover { transform:scale(1.05); }
-    .flex-row .text { flex:1 1 55%; }
-
-    /* FORM */
-    form { display:flex; flex-direction:column; gap:16px; max-width:600px; }
-    input, textarea {
-      padding:12px; border:1px solid #444; border-radius:8px;
-      background:#1a1a1a; color:#f5f5f5;
-    }
-    input:focus, textarea:focus { border-color:#B66E41; outline:none; }
-    button {
-      background:#B66E41; color:#fff; padding:12px;
-      border:none; border-radius:8px; cursor:pointer;
-      transition: background 0.3s ease, color 0.3s ease;
-    }
-    button:hover { background:#f5f5f3; color:#141517; }
-
-    /* FOOTER */
-    footer {
-      background:#111; padding:40px 20px; text-align:center; font-size:0.9rem; color:#aaa;
+    .hero-customization .hero-text p {
+      font-size: clamp(18px,2vw,26px); color:#F5F5F3; line-height:1.6;
     }
 
-    /* RESPONSIVE */
-    @media(max-width:900px) {
-      nav ul {
-        flex-direction:column; background:#141517;
-        position:absolute; top:60px; right:0;
-        width:200px; padding:20px; display:none;
+    /* ============ SECTION BASE ============ */
+    section { padding:100px 20px; }
+    .container { max-width:1200px; margin:0 auto; text-align:center; }
+    section h2 { font-family:"Playfair Display", serif; font-size: clamp(28px,3vw,42px); margin-bottom:20px; color:#B66E41; }
+    section p { font-size: clamp(16px,1.6vw,20px); line-height:1.8; margin-bottom:18px; color:#EDEDED; }
+
+    /* ============ FOOTER ============ */
+    .site-footer { text-align:center; padding:30px 20px; background:#141517; color:#aaa; font-size:0.95rem; border-top:1px solid rgba(245,245,243,0.08); }
+
+    /* ============ RESPONSIVE ============ */
+    @media(max-width:600px){
+      .header-right {
+        position:absolute; top:80px; right:0; background:rgba(20,21,23,0.95);
+        flex-direction:column; width:220px; padding:24px; display:none;
       }
-      nav ul.active { display:flex; }
-      .hamburger { display:block; }
-      .flex-row { flex-direction:column; text-align:center; }
-      .flex-row img { max-width:100%; }
+      .header-right.open { display:flex; }
+      .hamburger{ display:block; }
     }
   </style>
 </head>
 <body>
 
   <!-- HEADER -->
-  <header class="site-header">
-    <div class="logo">SÉRAC</div>
-    <nav>
-      <ul>
-        <li><a href="index.html">Home</a></li>
-        <li><a href="about.html">About Us</a></li>
-        <li><a href="shop.html">Shop</a></li>
-        <li><a href="contact.html">Contact</a></li>
-      </ul>
+  <header class="site-header" id="siteHeader">
+    <div class="header-left">
+      <img src="asset/logo.png" alt="Serac Logo" class="brand-logo">
+      <div class="brand-title">Serac</div>
+    </div>
+    <nav class="header-right">
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
     </nav>
-    <div class="hamburger"><i class="fas fa-bars"></i></div>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
   </header>
 
   <!-- HERO -->
-  <section class="hero">
-    <div class="hero-content">
+  <section class="hero-customization">
+    <div class="hero-text">
       <h1>Customization</h1>
-      <p>Craft your style. Define your edge.</p>
+      <p>Personalize your Serac experience. Choose designs, fits, and details that reflect your style.</p>
     </div>
   </section>
 
-  <!-- CUSTOMIZATION OPTIONS -->
-  <section>
-    <h2>Personalized Options</h2>
-    <div class="flex-row">
-      <div class="text">
-        <p>Sérac offers tailored customization to bring your ideas to life. Choose unique materials, select finishes, and engrave personal statements into every piece.</p>
-      </div>
-      <img src="images/customization-options.jpg" alt="Customization Options"/>
+  <!-- CUSTOMIZATION SECTION -->
+  <section id="custom-options">
+    <div class="container">
+      <h2>Tailored Just for You</h2>
+      <p>At Serac, we believe in individuality. Our customization service allows you to choose materials, colors, and finishes to create pieces that are uniquely yours.</p>
     </div>
   </section>
 
-  <!-- ORDER PROCESS -->
-  <section>
-    <h2>Simple Process</h2>
-    <div class="flex-row">
-      <img src="images/customization-process.jpg" alt="Order Process"/>
-      <div class="text">
-        <p>Our streamlined order process ensures your customization is handled with precision and speed. From consultation to final delivery, you remain in control.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- CONTACT FORM -->
-  <section>
-    <h2>Start Customizing</h2>
-    <form>
-      <input type="text" placeholder="Your Name" required/>
-      <input type="email" placeholder="Your Email" required/>
-      <textarea rows="5" placeholder="Your Message" required></textarea>
-      <button type="submit">Send Request</button>
-    </form>
-  </section>
-
-  <!-- FOOTER -->
-  <footer>
-    <p>&copy; 2025 Sérac. All rights reserved.</p>
+  <footer class="site-footer">
+    <p>© 2025 Serac</p>
   </footer>
 
   <!-- SCRIPT -->
   <script>
-    // Hamburger toggle
-    const hamburger=document.querySelector('.hamburger');
-    const navLinks=document.querySelector('nav ul');
-    hamburger.addEventListener('click',()=>{ navLinks.classList.toggle('active'); });
-
-    // Change header background on scroll
-    window.addEventListener("scroll", () => {
-      const header = document.querySelector(".site-header");
-      if (window.scrollY > 50) {
-        header.classList.add("scrolled");
-      } else {
-        header.classList.remove("scrolled");
-      }
-    });
-    
- // Customization form submission → WhatsApp
-    const customForm = document.getElementById('customForm');
-    customForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const name = document.getElementById('name').value;
-      const phone = document.getElementById('phone').value;
-      const request = document.getElementById('request').value;
-
-      const message = encodeURIComponent(
-        `Customization Request (Sérac):%0AName: ${name}%0APhone: ${phone}%0ARequest: ${request}`
-      );
-
-      // WhatsApp link to Sérac brand number
-      const whatsappNumber = "08085578326"; // Sérac WhatsApp
-      window.open(`https://wa.me/${whatsappNumber}?text=${message}`, "_blank");
-
-      alert("Thank you! Your request has been sent. We will contact you via WhatsApp within 24 hours.");
-      customForm.reset();
+    const siteHeader = document.getElementById('siteHeader');
+    window.addEventListener('scroll', () => {
+      if(window.scrollY > 50){ siteHeader.classList.add('scrolled'); }
+      else{ siteHeader.classList.remove('scrolled'); }
     });
 
-    // Firebase brand context
-    const firebaseBrand = "serac";
-
+    const hamburger = document.getElementById('hamburger');
+    const headerRight = document.querySelector('.header-right');
+    hamburger.addEventListener('click', () => {
+      headerRight.classList.toggle('open');
+      hamburger.classList.toggle('open');
+    });
   </script>
 </body>
 </html>
