@@ -4,79 +4,80 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sérac - Customization</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <!-- Becko-style Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* RESET */
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family: "Montserrat", sans-serif; background:#141517; color:#f5f5f5; line-height:1.6; }
-    a { text-decoration:none; color:inherit; transition:color 0.3s ease; }
+    /* ================= RESET & BASE ================= */
+    * { box-sizing: border-box; margin:0; padding:0; }
+    html, body { height: 100%; font-family: "Montserrat", Arial, sans-serif; color:#F5F5F3; background:#141517; scroll-behavior:smooth; }
+    a { text-decoration:none; color: inherit; transition: color 0.3s ease; }
+    a:hover { color:#B66E41; }
 
-    /* HEADER */
+    /* ================= HEADER ================= */
     .site-header {
-      background: transparent;
-      transition: background 0.3s ease, border-bottom 0.3s ease;
-      color:#f5f5f5;
-      display:flex; justify-content:space-between; align-items:center;
-      padding:16px 28px;
-      position:fixed; top:0; left:0; right:0;
-      z-index:1000;
-      border-bottom: none; /* changed: no border until scroll */
-    }
-
-    .site-header.scrolled {
-      background:#141517;
-      border-bottom:1px solid rgba(255,255,255,0.08);
-    }
-
-    .header-left { display:flex; align-items:center; gap:12px; }
-    .brand-logo { height:60px; }
-    .brand-title { font-family:"Playfair Display", serif; font-size:24px; font-weight:700; color:#B66E41; }
-    .header-right { display:flex; gap:20px; }
-    .header-right a { font-weight:500; }
-    .header-right a:hover { color:#B66E41; }
-
-    /* Hamburger */
-    .hamburger { display:none; background:none; border:none; cursor:pointer; width:30px; height:24px; position:relative; }
-    .hamburger span {
-      display:block; width:100%; height:3px; background:#B66E41; border-radius:2px; position:absolute; left:0; transition:0.3s;
-    }
-    .hamburger span:nth-child(1){ top:0; }
-    .hamburger span:nth-child(2){ top:10px; }
-    .hamburger span:nth-child(3){ top:20px; }
-    .hamburger.open span:nth-child(1){ transform:rotate(45deg); top:10px; background:#B66E41; }
-    .hamburger.open span:nth-child(2){ opacity:0; }
-    .hamburger.open span:nth-child(3){ transform:rotate(-45deg); top:10px; background:#B66E41; }
-
-    /* HERO */
-    .hero {
-      position: relative;
-      height: 90vh;
+      position: fixed;
+      top: 0; left: 0; right: 0;
       display: flex;
-      justify-content: center;
       align-items: center;
-      text-align: center;
-      margin-top: 80px;
-      overflow: hidden;
+      justify-content: space-between;
+      padding: 10px 20px;
+      z-index: 1200;
+      background: transparent;
+      border-bottom: 1px solid rgba(245,245,243,0.1);
+      transition: background 0.4s ease, box-shadow 0.4s ease;
+      height: 80px;
     }
-    .hero::after {
+    .site-header.scrolled { background: rgba(20,21,23,0.95); box-shadow: 0 4px 20px rgba(0,0,0,0.6); }
+    .header-left { display: flex; align-items: center; gap: 18px; }
+    .brand-logo { height: 80px; width: auto; }
+    .brand-title { font-family: "Playfair Display", serif; font-weight: 700; font-size: 1.9rem; color: #B66E41; letter-spacing: 1px; }
+    .header-right { display: flex; gap: 24px; font-weight:500; }
+    .header-right a { color: #F5F5F3; position: relative; padding: 6px 0; font-size: 1rem; }
+    .header-right a::after {
       content: "";
       position: absolute;
-      inset: 0;
-      background: url("asset/bg25.jpg") center/cover no-repeat;
-      transform: scale(1.1);
-      z-index: -1;
-      border-radius: 12px;
-      box-shadow: inset 0 0 0 2000px rgba(20,21,23,0.55); 
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: #B66E41;
+      transition: width 0.3s ease;
     }
-    .hero-text { position: relative; display: inline-block; margin-bottom:12px; }
-    .hero-text h1 { font-family:"Playfair Display", serif; font-size: clamp(36px,5vw,64px); margin-bottom:12px; color:#B66E41; }
-    .hero-text p { font-size: clamp(16px,2vw,22px); max-width:700px; color:#F5F5F3}
+    .header-right a:hover::after { width: 100%; }
 
-    /* CUSTOMIZATION SECTION */
-    section.customization { padding:80px 20px; background:#1d1f22; color:#f5f5f5; }
-    .container { max-width:1100px; margin:auto; }
-    .customization h2 { text-align:center; font-size:28px; margin-bottom:20px; font-family:"Playfair Display", serif; color:#F5F5F3; }
+    /* ================= HAMBURGER ================= */
+    .hamburger { display:none; background:none; border:none; width:44px; height:40px; cursor:pointer; position: relative; z-index:1300; }
+    .hamburger span { display:block; height:3px; width:26px; background:#B66E41; margin:6px auto; border-radius:2px; transition: all 0.3s ease; }
+    .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 6px); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(6px, -6px); }
+
+    /* ================= HERO ================= */
+    .hero-custom {
+      height: 90vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      background: url("asset/bg25.jpg") center center / cover no-repeat;
+      position:relative;
+      margin-top:0;
+    }
+    .hero-custom::after {
+      content:"";
+      position:absolute;
+      top:0;left:0;right:0;bottom:0;
+      background:rgba(20,21,23,0.6);
+    }
+    .hero-custom .hero-text { position:relative; z-index:2; max-width:800px; padding:0 15px; }
+    .hero-custom .hero-text h1 { font-family:"Playfair Display", serif; font-size: clamp(42px,6vw,72px); margin-bottom:18px; color:#B66E41; line-height:1.2; }
+    .hero-custom .hero-text p { font-size: clamp(18px,2vw,26px); color:#F5F5F3; line-height:1.6; }
+
+    /* ================= CUSTOMIZATION SECTION ================= */
+    section.customization { padding:100px 20px; background:#1d1f22; color:#f5f5f5; }
+    .container { max-width:1200px; margin:auto; }
+    .customization h2 { text-align:center; font-size: clamp(28px,3vw,42px); margin-bottom:20px; font-family:"Playfair Display", serif; color:#B66E41; }
     .custom-intro { text-align:center; max-width:700px; margin:0 auto 40px auto; font-size:18px; color:#d3d3d3; }
 
     .custom-grid { display:grid; grid-template-columns:1fr 1fr; gap:40px; }
@@ -108,22 +109,16 @@
     }
     .custom-form button:hover { background:#8a4d2b; transform:scale(1.05); }
 
-    /* FOOTER */
-    footer { text-align:center; padding:20px; background:#141517; color:#f5f5f5; margin-top:60px; border-top:1px solid rgba(255,255,255,0.08); }
+    /* ================= FOOTER ================= */
+    footer { text-align:center; padding:30px 20px; background:#141517; color:#f5f5f5; margin-top:80px; border-top:1px solid rgba(255,255,255,0.08); }
     footer p { color:#aaa; }
 
-    /* RESPONSIVE */
+    /* ================= RESPONSIVE ================= */
     @media(max-width:900px){ .custom-grid { grid-template-columns:1fr; } }
-    @media(max-width:600px){
-      .header-right { display:none; flex-direction:column; background:#1d1f22; position:absolute; top:70px; right:0; width:200px; padding:20px; }
+    @media(max-width:768px){
+      .header-right { display:none; flex-direction:column; background:#1d1f22; position:absolute; top:80px; right:0; width:220px; padding:20px; border-left:1px solid rgba(245,245,243,0.08); }
       .header-right.open { display:flex; }
       .hamburger { display:block; }
-      .hero-text h1 { font-size:32px; }
-    }
-    @media(max-width:600px){
-      .hero { height:40vh; margin-top:0; padding-top:80px; }
-      .hero-text h1 { font-size:clamp(24px,5vw,32px); line-height:1.2; margin:0; }
-      .hero-text p { font-size:clamp(14px,2.5vw,18px); margin:0 auto; }
     }
   </style>
 </head>
@@ -145,7 +140,7 @@
   </header>
 
   <!-- HERO -->
-  <section class="hero">
+  <section class="hero-custom">
     <div class="hero-text">
       <h1>Customize</h1>
       <p>Send us your requests</p> 
@@ -214,7 +209,6 @@
         `Customization Request (Sérac):%0AName: ${name}%0APhone: ${phone}%0ARequest: ${request}`
       );
 
-      // WhatsApp link to Sérac brand number
       const whatsappNumber = "08085578326"; // Sérac WhatsApp
       window.open(`https://wa.me/${whatsappNumber}?text=${message}`, "_blank");
 
