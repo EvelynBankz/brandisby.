@@ -1,33 +1,168 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Checkout - SERAC</title> <!-- Change brand here -->
-  <link rel="stylesheet" href="shop.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sérac - Checkout</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    form { max-width: 500px; margin: auto; display: flex; flex-direction: column; }
-    input, button { margin: 8px 0; padding: 10px; border-radius: 4px; border: 1px solid #ccc; }
-    button { background-color: #4CAF50; color: white; border: none; cursor: pointer; }
-    button:hover { background-color: #45a049; }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:"Montserrat",sans-serif;background:#141517;color:#fff;line-height:1.6}
+    a{text-decoration:none;color:inherit}
+
+    /* header */
+    .site-header{background:#4B4E54;color:#B66E41;display:flex;justify-content:space-between;align-items:center;padding:16px 28px;position:fixed;top:0;left:0;right:0;z-index:1000}
+    .brand-logo{height:60px}
+    .brand-title{font-family:"Playfair Display",serif;font-weight:700;font-size:24px;color:#B66E41}
+
+    /* nav */
+    .header-right{display:flex;gap:18px;align-items:center}
+    .header-right a{font-weight:500;transition:color .2s}
+    .header-right a:hover{color:#B66E41}
+    .cart-count{background:#B66E41;color:#141517;border-radius:50%;padding:2px 6px;font-weight:600;font-size:12px;margin-left:6px}
+
+    /* hamburger */
+    .hamburger{display:none;background:none;border:none;width:44px;height:40px;cursor:pointer;position:relative;z-index:1300}
+    .hamburger span{display:block;height:2.5px;width:22px;background:#B66E41;margin:6px auto;border-radius:2px;transition:all 0.3s ease}
+    .hamburger.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
+    .hamburger.open span:nth-child(2){opacity:0}
+    .hamburger.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+
+    /* hero */
+    .hero{position:relative;height:90vh;display:flex;align-items:center;justify-content:center;margin-top:80px;text-align:center}
+    .hero::after{content:"";position:absolute;inset:0;background:url('../asset/bg17.jpg') center/cover no-repeat;transform:scale(1.08);z-index:-1;border-radius:12px;box-shadow:inset 0 0 0 2000px rgba(20,21,23,0.18)}
+    .hero-text h1{font-family:"Playfair Display",serif;color:#B66E41;font-size:clamp(28px,5vw,48px)}
+
+    /* checkout grid */
+    section.checkout{padding:60px 20px}
+    .container{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1.6fr;gap:28px}
+    .checkout-form,.order-summary{border-radius:12px;padding:18px;box-shadow:0 4px 10px rgba(0,0,0,0.08)}
+    .checkout-form{background:#4B4E54;color:#fff}
+    .order-summary{background:#1f1f1f;color:#fff}
+    h2{font-family:"Playfair Display",serif;margin-bottom:12px;font-size:20px}
+    label{display:block;margin-bottom:6px;font-weight:500}
+    input,textarea,select{width:100%;padding:10px;border-radius:6px;border:1px solid #B66E41;margin-bottom:12px;font-family:inherit;background:#141517;color:#fff}
+    textarea{min-height:80px;resize:vertical}
+    .currency-selector{text-align:right;margin-bottom:12px}
+    .checkout-btn{display:block;width:100%;background:#B66E41;color:#141517;padding:14px;border-radius:6px;border:none;font-weight:700;cursor:pointer;transition:all 0.2s ease}
+    .checkout-btn:hover{background:#8a5533}
+
+    /* order summary */
+    .order-summary ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px}
+    .order-item{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;padding:10px;border-radius:8px;background:rgba(182,110,65,0.1)}
+    .order-item .left{flex:1 1 70%}
+    .order-item .right{flex:0 0 150px;text-align:right}
+    .order-item .title{font-weight:600}
+    .order-item .meta{font-size:0.95rem;color:#ccc;margin-top:6px}
+
+    /* variant toggle */
+    .variant-toggle{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:6px;border:1px solid #B66E41;background:#141517;color:#B66E41;cursor:pointer;padding:0;margin-left:8px;transition:all 0.2s ease}
+    .variant-toggle svg{width:14px;height:14px;transition:transform .25s ease}
+    .variant-toggle[aria-expanded="true"] svg{transform:rotate(180deg)}
+    .variants-container{max-height:0;overflow:hidden;transition:max-height .28s ease,padding .28s ease;padding-left:12px;border-left:2px solid rgba(182,110,65,0.3);margin-top:8px}
+    .variants-container.show{max-height:500px;padding-top:8px;padding-bottom:8px}
+    .variant-row{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:6px 0;border-bottom:1px dashed rgba(182,110,65,0.2)}
+    .variant-attrs{font-size:0.95rem;color:#ccc}
+    .variant-price{font-weight:600;min-width:110px;text-align:right}
+
+    .subtotal{font-weight:700;text-align:right;margin-top:12px}
+    .note{font-size:0.9rem;color:#aaa;margin-top:8px}
+
+    footer{text-align:center;padding:20px;background:#4B4E54;color:#B66E41;margin-top:36px}
+
+    /* responsive */
+    @media(max-width:900px){.container{grid-template-columns:1fr}}
+
+    @media(max-width:600px){
+      .header-right{
+        position:absolute;
+        top:70px;
+        right:0;
+        background:rgba(20,21,23,0.95);
+        flex-direction:column;
+        width:200px;
+        padding:20px;
+        display:none;
+        border-radius:0 0 0 10px;
+      }
+      .header-right.open{display:flex}
+      .hamburger{display:block}
+      section{padding:60px 20px}
+      .hero{height:40vh}
+    }
+
+    @media(max-width:420px){
+      .brand-logo{height:clamp(40px,15vw,80px)}
+      .brand-title{font-size:clamp(16px,7vw,22px)}
+      .hero{height:40vh}
+    }
   </style>
 </head>
 <body>
+  <header class="site-header">
+    <div style="display:flex;align-items:center;gap:14px">
+      <img src="../logo.png" alt="Sérac Logo" class="brand-logo">
+      <div class="brand-title">Sérac</div>
+    </div>
+    <!-- Hamburger -->
+    <button class="hamburger" id="hamburger-btn">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="header-right" id="nav-menu">
+      <a href="../index.html">Home</a>
+      <a href="../shop.html">Shop</a>
+      <a href="../about.html">About</a>
+      <a href="../contact.html">Contact</a>
+      <a href="../cart.html">Cart <span class="cart-count" id="cartCount">0</span></a>
+    </nav>
+  </header>
 
-  <h1>Checkout - SERAC</h1>
-  <form id="checkout-form">
-    <input type="text" name="name" placeholder="Full Name" required>
-    <input type="email" name="email" placeholder="Email" required>
-    <input type="text" name="address" placeholder="Shipping Address" required>
-    <input type="text" name="city" placeholder="City" required>
-    <input type="text" name="zip" placeholder="ZIP / Postal Code" required>
-    <button type="submit">Place Order</button>
-  </form>
+  <section class="hero"><div class="hero-text"><h1>Checkout</h1></div></section>
 
+  <section class="checkout">
+    <div class="container">
+      <!-- Billing Form -->
+      <div class="checkout-form">
+        <h2>Billing Details</h2>
+        <form id="checkoutForm">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" required>
+          <label for="email">Email</label>
+          <input type="email" id="email" required>
+          <label for="phone">Phone</label>
+          <input type="tel" id="phone" required>
+          <label for="address">Address</label>
+          <textarea id="address" required></textarea>
+        </form>
+      </div>
+
+      <!-- Order Summary -->
+      <div class="order-summary">
+        <h2>Order Summary</h2>
+        <div class="currency-selector" id="currencySelectorWrapper" style="display:none">
+          <label for="currency">Currency:</label>
+          <select id="currency">
+            <option value="NGN">NGN</option>
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="GBP">GBP</option>
+          </select>
+        </div>
+        <ul id="orderItems"></ul>
+        <div class="subtotal" id="orderSubtotal"></div>
+        <div class="note">You will be redirected to payment after clicking Proceed to Payment.</div>
+        <button id="payBtn" class="checkout-btn">Proceed to Payment</button>
+      </div>
+    </div>
+  </section>
+
+  <footer><p>© 2025 Sérac</p></footer>
+
+  <script src="https://checkout.flutterwave.com/v3.js"></script>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
@@ -37,49 +172,233 @@
       messagingSenderId: "87213267039",
       appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
     };
-
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
+    // DOM elements
+    const cartCountElem = document.getElementById('cartCount');
+    const orderItemsEl = document.getElementById('orderItems');
+    const orderSubtotalEl = document.getElementById('orderSubtotal');
+    const currencySelect = document.getElementById('currency');
+    const currencyWrapper = document.getElementById('currencySelectorWrapper');
+    const payBtn = document.getElementById('payBtn');
+
+    // cart & quote
+    let rawCart = JSON.parse(localStorage.getItem('cart_serac')) || [];
+    function mergeCartItems(cartArray){
+      const merged=[];
+      cartArray.forEach(item=>{
+        const idx = merged.findIndex(i => i.id === item.id && (i.color||'') === (item.color||'') && (i.size||'') === (item.size||''));
+        if(idx === -1) merged.push({...item});
+        else merged[idx].quantity = Number(merged[idx].quantity||0) + Number(item.quantity||0);
+      });
+      return merged;
+    }
+    rawCart = mergeCartItems(rawCart);
+
     const urlParams = new URLSearchParams(window.location.search);
-    const BRAND = urlParams.get('brand') || 'serac';
-    const CART_KEY = `${BRAND}_cart`;
+    const quoteId = urlParams.get('quoteId');
+    let quote = null;
+    let selectedCurrency = localStorage.getItem('currency_serac') || 'NGN';
+    currencySelect.value = selectedCurrency;
 
-    const form = document.getElementById('checkout-form');
+    function formatPrice(value, currency){
+      const localeMap = { USD:'en-US', EUR:'de-DE', GBP:'en-GB', NGN:'en-NG' };
+      const minFrac = currency === 'NGN' ? 0 : 2;
+      try {
+        return new Intl.NumberFormat(localeMap[currency] || 'en-US', { style:'currency', currency, minimumFractionDigits: minFrac }).format(Number(value || 0));
+      } catch(e) {
+        return `${currency} ${Number(value || 0).toFixed(minFrac)}`;
+      }
+    }
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const cart = JSON.parse(localStorage.getItem(CART_KEY)) || [];
+    function getUnitPriceForCurrency(productDoc, cartItem, currency) {
+      if(productDoc){
+        if(currency === 'NGN' && productDoc.priceNGN != null) return Number(productDoc.priceNGN);
+        if(currency === 'USD' && productDoc.priceUSD != null) return Number(productDoc.priceUSD);
+        if(currency === 'EUR' && productDoc.priceEUR != null) return Number(productDoc.priceEUR);
+        if(currency === 'GBP' && productDoc.priceGBP != null) return Number(productDoc.priceGBP);
+        if(productDoc.price != null) return Number(productDoc.price);
+      }
+      if(cartItem && cartItem.price != null) return Number(cartItem.price);
+      return 0;
+    }
 
-      if(cart.length === 0) {
-        alert("Your cart is empty!");
-        return;
+    function groupCartByProduct(cartArr){
+      const map = new Map();
+      cartArr.forEach(row=>{
+        if(!map.has(row.id)) map.set(row.id, []);
+        map.get(row.id).push(row);
+      });
+      return map;
+    }
+
+    async function fetchProducts(productIds){
+      const out = {};
+      const promises = productIds.map(async id=>{
+        try {
+          const dref = doc(db, "brands", "serac", "products", id);
+          const snap = await getDoc(dref);
+          if(snap.exists()) out[id] = snap.data();
+        } catch(e){
+          console.warn("Failed fetch product", id, e);
+        }
+      });
+      await Promise.all(promises);
+      return out;
+    }
+
+    async function buildQuoteFromCart(){
+      const merged = mergeCartItems(rawCart);
+      const byProduct = groupCartByProduct(merged);
+      const productIds = Array.from(byProduct.keys());
+      const productsData = await fetchProducts(productIds);
+      const items = [];
+
+      for(const pid of productIds){
+        const rows = byProduct.get(pid) || [];
+        const productDoc = productsData[pid] || null;
+        const image = productDoc?.images?.[0] || productDoc?.imageUrl || rows[0]?.imageUrl || '';
+        const name = productDoc?.name || rows[0]?.name || 'Product';
+        const variantDetails = rows.map(r => {
+          const unitPrices = {
+            NGN: getUnitPriceForCurrency(productDoc, r, 'NGN'),
+            USD: getUnitPriceForCurrency(productDoc, r, 'USD'),
+            EUR: getUnitPriceForCurrency(productDoc, r, 'EUR'),
+            GBP: getUnitPriceForCurrency(productDoc, r, 'GBP')
+          };
+          const quantity = Number(r.quantity) || 0;
+          const linePrices = {
+            NGN: (unitPrices.NGN || 0) * quantity,
+            USD: (unitPrices.USD || 0) * quantity,
+            EUR: (unitPrices.EUR || 0) * quantity,
+            GBP: (unitPrices.GBP || 0) * quantity
+          };
+          return { id: r.id, color: r.color||'', size: r.size||'', quantity, unitPrices, linePrices };
+        });
+
+        const totalQty = variantDetails.reduce((s,a)=>s + a.quantity, 0);
+        const totalPrices = {
+          NGN: variantDetails.reduce((s,a) => s + (a.linePrices.NGN||0), 0),
+          USD: variantDetails.reduce((s,a) => s + (a.linePrices.USD||0), 0),
+          EUR: variantDetails.reduce((s,a) => s + (a.linePrices.EUR||0), 0),
+          GBP: variantDetails.reduce((s,a) => s + (a.linePrices.GBP||0), 0)
+        };
+
+        items.push({ productId: pid, name, image, totalQuantity: totalQty, totalPrices, variants: variantDetails });
       }
 
-      const order = {
-        brand: BRAND,
-        items: cart,
-        customer: {
-          name: form.name.value,
-          email: form.email.value,
-          address: form.address.value,
-          city: form.city.value,
-          zip: form.zip.value
-        },
-        createdAt: new Date()
+      return { items };
+    }
+
+    async function loadCheckout(){
+      selectedCurrency = localStorage.getItem('currency_serac') || 'NGN';
+      currencySelect.value = selectedCurrency;
+      currencyWrapper.style.display = 'none';
+
+      if(quoteId){
+        try{
+          const qRef = doc(db, "brands", "serac", "quotes", quoteId);
+          const snap = await getDoc(qRef);
+          if(!snap.exists()){ alert("Quote not found."); return; }
+          const rawQuote = snap.data();
+          if(rawQuote.customer) document.getElementById('name').value = rawQuote.customer;
+          if(rawQuote.email) document.getElementById('email').value = rawQuote.email;
+
+          currencyWrapper.style.display = 'block';
+          selectedCurrency = localStorage.getItem('currency_serac') || rawQuote.currency || 'NGN';
+          currencySelect.value = selectedCurrency;
+
+          const items = (Array.isArray(rawQuote.items)?rawQuote.items:[]).map(ci=>{
+            if(Array.isArray(ci.variants) && ci.variants.length){
+              const variants = ci.variants.map(v=>({
+                id:v.id||ci.id||'',
+                color:v.color||'',
+                size:v.size||'',
+                quantity:Number(v.qty)||0,
+                unitPrices:{
+                  NGN:Number(v.priceNGN)||0,
+                  USD:Number(v.priceUSD)||0,
+                  EUR:Number(v.priceEUR)||0,
+                  GBP:Number(v.priceGBP)||0
+                },
+                linePrices:{
+                  NGN:(Number(v.priceNGN)||0)*(Number(v.qty)||0),
+                  USD:(Number(v.priceUSD)||0)*(Number(v.qty)||0),
+                  EUR:(Number(v.priceEUR)||0)*(Number(v.qty)||0),
+                  GBP:(Number(v.priceGBP)||0)*(Number(v.qty)||0)
+                }
+              }));
+              return {...ci, variants};
+            } else return ci;
+          });
+
+          quote = { items };
+          renderOrder();
+        } catch(e){ console.error(e); alert("Failed to load quote."); }
+      } else {
+        quote = await buildQuoteFromCart();
+        renderOrder();
+      }
+    }
+
+    function renderOrder(){
+      if(!quote) return;
+      orderItemsEl.innerHTML='';
+      let subtotal = 0;
+
+      quote.items.forEach(prod=>{
+        const li = document.createElement('li');
+        li.className='order-item';
+        li.innerHTML=`<div class="left">
+          <div class="title">${prod.name}</div>
+        </div>
+        <div class="right">${formatPrice(prod.totalPrices[selectedCurrency]||0, selectedCurrency)}</div>`;
+        orderItemsEl.appendChild(li);
+        subtotal += prod.totalPrices[selectedCurrency]||0;
+      });
+
+      orderSubtotalEl.textContent=`Subtotal: ${formatPrice(subtotal, selectedCurrency)}`;
+      cartCountElem.textContent = quote.items.reduce((s,a)=>s+a.totalQuantity,0);
+    }
+
+    currencySelect.addEventListener('change',()=>{
+      selectedCurrency = currencySelect.value;
+      localStorage.setItem('currency_serac', selectedCurrency);
+      renderOrder();
+    });
+
+    payBtn.addEventListener('click',async()=>{
+      const customerName = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const address = document.getElementById('address').value.trim();
+      if(!customerName || !email || !phone || !address){ alert("Please fill all billing fields"); return; }
+
+      const paymentData = {
+        tx_ref: 'serac_'+Date.now(),
+        amount: quote.items.reduce((s,a)=>s+(a.totalPrices[selectedCurrency]||0),0),
+        currency: selectedCurrency,
+        customer:{name:customerName,email,phone_number:phone},
+        meta:{address},
+        callback: function(resp){ console.log(resp); alert("Payment status: "+resp.status) },
+        onclose:function(){ console.log("Payment closed") },
+        customizations:{title:"Sérac",description:"Sérac Checkout",logo:"../logo.png"}
       };
 
-      try {
-        await addDoc(collection(db, 'orders'), order);
-        alert("Order placed successfully!");
-        localStorage.removeItem(CART_KEY);
-        window.location.href = `thankyou.html?brand=${BRAND}`;
-      } catch (err) {
-        console.error(err);
-        alert("Error placing order. Please try again.");
-      }
+      FlutterwaveCheckout(paymentData);
     });
+
+    loadCheckout();
   </script>
 
+  <script>
+    const hamburgerBtn = document.getElementById('hamburger-btn');
+    const navMenu = document.getElementById('nav-menu');
+    hamburgerBtn.addEventListener('click', ()=>{
+      hamburgerBtn.classList.toggle('open');
+      navMenu.classList.toggle('open');
+    });
+  </script>
 </body>
 </html>
