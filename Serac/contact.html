@@ -1,83 +1,246 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Contact Us - Serac</title>
-<link rel="stylesheet" href="contact.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sérac - Contact Us</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* RESET */
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { 
+      font-family:"Montserrat", sans-serif; 
+      background:#141517; 
+      color:#fff; 
+      line-height:1.6; 
+    }
+    a { text-decoration:none; color:inherit; transition:color 0.3s ease; }
+
+    /* HEADER */
+    .site-header {
+      background:#141517;
+      color:#fff;
+      display:flex; justify-content:space-between; align-items:center;
+      padding:16px 28px;
+      position:fixed; top:0; left:0; right:0;
+      z-index:1000;
+    }
+    .header-left { display:flex; align-items:center; gap:12px; }
+    .brand-logo { height:60px; }
+    .brand-title { font-family:"Playfair Display", serif; font-size:24px; font-weight:700; }
+    .header-right { display:flex; gap:20px; }
+    .header-right a { font-weight:500; }
+    .header-right a:hover { color:#B66E41; }
+
+    /* HAMBURGER */
+    .hamburger { 
+      display:none; background:none; border:none; cursor:pointer; 
+      width:30px; height:24px; position:relative;
+    }
+    .hamburger span {
+      display:block; width:100%; height:3px; background:#fff;
+      border-radius:2px; position:absolute; left:0; transition:0.3s;
+    }
+    .hamburger span:nth-child(1){ top:0; }
+    .hamburger span:nth-child(2){ top:10px; }
+    .hamburger span:nth-child(3){ top:20px; }
+    .hamburger.open span:nth-child(1){ transform:rotate(45deg); top:10px; }
+    .hamburger.open span:nth-child(2){ opacity:0; }
+    .hamburger.open span:nth-child(3){ transform:rotate(-45deg); top:10px; }
+
+    /* HERO */
+    .hero {
+      position:relative; height:90vh; display:flex;
+      justify-content:center; align-items:center; text-align:center;
+      margin-top:80px; overflow:hidden;
+    }
+    .hero::after {
+      content:""; position:absolute; inset:0;
+      background:url("asset/bg-serac.jpg") center/cover no-repeat;
+      transform:scale(1.1);
+      z-index:-1;
+      box-shadow:inset 0 0 0 2000px rgba(20,21,23,0.6);
+    }
+    .hero-text {
+      position:relative; display:inline-block;
+      color:#B66E41; margin-bottom:12px;
+      transition: all 0.4s ease;
+    }
+    .hero-text h1 {
+      font-family:"Playfair Display", serif;
+      font-size:clamp(36px,5vw,64px); margin-bottom:12px;
+    }
+    .hero-text p {
+      font-size:clamp(16px,2vw,24px); max-width:700px;
+    }
+
+    /* CONTACT */
+    section.contact { padding:80px 20px; background:#1C1D20; }
+    .container { max-width:1100px; margin:auto; }
+    .contact h2 {
+      text-align:center; font-size:28px; margin-bottom:20px;
+      font-family:"Playfair Display", serif; color:#fff;
+    }
+    .contact-intro {
+      text-align:center; max-width:700px; margin:0 auto 40px auto;
+      font-size:18px; color:#ddd;
+    }
+    .contact-grid {
+      display:grid; grid-template-columns:1fr 1fr; gap:40px;
+    }
+    .contact-info {
+      background:#2A2B30;
+      padding:30px; border-radius:12px;
+      box-shadow:0 4px 15px rgba(0,0,0,0.4);
+      transition: transform 0.3s ease;
+    }
+    .contact-info:hover { transform: translateY(-4px); }
+    .contact-info h3 {
+      font-family:"Playfair Display", serif; font-size:22px; margin-bottom:20px; color:#B66E41;
+    }
+    .contact-info li {
+      margin-bottom:12px; font-size:16px;
+      display:flex; align-items:center; gap:10px;
+      color:#ccc;
+    }
+    .contact-info li i { color:#B66E41; }
+
+    .contact-form {
+      background:#2A2B30;
+      padding:30px; border-radius:12px;
+      box-shadow:0 4px 15px rgba(0,0,0,0.4);
+      transition: transform 0.3s ease;
+    }
+    .contact-form:hover { transform: translateY(-4px); }
+    .contact-form h3 {
+      font-family:"Playfair Display", serif; font-size:22px; margin-bottom:20px; color:#B66E41;
+    }
+    .contact-form input,
+    .contact-form textarea {
+      padding:12px 15px; border:none; border-radius:8px;
+      font-size:16px; outline:none; background:#4B4E54; color:#fff;
+      transition: background 0.3s ease;
+    }
+    .contact-form input:focus,
+    .contact-form textarea:focus { background:#3a3d42; }
+    .contact-form textarea { min-height:120px; resize:vertical; }
+    .contact-form button {
+      background:#B66E41; color:#fff; border:none; padding:14px;
+      border-radius:8px; font-size:16px; font-weight:600;
+      cursor:pointer; transition: background 0.3s ease, transform 0.3s ease;
+    }
+    .contact-form button:hover { background:#91542F; transform:scale(1.03); }
+
+    /* FOOTER */
+    footer { text-align:center; padding:20px; background:#141517; color:#aaa; margin-top:60px; }
+    footer p { font-size:14px; }
+
+    /* RESPONSIVE */
+    @media(max-width:900px){ .contact-grid { grid-template-columns:1fr; } }
+    @media(max-width:600px){
+      .header-right { display:none; flex-direction:column; background:#141517;
+        position:absolute; top:70px; right:0; width:200px; padding:20px; }
+      .header-right.open { display:flex; }
+      .hamburger { display:block; }
+      .hero-text h1 { font-size:32px; }
+    }
+    @media(max-width:600px){
+      .hero { height:40vh; margin-top:0; padding-top:80px; }
+      .hero-text h1 { font-size:clamp(24px,5vw,32px); line-height:1.2; margin:0; }
+      .hero-text p { font-size:clamp(14px,2.5vw,18px); margin:0 auto; }
+    }
+  </style>
 </head>
-<body class="serac-body">
+<body>
 
-<header class="site-header">
-  <div class="header-left">
-    <img src="serac-logo.png" alt="Serac Logo" class="brand-logo">
-    <span class="brand-title">Serac</span>
-  </div>
-  <nav class="header-right">
-    <a href="about.html">About</a>
-    <a href="shop.html">Shop</a>
-    <a href="contact.html">Contact</a>
-  </nav>
-  <button class="hamburger" aria-label="Menu">
-    <span></span>
-    <span></span>
-    <span></span>
-  </button>
-</header>
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="header-left">
+      <img src="logo-serac.png" alt="Sérac Logo" class="brand-logo">
+      <div class="brand-title">Sérac</div>
+    </div>
+    <nav class="header-right">
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="about.html">About</a>
+      <a href="customization.html">Customize</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+    <button class="hamburger" id="hamburger">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
 
-<main>
   <!-- HERO -->
-  <section class="hero-contact">
+  <section class="hero">
     <div class="hero-text">
       <h1>Contact Us</h1>
-      <p>Have questions or need support? We’re here to help you with any inquiries.</p>
+      <p>Talk to our team — we’re here to help</p>
     </div>
   </section>
 
-  <!-- CONTACT FORM -->
-  <section class="contact-form-section">
+  <!-- CONTACT -->
+  <section class="contact">
     <div class="container">
       <h2>Get in Touch</h2>
-      <form>
-        <input type="text" placeholder="Name" required>
-        <input type="email" placeholder="Email" required>
-        <textarea placeholder="Your Message" required></textarea>
-        <button type="submit">Send Message</button>
-      </form>
+      <p class="contact-intro">
+        Got a proposal? Want to partner? Join our Affiliate program? Have some questions or complaints? 
+        We’d love to hear from you.
+      </p>
+
+      <div class="contact-grid">
+        <!-- INFO -->
+        <div class="contact-info">
+          <h3>Our Details</h3>
+          <ul>
+            <li><i class="fas fa-map-marker-alt"></i> Lagos, Nigeria</li>
+            <li><i class="fas fa-envelope"></i> contact.serac@gmail.com</li>
+            <li><i class="fas fa-phone"></i> +234 811 069 0932</li>
+            <li><i class="fas fa-clock"></i> Mon - Fri: 9AM - 6PM</li>
+          </ul>
+        </div>
+
+        <!-- FORM -->
+        <div class="contact-form">
+          <h3>Send us a Message</h3>
+          <form id="contactForm">
+            <input type="text" id="name" placeholder="Your Name" required>
+            <input type="email" id="email" placeholder="Your Email" required>
+            <textarea id="message" placeholder="Your Message" required></textarea>
+            <button type="submit">Send Message</button>
+          </form>
+        </div>
+      </div>
     </div>
   </section>
 
-  <!-- CONTACT INFO -->
-  <section class="contact-info-section">
-    <div class="container">
-      <h2>Our Contact Info</h2>
-      <p>Email: info@serac.com</p>
-      <p>Phone: +1 987 654 321</p>
-      <p>Address: 456 Serac Avenue, City, Country</p>
-    </div>
-  </section>
-</main>
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2025 Sérac</p>
+  </footer>
 
-<footer class="site-footer">
-  <p>&copy; 2025 Serac. All Rights Reserved.</p>
-</footer>
+  <!-- SCRIPT -->
+  <script>
+    // Hamburger toggle
+    const hamburger = document.getElementById('hamburger');
+    const navMenu = document.querySelector('.header-right');
+    hamburger.addEventListener('click', () => {
+      navMenu.classList.toggle('open');
+      hamburger.classList.toggle('open');
+    });
 
-<script>
-const hamburger = document.querySelector('.hamburger');
-const mobileNav = document.createElement('div');
-mobileNav.className = 'mobile-nav';
-mobileNav.innerHTML = `
-  <a href="about.html">About</a>
-  <a href="shop.html">Shop</a>
-  <a href="contact.html">Contact</a>
-`;
-document.body.appendChild(mobileNav);
+    // Simple form submission (placeholder only)
+    const form = document.getElementById('contactForm');
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      alert("Thank you for contacting Sérac, " + document.getElementById('name').value + "! We'll get back to you soon.");
+      form.reset();
+    });
 
-hamburger.addEventListener('click', () => {
-  hamburger.classList.toggle('is-active');
-  mobileNav.classList.toggle('open');
-});
-</script>
-
+    // Example Firebase placeholder (brand = "serac")
+    const brand = "serac"; 
+    console.log("Contact form initialized for brand:", brand);
+  </script>
 </body>
 </html>
