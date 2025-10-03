@@ -227,13 +227,11 @@ const cartSubtotalElem = document.getElementById('cartSubtotal');
 const checkoutBtn = document.getElementById('checkoutBtn');
 const currencySelect = document.getElementById('currency');
 
-// Sérac-specific localStorage keys (so it doesn't share with Fleur De Vie)
-const STORAGE_KEY = 'serac_cart';
-const CURRENCY_KEY = 'serac_currency';
+// Updated keys to match shop.html localStorage
+const STORAGE_KEY = 'seracCart';
+const CURRENCY_KEY = 'seracCurrency';
 
-// load cart from Sérac storage
 let cart = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-
 if(localStorage.getItem(CURRENCY_KEY)) currencySelect.value = localStorage.getItem(CURRENCY_KEY);
 
 function formatPrice(value, currency){
@@ -262,7 +260,6 @@ function groupVariants(productId){
 
 async function fetchProductData(productId){
   try{
-    // <-- UPDATED BRAND PATH: pulls Sérac products
     const dref = doc(db,"brands","serac","products",productId);
     const snap = await getDoc(dref);
     if(snap.exists()) return snap.data();
@@ -332,7 +329,6 @@ async function renderCart(){
   }
   cartSubtotalElem.textContent = `Subtotal: ${formatPrice(subtotal, currency)}`;
 
-  // attach events
   cartGrid.querySelectorAll('.show-variants-btn').forEach(btn=>{
     btn.addEventListener('click', ()=>{ btn.nextElementSibling.style.display=btn.nextElementSibling.style.display==='flex'?'none':'flex'; });
   });
@@ -382,7 +378,6 @@ document.getElementById('hamburger').addEventListener('click', ()=>{
 
 (async function init(){ cart=mergeCartItems(cart); await renderCart(); updateCartCount(); })();
 
-// Listen for storage changes — only react to Sérac key so it remains isolated
 window.addEventListener('storage', (e)=>{
   if(e.key === STORAGE_KEY || e.key === CURRENCY_KEY){
     cart = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
@@ -391,7 +386,6 @@ window.addEventListener('storage', (e)=>{
     updateCartCount();
   }
 });
-
 </script>
 </body>
 </html>
