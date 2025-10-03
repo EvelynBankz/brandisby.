@@ -3,182 +3,205 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Contact Us - Sérac</title>
-  <link rel="stylesheet" href="styles/style.css">
+  <title>Sérac - Contact Us</title>
+  <!-- Becko-style Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    * { box-sizing:border-box; margin:0; padding:0; }
-    body { font-family:"Be Vietnam Pro", sans-serif; background:#000; color:#fff; line-height:1.6; }
-    a { text-decoration:none; color:inherit; }
+    /* ================= RESET & BASE ================= */
+    * { box-sizing: border-box; margin:0; padding:0; }
+    html, body { height:100%; font-family:"Montserrat", sans-serif; color:#F5F5F3; background:#141517; scroll-behavior:smooth; }
+    a { text-decoration:none; color: inherit; transition: color 0.3s ease; }
+    a:hover { color:#B66E41; }
 
-    /* Header */
-    header {
-      position: fixed;
-      width: 100%;
-      top: 0; left: 0;
-      z-index: 1000;
-      background: transparent;
-      color: #fff;
-      transition: background 0.3s ease, padding 0.3s ease;
-      padding: 16px 0;
+    /* ================= HEADER ================= */
+    .site-header {
+      position: fixed; top:0; left:0; right:0;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:10px 20px; z-index:1200; background:transparent;
+      border-bottom: 1px solid rgba(245,245,243,0.1);
+      transition: background 0.4s ease, box-shadow 0.4s ease, border-bottom 0.4s ease;
+      height:80px;
     }
-    header.scrolled { background:#111; padding:12px 0; }
-    .site-header { display:flex; justify-content:space-between; align-items:center; padding:0 20px; }
-    .header-left h1 { font-size:1.5rem; font-weight:700; }
-    .header-right nav ul { list-style:none; display:flex; gap:20px; }
-    .header-right nav ul li a { font-weight:500; transition:color 0.3s; }
-    .header-right nav ul li a:hover { color:#8A4D2B; }
+    .site-header.scrolled { background: rgba(20,21,23,0.95); box-shadow:0 4px 20px rgba(0,0,0,0.6); border-bottom:1px solid rgba(255,255,255,0.08); }
+    .header-left { display:flex; align-items:center; gap:18px; }
+    .brand-logo { height:80px; width:auto; }
+    .brand-title { font-family:"Playfair Display", serif; font-weight:700; font-size:1.9rem; color:#B66E41; letter-spacing:1px; }
+    .header-right { display:flex; gap:24px; font-weight:500; }
+    .header-right a { color:#F5F5F3; position:relative; padding:6px 0; font-size:1rem; }
+    .header-right a::after { content:""; position:absolute; bottom:-4px; left:0; width:0; height:2px; background:#B66E41; transition:width 0.3s ease; }
+    .header-right a:hover::after { width:100%; }
 
-    /* Hero */
+    /* ================= HAMBURGER ================= */
+    .hamburger { display:none; background:none; border:none; width:44px; height:40px; cursor:pointer; position: relative; z-index:1300; }
+    .hamburger span { display:block; height:3px; width:26px; background:#B66E41; margin:6px auto; border-radius:2px; transition: all 0.3s ease; }
+    .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 6px); }
+    .hamburger.open span:nth-child(2) { opacity:0; }
+    .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(6px, -6px); }
+
+    /* ================= HERO ================= */
     .hero {
-      height:90vh; display:flex; flex-direction:column; justify-content:center; align-items:center;
-      text-align:center; padding:0 20px;
-      background:linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('images/contact-hero.jpg') center/cover no-repeat;
+      height:90vh; display:flex; align-items:center; justify-content:center; text-align:center;
+      position:relative; margin-top:0;
     }
-    .hero h2 { font-size:3rem; margin-bottom:10px; }
-    .hero p { font-size:1.2rem; max-width:700px; }
-
-    /* Sections */
-    section { padding:80px 20px; max-width:1200px; margin:auto; }
-    section h2 { font-size:2rem; margin-bottom:20px; }
-    section p { margin-bottom:20px; color:#ddd; }
-
-    .split { display:flex; flex-wrap:wrap; align-items:center; gap:40px; }
-    .split img { flex:1; max-width:500px; border-radius:12px; box-shadow:0 6px 16px rgba(0,0,0,0.6); }
-    .split div { flex:1; }
-
-    /* Contact form */
-    .contact-form { background:#111; padding:40px; border-radius:12px; box-shadow:0 6px 20px rgba(0,0,0,0.5); }
-    .contact-form form { display:flex; flex-direction:column; gap:15px; }
-    .contact-form input, .contact-form textarea {
-      padding:12px; border:none; border-radius:6px; background:#222; color:#fff; width:100%;
+    .hero::after {
+      content:""; position:absolute; inset:0;
+      background:url("asset/bg25.jpg") center/cover no-repeat;
+      z-index:-1; 
+      box-shadow:inset 0 0 0 2000px rgba(20,21,23,0.65);
     }
-    .contact-form button {
-      padding:14px; background:#8A4D2B; border:none; border-radius:6px;
-      color:#fff; font-weight:600; cursor:pointer; transition:0.3s;
-    }
-    .contact-form button:hover { background:#a65e39; }
+    .hero-text { position:relative; z-index:2; max-width:800px; padding:0 15px; }
+    .hero-text h1 { font-family:"Playfair Display", serif; font-size: clamp(42px,6vw,72px); margin-bottom:18px; color:#B66E41; line-height:1.2; }
+    .hero-text p { font-size: clamp(18px,2vw,26px); color:#F5F5F3; line-height:1.6; }
 
-    /* Footer */
-    footer { text-align:center; padding:20px; background:#111; font-size:0.9rem; }
+    /* ================= STORYTELLING SECTIONS ================= */
+    section.story { padding:100px 20px; background:#1d1f22; color:#f5f5f5; }
+    section.story:nth-child(even) { background:#2a2d32; }
+    .container { max-width:1200px; margin:auto; }
+    .story h2 { font-family:"Playfair Display", serif; font-size:clamp(28px,3vw,42px); margin-bottom:20px; color:#B66E41; text-align:center; }
+    .story p { font-size:18px; max-width:750px; margin:0 auto 40px auto; color:#d3d3d3; text-align:center; line-height:1.6; }
+    .story-flex { display:flex; gap:40px; align-items:center; justify-content:center; flex-wrap:wrap; margin-top:40px; }
+    .story-img { flex:1; min-width:300px; max-width:500px; border-radius:12px; overflow:hidden; }
+    .story-img img { width:100%; display:block; border-radius:12px; }
+    .story-text { flex:1; min-width:300px; max-width:600px; color:#f5f5f5; }
 
-    /* Responsive */
-    @media(max-width:768px){
-      .split { flex-direction:column; }
-      .hero h2 { font-size:2.2rem; }
-    }
+    /* ================= CONTACT SECTION ================= */
+    section.contact { padding:100px 20px; background:#1C1D20; }
+    .section-header { text-align:center; margin-bottom:60px; }
+    .section-header h2 { font-family:"Playfair Display", serif; font-size:28px; color:#F5F5F3; margin-bottom:12px; }
+    .section-header p { font-size:18px; color:#ccc; }
 
-    /* Hamburger */
-    .hamburger { display:none; cursor:pointer; flex-direction:column; gap:5px; }
-    .hamburger span { display:block; width:25px; height:3px; background:#fff; transition:0.3s; }
-    .hamburger.open span:nth-child(1){ transform:rotate(45deg) translate(5px,5px); }
-    .hamburger.open span:nth-child(2){ opacity:0; }
-    .hamburger.open span:nth-child(3){ transform:rotate(-45deg) translate(5px,-5px); }
-    @media(max-width:768px){
-      .hamburger { display:flex; }
-      .header-right nav ul {
-        position:absolute; top:60px; right:0; background:#111;
-        flex-direction:column; width:200px; display:none; padding:20px;
-      }
-      .header-right nav ul.open { display:flex; }
-    }
+    .contact-flex { display:flex; justify-content:space-between; align-items:flex-start; gap:50px; flex-wrap:wrap; }
+    .contact-info, .contact-form { flex:1; background:#2A2B30; padding:40px; border-radius:16px; box-shadow:0 4px 15px rgba(0,0,0,0.4); transition:transform 0.3s ease; }
+    .contact-info:hover, .contact-form:hover { transform: translateY(-4px); }
+    .contact-info h3, .contact-form h3 { font-family:"Playfair Display", serif; font-size:24px; margin-bottom:24px; color:#B66E41; }
+    .contact-info li { margin-bottom:16px; font-size:16px; display:flex; align-items:center; gap:12px; color:#ccc; }
+    .contact-info li i { color:#B66E41; }
+    .contact-form input, .contact-form textarea { width:100%; margin-bottom:16px; padding:14px 16px; border:none; border-radius:10px; font-size:16px; outline:none; background:#4B4E54; color:#fff; transition: background 0.3s ease; }
+    .contact-form input:focus, .contact-form textarea:focus { background:#3a3d42; }
+    .contact-form textarea { min-height:140px; resize:vertical; }
+    .contact-form button { background:#B66E41; color:#fff; border:none; padding:16px; border-radius:10px; font-size:17px; font-weight:600; cursor:pointer; transition: all 0.3s ease; width:100%; }
+    .contact-form button:hover { background:#91542F; transform:scale(1.02); }
+
+    /* ================= FOOTER ================= */
+    footer { text-align:center; padding:28px; background:#141517; color:#aaa; margin-top:60px; }
+    footer p { font-size:14px; }
+
+    /* ================= RESPONSIVE ================= */
+    @media(max-width:900px){ .contact-flex, .story-flex { flex-direction:column; } }
+    @media(max-width:768px){ .header-right { display:none; flex-direction:column; background:#1d1f22; position:absolute; top:80px; right:0; width:220px; padding:20px; } .header-right.open{ display:flex; } .hamburger{ display:block; } }
   </style>
 </head>
 <body>
 
-  <!-- Header -->
+  <!-- HEADER -->
   <header class="site-header">
-    <div class="header-left"><h1>Sérac</h1></div>
-    <div class="header-right">
-      <nav>
-        <ul>
-          <li><a href="index.html">Home</a></li>
-          <li><a href="about.html">About</a></li>
-          <li><a href="shop.html">Shop</a></li>
-          <li><a href="customization.html">Customization</a></li>
-          <li><a href="contact.html" class="active">Contact</a></li>
-        </ul>
-      </nav>
+    <div class="header-left">
+      <img src="asset/logo.png" alt="Sérac Logo" class="brand-logo">
+      <div class="brand-title">Sérac</div>
     </div>
-    <div class="hamburger" id="hamburger">
-      <span></span><span></span><span></span>
-    </div>
+    <nav class="header-right">
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="about.html">About</a>
+      <a href="customization.html">Customize</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
   </header>
 
-  <!-- Hero -->
+  <!-- HERO -->
   <section class="hero">
-    <h2>Contact Sérac</h2>
-    <p>We’re here to connect with you—whether for questions, collaborations, or partnerships.</p>
+    <div class="hero-text">
+      <h1>Contact Us</h1>
+      <p>Talk to our team — we’re here to help</p>
+    </div>
   </section>
 
-  <!-- Storytelling Sections -->
-  <section>
-    <h2>Why Reach Out to Us</h2>
-    <p>Every message we receive is more than just words—it’s an opportunity to build connections and elevate your experience with Sérac. Whether it’s a simple inquiry or a bold new idea, your voice matters to us.</p>
+  <!-- STORYTELLING SECTIONS -->
+  <section class="story">
+    <div class="container">
+      <h2>Why Reach Out to Sérac</h2>
+      <p>Whether it’s a partnership, an affiliate opportunity, a suggestion, or a question, connecting with us ensures a seamless and premium experience. Every message matters, and every inquiry receives a swift response.</p>
+      <div class="story-flex">
+        <div class="story-img"><img src="asset/story1.jpg" alt="Why Contact Sérac"></div>
+        <div class="story-text"><p>We value transparency, quality, and commitment. Your voice is part of our growth, and we make it a priority to respond with clarity and care.</p></div>
+      </div>
+    </div>
   </section>
 
-  <section class="split">
-    <div>
+  <section class="story">
+    <div class="container">
       <h2>Our Promise to You</h2>
-      <p>We believe in precision, clarity, and honesty. When you reach out, expect nothing less than transparent communication and genuine support. This is our craft promise—not just in our products, but in the way we connect with you.</p>
-    </div>
-    <img src="images/contact-promise.jpg" alt="Our Promise Placeholder">
-  </section>
-
-  <section>
-    <h2>Partnerships & Affiliates</h2>
-    <p>Sérac thrives on collaboration. If you’re a creative, a retailer, or a visionary, we invite you to partner with us. Together, we can redefine what it means to move with stone-cold confidence.</p>
-  </section>
-
-  <!-- Contact Form -->
-  <section>
-    <div class="contact-form">
-      <h2>Get In Touch</h2>
-      <form id="customForm">
-        <input type="text" id="name" name="name" placeholder="Your Name" required>
-        <input type="tel" id="phone" name="phone" placeholder="Phone Number" required>
-        <textarea id="request" name="request" rows="5" placeholder="Your Message" required></textarea>
-        <button type="submit">Send Message</button>
-      </form>
+      <p>At Sérac, every interaction is treated with the highest standard of professionalism. Expect timely replies, thoughtful guidance, and a dedication to resolving your needs efficiently.</p>
+      <div class="story-flex">
+        <div class="story-text"><p>From inquiries about our products to collaboration proposals, your experience with Sérac is curated to reflect our brand values: minimal, sharp, and luxurious.</p></div>
+        <div class="story-img"><img src="asset/story2.jpg" alt="Sérac Promise"></div>
+      </div>
     </div>
   </section>
 
-  <!-- Footer -->
+  <!-- CONTACT SECTION -->
+  <section class="contact">
+    <div class="container">
+      <div class="section-header">
+        <h2>Get in Touch</h2>
+        <p>Got a proposal? Want to partner? Join our Affiliate program? Have some questions or complaints? We’d love to hear from you.</p>
+      </div>
+
+      <div class="contact-flex">
+        <!-- INFO -->
+        <div class="contact-info">
+          <h3>Our Details</h3>
+          <ul>
+            <li><i class="fas fa-map-marker-alt"></i> Lagos, Nigeria</li>
+            <li><i class="fas fa-envelope"></i> contact.serac@gmail.com</li>
+            <li><i class="fas fa-phone"></i> +234 811 069 0932</li>
+            <li><i class="fas fa-clock"></i> Mon - Fri: 9AM - 6PM</li>
+          </ul>
+        </div>
+
+        <!-- FORM -->
+        <div class="contact-form">
+          <h3>Send us a Message</h3>
+          <form id="contactForm">
+            <input type="text" id="name" placeholder="Your Name" required>
+            <input type="email" id="email" placeholder="Your Email" required>
+            <textarea id="message" placeholder="Your Message" required></textarea>
+            <button type="submit">Send Message</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
   <footer>
-    <p>&copy; 2025 Sérac. All rights reserved.</p>
+    <p>© 2025 Sérac</p>
   </footer>
 
-  <!-- Script -->
+  <!-- SCRIPT -->
   <script>
     // Hamburger toggle
     const hamburger = document.getElementById('hamburger');
-    const navMenu = document.querySelector('.header-right nav ul');
+    const navMenu = document.querySelector('.header-right');
     hamburger.addEventListener('click', () => {
       navMenu.classList.toggle('open');
       hamburger.classList.toggle('open');
     });
 
-    // Contact form submission → WhatsApp
-    const customForm = document.getElementById('customForm');
-    customForm.addEventListener('submit', (e) => {
+    // Simple form submission (demo)
+    const form = document.getElementById('contactForm');
+    form.addEventListener('submit', (e) => {
       e.preventDefault();
-      const name = document.getElementById('name').value;
-      const phone = document.getElementById('phone').value;
-      const request = document.getElementById('request').value;
-
-      const message = encodeURIComponent(
-        `Contact Request (Sérac):%0AName: ${name}%0APhone: ${phone}%0AMessage: ${request}`
-      );
-
-      const whatsappNumber = "08085578326"; // Sérac WhatsApp
-      window.open(`https://wa.me/${whatsappNumber}?text=${message}`, "_blank");
-
-      alert("Thank you! Your message has been sent. We will contact you via WhatsApp within 24 hours.");
-      customForm.reset();
+      alert("Thank you for contacting Sérac, " + document.getElementById('name').value + "! We'll get back to you soon.");
+      form.reset();
     });
 
-    // Firebase brand context
-    const firebaseBrand = "serac";
-
+    // Example Firebase placeholder (brand = "serac")
+    const brand = "serac";
+    console.log("Contact form initialized for brand:", brand);
+    
     // Change header background on scroll
     window.addEventListener("scroll", () => {
       const header = document.querySelector(".site-header");
@@ -189,6 +212,5 @@
       }
     });
   </script>
-
 </body>
 </html>
