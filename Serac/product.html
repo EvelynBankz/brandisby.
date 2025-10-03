@@ -394,9 +394,12 @@ const sizeOptions = document.getElementById('sizeOptions');
 
 let currentProductData = null;
 
-/* CART helpers */
-function getCart(){ return JSON.parse(localStorage.getItem('cart')) || []; }
-function setCart(cart){ localStorage.setItem('cart', JSON.stringify(cart)); updateCartCount(); }
+/* CART helpers — UPDATED STORAGE KEYS */
+const STORAGE_KEY = 'seracCart';
+const CURRENCY_KEY = 'seracCurrency';
+
+function getCart(){ return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+function setCart(cart){ localStorage.setItem(STORAGE_KEY, JSON.stringify(cart)); updateCartCount(); }
 function updateCartCount(){
   const cart = getCart();
   cartCountElem.textContent = cart.reduce((sum,item)=>sum+Number(item.quantity||0),0);
@@ -444,7 +447,6 @@ const urlCurrency = urlParams.get('currency');
 async function loadProduct(){
   if(!productId) return;
   try{
-    // <-- UPDATED: load from Sérac brand path in Firestore
     const docRef = doc(db,"brands","serac","products",productId);
     const docSnap = await getDoc(docRef);
     if(docSnap.exists()){
