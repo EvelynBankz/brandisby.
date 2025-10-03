@@ -1,219 +1,238 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sérac - Contact Us</title>
-  <!-- Becko-style Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    /* ================= RESET & BASE ================= */
-    * { box-sizing: border-box; margin:0; padding:0; }
-    html, body { height:100%; font-family:"Montserrat", sans-serif; color:#F5F5F3; background:#141517; scroll-behavior:smooth; }
-    a { text-decoration:none; color: inherit; transition: color 0.3s ease; }
-    a:hover { color:#B66E41; }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sérac - Contact Us</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  /* ================= RESET & BASE ================= */
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { font-family:"Montserrat", sans-serif; color:#F5F5F3; background:#141517; scroll-behavior:smooth; }
+  a { text-decoration:none; color: inherit; transition: color 0.3s ease; }
+  a:hover { color:#B66E41; }
 
-    /* ================= HEADER ================= */
-    .site-header {
-      position: fixed; top:0; left:0; right:0;
-      display:flex; align-items:center; justify-content:space-between;
-      padding:10px 20px; z-index:1200; background:transparent;
-      border-bottom: 1px solid rgba(245,245,243,0.1);
-      transition: background 0.4s ease, box-shadow 0.4s ease, border-bottom 0.4s ease;
-      height:80px;
-    }
-    .site-header.scrolled { background: rgba(20,21,23,0.95); box-shadow:0 4px 20px rgba(0,0,0,0.6); border-bottom:1px solid rgba(255,255,255,0.08); }
-    .header-left { display:flex; align-items:center; gap:18px; }
-    .brand-logo { height:80px; width:auto; }
-    .brand-title { font-family:"Playfair Display", serif; font-weight:700; font-size:1.9rem; color:#B66E41; letter-spacing:1px; }
-    .header-right { display:flex; gap:24px; font-weight:500; }
-    .header-right a { color:#F5F5F3; position:relative; padding:6px 0; font-size:1rem; }
-    .header-right a::after { content:""; position:absolute; bottom:-4px; left:0; width:0; height:2px; background:#B66E41; transition:width 0.3s ease; }
-    .header-right a:hover::after { width:100%; }
+  /* ================= HEADER ================= */
+  .site-header {
+    position: fixed;
+    top:0; left:0; right:0;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:16px 28px;
+    background: transparent;
+    border-bottom:1px solid rgba(245,245,243,0.1);
+    transition: background 0.4s ease, box-shadow 0.4s ease;
+    z-index:1200;
+  }
+  .site-header.scrolled { background: rgba(20,21,23,0.95); box-shadow:0 4px 20px rgba(0,0,0,0.6); }
+  .header-left { display:flex; align-items:center; gap:12px; }
+  .brand-logo { height:70px; }
+  .brand-title { font-family:"Playfair Display", serif; font-size:28px; font-weight:700; color:#B66E41; }
+  .header-right { display:flex; gap:28px; font-weight:500; }
+  .header-right a::after {
+    content:""; position:absolute; bottom:-4px; left:0; width:0; height:2px; background:#B66E41; transition: width 0.3s ease;
+  }
+  .header-right a:hover::after { width:100%; }
 
-    /* ================= HAMBURGER ================= */
-    .hamburger { display:none; background:none; border:none; width:44px; height:40px; cursor:pointer; position: relative; z-index:1300; }
-    .hamburger span { display:block; height:3px; width:26px; background:#B66E41; margin:6px auto; border-radius:2px; transition: all 0.3s ease; }
-    .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 6px); }
-    .hamburger.open span:nth-child(2) { opacity:0; }
-    .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(6px, -6px); }
+  /* ================= HAMBURGER ================= */
+  .hamburger { display:none; background:none; border:none; width:30px; height:24px; position:relative; cursor:pointer; z-index:1300; }
+  .hamburger span { display:block; width:100%; height:3px; background:#B66E41; border-radius:2px; position:absolute; left:0; transition:0.3s; }
+  .hamburger span:nth-child(1){ top:0; }
+  .hamburger span:nth-child(2){ top:10px; }
+  .hamburger span:nth-child(3){ top:20px; }
+  .hamburger.open span:nth-child(1){ transform:rotate(45deg); top:10px; }
+  .hamburger.open span:nth-child(2){ opacity:0; }
+  .hamburger.open span:nth-child(3){ transform:rotate(-45deg); top:10px; }
 
-    /* ================= HERO ================= */
-    .hero {
-      height:100vh; display:flex; align-items:center; justify-content:center; text-align:center;
-      position:relative; margin-top:0;
-      opacity:0; transform: translateY(40px); transition: all 1s ease-out;
-    }
-    .hero.visible { opacity:1; transform: translateY(0); }
-    .hero::after {
-      content:""; position:absolute; inset:0;
-      background:url("asset/bg25.jpg") center/cover no-repeat;
-      z-index:-1; 
-      box-shadow:inset 0 0 0 2000px rgba(20,21,23,0.65);
-    }
-    .hero-text { position:relative; z-index:2; max-width:800px; padding:0 15px; }
-    .hero-text h1 { font-family:"Playfair Display", serif; font-size: clamp(42px,6vw,72px); margin-bottom:18px; color:#B66E41; line-height:1.2; }
-    .hero-text p { font-size: clamp(18px,2vw,26px); color:#F5F5F3; line-height:1.6; }
+  /* ================= HERO ================= */
+  .hero {
+    position:relative;
+    height:90vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    margin-top:80px;
+    overflow:hidden;
+  }
+  .hero::after {
+    content:""; position:absolute; inset:0;
+    background:url("asset/bg25.jpg") center/cover no-repeat;
+    z-index:-1;
+    box-shadow:inset 0 0 0 2000px rgba(20,21,23,0.65);
+  }
+  .hero-text { position:relative; color:#B66E41; }
+  .hero-text h1 { font-family:"Playfair Display", serif; font-size:clamp(36px,5vw,64px); margin-bottom:12px; }
+  .hero-text p { font-size:clamp(16px,2vw,22px); color:#eee; }
 
-    /* ================= STORYTELLING SECTIONS ================= */
-    section.story { padding:100px 20px; background:#1d1f22; color:#f5f5f5; opacity:0; transform: translateY(40px); transition: all 1s ease-out; }
-    section.story:nth-child(even) { background:#2a2d32; }
-    section.story.visible { opacity:1; transform: translateY(0); }
-    .story h2 { font-family:"Playfair Display", serif; font-size:clamp(28px,3vw,42px); margin-bottom:20px; color:#B66E41; text-align:center; }
-    .story p { font-size:18px; max-width:750px; margin:0 auto 40px auto; color:#d3d3d3; text-align:center; line-height:1.6; }
-    .story-flex { display:flex; gap:40px; align-items:center; justify-content:center; flex-wrap:wrap; margin-top:40px; }
-    .story-img { flex:1; min-width:300px; max-width:500px; border-radius:12px; overflow:hidden; }
-    .story-img img { width:100%; display:block; border-radius:12px; }
-    .story-text { flex:1; min-width:300px; max-width:600px; color:#f5f5f5; }
+  /* ================= STORYTELLING SECTIONS ================= */
+  section.story { padding:100px 20px; color:#f5f5f5; }
+  section.story .container { max-width:1200px; margin:auto; display:grid; grid-template-columns:1fr 1fr; gap:40px; align-items:center; }
+  section.story .story-text h2 { font-family:"Playfair Display", serif; font-size:clamp(28px,3vw,42px); color:#B66E41; margin-bottom:18px; }
+  section.story .story-text p { font-size:18px; color:#ccc; line-height:1.6; }
+  section.story img { width:100%; border-radius:16px; box-shadow:0 4px 20px rgba(0,0,0,0.6); }
 
-    /* ================= CONTACT SECTION ================= */
-    section.contact { padding:100px 20px; background:#1C1D20; opacity:0; transform: translateY(40px); transition: all 1s ease-out; }
-    section.contact.visible { opacity:1; transform: translateY(0); }
-    .section-header { text-align:center; margin-bottom:60px; }
-    .section-header h2 { font-family:"Playfair Display", serif; font-size:28px; color:#F5F5F3; margin-bottom:12px; }
-    .section-header p { font-size:18px; color:#ccc; }
+  /* ================= CONTACT ================= */
+  section.contact { padding:100px 20px; background:#1C1D20; }
+  .contact-flex { display:flex; justify-content:space-between; align-items:stretch; gap:50px; flex-wrap:wrap; }
+  .contact-info, .contact-form {
+    flex:1 1 300px;
+    background:#2A2B30;
+    padding:40px;
+    border-radius:16px;
+    box-shadow:0 4px 15px rgba(0,0,0,0.4);
+    transition:transform 0.3s ease;
+  }
+  .contact-info:hover, .contact-form:hover { transform:translateY(-4px); }
+  .contact-info h3, .contact-form h3 { font-family:"Playfair Display", serif; font-size:24px; margin-bottom:24px; color:#B66E41; }
+  .contact-info li { margin-bottom:16px; font-size:16px; display:flex; align-items:center; gap:12px; color:#ccc; }
+  .contact-info li i { color:#B66E41; }
 
-    .contact-flex { display:flex; justify-content:space-between; align-items:flex-start; gap:50px; flex-wrap:wrap; }
-    .contact-info, .contact-form { flex:1; background:#2A2B30; padding:40px; border-radius:16px; box-shadow:0 4px 15px rgba(0,0,0,0.4); transition:transform 0.3s ease; }
-    .contact-info:hover, .contact-form:hover { transform: translateY(-4px); }
-    .contact-info h3, .contact-form h3 { font-family:"Playfair Display", serif; font-size:24px; margin-bottom:24px; color:#B66E41; }
-    .contact-info li { margin-bottom:16px; font-size:16px; display:flex; align-items:center; gap:12px; color:#ccc; }
-    .contact-info li i { color:#B66E41; }
-    .contact-form input, .contact-form textarea { width:100%; margin-bottom:16px; padding:14px 16px; border:none; border-radius:10px; font-size:16px; outline:none; background:#4B4E54; color:#fff; transition: background 0.3s ease; }
-    .contact-form input:focus, .contact-form textarea:focus { background:#3a3d42; }
-    .contact-form textarea { min-height:140px; resize:vertical; }
-    .contact-form button { background:#B66E41; color:#fff; border:none; padding:16px; border-radius:10px; font-size:17px; font-weight:600; cursor:pointer; transition: all 0.3s ease; width:100%; }
-    .contact-form button:hover { background:#91542F; transform:scale(1.02); }
+  .contact-form input, .contact-form textarea {
+    width:100%; margin-bottom:16px;
+    padding:14px 16px; border:none; border-radius:10px;
+    font-size:16px; outline:none;
+    background:#4B4E54; color:#fff; transition: background 0.3s ease;
+  }
+  .contact-form input:focus, .contact-form textarea:focus { background:#3a3d42; }
+  .contact-form textarea { min-height:140px; resize:vertical; }
+  .contact-form button {
+    background:#B66E41; color:#fff; border:none;
+    padding:16px; border-radius:10px;
+    font-size:17px; font-weight:600;
+    cursor:pointer; transition: all 0.3s ease;
+    width:100%;
+  }
+  .contact-form button:hover { background:#91542F; transform:scale(1.02); }
 
-    /* ================= FOOTER ================= */
-    footer { text-align:center; padding:28px; background:#141517; color:#aaa; margin-top:60px; }
-    footer p { font-size:14px; }
+  /* ================= FOOTER ================= */
+  footer { text-align:center; padding:28px; background:#141517; color:#aaa; margin-top:60px; }
+  footer p { font-size:14px; }
 
-    /* ================= RESPONSIVE ================= */
-    @media(max-width:900px){ .contact-flex, .story-flex { flex-direction:column; } }
-    @media(max-width:768px){ .header-right { display:none; flex-direction:column; background:#1d1f22; position:absolute; top:80px; right:0; width:220px; padding:20px; } .header-right.open{ display:flex; } .hamburger{ display:block; } }
-  </style>
+  /* ================= RESPONSIVE ================= */
+  @media(max-width:900px){ section.story .container { grid-template-columns:1fr; gap:30px; } .contact-flex { flex-direction:column; } }
+  @media(max-width:600px){ .header-right { display:none; flex-direction:column; background:#141517; position:absolute; top:70px; right:0; width:220px; padding:20px; } .header-right.open { display:flex; } .hamburger { display:block; } .hero { height:50vh; } .hero-text h1 { font-size:28px; } }
+</style>
 </head>
 <body>
 
-  <!-- HEADER -->
-  <header class="site-header">
-    <div class="header-left">
-      <img src="asset/logo.png" alt="Sérac Logo" class="brand-logo">
-      <div class="brand-title">Sérac</div>
-    </div>
-    <nav class="header-right">
-      <a href="index.html">Home</a>
-      <a href="shop.html">Shop</a>
-      <a href="about.html">About</a>
-      <a href="customization.html">Customize</a>
-      <a href="contact.html">Contact</a>
-    </nav>
-    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
-  </header>
+<!-- HEADER -->
+<header class="site-header">
+  <div class="header-left">
+    <img src="asset/logo.png" alt="Sérac Logo" class="brand-logo">
+    <div class="brand-title">Sérac</div>
+  </div>
+  <nav class="header-right">
+    <a href="index.html">Home</a>
+    <a href="shop.html">Shop</a>
+    <a href="about.html">About</a>
+    <a href="customization.html">Customize</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+  <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+</header>
 
-  <!-- HERO -->
-  <section class="hero">
-    <div class="hero-text">
-      <h1>Contact Us</h1>
-      <p>Talk to our team — we’re here to help</p>
-    </div>
-  </section>
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-text">
+    <h1>Contact Us</h1>
+    <p>Talk to our team — we’re here to help</p>
+  </div>
+</section>
 
-  <!-- STORYTELLING SECTIONS -->
-  <section class="story">
-    <div class="container">
-      <h2>Why Reach Out to Sérac</h2>
-      <p>Whether it’s a partnership, an affiliate opportunity, a suggestion, or a question, connecting with us ensures a seamless and premium experience.</p>
-      <div class="story-flex">
-        <div class="story-img"><img src="asset/story1.jpg" alt="Why Contact Sérac"></div>
-        <div class="story-text"><p>We value transparency, quality, and commitment. Your voice is part of our growth, and we make it a priority to respond with clarity and care.</p></div>
+<!-- STORYTELLING SECTIONS -->
+<section class="story" style="background:#1d1f22;">
+  <div class="container">
+    <div class="story-text">
+      <h2>Why Contact Sérac</h2>
+      <p>Whether you have questions, want to partner, or explore our affiliate program, we make it simple and luxurious to reach us. Your ideas and proposals matter.</p>
+    </div>
+    <img src="asset/story1.jpg" alt="Why Contact Sérac">
+  </div>
+</section>
+
+<section class="story">
+  <div class="container">
+    <img src="asset/story2.jpg" alt="Our Craft Promise">
+    <div class="story-text">
+      <h2>Our Craft Promise</h2>
+      <p>Every inquiry is handled with precision, care, and speed. We believe in personalized attention, keeping our communication as sharp and refined as the Sérac brand itself.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="contact">
+  <div class="container">
+    <div class="section-header">
+      <h2>Get in Touch</h2>
+      <p>Got a proposal? Want to partner? Join our Affiliate program? Have questions or feedback? We’d love to hear from you.</p>
+    </div>
+
+    <div class="contact-flex">
+      <!-- INFO -->
+      <div class="contact-info">
+        <h3>Our Details</h3>
+        <ul>
+          <li><i class="fas fa-map-marker-alt"></i> Lagos, Nigeria</li>
+          <li><i class="fas fa-envelope"></i> contact.serac@gmail.com</li>
+          <li><i class="fas fa-phone"></i> +234 811 069 0932</li>
+          <li><i class="fas fa-clock"></i> Mon - Fri: 9AM - 6PM</li>
+        </ul>
+      </div>
+
+      <!-- FORM -->
+      <div class="contact-form">
+        <h3>Send us a Message</h3>
+        <form id="contactForm">
+          <input type="text" id="name" placeholder="Your Name" required>
+          <input type="email" id="email" placeholder="Your Email" required>
+          <textarea id="message" placeholder="Your Message" required></textarea>
+          <button type="submit">Send Message</button>
+        </form>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section class="story">
-    <div class="container">
-      <h2>Our Promise to You</h2>
-      <p>Every interaction is treated with the highest standard of professionalism. Expect timely replies, thoughtful guidance, and a dedication to resolving your needs efficiently.</p>
-      <div class="story-flex">
-        <div class="story-text"><p>From inquiries about our products to collaboration proposals, your experience with Sérac reflects our brand values: minimal, sharp, and luxurious.</p></div>
-        <div class="story-img"><img src="asset/story2.jpg" alt="Sérac Promise"></div>
-      </div>
-    </div>
-  </section>
+<!-- FOOTER -->
+<footer>
+  <p>© 2025 Sérac</p>
+</footer>
 
-  <!-- CONTACT SECTION -->
-  <section class="contact">
-    <div class="container">
-      <div class="section-header">
-        <h2>Get in Touch</h2>
-        <p>Got a proposal? Want to partner? Join our Affiliate program? Have questions? We’d love to hear from you.</p>
-      </div>
+<!-- SCRIPT -->
+<script>
+  // Hamburger toggle
+  const hamburger = document.getElementById('hamburger');
+  const navMenu = document.querySelector('.header-right');
+  hamburger.addEventListener('click', () => {
+    navMenu.classList.toggle('open');
+    hamburger.classList.toggle('open');
+  });
 
-      <div class="contact-flex">
-        <div class="contact-info">
-          <h3>Our Details</h3>
-          <ul>
-            <li><i class="fas fa-map-marker-alt"></i> Lagos, Nigeria</li>
-            <li><i class="fas fa-envelope"></i> contact.serac@gmail.com</li>
-            <li><i class="fas fa-phone"></i> +234 811 069 0932</li>
-            <li><i class="fas fa-clock"></i> Mon - Fri: 9AM - 6PM</li>
-          </ul>
-        </div>
+  // Contact form submission
+  const form = document.getElementById('contactForm');
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    alert("Thank you for contacting Sérac, " + document.getElementById('name').value + "! We'll get back to you soon.");
+    form.reset();
+  });
 
-        <div class="contact-form">
-          <h3>Send us a Message</h3>
-          <form id="contactForm">
-            <input type="text" id="name" placeholder="Your Name" required>
-            <input type="email" id="email" placeholder="Your Email" required>
-            <textarea id="message" placeholder="Your Message" required></textarea>
-            <button type="submit">Send Message</button>
-          </form>
-        </div>
-      </div>
-    </div>
-  </section>
+  // Firebase brand placeholder
+  const brand = "serac";
+  console.log("Contact form initialized for brand:", brand);
 
-  <!-- FOOTER -->
-  <footer>
-    <p>© 2025 Sérac</p>
-  </footer>
-
-  <!-- SCRIPT -->
-  <script>
-    // Hamburger toggle
-    const hamburger = document.getElementById('hamburger');
-    const navMenu = document.querySelector('.header-right');
-    hamburger.addEventListener('click', () => {
-      navMenu.classList.toggle('open');
-      hamburger.classList.toggle('open');
-    });
-
-    // Contact form
-    const form = document.getElementById('contactForm');
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      alert("Thank you for contacting Sérac, " + document.getElementById('name').value + "! We'll get back to you soon.");
-      form.reset();
-    });
-
-    // Change header background on scroll
-    window.addEventListener("scroll", () => {
-      const header = document.querySelector(".site-header");
-      if (window.scrollY > 50) header.classList.add("scrolled");
-      else header.classList.remove("scrolled");
-
-      // Animate sections on scroll
-      document.querySelectorAll('.story, .hero, .contact').forEach(el => {
-        const rect = el.getBoundingClientRect();
-        if(rect.top < window.innerHeight - 100) el.classList.add('visible');
-      });
-    });
-
-    // Trigger on page load for hero
-    window.dispatchEvent(new Event('scroll'));
-  </script>
+  // Header background on scroll
+  window.addEventListener("scroll", () => {
+    const header = document.querySelector(".site-header");
+    if (window.scrollY > 50) {
+      header.classList.add("scrolled");
+    } else {
+      header.classList.remove("scrolled");
+    }
+  });
+</script>
 </body>
 </html>
