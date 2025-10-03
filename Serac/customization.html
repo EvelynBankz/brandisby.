@@ -21,8 +21,12 @@
       padding:16px 28px;
       position:fixed; top:0; left:0; right:0;
       z-index:1000;
-      border-bottom:1px solid rgba(255,255,255,0.08);
-    }
+      border-bottom:1px solid rgba(255,255,255,0.08);}
+
+    .site-header.scrolled {
+      background:#141517;
+      border-bottom:1px solid rgba(255,255,255,0.08);}
+
     .header-left { display:flex; align-items:center; gap:12px; }
     .brand-logo { height:60px; }
     .brand-title { font-family:"Playfair Display", serif; font-size:24px; font-weight:700; color:#B66E41; }
@@ -218,6 +222,17 @@
 
     // Firebase brand context
     const firebaseBrand = "serac";
+
+    // Change header background on scroll
+window.addEventListener("scroll", () => {
+  const header = document.querySelector(".site-header");
+  if (window.scrollY > 50) {
+    header.classList.add("scrolled");
+  } else {
+    header.classList.remove("scrolled");
+  }
+});
+
   </script>
 </body>
 </html>
