@@ -60,16 +60,31 @@ a { text-decoration:none; color:inherit; transition: var(--transition); }
 
 /* HERO */
 .hero {
-  position: relative; height:85vh; display:flex;
-  justify-content:center; align-items:center; text-align:center;
-  margin-top:90px; overflow:hidden; padding:20px;
+  position: relative;
+  height:90vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  margin-top:82px;
+  overflow:hidden;
+  padding:20px;
+  background: none; /* Ensure no background is overriding */
 }
+
 .hero::after {
-  content:""; position:absolute; inset:0;
-  background: url('asset/bg25.jpg') center/cover no-repeat;
-  transform: scale(1.05); z-index:-1; mix-blend-mode: multiply;
-  box-shadow: inset 0 0 0 2000px rgba(20,21,23,0.6);
+  content:"";
+  position:absolute;
+  inset:0;
+  background: url('assets/bg25.jpg') center/cover no-repeat;
+  transform: scale(1.05);
+  z-index:-1;
+  mix-blend-mode: multiply;
+  border-radius:14px;
+  box-shadow: inset 0 0 0 1200px rgba(20,21,23,0.55);
+  filter: contrast(0.95) saturate(0.85);
 }
+
 .hero-text {
   position:relative; display:inline-block; color:var(--gold);
   padding:20px 28px; border-radius:12px;
