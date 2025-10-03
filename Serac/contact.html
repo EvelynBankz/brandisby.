@@ -23,12 +23,10 @@
       z-index:1000;
       border-bottom:1px solid rgba(255,255,255,0.1);
     }
-
     .site-header.scrolled {
-    background:#141517;
-    border-bottom:1px solid rgba(255,255,255,0.08);
+      background:#141517;
+      border-bottom:1px solid rgba(255,255,255,0.08);
     }
-
     .header-left { display:flex; align-items:center; gap:12px; }
     .brand-logo { height:70px; }
     .brand-title { font-family:"Playfair Display", serif; font-size:28px; font-weight:700; color: #B66E41; }
@@ -71,13 +69,23 @@
     }
     .hero-text p { font-size:clamp(16px,2vw,22px); color:#eee; }
 
+    /* STORY SECTIONS */
+    section.story { padding:100px 20px; }
+    section.story:nth-of-type(even) { background:#1C1D20; }
+    section.story .container { max-width:1100px; margin:auto; text-align:center; }
+    section.story h2 {
+      font-family:"Playfair Display", serif;
+      font-size:32px; margin-bottom:20px; color:#B66E41;
+    }
+    section.story p {
+      font-size:18px; color:#ccc; max-width:800px; margin:0 auto 20px;
+    }
+
     /* CONTACT SECTION */
     section.contact { padding:100px 20px; background:#1C1D20; }
     .container { max-width:1200px; margin:auto; }
 
-    .section-header {
-      text-align:center; margin-bottom:60px;
-    }
+    .section-header { text-align:center; margin-bottom:60px; }
     .section-header h2 {
       font-family:"Playfair Display", serif;
       font-size:28px; color:#F5F5F3; margin-bottom:12px;
@@ -88,7 +96,6 @@
       display:flex; justify-content:space-between; align-items:flex-start;
       gap:50px; flex-wrap:wrap;
     }
-
     .contact-info, .contact-form {
       flex:1; background:#2A2B30; padding:40px;
       border-radius:16px;
@@ -96,7 +103,6 @@
       transition:transform 0.3s ease;
     }
     .contact-info:hover, .contact-form:hover { transform: translateY(-4px); }
-
     .contact-info h3, .contact-form h3 {
       font-family:"Playfair Display", serif; font-size:24px; margin-bottom:24px; color:#B66E41;
     }
@@ -105,7 +111,6 @@
       display:flex; align-items:center; gap:12px; color:#ccc;
     }
     .contact-info li i { color:#B66E41; }
-
     .contact-form input,
     .contact-form textarea {
       width:100%; margin-bottom:16px;
@@ -170,6 +175,28 @@
     </div>
   </section>
 
+  <!-- STORYTELLING SECTIONS -->
+  <section class="story">
+    <div class="container">
+      <h2>Why Reach Out to Us</h2>
+      <p>Every conversation with Sérac is an opportunity to build something stronger. Whether you’re a customer with a question, an affiliate with a bold idea, or a partner with a vision, we believe dialogue sharpens the brand just as stone sharpens steel.</p>
+    </div>
+  </section>
+
+  <section class="story">
+    <div class="container">
+      <h2>Our Promise to You</h2>
+      <p>We answer with clarity, precision, and respect. Your concerns, feedback, and collaborations are treated with the same dedication we put into crafting every piece of Sérac. You reach out — we respond, sharp and cold, but always reliable.</p>
+    </div>
+  </section>
+
+  <section class="story">
+    <div class="container">
+      <h2>Partnership & Affiliates</h2>
+      <p>From affiliate opportunities to strategic partnerships, Sérac invites you to step into a world of sharp edges and bold moves. We don’t just collaborate — we craft alliances that endure like stone.</p>
+    </div>
+  </section>
+
   <!-- CONTACT -->
   <section class="contact">
     <div class="container">
@@ -185,7 +212,7 @@
           <ul>
             <li><i class="fas fa-map-marker-alt"></i> Lagos, Nigeria</li>
             <li><i class="fas fa-envelope"></i> contact.serac@gmail.com</li>
-            <li><i class="fas fa-phone"></i> +234 811 069 0932</li>
+            <li><i class="fas fa-phone"></i> +234 808 557 8326</li>
             <li><i class="fas fa-clock"></i> Mon - Fri: 9AM - 6PM</li>
           </ul>
         </div>
