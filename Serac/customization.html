@@ -8,25 +8,19 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* ================= RESET & BASE ================= */
+    /* RESET & BASE */
     * { box-sizing: border-box; margin:0; padding:0; }
     html, body { height: 100%; font-family: "Montserrat", Arial, sans-serif; color:#F5F5F3; background:#141517; scroll-behavior:smooth; }
     a { text-decoration:none; color: inherit; transition: color 0.3s ease; }
     a:hover { color:#B66E41; }
 
-    /* ================= HEADER ================= */
+    /* HEADER */
     .site-header {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 10px 20px;
-      z-index: 1200;
-      background: transparent;
-      border-bottom: 1px solid rgba(245,245,243,0.1);
-      transition: background 0.4s ease, box-shadow 0.4s ease;
-      height: 80px;
+      position: fixed; top: 0; left: 0; right: 0;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 20px; z-index: 1200;
+      background: transparent; border-bottom: 1px solid rgba(245,245,243,0.1);
+      transition: background 0.4s ease, box-shadow 0.4s ease; height: 80px;
     }
     .site-header.scrolled { background: rgba(20,21,23,0.95); box-shadow: 0 4px 20px rgba(0,0,0,0.6); }
     .header-left { display: flex; align-items: center; gap: 18px; }
@@ -35,71 +29,59 @@
     .header-right { display: flex; gap: 24px; font-weight:500; }
     .header-right a { color: #F5F5F3; position: relative; padding: 6px 0; font-size: 1rem; }
     .header-right a::after {
-      content: "";
-      position: absolute;
-      bottom: -4px;
-      left: 0;
-      width: 0;
-      height: 2px;
-      background: #B66E41;
-      transition: width 0.3s ease;
+      content: ""; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px;
+      background: #B66E41; transition: width 0.3s ease;
     }
     .header-right a:hover::after { width: 100%; }
 
-    /* ================= HAMBURGER ================= */
+    /* HAMBURGER */
     .hamburger { display:none; background:none; border:none; width:44px; height:40px; cursor:pointer; position: relative; z-index:1300; }
     .hamburger span { display:block; height:3px; width:26px; background:#B66E41; margin:6px auto; border-radius:2px; transition: all 0.3s ease; }
     .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 6px); }
     .hamburger.open span:nth-child(2) { opacity: 0; }
     .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(6px, -6px); }
 
-    /* ================= HERO ================= */
+    /* HERO */
     .hero-custom {
-      height: 90vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
+      height: 90vh; display:flex; align-items:center; justify-content:center; text-align:center;
       background: url("asset/bg25.jpg") center center / cover no-repeat;
-      position:relative;
-      margin-top:0;
+      position:relative; margin-top:0;
     }
     .hero-custom::after {
-      content:"";
-      position:absolute;
-      top:0;left:0;right:0;bottom:0;
-      background:rgba(20,21,23,0.6);
+      content:""; position:absolute; top:0;left:0;right:0;bottom:0; background:rgba(20,21,23,0.6);
     }
     .hero-custom .hero-text { position:relative; z-index:2; max-width:800px; padding:0 15px; }
     .hero-custom .hero-text h1 { font-family:"Playfair Display", serif; font-size: clamp(42px,6vw,72px); margin-bottom:18px; color:#B66E41; line-height:1.2; }
     .hero-custom .hero-text p { font-size: clamp(18px,2vw,26px); color:#F5F5F3; line-height:1.6; }
 
-    /* ================= CUSTOMIZATION SECTION ================= */
-    section.customization { padding:100px 20px; background:#1d1f22; color:#f5f5f5; }
-    .container { max-width:1200px; margin:auto; }
-    .customization h2 { text-align:center; font-size: clamp(28px,3vw,42px); margin-bottom:20px; font-family:"Playfair Display", serif; color:#B66E41; }
-    .custom-intro { text-align:center; max-width:700px; margin:0 auto 40px auto; font-size:18px; color:#d3d3d3; }
-
-    .custom-grid { display:grid; grid-template-columns:1fr 1fr; gap:40px; }
-    .custom-info, .custom-form {
-      background:#2a2d32;
-      padding:30px;
-      border-radius:12px;
-      box-shadow:0 4px 14px rgba(0,0,0,0.3);
-      transition:transform 0.3s ease;
+    /* STORY SECTIONS */
+    .story-section {
+      display:flex; align-items:center; gap:50px; padding:100px 20px;
+      max-width:1200px; margin:auto; flex-wrap:wrap;
     }
-    .custom-info:hover, .custom-form:hover { transform:translateY(-6px); }
-    .custom-info h3, .custom-form h3 { font-family:"Playfair Display", serif; font-size:24px; margin-bottom:20px; color:#B66E41; }
+    .story-text { flex:1; }
+    .story-text h2 { font-family:"Playfair Display", serif; font-size: clamp(28px,3vw,42px); color:#B66E41; margin-bottom:20px; }
+    .story-text p { font-size:18px; color:#d3d3d3; line-height:1.7; }
+    .story-img { flex:1; }
+    .story-img img { width:100%; border-radius:12px; box-shadow:0 4px 18px rgba(0,0,0,0.4); }
 
-    .custom-info ul { list-style:none; }
-    .custom-info li { margin-bottom:12px; font-size:16px; display:flex; align-items:center; gap:10px; color:#f5f5f5; }
-    .custom-info li i { color:#B66E41; }
+    /* FORM SECTION */
+    .custom-form-section {
+      background:#1d1f22; padding:100px 20px; text-align:center;
+    }
+    .custom-form-section h2 { font-family:"Playfair Display", serif; font-size: clamp(28px,3vw,42px); margin-bottom:20px; color:#B66E41; }
+    .custom-form-section p { max-width:700px; margin:0 auto 40px auto; font-size:18px; color:#d3d3d3; line-height:1.6; }
 
+    .custom-form {
+      max-width:600px; margin:0 auto; background:#2a2d32;
+      padding:30px; border-radius:12px; box-shadow:0 4px 14px rgba(0,0,0,0.3);
+      text-align:left;
+    }
+    .custom-form h3 { font-family:"Playfair Display", serif; font-size:24px; margin-bottom:20px; color:#B66E41; }
     .custom-form form { display:flex; flex-direction:column; gap:15px; }
     .custom-form input, .custom-form textarea {
       padding:12px 15px; border:none; border-radius:8px;
-      font-size:16px; outline:none;
-      background:#1d1f22; color:#f5f5f5;
+      font-size:16px; outline:none; background:#1d1f22; color:#f5f5f5;
     }
     .custom-form textarea { min-height:120px; resize:vertical; }
     .custom-form button {
@@ -109,12 +91,12 @@
     }
     .custom-form button:hover { background:#8a4d2b; transform:scale(1.05); }
 
-    /* ================= FOOTER ================= */
+    /* FOOTER */
     footer { text-align:center; padding:30px 20px; background:#141517; color:#f5f5f5; margin-top:80px; border-top:1px solid rgba(255,255,255,0.08); }
     footer p { color:#aaa; }
 
-    /* ================= RESPONSIVE ================= */
-    @media(max-width:900px){ .custom-grid { grid-template-columns:1fr; } }
+    /* RESPONSIVE */
+    @media(max-width:900px){ .story-section{flex-direction:column;} }
     @media(max-width:768px){
       .header-right { display:none; flex-direction:column; background:#1d1f22; position:absolute; top:80px; right:0; width:220px; padding:20px; border-left:1px solid rgba(245,245,243,0.08); }
       .header-right.open { display:flex; }
@@ -148,37 +130,36 @@
     </div>
   </section>
 
-  <!-- CUSTOMIZATION -->
-  <section class="customization">
-    <div class="container">
-      <h2>Request Your Customization</h2>
-      <p class="custom-intro">
-        Fill out the form below with your details and a brief description of your request. Our team will contact you to finalize details and provide a quote.
-      </p>
+  <!-- HOW IT WORKS (Storytelling style) -->
+  <section class="story-section">
+    <div class="story-img">
+      <img src="asset/custom-process.jpg" alt="Customization Process">
+    </div>
+    <div class="story-text">
+      <h2>How It Works</h2>
+      <p>At Sérac, customization is more than a service — it’s a collaboration. Here’s how it flows:</p>
+      <ul style="list-style:none; margin-top:20px; color:#f5f5f5; padding-left:0;">
+        <li><i class="fas fa-clock" style="color:#B66E41; margin-right:10px;"></i> Response time: Less than a Day</li>
+        <li><i class="fas fa-envelope" style="color:#B66E41; margin-right:10px;"></i> We’ll message you via WhatsApp</li>
+        <li><i class="fas fa-check-circle" style="color:#B66E41; margin-right:10px;"></i> Finalize customization details</li>
+        <li><i class="fas fa-money-check" style="color:#B66E41; margin-right:10px;"></i> Quote generated and payment link provided</li>
+      </ul>
+    </div>
+  </section>
 
-      <div class="custom-grid">
-        <!-- INFO -->
-        <div class="custom-info">
-          <h3>How It Works</h3>
-          <ul>
-            <li><i class="fas fa-clock"></i> Response time: Less than a Day</li>
-            <li><i class="fas fa-envelope"></i> We’ll message you via WhatsApp</li>
-            <li><i class="fas fa-check-circle"></i> Finalize customization details</li>
-            <li><i class="fas fa-money-check"></i> Quote generated and payment link provided</li>
-          </ul>
-        </div>
+  <!-- FORM SECTION -->
+  <section class="custom-form-section">
+    <h2>Request Your Customization</h2>
+    <p>Fill out the form below with your details and a brief description of your request. Our team will contact you to finalize details and provide a quote.</p>
 
-        <!-- FORM -->
-        <div class="custom-form">
-          <h3>Send Your Request</h3>
-          <form id="customForm">
-            <input type="text" id="name" placeholder="Your Name" required>
-            <input type="tel" id="phone" placeholder="Phone Number" required>
-            <textarea id="request" placeholder="Brief description of your request" required></textarea>
-            <button type="submit">Submit Request</button>
-          </form>
-        </div>
-      </div>
+    <div class="custom-form">
+      <h3>Send Your Request</h3>
+      <form id="customForm">
+        <input type="text" id="name" placeholder="Your Name" required>
+        <input type="tel" id="phone" placeholder="Phone Number" required>
+        <textarea id="request" placeholder="Brief description of your request" required></textarea>
+        <button type="submit">Submit Request</button>
+      </form>
     </div>
   </section>
 
