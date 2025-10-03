@@ -57,9 +57,9 @@ a { text-decoration:none; color:inherit; transition: color var(--transition); }
 .hamburger.open span:nth-child(1){ transform:rotate(45deg); top:11px; background:var(--gold); }
 .hamburger.open span:nth-child(2){ opacity:0; }
 .hamburger.open span:nth-child(3){ transform:rotate(-45deg); top:11px; background:var(--gold); }
-
-/* HERO *//* HERO */
-.hero {
+ 
+/* HERO */
+  .hero {
     position: relative;
     height: 90vh;
     display: flex;
@@ -138,13 +138,12 @@ footer { text-align:center; padding:22px; background:transparent; color:#bdbdbd;
   .mobile-cart .cart-count { position:absolute; top:-8px; right:-8px; }
   .hero-text h1 { font-size:32px; }
 }
-
-
- @media(max-width:600px){
-      .hero { height:40vh; margin-top:0; padding-top:80px; }
-      .hero-text h1 { font-size:clamp(24px,5vw,32px); line-height:1.2; margin:0; }
-      .hero-text p { font-size:clamp(14px,2.5vw,18px); margin:0 auto; }
-    }
+  
+@media(max-width:600px){
+  .hero { height:40vh; margin-top:0; padding-top:80px; }
+  .hero-text h1 { font-size:clamp(24px,5vw,32px); line-height:1.2; margin:0; }
+  .hero-text p { font-size:clamp(14px,2.5vw,18px); margin:0 auto; }
+}
 
   
 button:focus, a:focus, input:focus, select:focus { outline: 3px solid rgba(182,110,65,0.12); outline-offset:2px; }
