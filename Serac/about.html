@@ -10,116 +10,62 @@
   <style>
     /* ================= RESET & BASE ================= */
     * { box-sizing: border-box; margin:0; padding:0; }
-    html, body { height: 100%; font-family: "Montserrat", Arial, sans-serif; color:#F5F5F3; background:#121212; scroll-behavior:smooth; }
+    html, body { height: 100%; font-family: "Montserrat", Arial, sans-serif; color:#F5F5F3; background:#141517; scroll-behavior:smooth; }
     a { text-decoration:none; color: inherit; transition: color 0.3s ease; }
     a:hover { color:#B66E41; }
-  
-  /* ================= HEADER ================= */
-  .site-header {
-    position: fixed;
-    top: 0; 
-    left: 0; 
-    right: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 4px 20px;        /* reduced vertical padding */
-    padding-left: 15px;       /* keep your left spacing */
-    z-index: 1200;
-    background: transparent;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    transition: background 0.4s ease, box-shadow 0.4s ease;
-    height: 80px;             /* explicitly control header height */
-  }
-  
-  .site-header.scrolled {
-    background: rgba(18,18,18,0.95);
-    box-shadow: 0 2px 10px rgba(0,0,0,0.6);
-  }
-  
-  .header-left { 
-    display: flex; 
-    align-items: center; 
-    gap: 20px;                /* smaller gap between logo + text */
-  }
-  
-  .brand-logo { 
-    height: 80px;             /* smaller logo height */
-    width: auto; 
-  }
-  
-  .brand-title { 
-    font-family: "Playfair Display", serif; 
-    font-weight: 700; 
-    font-size: 1.8rem;        /* smaller title */
-    color: #B66E41; 
-    letter-spacing: 1px;
-    margin: 0;                /* remove any default margin */
-  }
-  
-  .header-right { 
-    display: flex; 
-    gap: 20px;                /* tighter nav links */
-    font-weight: 500; 
-  }
-  
-  .header-right a { 
-    color: #B66E41; 
-    position: relative; 
-    padding: 4px 0;           /* reduce top/bottom space inside links */
-  }
-  
-  .header-right a::after {
-    content: "";
-    position: absolute;
-    bottom: -3px;             /* move line closer to text */
-    left: 0;
-    width: 0; 
-    height: 2px;
-    background: #D4AF37;
-    transition: width 0.3s ease;
-  }
-  
-  .header-right a:hover::after { width: 100%; }
+
+    /* ================= HEADER ================= */
+    .site-header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 20px;
+      z-index: 1200;
+      background: transparent;
+      border-bottom: 1px solid rgba(245,245,243,0.1);
+      transition: background 0.4s ease, box-shadow 0.4s ease;
+      height: 80px;
+    }
+
+    .site-header.scrolled {
+      background: rgba(20,21,23,0.95);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+    }
+
+    .header-left { display: flex; align-items: center; gap: 18px; }
+    .brand-logo { height: 80px; width: auto; }
+    .brand-title { font-family: "Playfair Display", serif; font-weight: 700; font-size: 1.9rem; color: #B66E41; letter-spacing: 1px; }
+    .header-right { display: flex; gap: 24px; font-weight:500; }
+    .header-right a { color: #F5F5F3; position: relative; padding: 6px 0; font-size: 1rem; }
+    .header-right a::after {
+      content: "";
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: #B66E41;
+      transition: width 0.3s ease;
+    }
+    .header-right a:hover::after { width: 100%; }
 
     /* ================= HAMBURGER ================= */
-    .hamburger { 
-      display:none; 
-      background:none; 
-      border:none; 
-      width:44px; 
-      height:40px; 
-      cursor:pointer; 
-      position: relative; 
-      z-index:1300; 
-    }
-    .hamburger span {
-      display:block;
-      height:3px;
-      width:26px;
-      background:#B66E41;
-      margin:6px auto;
-      border-radius:2px;
-      transition: all 0.3s ease;
-    }
-    .hamburger.open span:nth-child(1) {
-      transform: rotate(45deg) translate(5px, 6px);
-    }
-    .hamburger.open span:nth-child(2) {
-      opacity: 0;
-    }
-    .hamburger.open span:nth-child(3) {
-      transform: rotate(-45deg) translate(6px, -6px);
-    }
+    .hamburger { display:none; background:none; border:none; width:44px; height:40px; cursor:pointer; position: relative; z-index:1300; }
+    .hamburger span { display:block; height:3px; width:26px; background:#B66E41; margin:6px auto; border-radius:2px; transition: all 0.3s ease; }
+    .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 6px); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(6px, -6px); }
 
     /* ================= HERO ================= */
     .hero-about {
-      height: 90vh;
+      height: 85vh;
       display:flex;
       align-items:center;
       justify-content:center;
       text-align:center;
-      background: url("bg.jpg") center center / cover no-repeat;
+      background: url("asset/bg26.jpg") center center / cover no-repeat;
       margin-top: 0;
       position:relative;
     }
@@ -127,68 +73,44 @@
       content:"";
       position:absolute;
       top:0;left:0;right:0;bottom:0;
-      background:rgba(18,18,18,0.5);
+      background:rgba(20,21,23,0.6);
     }
-    .hero-about .hero-text {
-      position:relative;
-      z-index:2;
-    }
-    .hero-about .hero-text h1 { font-family:"Playfair Display", serif; font-size: clamp(42px,5.5vw,72px); margin-bottom:16px; color:#B66E41; animation: fadeInDown 1s ease; }
-    .hero-about .hero-text p { font-size: clamp(18px,2vw,26px); max-width:700px; color:#B66E41; margin:0 auto; animation: fadeInUp 1.2s ease; }
+    .hero-about .hero-text { position:relative; z-index:2; max-width:800px; padding:0 15px; }
+    .hero-about .hero-text h1 { font-family:"Playfair Display", serif; font-size: clamp(42px,6vw,72px); margin-bottom:18px; color:#B66E41; line-height:1.2; animation: fadeInDown 1s ease; }
+    .hero-about .hero-text p { font-size: clamp(18px,2vw,26px); color:#F5F5F3; line-height:1.6; animation: fadeInUp 1.2s ease; }
 
     /* ================= SECTIONS ================= */
     section { padding:100px 20px; position:relative; }
     .container { max-width:1200px; margin:0 auto; text-align:center; }
-    section h2 { font-family:"Playfair Display", serif; font-size: clamp(30px,3vw,44px); margin-bottom:24px; color:#B66E41; letter-spacing:1px; }
-    section p { font-size: clamp(16px,1.6vw,20px); line-height:1.8; margin-bottom:16px; color:#EDEDED; }
+    section h2 { font-family:"Playfair Display", serif; font-size: clamp(28px,3vw,42px); margin-bottom:20px; color:#B66E41; letter-spacing:1px; }
+    section p { font-size: clamp(16px,1.6vw,20px); line-height:1.8; margin-bottom:18px; color:#EDEDED; }
 
-    #faq, #testimonials, #how-to-shop, #working-hours { background:#1C1C1C; }
+    #faq, #testimonials, #how-to-shop, #working-hours { background:#1C1C1C; border-radius:12px; padding:80px 20px; }
 
-/* Vision / Affiliate / Partnerships with images (Becko style) */
-  #vision, #affiliate, #partnerships {
-    background: linear-gradient(180deg, #0a0a0a 0%, #111111 100%);
-    border: 1px solid rgba(212, 175, 55, 0.2); /* soft golden outline */
-    border-radius: 16px;
-    padding: 80px 40px; 
-    margin: 60px auto; 
-    max-width: 1200px;  /* keeps it centered and not too wide */
-    box-shadow: 0 8px 24px rgba(0,0,0,0.6);
-  }
-  
-  /* Keep inner container flex layout */
-  #vision .container, 
-  #affiliate .container, 
-  #partnerships .container {
-    display:flex;
-    flex-wrap:wrap;
-    align-items:center;
-    justify-content:space-between;
-    gap:40px;
-    text-align:left;
-  }
-  
-  /* Section images */
-  #vision img, #affiliate img, #partnerships img {
-    flex:1 1 45%;
-    border-radius:16px;
-    box-shadow:0 6px 18px rgba(0,0,0,0.6);
-    transition: transform 0.4s ease;
-  }
-  #vision img:hover, #affiliate img:hover, #partnerships img:hover {
-    transform: scale(1.05);
-  }
-  
-  /* Section text */
-  #vision .text, #affiliate .text, #partnerships .text {
-    flex:1 1 45%;
-  }
-
+    /* Vision / Affiliate / Partnerships */
+    #vision, #affiliate, #partnerships {
+      background:#141517;
+      border-radius:16px;
+      padding:80px 40px;
+      margin:60px auto;
+      max-width:1200px;
+      box-shadow: 0 10px 28px rgba(0,0,0,0.7);
+      border: 1px solid rgba(182,110,65,0.3);
+    }
+    #vision .container, #affiliate .container, #partnerships .container {
+      display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:40px; text-align:left;
+    }
+    #vision img, #affiliate img, #partnerships img {
+      flex:1 1 45%; border-radius:16px; box-shadow:0 6px 20px rgba(0,0,0,0.6); transition: transform 0.4s ease;
+    }
+    #vision img:hover, #affiliate img:hover, #partnerships img:hover { transform: scale(1.05); }
+    #vision .text, #affiliate .text, #partnerships .text { flex:1 1 45%; }
 
     /* ================= FAQ ================= */
-    .faq-item { background:#121212; margin-bottom:12px; border-radius:6px; overflow:hidden; cursor:pointer; border:1px solid rgba(255,255,255,0.08); transition: all 0.3s; }
-    .faq-item:hover { border-color:#291c14; }
-    .faq-question { padding:18px; font-weight:500; display:flex; justify-content: space-between; align-items:center; font-size:18px; }
-    .faq-answer { padding:0 18px 18px 18px; display:none; font-size:16px; line-height:1.7; color:#ccc; }
+    .faq-item { background:#141517; margin-bottom:12px; border-radius:8px; overflow:hidden; cursor:pointer; border:1px solid rgba(245,245,243,0.08); transition: all 0.3s; }
+    .faq-item:hover { border-color:#B66E41; }
+    .faq-question { padding:20px; font-weight:500; display:flex; justify-content: space-between; align-items:center; font-size:18px; }
+    .faq-answer { padding:0 20px 20px 20px; display:none; font-size:16px; line-height:1.7; color:#ccc; }
 
     /* ================= TESTIMONIALS ================= */
     .testimonials { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:28px; margin-top:32px; }
@@ -201,58 +123,41 @@
       flex-direction: column;
       justify-content: space-between;
       transition: transform 0.3s, border 0.3s;
-      border:1px solid rgba(255,255,255,0.08);
+      border:1px solid rgba(245,245,243,0.08);
     }
-    .testimonial-card:hover { transform: translateY(-8px); border-color:#D4AF37; }
-    .testimonial-stars { color: #291c14; margin-bottom:10px; font-size:1.1rem; }
-    .testimonial-text { font-size:17px; line-height:1.7; margin-bottom:14px; }
+    .testimonial-card:hover { transform: translateY(-8px); border-color:#B66E41; }
+    .testimonial-stars { color: #B66E41; margin-bottom:10px; font-size:1.1rem; }
+    .testimonial-text { font-size:17px; line-height:1.7; margin-bottom:14px; color:#F5F5F3; }
     .testimonial-author { font-weight:500; font-size: 1rem; color:#bbb; }
 
     .toggle-btn {
       margin-top:28px;
-      background:#291c14;
-      color:#121212;
+      background:#B66E41;
+      color:#141517;
       border:none;
-      padding:12px 22px;
+      padding:12px 24px;
       border-radius:30px;
       cursor:pointer;
       font-weight:600;
       transition: all 0.3s ease;
     }
-    .toggle-btn:hover { background:#B66E41; color:#fff; }
+    .toggle-btn:hover { background:#F5F5F3; color:#141517; }
 
     /* ================= FOOTER ================= */
-    .site-footer { text-align:center; padding:30px 20px; background: #121212; color:#aaa; font-size:0.95rem; border-top:1px solid rgba(255,255,255,0.08); }
+    .site-footer { text-align:center; padding:30px 20px; background: #141517; color:#aaa; font-size:0.95rem; border-top:1px solid rgba(245,245,243,0.08); }
 
     /* ================= ANIMATIONS ================= */
-    @keyframes fadeInDown {
-      from { opacity:0; transform: translateY(-40px); }
-      to { opacity:1; transform: translateY(0); }
-    }
-    @keyframes fadeInUp {
-      from { opacity:0; transform: translateY(40px); }
-      to { opacity:1; transform: translateY(0); }
-    }
+    @keyframes fadeInDown { from { opacity:0; transform: translateY(-40px); } to { opacity:1; transform: translateY(0); } }
+    @keyframes fadeInUp { from { opacity:0; transform: translateY(40px); } to { opacity:1; transform: translateY(0); } }
 
     /* ================= RESPONSIVE ================= */
     @media(max-width:900px){
-      #vision .container, #affiliate .container, #partnerships .container {
-        flex-direction:column;
-        text-align:center;
-      }
+      #vision .container, #affiliate .container, #partnerships .container { flex-direction:column; text-align:center; }
       #vision img, #affiliate img, #partnerships img { width:100%; }
     }
     @media(max-width:600px){
       .header-right { 
-        position: absolute;
-        top: 80px;
-        right: 0;
-        background: rgba(18,18,18,0.95);
-        flex-direction: column;
-        width: 220px;
-        padding: 24px;
-        display: none;
-        border-radius: 0 0 0 12px;
+        position: absolute; top: 80px; right: 0; background: rgba(20,21,23,0.95); flex-direction: column; width: 220px; padding: 24px; display: none; border-radius: 0 0 0 12px;
       }
       .header-right.open { display: flex; }
       .hamburger { display: block; }
@@ -269,7 +174,7 @@
   <!-- HEADER -->
   <header class="site-header" id="siteHeader">
     <div class="header-left">
-      <img src="logo.png" alt="Serac Logo" class="brand-logo">
+      <img src="asset/logo.png" alt="Serac Logo" class="brand-logo">
       <div class="brand-title">Serac</div>
     </div>
     <nav class="header-right">
