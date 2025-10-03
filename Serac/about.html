@@ -84,6 +84,8 @@
     #faq, #testimonials, #how-to-shop, #working-hours { background:#1C1C1C; border-radius:12px; padding:80px 20px; }
 
     /* ================= VISION / AFFILIATE / PARTNERSHIPS ================= */
+   
+    /* Vision / Affiliate / Partnerships */
     #vision, #affiliate, #partnerships {
       background:#141517;
       border-radius:16px;
@@ -93,28 +95,18 @@
       box-shadow: 0 10px 28px rgba(0,0,0,0.7);
       border: 1px solid rgba(182,110,65,0.3);
     }
-
-    /* Flex layout for text and image */
-    #vision .container,
-    #affiliate .container,
-    #partnerships .container {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 40px;
-      text-align: left;
-      flex-wrap: nowrap;
+    #vision .container, #affiliate .container, #partnerships .container {
+      display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:40px; text-align:left;
     }
-    /* Text and image width */
-    #vision .text, #affiliate .text, #partnerships .text,
     #vision img, #affiliate img, #partnerships img {
-      flex: 1 1 50%;
+      flex: 1 1 40%;        /* smaller image */
+      max-width: 400px;     /* limit width */
       border-radius:16px;
       box-shadow:0 6px 20px rgba(0,0,0,0.6);
       transition: transform 0.4s ease;
     }
-    /* Hover effect */
     #vision img:hover, #affiliate img:hover, #partnerships img:hover { transform: scale(1.05); }
+    #vision .text, #affiliate .text, #partnerships .text { flex:1 1 55%; }
 
     /* Alternate layout for Affiliate section */
     #affiliate .container { flex-direction: row-reverse; }
@@ -164,13 +156,10 @@
     @keyframes fadeInUp { from { opacity:0; transform: translateY(40px); } to { opacity:1; transform: translateY(0); } }
 
     /* ================= RESPONSIVE ================= */
-    @media(max-width:900px){
-      #vision .container,
-      #affiliate .container,
-      #partnerships .container { flex-direction: column; text-align: center; }
-      #vision img,
-      #affiliate img,
-      #partnerships img { width:100%; margin-top:20px; }
+  @media(max-width:900px){
+      #vision .container, #affiliate .container, #partnerships .container { flex-direction:column; text-align:center; }
+      #vision img, #affiliate img, #partnerships img { width:100%; max-width:100%; }
+      #vision .text, #affiliate .text, #partnerships .text { flex:1 1 100%; }
     }
     @media(max-width:600px){
       .header-right { 
