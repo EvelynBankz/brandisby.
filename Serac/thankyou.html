@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thank You - Sérac</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* RESET */
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:"Montserrat",sans-serif;background:#141517;color:#fff;line-height:1.6;text-align:center;}
+    a{text-decoration:none;color:inherit;}
+
+    /* HEADER */
+    .site-header{background:#141517;color:#fff;display:flex;justify-content:space-between;align-items:center;padding:16px 28px;position:fixed;top:0;left:0;right:0;z-index:1000;border-bottom:1px solid #2a2c31;}
+    .header-left{display:flex;align-items:center;gap:12px;}
+    .brand-logo{height:60px;}
+    .brand-title{font-family:"Playfair Display",serif;font-size:24px;font-weight:700;letter-spacing:1px;color:#B66E41;}
+    .header-right{display:flex;gap:20px;align-items:center;}
+    .header-right a{font-weight:500;transition:color 0.3s;}
+    .header-right a:hover{color:#B66E41;}
+    .cart-count{background:#B66E41;color:#fff;font-size:12px;font-weight:600;border-radius:50%;padding:2px 6px;margin-left:4px;}
+    .hamburger{display:none;background:none;border:none;cursor:pointer;width:30px;height:24px;position:relative;}
+    .hamburger span{display:block;width:100%;height:3px;background:#fff;border-radius:2px;position:absolute;left:0;transition:0.3s;}
+    .hamburger span:nth-child(1){top:0;}
+    .hamburger span:nth-child(2){top:10px;}
+    .hamburger span:nth-child(3){top:20px;}
+    .hamburger.open span:nth-child(1){transform:rotate(45deg);top:10px;}
+    .hamburger.open span:nth-child(2){opacity:0;}
+    .hamburger.open span:nth-child(3){transform:rotate(-45deg);top:10px;}
+
+    /* HERO */
+    .hero{position:relative;height:90vh;display:flex;justify-content:center;align-items:center;text-align:center;margin-top:80px;overflow:hidden;}
+    .hero::after{content:"";position:absolute;inset:0;background:url('asset/bg2.jpg') center/cover no-repeat;transform:scale(1.1);z-index:-1;border-radius:12px;box-shadow:inset 0 0 0 2000px rgba(20,21,23,0.6);}
+    .hero-text{position:relative;display:inline-block;color:#B66E41;animation:fadeInUp 1s ease;}
+    .hero-text h1{font-family:"Playfair Display",serif;font-size:clamp(32px,5vw,56px);}
+
+    @keyframes fadeInUp {
+      from {opacity:0; transform:translateY(30px);}
+      to {opacity:1; transform:translateY(0);}
+    }
+
+    /* THANK YOU SECTION */
+    .thankyou-section{padding:80px 20px;}
+    .thankyou-box{background:#1c1e22;padding:40px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.4);max-width:700px;margin:auto;color:#ddd;}
+    .thankyou-box h2{font-family:"Playfair Display",serif;font-size:28px;margin-bottom:20px;color:#B66E41;}
+    .thankyou-box p{font-size:18px;margin-bottom:24px;color:#ccc;}
+    .order-details{text-align:left;margin-top:20px;}
+    .order-details h3{margin-bottom:10px;font-family:"Playfair Display",serif;color:#B66E41;}
+    .order-details ul{list-style:none;padding:0;margin:0;}
+    .order-details li{margin-bottom:8px;font-size:16px;color:#eee;}
+    .btn{display:inline-block;padding:14px 28px;border-radius:8px;font-weight:600;transition:0.3s;}
+    .btn-primary{background:#B66E41;color:#fff;border:none;}
+    .btn-primary:hover{background:#a25f37;}
+    .btn-secondary{background:transparent;color:#B66E41;border:2px solid #B66E41;margin-left:10px;}
+    .btn-secondary:hover{background:#B66E41;color:#fff;}
+
+    footer{text-align:center;padding:20px;background:#141517;color:#777;margin-top:60px;border-top:1px solid #2a2c31;}
+
+    @media(max-width:800px){
+      .header-right{display:none;flex-direction:column;position:absolute;top:70px;right:0;background:#141517;width:200px;padding:20px;}
+      .header-right.open{display:flex;}
+      .hamburger{display:block;}
+      .thankyou-box{padding:20px;}
+    }
+
+    /* MOBILE HERO ADJUSTMENT */
+    @media(max-width:600px){
+      .hero {height:40vh;margin-top:0;padding-top:80px;}
+      .hero-text h1 {font-size:clamp(24px,5vw,32px);line-height:1.2;margin:0;}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="header-left">
+      <img src="logo.png" alt="Sérac Logo" class="brand-logo">
+      <div class="brand-title">Sérac</div>
+    </div>
+    <nav class="header-right">
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-text">
+      <h1>Thank You</h1>
+    </div>
+  </section>
+
+  <!-- THANK YOU SECTION -->
+  <section class="thankyou-section">
+    <div class="thankyou-box">
+      <h2>We’ve received your order 🎉</h2>
+      <p>Thank you for shopping with <strong>Sérac</strong>.  
+      Your order is being processed and you’ll receive a confirmation email shortly.</p>
+
+      <!-- ORDER DETAILS -->
+      <div class="order-details" id="orderDetails"></div>
+
+      <a href="shop.html" class="btn btn-primary">Continue Shopping</a>
+      <a href="index.html" class="btn btn-secondary">Return Home</a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2025 Sérac</p>
+  </footer>
+
+  <script>
+    // Hamburger toggle
+    document.getElementById('hamburger').addEventListener('click',()=>{
+      document.querySelector('.header-right').classList.toggle('open');
+      document.getElementById('hamburger').classList.toggle('open');
+    });
+
+    // Load order details from localStorage (set in checkout.html)
+    const orderData = JSON.parse(localStorage.getItem('lastOrder_serac'));
+    if(orderData){
+      const detailsDiv = document.getElementById('orderDetails');
+      let html = `
+        <h3>Order Details</h3>
+        <ul>
+          <li><strong>Name:</strong> ${orderData.name}</li>
+          <li><strong>Email:</strong> ${orderData.email}</li>
+          <li><strong>Phone:</strong> ${orderData.phone}</li>
+          <li><strong>Address:</strong> ${orderData.address}</li>
+          <li><strong>Currency:</strong> ${orderData.currency}</li>
+          <li><strong>Total Paid:</strong> ${orderData.currency} ${orderData.total}</li>
+        </ul>
+        <h3>Items</h3>
+        <ul>`;
+      orderData.items.forEach(item=>{
+        html+=`<li>${item.name} (x${item.quantity})</li>`;
+      });
+      html+=`</ul>`;
+      detailsDiv.innerHTML = html;
+
+      // Clear after displaying
+      localStorage.removeItem('lastOrder_serac');
+    }
+  </script>
+</body>
+</html>
