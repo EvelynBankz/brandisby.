@@ -227,11 +227,13 @@ const cartSubtotalElem = document.getElementById('cartSubtotal');
 const checkoutBtn = document.getElementById('checkoutBtn');
 const currencySelect = document.getElementById('currency');
 
-// Updated keys to match shop.html localStorage
+// SYNCHRONIZED with shop.html localStorage
 const STORAGE_KEY = 'seracCart';
 const CURRENCY_KEY = 'seracCurrency';
 
+// load cart from Sérac storage
 let cart = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+
 if(localStorage.getItem(CURRENCY_KEY)) currencySelect.value = localStorage.getItem(CURRENCY_KEY);
 
 function formatPrice(value, currency){
@@ -386,6 +388,7 @@ window.addEventListener('storage', (e)=>{
     updateCartCount();
   }
 });
+
 </script>
 </body>
 </html>
