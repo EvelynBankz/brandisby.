@@ -1,258 +1,234 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Sérac Admin Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&display=swap" rel="stylesheet">
-<style>
-  * { box-sizing:border-box; margin:0; padding:0; }
-  body { font-family:"Be Vietnam Pro", sans-serif; background:#0a0a0a; color:#fff; line-height:1.6; }
-  a { text-decoration:none; color:inherit; }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sérac Admin Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:"Be Vietnam Pro", sans-serif; background:#0a0a0a; color:#fff; line-height:1.6; }
+    a { text-decoration:none; color:inherit; }
 
-  header {
-    top:0;
-    z-index:1000;
-    background:transparent;
-    transition: background 0.3s ease;
-    color:#fff;
-    padding:1rem 2rem;
-    font-size:1.8rem;
-    font-weight:700;
-    letter-spacing:1px;
-    text-align:center;
-  }
-  header.scrolled { background:#000; }
+    header {
+      top:0; z-index:1000; background:transparent; transition: background 0.3s ease;
+      color:#fff; padding:1rem 2rem; font-size:1.8rem; font-weight:700; letter-spacing:1px; text-align:center;
+    }
+    header.scrolled { background:#000; }
 
-  .container {
-    max-width:1000px;
-    margin:2rem auto;
-    padding:2rem;
-    background:#1a1a1a; /* same as customization.html form background */
-    border-radius:12px;
-    box-shadow:0 4px 16px rgba(0,0,0,0.7);
-  }
+    .container { max-width:1000px; margin:2rem auto; padding:2rem; background:#1a1a1a; border-radius:12px; box-shadow:0 4px 16px rgba(0,0,0,0.7); }
 
-  h2 { font-weight:700; margin-bottom:1rem; color:#fff; letter-spacing:0.5px; }
-  h3 { font-weight:600; color:#fff; margin-top:1rem; }
+    h2 { font-weight:700; margin-bottom:1rem; color:#fff; letter-spacing:0.5px; }
+    label { display:block; margin-top:1rem; font-weight:600; color:#ddd; }
+    input, textarea, select { width:100%; padding:0.6rem; margin-top:0.5rem; border:1px solid #444; border-radius:6px; font-size:1rem; background:#0a0a0a; color:#fff; }
+    button { margin-top:1rem; padding:0.75rem 1.2rem; background:#8A4D2B; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:700; transition:0.3s; }
+    button:hover { background:#a35d39; }
 
-  label { display:block; margin-top:1rem; font-weight:600; }
-  input, textarea, select { width:100%; padding:0.6rem; margin-top:0.5rem; border:1px solid #444; border-radius:6px; font-size:1rem; background:#0a0a0a; color:#fff; }
-  button { margin-top:1rem; padding:0.75rem 1.2rem; background:#8A4D2B; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:700; transition:0.3s; } /* button color same as customization */
-  button:hover { background:#a35d39; }
+    .message { margin-top:1rem; font-weight:500; font-size:1rem; text-align:center; color:#fff; }
 
-  .message { margin-top:1rem; font-weight:500; font-size:1rem; text-align:center; }
+    table { width:100%; border-collapse:collapse; margin-top:1.5rem; background:#111; border:1px solid #333; border-radius:12px; overflow:hidden; }
+    th, td { padding:0.75rem; border-bottom:1px solid #222; text-align:left; font-size:0.95rem; vertical-align:top; }
+    th { background:#222; color:#fff; font-weight:700; }
+    td img { width:60px; border-radius:6px; }
 
-  table { width:100%; border-collapse:collapse; margin-top:1.5rem; background:#111; border:1px solid #333; border-radius:12px; overflow:hidden; }
-  th, td { padding:0.75rem; border-bottom:1px solid #222; text-align:left; font-size:0.95rem; vertical-align:top; }
-  th { background:#222; color:#fff; font-weight:700; }
-  td img { width:60px; border-radius:6px; }
+    .actions button { margin-right:0.5rem; padding:0.4rem 0.6rem; font-size:0.9rem; background:#8A4D2B; color:#fff; }
+    .actions button:hover { background:#a35d39; }
 
-  .actions button { margin-right:0.5rem; padding:0.4rem 0.6rem; font-size:0.9rem; background:#8A4D2B; color:#fff; }
-  .actions button:hover { background:#a35d39; }
+    .small-note { font-size:0.9rem; color:#bbb; margin-top:8px; }
 
-  .small-note { font-size:0.9rem; color:#bbb; margin-top:8px; }
+    .dashboard-nav { display:flex; gap:10px; margin-bottom:1.5rem; }
+    .dashboard-nav button { flex:1; background:#8A4D2B; color:#fff; border:1px solid #8A4D2B; transition:0.3s; }
+    .dashboard-nav button:hover { background:#a35d39; }
 
-  .dashboard-nav { display:flex; gap:10px; margin-bottom:1.5rem; }
-  .dashboard-nav button { flex:1; background:#8A4D2B; color:#fff; border:1px solid #8A4D2B; transition:0.3s; }
-  .dashboard-nav button:hover { background:#a35d39; }
+    .section { display:none; margin-top:1rem; }
+    .section.active { display:block; }
 
-  .section { display:none; margin-top:1rem; }
-  .section.active { display:block; }
+    .quote-item { border:1px solid #444; padding:8px; margin-top:8px; background:#111; border-radius:6px; display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
 
-  .details-row { background:#111; }
-  .details-row td { padding:12px; }
+    .add-item-panel { border:1px dashed #444; padding:12px; margin-top:8px; background:#1a1a1a; border-radius:8px; }
+    .inline-grid { display:grid; grid-template-columns: repeat(4,1fr); gap:8px; }
+    .repeatable { margin-top:8px; }
+    .repeatable .row { display:flex; gap:8px; margin-top:8px; }
+    .repeatable .row input { flex:1; }
+    .repeatable .row button { flex-shrink:0; padding:0.4rem 0.6rem; background:#8A4D2B; color:#fff; border:none; border-radius:6px; }
+    .repeatable .row button:hover { background:#a35d39; }
 
-  .order-filters { display:flex; gap:10px; margin-bottom:1rem; flex-wrap:wrap; }
-  .order-filters input, .order-filters select { flex:1; max-width:320px; }
+    .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.85); display:none; align-items:center; justify-content:center; z-index:9999; }
+    .modal { background:#1a1a1a; color:#fff; padding:16px; border-radius:10px; max-width:800px; width:95%; max-height:90vh; overflow:auto; }
+    .modal .modal-header { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+    .modal .modal-body { margin-top:12px; }
+    .modal .close { background:#8A4D2B; border:none; color:#fff; padding:6px 10px; border-radius:6px; cursor:pointer; }
+    .modal .close:hover { background:#a35d39; }
 
-  .quote-item { border:1px solid #444; padding:8px; margin-top:8px; background:#111; border-radius:6px; }
-
-  .copy-btn { background:none; border:none; cursor:pointer; margin-left:6px; font-size:1rem; color:#fff; }
-  .copy-btn:hover { opacity:0.7; }
-
-  .add-item-panel { border:1px dashed #444; padding:12px; margin-top:8px; background:#1a1a1a; border-radius:8px; } /* form panel same as customization */
-  .inline-grid { display:grid; grid-template-columns: repeat(4,1fr); gap:8px; }
-  .repeatable { margin-top:8px; }
-  .repeatable .row { display:flex; gap:8px; margin-top:8px; }
-  .repeatable .row input { flex:1; }
-  .repeatable .row button { flex-shrink:0; padding:0.4rem 0.6rem; background:#8A4D2B; color:#fff; border:none; border-radius:6px; }
-  .repeatable .row button:hover { background:#a35d39; }
-
-  .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.85); display:none; align-items:center; justify-content:center; z-index:9999; }
-  .modal { background:#1a1a1a; color:#fff; padding:16px; border-radius:10px; max-width:800px; width:95%; max-height:90vh; overflow:auto; } /* modal bg same as customization */
-  .modal .modal-header { display:flex; justify-content:space-between; align-items:center; gap:12px; }
-  .modal .modal-body { margin-top:12px; }
-  .modal .close { background:#8A4D2B; border:none; color:#fff; padding:6px 10px; border-radius:6px; cursor:pointer; }
-  .modal .close:hover { background:#a35d39; }
-
-  @media(max-width:600px){
-    .container { padding:1rem; }
-    table, th, td { font-size:0.85rem; }
-    th, td { padding:0.5rem; }
-    .dashboard-nav { flex-direction:column; }
-    .order-filters { flex-direction:column; }
-    .inline-grid { grid-template-columns:1fr; }
-  }
-</style>
+    @media(max-width:600px){
+      .container { padding:1rem; }
+      table, th, td { font-size:0.85rem; }
+      th, td { padding:0.5rem; }
+      .dashboard-nav { flex-direction:column; }
+      .inline-grid { grid-template-columns:1fr; }
+    }
+  </style>
 </head>
 <body>
+  <header id="mainHeader">Sérac Admin Dashboard</header>
 
-<header>Sérac Admin Dashboard</header>
-
-<!-- LOGIN FORM -->
-<div class="container" id="loginContainer">
-  <h2>Admin Login</h2>
-  <form id="loginForm">
-    <label for="loginEmail">Email</label>
-    <input type="email" id="loginEmail" required>
-    <label for="loginPassword">Password</label>
-    <input type="password" id="loginPassword" required>
-    <button type="submit">Login</button>
-    <div class="message" id="loginMessage"></div>
-  </form>
-</div>
-
-<!-- DASHBOARD -->
-<div class="container" id="dashboardContainer" style="display:none;">
-  <div class="dashboard-nav">
-    <button type="button" data-target="productsSection">📦 Products</button>
-    <button type="button" data-target="quotesSection">💳 Quotes</button>
-    <button type="button" data-target="ordersSection">🧾 Orders</button>
+  <!-- LOGIN -->
+  <div class="container" id="loginContainer">
+    <h2>Admin Login</h2>
+    <form id="loginForm">
+      <label for="loginEmail">Email</label>
+      <input id="loginEmail" type="email" required>
+      <label for="loginPassword">Password</label>
+      <input id="loginPassword" type="password" required>
+      <button type="submit">Login</button>
+      <div id="loginMessage" class="message"></div>
+    </form>
   </div>
 
-  <!-- PRODUCTS SECTION -->
-  <div class="section" id="productsSection">
-    <h2>Manage Products</h2>
-    <form id="productForm">
-      <label>Name</label><input type="text" id="productName" required>
-      <label>Price (NGN)</label><input type="number" id="productPriceNGN" step="0.01">
-      <label>Price (USD)</label><input type="number" id="productPriceUSD" step="0.01">
-      <label>Price (EUR)</label><input type="number" id="productPriceEUR" step="0.01">
-      <label>Price (GBP)</label><input type="number" id="productPriceGBP" step="0.01">
-      <label>Description</label><textarea id="productDesc"></textarea>
+  <!-- DASHBOARD -->
+  <div class="container" id="dashboardContainer" style="display:none;">
+    <div class="dashboard-nav">
+      <button type="button" data-target="productsSection">📦 Products</button>
+      <button type="button" data-target="quotesSection">💳 Quotes</button>
+      <button type="button" data-target="ordersSection">🧾 Orders</button>
+    </div>
 
-      <label>Sizes</label>
-      <div id="sizesRepeat" class="repeatable"></div>
-      <button type="button" id="addSizeBtn">+ Add Size</button>
+    <!-- PRODUCTS -->
+    <div class="section" id="productsSection">
+      <h2>Manage Products</h2>
+      <form id="productForm">
+        <label>Name</label><input id="productName" type="text" required>
 
-      <label>Colors</label>
-      <div id="colorsRepeat" class="repeatable"></div>
-      <button type="button" id="addColorBtn">+ Add Color</button>
+        <label>Price (NGN)</label><input id="productPriceNGN" type="number" step="0.01" inputmode="decimal">
+        <label>Price (USD)</label><input id="productPriceUSD" type="number" step="0.01" inputmode="decimal">
+        <label>Price (EUR)</label><input id="productPriceEUR" type="number" step="0.01" inputmode="decimal">
+        <label>Price (GBP)</label><input id="productPriceGBP" type="number" step="0.01" inputmode="decimal">
 
-      <label>Images (URLs)</label>
-      <div id="imagesRepeat" class="repeatable"></div>
-      <button type="button" id="addImageBtn">+ Add Image</button>
-      <div class="small-note">First image will be used as thumbnail.</div>
+        <label>Description</label><textarea id="productDesc"></textarea>
 
-      <label>Customization Available</label>
-      <select id="productCustom"><option value="false">No</option><option value="true">Yes</option></select>
+        <label>Sizes</label><div id="sizesRepeat" class="repeatable"></div>
+        <button type="button" id="addSizeBtn">+ Add Size</button>
 
-      <label>Published</label>
-      <select id="productPublished"><option value="false">No</option><option value="true">Yes</option></select>
+        <label>Colors</label><div id="colorsRepeat" class="repeatable"></div>
+        <button type="button" id="addColorBtn">+ Add Color</button>
 
-      <button type="submit">Add Product</button>
-    </form>
-    <div id="productMessage" class="message"></div>
+        <label>Images (URLs)</label><div id="imagesRepeat" class="repeatable"></div>
+        <button type="button" id="addImageBtn">+ Add Image</button>
+        <div class="small-note">First image will be used as thumbnail.</div>
 
-   
-  <!-- Table Currency Selector -->
-  <label>Table Price Currency:
-    <select id="productCurrencySelect">
-      <option value="NGN">NGN</option>
-      <option value="USD">USD</option>
-      <option value="EUR">EUR</option>
-      <option value="GBP">GBP</option>
-    </select>
-  </label>
+        <label>Customization Available</label>
+        <select id="productCustom"><option value="false">No</option><option value="true">Yes</option></select>
 
-  <!-- Products Table -->
-  <table>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Price</th>
-        <th>Image</th>
-        <th>Customization</th>
-        <th>Published</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody id="productsTableBody"></tbody>
-  </table>
-</div>
+        <label>Published</label>
+        <select id="productPublished"><option value="false">No</option><option value="true">Yes</option></select>
 
-  <!-- QUOTES SECTION -->
-  <div class="section" id="quotesSection">
-    <h2>Manage Quotes</h2>
-    <form id="quoteForm">
-      <label>Customer Name</label><input type="text" id="quoteCustomerName" required>
-      <label>Customer Email</label><input type="email" id="quoteCustomerEmail" required>
-      
-      <h3>Quote Items</h3>
-      <div id="quoteItems"></div>
-      <button type="button" id="addQuoteItem">+ Add Item</button>
+        <button type="submit" id="productSubmitBtn">Add Product</button>
+      </form>
 
-      <div style="display:flex; gap:8px; align-items:center; margin-top:8px;">
-        <button type="button" id="generateQuoteLinkBtn">Generate Link</button>
-        <div id="generatedQuoteLink" style="margin-left:8px;"></div>
-      </div>
-    </form>
-    <div id="quoteMessage" class="message"></div>
+      <div id="productMessage" class="message"></div>
 
-    <label>Display Currency for Quotes</label>
-    <select id="quotesDisplayCurrency">
-      <option value="NGN">NGN</option><option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option>
-    </select>
+      <label style="margin-top:12px;">Table Price Currency:
+        <select id="productCurrencySelect">
+          <option value="NGN">NGN</option>
+          <option value="USD">USD</option>
+          <option value="EUR">EUR</option>
+          <option value="GBP">GBP</option>
+        </select>
+      </label>
 
-    <table id="quotesTable">
-      <thead><tr><th>Customer</th><th>Email</th><th>Status</th><th>Total</th><th>Actions</th></tr></thead>
-      <tbody></tbody>
-    </table>
-  </div>
+      <table id="productsTable">
+        <thead>
+          <tr><th>Name</th><th>Price</th><th>Image</th><th>Customization</th><th>Published</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="productsTableBody"></tbody>
+      </table>
+    </div>
 
-  <!-- QUOTE MODAL -->
-  <div id="quoteModalBackdrop" class="modal-backdrop">
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="quoteModalTitle">
-      <div class="modal-header">
-        <h3 id="quoteModalTitle">Quote Details</h3>
-        <div>
-          <button id="openCheckoutBtn" class="close">Open Checkout</button>
-          <button id="closeModalBtn" class="close">Close</button>
+    <!-- QUOTES -->
+    <div class="section" id="quotesSection">
+      <h2>Manage Quotes</h2>
+      <form id="quoteForm">
+        <label>Customer Name</label><input id="quoteCustomerName" type="text" required>
+        <label>Customer Email</label><input id="quoteCustomerEmail" type="email" required>
+
+        <h3>Quote Items</h3>
+        <div id="quoteItems"></div>
+
+        <div id="addItemPanel" class="add-item-panel" style="display:none;">
+          <label>Item Name</label><input id="ai_name" type="text" placeholder="Item name">
+          <label>Quantity</label><input id="ai_qty" type="number" min="1" value="1">
+          <label>Description</label><input id="ai_desc" type="text" placeholder="Optional description">
+          <div class="inline-grid" style="margin-top:8px;">
+            <div><label>Price NGN</label><input id="ai_price_ngn" type="number" step="0.01"></div>
+            <div><label>Price USD</label><input id="ai_price_usd" type="number" step="0.01"></div>
+            <div><label>Price EUR</label><input id="ai_price_eur" type="number" step="0.01"></div>
+            <div><label>Price GBP</label><input id="ai_price_gbp" type="number" step="0.01"></div>
+          </div>
+          <div style="display:flex; gap:8px; margin-top:8px;">
+            <button type="button" id="ai_add">Add</button>
+            <button type="button" id="ai_cancel" style="background:#111;color:#fff;border:1px solid #444;">Cancel</button>
+          </div>
         </div>
+
+        <button type="button" id="addQuoteItem">+ Add Item</button>
+
+        <div style="display:flex; gap:8px; align-items:center; margin-top:8px;">
+          <button type="button" id="generateQuoteLinkBtn">Generate Link</button>
+          <div id="generatedQuoteLink" style="margin-left:8px;"></div>
+        </div>
+      </form>
+      <div id="quoteMessage" class="message"></div>
+
+      <label>Display Currency for Quotes</label>
+      <select id="quotesDisplayCurrency"><option value="NGN">NGN</option><option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option></select>
+
+      <table id="quotesTable">
+        <thead><tr><th>Customer</th><th>Email</th><th>Checkout Link</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- QUOTE MODAL -->
+    <div id="quoteModalBackdrop" class="modal-backdrop">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="quoteModalTitle">
+        <div class="modal-header">
+          <h3 id="quoteModalTitle">Quote Details</h3>
+          <div>
+            <button id="openCheckoutBtn" class="close">Open Checkout</button>
+            <button id="closeModalBtn" class="close">Close</button>
+          </div>
+        </div>
+        <div class="modal-body" id="quoteModalBody"></div>
       </div>
-      <div class="modal-body" id="quoteModalBody"></div>
-    </div>
-  </div>
-
-  <!-- ORDERS SECTION -->
-  <div class="section" id="ordersSection">
-    <h2>Manage Orders</h2>
-    <div class="order-filters">
-      <input type="text" id="orderSearch" placeholder="Search by customer or email...">
-      <select id="orderStatusFilter">
-        <option value="">All Status</option>
-        <option>Pending</option><option>Paid</option><option>Processing</option><option>Shipped</option><option>Completed</option><option>Cancelled</option>
-      </select>
-      <label>Export Currency</label>
-      <select id="exportCurrency"><option value="NGN">NGN</option><option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option></select>
-      <input type="date" id="exportFrom"><input type="date" id="exportTo">
-      <button id="exportOrders">Export Orders CSV</button>
     </div>
 
-    <table id="ordersTable">
-      <thead><tr><th>Customer</th><th>Email</th><th>Status</th><th>Total</th></tr></thead>
-      <tbody></tbody>
-    </table>
+    <!-- ORDERS -->
+    <div class="section" id="ordersSection">
+      <h2>Manage Orders</h2>
+      <div class="order-filters">
+        <input id="orderSearch" type="text" placeholder="Search by customer or email...">
+        <select id="orderStatusFilter"><option value="">All Status</option><option>Pending</option><option>Paid</option><option>Processing</option><option>Shipped</option><option>Completed</option><option>Cancelled</option></select>
+
+        <label style="width:100%; margin-top:8px;">Export options</label>
+        <select id="exportCurrency" style="max-width:200px;"><option value="NGN">NGN</option><option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option></select>
+        <input id="exportFrom" type="date"><input id="exportTo" type="date">
+        <button id="exportOrders">Export Orders CSV</button>
+      </div>
+
+      <table id="ordersTable">
+        <thead><tr><th>Order ID</th><th>Customer</th><th>Email</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
   </div>
-</div>
 
 <script type="module">
+/* Firebase SDK imports */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-/* ---------------- FIREBASE CONFIG ---------------- */
+/* ---------------- FIREBASE CONFIG (keep same as Serac) ---------------- */
 const firebaseConfig = {
   apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
   authDomain: "brandisby.firebaseapp.com",
@@ -268,53 +244,42 @@ const db = getFirestore(app);
 /* ---------------- ALLOWED ADMINS ---------------- */
 const allowedAdmins = ["stonecold.serac@gmail.com"].map(e => e.toLowerCase().trim());
 
-/* ---------------- COLLECTION HELPERS ---------------- */
+/* ---------------- COLLECTION HELPERS (serac paths) ---------------- */
 const productsCollection = () => collection(db, "brands", "serac", "products");
 const quotesCollection = () => collection(db, "brands", "serac", "quotes");
 const ordersCollection = () => collection(db, "brands", "serac", "orders");
 
-/* ---------------- UTILS ---------------- */
-function formatCurrency(value, currency){
-  const localeMap = { NGN:'en-NG', USD:'en-US', EUR:'de-DE', GBP:'en-GB' };
-  const minFrac = currency==='NGN'?0:2;
-  try { return new Intl.NumberFormat(localeMap[currency]||'en-US',{style:'currency',currency,minimumFractionDigits:minFrac}).format(value); }
-  catch(e){return `${value} ${currency}`;}
-}
-function escapeHtml(str){ if (!str && str!==0) return ""; return String(str).replace(/[&<>"']/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[s])); }
-
-/* ---------------- DOM ELEMENTS ---------------- */
+/* ---------------- DOM REFS ---------------- */
 const loginForm = document.getElementById("loginForm");
 const loginMessage = document.getElementById("loginMessage");
 const loginContainer = document.getElementById("loginContainer");
 const dashboardContainer = document.getElementById("dashboardContainer");
 
-/* Products */
 const productForm = document.getElementById("productForm");
 const productMessage = document.getElementById("productMessage");
 const productsTableBody = document.getElementById("productsTableBody");
-const tableCurrencySelect = document.getElementById("tableCurrency");
+const productCurrencySelect = document.getElementById("productCurrencySelect");
+const productSubmitBtn = document.getElementById("productSubmitBtn");
+
 const sizesRepeat = document.getElementById("sizesRepeat");
 const colorsRepeat = document.getElementById("colorsRepeat");
 const imagesRepeat = document.getElementById("imagesRepeat");
 const addSizeBtn = document.getElementById("addSizeBtn");
 const addColorBtn = document.getElementById("addColorBtn");
 const addImageBtn = document.getElementById("addImageBtn");
-const currencySelect = document.getElementById("productPriceCurrency");
 
-/* Quotes */
 const quoteForm = document.getElementById("quoteForm");
 const quoteItemsDiv = document.getElementById("quoteItems");
 const addQuoteItemBtn = document.getElementById("addQuoteItem");
+const addItemPanel = document.getElementById("addItemPanel");
+const ai_add = document.getElementById("ai_add");
+const ai_cancel = document.getElementById("ai_cancel");
 const quotesTableBody = document.querySelector("#quotesTable tbody");
 const quoteMessage = document.getElementById("quoteMessage");
 const generateQuoteLinkBtn = document.getElementById("generateQuoteLinkBtn");
 const generatedQuoteLink = document.getElementById("generatedQuoteLink");
 const quotesDisplayCurrency = document.getElementById("quotesDisplayCurrency");
-const addItemPanel = document.getElementById("addItemPanel");
-const ai_add = document.getElementById("ai_add");
-const ai_cancel = document.getElementById("ai_cancel");
 
-/* Orders */
 const ordersTableBody = document.querySelector("#ordersTable tbody");
 const orderSearch = document.getElementById("orderSearch");
 const orderStatusFilter = document.getElementById("orderStatusFilter");
@@ -323,369 +288,682 @@ const exportCurrency = document.getElementById("exportCurrency");
 const exportFrom = document.getElementById("exportFrom");
 const exportTo = document.getElementById("exportTo");
 
-/* Quote Modal */
-const quoteModalBackdrop = document.getElementById('quoteModalBackdrop');
-const quoteModalBody = document.getElementById('quoteModalBody');
-const closeModalBtn = document.getElementById('closeModalBtn');
-const openCheckoutBtn = document.getElementById('openCheckoutBtn');
+const quoteModalBackdrop = document.getElementById("quoteModalBackdrop");
+const quoteModalBody = document.getElementById("quoteModalBody");
+const closeModalBtn = document.getElementById("closeModalBtn");
+const openCheckoutBtn = document.getElementById("openCheckoutBtn");
 
 /* ---------------- STATE ---------------- */
-let currentEditingProductId = null;
-let productsCache = [];
-let quotesCache = [];
+let productsCache = []; // array of {id, ...data}
+let quotesCache = [];   // array of {id, ...data}
 let allOrders = [];
+let currentEditingProductId = null;
 let quoteDraftItems = [];
 
+/* ---------------- UTILS ---------------- */
+function escapeHtml(str){ if (!str && str !== 0) return ""; return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[s])); }
+function formatCurrency(value, currency){
+  const localeMap = { NGN:'en-NG', USD:'en-US', EUR:'de-DE', GBP:'en-GB' };
+  const minFrac = currency === 'NGN' ? 0 : 2;
+  try { return new Intl.NumberFormat(localeMap[currency]||'en-US',{ style:'currency', currency, minimumFractionDigits: minFrac }).format(Number(value||0)); }
+  catch(e){ return `${value} ${currency}`; }
+}
+
 /* ---------------- REPEATABLE INPUT HELPERS ---------------- */
-function createRepeatRow(value='', placeholder=''){
+function createRepeatRow(value='', placeholder='') {
   const row = document.createElement('div');
-  row.className='row';
-  row.innerHTML = `<input type="text" value="${escapeHtml(value)}" placeholder="${escapeHtml(placeholder)}">
+  row.className = 'row';
+  row.innerHTML = `<input type="text" value="${escapeHtml(value)}" placeholder="${escapeHtml(placeholder)}" />
                    <button type="button" class="remove-row">Remove</button>`;
-  row.querySelector(".remove-row").addEventListener("click", ()=>row.remove());
+  row.querySelector('.remove-row').addEventListener('click', () => row.remove());
   return row;
 }
-function addSizeInput(v=''){ sizesRepeat.appendChild(createRepeatRow(v,'Size e.g. S,M,L')); }
-function addColorInput(v=''){ colorsRepeat.appendChild(createRepeatRow(v,'Color e.g. Olive')); }
-function addImageInput(v=''){ imagesRepeat.appendChild(createRepeatRow(v,'https://.../image.jpg')); }
+function addSizeInput(val=''){ sizesRepeat.appendChild(createRepeatRow(val,'Size e.g. S, M, L')); }
+function addColorInput(val=''){ colorsRepeat.appendChild(createRepeatRow(val,'Color e.g. Olive')); }
+function addImageInput(val=''){ imagesRepeat.appendChild(createRepeatRow(val,'https://.../image.jpg')); }
 
-addSizeBtn?.addEventListener('click',()=>addSizeInput());
-addColorBtn?.addEventListener('click',()=>addColorInput());
-addImageBtn?.addEventListener('click',()=>addImageInput());
+addSizeBtn?.addEventListener('click', ()=>addSizeInput());
+addColorBtn?.addEventListener('click', ()=>addColorInput());
+addImageBtn?.addEventListener('click', ()=>addImageInput());
 
 addSizeInput(); addColorInput(); addImageInput();
 
 /* ---------------- AUTH ---------------- */
-loginForm.addEventListener("submit", async e => {
+loginForm.addEventListener('submit', async (e) => {
   e.preventDefault();
-  loginMessage.textContent = "";
-  const email = document.getElementById("loginEmail").value;
-  const password = document.getElementById("loginPassword").value;
+  loginMessage.textContent = '';
   try {
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
     const userCred = await signInWithEmailAndPassword(auth, email, password);
-    const userEmail = (userCred.user.email||"").toLowerCase().trim();
-    if (allowedAdmins.includes(userEmail)) {
-      loginContainer.style.display = "none";
-      dashboardContainer.style.display = "block";
-      subscribeProducts();
-      subscribeQuotes();
-      subscribeOrders();
-      showSection("productsSection");
+    const normalized = (userCred.user.email || '').toLowerCase().trim();
+    if (allowedAdmins.includes(normalized)) {
+      loginContainer.style.display = 'none';
+      dashboardContainer.style.display = 'block';
+      startSubscriptions();
     } else {
-      loginMessage.textContent = "❌ Not authorized.";
-      loginMessage.style.color = "red";
+      loginMessage.textContent = '❌ Not authorized.';
+      loginMessage.style.color = 'red';
       await signOut(auth);
     }
-  } catch(err){
-    console.error(err);
-    loginMessage.textContent = `❌ ${err.code||""}: ${err.message||err}`;
-    loginMessage.style.color = "red";
+  } catch (err) {
+    console.error('Login error', err);
+    loginMessage.textContent = `❌ ${err.code || ''}: ${err.message || err}`;
+    loginMessage.style.color = 'red';
   }
 });
 
 onAuthStateChanged(auth, user => {
-  if (user && allowedAdmins.includes((user.email||"").toLowerCase().trim())) {
-    loginContainer.style.display = "none";
-    dashboardContainer.style.display = "block";
-    subscribeProducts();
-    subscribeQuotes();
-    subscribeOrders();
-    showSection("productsSection");
+  if (user && allowedAdmins.includes((user.email||'').toLowerCase().trim())) {
+    loginContainer.style.display = 'none';
+    dashboardContainer.style.display = 'block';
+    startSubscriptions();
   } else {
-    loginContainer.style.display = "block";
-    dashboardContainer.style.display = "none";
+    loginContainer.style.display = 'block';
+    dashboardContainer.style.display = 'none';
   }
 });
 
 /* ---------------- NAVIGATION ---------------- */
-document.querySelectorAll(".dashboard-nav button").forEach(btn => {
-  btn.addEventListener("click", () => showSection(btn.dataset.target));
-});
+document.querySelectorAll('.dashboard-nav button').forEach(btn => btn.addEventListener('click', () => showSection(btn.dataset.target)));
 function showSection(id){
-  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
 }
 
-/* ---------------- POPULATE PRODUCT FORM ---------------- */
-function populateProductForm(product){
-  if(!product) return;
-  currentEditingProductId = product.id;
+/* ---------------- PRODUCTS: RENDER + CRUD ---------------- */
+/* Render a single product row (used to add or update only that row) */
+function refreshProductRow(product) {
+  if (!product || !product.id) return;
+  // ensure product in cache
+  const idx = productsCache.findIndex(p => p.id === product.id);
+  if (idx === -1) productsCache.push(product);
+  else productsCache[idx] = product;
 
-  document.getElementById("productName").value = product.name || "";
-  document.getElementById("productPriceNGN").value = product.priceNGN || 0;
-  document.getElementById("productPriceUSD").value = product.priceUSD || 0;
-  document.getElementById("productPriceEUR").value = product.priceEUR || 0;
-  document.getElementById("productPriceGBP").value = product.priceGBP || 0;
-  document.getElementById("productDesc").value = product.description || "";
-  document.getElementById("productCustom").value = product.customizationAvailable ? "true" : "false";
-  document.getElementById("productPublished").value = product.published ? "true" : "false";
-
-  sizesRepeat.innerHTML=""; (product.sizes||[]).forEach(s=>addSizeInput(s));
-  colorsRepeat.innerHTML=""; (product.colors||[]).forEach(c=>addColorInput(c));
-  imagesRepeat.innerHTML=""; (product.images||[]).forEach(img=>addImageInput(img));
-
-  productForm.scrollIntoView({behavior:"smooth"});
-}
-
-/* ---------------- REFRESH PRODUCT ROW ---------------- */
-function refreshProductRow(product){
-  const trExisting = productsTableBody.querySelector(`tr[data-id="${product.id}"]`);
-  const currency = currencySelect?.value || 'NGN';
+  const currency = productCurrencySelect?.value || 'NGN';
   const priceMap = { NGN: product.priceNGN, USD: product.priceUSD, EUR: product.priceEUR, GBP: product.priceGBP };
   const price = priceMap[currency] || 0;
+  const firstImg = (product.images && product.images.length) ? product.images[0] : (product.imageUrl || '');
 
   const trHtml = `
     <td>${escapeHtml(product.name)}</td>
     <td class="product-price">${formatCurrency(price, currency)}</td>
-    <td>${product.imageUrl ? `<img src="${product.imageUrl}" alt="${escapeHtml(product.name)}" style="height:50px;width:auto;border-radius:6px;">` : ''}</td>
-    <td>${product.customizationAvailable ? '✅' : '❌'}</td>
-    <td>${product.published ? '✅' : '❌'}</td>
-    <td>
+    <td>${firstImg ? `<img src="${escapeHtml(firstImg)}" alt="${escapeHtml(product.name)}" style="height:50px;width:auto;border-radius:6px;">` : ''}${(product.images && product.images.length)? ` <small>(${product.images.length})</small>`: ''}</td>
+    <td>${product.customizationAvailable ? 'Yes' : 'No'}</td>
+    <td>${product.published ? 'Yes' : 'No'}</td>
+    <td class="actions">
       <button data-id="${product.id}" class="edit-product">Edit</button>
       <button data-id="${product.id}" class="delete-product">Delete</button>
     </td>`;
 
-  let trRow;
-  if(trExisting){
-    trExisting.innerHTML = trHtml;
-    trRow = trExisting;
+  // find existing row or create
+  let tr = productsTableBody.querySelector(`tr[data-id="${product.id}"]`);
+  if (tr) {
+    tr.innerHTML = trHtml;
   } else {
-    trRow = document.createElement("tr");
-    trRow.dataset.id = product.id;
-    trRow.innerHTML = trHtml;
-    productsTableBody.appendChild(trRow);
+    tr = document.createElement('tr');
+    tr.dataset.id = product.id;
+    tr.innerHTML = trHtml;
+    productsTableBody.appendChild(tr);
   }
 
-  // Highlight
-  trRow.style.transition="background-color 0.6s ease";
-  trRow.style.backgroundColor="#ffeeba";
-  setTimeout(()=>{ trRow.style.backgroundColor=""; },600);
+  // subtle highlight on the single row (not the whole table)
+  tr.style.transition = 'background-color 0.6s ease';
+  tr.style.backgroundColor = '#ffeeba';
+  setTimeout(() => { tr.style.backgroundColor = ''; }, 600);
 
-  // Handlers
-  trRow.querySelector(".edit-product").onclick = ()=>populateProductForm(product);
-  trRow.querySelector(".delete-product").onclick = async ()=>{
-    if(confirm("Delete this product?")){
-      await deleteDoc(doc(db,"brands","serac","products",product.id));
-      trRow.remove();
-      productsCache = productsCache.filter(p=>p.id!==product.id);
+  // handlers
+  const editBtn = tr.querySelector('.edit-product');
+  const deleteBtn = tr.querySelector('.delete-product');
+
+  if (editBtn) editBtn.onclick = () => populateProductForm(product);
+  if (deleteBtn) deleteBtn.onclick = async () => {
+    if (!confirm('Delete this product?')) return;
+    try {
+      await deleteDoc(doc(db, "brands", "serac", "products", product.id));
+      productsCache = productsCache.filter(p => p.id !== product.id);
+      const row = productsTableBody.querySelector(`tr[data-id="${product.id}"]`);
+      if (row) row.remove();
+    } catch (err) {
+      console.error('Delete product failed', err);
+      alert('Failed to delete product');
     }
   };
 }
 
-/* ---------------- SUBSCRIBE PRODUCTS ---------------- */
-function subscribeProducts(){
-  onSnapshot(productsCollection(), snap=>{
-    productsCache = [];
-    const seenIds = new Set();
-
-    snap.forEach(docSnap=>{
-      const p = { id: docSnap.id, ...docSnap.data() };
-      productsCache.push(p);
-      refreshProductRow(p); // Only refresh/add the row for this product
-      seenIds.add(p.id);
-    });
-
-    // Remove rows that no longer exist in Firestore
-    productsTableBody.querySelectorAll("tr[data-id]").forEach(tr=>{
-      if(!seenIds.has(tr.dataset.id)){
-        tr.remove();
-      }
-    });
-  });
-}
-
-/* ---------------- UPDATE TABLE PRICES ---------------- */
-function updateTablePrices(){
-  const currency = currencySelect?.value || 'NGN';
-  productsCache.forEach(product=>{
+/* Update all table prices when currency selector changes */
+function updateTablePrices() {
+  const currency = productCurrencySelect?.value || 'NGN';
+  productsCache.forEach(product => {
     const tr = productsTableBody.querySelector(`tr[data-id="${product.id}"]`);
-    if(tr){
+    if (tr) {
       const priceMap = { NGN: product.priceNGN, USD: product.priceUSD, EUR: product.priceEUR, GBP: product.priceGBP };
-      const priceCell = tr.querySelector(".product-price");
-      if(priceCell){
-        priceCell.textContent = formatCurrency(priceMap[currency]||0, currency);
-      }
+      const priceCell = tr.querySelector('.product-price');
+      if (priceCell) priceCell.textContent = formatCurrency(priceMap[currency] || 0, currency);
     }
   });
 }
 
+/* Populate product form for editing */
+function populateProductForm(product) {
+  if (!product) return;
+  currentEditingProductId = product.id;
+  document.getElementById('productName').value = product.name || '';
+  document.getElementById('productPriceNGN').value = product.priceNGN != null ? product.priceNGN : '';
+  document.getElementById('productPriceUSD').value = product.priceUSD != null ? product.priceUSD : '';
+  document.getElementById('productPriceEUR').value = product.priceEUR != null ? product.priceEUR : '';
+  document.getElementById('productPriceGBP').value = product.priceGBP != null ? product.priceGBP : '';
+  document.getElementById('productDesc').value = product.description || '';
+  document.getElementById('productCustom').value = product.customizationAvailable ? 'true' : 'false';
+  document.getElementById('productPublished').value = product.published ? 'true' : 'false';
 
-/* ---------------- DOM CONTENT LOADED ---------------- */
-document.addEventListener("DOMContentLoaded",()=>{
-  subscribeProducts();
-  currencySelect?.addEventListener("change",updateTablePrices);
+  sizesRepeat.innerHTML = ''; (product.sizes || []).forEach(s => addSizeInput(s)); if ((product.sizes || []).length === 0) addSizeInput();
+  colorsRepeat.innerHTML = ''; (product.colors || []).forEach(c => addColorInput(c)); if ((product.colors || []).length === 0) addColorInput();
+  imagesRepeat.innerHTML = ''; (product.images || []).forEach(i => addImageInput(i)); if ((product.images || []).length === 0) addImageInput();
 
-  /* PRODUCT FORM SUBMIT */
-  productForm?.addEventListener("submit", async e=>{
-    e.preventDefault();
-    const data = {
-      name: document.getElementById("productName").value.trim(),
-      priceNGN: parseFloat(document.getElementById("productPriceNGN").value)||0,
-      priceUSD: parseFloat(document.getElementById("productPriceUSD").value)||0,
-      priceEUR: parseFloat(document.getElementById("productPriceEUR").value)||0,
-      priceGBP: parseFloat(document.getElementById("productPriceGBP").value)||0,
-      description: document.getElementById("productDesc").value.trim()||"",
-      customizationAvailable: document.getElementById("productCustom").value==="true",
-      published: document.getElementById("productPublished").value==="true",
-      sizes: Array.from(sizesRepeat.querySelectorAll('input')).map(i=>i.value.trim()).filter(Boolean),
-      colors: Array.from(colorsRepeat.querySelectorAll('input')).map(i=>i.value.trim()).filter(Boolean),
-      images: Array.from(imagesRepeat.querySelectorAll('input')).map(i=>i.value.trim()).filter(Boolean),
-      imageUrl: Array.from(imagesRepeat.querySelectorAll('input'))[0]?.value || "",
-      updatedAt: new Date().toISOString()
-    };
+  productSubmitBtn.textContent = 'Save Product';
+  productForm.scrollIntoView({ behavior: 'smooth' });
+}
 
-    try {
-      let productId;
-      if(currentEditingProductId){
-        await updateDoc(doc(db,"brands","serac","products",currentEditingProductId),data);
-        productMessage.textContent="✅ Product updated.";
-        productId = currentEditingProductId;
-        currentEditingProductId=null;
-      } else {
-        const docRef = await addDoc(productsCollection(), data);
-        productMessage.textContent="✅ Product added.";
-        productId = docRef.id;
-      }
+/* Subscribe products (snapshot) -> refresh only changed rows + remove deleted rows */
+function subscribeProducts() {
+  try {
+    onSnapshot(productsCollection(), snapshot => {
+      const seen = new Set();
+      snapshot.forEach(docSnap => {
+        const p = { id: docSnap.id, ...docSnap.data() };
+        seen.add(p.id);
+        // update cache and UI
+        const idx = productsCache.findIndex(x => x.id === p.id);
+        if (idx === -1) productsCache.push(p);
+        else productsCache[idx] = p;
+        refreshProductRow(p);
+      });
+      // remove any rows not in snapshot
+      productsTableBody.querySelectorAll('tr[data-id]').forEach(tr => {
+        if (!seen.has(tr.dataset.id)) tr.remove();
+      });
+    }, err => {
+      console.error('Products snapshot error', err);
+      productMessage.textContent = `❌ Products load error: ${err.message || err}`;
+      productMessage.style.color = 'red';
+    });
+  } catch (err) {
+    console.error('subscribeProducts failed', err);
+  }
+}
 
-      productForm.reset();
-      sizesRepeat.innerHTML=""; colorsRepeat.innerHTML=""; imagesRepeat.innerHTML="";
-      addSizeInput(); addColorInput(); addImageInput();
+/* Product form submit */
+productForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const data = {
+    name: document.getElementById('productName').value.trim(),
+    priceNGN: parseFloat(document.getElementById('productPriceNGN').value) || 0,
+    priceUSD: parseFloat(document.getElementById('productPriceUSD').value) || 0,
+    priceEUR: parseFloat(document.getElementById('productPriceEUR').value) || 0,
+    priceGBP: parseFloat(document.getElementById('productPriceGBP').value) || 0,
+    description: document.getElementById('productDesc').value.trim() || '',
+    customizationAvailable: document.getElementById('productCustom').value === 'true',
+    published: document.getElementById('productPublished').value === 'true',
+    sizes: Array.from(sizesRepeat.querySelectorAll('input')).map(i => i.value.trim()).filter(Boolean),
+    colors: Array.from(colorsRepeat.querySelectorAll('input')).map(i => i.value.trim()).filter(Boolean),
+    images: Array.from(imagesRepeat.querySelectorAll('input')).map(i => i.value.trim()).filter(Boolean),
+    imageUrl: Array.from(imagesRepeat.querySelectorAll('input'))[0]?.value || '',
+    updatedAt: new Date().toISOString()
+  };
 
-      const existingIndex = productsCache.findIndex(p=>p.id===productId);
-      const newProduct = { id: productId, ...data };
-      if(existingIndex>-1){ productsCache[existingIndex]=newProduct; } else { productsCache.push(newProduct); }
-
-      refreshProductRow(newProduct);
-    } catch(err){
-      console.error(err);
-      productMessage.textContent="❌ "+err.message;
+  try {
+    let productId;
+    if (currentEditingProductId) {
+      await updateDoc(doc(db, "brands", "serac", "products", currentEditingProductId), data);
+      productMessage.textContent = '✅ Product updated.';
+      currentEditingProductId = null;
+      productSubmitBtn.textContent = 'Add Product';
+      productId = currentEditingProductId;
+    } else {
+      const docRef = await addDoc(productsCollection(), data);
+      productMessage.textContent = '✅ Product added.';
+      productId = docRef.id;
     }
-  });
+
+    // Reset form & repeatable fields
+    productForm.reset();
+    sizesRepeat.innerHTML = ''; colorsRepeat.innerHTML = ''; imagesRepeat.innerHTML = '';
+    addSizeInput(); addColorInput(); addImageInput();
+
+    // refresh UI (subscribe will also reflect it)
+  } catch (err) {
+    console.error('Product save failed', err);
+    productMessage.textContent = '❌ ' + (err.message || 'Error saving product');
+    productMessage.style.color = 'red';
+  }
 });
 
-/* ---------------- QUOTES & ORDERS ---------------- */
-/* Keep your existing subscribeQuotes(), openQuoteModal(), subscribeOrders(), renderOrders(), quoteForm submit code as is */
+/* ---------------- QUOTES (draft items, save, render) ---------------- */
+function renderDraftItems() {
+  quoteItemsDiv.innerHTML = '';
+  if (!quoteDraftItems.length) {
+    quoteItemsDiv.innerHTML = '<div class="small-note">No items added yet.</div>';
+    return;
+  }
+  quoteDraftItems.forEach((it, idx) => {
+    const div = document.createElement('div');
+    div.className = 'quote-item';
+    div.innerHTML = `
+      <div style="flex:1;">
+        <strong>${escapeHtml(it.name)}</strong> × ${it.qty}<br><small>${escapeHtml(it.desc || '')}</small>
+        <div style="margin-top:8px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+          <div>NGN: ${it.priceNGN!=null?formatCurrency(it.priceNGN,'NGN'):'-'}</div>
+          <div>USD: ${it.priceUSD!=null?formatCurrency(it.priceUSD,'USD'):'-'}</div>
+          <div>EUR: ${it.priceEUR!=null?formatCurrency(it.priceEUR,'EUR'):'-'}</div>
+          <div>GBP: ${it.priceGBP!=null?formatCurrency(it.priceGBP,'GBP'):'-'}</div>
+        </div>
+      </div>
+      <div style="min-width:90px;text-align:right;">
+        <button data-idx="${idx}" class="remove-draft">Remove</button>
+      </div>`;
+    quoteItemsDiv.appendChild(div);
+  });
 
+  document.querySelectorAll('.remove-draft').forEach(btn => btn.addEventListener('click', () => {
+    quoteDraftItems.splice(parseInt(btn.dataset.idx), 1);
+    renderDraftItems();
+  }));
+}
 
-/* ---------------- QUOTES ---------------- */
-function subscribeQuotes(){
+/* Add item panel toggles & logic */
+const addQuoteItemBtnEl = document.getElementById('addQuoteItem');
+addQuoteItemBtnEl.addEventListener('click', () => {
+  addItemPanel.style.display = addItemPanel.style.display === 'block' ? 'none' : 'block';
+  if (addItemPanel.style.display === 'block') document.getElementById('ai_name').focus();
+});
+
+ai_cancel?.addEventListener('click', () => {
+  addItemPanel.style.display = 'none';
+  document.getElementById('ai_name').value = '';
+  document.getElementById('ai_qty').value = 1;
+  document.getElementById('ai_desc').value = '';
+  document.getElementById('ai_price_ngn').value = '';
+  document.getElementById('ai_price_usd').value = '';
+  document.getElementById('ai_price_eur').value = '';
+  document.getElementById('ai_price_gbp').value = '';
+});
+
+ai_add?.addEventListener('click', () => {
+  const name = document.getElementById('ai_name').value.trim();
+  const qty = parseInt(document.getElementById('ai_qty').value) || 0;
+  if (!name || qty <= 0) { alert('Please enter item name and quantity.'); return; }
+  const item = {
+    name,
+    qty,
+    desc: document.getElementById('ai_desc').value || '',
+    priceNGN: document.getElementById('ai_price_ngn').value ? parseFloat(document.getElementById('ai_price_ngn').value) : null,
+    priceUSD: document.getElementById('ai_price_usd').value ? parseFloat(document.getElementById('ai_price_usd').value) : null,
+    priceEUR: document.getElementById('ai_price_eur').value ? parseFloat(document.getElementById('ai_price_eur').value) : null,
+    priceGBP: document.getElementById('ai_price_gbp').value ? parseFloat(document.getElementById('ai_price_gbp').value) : null
+  };
+  quoteDraftItems.push(item);
+  // clear & hide
+  document.getElementById('ai_name').value = '';
+  document.getElementById('ai_qty').value = 1;
+  document.getElementById('ai_desc').value = '';
+  document.getElementById('ai_price_ngn').value = '';
+  document.getElementById('ai_price_usd').value = '';
+  document.getElementById('ai_price_eur').value = '';
+  document.getElementById('ai_price_gbp').value = '';
+  addItemPanel.style.display = 'none';
+  renderDraftItems();
+});
+
+/* Generate quote link (save to Firestore / localStorage) */
+generateQuoteLinkBtn.addEventListener('click', async () => {
+  const customer = document.getElementById('quoteCustomerName').value.trim();
+  const email = document.getElementById('quoteCustomerEmail').value.trim();
+  if (!customer || !email) { alert('Customer name and email required.'); return; }
+  if (!quoteDraftItems.length) { alert('Add at least one item.'); return; }
+
+  const data = {
+    customerName: customer,
+    customerEmail: email,
+    items: quoteDraftItems,
+    status: 'Unpaid',
+    createdAt: new Date().toISOString(),
+    currency: 'NGN'
+  };
+
   try {
-    onSnapshot(quotesCollection(), snap=>{
-      quotesCache=[];
-      quotesTableBody.innerHTML="";
-      snap.forEach(docSnap=>{
-        const q = {...docSnap.data(), id:docSnap.id};
+    const docRef = await addDoc(quotesCollection(), data);
+    const id = docRef.id;
+    const link = `./checkout/index.html?quoteId=${id}`;
+
+    try { localStorage.setItem(id, JSON.stringify(data)); } catch(e) { console.warn('localStorage save failed', e); }
+
+    generatedQuoteLink.innerHTML = `
+      <a href="${link}" target="_blank" id="gqlink">${link}</a>
+      <button class="copy-btn" id="copyGeneratedBtn" data-link="${link}">📋</button>
+    `;
+    document.getElementById('copyGeneratedBtn').addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(link); } catch(e){ console.warn('copy failed', e); }
+      const btn = document.getElementById('copyGeneratedBtn'); btn.textContent = '✅';
+      setTimeout(()=> btn.textContent = '📋', 1000);
+    });
+
+    quoteMessage.textContent = '✅ Quote saved and link generated.';
+    quoteMessage.style.color = 'green';
+    quoteForm.reset();
+    quoteDraftItems = [];
+    renderDraftItems();
+  } catch (err) {
+    console.error('Save quote failed', err);
+    quoteMessage.textContent = '❌ Error saving quote.';
+    quoteMessage.style.color = 'red';
+  }
+});
+
+/* Helper to compute total from items for a given currency */
+function computeTotalFromItems(items = [], currency = 'NGN') {
+  let total = 0;
+  items.forEach(it => {
+    const qty = parseFloat(it.qty) || 0;
+    let price = 0;
+    if (currency === 'NGN') price = it.priceNGN || 0;
+    if (currency === 'USD') price = it.priceUSD || 0;
+    if (currency === 'EUR') price = it.priceEUR || 0;
+    if (currency === 'GBP') price = it.priceGBP || 0;
+    total += (price * qty);
+  });
+  return total;
+}
+
+/* Subscribe and render quotes table */
+function subscribeQuotes() {
+  try {
+    onSnapshot(quotesCollection(), snap => {
+      quotesCache = [];
+      const tbody = quotesTableBody;
+      tbody.innerHTML = '';
+      snap.forEach(docSnap => {
+        const q = { id: docSnap.id, ...docSnap.data() };
         quotesCache.push(q);
+
+        // compute total using display currency selection
+        const displayCurrency = quotesDisplayCurrency.value || 'NGN';
+        const computedTotal = computeTotalFromItems(q.items || [], displayCurrency);
+        const displayTotal = computedTotal > 0 ? formatCurrency(computedTotal, displayCurrency) : (q.total ? formatCurrency(q.total, q.currency||displayCurrency) : '—');
+
+        const link = `./checkout/index.html?quoteId=${q.id}`;
         const tr = document.createElement('tr');
-        tr.innerHTML=`
-          <td>${escapeHtml(q.customerName||"")}</td>
-          <td>${escapeHtml(q.customerEmail||"")}</td>
-          <td>${q.status||"Pending"}</td>
-          <td>${formatCurrency(q.total||0,q.currency||'NGN')}</td>
+        tr.innerHTML = `
+          <td>${escapeHtml(q.customerName || '')}</td>
+          <td>${escapeHtml(q.customerEmail || '')}</td>
           <td>
+            <a href="${link}" target="_blank" style="display:inline-block;max-width:60%;">${link}</a>
+            <button class="copy-btn" data-link="${link}" title="Copy link">📋</button>
+          </td>
+          <td>${displayTotal}</td>
+          <td>
+            <select data-id="${q.id}" class="quote-status-select">
+              <option ${q.status === 'Unpaid' ? 'selected' : ''}>Unpaid</option>
+              <option ${q.status === 'Pending' ? 'selected' : ''}>Pending</option>
+              <option ${q.status === 'Paid' ? 'selected' : ''}>Paid</option>
+              <option ${q.status === 'Processing' ? 'selected' : ''}>Processing</option>
+              <option ${q.status === 'Completed' ? 'selected' : ''}>Completed</option>
+              <option ${q.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+            </select>
+          </td>
+          <td class="actions">
             <button data-id="${q.id}" class="view-quote">View</button>
             <button data-id="${q.id}" class="delete-quote">Delete</button>
           </td>`;
-        quotesTableBody.appendChild(tr);
+        tbody.appendChild(tr);
 
-        tr.querySelector(".view-quote").addEventListener("click",()=>openQuoteModal(q));
-        tr.querySelector(".delete-quote").addEventListener("click", async ()=>{
-          if(confirm("Delete this quote?")) await deleteDoc(doc(db,"brands","serac","quotes",q.id));
+        // copy link
+        tr.querySelector('.copy-btn').addEventListener('click', async (ev) => {
+          const l = ev.currentTarget.dataset.link;
+          try { await navigator.clipboard.writeText(l); ev.currentTarget.textContent = '✅'; setTimeout(()=>ev.currentTarget.textContent='📋',1000); } catch(e){ alert('Copy failed: ' + l); }
+        });
+
+        // view
+        tr.querySelector('.view-quote').addEventListener('click', () => populateQuoteModal(q.id));
+        // delete
+        tr.querySelector('.delete-quote').addEventListener('click', async () => {
+          if (!confirm('Delete this quote?')) return;
+          try { await deleteDoc(doc(db, "brands", "serac", "quotes", q.id)); } catch (err) { console.error(err); alert('Delete failed'); }
         });
       });
+
+      // wire status selects
+      document.querySelectorAll('.quote-status-select').forEach(sel => sel.addEventListener('change', async (ev) => {
+        const newStatus = ev.target.value;
+        const id = ev.target.dataset.id;
+        try { await updateDoc(doc(db, "brands", "serac", "quotes", id), { status: newStatus }); } catch(err){ console.error('Status update failed', err); alert('Failed to update status'); }
+      }));
     });
-  } catch(err){ console.error("Quotes subscription failed:",err); }
+  } catch (err) { console.error('subscribeQuotes failed', err); }
 }
 
-function openQuoteModal(q){
-  quoteModalBody.innerHTML="";
-  (q.items||[]).forEach(item=>{
-    const div = document.createElement('div');
-    div.textContent = `${item.name} - ${item.quantity} pcs - ${formatCurrency(item.price*item.quantity,q.currency||'NGN')}`;
-    quoteModalBody.appendChild(div);
+/* Populate quote modal */
+async function populateQuoteModal(id) {
+  // try find in cache
+  let q = quotesCache.find(x => x.id === id);
+  if (!q) {
+    try {
+      const snap = await getDoc(doc(db, "brands", "serac", "quotes", id));
+      if (!snap.exists()) { alert('Quote not found'); return; }
+      q = { id: snap.id, ...snap.data() };
+    } catch (err) { console.error('fetch quote failed', err); alert('Failed to load quote'); return; }
+  }
+
+  const displayCurrency = quotesDisplayCurrency.value || 'NGN';
+  let html = `
+    <div style="display:flex; justify-content:space-between; gap:12px; align-items:center;">
+      <div>
+        <strong>${escapeHtml(q.customerName || '')}</strong><br>
+        <small>${escapeHtml(q.customerEmail || '')}</small><br>
+        <small>Quote currency: ${q.currency || 'NGN'}</small>
+      </div>
+      <div style="text-align:right;">
+        <a href="./checkout/index.html?quoteId=${q.id}" target="_blank">Open checkout</a>
+        <button class="copy-btn" id="modalCopyBtn" data-link="./checkout/index.html?quoteId=${q.id}">📋</button>
+      </div>
+    </div>
+    <hr style="margin:12px 0;">
+    <div><h4>Items (prices in ${displayCurrency})</h4>`;
+
+  let computedTotal = 0;
+  (q.items || []).forEach(it => {
+    const qty = parseFloat(it.qty || it.quantity || 0) || 0;
+    let price = 0;
+    if (displayCurrency === 'NGN') price = it.priceNGN || it.price || 0;
+    if (displayCurrency === 'USD') price = it.priceUSD || it.price || 0;
+    if (displayCurrency === 'EUR') price = it.priceEUR || it.price || 0;
+    if (displayCurrency === 'GBP') price = it.priceGBP || it.price || 0;
+    const line = price * qty;
+    computedTotal += line;
+    html += `
+      <div style="border:1px solid #222; padding:8px; margin-bottom:8px; border-radius:6px;">
+        <strong>${escapeHtml(it.name)}</strong> × ${qty} <br>
+        <small>${escapeHtml(it.desc || '')}</small>
+        <div style="margin-top:6px;">${formatCurrency(price, displayCurrency)} each — Line total: ${formatCurrency(line, displayCurrency)}</div>
+      </div>`;
   });
-  quoteModalBackdrop.style.display="block";
-}
-closeModalBtn.addEventListener('click',()=>quoteModalBackdrop.style.display='none');
-quoteModalBackdrop.addEventListener('click',e=>{if(e.target===quoteModalBackdrop) quoteModalBackdrop.style.display='none';});
 
-/* ---------------- ORDERS ---------------- */
-function subscribeOrders(){
+  html += `</div>`;
+  if (computedTotal > 0) html += `<div style="margin-top:8px;"><strong>Total: ${formatCurrency(computedTotal, displayCurrency)}</strong></div>`;
+  else if (q.total != null) html += `<div style="margin-top:8px;"><strong>Total: ${formatCurrency(q.total, q.currency||displayCurrency)}</strong></div>`;
+  else html += `<div style="margin-top:8px;"><strong>Total: —</strong></div>`;
+
+  quoteModalBody.innerHTML = html;
+
+  const modalCopyBtn = document.getElementById('modalCopyBtn');
+  if (modalCopyBtn) modalCopyBtn.addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(modalCopyBtn.dataset.link); modalCopyBtn.textContent = '✅'; setTimeout(()=>modalCopyBtn.textContent='📋',1000); } catch(e){ alert('Copy failed'); }
+  });
+
+  quoteModalBackdrop.style.display = 'flex';
+  quoteModalBackdrop.dataset.currentId = id;
+}
+
+/* Modal handlers */
+closeModalBtn.addEventListener('click', () => { quoteModalBackdrop.style.display = 'none'; quoteModalBackdrop.dataset.currentId = ''; });
+quoteModalBackdrop.addEventListener('click', (ev) => { if (ev.target === quoteModalBackdrop) { quoteModalBackdrop.style.display = 'none'; quoteModalBackdrop.dataset.currentId = ''; } });
+openCheckoutBtn.addEventListener('click', () => {
+  const id = quoteModalBackdrop.dataset.currentId;
+  if (id) window.open(`./checkout/index.html?quoteId=${id}`, '_blank');
+});
+
+/* ---------------- ORDERS (subscribe + render + export) ---------------- */
+function subscribeOrders() {
   try {
-    onSnapshot(ordersCollection(), snap=>{
-      allOrders=[];
-      ordersTableBody.innerHTML="";
-      snap.forEach(docSnap=>{
-        const o={...docSnap.data(),id:docSnap.id};
-        allOrders.push(o);
-      });
-      renderOrders(allOrders);
-    });
-  } catch(err){ console.error("Orders subscription failed:",err); }
+    onSnapshot(ordersCollection(), snap => {
+      allOrders = [];
+      snap.forEach(docSnap => { const o = { id: docSnap.id, ...docSnap.data() }; allOrders.push(o); });
+      renderOrders();
+    }, err => { console.error('orders snapshot error', err); alert('Orders load error: ' + (err.message || err)); });
+  } catch (err) { console.error('subscribeOrders failed', err); }
 }
 
-function renderOrders(orders){
-  const searchTerm = (orderSearch?.value||"").toLowerCase();
-  const statusFilter = orderStatusFilter?.value;
-  ordersTableBody.innerHTML="";
-  orders.filter(o=>{
-    const matchesSearch = o.customerName?.toLowerCase().includes(searchTerm)||o.customerEmail?.toLowerCase().includes(searchTerm);
-    const matchesStatus = !statusFilter||o.status===statusFilter;
-    return matchesSearch && matchesStatus;
-  }).forEach(o=>{
-    const tr=document.createElement('tr');
-    tr.innerHTML=`
-      <td>${escapeHtml(o.customerName)}</td>
-      <td>${escapeHtml(o.customerEmail)}</td>
-      <td>${o.status||"Pending"}</td>
-      <td>${formatCurrency(o.total||0,o.currency||'NGN')}</td>
-      <td>${escapeHtml(o.paymentStatus||"")}</td>`;
+function renderOrders() {
+  const term = (orderSearch.value || '').toLowerCase();
+  const status = orderStatusFilter.value;
+  ordersTableBody.innerHTML = '';
+  allOrders.filter(o => {
+    const matchesStatus = !status || o.status === status;
+    const matchesTerm = !term || (o.customerName || '').toLowerCase().includes(term) || (o.customerEmail || '').toLowerCase().includes(term) || (o.id || '').toLowerCase().includes(term);
+    return matchesStatus && matchesTerm;
+  }).forEach(o => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${escapeHtml(o.id || '')}</td>
+      <td>${escapeHtml(o.customerName || o.customer || '')}</td>
+      <td>${escapeHtml(o.customerEmail || o.email || '')}</td>
+      <td>${formatCurrency(o.total || 0, o.currency || 'NGN')}</td>
+      <td>${escapeHtml(o.status || '')}</td>
+      <td></td>`;
     ordersTableBody.appendChild(tr);
   });
 }
 
-orderSearch?.addEventListener("input",()=>renderOrders(allOrders));
-orderStatusFilter?.addEventListener("change",()=>renderOrders(allOrders));
+orderSearch.addEventListener('input', renderOrders);
+orderStatusFilter.addEventListener('change', renderOrders);
 
-exportBtn?.addEventListener("click",()=>{
-  let csv="Customer Name,Email,Status,Total,Payment\n";
-  allOrders.forEach(o=>{
-    csv+=`${escapeHtml(o.customerName)},${escapeHtml(o.customerEmail)},${o.status||"Pending"},${o.total||0},${o.paymentStatus||""}\n`;
-  });
-  const blob=new Blob([csv],{type:'text/csv'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a'); a.href=url;
-  a.download="serac_orders.csv"; a.click(); URL.revokeObjectURL(url);
-});
+/* Exchange rates helper for export (fallback if fetch fails) */
+async function fetchRates(base = 'NGN') {
+  try {
+    const symbols = 'USD,EUR,GBP,NGN';
+    const res = await fetch(`https://api.exchangerate.host/latest?base=${encodeURIComponent(base)}&symbols=${symbols}`);
+    const d = await res.json();
+    if (d && d.rates) return d.rates;
+  } catch (e) { console.warn('fetch rates failed', e); }
+  return { NGN:1, USD:0.0022, EUR:0.0020, GBP:0.0018 };
+}
 
-/* ---------------- QUOTE FORM ---------------- */
-addQuoteItemBtn?.addEventListener("click",()=>{ 
-  const div=document.createElement("div");
-  div.className="quote-item";
-  div.innerHTML=`<input type="text" placeholder="Product name"><input type="number" placeholder="Price"><input type="number" placeholder="Quantity"><button type="button" class="remove-row">Remove</button>`;
-  div.querySelector(".remove-row").addEventListener("click",()=>div.remove());
-  quoteItemsDiv.appendChild(div);
-});
-
-quoteForm?.addEventListener("submit",async e=>{
+exportBtn.addEventListener('click', async (e) => {
   e.preventDefault();
-  const items = Array.from(quoteItemsDiv.querySelectorAll(".quote-item")).map(div=>{
-    const inputs = div.querySelectorAll("input");
-    return { name:inputs[0].value, price:parseFloat(inputs[1].value)||0, quantity:parseInt(inputs[2].value)||0 };
-  }).filter(i=>i.name && i.quantity>0);
+  const from = exportFrom.value || null;
+  const to = exportTo.value || null;
 
-  const total = items.reduce((sum,i)=>sum+i.price*i.quantity,0);
-  const data = {
-    customerName: document.getElementById("quoteCustomerName").value,
-    customerEmail: document.getElementById("quoteCustomerEmail").value,
-    items, total, currency: document.getElementById("quoteCurrency").value, status:"Pending", createdAt:new Date().toISOString()
-  };
-  try { await addDoc(quotesCollection(), data); quoteForm.reset(); quoteItemsDiv.innerHTML=""; quoteMessage.textContent="✅ Quote added.";}
-  catch(err){console.error(err); quoteMessage.textContent="❌ "+err.message;}
+  const toExport = allOrders.filter(o => {
+    if (!o.createdAt) return true;
+    const d = new Date(o.createdAt);
+    if (from) { const f = new Date(from); if (d < f) return false; }
+    if (to) { const t = new Date(to); t.setHours(23,59,59,999); if (d > t) return false; }
+    return true;
+  });
+
+  const rows = [];
+  // Keep original currency/total only
+  rows.push(['orderId','customer','email','createdAt','status','currency','total']);
+
+  for (const o of toExport) {
+    rows.push([
+      o.id || '',
+      o.customerName || o.customer || '',
+      o.customerEmail || o.email || '',
+      o.createdAt || '',
+      o.status || '',
+      o.currency || 'NGN',
+      o.total || 0
+    ]);
+  }
+
+  const csv = rows.map(r => r.map(cell => {
+    if (cell === null || cell === undefined) return '';
+    const s = String(cell);
+    if (s.includes(',') || s.includes('"') || s.includes('\n')) return `"${s.replace(/"/g,'""')}"`;
+    return s;
+  }).join(',')).join('\n');
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `orders_export_${Date.now()}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
 });
 
+
+/* ---------------- QUOTE FORM (serac inline add items variant) ---------------- */
+addQuoteItemBtn?.addEventListener('click', () => {
+  addItemPanel.style.display = addItemPanel.style.display === 'block' ? 'none' : 'block';
+});
+
+quoteForm?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  // gather items already in draft (quoteDraftItems)
+  const items = quoteDraftItems.map(it => ({
+    name: it.name, qty: it.qty, desc: it.desc || '',
+    priceNGN: it.priceNGN, priceUSD: it.priceUSD, priceEUR: it.priceEUR, priceGBP: it.priceGBP
+  }));
+
+  if (!items.length) return alert('Add items to the quote before saving.');
+
+  const total = computeTotalFromItems(items, 'NGN'); // store as NGN by default for explicit total
+  const data = {
+    customerName: document.getElementById('quoteCustomerName').value,
+    customerEmail: document.getElementById('quoteCustomerEmail').value,
+    items, total, currency: 'NGN', status: 'Pending', createdAt: new Date().toISOString()
+  };
+  try {
+    await addDoc(quotesCollection(), data);
+    quoteForm.reset();
+    quoteDraftItems = [];
+    renderDraftItems();
+    quoteMessage.textContent = '✅ Quote added.';
+    quoteMessage.style.color = 'green';
+  } catch (err) {
+    console.error('Add quote failed', err);
+    quoteMessage.textContent = '❌ ' + (err.message || 'Error');
+    quoteMessage.style.color = 'red';
+  }
+});
+
+/* ---------------- START SUBSCRIPTIONS & UI WIRING ---------------- */
+function startSubscriptions() {
+  subscribeProducts();
+  subscribeQuotes();
+  subscribeOrders();
+}
+
+/* wire currency select to update table */
+productCurrencySelect.addEventListener('change', updateTablePrices);
+
+/* wire quotes currency display change to re-render modal if open */
+quotesDisplayCurrency.addEventListener('change', () => {
+  subscribeQuotes(); // simple refresh; snapshot will update UI
+  if (quoteModalBackdrop.style.display === 'flex') {
+    const currentDisplayedId = quoteModalBackdrop.dataset.currentId;
+    if (currentDisplayedId) populateQuoteModal(currentDisplayedId);
+  }
+});
+
+/* initial render of draft items */
+renderDraftItems();
+
+/* ensure subscriptions start if already logged-in */
+if (auth.currentUser && allowedAdmins.includes((auth.currentUser.email||'').toLowerCase().trim())) startSubscriptions();
 
 </script>
-
 </body>
 </html>
