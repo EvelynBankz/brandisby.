@@ -405,104 +405,102 @@ addImageBtn.addEventListener('click',()=>addImageInput());
 
 addSizeInput(); addColorInput(); addImageInput();
 
-/* ---------------- ELEMENTS ---------------- */
-const productsTableBody = document.getElementById("productsTableBody");
-
 /* ---------------- PRODUCTS ---------------- */
-productForm.addEventListener("submit", async e => {
-  e.preventDefault();
+function subscribeProducts(productsTableBody) {
+    try {
+        onSnapshot(collection(db, "brands", "serac", "products"), snap => {
+            productsCache = [];
+            productsTableBody.innerHTML = "";
 
-  const data = {
-    name: document.getElementById("productName").value.trim(),
-    priceNGN: parseFloat(document.getElementById("productPriceNGN").value) || 0,
-    priceUSD: parseFloat(document.getElementById("productPriceUSD").value) || 0,
-    priceEUR: parseFloat(document.getElementById("productPriceEUR").value) || 0,
-    priceGBP: parseFloat(document.getElementById("productPriceGBP").value) || 0,
-    description: document.getElementById("productDesc").value.trim() || "",
-    customizationAvailable: document.getElementById("productCustom").value === "true",
-    published: document.getElementById("productPublished").value === "true",
-    updatedAt: new Date().toISOString()
-  };
+            snap.forEach(docSnap => {
+                const p = { id: docSnap.id, ...docSnap.data() };
+                productsCache.push(p);
 
-  // Save sizes and colors
-  data.sizes = Array.from(sizesRepeat.querySelectorAll('input'))
-                    .map(i => i.value.trim())
-                    .filter(Boolean);
-  data.colors = Array.from(colorsRepeat.querySelectorAll('input'))
-                     .map(i => i.value.trim())
-                     .filter(Boolean);
+                // Determine price from dropdown or default to NGN
+                const currencySelect = document.getElementById("productPriceCurrency");
+                const currency = currencySelect ? currencySelect.value : 'NGN';
+                const priceMap = { NGN: p.priceNGN, USD: p.priceUSD, EUR: p.priceEUR, GBP: p.priceGBP };
+                const price = priceMap[currency] || 0;
 
-  // Save images and first image as imageUrl
-  data.images = Array.from(imagesRepeat.querySelectorAll('input'))
-                     .map(i => i.value.trim())
-                     .filter(Boolean);
-  data.imageUrl = data.images[0] || "";
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${escapeHtml(p.name)}</td>
+                    <td>${formatCurrency(price, currency)}</td>
+                    <td>${p.imageUrl ? `<img src="${p.imageUrl}" alt="${escapeHtml(p.name)}" style="height:50px; width:auto; border-radius:6px;">` : ''}</td>
+                    <td>${p.customizationAvailable ? '✅' : '❌'}</td>
+                    <td>${p.published ? '✅' : '❌'}</td>
+                    <td>
+                        <button data-id="${p.id}" class="edit-product">Edit</button>
+                        <button data-id="${p.id}" class="delete-product">Delete</button>
+                    </td>`;
+                productsTableBody.appendChild(tr);
 
-  try {
-    if(currentEditingProductId){
-      // Update existing product
-      await updateDoc(doc(db, "brands", "serac", "products", currentEditingProductId), data);
-      productMessage.textContent = "✅ Product updated.";
-      currentEditingProductId = null;
-      productForm.reset();
-    } else {
-      // Add new product
-      await addDoc(collection(db, "brands", "serac", "products"), data);
-      productMessage.textContent = "✅ Product added.";
-      productForm.reset();
-    }
-  } catch(err) {
-    console.error(err);
-    productMessage.textContent = "❌ " + err.message;
-  }
-});
-
-/* ---------------- SUBSCRIBE PRODUCTS ---------------- */
-function subscribeProducts() {
-  try {
-    onSnapshot(collection(db, "brands", "serac", "products"), snap => {
-      productsCache = [];
-      productsTableBody.innerHTML = "";
-
-      snap.forEach(docSnap => {
-        const p = { id: docSnap.id, ...docSnap.data() };
-        productsCache.push(p);
-
-        const currencySelect = document.getElementById("productPriceCurrency");
-        const currency = currencySelect ? currencySelect.value : 'NGN';
-        const priceMap = { NGN: p.priceNGN, USD: p.priceUSD, EUR: p.priceEUR, GBP: p.priceGBP };
-        const price = priceMap[currency] || 0;
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${escapeHtml(p.name)}</td>
-          <td>${formatCurrency(price, currency)}</td>
-          <td>${p.imageUrl ? `<img src="${p.imageUrl}" alt="${escapeHtml(p.name)}" style="height:50px; width:auto; border-radius:6px;">` : ''}</td>
-          <td>${p.customizationAvailable ? '✅' : '❌'}</td>
-          <td>${p.published ? '✅' : '❌'}</td>
-          <td>
-            <button data-id="${p.id}" class="edit-product">Edit</button>
-            <button data-id="${p.id}" class="delete-product">Delete</button>
-          </td>`;
-        productsTableBody.appendChild(tr);
-
-        tr.querySelector(".edit-product").addEventListener("click", () => populateProductForm(p));
-        tr.querySelector(".delete-product").addEventListener("click", async () => {
-          if(confirm("Delete this product?")) 
-            await deleteDoc(doc(db, "brands", "serac", "products", p.id));
+                tr.querySelector(".edit-product").addEventListener("click", () => populateProductForm(p));
+                tr.querySelector(".delete-product").addEventListener("click", async () => {
+                    if (confirm("Delete this product?"))
+                        await deleteDoc(doc(db, "brands", "serac", "products", p.id));
+                });
+            });
         });
-      });
-    });
-  } catch(err) {
-    console.error("Products subscription failed:", err);
-  }
+    } catch(err) {
+        console.error("Products subscription failed:", err);
+    }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    subscribeProducts();
+    const productsTableBody = document.getElementById("productsTableBody");
+
+    // Subscribe products after DOM is ready
+    subscribeProducts(productsTableBody);
+
+    // Product form submit
+    productForm.addEventListener("submit", async e => {
+        e.preventDefault();
+
+        const data = {
+            name: document.getElementById("productName").value.trim(),
+            priceNGN: parseFloat(document.getElementById("productPriceNGN").value) || 0,
+            priceUSD: parseFloat(document.getElementById("productPriceUSD").value) || 0,
+            priceEUR: parseFloat(document.getElementById("productPriceEUR").value) || 0,
+            priceGBP: parseFloat(document.getElementById("productPriceGBP").value) || 0,
+            description: document.getElementById("productDesc").value.trim() || "",
+            customizationAvailable: document.getElementById("productCustom").value === "true",
+            published: document.getElementById("productPublished").value === "true",
+            updatedAt: new Date().toISOString()
+        };
+
+        // Sizes and colors
+        data.sizes = Array.from(sizesRepeat.querySelectorAll('input'))
+                          .map(i => i.value.trim())
+                          .filter(Boolean);
+        data.colors = Array.from(colorsRepeat.querySelectorAll('input'))
+                           .map(i => i.value.trim())
+                           .filter(Boolean);
+
+        // Images
+        data.images = Array.from(imagesRepeat.querySelectorAll('input'))
+                           .map(i => i.value.trim())
+                           .filter(Boolean);
+        data.imageUrl = data.images[0] || "";
+
+        try {
+            if(currentEditingProductId){
+                await updateDoc(doc(db, "brands", "serac", "products", currentEditingProductId), data);
+                productMessage.textContent = "✅ Product updated.";
+                currentEditingProductId = null;
+                productForm.reset();
+            } else {
+                await addDoc(collection(db, "brands", "serac", "products"), data);
+                productMessage.textContent = "✅ Product added.";
+                productForm.reset();
+            }
+        } catch(err) {
+            console.error(err);
+            productMessage.textContent = "❌ " + err.message;
+        }
+    });
 });
 
- 
 /* ---------------- QUOTES ---------------- */
 function subscribeQuotes(){
   try {
