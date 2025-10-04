@@ -571,14 +571,6 @@ quoteForm?.addEventListener("submit",async e=>{
   catch(err){console.error(err); quoteMessage.textContent="❌ "+err.message;}
 });
 
-/* ---------------- SCROLL EFFECT ---------------- */
-const header = document.getElementById('mainHeader');
-if(header){
-  window.addEventListener('scroll', () => {
-    if(window.scrollY > 20) header.classList.add('scrolled');
-    else header.classList.remove('scrolled');
-  });
-}
 
 </script>
 
