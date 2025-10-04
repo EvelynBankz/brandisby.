@@ -475,12 +475,21 @@ function refreshProductRow(product){
 /* ---------------- SUBSCRIBE PRODUCTS ---------------- */
 function subscribeProducts(){
   onSnapshot(productsCollection(), snap=>{
-    productsCache=[];
-    productsTableBody.innerHTML="";
+    productsCache = [];
+    const seenIds = new Set();
+
     snap.forEach(docSnap=>{
       const p = { id: docSnap.id, ...docSnap.data() };
       productsCache.push(p);
-      refreshProductRow(p);
+      refreshProductRow(p); // Only refresh/add the row for this product
+      seenIds.add(p.id);
+    });
+
+    // Remove rows that no longer exist in Firestore
+    productsTableBody.querySelectorAll("tr[data-id]").forEach(tr=>{
+      if(!seenIds.has(tr.dataset.id)){
+        tr.remove();
+      }
     });
   });
 }
@@ -492,10 +501,14 @@ function updateTablePrices(){
     const tr = productsTableBody.querySelector(`tr[data-id="${product.id}"]`);
     if(tr){
       const priceMap = { NGN: product.priceNGN, USD: product.priceUSD, EUR: product.priceEUR, GBP: product.priceGBP };
-      tr.querySelector(".product-price").textContent = formatCurrency(priceMap[currency]||0,currency);
+      const priceCell = tr.querySelector(".product-price");
+      if(priceCell){
+        priceCell.textContent = formatCurrency(priceMap[currency]||0, currency);
+      }
     }
   });
 }
+
 
 /* ---------------- DOM CONTENT LOADED ---------------- */
 document.addEventListener("DOMContentLoaded",()=>{
