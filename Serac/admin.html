@@ -416,16 +416,11 @@ function subscribeProducts(productsTableBody) {
                 const p = { id: docSnap.id, ...docSnap.data() };
                 productsCache.push(p);
 
-                // Determine price from dropdown or default to NGN
-                const currencySelect = document.getElementById("productPriceCurrency");
-                const currency = currencySelect ? currencySelect.value : 'NGN';
-                const priceMap = { NGN: p.priceNGN, USD: p.priceUSD, EUR: p.priceEUR, GBP: p.priceGBP };
-                const price = priceMap[currency] || 0;
-
                 const tr = document.createElement('tr');
+                tr.dataset.id = p.id; // store id for updates
                 tr.innerHTML = `
                     <td>${escapeHtml(p.name)}</td>
-                    <td>${formatCurrency(price, currency)}</td>
+                    <td class="product-price"></td>
                     <td>${p.imageUrl ? `<img src="${p.imageUrl}" alt="${escapeHtml(p.name)}" style="height:50px; width:auto; border-radius:6px;">` : ''}</td>
                     <td>${p.customizationAvailable ? '✅' : '❌'}</td>
                     <td>${p.published ? '✅' : '❌'}</td>
@@ -435,16 +430,43 @@ function subscribeProducts(productsTableBody) {
                     </td>`;
                 productsTableBody.appendChild(tr);
 
+                // Edit/Delete handlers
                 tr.querySelector(".edit-product").addEventListener("click", () => populateProductForm(p));
                 tr.querySelector(".delete-product").addEventListener("click", async () => {
-                    if (confirm("Delete this product?"))
+                    if (confirm("Delete this product?")) {
                         await deleteDoc(doc(db, "brands", "serac", "products", p.id));
+                        // Remove from table immediately
+                        tr.remove();
+                        productsCache = productsCache.filter(prod => prod.id !== p.id);
+                    }
                 });
             });
+
+            // Update prices according to current currency
+            updateTablePrices();
         });
-    } catch(err) {
+    } catch(err){
         console.error("Products subscription failed:", err);
     }
+}
+
+// Update table prices based on dropdown
+function updateTablePrices() {
+    const currencySelect = document.getElementById("productPriceCurrency");
+    if(!currencySelect) return;
+
+    const currency = currencySelect.value;
+    const rows = productsTableBody.querySelectorAll("tr");
+
+    rows.forEach(tr => {
+        const product = productsCache.find(p => p.id === tr.dataset.id);
+        if(!product) return;
+
+        const priceMap = { NGN: product.priceNGN, USD: product.priceUSD, EUR: product.priceEUR, GBP: product.priceGBP };
+        const price = priceMap[currency] || 0;
+
+        tr.querySelector(".product-price").textContent = formatCurrency(price, currency);
+    });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -452,6 +474,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Subscribe products after DOM is ready
     subscribeProducts(productsTableBody);
+
+    // Currency dropdown change updates table live
+    const currencySelect = document.getElementById("productPriceCurrency");
+    if(currencySelect) {
+        currencySelect.addEventListener("change", () => updateTablePrices());
+    }
 
     // Product form submit
     productForm.addEventListener("submit", async e => {
@@ -469,37 +497,130 @@ document.addEventListener("DOMContentLoaded", () => {
             updatedAt: new Date().toISOString()
         };
 
-        // Sizes and colors
-        data.sizes = Array.from(sizesRepeat.querySelectorAll('input'))
-                          .map(i => i.value.trim())
-                          .filter(Boolean);
-        data.colors = Array.from(colorsRepeat.querySelectorAll('input'))
-                           .map(i => i.value.trim())
-                           .filter(Boolean);
-
-        // Images
-        data.images = Array.from(imagesRepeat.querySelectorAll('input'))
-                           .map(i => i.value.trim())
-                           .filter(Boolean);
+        data.sizes = Array.from(sizesRepeat.querySelectorAll('input')).map(i => i.value.trim()).filter(Boolean);
+        data.colors = Array.from(colorsRepeat.querySelectorAll('input')).map(i => i.value.trim()).filter(Boolean);
+        data.images = Array.from(imagesRepeat.querySelectorAll('input')).map(i => i.value.trim()).filter(Boolean);
         data.imageUrl = data.images[0] || "";
 
         try {
+            let productId;
             if(currentEditingProductId){
                 await updateDoc(doc(db, "brands", "serac", "products", currentEditingProductId), data);
                 productMessage.textContent = "✅ Product updated.";
+                productId = currentEditingProductId;
                 currentEditingProductId = null;
-                productForm.reset();
             } else {
-                await addDoc(collection(db, "brands", "serac", "products"), data);
+                const docRef = await addDoc(collection(db, "brands", "serac", "products"), data);
                 productMessage.textContent = "✅ Product added.";
-                productForm.reset();
+                productId = docRef.id;
             }
+            productForm.reset();
+
+            // Update productsCache and table immediately
+            const existingIndex = productsCache.findIndex(p => p.id === productId);
+            const newProduct = { id: productId, ...data };
+            if(existingIndex > -1){
+                productsCache[existingIndex] = newProduct;
+            } else {
+                productsCache.push(newProduct);
+            }
+
+            // Refresh table row for this product
+            refreshProductRow(newProduct);
         } catch(err) {
             console.error(err);
             productMessage.textContent = "❌ " + err.message;
         }
     });
 });
+
+// Refresh or add a single product row
+function refreshProductRow(product) {
+    const trExisting = productsTableBody.querySelector(`tr[data-id="${product.id}"]`);
+    const currencySelect = document.getElementById("productPriceCurrency");
+    const currency = currencySelect ? currencySelect.value : 'NGN';
+    const priceMap = { NGN: product.priceNGN, USD: product.priceUSD, EUR: product.priceEUR, GBP: product.priceGBP };
+    const price = priceMap[currency] || 0;
+
+    const trHtml = `
+        <td>${escapeHtml(product.name)}</td>
+        <td class="product-price">${formatCurrency(price, currency)}</td>
+        <td>${product.imageUrl ? `<img src="${product.imageUrl}" alt="${escapeHtml(product.name)}" style="height:50px; width:auto; border-radius:6px;">` : ''}</td>
+        <td>${product.customizationAvailable ? '✅' : '❌'}</td>
+        <td>${product.published ? '✅' : '❌'}</td>
+        <td>
+            <button data-id="${product.id}" class="edit-product">Edit</button>
+            <button data-id="${product.id}" class="delete-product">Delete</button>
+        </td>`;
+
+    if(trExisting){
+        trExisting.innerHTML = trHtml;
+    } else {
+        const tr = document.createElement('tr');
+        tr.dataset.id = product.id;
+        tr.innerHTML = trHtml;
+        productsTableBody.appendChild(tr);
+    }
+
+ // Refresh or add a single product row with highlight animation
+function refreshProductRow(product) {
+    const trExisting = productsTableBody.querySelector(`tr[data-id="${product.id}"]`);
+    const currencySelect = document.getElementById("productPriceCurrency");
+    const currency = currencySelect ? currencySelect.value : 'NGN';
+    const priceMap = { NGN: product.priceNGN, USD: product.priceUSD, EUR: product.priceEUR, GBP: product.priceGBP };
+    const price = priceMap[currency] || 0;
+
+    const trHtml = `
+        <td>${escapeHtml(product.name)}</td>
+        <td class="product-price">${formatCurrency(price, currency)}</td>
+        <td>${product.imageUrl ? `<img src="${product.imageUrl}" alt="${escapeHtml(product.name)}" style="height:50px; width:auto; border-radius:6px;">` : ''}</td>
+        <td>${product.customizationAvailable ? '✅' : '❌'}</td>
+        <td>${product.published ? '✅' : '❌'}</td>
+        <td>
+            <button data-id="${product.id}" class="edit-product">Edit</button>
+            <button data-id="${product.id}" class="delete-product">Delete</button>
+        </td>`;
+
+    let trRow;
+    if(trExisting){
+        trExisting.innerHTML = trHtml;
+        trRow = trExisting;
+    } else {
+        trRow = document.createElement('tr');
+        trRow.dataset.id = product.id;
+        trRow.innerHTML = trHtml;
+        productsTableBody.appendChild(trRow);
+    }
+
+    // Highlight animation
+    trRow.style.transition = "background-color 0.6s ease";
+    trRow.style.backgroundColor = "#ffeeba"; // highlight color
+    setTimeout(() => {
+        trRow.style.backgroundColor = ""; // fade back to normal
+    }, 600);
+
+    // Reattach Edit/Delete handlers
+    trRow.querySelector(".edit-product").addEventListener("click", () => populateProductForm(product));
+    trRow.querySelector(".delete-product").addEventListener("click", async () => {
+        if (confirm("Delete this product?")) {
+            await deleteDoc(doc(db, "brands", "serac", "products", product.id));
+            trRow.remove();
+            productsCache = productsCache.filter(p => p.id !== product.id);
+        }
+    });
+}
+ 
+    // Reattach Edit/Delete handlers
+    const trRow = trExisting || productsTableBody.querySelector(`tr[data-id="${product.id}"]`);
+    trRow.querySelector(".edit-product").addEventListener("click", () => populateProductForm(product));
+    trRow.querySelector(".delete-product").addEventListener("click", async () => {
+        if (confirm("Delete this product?")) {
+            await deleteDoc(doc(db, "brands", "serac", "products", product.id));
+            trRow.remove();
+            productsCache = productsCache.filter(p => p.id !== product.id);
+        }
+    });
+}
 
 /* ---------------- QUOTES ---------------- */
 function subscribeQuotes(){
