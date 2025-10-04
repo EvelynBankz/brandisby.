@@ -155,16 +155,32 @@
     </form>
     <div id="productMessage" class="message"></div>
 
-    <label>Table Currency:</label>
-    <select id="tableCurrency">
-      <option value="NGN">NGN</option><option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option>
+   
+  <!-- Table Currency Selector -->
+  <label>Table Price Currency:
+    <select id="productCurrencySelect">
+      <option value="NGN">NGN</option>
+      <option value="USD">USD</option>
+      <option value="EUR">EUR</option>
+      <option value="GBP">GBP</option>
     </select>
+  </label>
 
-    <table id="productsTable">
-      <thead><tr><th>Name</th><th>Price NGN</th><th>Price USD</th><th>Price EUR</th><th>Price GBP</th><th>Published</th><th>Actions</th></tr></thead>
-      <tbody></tbody>
-    </table>
-  </div>
+  <!-- Products Table -->
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Price</th>
+        <th>Image</th>
+        <th>Customization</th>
+        <th>Published</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="productsTableBody"></tbody>
+  </table>
+</div>
 
   <!-- QUOTES SECTION -->
   <div class="section" id="quotesSection">
@@ -390,91 +406,88 @@ addImageBtn.addEventListener('click',()=>addImageInput());
 addSizeInput(); addColorInput(); addImageInput();
 
 /* ---------------- PRODUCTS ---------------- */
-productForm.addEventListener("submit", async e => {
+// --- Product Form Submit ---
+productForm.addEventListener("submit", async e=>{
   e.preventDefault();
-
   const data = {
-    name: document.getElementById("productName").value.trim(),
-    priceNGN: parseFloat(document.getElementById("productPriceNGN").value) || 0,
-    priceUSD: parseFloat(document.getElementById("productPriceUSD").value) || 0,
-    priceEUR: parseFloat(document.getElementById("productPriceEUR").value) || 0,
-    priceGBP: parseFloat(document.getElementById("productPriceGBP").value) || 0,
-    description: document.getElementById("productDesc").value.trim() || "",
-    customizationAvailable: document.getElementById("productCustom").value === "true",
-    published: document.getElementById("productPublished").value === "true",
+    name: document.getElementById("productName").value,
+    priceNGN: parseFloat(document.getElementById("productPriceNGN").value)||0,
+    priceUSD: parseFloat(document.getElementById("productPriceUSD").value)||0,
+    priceEUR: parseFloat(document.getElementById("productPriceEUR").value)||0,
+    priceGBP: parseFloat(document.getElementById("productPriceGBP").value)||0,
+    description: document.getElementById("productDesc").value||"",
+    customizationAvailable: document.getElementById("productCustom").value==="true",
+    published: document.getElementById("productPublished").value==="true",
+    sizes: document.getElementById("productSizes").value.split(',').map(s=>s.trim()).filter(Boolean),
+    colors: document.getElementById("productColors").value.split(',').map(s=>s.trim()).filter(Boolean),
+    images: document.getElementById("productImages").value.split(',').map(s=>s.trim()).filter(Boolean),
     updatedAt: new Date().toISOString()
   };
 
-  // Save sizes and colors
-  data.sizes = Array.from(sizesRepeat.querySelectorAll('input'))
-                    .map(i => i.value.trim())
-                    .filter(Boolean);
-  data.colors = Array.from(colorsRepeat.querySelectorAll('input'))
-                     .map(i => i.value.trim())
-                     .filter(Boolean);
-
-  // Save images and first image as imageUrl
-  data.images = Array.from(imagesRepeat.querySelectorAll('input'))
-                     .map(i => i.value.trim())
-                     .filter(Boolean);
-  data.imageUrl = data.images[0] || "";
-
-  try {
+  try{
     if(currentEditingProductId){
-      // Update existing product
-      await updateDoc(doc(db, "brands", "serac", "products", currentEditingProductId), data);
-      productMessage.textContent = "✅ Product updated.";
-      currentEditingProductId = null;
+      await updateDoc(doc(db,"brands","serac","products",currentEditingProductId),data);
+      productMessage.textContent="✅ Product updated.";
+      currentEditingProductId=null;
       productForm.reset();
     } else {
-      // Add new product
-      await addDoc(collection(db, "brands", "serac", "products"), data);
-      productMessage.textContent = "✅ Product added.";
+      await addDoc(productsCollection(), data);
+      productMessage.textContent="✅ Product added.";
       productForm.reset();
     }
-  } catch(err) {
-    console.error(err);
-    productMessage.textContent = "❌ " + err.message;
-  }
+  } catch(err){ console.error(err); productMessage.textContent="❌ "+err.message; }
 });
 
-/* ---------------- SUBSCRIBE PRODUCTS ---------------- */
+// --- Subscribe and Render Products Table ---
 function subscribeProducts(){
-  try {
-    onSnapshot(collection(db, "brands", "serac", "products"), snap => {
-      productsCache = [];
-      productsTableBody.innerHTML = "";
-
-      snap.forEach(docSnap => {
-        const p = { id: docSnap.id, ...docSnap.data() };
-        productsCache.push(p);
-
+  try{
+    onSnapshot(productsCollection(), snap=>{
+      productsTableBody.innerHTML="";
+      const currency = currencySelectAdmin.value || 'NGN';
+      snap.forEach(docSnap=>{
+        const p = {...docSnap.data(), id:docSnap.id};
         const tr = document.createElement('tr');
-        tr.innerHTML = `
+        tr.innerHTML=`
           <td>${escapeHtml(p.name)}</td>
-          <td>${formatCurrency(p.priceNGN,'NGN')}</td>
-          <td>${formatCurrency(p.priceUSD,'USD')}</td>
-          <td>${formatCurrency(p.priceEUR,'EUR')}</td>
-          <td>${formatCurrency(p.priceGBP,'GBP')}</td>
-          <td>${p.published ? '✅' : '❌'}</td>
+          <td>${formatCurrency(p['price'+currency],currency)}</td>
+          <td>${p.images?.[0]?`<img src="${p.images[0]}" class="table-img">`:'-'}</td>
+          <td>${p.customizationAvailable?'✅':'❌'}</td>
+          <td>${p.published?'✅':'❌'}</td>
           <td>
             <button data-id="${p.id}" class="edit-product">Edit</button>
             <button data-id="${p.id}" class="delete-product">Delete</button>
-          </td>`;
+          </td>
+        `;
         productsTableBody.appendChild(tr);
 
-        tr.querySelector(".edit-product").addEventListener("click", () => populateProductForm(p));
-        tr.querySelector(".delete-product").addEventListener("click", async () => {
-          if(confirm("Delete this product?")) 
-            await deleteDoc(doc(db, "brands", "serac", "products", p.id));
+        tr.querySelector(".edit-product").addEventListener("click", ()=>{
+          currentEditingProductId = p.id;
+          document.getElementById("productName").value = p.name;
+          document.getElementById("productPriceNGN").value = p.priceNGN;
+          document.getElementById("productPriceUSD").value = p.priceUSD;
+          document.getElementById("productPriceEUR").value = p.priceEUR;
+          document.getElementById("productPriceGBP").value = p.priceGBP;
+          document.getElementById("productDesc").value = p.description;
+          document.getElementById("productCustom").value = p.customizationAvailable?"true":"false";
+          document.getElementById("productPublished").value = p.published?"true":"false";
+          document.getElementById("productSizes").value = p.sizes?.join(',')||'';
+          document.getElementById("productColors").value = p.colors?.join(',')||'';
+          document.getElementById("productImages").value = p.images?.join(',')||'';
+        });
+
+        tr.querySelector(".delete-product").addEventListener("click", async ()=>{
+          if(confirm("Delete this product?")) await deleteDoc(doc(db,"brands","serac","products",p.id));
         });
       });
     });
-  } catch(err){
-    console.error("Products subscription failed:", err);
-  }
+  } catch(err){ console.error("Products subscription failed:",err); }
 }
 
+// Re-render table when currency changes
+currencySelectAdmin.addEventListener('change', subscribeProducts);
+
+subscribeProducts();
+ 
 /* ---------------- QUOTES ---------------- */
 function subscribeQuotes(){
   try {
