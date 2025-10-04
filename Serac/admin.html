@@ -406,6 +406,11 @@ addImageBtn.addEventListener('click',()=>addImageInput());
 addSizeInput(); addColorInput(); addImageInput();
 
 /* ---------------- PRODUCTS ---------------- */
+/* ---------------- PRODUCTS ---------------- */
+const productsTableBody = document.getElementById("productsTableBody");
+let productsCache = [];
+
+// Handle product form submission
 productForm.addEventListener("submit", async e => {
   e.preventDefault();
 
@@ -455,10 +460,10 @@ productForm.addEventListener("submit", async e => {
 });
 
 /* ---------------- SUBSCRIBE PRODUCTS ---------------- */
-/* ---------------- SUBSCRIBE PRODUCTS ---------------- */
-function subscribeProducts(){
+function subscribeProducts() {
   try {
-    onSnapshot(collection(db, "brands", "serac", "products"), snap => {
+    const productsCollectionRef = collection(db, "brands", "serac", "products");
+    onSnapshot(productsCollectionRef, snap => {
       productsCache = [];
       productsTableBody.innerHTML = "";
 
@@ -466,17 +471,17 @@ function subscribeProducts(){
         const p = { id: docSnap.id, ...docSnap.data() };
         productsCache.push(p);
 
-        // Determine price from dropdown or default to NGN
-        const currencySelect = document.getElementById("productPriceCurrency"); // dropdown in product form
-        const currency = currencySelect ? currencySelect.value : 'NGN';
+        // Determine price based on product form dropdown
+        const currencySelect = document.getElementById("productPriceCurrency");
+        const currency = currencySelect ? currencySelect.value : "NGN";
         const priceMap = { NGN: p.priceNGN, USD: p.priceUSD, EUR: p.priceEUR, GBP: p.priceGBP };
         const price = priceMap[currency] || 0;
 
-        const tr = document.createElement('tr');
+        const tr = document.createElement("tr");
         tr.innerHTML = `
           <td>${escapeHtml(p.name)}</td>
           <td>${formatCurrency(price, currency)}</td>
-          <td>${p.imageUrl ? `<img src="${p.imageUrl}" alt="${escapeHtml(p.name)}" style="height:50px; width:auto; border-radius:6px;">` : ''}</td>
+          <td>${p.imageUrl ? `<img src="${p.imageUrl}" alt="${escapeHtml(p.name)}" style="height:50px; width:auto; border-radius:6px;">` : ""}</td>
           <td>${p.customizationAvailable ? '✅' : '❌'}</td>
           <td>${p.published ? '✅' : '❌'}</td>
           <td>
@@ -485,17 +490,26 @@ function subscribeProducts(){
           </td>`;
         productsTableBody.appendChild(tr);
 
+        // Edit button
         tr.querySelector(".edit-product").addEventListener("click", () => populateProductForm(p));
+        // Delete button
         tr.querySelector(".delete-product").addEventListener("click", async () => {
-          if(confirm("Delete this product?")) 
+          if(confirm("Delete this product?")) {
             await deleteDoc(doc(db, "brands", "serac", "products", p.id));
+          }
         });
       });
     });
-  } catch(err){
+  } catch(err) {
     console.error("Products subscription failed:", err);
   }
 }
+
+// Initialize subscription after DOM loaded
+document.addEventListener("DOMContentLoaded", () => {
+  subscribeProducts();
+});
+
 
  
 /* ---------------- QUOTES ---------------- */
