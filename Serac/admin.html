@@ -405,11 +405,12 @@ addImageBtn.addEventListener('click',()=>addImageInput());
 
 addSizeInput(); addColorInput(); addImageInput();
 
+/* ---------------- ELEMENTS ---------------- */
+const productsTableBody = document.getElementById("productsTableBody");
+
 /* ---------------- PRODUCTS ---------------- */
 productForm.addEventListener("submit", async e => {
   e.preventDefault();
-
- const productsTableBody = document.getElementById("productsTableBody");
 
   const data = {
     name: document.getElementById("productName").value.trim(),
@@ -457,8 +458,7 @@ productForm.addEventListener("submit", async e => {
 });
 
 /* ---------------- SUBSCRIBE PRODUCTS ---------------- */
-/* ---------------- SUBSCRIBE PRODUCTS ---------------- */
-function subscribeProducts(){
+function subscribeProducts() {
   try {
     onSnapshot(collection(db, "brands", "serac", "products"), snap => {
       productsCache = [];
@@ -468,8 +468,7 @@ function subscribeProducts(){
         const p = { id: docSnap.id, ...docSnap.data() };
         productsCache.push(p);
 
-        // Determine price from dropdown or default to NGN
-        const currencySelect = document.getElementById("productPriceCurrency"); // dropdown in product form
+        const currencySelect = document.getElementById("productPriceCurrency");
         const currency = currencySelect ? currencySelect.value : 'NGN';
         const priceMap = { NGN: p.priceNGN, USD: p.priceUSD, EUR: p.priceEUR, GBP: p.priceGBP };
         const price = priceMap[currency] || 0;
@@ -494,7 +493,7 @@ function subscribeProducts(){
         });
       });
     });
-  } catch(err){
+  } catch(err) {
     console.error("Products subscription failed:", err);
   }
 }
