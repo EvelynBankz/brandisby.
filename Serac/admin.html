@@ -250,7 +250,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
 /* ---------------- FIREBASE CONFIG ---------------- */
 const firebaseConfig = {
@@ -269,9 +269,9 @@ const db = getFirestore(app);
 const allowedAdmins = ["stonecold.serac@gmail.com"].map(e => e.toLowerCase().trim());
 
 /* ---------------- COLLECTION HELPERS ---------------- */
-function productsCollection() { return collection(db, "brands", "serac", "products"); }
-function quotesCollection() { return collection(db, "brands", "serac", "quotes"); }
-function ordersCollection() { return collection(db, "brands", "serac", "orders"); }
+const productsCollection = () => collection(db, "brands", "serac", "products");
+const quotesCollection = () => collection(db, "brands", "serac", "quotes");
+const ordersCollection = () => collection(db, "brands", "serac", "orders");
 
 /* ---------------- UTILS ---------------- */
 function formatCurrency(value, currency){
@@ -282,7 +282,7 @@ function formatCurrency(value, currency){
 }
 function escapeHtml(str){ if (!str && str!==0) return ""; return String(str).replace(/[&<>"']/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[s])); }
 
-/* ---------------- UI ELEMENTS ---------------- */
+/* ---------------- DOM ELEMENTS ---------------- */
 const loginForm = document.getElementById("loginForm");
 const loginMessage = document.getElementById("loginMessage");
 const loginContainer = document.getElementById("loginContainer");
@@ -291,7 +291,7 @@ const dashboardContainer = document.getElementById("dashboardContainer");
 /* Products */
 const productForm = document.getElementById("productForm");
 const productMessage = document.getElementById("productMessage");
-const productsTableBody = document.querySelector("#productsTable tbody");
+const productsTableBody = document.getElementById("productsTableBody");
 const tableCurrencySelect = document.getElementById("tableCurrency");
 const sizesRepeat = document.getElementById("sizesRepeat");
 const colorsRepeat = document.getElementById("colorsRepeat");
@@ -299,6 +299,7 @@ const imagesRepeat = document.getElementById("imagesRepeat");
 const addSizeBtn = document.getElementById("addSizeBtn");
 const addColorBtn = document.getElementById("addColorBtn");
 const addImageBtn = document.getElementById("addImageBtn");
+const currencySelect = document.getElementById("productPriceCurrency");
 
 /* Quotes */
 const quoteForm = document.getElementById("quoteForm");
@@ -334,6 +335,25 @@ let productsCache = [];
 let quotesCache = [];
 let allOrders = [];
 let quoteDraftItems = [];
+
+/* ---------------- REPEATABLE INPUT HELPERS ---------------- */
+function createRepeatRow(value='', placeholder=''){
+  const row = document.createElement('div');
+  row.className='row';
+  row.innerHTML = `<input type="text" value="${escapeHtml(value)}" placeholder="${escapeHtml(placeholder)}">
+                   <button type="button" class="remove-row">Remove</button>`;
+  row.querySelector(".remove-row").addEventListener("click", ()=>row.remove());
+  return row;
+}
+function addSizeInput(v=''){ sizesRepeat.appendChild(createRepeatRow(v,'Size e.g. S,M,L')); }
+function addColorInput(v=''){ colorsRepeat.appendChild(createRepeatRow(v,'Color e.g. Olive')); }
+function addImageInput(v=''){ imagesRepeat.appendChild(createRepeatRow(v,'https://.../image.jpg')); }
+
+addSizeBtn?.addEventListener('click',()=>addSizeInput());
+addColorBtn?.addEventListener('click',()=>addColorInput());
+addImageBtn?.addEventListener('click',()=>addImageInput());
+
+addSizeInput(); addColorInput(); addImageInput();
 
 /* ---------------- AUTH ---------------- */
 loginForm.addEventListener("submit", async e => {
@@ -386,153 +406,152 @@ function showSection(id){
   document.getElementById(id).classList.add("active");
 }
 
-/* ---------------- REPEATABLE INPUTS ---------------- */
-function createRepeatRow(value='', placeholder=''){
-  const row = document.createElement('div');
-  row.className='row';
-  row.innerHTML = `<input type="text" value="${escapeHtml(value)}" placeholder="${escapeHtml(placeholder)}">
-                   <button type="button" class="remove-row">Remove</button>`;
-  row.querySelector(".remove-row").addEventListener("click", ()=>row.remove());
-  return row;
-}
-function addSizeInput(v=''){ sizesRepeat.appendChild(createRepeatRow(v,'Size e.g. S,M,L')); }
-function addColorInput(v=''){ colorsRepeat.appendChild(createRepeatRow(v,'Color e.g. Olive')); }
-function addImageInput(v=''){ imagesRepeat.appendChild(createRepeatRow(v,'https://.../image.jpg')); }
+/* ---------------- POPULATE PRODUCT FORM ---------------- */
+function populateProductForm(product){
+  if(!product) return;
+  currentEditingProductId = product.id;
 
-addSizeBtn.addEventListener('click',()=>addSizeInput());
-addColorBtn.addEventListener('click',()=>addColorInput());
-addImageBtn.addEventListener('click',()=>addImageInput());
+  document.getElementById("productName").value = product.name || "";
+  document.getElementById("productPriceNGN").value = product.priceNGN || 0;
+  document.getElementById("productPriceUSD").value = product.priceUSD || 0;
+  document.getElementById("productPriceEUR").value = product.priceEUR || 0;
+  document.getElementById("productPriceGBP").value = product.priceGBP || 0;
+  document.getElementById("productDesc").value = product.description || "";
+  document.getElementById("productCustom").value = product.customizationAvailable ? "true" : "false";
+  document.getElementById("productPublished").value = product.published ? "true" : "false";
 
-addSizeInput(); addColorInput(); addImageInput();
+  sizesRepeat.innerHTML=""; (product.sizes||[]).forEach(s=>addSizeInput(s));
+  colorsRepeat.innerHTML=""; (product.colors||[]).forEach(c=>addColorInput(c));
+  imagesRepeat.innerHTML=""; (product.images||[]).forEach(img=>addImageInput(img));
 
-/* ---------------- PRODUCTS ---------------- */
-let currentEditingProductId = null;
-let productsCache = [];
-
-function populateProductForm(product) {
-    if(!product) return;
-    currentEditingProductId = product.id;
-
-    document.getElementById("productName").value = product.name || "";
-    document.getElementById("productPriceNGN").value = product.priceNGN || 0;
-    document.getElementById("productPriceUSD").value = product.priceUSD || 0;
-    document.getElementById("productPriceEUR").value = product.priceEUR || 0;
-    document.getElementById("productPriceGBP").value = product.priceGBP || 0;
-    document.getElementById("productDesc").value = product.description || "";
-    document.getElementById("productCustom").value = product.customizationAvailable ? "true" : "false";
-    document.getElementById("productPublished").value = product.published ? "true" : "false";
-
-    // Repeatable fields
-    sizesRepeat.innerHTML = ""; (product.sizes || []).forEach(v => sizesRepeat.appendChild(createRepeatRow(v,"Size e.g. S,M,L")));
-    colorsRepeat.innerHTML = ""; (product.colors || []).forEach(v => colorsRepeat.appendChild(createRepeatRow(v,"Color e.g. Olive")));
-    imagesRepeat.innerHTML = ""; (product.images || []).forEach(v => imagesRepeat.appendChild(createRepeatRow(v,"https://.../image.jpg")));
-
-    productForm.scrollIntoView({behavior:"smooth"});
+  productForm.scrollIntoView({behavior:"smooth"});
 }
 
-function refreshProductRow(product, highlight=true){
-    let tr = productsTableBody.querySelector(`tr[data-id="${product.id}"]`);
-    const currency = currencySelect ? currencySelect.value : 'NGN';
-    const priceMap = { NGN: product.priceNGN, USD: product.priceUSD, EUR: product.priceEUR, GBP: product.priceGBP };
-    const price = priceMap[currency] || 0;
+/* ---------------- REFRESH PRODUCT ROW ---------------- */
+function refreshProductRow(product){
+  const trExisting = productsTableBody.querySelector(`tr[data-id="${product.id}"]`);
+  const currency = currencySelect?.value || 'NGN';
+  const priceMap = { NGN: product.priceNGN, USD: product.priceUSD, EUR: product.priceEUR, GBP: product.priceGBP };
+  const price = priceMap[currency] || 0;
 
-    const trHtml = `
-        <td>${escapeHtml(product.name)}</td>
-        <td class="product-price">${formatCurrency(price, currency)}</td>
-        <td>${product.imageUrl ? `<img src="${escapeHtml(product.imageUrl)}" alt="${escapeHtml(product.name)}" style="height:50px;width:auto;border-radius:6px;">` : ''}</td>
-        <td>${product.customizationAvailable?'✅':'❌'}</td>
-        <td>${product.published?'✅':'❌'}</td>
-        <td>
-            <button data-id="${product.id}" class="edit-product">Edit</button>
-            <button data-id="${product.id}" class="delete-product">Delete</button>
-        </td>`;
+  const trHtml = `
+    <td>${escapeHtml(product.name)}</td>
+    <td class="product-price">${formatCurrency(price, currency)}</td>
+    <td>${product.imageUrl ? `<img src="${product.imageUrl}" alt="${escapeHtml(product.name)}" style="height:50px;width:auto;border-radius:6px;">` : ''}</td>
+    <td>${product.customizationAvailable ? '✅' : '❌'}</td>
+    <td>${product.published ? '✅' : '❌'}</td>
+    <td>
+      <button data-id="${product.id}" class="edit-product">Edit</button>
+      <button data-id="${product.id}" class="delete-product">Delete</button>
+    </td>`;
 
-    if(tr){ tr.innerHTML = trHtml; } 
-    else { tr = document.createElement('tr'); tr.dataset.id=product.id; tr.innerHTML=trHtml; productsTableBody.appendChild(tr); }
+  let trRow;
+  if(trExisting){
+    trExisting.innerHTML = trHtml;
+    trRow = trExisting;
+  } else {
+    trRow = document.createElement("tr");
+    trRow.dataset.id = product.id;
+    trRow.innerHTML = trHtml;
+    productsTableBody.appendChild(trRow);
+  }
 
-    if(highlight){
-        tr.style.transition = "background-color 0.6s ease"; tr.style.backgroundColor = "#ffeeba";
-        setTimeout(()=>{tr.style.backgroundColor="";},600);
+  // Highlight
+  trRow.style.transition="background-color 0.6s ease";
+  trRow.style.backgroundColor="#ffeeba";
+  setTimeout(()=>{ trRow.style.backgroundColor=""; },600);
+
+  // Handlers
+  trRow.querySelector(".edit-product").onclick = ()=>populateProductForm(product);
+  trRow.querySelector(".delete-product").onclick = async ()=>{
+    if(confirm("Delete this product?")){
+      await deleteDoc(doc(db,"brands","serac","products",product.id));
+      trRow.remove();
+      productsCache = productsCache.filter(p=>p.id!==product.id);
     }
-
-    // Handlers
-    tr.querySelector(".edit-product").onclick = () => populateProductForm(product);
-    tr.querySelector(".delete-product").onclick = async () => {
-        if(confirm("Delete this product?")){
-            await deleteDoc(doc(db,"brands","serac","products",product.id));
-            tr.remove();
-            productsCache = productsCache.filter(p=>p.id!==product.id);
-        }
-    };
+  };
 }
 
+/* ---------------- SUBSCRIBE PRODUCTS ---------------- */
 function subscribeProducts(){
-    onSnapshot(productsCollection(), snap=>{
-        productsCache = [];
-        productsTableBody.innerHTML = "";
-        snap.forEach(docSnap=>{
-            const p = { id: docSnap.id, ...docSnap.data() };
-            productsCache.push(p);
-            refreshProductRow(p,false);
-        });
+  onSnapshot(productsCollection(), snap=>{
+    productsCache=[];
+    productsTableBody.innerHTML="";
+    snap.forEach(docSnap=>{
+      const p = { id: docSnap.id, ...docSnap.data() };
+      productsCache.push(p);
+      refreshProductRow(p);
     });
+  });
 }
 
+/* ---------------- UPDATE TABLE PRICES ---------------- */
 function updateTablePrices(){
-    if(!currencySelect) return;
-    const currency = currencySelect.value;
-    productsCache.forEach(product => refreshProductRow(product,false));
+  const currency = currencySelect?.value || 'NGN';
+  productsCache.forEach(product=>{
+    const tr = productsTableBody.querySelector(`tr[data-id="${product.id}"]`);
+    if(tr){
+      const priceMap = { NGN: product.priceNGN, USD: product.priceUSD, EUR: product.priceEUR, GBP: product.priceGBP };
+      tr.querySelector(".product-price").textContent = formatCurrency(priceMap[currency]||0,currency);
+    }
+  });
 }
 
-// Product form submit
-productForm.addEventListener("submit", async e=>{
+/* ---------------- DOM CONTENT LOADED ---------------- */
+document.addEventListener("DOMContentLoaded",()=>{
+  subscribeProducts();
+  currencySelect?.addEventListener("change",updateTablePrices);
+
+  /* PRODUCT FORM SUBMIT */
+  productForm?.addEventListener("submit", async e=>{
     e.preventDefault();
     const data = {
-        name: document.getElementById("productName").value.trim(),
-        priceNGN: parseFloat(document.getElementById("productPriceNGN").value)||0,
-        priceUSD: parseFloat(document.getElementById("productPriceUSD").value)||0,
-        priceEUR: parseFloat(document.getElementById("productPriceEUR").value)||0,
-        priceGBP: parseFloat(document.getElementById("productPriceGBP").value)||0,
-        description: document.getElementById("productDesc").value.trim()||"",
-        customizationAvailable: document.getElementById("productCustom").value==="true",
-        published: document.getElementById("productPublished").value==="true",
-        updatedAt: new Date().toISOString(),
-        sizes: Array.from(sizesRepeat.querySelectorAll('input')).map(i=>i.value.trim()).filter(Boolean),
-        colors: Array.from(colorsRepeat.querySelectorAll('input')).map(i=>i.value.trim()).filter(Boolean),
-        images: Array.from(imagesRepeat.querySelectorAll('input')).map(i=>i.value.trim()).filter(Boolean)
+      name: document.getElementById("productName").value.trim(),
+      priceNGN: parseFloat(document.getElementById("productPriceNGN").value)||0,
+      priceUSD: parseFloat(document.getElementById("productPriceUSD").value)||0,
+      priceEUR: parseFloat(document.getElementById("productPriceEUR").value)||0,
+      priceGBP: parseFloat(document.getElementById("productPriceGBP").value)||0,
+      description: document.getElementById("productDesc").value.trim()||"",
+      customizationAvailable: document.getElementById("productCustom").value==="true",
+      published: document.getElementById("productPublished").value==="true",
+      sizes: Array.from(sizesRepeat.querySelectorAll('input')).map(i=>i.value.trim()).filter(Boolean),
+      colors: Array.from(colorsRepeat.querySelectorAll('input')).map(i=>i.value.trim()).filter(Boolean),
+      images: Array.from(imagesRepeat.querySelectorAll('input')).map(i=>i.value.trim()).filter(Boolean),
+      imageUrl: Array.from(imagesRepeat.querySelectorAll('input'))[0]?.value || "",
+      updatedAt: new Date().toISOString()
     };
-    data.imageUrl = data.images[0]||"";
 
-    try{
-        let productId;
-        if(currentEditingProductId){
-            await updateDoc(doc(db,"brands","serac","products",currentEditingProductId),data);
-            productMessage.textContent="✅ Product updated.";
-            productId=currentEditingProductId; currentEditingProductId=null;
-        } else {
-            const docRef = await addDoc(productsCollection(),data);
-            productMessage.textContent="✅ Product added.";
-            productId=docRef.id;
-        }
+    try {
+      let productId;
+      if(currentEditingProductId){
+        await updateDoc(doc(db,"brands","serac","products",currentEditingProductId),data);
+        productMessage.textContent="✅ Product updated.";
+        productId = currentEditingProductId;
+        currentEditingProductId=null;
+      } else {
+        const docRef = await addDoc(productsCollection(), data);
+        productMessage.textContent="✅ Product added.";
+        productId = docRef.id;
+      }
 
-        productForm.reset();
-        const existingIndex = productsCache.findIndex(p=>p.id===productId);
-        const newProduct = { id: productId, ...data };
-        if(existingIndex>-1) productsCache[existingIndex]=newProduct;
-        else productsCache.push(newProduct);
+      productForm.reset();
+      sizesRepeat.innerHTML=""; colorsRepeat.innerHTML=""; imagesRepeat.innerHTML="";
+      addSizeInput(); addColorInput(); addImageInput();
 
-        refreshProductRow(newProduct);
+      const existingIndex = productsCache.findIndex(p=>p.id===productId);
+      const newProduct = { id: productId, ...data };
+      if(existingIndex>-1){ productsCache[existingIndex]=newProduct; } else { productsCache.push(newProduct); }
+
+      refreshProductRow(newProduct);
     } catch(err){
-        console.error(err); productMessage.textContent="❌ "+err.message;
+      console.error(err);
+      productMessage.textContent="❌ "+err.message;
     }
+  });
 });
 
-// Currency live update
-if(currencySelect) currencySelect.addEventListener("change", updateTablePrices);
-
-// Initialize products
-subscribeProducts();
-
+/* ---------------- QUOTES & ORDERS ---------------- */
+/* Keep your existing subscribeQuotes(), openQuoteModal(), subscribeOrders(), renderOrders(), quoteForm submit code as is */
 
 
 /* ---------------- QUOTES ---------------- */
