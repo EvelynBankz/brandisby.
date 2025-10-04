@@ -405,7 +405,11 @@ addImageBtn.addEventListener('click',()=>addImageInput());
 
 addSizeInput(); addColorInput(); addImageInput();
 
-/* ---------------- PRODUCTS ---------------- */
+/* ---------------- GLOBAL ---------------- */
+let productsCache = [];
+let currentEditingProductId = null;
+
+/* ---------------- SUBSCRIBE PRODUCTS ---------------- */
 function subscribeProducts(productsTableBody) {
     try {
         onSnapshot(collection(db, "brands", "serac", "products"), snap => {
@@ -415,31 +419,7 @@ function subscribeProducts(productsTableBody) {
             snap.forEach(docSnap => {
                 const p = { id: docSnap.id, ...docSnap.data() };
                 productsCache.push(p);
-
-                const tr = document.createElement('tr');
-                tr.dataset.id = p.id; // store id for updates
-                tr.innerHTML = `
-                    <td>${escapeHtml(p.name)}</td>
-                    <td class="product-price"></td>
-                    <td>${p.imageUrl ? `<img src="${p.imageUrl}" alt="${escapeHtml(p.name)}" style="height:50px; width:auto; border-radius:6px;">` : ''}</td>
-                    <td>${p.customizationAvailable ? '✅' : '❌'}</td>
-                    <td>${p.published ? '✅' : '❌'}</td>
-                    <td>
-                        <button data-id="${p.id}" class="edit-product">Edit</button>
-                        <button data-id="${p.id}" class="delete-product">Delete</button>
-                    </td>`;
-                productsTableBody.appendChild(tr);
-
-                // Edit/Delete handlers
-                tr.querySelector(".edit-product").addEventListener("click", () => populateProductForm(p));
-                tr.querySelector(".delete-product").addEventListener("click", async () => {
-                    if (confirm("Delete this product?")) {
-                        await deleteDoc(doc(db, "brands", "serac", "products", p.id));
-                        // Remove from table immediately
-                        tr.remove();
-                        productsCache = productsCache.filter(prod => prod.id !== p.id);
-                    }
-                });
+                refreshProductRow(p);
             });
 
             // Update prices according to current currency
@@ -450,7 +430,7 @@ function subscribeProducts(productsTableBody) {
     }
 }
 
-// Update table prices based on dropdown
+/* ---------------- UPDATE TABLE PRICES ---------------- */
 function updateTablePrices() {
     const currencySelect = document.getElementById("productPriceCurrency");
     if(!currencySelect) return;
@@ -469,13 +449,62 @@ function updateTablePrices() {
     });
 }
 
+/* ---------------- REFRESH OR ADD SINGLE ROW ---------------- */
+function refreshProductRow(product) {
+    const trExisting = productsTableBody.querySelector(`tr[data-id="${product.id}"]`);
+    const currencySelect = document.getElementById("productPriceCurrency");
+    const currency = currencySelect ? currencySelect.value : 'NGN';
+    const priceMap = { NGN: product.priceNGN, USD: product.priceUSD, EUR: product.priceEUR, GBP: product.priceGBP };
+    const price = priceMap[currency] || 0;
+
+    const trHtml = `
+        <td>${escapeHtml(product.name)}</td>
+        <td class="product-price">${formatCurrency(price, currency)}</td>
+        <td>${product.imageUrl ? `<img src="${product.imageUrl}" alt="${escapeHtml(product.name)}" style="height:50px; width:auto; border-radius:6px;">` : ''}</td>
+        <td>${product.customizationAvailable ? '✅' : '❌'}</td>
+        <td>${product.published ? '✅' : '❌'}</td>
+        <td>
+            <button data-id="${product.id}" class="edit-product">Edit</button>
+            <button data-id="${product.id}" class="delete-product">Delete</button>
+        </td>`;
+
+    let trRow;
+    if(trExisting){
+        trExisting.innerHTML = trHtml;
+        trRow = trExisting;
+    } else {
+        trRow = document.createElement('tr');
+        trRow.dataset.id = product.id;
+        trRow.innerHTML = trHtml;
+        productsTableBody.appendChild(trRow);
+    }
+
+    // Highlight animation
+    trRow.style.transition = "background-color 0.6s ease";
+    trRow.style.backgroundColor = "#ffeeba";
+    setTimeout(() => {
+        trRow.style.backgroundColor = "";
+    }, 600);
+
+    // Attach Edit/Delete handlers
+    trRow.querySelector(".edit-product").addEventListener("click", () => populateProductForm(product));
+    trRow.querySelector(".delete-product").addEventListener("click", async () => {
+        if(confirm("Delete this product?")) {
+            await deleteDoc(doc(db, "brands", "serac", "products", product.id));
+            trRow.remove();
+            productsCache = productsCache.filter(p => p.id !== product.id);
+        }
+    });
+}
+
+/* ---------------- DOM CONTENT LOADED ---------------- */
 document.addEventListener("DOMContentLoaded", () => {
     const productsTableBody = document.getElementById("productsTableBody");
 
-    // Subscribe products after DOM is ready
+    // Subscribe products
     subscribeProducts(productsTableBody);
 
-    // Currency dropdown change updates table live
+    // Currency dropdown updates table live
     const currencySelect = document.getElementById("productPriceCurrency");
     if(currencySelect) {
         currencySelect.addEventListener("change", () => updateTablePrices());
@@ -516,7 +545,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             productForm.reset();
 
-            // Update productsCache and table immediately
+            // Update cache and table row immediately
             const existingIndex = productsCache.findIndex(p => p.id === productId);
             const newProduct = { id: productId, ...data };
             if(existingIndex > -1){
@@ -525,7 +554,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 productsCache.push(newProduct);
             }
 
-            // Refresh table row for this product
             refreshProductRow(newProduct);
         } catch(err) {
             console.error(err);
@@ -534,93 +562,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-// Refresh or add a single product row
-function refreshProductRow(product) {
-    const trExisting = productsTableBody.querySelector(`tr[data-id="${product.id}"]`);
-    const currencySelect = document.getElementById("productPriceCurrency");
-    const currency = currencySelect ? currencySelect.value : 'NGN';
-    const priceMap = { NGN: product.priceNGN, USD: product.priceUSD, EUR: product.priceEUR, GBP: product.priceGBP };
-    const price = priceMap[currency] || 0;
-
-    const trHtml = `
-        <td>${escapeHtml(product.name)}</td>
-        <td class="product-price">${formatCurrency(price, currency)}</td>
-        <td>${product.imageUrl ? `<img src="${product.imageUrl}" alt="${escapeHtml(product.name)}" style="height:50px; width:auto; border-radius:6px;">` : ''}</td>
-        <td>${product.customizationAvailable ? '✅' : '❌'}</td>
-        <td>${product.published ? '✅' : '❌'}</td>
-        <td>
-            <button data-id="${product.id}" class="edit-product">Edit</button>
-            <button data-id="${product.id}" class="delete-product">Delete</button>
-        </td>`;
-
-    if(trExisting){
-        trExisting.innerHTML = trHtml;
-    } else {
-        const tr = document.createElement('tr');
-        tr.dataset.id = product.id;
-        tr.innerHTML = trHtml;
-        productsTableBody.appendChild(tr);
-    }
-
- // Refresh or add a single product row with highlight animation
-function refreshProductRow(product) {
-    const trExisting = productsTableBody.querySelector(`tr[data-id="${product.id}"]`);
-    const currencySelect = document.getElementById("productPriceCurrency");
-    const currency = currencySelect ? currencySelect.value : 'NGN';
-    const priceMap = { NGN: product.priceNGN, USD: product.priceUSD, EUR: product.priceEUR, GBP: product.priceGBP };
-    const price = priceMap[currency] || 0;
-
-    const trHtml = `
-        <td>${escapeHtml(product.name)}</td>
-        <td class="product-price">${formatCurrency(price, currency)}</td>
-        <td>${product.imageUrl ? `<img src="${product.imageUrl}" alt="${escapeHtml(product.name)}" style="height:50px; width:auto; border-radius:6px;">` : ''}</td>
-        <td>${product.customizationAvailable ? '✅' : '❌'}</td>
-        <td>${product.published ? '✅' : '❌'}</td>
-        <td>
-            <button data-id="${product.id}" class="edit-product">Edit</button>
-            <button data-id="${product.id}" class="delete-product">Delete</button>
-        </td>`;
-
-    let trRow;
-    if(trExisting){
-        trExisting.innerHTML = trHtml;
-        trRow = trExisting;
-    } else {
-        trRow = document.createElement('tr');
-        trRow.dataset.id = product.id;
-        trRow.innerHTML = trHtml;
-        productsTableBody.appendChild(trRow);
-    }
-
-    // Highlight animation
-    trRow.style.transition = "background-color 0.6s ease";
-    trRow.style.backgroundColor = "#ffeeba"; // highlight color
-    setTimeout(() => {
-        trRow.style.backgroundColor = ""; // fade back to normal
-    }, 600);
-
-    // Reattach Edit/Delete handlers
-    trRow.querySelector(".edit-product").addEventListener("click", () => populateProductForm(product));
-    trRow.querySelector(".delete-product").addEventListener("click", async () => {
-        if (confirm("Delete this product?")) {
-            await deleteDoc(doc(db, "brands", "serac", "products", product.id));
-            trRow.remove();
-            productsCache = productsCache.filter(p => p.id !== product.id);
-        }
-    });
-}
- 
-    // Reattach Edit/Delete handlers
-    const trRow = trExisting || productsTableBody.querySelector(`tr[data-id="${product.id}"]`);
-    trRow.querySelector(".edit-product").addEventListener("click", () => populateProductForm(product));
-    trRow.querySelector(".delete-product").addEventListener("click", async () => {
-        if (confirm("Delete this product?")) {
-            await deleteDoc(doc(db, "brands", "serac", "products", product.id));
-            trRow.remove();
-            productsCache = productsCache.filter(p => p.id !== product.id);
-        }
-    });
-}
 
 /* ---------------- QUOTES ---------------- */
 function subscribeQuotes(){
