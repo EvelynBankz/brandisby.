@@ -5,28 +5,94 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Sérac Admin Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Sérac Admin Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   * { box-sizing:border-box; margin:0; padding:0; }
   body { font-family:"Be Vietnam Pro", sans-serif; background:#000; color:#fff; line-height:1.6; }
   a { text-decoration:none; color:inherit; }
 
-  header { background:#8A4D2B; color:#fff; padding:16px; text-align:center; font-size:24px; font-weight:700; letter-spacing:1px; border-bottom:2px solid #fff; }
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: rgba(0,0,0,0.8);
+    transition: background 0.3s ease;
+    color: #fff;
+    padding: 16px;
+    text-align: center;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    border-bottom: 1px solid #444;
+  }
 
-  .container { max-width:1000px; margin:2rem auto; padding:2rem; background:#B66E41; border-radius:12px; box-shadow:0 4px 16px rgba(255,255,255,0.05); }
+  header.scrolled { background:#000; }
+
+  .container {
+    max-width: 1000px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #111;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(255,255,255,0.05);
+  }
 
   h2 { font-weight:700; margin-bottom:16px; color:#fff; letter-spacing:0.5px; }
 
   label { display:block; margin-top:1rem; font-weight:600; }
-  input, textarea, select { width:100%; padding:0.6rem; margin-top:0.5rem; border:1px solid #444; border-radius:6px; font-size:1rem; background:#000; color:#fff; }
+  input, textarea, select {
+    width:100%;
+    padding:0.6rem;
+    margin-top:0.5rem;
+    border:1px solid #333;
+    border-radius:6px;
+    font-size:1rem;
+    background:#000;
+    color:#fff;
+  }
 
-  button { margin-top:1rem; padding:0.75rem 1.2rem; background:#fff; color:#000; border:none; border-radius:6px; cursor:pointer; font-weight:700; transition:0.3s; }
+  button {
+    margin-top:1rem;
+    padding:0.75rem 1.2rem;
+    background:#fff;
+    color:#000;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:700;
+    transition:0.3s;
+  }
   button:hover { background:#ccc; }
 
   .message { margin-top:1rem; font-weight:500; font-size:1rem; text-align:center; }
 
-  table { width:100%; border-collapse:collapse; margin-top:1.5rem; background:#000; border:1px solid #333; border-radius:12px; overflow:hidden; }
-  th, td { padding:0.75rem; border-bottom:1px solid #222; text-align:left; font-size:0.95rem; vertical-align:top; }
-  th { background:#8A4D2B; color:#fff; font-weight:700; }
+  table {
+    width:100%;
+    border-collapse:collapse;
+    margin-top:1.5rem;
+    background:#111;
+    border:1px solid #222;
+    border-radius:12px;
+    overflow:hidden;
+  }
+  th, td {
+    padding:0.75rem;
+    border-bottom:1px solid #222;
+    text-align:left;
+    font-size:0.95rem;
+    vertical-align:top;
+  }
+  th {
+    background:#222;
+    color:#fff;
+    font-weight:700;
+  }
   td img { width:60px; border-radius:6px; }
 
   .actions button { margin-right:0.5rem; padding:0.4rem 0.6rem; font-size:0.9rem; }
@@ -34,9 +100,21 @@
 
   .small-note { font-size:0.9rem; color:#bbb; margin-top:8px; }
 
-  .dashboard-nav { display:flex; gap:10px; margin-bottom:1.5rem; }
-  .dashboard-nav button { flex:1; background:#111; color:#fff; border:1px solid #444; }
+  .dashboard-nav {
+    display:flex;
+    gap:10px;
+    margin-bottom:1.5rem;
+  }
+  .dashboard-nav button {
+    flex:1;
+    background:#111;
+    color:#fff;
+    border:1px solid #333;
+    border-radius:6px;
+    transition:0.3s;
+  }
   .dashboard-nav button:hover { background:#222; }
+
   .section { display:none; margin-top:1rem; }
   .section.active { display:block; }
 
@@ -46,7 +124,7 @@
   .order-filters { display:flex; gap:10px; margin-bottom:1rem; flex-wrap:wrap; }
   .order-filters input, .order-filters select { flex:1; max-width:320px; }
 
-  .quote-item { border:1px solid #444; padding:8px; margin-top:8px; background:#000; border-radius:6px; }
+  .quote-item { border:1px solid #333; padding:8px; margin-top:8px; background:#111; border-radius:6px; }
 
   .copy-btn { background:none; border:none; cursor:pointer; margin-left:6px; font-size:1rem; color:#fff; }
   .copy-btn:hover { opacity:0.7; }
@@ -59,7 +137,7 @@
     .order-filters { flex-direction:column; }
   }
 
-  .add-item-panel { border:1px dashed #444; padding:12px; margin-top:8px; background:#000; border-radius:8px; }
+  .add-item-panel { border:1px dashed #333; padding:12px; margin-top:8px; background:#111; border-radius:8px; }
   .inline-grid { display:grid; grid-template-columns: repeat(4,1fr); gap:8px; }
   @media(max-width:600px){ .inline-grid { grid-template-columns: 1fr; } }
 
@@ -413,6 +491,12 @@ tableCurrencySelect.addEventListener("change",()=>renderProductsTable());
 
 window.deleteProduct=async id=>{ if(!confirm("Delete this product?")) return; try{ await deleteDoc(doc(db,"brands","serac","products",id)); }catch(err){console.error(err); alert("Error deleting product");} }
 window.editProduct=async id=>{ const d=await getDoc(doc(db,"brands","serac","products",id)); if(!d.exists()) return alert("Product not found"); const p=d.data(); document.getElementById("productName").value=p.name||""; document.getElementById("productPriceNGN").value=p.priceNGN!=null?p.priceNGN:""; document.getElementById("productPriceUSD").value=p.priceUSD!=null?p.priceUSD:""; document.getElementById("productPriceEUR").value=p.priceEUR!=null?p.priceEUR:""; document.getElementById("productPriceGBP").value=p.priceGBP!=null?p.priceGBP:""; document.getElementById("productDesc").value=p.description||""; document.getElementById("productCustom").value=p.customizationAvailable?"true":"false"; document.getElementById("productPublished").value=p.published?"true":"false"; sizesRepeat.innerHTML=""; (p.sizes||[]).forEach(s=>addSizeInput(s)); if(!(p.sizes||[]).length) addSizeInput(); colorsRepeat.innerHTML=""; (p.colors||[]).forEach(c=>addColorInput(c)); if(!(p.colors||[]).length) addColorInput(); imagesRepeat.innerHTML=""; (p.images||[]).forEach(i=>addImageInput(i)); if(!(p.images||[]).length) addImageInput(); currentEditingProductId=id; productForm.querySelector("button[type='submit']").textContent="Save Product"; }
+
+const header = document.getElementById('mainHeader');
+window.addEventListener('scroll', () => {
+  if(window.scrollY > 20) header.classList.add('scrolled');
+  else header.classList.remove('scrolled');
+});
 </script>
 </body>
 </html>
