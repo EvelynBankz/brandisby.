@@ -948,13 +948,26 @@ window.viewQuoteModal = (id) => {
 /* ---------------- ORDERS ---------------- */
 function subscribeOrders() {
   const ordersRef = collection(db, "brands", "fleurdevie", "orders");
+
+  // Listen for real-time updates
   onSnapshot(ordersRef, snap => {
     allOrders = [];
     ordersTableBody.innerHTML = "";
+
     snap.forEach(docSnap => {
-      const o = docSnap.data(); o.id = docSnap.id;
+      const o = docSnap.data();
+      o.id = docSnap.id;
+
+      // Ensure required fields exist to avoid Firestore permission errors
+      if (!o.customerEmail) o.customerEmail = "";  
+      if (!o.customer) o.customer = "";
+      if (!o.status) o.status = "Pending";
+      if (!o.currency) o.currency = "NGN";
+      if (!o.total) o.total = 0;
+
       allOrders.push(o);
     });
+
     renderOrders();
   }, err => {
     console.error("Orders snapshot error:", err);
@@ -965,27 +978,38 @@ function subscribeOrders() {
 function renderOrders() {
   const term = (orderSearch.value || "").toLowerCase();
   const status = orderStatusFilter.value;
+
   ordersTableBody.innerHTML = "";
 
   const filtered = allOrders.filter(o => {
     const matchesStatus = !status || o.status === status;
-    const matchesTerm = !term || (o.customer || "").toLowerCase().includes(term) || (o.email || "").toLowerCase().includes(term);
+    const matchesTerm = !term ||
+      (o.customer || "").toLowerCase().includes(term) ||
+      (o.customerEmail || "").toLowerCase().includes(term);
     return matchesStatus && matchesTerm;
   });
 
   filtered.forEach(o => {
     const row = document.createElement("tr");
-    row.innerHTML = `<td>${o.id}</td><td>${o.customer || ''}</td><td>${o.email || ''}</td><td>${formatCurrency(o.total || 0, o.currency || 'NGN')}</td><td>${o.status || ''}</td><td></td>`;
+    row.innerHTML = `
+      <td>${escapeHtml(o.id)}</td>
+      <td>${escapeHtml(o.customer)}</td>
+      <td>${escapeHtml(o.customerEmail)}</td>
+      <td>${formatCurrency(o.total, o.currency)}</td>
+      <td>${escapeHtml(o.status)}</td>
+      <td></td>
+    `;
     ordersTableBody.appendChild(row);
   });
 }
+
 orderSearch.addEventListener("input", renderOrders);
 orderStatusFilter.addEventListener("change", renderOrders);
 
-/* Export CSV logic with date filtering and conversion to selected currency (keeps original logic) */
+/* ---------------- EXPORT ORDERS ---------------- */
 exportBtn.addEventListener("click", exportOrdersCSV);
 
-async function fetchRates(base='NGN'){
+async function fetchRates(base = 'NGN') {
   try {
     const symbols = 'USD,EUR,GBP,NGN';
     const res = await fetch(`https://api.exchangerate.host/latest?base=${encodeURIComponent(base)}&symbols=${symbols}`);
@@ -1001,10 +1025,7 @@ function inDateRange(itemDateISO, fromISO, toISO) {
   if (!itemDateISO) return true;
   const d = new Date(itemDateISO);
   if (isNaN(d)) return true;
-  if (fromISO) {
-    const fromD = new Date(fromISO);
-    if (d < fromD) return false;
-  }
+  if (fromISO && d < new Date(fromISO)) return false;
   if (toISO) {
     const toD = new Date(toISO);
     toD.setHours(23,59,59,999);
@@ -1018,17 +1039,18 @@ async function exportOrdersCSV(e){
   const from = exportFrom.value || null;
   const to = exportTo.value || null;
   const targetCurrency = exportCurrency.value || 'NGN';
+
   const toExport = allOrders.filter(o => inDateRange(o.createdAt, from, to));
   const ratesFromNGN = await fetchRates('NGN');
   const rows = [];
   rows.push(['orderId','customer','email','createdAt','status','originalCurrency','originalTotal', `total_${targetCurrency}`]);
+
   for (const o of toExport) {
     const origCurrency = o.currency || 'NGN';
     const origTotal = parseFloat(o.total || 0);
     let converted = origTotal;
-    if (origCurrency === targetCurrency) {
-      converted = origTotal;
-    } else {
+
+    if (origCurrency !== targetCurrency) {
       if (origCurrency === 'NGN') {
         converted = origTotal * (ratesFromNGN[targetCurrency] || 1);
       } else {
@@ -1047,8 +1069,19 @@ async function exportOrdersCSV(e){
         }
       }
     }
-    rows.push([ o.id || '', o.customer || '', o.email || '', o.createdAt || '', o.status || '', origCurrency, origTotal, converted ]);
+
+    rows.push([ 
+      o.id || '', 
+      o.customer || '', 
+      o.customerEmail || '', 
+      o.createdAt || '', 
+      o.status || '', 
+      origCurrency, 
+      origTotal, 
+      converted 
+    ]);
   }
+
   const csv = rows.map(r => r.map(cell => {
     if (cell === null || cell === undefined) return '';
     const s = String(cell);
@@ -1069,6 +1102,7 @@ async function exportOrdersCSV(e){
   a.remove();
   URL.revokeObjectURL(url);
 }
+
 
 /* ---------------- START SUBSCRIPTIONS ---------------- */
 subscribeProducts();
