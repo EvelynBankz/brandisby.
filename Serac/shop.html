@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Sérac - Shop</title>
 
-<!-- Fonts: Montserrat (body) + Playfair Display (headlines) -->
+<!-- Fonts + Icons -->
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -21,26 +21,26 @@
 }
 
 /* RESET */
-* { margin:0; padding:0; box-sizing:border-box; font-smooth:antialiased; -moz-osx-font-smoothing:grayscale; }
+* { margin:0; padding:0; box-sizing:border-box; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
 body { font-family:"Montserrat", sans-serif; background:var(--bg-dark); color:#e6e6e6; line-height:1.6; }
 a { text-decoration:none; color:inherit; transition: color var(--transition); }
 
 /* HEADER */
 .site-header {
-background: transparent;
-transition: background 0.3s ease, border-bottom 0.3s ease;
-color:#f5f5f5;
-display:flex; justify-content:space-between; align-items:center;
-padding:16px 28px;
-position:fixed; top:0; left:0; right:0;
-z-index:1000;
-border-bottom:1px solid rgba(255,255,255,0.08);}
- 
-.site-header.scrolled { background:var(--bg-dark); border-bottom:1px solid rgba(255,255,255,0.08); }
+  background: transparent;
+  transition: background 0.3s ease, border-bottom 0.3s ease;
+  color:#f5f5f5;
+  display:flex; justify-content:space-between; align-items:center;
+  padding:16px 28px;
+  position:fixed; top:0; left:0; right:0;
+  z-index:1000;
+  border-bottom:1px solid rgba(255,255,255,0.04);
+}
+.site-header.scrolled { background:var(--bg-dark); border-bottom:1px solid rgba(255,255,255,0.06); }
 
 .header-left { display:flex; align-items:center; gap:14px; }
-.brand-logo { height:60px; width:auto; object-fit:contain; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.6)); }
-.brand-title { font-family:"Playfair Display", serif; font-size:24px; font-weight:700; color:var(--gold); letter-spacing:0.6px; }
+.brand-logo { height:56px; width:auto; object-fit:contain; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.6)); }
+.brand-title { font-family:"Playfair Display", serif; font-size:22px; font-weight:700; color:var(--gold); letter-spacing:0.6px; }
 
 .header-right { display:flex; gap:22px; align-items:center; }
 .header-right a { font-weight:500; color:var(--muted); padding:6px 8px; border-radius:8px; transition: all var(--transition); }
@@ -50,9 +50,7 @@ border-bottom:1px solid rgba(255,255,255,0.08);}
 
 /* Hamburger */
 .hamburger { display:none; background:none; border:none; cursor:pointer; width:30px; height:24px; position:relative; }
-.hamburger span {
-  display:block; width:100%; height:3px; background:#B66E41; border-radius:2px; position:absolute; left:0; transition:0.3s;
-}
+.hamburger span { display:block; width:100%; height:3px; background:#B66E41; border-radius:2px; position:absolute; left:0; transition:0.3s; }
 .hamburger span:nth-child(1){ top:0; }
 .hamburger span:nth-child(2){ top:10px; }
 .hamburger span:nth-child(3){ top:20px; }
@@ -61,31 +59,11 @@ border-bottom:1px solid rgba(255,255,255,0.08);}
 .hamburger.open span:nth-child(3){ transform:rotate(-45deg); top:10px; background:#B66E41; }
 
 /* HERO */
-  .hero {
-    position: relative;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    margin-top: 0px;
-    overflow: hidden;
-  }
-  
-  .hero::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: url("asset/bg25.jpg") center/cover no-repeat;
-    transform: scale(1.1);
-    z-index: -1;
-    border-radius: 12px;
-    box-shadow: inset 0 0 0 2000px rgba(20,21,23,0.55); 
-  }
-  .hero-text { position: relative; display: inline-block; margin-bottom:12px; }
-  .hero-text h1 { font-family:"Playfair Display", serif; font-size: clamp(36px,5vw,64px); margin-bottom:12px; color:#B66E41; }
-  .hero-text p { font-size: clamp(16px,2vw,22px); max-width:700px; color:#F5F5F3}
-
+.hero { position: relative; height: 90vh; display: flex; justify-content: center; align-items: center; text-align: center; margin-top: 0px; overflow: hidden; padding-top:72px; }
+.hero::after { content: ""; position: absolute; inset: 0; background: url("asset/bg25.jpg") center/cover no-repeat; transform: scale(1.06); z-index: -1; border-radius: 12px; box-shadow: inset 0 0 0 2000px rgba(20,21,23,0.55); }
+.hero-text { position: relative; display: inline-block; margin-bottom:12px; }
+.hero-text h1 { font-family:"Playfair Display", serif; font-size: clamp(36px,5vw,64px); margin-bottom:12px; color:#B66E41; }
+.hero-text p { font-size: clamp(16px,2vw,22px); max-width:700px; color:#F5F5F3}
 
 /* SHOP CONTROLS */
 .shop-controls { display:flex; justify-content:space-between; flex-wrap:wrap; margin-bottom:24px; gap:12px; align-items:center; }
@@ -148,7 +126,6 @@ footer { text-align:center; padding:22px; background:transparent; color:#bdbdbd;
   .hero-text p { font-size:clamp(14px,2.5vw,18px); margin:0 auto; }
 }
 
-  
 button:focus, a:focus, input:focus, select:focus { outline: 3px solid rgba(182,110,65,0.12); outline-offset:2px; }
 </style>
 </head>
@@ -159,9 +136,11 @@ button:focus, a:focus, input:focus, select:focus { outline: 3px solid rgba(182,1
     <img src="asset/logo.png" alt="Sérac Logo" class="brand-logo">
     <div class="brand-title">Sérac</div>
   </div>
+
   <div class="mobile-cart" style="display:none;">
     <a href="cart.html"><i class="fa-solid fa-cart-shopping"></i><span class="cart-count" id="cartCountMobile">0</span></a>
   </div>
+
   <nav class="header-right">
     <a href="index.html">Home</a>
     <a href="about.html">About</a>
@@ -169,6 +148,7 @@ button:focus, a:focus, input:focus, select:focus { outline: 3px solid rgba(182,1
     <a href="customization.html">Customize</a>
     <a href="contact.html">Contact</a>
   </nav>
+
   <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
 </header>
 
@@ -199,6 +179,7 @@ button:focus, a:focus, input:focus, select:focus { outline: 3px solid rgba(182,1
         </select>
       </div>
     </div>
+
     <div class="product-grid" id="productGrid"></div>
   </div>
 </section>
@@ -208,9 +189,9 @@ button:focus, a:focus, input:focus, select:focus { outline: 3px solid rgba(182,1
 </footer>
 
 <script type="module">
-// --- ALL YOUR ORIGINAL JS BELOW UNCHANGED ---
+/* ---------- Firebase ---------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, query, where, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
@@ -223,6 +204,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+/* ---------- DOM refs ---------- */
 const productGrid = document.getElementById('productGrid');
 const cartCountElem = document.getElementById('cartCount');
 const cartCountMobileElem = document.getElementById('cartCountMobile');
@@ -230,150 +212,226 @@ const searchInput = document.getElementById('searchInput');
 const sortSelect = document.getElementById('sortSelect');
 const currencySelect = document.getElementById('currencySelect');
 
-let cart = JSON.parse(localStorage.getItem('seracCart')) || [];
-let productsData = {};
+/* ---------- Namespaced localStorage keys for Serac ---------- */
+const CART_KEY = 'seracCart';
+const CURRENCY_KEY = 'seracCurrency';
 
-if(localStorage.getItem('seracCurrency')) currencySelect.value = localStorage.getItem('seracCurrency');
-currencySelect.addEventListener('change', ()=>{ localStorage.setItem('seracCurrency', currencySelect.value); loadProducts(); });
+/* ---------- State ---------- */
+let cart = JSON.parse(localStorage.getItem(CART_KEY)) || [];
+cart = mergeCartItems(cart);
+let productsData = {}; // map id -> product data
 
-function getCart(){ return JSON.parse(localStorage.getItem('seracCart')) || []; }
-function setCart(cartArray){ 
-  cart = mergeCartItems(cartArray); 
-  localStorage.setItem('seracCart', JSON.stringify(cart)); 
-  updateCartCount(); 
+/* ---------- Init: restore currency preference ---------- */
+if (localStorage.getItem(CURRENCY_KEY)) currencySelect.value = localStorage.getItem(CURRENCY_KEY);
+
+/* ---------- Utility: localStorage cart helpers ---------- */
+function getCart() { return JSON.parse(localStorage.getItem(CART_KEY)) || []; }
+function setCart(cartArray) {
+  cart = mergeCartItems(cartArray);
+  try { localStorage.setItem(CART_KEY, JSON.stringify(cart)); }
+  catch(e) { console.warn("Could not set localStorage", e); }
+  updateCartCount();
 }
-function updateCartCount(){ 
-  const total = cart.reduce((sum,i)=>sum+(i.quantity||0),0); 
-  cartCountElem.textContent=total; 
-  cartCountMobileElem.textContent=total;
-}
-function mergeCartItems(cartArray){
+function mergeCartItems(cartArray) {
   const merged = [];
-  cartArray.forEach(item=>{
-    const idx = merged.findIndex(i=>i.id===item.id && (i.color||'')=== (item.color||'') && (i.size||'')=== (item.size||''));
-    if(idx===-1) merged.push({...item});
-    else merged[idx].quantity = (merged[idx].quantity||0) + (item.quantity||0);
+  (cartArray || []).forEach(item => {
+    const idx = merged.findIndex(i => i.id === item.id && (i.color || '') === (item.color || '') && (i.size || '') === (item.size || ''));
+    if (idx === -1) merged.push({ ...item });
+    else merged[idx].quantity = (merged[idx].quantity || 0) + (item.quantity || 0);
   });
   return merged;
 }
-function getTotalQuantity(productId){ return cart.filter(i=>i.id===productId).reduce((sum,i)=>sum+(i.quantity||0),0); }
-function addToCart(product){
+function updateCartCount() {
+  const total = (cart || []).reduce((sum, i) => sum + (i.quantity || 0), 0);
+  cartCountElem.textContent = total;
+  cartCountMobileElem.textContent = total;
+}
+
+/* ---------- Cart operations ---------- */
+function getTotalQuantity(productId) {
+  return (cart || []).filter(i => i.id === productId).reduce((sum, i) => sum + (i.quantity || 0), 0);
+}
+
+function addToCart(product) {
   let currentCart = getCart();
-  const idx = currentCart.findIndex(i=>i.id===product.id && (i.color||'')===(product.color||'') && (i.size||'')===(product.size||''));
-  if(idx>-1) currentCart[idx].quantity +=1;
-  else currentCart.push({...product,quantity:1});
+  const idx = currentCart.findIndex(i => i.id === product.id && (i.color || '') === (product.color || '') && (i.size || '') === (product.size || ''));
+  if (idx > -1) currentCart[idx].quantity += 1;
+  else currentCart.push({ ...product, quantity: 1 });
   setCart(currentCart);
   updateProductUI(product.id);
 }
-function removeFromCart(productId){
+
+function removeFromCart(productId) {
   let currentCart = getCart();
-  const idx = currentCart.findIndex(i=>i.id===productId);
-  if(idx>-1){ currentCart[idx].quantity-=1; if(currentCart[idx].quantity<=0) currentCart.splice(idx,1); }
+  const idx = currentCart.findIndex(i => i.id === productId);
+  if (idx > -1) {
+    currentCart[idx].quantity -= 1;
+    if (currentCart[idx].quantity <= 0) currentCart.splice(idx, 1);
+  }
   setCart(currentCart);
   updateProductUI(productId);
 }
-function updateProductUI(productId){
+
+/* Update a product card UI (badge and Add button visibility) */
+function updateProductUI(productId) {
   const card = document.getElementById(`product-${productId}`);
-  if(!card) return;
+  if (!card) return;
   const addBtn = card.querySelector('.add-cart');
   const badge = card.querySelector('.quantity-badge');
   const totalQty = getTotalQuantity(productId);
-  if(totalQty>0){ addBtn.style.display='none'; badge.textContent=totalQty; } 
-  else { addBtn.style.display='block'; badge.textContent=''; }
+  if (totalQty > 0) {
+    if (addBtn) addBtn.style.display = 'none';
+    if (badge) badge.textContent = totalQty;
+  } else {
+    if (addBtn) addBtn.style.display = 'block';
+    if (badge) badge.textContent = '';
+  }
 }
-function formatPrice(product, currency){
-  if(!product) return '';
-  const price = currency==='NGN'?product.priceNGN:currency==='USD'?product.priceUSD:currency==='EUR'?product.priceEUR:currency==='GBP'?product.priceGBP:product.priceNGN;
-  const localeMap={ NGN:'en-NG', USD:'en-US', EUR:'de-DE', GBP:'en-GB' };
-  return new Intl.NumberFormat(localeMap[currency],{style:'currency',currency,minimumFractionDigits:currency==='NGN'?0:2}).format(price);
+
+/* Price formatting (same behaviour as FleurdeVie) */
+function formatPrice(product, currency) {
+  if (!product) return '';
+  const price = currency === 'NGN' ? product.priceNGN : currency === 'USD' ? product.priceUSD : currency === 'EUR' ? product.priceEUR : currency === 'GBP' ? product.priceGBP : product.priceNGN;
+  const localeMap = { NGN: 'en-NG', USD: 'en-US', EUR: 'de-DE', GBP: 'en-GB' };
+  return new Intl.NumberFormat(localeMap[currency] || 'en-US', { style: 'currency', currency, minimumFractionDigits: currency === 'NGN' ? 0 : 2 }).format(price);
 }
-async function loadProducts(){
-  try{
-    const q = query(collection(db,"brands","serac","products"), where("published","==",true));
+
+/* ---------- Load & render products (Serac collection) ---------- */
+async function loadProducts() {
+  try {
+    productGrid.innerHTML = '<p style="text-align:center; color:var(--muted);">Loading products…</p>';
+    const q = query(collection(db, "brands", "serac", "products"), where("published", "==", true));
     const snapshot = await getDocs(q);
-    const products=[];
-    snapshot.forEach(doc=>{
-      const data=doc.data();
-      if(!data.name || !data.imageUrl) return;
-      products.push({id:doc.id,...data});
-      productsData[doc.id]=data;
+    const products = [];
+    productsData = {};
+    snapshot.forEach(docSnap => {
+      const data = docSnap.data();
+      // keep same validations as FleurDeVie: require name + imageUrl (but still include product even if image absent — kept consistent)
+      if (!data.name) return;
+      const p = { id: docSnap.id, ...data };
+      products.push(p);
+      productsData[docSnap.id] = p;
     });
     displayProducts(products);
-  }catch(e){ console.error(e); productGrid.innerHTML='<p style="text-align:center;color:tomato;">Failed to load products.</p>'; }
+  } catch (e) {
+    console.error(e);
+    productGrid.innerHTML = '<p style="text-align:center;color:tomato;">Failed to load products.</p>';
+  }
 }
-function displayProducts(products){
-  const term = searchInput.value.toLowerCase();
-  let filtered = products.filter(p=>p.name.toLowerCase().includes(term));
+
+/* Display with same UX as FleurDeVie (search, sort, currency) */
+function displayProducts(products) {
+  const term = (searchInput.value || '').toLowerCase();
+  let filtered = (products || []).filter(p => (p.name || '').toLowerCase().includes(term));
+
   const sortVal = sortSelect.value;
   const currency = currencySelect.value;
-  function getPriceForCurrency(product){ return currency==='NGN'?product.priceNGN:currency==='USD'?product.priceUSD:currency==='EUR'?product.priceEUR:currency==='GBP'?product.priceGBP:product.priceNGN; }
-  if(sortVal==='alphabet') filtered.sort((a,b)=>a.name.localeCompare(b.name));
-  if(sortVal==='price-asc') filtered.sort((a,b)=>getPriceForCurrency(a)-getPriceForCurrency(b));
-  if(sortVal==='price-desc') filtered.sort((a,b)=>getPriceForCurrency(b)-getPriceForCurrency(a));
 
-  productGrid.innerHTML='';
-  for(const p of filtered){
+  function getPriceForCurrency(product) {
+    return currency === 'NGN' ? product.priceNGN : currency === 'USD' ? product.priceUSD : currency === 'EUR' ? product.priceEUR : currency === 'GBP' ? product.priceGBP : product.priceNGN;
+  }
+
+  if (sortVal === 'alphabet') filtered.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  if (sortVal === 'price-asc') filtered.sort((a, b) => (getPriceForCurrency(a) || 0) - (getPriceForCurrency(b) || 0));
+  if (sortVal === 'price-desc') filtered.sort((a, b) => (getPriceForCurrency(b) || 0) - (getPriceForCurrency(a) || 0));
+
+  productGrid.innerHTML = '';
+  for (const p of filtered) {
     const quantity = getTotalQuantity(p.id);
     const priceForCurrency = getPriceForCurrency(p);
 
     const div = document.createElement('div');
-    div.className='product-card';
-    div.id=`product-${p.id}`;
+    div.className = 'product-card';
+    div.id = `product-${p.id}`;
 
-    div.innerHTML=`
-      ${p.customizationAvailable?`<a href="customization.html?productId=${p.id}" class="customize-badge" onclick="event.stopPropagation()"><i class="fa-solid fa-wand-magic-sparkles"></i> Customize</a>`:''}
+    div.innerHTML = `
+      ${p.customizationAvailable ? `<a href="customization.html?productId=${p.id}" class="customize-badge" onclick="event.stopPropagation()"><i class="fa-solid fa-wand-magic-sparkles"></i> Customize</a>` : ''}
       <a href="product.html?productId=${p.id}&price=${priceForCurrency}&currency=${currency}">
-        <img src="${p.imageUrl}" alt="${p.name}">
+        <img src="${escapeHtml(p.imageUrl || '')}" alt="${escapeHtml(p.name || '')}">
       </a>
-      <h3>${p.name}</h3>
-      <div class="description">${truncateText(p.description||'',15)}</div>
-      <div class="price">${formatPrice(p,currency)}</div>
+      <h3>${escapeHtml(p.name || '')}</h3>
+      <div class="description">${escapeHtml(truncateText(p.description || '', 15))}</div>
+      <div class="price">${formatPrice(p, currency)}</div>
       <div class="quantity-controls">
-        <button class="minus">-</button>
-        <span class="quantity-badge">${quantity>0?quantity:''}</span>
-        <button class="plus">+</button>
+        <button class="minus" aria-label="Decrease">-</button>
+        <span class="quantity-badge">${quantity > 0 ? quantity : ''}</span>
+        <button class="plus" aria-label="Increase">+</button>
       </div>
-      <button class="add-cart" style="display:${quantity>0?'none':'block'};">Add to Cart</button>
+      <button class="add-cart" style="display:${quantity > 0 ? 'none' : 'block'};">Add to Cart</button>
     `;
 
-    div.querySelector('.plus').addEventListener('click', e=>{ e.stopPropagation(); addToCart(p); });
-    div.querySelector('.minus').addEventListener('click', e=>{ e.stopPropagation(); removeFromCart(p.id); });
-    const addBtn = div.querySelector('.add-cart'); if(addBtn) addBtn.addEventListener('click', e=>{ e.stopPropagation(); addToCart(p); });
+    // Wire controls
+    const plusBtn = div.querySelector('.plus');
+    const minusBtn = div.querySelector('.minus');
+    const addBtn = div.querySelector('.add-cart');
+
+    plusBtn?.addEventListener('click', e => { e.stopPropagation(); addToCart(p); });
+    minusBtn?.addEventListener('click', e => { e.stopPropagation(); removeFromCart(p.id); });
+    addBtn?.addEventListener('click', e => { e.stopPropagation(); addToCart(p); });
 
     productGrid.appendChild(div);
   }
+
+  // update cart count + product UIs
   updateCartCount();
+  (products || []).forEach(p => updateProductUI(p.id));
 }
-function truncateText(str,numWords){ const arr = str.split(' '); return arr.length>numWords?arr.slice(0,numWords).join(' ')+'...':str; }
 
-searchInput.addEventListener('input', ()=>loadProducts());
-sortSelect.addEventListener('change', ()=>loadProducts());
+/* small helpers */
+function truncateText(text, wordLimit) { return text.split(' ').slice(0, wordLimit).join(' '); }
+function escapeHtml(str) { if (!str && str !== 0) return ""; return String(str).replace(/[&<>"']/g, s => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": "&#39;" }[s])); }
 
-document.getElementById('hamburger').addEventListener('click', ()=>{
-  const nav = document.querySelector('.header-right');
-  nav.classList.toggle('open');
-  document.getElementById('hamburger').classList.toggle('open');
+/* ---------- Event wiring ---------- */
+
+// Search/sort -> reload/filter client-side
+searchInput.addEventListener('input', () => { loadProducts(); });
+sortSelect.addEventListener('change', () => { loadProducts(); });
+
+// Currency persistence: Serac key
+currencySelect.addEventListener('change', () => {
+  try { localStorage.setItem(CURRENCY_KEY, currencySelect.value); } catch(e) { console.warn("couldn't save currency", e); }
+  loadProducts();
 });
 
-loadProducts();
+/* Hamburger */
+const hamburger = document.getElementById('hamburger');
+const navMenu = document.querySelector('.header-right');
+hamburger.addEventListener('click', () => {
+  navMenu.classList.toggle('open');
+  hamburger.classList.toggle('open');
+});
 
-// Hamburger toggle
-    const hamburger = document.getElementById('hamburger');
-    const navMenu = document.querySelector('.header-right');
-    hamburger.addEventListener('click', () => {
-      navMenu.classList.toggle('open');
-      hamburger.classList.toggle('open');
-    });
-  
-// Header background on scroll
+/* Mobile cart show/hide based on width */
+function handleMobileCart() { document.querySelector('.mobile-cart').style.display = window.innerWidth <= 600 ? 'flex' : 'none'; }
+window.addEventListener('resize', handleMobileCart);
+handleMobileCart();
+
+/* Header background on scroll (same as Serac theme) */
 window.addEventListener('scroll', () => {
   const header = document.querySelector('.site-header');
-  if(window.scrollY > 50) {
-    header.classList.add('scrolled');
-  } else {
-    header.classList.remove('scrolled');
+  if (window.scrollY > 50) header.classList.add('scrolled'); else header.classList.remove('scrolled');
+});
+
+/* Storage event synchronization (other tabs) */
+window.addEventListener('storage', (ev) => {
+  if (ev.key === CART_KEY) {
+    cart = JSON.parse(localStorage.getItem(CART_KEY)) || [];
+    cart = mergeCartItems(cart);
+    updateCartCount();
+    // re-render product UIs in case quantities changed externally
+    Object.keys(productsData).forEach(pid => updateProductUI(pid));
+  } else if (ev.key === CURRENCY_KEY) {
+    const val = localStorage.getItem(CURRENCY_KEY);
+    if (val) {
+      try { currencySelect.value = val; } catch(e) {}
+      loadProducts();
+    }
   }
-})
+});
+
+/* ---------- initial load ---------- */
+updateCartCount();
+loadProducts();
 
 </script>
 
