@@ -390,67 +390,89 @@ addImageBtn.addEventListener('click',()=>addImageInput());
 addSizeInput(); addColorInput(); addImageInput();
 
 /* ---------------- PRODUCTS ---------------- */
-productForm.addEventListener("submit", async e=>{
+productForm.addEventListener("submit", async e => {
   e.preventDefault();
+
   const data = {
-    name: document.getElementById("productName").value,
-    priceNGN: parseFloat(document.getElementById("productPriceNGN").value)||0,
-    priceUSD: parseFloat(document.getElementById("productPriceUSD").value)||0,
-    priceEUR: parseFloat(document.getElementById("productPriceEUR").value)||0,
-    priceGBP: parseFloat(document.getElementById("productPriceGBP").value)||0,
-    description: document.getElementById("productDesc").value||"",
-    customizationAvailable: document.getElementById("productCustom").value==="true",
-    published: document.getElementById("productPublished").value==="true",
+    name: document.getElementById("productName").value.trim(),
+    priceNGN: parseFloat(document.getElementById("productPriceNGN").value) || 0,
+    priceUSD: parseFloat(document.getElementById("productPriceUSD").value) || 0,
+    priceEUR: parseFloat(document.getElementById("productPriceEUR").value) || 0,
+    priceGBP: parseFloat(document.getElementById("productPriceGBP").value) || 0,
+    description: document.getElementById("productDesc").value.trim() || "",
+    customizationAvailable: document.getElementById("productCustom").value === "true",
+    published: document.getElementById("productPublished").value === "true",
     updatedAt: new Date().toISOString()
   };
-  data.sizes = Array.from(sizesRepeat.querySelectorAll('input')).map(i=>i.value.trim()).filter(Boolean);
-  data.colors = Array.from(colorsRepeat.querySelectorAll('input')).map(i=>i.value.trim()).filter(Boolean);
-  data.images = Array.from(imagesRepeat.querySelectorAll('input')).map(i=>i.value.trim()).filter(Boolean);
 
-  try{
+  // Save sizes and colors
+  data.sizes = Array.from(sizesRepeat.querySelectorAll('input'))
+                    .map(i => i.value.trim())
+                    .filter(Boolean);
+  data.colors = Array.from(colorsRepeat.querySelectorAll('input'))
+                     .map(i => i.value.trim())
+                     .filter(Boolean);
+
+  // Save images and first image as imageUrl
+  data.images = Array.from(imagesRepeat.querySelectorAll('input'))
+                     .map(i => i.value.trim())
+                     .filter(Boolean);
+  data.imageUrl = data.images[0] || "";
+
+  try {
     if(currentEditingProductId){
-      await updateDoc(doc(db,"brands","serac","products",currentEditingProductId),data);
-      productMessage.textContent="✅ Product updated.";
-      currentEditingProductId=null;
+      // Update existing product
+      await updateDoc(doc(db, "brands", "serac", "products", currentEditingProductId), data);
+      productMessage.textContent = "✅ Product updated.";
+      currentEditingProductId = null;
       productForm.reset();
     } else {
-      await addDoc(productsCollection(), data);
-      productMessage.textContent="✅ Product added.";
+      // Add new product
+      await addDoc(collection(db, "brands", "serac", "products"), data);
+      productMessage.textContent = "✅ Product added.";
       productForm.reset();
     }
-  } catch(err){ console.error(err); productMessage.textContent="❌ "+err.message; }
+  } catch(err) {
+    console.error(err);
+    productMessage.textContent = "❌ " + err.message;
+  }
 });
 
 /* ---------------- SUBSCRIBE PRODUCTS ---------------- */
 function subscribeProducts(){
   try {
-    onSnapshot(productsCollection(), snap=>{
-      productsCache=[];
-      productsTableBody.innerHTML="";
-      snap.forEach(docSnap=>{
-        const p = {...docSnap.data(), id:docSnap.id};
+    onSnapshot(collection(db, "brands", "serac", "products"), snap => {
+      productsCache = [];
+      productsTableBody.innerHTML = "";
+
+      snap.forEach(docSnap => {
+        const p = { id: docSnap.id, ...docSnap.data() };
         productsCache.push(p);
+
         const tr = document.createElement('tr');
-        tr.innerHTML=`
+        tr.innerHTML = `
           <td>${escapeHtml(p.name)}</td>
           <td>${formatCurrency(p.priceNGN,'NGN')}</td>
           <td>${formatCurrency(p.priceUSD,'USD')}</td>
           <td>${formatCurrency(p.priceEUR,'EUR')}</td>
           <td>${formatCurrency(p.priceGBP,'GBP')}</td>
-          <td>${p.published?'✅':'❌'}</td>
+          <td>${p.published ? '✅' : '❌'}</td>
           <td>
             <button data-id="${p.id}" class="edit-product">Edit</button>
             <button data-id="${p.id}" class="delete-product">Delete</button>
           </td>`;
         productsTableBody.appendChild(tr);
 
-        tr.querySelector(".edit-product").addEventListener("click", ()=>populateProductForm(p));
-        tr.querySelector(".delete-product").addEventListener("click", async ()=>{ 
-          if(confirm("Delete this product?")) await deleteDoc(doc(db,"brands","serac","products",p.id));
+        tr.querySelector(".edit-product").addEventListener("click", () => populateProductForm(p));
+        tr.querySelector(".delete-product").addEventListener("click", async () => {
+          if(confirm("Delete this product?")) 
+            await deleteDoc(doc(db, "brands", "serac", "products", p.id));
         });
       });
     });
-  } catch(err){ console.error("Products subscription failed:",err); }
+  } catch(err){
+    console.error("Products subscription failed:", err);
+  }
 }
 
 /* ---------------- QUOTES ---------------- */
