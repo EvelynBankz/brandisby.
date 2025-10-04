@@ -406,87 +406,97 @@ addImageBtn.addEventListener('click',()=>addImageInput());
 addSizeInput(); addColorInput(); addImageInput();
 
 /* ---------------- PRODUCTS ---------------- */
-// --- Product Form Submit ---
-productForm.addEventListener("submit", async e=>{
+/* ---------------- PRODUCTS ---------------- */
+productForm.addEventListener("submit", async e => {
   e.preventDefault();
+
   const data = {
-    name: document.getElementById("productName").value,
-    priceNGN: parseFloat(document.getElementById("productPriceNGN").value)||0,
-    priceUSD: parseFloat(document.getElementById("productPriceUSD").value)||0,
-    priceEUR: parseFloat(document.getElementById("productPriceEUR").value)||0,
-    priceGBP: parseFloat(document.getElementById("productPriceGBP").value)||0,
-    description: document.getElementById("productDesc").value||"",
-    customizationAvailable: document.getElementById("productCustom").value==="true",
-    published: document.getElementById("productPublished").value==="true",
-    sizes: document.getElementById("productSizes").value.split(',').map(s=>s.trim()).filter(Boolean),
-    colors: document.getElementById("productColors").value.split(',').map(s=>s.trim()).filter(Boolean),
-    images: document.getElementById("productImages").value.split(',').map(s=>s.trim()).filter(Boolean),
+    name: document.getElementById("productName").value.trim(),
+    priceNGN: parseFloat(document.getElementById("productPriceNGN").value) || 0,
+    priceUSD: parseFloat(document.getElementById("productPriceUSD").value) || 0,
+    priceEUR: parseFloat(document.getElementById("productPriceEUR").value) || 0,
+    priceGBP: parseFloat(document.getElementById("productPriceGBP").value) || 0,
+    description: document.getElementById("productDesc").value.trim() || "",
+    customizationAvailable: document.getElementById("productCustom").value === "true",
+    published: document.getElementById("productPublished").value === "true",
     updatedAt: new Date().toISOString()
   };
 
-  try{
+  // Save sizes and colors
+  data.sizes = Array.from(sizesRepeat.querySelectorAll('input'))
+                    .map(i => i.value.trim())
+                    .filter(Boolean);
+  data.colors = Array.from(colorsRepeat.querySelectorAll('input'))
+                     .map(i => i.value.trim())
+                     .filter(Boolean);
+
+  // Save images and first image as imageUrl
+  data.images = Array.from(imagesRepeat.querySelectorAll('input'))
+                     .map(i => i.value.trim())
+                     .filter(Boolean);
+  data.imageUrl = data.images[0] || "";
+
+  try {
     if(currentEditingProductId){
-      await updateDoc(doc(db,"brands","serac","products",currentEditingProductId),data);
-      productMessage.textContent="✅ Product updated.";
-      currentEditingProductId=null;
+      // Update existing product
+      await updateDoc(doc(db, "brands", "serac", "products", currentEditingProductId), data);
+      productMessage.textContent = "✅ Product updated.";
+      currentEditingProductId = null;
       productForm.reset();
     } else {
-      await addDoc(productsCollection(), data);
-      productMessage.textContent="✅ Product added.";
+      // Add new product
+      await addDoc(collection(db, "brands", "serac", "products"), data);
+      productMessage.textContent = "✅ Product added.";
       productForm.reset();
     }
-  } catch(err){ console.error(err); productMessage.textContent="❌ "+err.message; }
+  } catch(err) {
+    console.error(err);
+    productMessage.textContent = "❌ " + err.message;
+  }
 });
 
-// --- Subscribe and Render Products Table ---
+/* ---------------- SUBSCRIBE PRODUCTS ---------------- */
 function subscribeProducts(){
-  try{
-    onSnapshot(productsCollection(), snap=>{
-      productsTableBody.innerHTML="";
-      const currency = currencySelectAdmin.value || 'NGN';
-      snap.forEach(docSnap=>{
-        const p = {...docSnap.data(), id:docSnap.id};
+  try {
+    onSnapshot(collection(db, "brands", "serac", "products"), snap => {
+      productsCache = [];
+      productsTableBody.innerHTML = "";
+
+      snap.forEach(docSnap => {
+        const p = { id: docSnap.id, ...docSnap.data() };
+        productsCache.push(p);
+
+        // Determine price from dropdown in product form
+        const currencySelect = document.getElementById("productPriceCurrency"); // Make sure you have this dropdown in your form
+        const currency = currencySelect ? currencySelect.value : 'NGN';
+        const priceMap = { NGN: p.priceNGN, USD: p.priceUSD, EUR: p.priceEUR, GBP: p.priceGBP };
+        const price = priceMap[currency] || 0;
+
         const tr = document.createElement('tr');
-        tr.innerHTML=`
+        tr.innerHTML = `
           <td>${escapeHtml(p.name)}</td>
-          <td>${formatCurrency(p['price'+currency],currency)}</td>
-          <td>${p.images?.[0]?`<img src="${p.images[0]}" class="table-img">`:'-'}</td>
-          <td>${p.customizationAvailable?'✅':'❌'}</td>
-          <td>${p.published?'✅':'❌'}</td>
+          <td>${formatCurrency(price, currency)}</td>
+          <td>${p.imageUrl ? `<img src="${p.imageUrl}" alt="${escapeHtml(p.name)}" style="height:50px; width:auto; border-radius:6px;">` : ''}</td>
+          <td>${p.customizationAvailable ? '✅' : '❌'}</td>
+          <td>${p.published ? '✅' : '❌'}</td>
           <td>
             <button data-id="${p.id}" class="edit-product">Edit</button>
             <button data-id="${p.id}" class="delete-product">Delete</button>
-          </td>
-        `;
+          </td>`;
         productsTableBody.appendChild(tr);
 
-        tr.querySelector(".edit-product").addEventListener("click", ()=>{
-          currentEditingProductId = p.id;
-          document.getElementById("productName").value = p.name;
-          document.getElementById("productPriceNGN").value = p.priceNGN;
-          document.getElementById("productPriceUSD").value = p.priceUSD;
-          document.getElementById("productPriceEUR").value = p.priceEUR;
-          document.getElementById("productPriceGBP").value = p.priceGBP;
-          document.getElementById("productDesc").value = p.description;
-          document.getElementById("productCustom").value = p.customizationAvailable?"true":"false";
-          document.getElementById("productPublished").value = p.published?"true":"false";
-          document.getElementById("productSizes").value = p.sizes?.join(',')||'';
-          document.getElementById("productColors").value = p.colors?.join(',')||'';
-          document.getElementById("productImages").value = p.images?.join(',')||'';
-        });
-
-        tr.querySelector(".delete-product").addEventListener("click", async ()=>{
-          if(confirm("Delete this product?")) await deleteDoc(doc(db,"brands","serac","products",p.id));
+        // Button actions
+        tr.querySelector(".edit-product").addEventListener("click", () => populateProductForm(p));
+        tr.querySelector(".delete-product").addEventListener("click", async () => {
+          if(confirm("Delete this product?")) 
+            await deleteDoc(doc(db, "brands", "serac", "products", p.id));
         });
       });
     });
-  } catch(err){ console.error("Products subscription failed:",err); }
+  } catch(err){
+    console.error("Products subscription failed:", err);
+  }
 }
-
-// Re-render table when currency changes
-currencySelectAdmin.addEventListener('change', subscribeProducts);
-
-subscribeProducts();
  
 /* ---------------- QUOTES ---------------- */
 function subscribeQuotes(){
