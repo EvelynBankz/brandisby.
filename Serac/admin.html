@@ -144,63 +144,71 @@
       </table>
     </div>
 
-    <!-- QUOTES -->
-    <div class="section" id="quotesSection">
-      <h2>Manage Quotes</h2>
-      <form id="quoteForm">
-        <label>Customer Name</label><input id="quoteCustomerName" type="text" required>
-        <label>Customer Email</label><input id="quoteCustomerEmail" type="email" required>
+  <!-- QUOTES -->
+<div class="section" id="quotesSection">
+  <h2>Manage Quotes</h2>
+  <form id="quoteForm">
+    <label>Customer Name</label><input id="quoteCustomerName" type="text" required>
+    <label>Customer Email</label><input id="quoteCustomerEmail" type="email" required>
 
-        <h3>Quote Items</h3>
-        <div id="quoteItems"></div>
+    <h3>Quote Items</h3>
+    <div id="quoteItems"></div>
 
-        <div id="addItemPanel" class="add-item-panel" style="display:none;">
-          <label>Item Name</label><input id="ai_name" type="text" placeholder="Item name">
-          <label>Quantity</label><input id="ai_qty" type="number" min="1" value="1">
-          <label>Description</label><input id="ai_desc" type="text" placeholder="Optional description">
-          <div class="inline-grid" style="margin-top:8px;">
-            <div><label>Price NGN</label><input id="ai_price_ngn" type="number" step="0.01"></div>
-            <div><label>Price USD</label><input id="ai_price_usd" type="number" step="0.01"></div>
-            <div><label>Price EUR</label><input id="ai_price_eur" type="number" step="0.01"></div>
-            <div><label>Price GBP</label><input id="ai_price_gbp" type="number" step="0.01"></div>
-          </div>
-          <div style="display:flex; gap:8px; margin-top:8px;">
-            <button type="button" id="ai_add">Add</button>
-            <button type="button" id="ai_cancel" style="background:#111;color:#fff;border:1px solid #444;">Cancel</button>
-          </div>
-        </div>
-
-        <button type="button" id="addQuoteItem">+ Add Item</button>
-
-        <div style="display:flex; gap:8px; align-items:center; margin-top:8px;">
-          <button type="button" id="generateQuoteLinkBtn">Generate Link</button>
-          <div id="generatedQuoteLink" style="margin-left:8px;"></div>
-        </div>
-      </form>
-      <div id="quoteMessage" class="message"></div>
-
-      <label>Display Currency for Quotes</label>
-      <select id="quotesDisplayCurrency"><option value="NGN">NGN</option><option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option></select>
-
-      <table id="quotesTable">
-        <thead><tr><th>Customer</th><th>Email</th><th>Checkout Link</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
-
-    <!-- QUOTE MODAL -->
-    <div id="quoteModalBackdrop" class="modal-backdrop">
-      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="quoteModalTitle">
-        <div class="modal-header">
-          <h3 id="quoteModalTitle">Quote Details</h3>
-          <div>
-            <button id="openCheckoutBtn" class="close">Open Checkout</button>
-            <button id="closeModalBtn" class="close">Close</button>
-          </div>
-        </div>
-        <div class="modal-body" id="quoteModalBody"></div>
+    <div id="addItemPanel" class="add-item-panel" style="display:none;">
+      <label>Item Name</label><input id="ai_name" type="text" placeholder="Item name">
+      <label>Quantity</label><input id="ai_qty" type="number" min="1" value="1">
+      <label>Description</label><input id="ai_desc" type="text" placeholder="Optional description">
+      <div class="inline-grid" style="margin-top:8px;">
+        <div><label>Price NGN</label><input id="ai_price_ngn" type="number" step="0.01"></div>
+        <div><label>Price USD</label><input id="ai_price_usd" type="number" step="0.01"></div>
+        <div><label>Price EUR</label><input id="ai_price_eur" type="number" step="0.01"></div>
+        <div><label>Price GBP</label><input id="ai_price_gbp" type="number" step="0.01"></div>
+      </div>
+      <div style="display:flex; gap:8px; margin-top:8px;">
+        <button type="button" id="ai_add">Add</button>
+        <button type="button" id="ai_cancel" style="background:#111;color:#fff;border:1px solid #444;">Cancel</button>
       </div>
     </div>
+
+    <button type="button" id="addQuoteItem">+ Add Item</button>
+
+    <div style="display:flex; gap:8px; align-items:center; margin-top:8px;">
+      <button type="button" id="generateQuoteLinkBtn">Generate Link</button>
+      <div id="generatedQuoteLink" style="margin-left:8px;"></div>
+    </div>
+  </form>
+  <div id="quoteMessage" class="message"></div>
+
+  <label>Display Currency for Quotes</label>
+  <select id="quotesDisplayCurrency">
+    <option value="NGN">NGN</option>
+    <option value="USD">USD</option>
+    <option value="EUR">EUR</option>
+    <option value="GBP">GBP</option>
+  </select>
+
+  <table id="quotesTable">
+    <thead>
+      <tr><th>Customer</th><th>Email</th><th>Checkout Link</th><th>Total</th><th>Status</th><th>Actions</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<!-- QUOTE MODAL -->
+<div id="quoteModalBackdrop" class="modal-backdrop">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="quoteModalTitle">
+    <div class="modal-header">
+      <h3 id="quoteModalTitle">Quote Details</h3>
+      <div>
+        <button id="openCheckoutBtn" class="close">Open Checkout</button>
+        <button id="closeModalBtn" class="close">Close</button>
+      </div>
+    </div>
+    <div class="modal-body" id="quoteModalBody"></div>
+  </div>
+</div>
+
 
     <!-- ORDERS -->
     <div class="section" id="ordersSection">
@@ -540,7 +548,12 @@ productForm.addEventListener('submit', async (e) => {
   }
 });
 
-/* ---------------- QUOTES (draft items, save, render) ---------------- */
+/* ---------------- QUOTES (Sérac) ---------------- */
+
+// Draft items
+let quoteDraftItems = [];
+
+// Render draft items inside the quote form
 function renderDraftItems() {
   quoteItemsDiv.innerHTML = '';
   if (!quoteDraftItems.length) {
@@ -552,7 +565,8 @@ function renderDraftItems() {
     div.className = 'quote-item';
     div.innerHTML = `
       <div style="flex:1;">
-        <strong>${escapeHtml(it.name)}</strong> × ${it.qty}<br><small>${escapeHtml(it.desc || '')}</small>
+        <strong>${escapeHtml(it.name)}</strong> × ${it.qty}<br>
+        <small>${escapeHtml(it.desc || '')}</small>
         <div style="margin-top:8px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
           <div>NGN: ${it.priceNGN!=null?formatCurrency(it.priceNGN,'NGN'):'-'}</div>
           <div>USD: ${it.priceUSD!=null?formatCurrency(it.priceUSD,'USD'):'-'}</div>
@@ -566,14 +580,15 @@ function renderDraftItems() {
     quoteItemsDiv.appendChild(div);
   });
 
-  document.querySelectorAll('.remove-draft').forEach(btn => btn.addEventListener('click', () => {
-    quoteDraftItems.splice(parseInt(btn.dataset.idx), 1);
-    renderDraftItems();
-  }));
+  document.querySelectorAll('.remove-draft').forEach(btn => 
+    btn.addEventListener('click', () => {
+      quoteDraftItems.splice(parseInt(btn.dataset.idx), 1);
+      renderDraftItems();
+    })
+  );
 }
 
-/* Add item panel toggles & logic */
-const addQuoteItemBtnEl = document.getElementById('addQuoteItem');
+// Add-item panel toggles
 addQuoteItemBtnEl.addEventListener('click', () => {
   addItemPanel.style.display = addItemPanel.style.display === 'block' ? 'none' : 'block';
   if (addItemPanel.style.display === 'block') document.getElementById('ai_name').focus();
@@ -604,7 +619,7 @@ ai_add?.addEventListener('click', () => {
     priceGBP: document.getElementById('ai_price_gbp').value ? parseFloat(document.getElementById('ai_price_gbp').value) : null
   };
   quoteDraftItems.push(item);
-  // clear & hide
+  // reset inputs
   document.getElementById('ai_name').value = '';
   document.getElementById('ai_qty').value = 1;
   document.getElementById('ai_desc').value = '';
@@ -616,7 +631,7 @@ ai_add?.addEventListener('click', () => {
   renderDraftItems();
 });
 
-/* Generate quote link (save to Firestore / localStorage) */
+// Generate quote link for Sérac
 generateQuoteLinkBtn.addEventListener('click', async () => {
   const customer = document.getElementById('quoteCustomerName').value.trim();
   const email = document.getElementById('quoteCustomerEmail').value.trim();
@@ -633,11 +648,11 @@ generateQuoteLinkBtn.addEventListener('click', async () => {
   };
 
   try {
-    const docRef = await addDoc(quotesCollection(), data);
+    const docRef = await addDoc(collection(db, "brands", "serac", "quotes"), data);
     const id = docRef.id;
     const link = `./checkout/index.html?quoteId=${id}`;
 
-    try { localStorage.setItem(id, JSON.stringify(data)); } catch(e) { console.warn('localStorage save failed', e); }
+    try { localStorage.setItem(`serac_quote_${id}`, JSON.stringify(data)); } catch(e) { console.warn('localStorage save failed', e); }
 
     generatedQuoteLink.innerHTML = `
       <a href="${link}" target="_blank" id="gqlink">${link}</a>
@@ -661,7 +676,7 @@ generateQuoteLinkBtn.addEventListener('click', async () => {
   }
 });
 
-/* Helper to compute total from items for a given currency */
+// Compute total
 function computeTotalFromItems(items = [], currency = 'NGN') {
   let total = 0;
   items.forEach(it => {
@@ -676,23 +691,21 @@ function computeTotalFromItems(items = [], currency = 'NGN') {
   return total;
 }
 
-/* Subscribe and render quotes table */
+// Subscribe quotes from Firestore (Sérac)
 function subscribeQuotes() {
   try {
-    onSnapshot(quotesCollection(), snap => {
+    onSnapshot(collection(db, "brands", "serac", "quotes"), snap => {
       quotesCache = [];
-      const tbody = quotesTableBody;
-      tbody.innerHTML = '';
+      quotesTableBody.innerHTML = '';
       snap.forEach(docSnap => {
         const q = { id: docSnap.id, ...docSnap.data() };
         quotesCache.push(q);
 
-        // compute total using display currency selection
         const displayCurrency = quotesDisplayCurrency.value || 'NGN';
         const computedTotal = computeTotalFromItems(q.items || [], displayCurrency);
-        const displayTotal = computedTotal > 0 ? formatCurrency(computedTotal, displayCurrency) : (q.total ? formatCurrency(q.total, q.currency||displayCurrency) : '—');
-
+        const displayTotal = computedTotal > 0 ? formatCurrency(computedTotal, displayCurrency) : '—';
         const link = `./checkout/index.html?quoteId=${q.id}`;
+
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${escapeHtml(q.customerName || '')}</td>
@@ -716,43 +729,39 @@ function subscribeQuotes() {
             <button data-id="${q.id}" class="view-quote">View</button>
             <button data-id="${q.id}" class="delete-quote">Delete</button>
           </td>`;
-        tbody.appendChild(tr);
+        quotesTableBody.appendChild(tr);
 
-        // copy link
+        // Wire buttons
         tr.querySelector('.copy-btn').addEventListener('click', async (ev) => {
-          const l = ev.currentTarget.dataset.link;
-          try { await navigator.clipboard.writeText(l); ev.currentTarget.textContent = '✅'; setTimeout(()=>ev.currentTarget.textContent='📋',1000); } catch(e){ alert('Copy failed: ' + l); }
+          try { await navigator.clipboard.writeText(ev.currentTarget.dataset.link); ev.currentTarget.textContent = '✅'; setTimeout(()=>ev.currentTarget.textContent='📋',1000); } catch(e){ alert('Copy failed'); }
         });
-
-        // view
         tr.querySelector('.view-quote').addEventListener('click', () => populateQuoteModal(q.id));
-        // delete
         tr.querySelector('.delete-quote').addEventListener('click', async () => {
           if (!confirm('Delete this quote?')) return;
           try { await deleteDoc(doc(db, "brands", "serac", "quotes", q.id)); } catch (err) { console.error(err); alert('Delete failed'); }
         });
       });
 
-      // wire status selects
-      document.querySelectorAll('.quote-status-select').forEach(sel => sel.addEventListener('change', async (ev) => {
-        const newStatus = ev.target.value;
-        const id = ev.target.dataset.id;
-        try { await updateDoc(doc(db, "brands", "serac", "quotes", id), { status: newStatus }); } catch(err){ console.error('Status update failed', err); alert('Failed to update status'); }
-      }));
+      // Update status
+      document.querySelectorAll('.quote-status-select').forEach(sel => 
+        sel.addEventListener('change', async (ev) => {
+          try { await updateDoc(doc(db, "brands", "serac", "quotes", ev.target.dataset.id), { status: ev.target.value }); } 
+          catch(err){ console.error('Status update failed', err); alert('Failed to update status'); }
+        })
+      );
     });
   } catch (err) { console.error('subscribeQuotes failed', err); }
 }
 
-/* Populate quote modal */
+// Populate modal
 async function populateQuoteModal(id) {
-  // try find in cache
   let q = quotesCache.find(x => x.id === id);
   if (!q) {
     try {
       const snap = await getDoc(doc(db, "brands", "serac", "quotes", id));
       if (!snap.exists()) { alert('Quote not found'); return; }
       q = { id: snap.id, ...snap.data() };
-    } catch (err) { console.error('fetch quote failed', err); alert('Failed to load quote'); return; }
+    } catch (err) { console.error('fetch quote failed', err); return; }
   }
 
   const displayCurrency = quotesDisplayCurrency.value || 'NGN';
@@ -760,8 +769,7 @@ async function populateQuoteModal(id) {
     <div style="display:flex; justify-content:space-between; gap:12px; align-items:center;">
       <div>
         <strong>${escapeHtml(q.customerName || '')}</strong><br>
-        <small>${escapeHtml(q.customerEmail || '')}</small><br>
-        <small>Quote currency: ${q.currency || 'NGN'}</small>
+        <small>${escapeHtml(q.customerEmail || '')}</small>
       </div>
       <div style="text-align:right;">
         <a href="./checkout/index.html?quoteId=${q.id}" target="_blank">Open checkout</a>
@@ -769,49 +777,45 @@ async function populateQuoteModal(id) {
       </div>
     </div>
     <hr style="margin:12px 0;">
-    <div><h4>Items (prices in ${displayCurrency})</h4>`;
+    <div><h4>Items (${displayCurrency})</h4>`;
 
   let computedTotal = 0;
   (q.items || []).forEach(it => {
-    const qty = parseFloat(it.qty || it.quantity || 0) || 0;
+    const qty = parseFloat(it.qty) || 0;
     let price = 0;
-    if (displayCurrency === 'NGN') price = it.priceNGN || it.price || 0;
-    if (displayCurrency === 'USD') price = it.priceUSD || it.price || 0;
-    if (displayCurrency === 'EUR') price = it.priceEUR || it.price || 0;
-    if (displayCurrency === 'GBP') price = it.priceGBP || it.price || 0;
+    if (displayCurrency === 'NGN') price = it.priceNGN || 0;
+    if (displayCurrency === 'USD') price = it.priceUSD || 0;
+    if (displayCurrency === 'EUR') price = it.priceEUR || 0;
+    if (displayCurrency === 'GBP') price = it.priceGBP || 0;
     const line = price * qty;
     computedTotal += line;
     html += `
       <div style="border:1px solid #222; padding:8px; margin-bottom:8px; border-radius:6px;">
         <strong>${escapeHtml(it.name)}</strong> × ${qty} <br>
         <small>${escapeHtml(it.desc || '')}</small>
-        <div style="margin-top:6px;">${formatCurrency(price, displayCurrency)} each — Line total: ${formatCurrency(line, displayCurrency)}</div>
+        <div style="margin-top:6px;">${formatCurrency(price, displayCurrency)} each — Line: ${formatCurrency(line, displayCurrency)}</div>
       </div>`;
   });
 
-  html += `</div>`;
-  if (computedTotal > 0) html += `<div style="margin-top:8px;"><strong>Total: ${formatCurrency(computedTotal, displayCurrency)}</strong></div>`;
-  else if (q.total != null) html += `<div style="margin-top:8px;"><strong>Total: ${formatCurrency(q.total, q.currency||displayCurrency)}</strong></div>`;
-  else html += `<div style="margin-top:8px;"><strong>Total: —</strong></div>`;
-
+  html += `</div><div style="margin-top:8px;"><strong>Total: ${formatCurrency(computedTotal, displayCurrency)}</strong></div>`;
   quoteModalBody.innerHTML = html;
 
-  const modalCopyBtn = document.getElementById('modalCopyBtn');
-  if (modalCopyBtn) modalCopyBtn.addEventListener('click', async () => {
-    try { await navigator.clipboard.writeText(modalCopyBtn.dataset.link); modalCopyBtn.textContent = '✅'; setTimeout(()=>modalCopyBtn.textContent='📋',1000); } catch(e){ alert('Copy failed'); }
+  document.getElementById('modalCopyBtn').addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(`./checkout/index.html?quoteId=${q.id}`); } catch(e){ alert('Copy failed'); }
   });
 
   quoteModalBackdrop.style.display = 'flex';
   quoteModalBackdrop.dataset.currentId = id;
 }
 
-/* Modal handlers */
-closeModalBtn.addEventListener('click', () => { quoteModalBackdrop.style.display = 'none'; quoteModalBackdrop.dataset.currentId = ''; });
-quoteModalBackdrop.addEventListener('click', (ev) => { if (ev.target === quoteModalBackdrop) { quoteModalBackdrop.style.display = 'none'; quoteModalBackdrop.dataset.currentId = ''; } });
+// Modal close/open
+closeModalBtn.addEventListener('click', () => { quoteModalBackdrop.style.display = 'none'; });
+quoteModalBackdrop.addEventListener('click', (ev) => { if (ev.target === quoteModalBackdrop) { quoteModalBackdrop.style.display = 'none'; } });
 openCheckoutBtn.addEventListener('click', () => {
   const id = quoteModalBackdrop.dataset.currentId;
   if (id) window.open(`./checkout/index.html?quoteId=${id}`, '_blank');
 });
+
 
 /* ---------------- ORDERS (subscribe + render + export) ---------------- */
 function subscribeOrders() {
