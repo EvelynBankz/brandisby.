@@ -406,7 +406,6 @@ addImageBtn.addEventListener('click',()=>addImageInput());
 addSizeInput(); addColorInput(); addImageInput();
 
 /* ---------------- PRODUCTS ---------------- */
-/* ---------------- PRODUCTS ---------------- */
 productForm.addEventListener("submit", async e => {
   e.preventDefault();
 
@@ -456,6 +455,7 @@ productForm.addEventListener("submit", async e => {
 });
 
 /* ---------------- SUBSCRIBE PRODUCTS ---------------- */
+/* ---------------- SUBSCRIBE PRODUCTS ---------------- */
 function subscribeProducts(){
   try {
     onSnapshot(collection(db, "brands", "serac", "products"), snap => {
@@ -466,13 +466,18 @@ function subscribeProducts(){
         const p = { id: docSnap.id, ...docSnap.data() };
         productsCache.push(p);
 
+        // Determine price from dropdown or default to NGN
+        const currencySelect = document.getElementById("productPriceCurrency"); // dropdown in product form
+        const currency = currencySelect ? currencySelect.value : 'NGN';
+        const priceMap = { NGN: p.priceNGN, USD: p.priceUSD, EUR: p.priceEUR, GBP: p.priceGBP };
+        const price = priceMap[currency] || 0;
+
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${escapeHtml(p.name)}</td>
-          <td>${formatCurrency(p.priceNGN,'NGN')}</td>
-          <td>${formatCurrency(p.priceUSD,'USD')}</td>
-          <td>${formatCurrency(p.priceEUR,'EUR')}</td>
-          <td>${formatCurrency(p.priceGBP,'GBP')}</td>
+          <td>${formatCurrency(price, currency)}</td>
+          <td>${p.imageUrl ? `<img src="${p.imageUrl}" alt="${escapeHtml(p.name)}" style="height:50px; width:auto; border-radius:6px;">` : ''}</td>
+          <td>${p.customizationAvailable ? '✅' : '❌'}</td>
           <td>${p.published ? '✅' : '❌'}</td>
           <td>
             <button data-id="${p.id}" class="edit-product">Edit</button>
@@ -491,6 +496,7 @@ function subscribeProducts(){
     console.error("Products subscription failed:", err);
   }
 }
+
  
 /* ---------------- QUOTES ---------------- */
 function subscribeQuotes(){
