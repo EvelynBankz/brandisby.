@@ -405,98 +405,145 @@ addImageBtn.addEventListener('click',()=>addImageInput());
 
 addSizeInput(); addColorInput(); addImageInput();
 
-document.addEventListener("DOMContentLoaded", () => {
-    const productsTableBody = document.getElementById("productsTableBody");
-    const productForm = document.getElementById("productForm");
-    if (!productsTableBody || !productForm) return; // exit if we're not on the admin page
+/* ---------------- GLOBALS ---------------- */
+let currentEditingProductId = null;
+let productsCache = [];
 
-    let productsCache = [];
-    let currentEditingProductId = null;
+const productForm = document.getElementById("productForm");
+const productsTableBody = document.getElementById("productsTableBody");
+const sizesRepeat = document.getElementById("sizesRepeat");
+const colorsRepeat = document.getElementById("colorsRepeat");
+const imagesRepeat = document.getElementById("imagesRepeat");
+const productMessage = document.getElementById("productMessage");
+const currencySelect = document.getElementById("productPriceCurrency");
 
-    // Subscribe products
-    function subscribeProducts() {
-        try {
-            onSnapshot(collection(db, "brands", "serac", "products"), snap => {
-                productsCache = [];
-                productsTableBody.innerHTML = "";
+/* ---------------- POPULATE FORM ---------------- */
+function populateProductForm(product) {
+    if(!product) return;
 
-                snap.forEach(docSnap => {
-                    const p = { id: docSnap.id, ...docSnap.data() };
-                    productsCache.push(p);
-                    refreshProductRow(p);
-                });
-                updateTablePrices();
+    currentEditingProductId = product.id;
+
+    document.getElementById("productName").value = product.name || "";
+    document.getElementById("productPriceNGN").value = product.priceNGN || 0;
+    document.getElementById("productPriceUSD").value = product.priceUSD || 0;
+    document.getElementById("productPriceEUR").value = product.priceEUR || 0;
+    document.getElementById("productPriceGBP").value = product.priceGBP || 0;
+    document.getElementById("productDesc").value = product.description || "";
+    document.getElementById("productCustom").value = product.customizationAvailable ? "true" : "false";
+    document.getElementById("productPublished").value = product.published ? "true" : "false";
+
+    // Populate sizes
+    sizesRepeat.innerHTML = "";
+    (product.sizes || []).forEach(s => {
+        const input = document.createElement("input");
+        input.value = s;
+        sizesRepeat.appendChild(input);
+    });
+
+    // Populate colors
+    colorsRepeat.innerHTML = "";
+    (product.colors || []).forEach(c => {
+        const input = document.createElement("input");
+        input.value = c;
+        colorsRepeat.appendChild(input);
+    });
+
+    // Populate images
+    imagesRepeat.innerHTML = "";
+    (product.images || []).forEach(img => {
+        const input = document.createElement("input");
+        input.value = img;
+        imagesRepeat.appendChild(input);
+    });
+
+    // Scroll to form
+    productForm.scrollIntoView({ behavior: "smooth" });
+}
+
+/* ---------------- REFRESH TABLE ROW ---------------- */
+function refreshProductRow(product) {
+    const trExisting = productsTableBody.querySelector(`tr[data-id="${product.id}"]`);
+    const currency = currencySelect ? currencySelect.value : 'NGN';
+    const priceMap = { NGN: product.priceNGN, USD: product.priceUSD, EUR: product.priceEUR, GBP: product.priceGBP };
+    const price = priceMap[currency] || 0;
+
+    const trHtml = `
+        <td>${escapeHtml(product.name)}</td>
+        <td class="product-price">${formatCurrency(price, currency)}</td>
+        <td>${product.imageUrl ? `<img src="${product.imageUrl}" alt="${escapeHtml(product.name)}" style="height:50px; width:auto; border-radius:6px;">` : ''}</td>
+        <td>${product.customizationAvailable ? '✅' : '❌'}</td>
+        <td>${product.published ? '✅' : '❌'}</td>
+        <td>
+            <button data-id="${product.id}" class="edit-product">Edit</button>
+            <button data-id="${product.id}" class="delete-product">Delete</button>
+        </td>`;
+
+    let trRow;
+    if(trExisting){
+        trExisting.innerHTML = trHtml;
+        trRow = trExisting;
+    } else {
+        trRow = document.createElement('tr');
+        trRow.dataset.id = product.id;
+        trRow.innerHTML = trHtml;
+        productsTableBody.appendChild(trRow);
+    }
+
+    // Highlight animation
+    trRow.style.transition = "background-color 0.6s ease";
+    trRow.style.backgroundColor = "#ffeeba";
+    setTimeout(() => { trRow.style.backgroundColor = ""; }, 600);
+
+    // Reattach handlers
+    trRow.querySelector(".edit-product").onclick = () => populateProductForm(product);
+    trRow.querySelector(".delete-product").onclick = async () => {
+        if(confirm("Delete this product?")) {
+            await deleteDoc(doc(db, "brands", "serac", "products", product.id));
+            trRow.remove();
+            productsCache = productsCache.filter(p => p.id !== product.id);
+        }
+    };
+}
+
+/* ---------------- SUBSCRIBE PRODUCTS ---------------- */
+function subscribeProducts() {
+    try {
+        onSnapshot(collection(db, "brands", "serac", "products"), snap => {
+            productsCache = [];
+            productsTableBody.innerHTML = "";
+
+            snap.forEach(docSnap => {
+                const p = { id: docSnap.id, ...docSnap.data() };
+                productsCache.push(p);
+                refreshProductRow(p);
             });
-        } catch(err){
-            console.error("Products subscription failed:", err);
-        }
+        });
+    } catch(err) {
+        console.error("Products subscription failed:", err);
     }
+}
 
-    function updateTablePrices() {
-        const currencySelect = document.getElementById("productPriceCurrency");
-        if(!currencySelect) return;
+/* ---------------- UPDATE TABLE PRICES ---------------- */
+function updateTablePrices() {
+    if(!currencySelect) return;
+    const currency = currencySelect.value;
 
-        const currency = currencySelect.value;
-        const rows = productsTableBody.querySelectorAll("tr");
-
-        rows.forEach(tr => {
-            const product = productsCache.find(p => p.id === tr.dataset.id);
-            if(!product) return;
+    productsCache.forEach(product => {
+        const tr = productsTableBody.querySelector(`tr[data-id="${product.id}"]`);
+        if(tr){
             const priceMap = { NGN: product.priceNGN, USD: product.priceUSD, EUR: product.priceEUR, GBP: product.priceGBP };
-            const price = priceMap[currency] || 0;
-            tr.querySelector(".product-price").textContent = formatCurrency(price, currency);
-        });
-    }
-
-    function refreshProductRow(product) {
-        const trExisting = productsTableBody.querySelector(`tr[data-id="${product.id}"]`);
-        const currencySelect = document.getElementById("productPriceCurrency");
-        const currency = currencySelect ? currencySelect.value : 'NGN';
-        const priceMap = { NGN: product.priceNGN, USD: product.priceUSD, EUR: product.priceEUR, GBP: product.priceGBP };
-        const price = priceMap[currency] || 0;
-
-        const trHtml = `
-            <td>${escapeHtml(product.name)}</td>
-            <td class="product-price">${formatCurrency(price, currency)}</td>
-            <td>${product.imageUrl ? `<img src="${product.imageUrl}" alt="${escapeHtml(product.name)}" style="height:50px; width:auto; border-radius:6px;">` : ''}</td>
-            <td>${product.customizationAvailable ? '✅' : '❌'}</td>
-            <td>${product.published ? '✅' : '❌'}</td>
-            <td>
-                <button data-id="${product.id}" class="edit-product">Edit</button>
-                <button data-id="${product.id}" class="delete-product">Delete</button>
-            </td>`;
-
-        let trRow;
-        if(trExisting){
-            trExisting.innerHTML = trHtml;
-            trRow = trExisting;
-        } else {
-            trRow = document.createElement('tr');
-            trRow.dataset.id = product.id;
-            trRow.innerHTML = trHtml;
-            productsTableBody.appendChild(trRow);
+            tr.querySelector(".product-price").textContent = formatCurrency(priceMap[currency] || 0, currency);
         }
+    });
+}
 
-        // Highlight animation
-        trRow.style.transition = "background-color 0.6s ease";
-        trRow.style.backgroundColor = "#ffeeba";
-        setTimeout(() => { trRow.style.backgroundColor = ""; }, 600);
+/* ---------------- INITIALIZATION ---------------- */
+document.addEventListener("DOMContentLoaded", () => {
+    subscribeProducts();
 
-        // Attach Edit/Delete handlers
-        trRow.querySelector(".edit-product").addEventListener("click", () => populateProductForm(product));
-        trRow.querySelector(".delete-product").addEventListener("click", async () => {
-            if(confirm("Delete this product?")) {
-                await deleteDoc(doc(db, "brands", "serac", "products", product.id));
-                trRow.remove();
-                productsCache = productsCache.filter(p => p.id !== product.id);
-            }
-        });
-    }
-
-    // Currency dropdown
-    const currencySelect = document.getElementById("productPriceCurrency");
+    // Live price updates
     if(currencySelect) {
-        currencySelect.addEventListener("change", () => updateTablePrices());
+        currencySelect.addEventListener("change", updateTablePrices);
     }
 
     // Product form submit
@@ -515,9 +562,9 @@ document.addEventListener("DOMContentLoaded", () => {
             updatedAt: new Date().toISOString()
         };
 
-        data.sizes = Array.from(sizesRepeat.querySelectorAll('input')).map(i => i.value.trim()).filter(Boolean);
-        data.colors = Array.from(colorsRepeat.querySelectorAll('input')).map(i => i.value.trim()).filter(Boolean);
-        data.images = Array.from(imagesRepeat.querySelectorAll('input')).map(i => i.value.trim()).filter(Boolean);
+        data.sizes = Array.from(sizesRepeat.querySelectorAll('input')).map(i=>i.value.trim()).filter(Boolean);
+        data.colors = Array.from(colorsRepeat.querySelectorAll('input')).map(i=>i.value.trim()).filter(Boolean);
+        data.images = Array.from(imagesRepeat.querySelectorAll('input')).map(i=>i.value.trim()).filter(Boolean);
         data.imageUrl = data.images[0] || "";
 
         try {
@@ -532,6 +579,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 productMessage.textContent = "✅ Product added.";
                 productId = docRef.id;
             }
+
             productForm.reset();
 
             const existingIndex = productsCache.findIndex(p => p.id === productId);
@@ -548,9 +596,6 @@ document.addEventListener("DOMContentLoaded", () => {
             productMessage.textContent = "❌ " + err.message;
         }
     });
-
-    // Start subscription
-    subscribeProducts();
 });
 
 
