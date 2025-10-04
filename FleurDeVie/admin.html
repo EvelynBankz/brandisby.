@@ -507,61 +507,373 @@ window.editProduct=async id=>{
 }
 
 /* ---------------- QUOTES ---------------- */
-quoteForm.addEventListener("submit",e=>{
-  e.preventDefault();
-  // create quoteDraftItems array from UI
-  quoteDraftItems=[];
-  quoteItemsDiv.querySelectorAll(".quote-item").forEach(itemDiv=>{
-    const name=itemDiv.querySelector(".quote-name").value.trim();
-    const price=parseFloat(itemDiv.querySelector(".quote-price").value)||0;
-    const quantity=parseInt(itemDiv.querySelector(".quote-qty").value)||1;
-    if(name) quoteDraftItems.push({name,price,quantity});
+/* Quotes draft items */
+let quoteDraftItems=[];
+function renderDraftItems(){
+  quoteItemsDiv.innerHTML='';
+  if(!quoteDraftItems.length){ quoteItemsDiv.innerHTML='<div class="small-note">No items added yet.</div>'; return; }
+  quoteDraftItems.forEach((it,idx)=>{
+    const div=document.createElement("div"); div.className="quote-item";
+    div.innerHTML=`<div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;">
+      <div style="flex:1;"><strong>${it.name}</strong> × ${it.qty}<br><small>${it.desc||''}</small>
+      <div style="margin-top:8px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+        <div>NGN: ${it.priceNGN!=null?formatCurrency(it.priceNGN,'NGN'):'-'}</div>
+        <div>USD: ${it.priceUSD!=null?formatCurrency(it.priceUSD,'USD'):'-'}</div>
+        <div>EUR: ${it.priceEUR!=null?formatCurrency(it.priceEUR,'EUR'):'-'}</div>
+        <div>GBP: ${it.priceGBP!=null?formatCurrency(it.priceGBP,'GBP'):'-'}</div>
+      </div></div>
+      <div style="min-width:90px;text-align:right;"><button data-idx="${idx}" class="remove-draft">Remove</button></div>
+    </div>`;
+    quoteItemsDiv.appendChild(div);
   });
-  if(!quoteDraftItems.length){ quoteMessage.textContent="Add at least one item."; quoteMessage.style.color="red"; return; }
-  quoteMessage.textContent=""; quoteMessage.style.color="green";
-  generateQuoteLink();
+  document.querySelectorAll(".remove-draft").forEach(btn=>btn.addEventListener("click",()=>{ quoteDraftItems.splice(parseInt(btn.dataset.idx),1); renderDraftItems(); }));
+}
+/* Add Item panel toggles */
+const addItemPanel = document.getElementById("addItemPanel");
+const ai_add = document.getElementById("ai_add");
+const ai_cancel = document.getElementById("ai_cancel");
+
+addQuoteItemBtn.addEventListener("click", () => {
+  addItemPanel.style.display = addItemPanel.style.display === "none" ? "block" : "none";
+  if (addItemPanel.style.display === "block") document.getElementById("ai_name").focus();
 });
 
-generateQuoteLinkBtn.addEventListener("click",()=>generateQuoteLink());
+ai_cancel.addEventListener("click", () => {
+  addItemPanel.style.display = "none";
+  document.getElementById("ai_name").value = "";
+  document.getElementById("ai_qty").value = 1;
+  document.getElementById("ai_desc").value = "";
+  document.getElementById("ai_price_ngn").value = "";
+  document.getElementById("ai_price_usd").value = "";
+  document.getElementById("ai_price_eur").value = "";
+  document.getElementById("ai_price_gbp").value = "";
+});
 
-function generateQuoteLink(){
-  if(!quoteDraftItems.length){ alert("No quote items"); return; }
-  const quoteId="q_"+Date.now();
-  localStorage.setItem("quote_"+quoteId, JSON.stringify(quoteDraftItems));
-  generatedQuoteLink.value=`/checkout/index.html?quoteId=${quoteId}`;
-  generatedQuoteLink.select(); navigator.clipboard.writeText(generatedQuoteLink.value);
-  quoteMessage.textContent="✅ Quote link copied!"; quoteMessage.style.color="green";
-}
+/* Add item to draft */
+ai_add.addEventListener("click", () => {
+  const name = document.getElementById("ai_name").value.trim();
+  const qty = parseInt(document.getElementById("ai_qty").value) || 0;
+  if (!name || qty <= 0) {
+    alert("Please enter item name and quantity.");
+    return;
+  }
+  const item = {
+    name,
+    qty,
+    desc: document.getElementById("ai_desc").value || "",
+    priceNGN: document.getElementById("ai_price_ngn").value ? parseFloat(document.getElementById("ai_price_ngn").value) : null,
+    priceUSD: document.getElementById("ai_price_usd").value ? parseFloat(document.getElementById("ai_price_usd").value) : null,
+    priceEUR: document.getElementById("ai_price_eur").value ? parseFloat(document.getElementById("ai_price_eur").value) : null,
+    priceGBP: document.getElementById("ai_price_gbp").value ? parseFloat(document.getElementById("ai_price_gbp").value) : null
+  };
+  quoteDraftItems.push(item);
+  // clear panel & hide
+  document.getElementById("ai_name").value = "";
+  document.getElementById("ai_qty").value = 1;
+  document.getElementById("ai_desc").value = "";
+  document.getElementById("ai_price_ngn").value = "";
+  document.getElementById("ai_price_usd").value = "";
+  document.getElementById("ai_price_eur").value = "";
+  document.getElementById("ai_price_gbp").value = "";
+  addItemPanel.style.display = "none";
+  renderDraftItems();
+});
+/* Generate Quote Link */
+generateQuoteLinkBtn.addEventListener("click", async () => {
+  const customer = document.getElementById("quoteCustomer").value.trim();
+  const email = document.getElementById("quoteEmail").value.trim();
+  if (!customer || !email) { 
+    alert("Customer name and email required."); 
+    return; 
+  }
+  if (!quoteDraftItems.length) { 
+    alert("Add at least one item."); 
+    return; 
+  }
 
-function subscribeQuotes(){
-  const ref=collection(db,"brands","fleurdevie","quotes");
-  onSnapshot(ref,snap=>{
-    quotesCache=[];
-    snap.forEach(d=>quotesCache.push({id:d.id,data:d.data()}));
-    renderQuotesTable();
-  }, err=>{ console.error(err); quoteMessage.textContent=`❌ ${err.code||""}: ${err.message||err}`; quoteMessage.style.color="red"; });
-}
+  const data = {
+    customer,
+    email,
+    items: quoteDraftItems,
+    status: "Unpaid",
+    createdAt: new Date().toISOString()
+  };
 
-function renderQuotesTable(){
-  const currency=quotesDisplayCurrency.value||"NGN";
-  quotesTableBody.innerHTML="";
-  quotesCache.forEach(qObj=>{
-    const q=qObj.data;
-    let total=0;
-    (q.items||[]).forEach(it=>{
-      let p=0;
-      if(currency==="NGN") p=it.priceNGN||it.price||0;
-      else if(currency==="USD") p=it.priceUSD||it.price||0;
-      else if(currency==="EUR") p=it.priceEUR||it.price||0;
-      else if(currency==="GBP") p=it.priceGBP||it.price||0;
-      total+=p*(it.quantity||1);
+  try {
+    const docRef = await addDoc(collection(db, "brands", "fleurdevie", "quotes"), data);
+    const id = docRef.id;
+
+    // ✅ Use relative path here instead of window.location.origin
+    const link = `./checkout/index.html?quoteId=${id}`;
+
+
+    try { 
+      localStorage.setItem(id, JSON.stringify(data)); 
+    } catch (e) { 
+      console.warn(e); 
+    }
+
+    generatedQuoteLink.innerHTML = `
+      <a href="${link}" target="_blank" id="gqlink">${link}</a>
+      <button class="copy-btn" id="copyGeneratedBtn" data-link="${link}">📋</button>
+    `;
+
+    document.getElementById("copyGeneratedBtn").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(link);
+      const btn = document.getElementById("copyGeneratedBtn");
+      btn.textContent = "✅"; 
+      setTimeout(() => btn.textContent = "📋", 1000);
     });
-    const row=document.createElement("tr");
-    row.innerHTML=`<td>${escapeHtml(q.customerName||"")}</td><td>${formatCurrency(total,currency)}</td>
-      <td>${new Date(q.updatedAt||0).toLocaleString()}</td>
-      <td><input value="/checkout/index.html?quoteId=${qObj.id}" readonly style="width:100%"><button onclick="navigator.clipboard.writeText(this.previousElementSibling.value)">Copy</button></td>`;
+
+    quoteMessage.textContent = "✅ Quote saved and link generated."; 
+    quoteMessage.style.color = "green";
+    quoteForm.reset(); 
+    quoteDraftItems = []; 
+    renderDraftItems();
+
+  } catch (err) { 
+    console.error(err); 
+    quoteMessage.textContent = "❌ Error saving quote."; 
+    quoteMessage.style.color = "red"; 
+  }
+});
+
+  /* compute total from items in a given currency */
+function computeTotalFromItems(items = [], currency = 'NGN') {
+  let total = 0;
+  if (!items || !items.length) return 0;
+  items.forEach(it => {
+    const qty = parseFloat(it.qty) || 0;
+    let price = 0;
+    if (currency === 'NGN') price = it.priceNGN || 0;
+    if (currency === 'USD') price = it.priceUSD || 0;
+    if (currency === 'EUR') price = it.priceEUR || 0;
+    if (currency === 'GBP') price = it.priceGBP || 0;
+    total += (price * qty);
+  });
+  return total;
+}
+
+/* subscribe to quotes and keep cache, re-render on currency change */
+function subscribeQuotes() {
+  const quotesRef = collection(db, "brands", "fleurdevie", "quotes");
+  onSnapshot(quotesRef, snap => {
+    quotesCache = [];
+    snap.forEach(docSnap => quotesCache.push({ id: docSnap.id, data: docSnap.data() }));
+    renderQuotesTable();
+  }, err => {
+    console.error("Quotes snapshot error:", err);
+    quoteMessage.textContent = `❌ ${err.code || ""}: ${err.message || err}`;
+    quoteMessage.style.color = "red";
+  });
+}
+
+/* render the quotes table using quotesCache and selected display currency */
+function renderQuotesTable() {
+  const displayCurrency = quotesDisplayCurrency.value || 'NGN';
+  quotesTableBody.innerHTML = "";
+
+  quotesCache.forEach(qObj => {
+    const q = qObj.data;
+    const id = qObj.id;
+    const itemsCount = (q.items || []).length;
+
+    // compute a total from items in selected currency
+    const computedTotal = computeTotalFromItems(q.items || [], displayCurrency);
+    let displayTotal = "—";
+    if (computedTotal > 0) {
+      displayTotal = formatCurrency(computedTotal, displayCurrency);
+    } else if (q.totalExplicit != null) {
+      // show explicit total in its stored currency (do not convert) but note its currency
+      displayTotal = `${formatCurrency(q.totalExplicit, q.defaultCurrency || displayCurrency)} (${q.defaultCurrency || displayCurrency})`;
+    }
+
+    const link = `./checkout/index.html?quoteId=${id}`;
+    const status = q.status || "Unpaid";
+
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${escapeHtml(q.customer || "")}</td>
+      <td>${escapeHtml(q.email || "")}</td>
+      <td>
+        <a href="${link}" target="_blank" style="display:inline-block;max-width:60%;">${link}</a>
+        <button class="copy-btn" data-link="${link}" title="Copy link">📋</button>
+      </td>
+      <td>${displayTotal}</td>
+      <td>
+        <select data-id="${id}" class="quote-status-select">
+          <option ${status === 'Unpaid' ? 'selected' : ''}>Unpaid</option>
+          <option ${status === 'Pending' ? 'selected' : ''}>Pending</option>
+          <option ${status === 'Paid' ? 'selected' : ''}>Paid</option>
+          <option ${status === 'Processing' ? 'selected' : ''}>Processing</option>
+          <option ${status === 'Completed' ? 'selected' : ''}>Completed</option>
+          <option ${status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+        </select>
+      </td>
+      <td class="actions">
+        <button onclick="viewQuoteModal('${id}')">View</button>
+        <button onclick="deleteQuote('${id}')">Delete</button>
+      </td>
+    `;
     quotesTableBody.appendChild(row);
   });
+
+  // wire copy buttons
+  document.querySelectorAll("#quotesTable .copy-btn").forEach(btn => {
+    btn.onclick = async () => {
+      const l = btn.dataset.link;
+      try {
+        await navigator.clipboard.writeText(l);
+        const prev = btn.textContent;
+        btn.textContent = "✅";
+        setTimeout(()=> btn.textContent = "📋", 1000);
+      } catch(e){
+        console.warn("Copy failed", e);
+        alert("Copy failed. Link: " + l);
+      }
+    };
+  });
+
+  // wire status selects
+  document.querySelectorAll(".quote-status-select").forEach(sel => {
+    sel.onchange = async (ev) => {
+      const newStatus = ev.target.value;
+      const id = ev.target.dataset.id;
+      try {
+        await updateDoc(doc(db, "brands", "fleurdevie", "quotes", id), { status: newStatus });
+      } catch (err) {
+        console.error("Failed to update quote status", err);
+        alert("Failed to update status: " + (err.message || err));
+      }
+    };
+  });
+}
+
+/* when display currency changes re-render table and update modal if open */
+quotesDisplayCurrency.addEventListener('change', () => {
+  renderQuotesTable();
+  // if modal open and showing a quote, refresh it
+  if (document.getElementById('quoteModalBackdrop').style.display === 'flex') {
+    const currentDisplayedId = document.getElementById('quoteModalBackdrop').dataset.currentId;
+    if (currentDisplayedId) populateQuoteModal(currentDisplayedId);
+  }
+}
+
+);
+
+/* delete quote */
+window.deleteQuote = async (id) => {
+  if (!confirm("Delete this quote?")) return;
+  try { await deleteDoc(doc(db, "brands", "fleurdevie", "quotes", id)); } 
+  catch(err){console.error(err); alert("Error deleting quote");}
+}
+
+/* modal handling */
+const quoteModalBackdrop = document.getElementById('quoteModalBackdrop');
+const quoteModalBody = document.getElementById('quoteModalBody');
+const closeModalBtn = document.getElementById('closeModalBtn');
+const openCheckoutBtn = document.getElementById('openCheckoutBtn');
+
+closeModalBtn.addEventListener('click', () => { quoteModalBackdrop.style.display = 'none'; quoteModalBackdrop.dataset.currentId = ''; });
+quoteModalBackdrop.addEventListener('click', (ev) => { if (ev.target === quoteModalBackdrop) { quoteModalBackdrop.style.display = 'none'; quoteModalBackdrop.dataset.currentId = ''; } });
+
+openCheckoutBtn.addEventListener('click', () => {
+  const id = quoteModalBackdrop.dataset.currentId;
+  if (id) {
+    const link = `./checkout/index.html?quoteId=${id}`;
+    window.open(link, '_blank');
+  }
+});
+
+/* populate quote modal with quote details (uses cached quote where possible) */
+async function populateQuoteModal(id) {
+  const displayCurrency = quotesDisplayCurrency.value || 'NGN';
+  // try to find in cache
+  const qObj = quotesCache.find(qc => qc.id === id);
+  let q;
+  if (qObj) q = qObj.data;
+  else {
+    // fallback: fetch doc
+    const docRef = doc(db, "brands", "fleurdevie", "quotes", id);
+    const snap = await getDoc(docRef);
+    if (!snap.exists()) return alert("Quote not found");
+    q = snap.data();
+  }
+
+  // build html
+  const link = `./checkout/index.html?quoteId=${id}`;
+  let html = `
+    <div style="display:flex; justify-content:space-between; gap:12px; align-items:center;">
+      <div>
+        <strong>${escapeHtml(q.customer || '')}</strong><br>
+        <small>${escapeHtml(q.email || '')}</small><br>
+        <small>Quote currency: ${q.defaultCurrency || 'NGN'}</small>
+      </div>
+      <div style="text-align:right;">
+        <a href="${link}" target="_blank">${link}</a>
+        <button class="copy-btn" id="modalCopyBtn" data-link="${link}" title="Copy link">📋</button>
+      </div>
+    </div>
+    <hr style="margin:12px 0;">
+    <div>
+      <h4>Items (displaying prices in ${displayCurrency})</h4>
+      <div>
+  `;
+  let computedTotal = 0;
+  (q.items || []).forEach(it => {
+    const qty = parseFloat(it.qty) || 0;
+    let price = 0;
+    if (displayCurrency === 'NGN') price = it.priceNGN || 0;
+    if (displayCurrency === 'USD') price = it.priceUSD || 0;
+    if (displayCurrency === 'EUR') price = it.priceEUR || 0;
+    if (displayCurrency === 'GBP') price = it.priceGBP || 0;
+    const line = price * qty;
+    computedTotal += line;
+    html += `
+      <div style="border:1px solid #eee; padding:8px; margin-bottom:8px; border-radius:6px;">
+        <strong>${escapeHtml(it.name)}</strong> &times; ${qty} <br>
+        <small>${escapeHtml(it.desc || '')}</small>
+        <div style="margin-top:6px;">
+          ${formatCurrency(price, displayCurrency)} each — Line total: ${formatCurrency(line, displayCurrency)}
+        </div>
+      </div>
+    `;
+  });
+  html += `</div></div>`;
+
+  if (computedTotal > 0) {
+    html += `<div style="margin-top:8px;"><strong>Total: ${formatCurrency(computedTotal, displayCurrency)}</strong></div>`;
+  } else if (q.totalExplicit != null) {
+    html += `<div style="margin-top:8px;"><strong>Total (explicit): ${formatCurrency(q.totalExplicit, q.defaultCurrency || displayCurrency)} (${q.defaultCurrency || displayCurrency})</strong></div>`;
+  } else {
+    html += `<div style="margin-top:8px;"><strong>Total: —</strong></div>`;
+  }
+
+  quoteModalBody.innerHTML = html;
+
+  // wire modal copy button
+  const modalCopyBtn = document.getElementById('modalCopyBtn');
+  if (modalCopyBtn) {
+    modalCopyBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(modalCopyBtn.dataset.link);
+        modalCopyBtn.textContent = "✅";
+        setTimeout(()=> modalCopyBtn.textContent = "📋", 1000);
+      } catch(e) {
+        console.warn("Copy failed", e);
+        alert("Copy failed. Link: " + modalCopyBtn.dataset.link);
+      }
+    });
+  }
+
+  // show modal and store current id
+  quoteModalBackdrop.dataset.currentId = id;
+  quoteModalBackdrop.style.display = 'flex';
+}
+
+/* viewQuoteModal wrapper */
+window.viewQuoteModal = (id) => {
+  populateQuoteModal(id);
 }
 
 /* ---------------- ORDERS ---------------- */
