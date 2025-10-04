@@ -947,8 +947,29 @@ window.viewQuoteModal = (id) => {
 
 /* ---------------- ORDERS ---------------- */
 function subscribeOrders() {
+  const user = firebase.auth().currentUser;
+  if (!user) return;
+  const userEmail = user.email;
+
+  // Reference to the orders collection
   const ordersRef = collection(db, "brands", "fleurdevie", "orders");
-  onSnapshot(ordersRef, snap => {
+
+  let ordersQuery;
+
+  if (userEmail === "evelynopemipo98@gmail.com" || userEmail === "yourstruly.fleurdevie@gmail.com") {
+    // Admins: get all orders
+    ordersQuery = query(ordersRef, orderBy("createdAt", "desc"));
+  } else {
+    // Customers: only their own orders
+    ordersQuery = query(
+      ordersRef,
+      where("customerEmail", "==", userEmail),
+      orderBy("createdAt", "desc")
+    );
+  }
+
+  // Listen for real-time updates
+  const unsubscribe = onSnapshot(ordersQuery, snap => {
     allOrders = [];
     ordersTableBody.innerHTML = "";
     snap.forEach(docSnap => {
@@ -960,7 +981,10 @@ function subscribeOrders() {
     console.error("Orders snapshot error:", err);
     alert("Orders load error: " + (err.message || err));
   });
+
+  return unsubscribe;
 }
+
 
 function renderOrders() {
   const term = (orderSearch.value || "").toLowerCase();
