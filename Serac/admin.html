@@ -328,7 +328,8 @@ loginForm.addEventListener("submit", async e => {
   const password = document.getElementById("loginPassword").value;
   try {
     const userCred = await signInWithEmailAndPassword(auth, email, password);
-    if (allowedAdmins.includes((userCred.user.email||"").toLowerCase().trim())) {
+    const userEmail = (userCred.user.email||"").toLowerCase().trim();
+    if (allowedAdmins.includes(userEmail)) {
       loginContainer.style.display = "none";
       dashboardContainer.style.display = "block";
       subscribeProducts();
@@ -423,76 +424,64 @@ productForm.addEventListener("submit", async e=>{
 
 /* ---------------- SUBSCRIBE PRODUCTS ---------------- */
 function subscribeProducts(){
-  onSnapshot(productsCollection(), snap=>{
-    productsCache=[];
-    productsTableBody.innerHTML="";
-    snap.forEach(docSnap=>{
-      const p = {...docSnap.data(), id:docSnap.id};
-      productsCache.push(p);
-      const tr = document.createElement('tr');
-      tr.innerHTML=`
-        <td>${escapeHtml(p.name)}</td>
-        <td>${formatCurrency(p.priceNGN,'NGN')}</td>
-        <td>${formatCurrency(p.priceUSD,'USD')}</td>
-        <td>${formatCurrency(p.priceEUR,'EUR')}</td>
-        <td>${formatCurrency(p.priceGBP,'GBP')}</td>
-        <td>${p.published?'✅':'❌'}</td>
-        <td>
-          <button data-id="${p.id}" class="edit-product">Edit</button>
-          <button data-id="${p.id}" class="delete-product">Delete</button>
-        </td>`;
-      productsTableBody.appendChild(tr);
+  try {
+    onSnapshot(productsCollection(), snap=>{
+      productsCache=[];
+      productsTableBody.innerHTML="";
+      snap.forEach(docSnap=>{
+        const p = {...docSnap.data(), id:docSnap.id};
+        productsCache.push(p);
+        const tr = document.createElement('tr');
+        tr.innerHTML=`
+          <td>${escapeHtml(p.name)}</td>
+          <td>${formatCurrency(p.priceNGN,'NGN')}</td>
+          <td>${formatCurrency(p.priceUSD,'USD')}</td>
+          <td>${formatCurrency(p.priceEUR,'EUR')}</td>
+          <td>${formatCurrency(p.priceGBP,'GBP')}</td>
+          <td>${p.published?'✅':'❌'}</td>
+          <td>
+            <button data-id="${p.id}" class="edit-product">Edit</button>
+            <button data-id="${p.id}" class="delete-product">Delete</button>
+          </td>`;
+        productsTableBody.appendChild(tr);
 
-      tr.querySelector(".edit-product").addEventListener("click", ()=>populateProductForm(p));
-      tr.querySelector(".delete-product").addEventListener("click", async ()=>{ 
-        if(confirm("Delete this product?")) await deleteDoc(doc(db,"brands","serac","products",p.id));
+        tr.querySelector(".edit-product").addEventListener("click", ()=>populateProductForm(p));
+        tr.querySelector(".delete-product").addEventListener("click", async ()=>{ 
+          if(confirm("Delete this product?")) await deleteDoc(doc(db,"brands","serac","products",p.id));
+        });
       });
     });
-  });
-}
-function populateProductForm(p){
-  currentEditingProductId = p.id;
-  document.getElementById("productName").value=p.name;
-  document.getElementById("productPriceNGN").value=p.priceNGN;
-  document.getElementById("productPriceUSD").value=p.priceUSD;
-  document.getElementById("productPriceEUR").value=p.priceEUR;
-  document.getElementById("productPriceGBP").value=p.priceGBP;
-  document.getElementById("productDesc").value=p.description;
-  document.getElementById("productCustom").value=p.customizationAvailable?'true':'false';
-  document.getElementById("productPublished").value=p.published?'true':'false';
-
-  sizesRepeat.innerHTML=''; colorsRepeat.innerHTML=''; imagesRepeat.innerHTML='';
-  (p.sizes||[]).forEach(addSizeInput);
-  (p.colors||[]).forEach(addColorInput);
-  (p.images||[]).forEach(addImageInput);
+  } catch(err){ console.error("Products subscription failed:",err); }
 }
 
 /* ---------------- QUOTES ---------------- */
 function subscribeQuotes(){
-  onSnapshot(quotesCollection(), snap=>{
-    quotesCache=[];
-    quotesTableBody.innerHTML="";
-    snap.forEach(docSnap=>{
-      const q = {...docSnap.data(), id:docSnap.id};
-      quotesCache.push(q);
-      const tr = document.createElement('tr');
-      tr.innerHTML=`
-        <td>${escapeHtml(q.customerName||"")}</td>
-        <td>${escapeHtml(q.customerEmail||"")}</td>
-        <td>${q.status||"Pending"}</td>
-        <td>${formatCurrency(q.total||0,q.currency||'NGN')}</td>
-        <td>
-          <button data-id="${q.id}" class="view-quote">View</button>
-          <button data-id="${q.id}" class="delete-quote">Delete</button>
-        </td>`;
-      quotesTableBody.appendChild(tr);
+  try {
+    onSnapshot(quotesCollection(), snap=>{
+      quotesCache=[];
+      quotesTableBody.innerHTML="";
+      snap.forEach(docSnap=>{
+        const q = {...docSnap.data(), id:docSnap.id};
+        quotesCache.push(q);
+        const tr = document.createElement('tr');
+        tr.innerHTML=`
+          <td>${escapeHtml(q.customerName||"")}</td>
+          <td>${escapeHtml(q.customerEmail||"")}</td>
+          <td>${q.status||"Pending"}</td>
+          <td>${formatCurrency(q.total||0,q.currency||'NGN')}</td>
+          <td>
+            <button data-id="${q.id}" class="view-quote">View</button>
+            <button data-id="${q.id}" class="delete-quote">Delete</button>
+          </td>`;
+        quotesTableBody.appendChild(tr);
 
-      tr.querySelector(".view-quote").addEventListener("click",()=>openQuoteModal(q));
-      tr.querySelector(".delete-quote").addEventListener("click", async ()=>{
-        if(confirm("Delete this quote?")) await deleteDoc(doc(db,"brands","serac","quotes",q.id));
+        tr.querySelector(".view-quote").addEventListener("click",()=>openQuoteModal(q));
+        tr.querySelector(".delete-quote").addEventListener("click", async ()=>{
+          if(confirm("Delete this quote?")) await deleteDoc(doc(db,"brands","serac","quotes",q.id));
+        });
       });
     });
-  });
+  } catch(err){ console.error("Quotes subscription failed:",err); }
 }
 
 function openQuoteModal(q){
@@ -509,16 +498,19 @@ quoteModalBackdrop.addEventListener('click',e=>{if(e.target===quoteModalBackdrop
 
 /* ---------------- ORDERS ---------------- */
 function subscribeOrders(){
-  onSnapshot(ordersCollection(), snap=>{
-    allOrders=[];
-    ordersTableBody.innerHTML="";
-    snap.forEach(docSnap=>{
-      const o={...docSnap.data(),id:docSnap.id};
-      allOrders.push(o);
+  try {
+    onSnapshot(ordersCollection(), snap=>{
+      allOrders=[];
+      ordersTableBody.innerHTML="";
+      snap.forEach(docSnap=>{
+        const o={...docSnap.data(),id:docSnap.id};
+        allOrders.push(o);
+      });
+      renderOrders(allOrders);
     });
-    renderOrders(allOrders);
-  });
+  } catch(err){ console.error("Orders subscription failed:",err); }
 }
+
 function renderOrders(orders){
   const searchTerm = (orderSearch?.value||"").toLowerCase();
   const statusFilter = orderStatusFilter?.value;
@@ -579,11 +571,13 @@ quoteForm?.addEventListener("submit",async e=>{
   catch(err){console.error(err); quoteMessage.textContent="❌ "+err.message;}
 });
 
+/* ---------------- SCROLL EFFECT ---------------- */
 const header = document.getElementById('mainHeader');
 window.addEventListener('scroll', () => {
   if(window.scrollY > 20) header.classList.add('scrolled');
   else header.classList.remove('scrolled');
 });
 </script>
+
 </body>
 </html>
