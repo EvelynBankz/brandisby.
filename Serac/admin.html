@@ -409,6 +409,8 @@ addSizeInput(); addColorInput(); addImageInput();
 productForm.addEventListener("submit", async e => {
   e.preventDefault();
 
+ const productsTableBody = document.getElementById("productsTableBody");
+
   const data = {
     name: document.getElementById("productName").value.trim(),
     priceNGN: parseFloat(document.getElementById("productPriceNGN").value) || 0,
@@ -497,6 +499,9 @@ function subscribeProducts(){
   }
 }
 
+document.addEventListener("DOMContentLoaded", () => {
+    subscribeProducts();
+});
 
  
 /* ---------------- QUOTES ---------------- */
