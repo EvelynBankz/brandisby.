@@ -14,106 +14,56 @@
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   * { box-sizing:border-box; margin:0; padding:0; }
-  body { font-family:"Be Vietnam Pro", sans-serif; background:#000; color:#fff; line-height:1.6; }
+  body { font-family:"Be Vietnam Pro", sans-serif; background:#0a0a0a; color:#fff; line-height:1.6; }
   a { text-decoration:none; color:inherit; }
 
   header {
     position: sticky;
-    top: 0;
-    z-index: 1000;
-    background: rgba(0,0,0,0.8);
+    top:0;
+    z-index:1000;
+    background:transparent;
     transition: background 0.3s ease;
-    color: #fff;
-    padding: 16px;
-    text-align: center;
-    font-size: 24px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    border-bottom: 1px solid #444;
+    color:#fff;
+    padding:1rem 2rem;
+    font-size:1.8rem;
+    font-weight:700;
+    letter-spacing:1px;
+    text-align:center;
   }
-
   header.scrolled { background:#000; }
 
   .container {
-    max-width: 1000px;
-    margin: 2rem auto;
-    padding: 2rem;
-    background: #111;
-    border-radius: 12px;
-    box-shadow: 0 4px 16px rgba(255,255,255,0.05);
+    max-width:1000px;
+    margin:2rem auto;
+    padding:2rem;
+    background:#1a1a1a; /* same as customization.html form background */
+    border-radius:12px;
+    box-shadow:0 4px 16px rgba(0,0,0,0.7);
   }
 
-  h2 { font-weight:700; margin-bottom:16px; color:#fff; letter-spacing:0.5px; }
+  h2 { font-weight:700; margin-bottom:1rem; color:#fff; letter-spacing:0.5px; }
+  h3 { font-weight:600; color:#fff; margin-top:1rem; }
 
   label { display:block; margin-top:1rem; font-weight:600; }
-  input, textarea, select {
-    width:100%;
-    padding:0.6rem;
-    margin-top:0.5rem;
-    border:1px solid #333;
-    border-radius:6px;
-    font-size:1rem;
-    background:#000;
-    color:#fff;
-  }
-
-  button {
-    margin-top:1rem;
-    padding:0.75rem 1.2rem;
-    background:#fff;
-    color:#000;
-    border:none;
-    border-radius:6px;
-    cursor:pointer;
-    font-weight:700;
-    transition:0.3s;
-  }
-  button:hover { background:#ccc; }
+  input, textarea, select { width:100%; padding:0.6rem; margin-top:0.5rem; border:1px solid #444; border-radius:6px; font-size:1rem; background:#0a0a0a; color:#fff; }
+  button { margin-top:1rem; padding:0.75rem 1.2rem; background:#8A4D2B; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:700; transition:0.3s; } /* button color same as customization */
+  button:hover { background:#a35d39; }
 
   .message { margin-top:1rem; font-weight:500; font-size:1rem; text-align:center; }
 
-  table {
-    width:100%;
-    border-collapse:collapse;
-    margin-top:1.5rem;
-    background:#111;
-    border:1px solid #222;
-    border-radius:12px;
-    overflow:hidden;
-  }
-  th, td {
-    padding:0.75rem;
-    border-bottom:1px solid #222;
-    text-align:left;
-    font-size:0.95rem;
-    vertical-align:top;
-  }
-  th {
-    background:#222;
-    color:#fff;
-    font-weight:700;
-  }
+  table { width:100%; border-collapse:collapse; margin-top:1.5rem; background:#111; border:1px solid #333; border-radius:12px; overflow:hidden; }
+  th, td { padding:0.75rem; border-bottom:1px solid #222; text-align:left; font-size:0.95rem; vertical-align:top; }
+  th { background:#222; color:#fff; font-weight:700; }
   td img { width:60px; border-radius:6px; }
 
-  .actions button { margin-right:0.5rem; padding:0.4rem 0.6rem; font-size:0.9rem; }
-  .actions button:hover { opacity:0.85; }
+  .actions button { margin-right:0.5rem; padding:0.4rem 0.6rem; font-size:0.9rem; background:#8A4D2B; color:#fff; }
+  .actions button:hover { background:#a35d39; }
 
   .small-note { font-size:0.9rem; color:#bbb; margin-top:8px; }
 
-  .dashboard-nav {
-    display:flex;
-    gap:10px;
-    margin-bottom:1.5rem;
-  }
-  .dashboard-nav button {
-    flex:1;
-    background:#111;
-    color:#fff;
-    border:1px solid #333;
-    border-radius:6px;
-    transition:0.3s;
-  }
-  .dashboard-nav button:hover { background:#222; }
+  .dashboard-nav { display:flex; gap:10px; margin-bottom:1.5rem; }
+  .dashboard-nav button { flex:1; background:#8A4D2B; color:#fff; border:1px solid #8A4D2B; transition:0.3s; }
+  .dashboard-nav button:hover { background:#a35d39; }
 
   .section { display:none; margin-top:1rem; }
   .section.active { display:block; }
@@ -124,10 +74,25 @@
   .order-filters { display:flex; gap:10px; margin-bottom:1rem; flex-wrap:wrap; }
   .order-filters input, .order-filters select { flex:1; max-width:320px; }
 
-  .quote-item { border:1px solid #333; padding:8px; margin-top:8px; background:#111; border-radius:6px; }
+  .quote-item { border:1px solid #444; padding:8px; margin-top:8px; background:#111; border-radius:6px; }
 
   .copy-btn { background:none; border:none; cursor:pointer; margin-left:6px; font-size:1rem; color:#fff; }
   .copy-btn:hover { opacity:0.7; }
+
+  .add-item-panel { border:1px dashed #444; padding:12px; margin-top:8px; background:#1a1a1a; border-radius:8px; } /* form panel same as customization */
+  .inline-grid { display:grid; grid-template-columns: repeat(4,1fr); gap:8px; }
+  .repeatable { margin-top:8px; }
+  .repeatable .row { display:flex; gap:8px; margin-top:8px; }
+  .repeatable .row input { flex:1; }
+  .repeatable .row button { flex-shrink:0; padding:0.4rem 0.6rem; background:#8A4D2B; color:#fff; border:none; border-radius:6px; }
+  .repeatable .row button:hover { background:#a35d39; }
+
+  .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.85); display:none; align-items:center; justify-content:center; z-index:9999; }
+  .modal { background:#1a1a1a; color:#fff; padding:16px; border-radius:10px; max-width:800px; width:95%; max-height:90vh; overflow:auto; } /* modal bg same as customization */
+  .modal .modal-header { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+  .modal .modal-body { margin-top:12px; }
+  .modal .close { background:#8A4D2B; border:none; color:#fff; padding:6px 10px; border-radius:6px; cursor:pointer; }
+  .modal .close:hover { background:#a35d39; }
 
   @media(max-width:600px){
     .container { padding:1rem; }
@@ -135,23 +100,9 @@
     th, td { padding:0.5rem; }
     .dashboard-nav { flex-direction:column; }
     .order-filters { flex-direction:column; }
+    .inline-grid { grid-template-columns:1fr; }
   }
-
-  .add-item-panel { border:1px dashed #333; padding:12px; margin-top:8px; background:#111; border-radius:8px; }
-  .inline-grid { display:grid; grid-template-columns: repeat(4,1fr); gap:8px; }
-  @media(max-width:600px){ .inline-grid { grid-template-columns: 1fr; } }
-
-  .repeatable { margin-top:8px; }
-  .repeatable .row { display:flex; gap:8px; margin-top:8px; }
-  .repeatable .row input { flex:1; }
-  .repeatable .row button { flex-shrink:0; padding:0.4rem 0.6rem; background:#fff; color:#000; }
-
-  .modal-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.7); display:none; align-items:center; justify-content:center; z-index:9999; }
-  .modal { background:#111; color:#fff; padding:16px; border-radius:10px; max-width:800px; width:95%; max-height:90vh; overflow:auto; }
-  .modal .modal-header { display:flex; justify-content:space-between; align-items:center; gap:12px; }
-  .modal .modal-body { margin-top:12px; }
-  .modal .close { background:#000; border:1px solid #fff; color:#fff; padding:6px 10px; border-radius:6px; cursor:pointer; }
-</style>
+</style>>
 </head>
 <body>
 
