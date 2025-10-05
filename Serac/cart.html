@@ -29,7 +29,7 @@ body { font-family: "Montserrat", sans-serif; background: linear-gradient(180deg
 a { text-decoration:none; color:inherit; }
 img { display:block; max-width:100%; }
 
-/* ================= HEADER (matched to customization.html) ================= */
+/* ================= HEADER (shop.html style + fade-in) ================= */
 header.site-header {
   position: fixed; top:0; left:0; right:0;
   display:flex; align-items:center; justify-content:space-between;
@@ -38,6 +38,8 @@ header.site-header {
   border-bottom:1px solid rgba(245,245,243,0.1);
   transition:background 0.4s ease, box-shadow 0.4s ease;
   height:80px;
+  opacity:0;
+  transform: translateY(-20px);
 }
 header.site-header.scrolled { background: rgba(20,21,23,0.95); box-shadow:0 4px 20px rgba(0,0,0,0.6); }
 .header-left { display:flex; align-items:center; gap:18px; }
@@ -51,14 +53,14 @@ header.site-header.scrolled { background: rgba(20,21,23,0.95); box-shadow:0 4px 
 }
 .header-right a:hover::after { width:100%; }
 
-/* HAMBURGER (customization style) */
+/* HAMBURGER */
 .hamburger { display:none; background:none; border:none; width:44px; height:40px; cursor:pointer; position:relative; z-index:1300; }
 .hamburger span { display:block; height:3px; width:26px; background:var(--accent); margin:6px auto; border-radius:2px; transition:all 0.3s ease; }
 .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 6px); }
 .hamburger.open span:nth-child(2) { opacity: 0; }
 .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(6px, -6px); }
 
-/* ================= HERO (matched to customization.html) ================= */
+/* ================= HERO (shop.html fade-in + background) ================= */
 .hero {
   position: relative;
   height:86vh;
@@ -66,10 +68,13 @@ header.site-header.scrolled { background: rgba(20,21,23,0.95); box-shadow:0 4px 
   justify-content:center;
   align-items:center;
   text-align:center;
-  margin-top:86px; /* push below fixed header */
+  margin-top:86px;
   overflow:hidden;
   border-bottom-left-radius:var(--radius);
   border-bottom-right-radius:var(--radius);
+  opacity:0;
+  transform: translateY(20px);
+  transition: opacity 1s ease, transform 1s ease;
 }
 .hero::after {
   content:""; position:absolute; inset:0; background: url('asset/bg25.jpg') center/cover no-repeat; transform:scale(1.05); z-index:-2;
@@ -82,22 +87,16 @@ header.site-header.scrolled { background: rgba(20,21,23,0.95); box-shadow:0 4px 
 .hero-text h1 { font-family:"Playfair Display", serif; font-size:clamp(42px,6vw,72px); margin-bottom:18px; color:var(--accent); line-height:1.2; }
 .hero-text p { font-size:clamp(18px,2vw,26px); color:#F5F5F3; line-height:1.6; }
 
-/* ================= CART & PAGE (original cart styles preserved) ================= */
-
-/* CART SECTION */
+/* ================= CART STYLES (preserved) ================= */
 section.cart { padding:56px 18px; background: transparent; }
 .container { max-width:1100px; margin:auto; }
 h2 { text-align:center; font-size:26px; font-family:"Playfair Display", serif; margin-bottom:18px; color:var(--text); }
-
-/* currency select */
 .currency-selector { text-align:right; margin-bottom:12px; }
 .currency-selector select {
   padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.06);
   background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));
   color:var(--text); transition: all var(--transition);
 }
-
-/* Cart grid & items */
 .cart-grid { display:flex; flex-direction:column; gap:18px; }
 .cart-item {
   background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.03));
@@ -111,8 +110,6 @@ h2 { text-align:center; font-size:26px; font-family:"Playfair Display", serif; m
 .cart-item-details h3 { font-family:"Playfair Display", serif; margin-bottom:8px; font-size:20px; color:var(--text); }
 .variant-summary { font-size:0.95rem; color:var(--subtext); margin-bottom:6px; }
 .price { font-weight:700; margin-bottom:10px; color:var(--accent); font-size:1.05rem; }
-
-/* quantity controls */
 .quantity-controls { display:flex; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap; }
 .quantity-controls button {
   background: transparent; color:var(--text); border:1px solid rgba(255,255,255,0.06);
@@ -120,8 +117,6 @@ h2 { text-align:center; font-size:26px; font-family:"Playfair Display", serif; m
 }
 .quantity-controls button:hover { transform:translateY(-3px); border-color:var(--accent); color:var(--accent); box-shadow: 0 8px 20px rgba(182,110,65,0.08); }
 .quantity-controls input { width:64px; text-align:center; padding:8px; border-radius:8px; border:1px solid rgba(255,255,255,0.06); background:transparent; color:var(--text); }
-
-/* Show Variants Button */
 .show-variants-btn {
   background: transparent;
   color:var(--text);
@@ -136,10 +131,7 @@ h2 { text-align:center; font-size:26px; font-family:"Playfair Display", serif; m
   transition: all var(--transition);
 }
 .show-variants-btn:hover { background: rgba(182,110,65,0.06); border-color: var(--accent); color: var(--accent); transform:translateY(-3px); }
-
 .variants-container { display:none; flex-direction:column; gap:8px; margin-top:8px; padding-left:8px; border-left:2px dashed rgba(255,255,255,0.03); }
-
-/* subtotal & buttons */
 .cart-subtotal { text-align:right; font-weight:700; margin-top:10px; color:var(--text); font-size:1.05rem; }
 .cart-empty { text-align:center; font-size:18px; margin-top:20px; color:var(--subtext); display:none; }
 .cart-buttons { margin-top:20px; display:flex; justify-content:flex-end; gap:12px; flex-wrap:wrap; }
@@ -391,8 +383,16 @@ document.getElementById('hamburger').addEventListener('click', ()=>{
   document.getElementById('hamburger').classList.toggle('open');
 });
 
-/* Keep your original init and storage sync logic intact */
-(async function init(){ cart=mergeCartItems(cart); await renderCart(); updateCartCount(); })();
+(async function init(){ 
+  cart=mergeCartItems(cart); 
+  await renderCart(); 
+  updateCartCount(); 
+
+  // fade-in animations
+  const header = document.querySelector(".site-header");
+  const hero = document.querySelector(".hero");
+  requestAnimationFrame(()=>{ header.style.opacity=1; header.style.transform='translateY(0)'; hero.style.opacity=1; hero.style.transform='translateY(0)'; });
+})();
 
 window.addEventListener('storage', (e)=>{
   if(e.key === STORAGE_KEY || e.key === CURRENCY_KEY){
@@ -403,7 +403,6 @@ window.addEventListener('storage', (e)=>{
   }
 });
 
-/* -- Add header scrolled behavior (from customization.html) -- */
 window.addEventListener("scroll", () => {
   const header = document.querySelector(".site-header");
   if (window.scrollY > 50) header.classList.add("scrolled");
