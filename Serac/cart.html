@@ -30,48 +30,44 @@ a { text-decoration:none; color:inherit; }
 img { display:block; max-width:100%; }
 
 /* HEADER */
-header.site-header {
-  position: fixed; top:0; left:0; right:0;
-  display:flex; align-items:center; justify-content:space-between;
-  padding:10px 20px; z-index:1200;
-  background:transparent;
-  border-bottom:1px solid rgba(245,245,243,0.1);
-  transition:background 0.4s ease, box-shadow 0.4s ease;
-  height:80px;
+.site-header {
+  background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.015));
+  color:var(--text);
+  display:flex; justify-content:space-between; align-items:center;
+  padding:18px 28px; position:fixed; top:0; left:0; right:0; z-index:1000;
+  border-bottom:1px solid var(--muted);
+  backdrop-filter: blur(6px);
 }
-.site-header.scrolled { background: rgba(20,21,23,0.95); box-shadow:0 4px 20px rgba(0,0,0,0.6); }
-.header-left { display:flex; align-items:center; gap:18px; }
-.brand-logo { height:80px; width:auto; }
-.brand-title { font-family:"Playfair Display", serif; font-weight:700; font-size:1.9rem; color:#B66E41; letter-spacing:1px; }
-.header-right { display:flex; gap:24px; font-weight:500; }
-.header-right a { color:#F5F5F3; position:relative; padding:6px 0; font-size:1rem; }
-.header-right a::after {
-  content:""; position:absolute; bottom:-4px; left:0; width:0; height:2px;
-  background:#B66E41; transition:width 0.3s ease;
+.header-left { display:flex; align-items:center; gap:14px; }
+.brand-logo { height:56px; width:auto; object-fit:contain; filter:drop-shadow(0 6px 12px rgba(0,0,0,0.6)); }
+.brand-title { font-family:"Playfair Display", serif; font-size:22px; font-weight:700; color:var(--text); letter-spacing:0.4px; }
+.header-right { display:flex; gap:20px; align-items:center; }
+.header-right a { font-weight:500; color:var(--subtext); padding:8px 10px; border-radius:8px; transition: all var(--transition); }
+.header-right a:hover { color:var(--text); transform:translateY(-2px); }
+.cart-count { background:var(--accent); color:#fff; font-size:12px; font-weight:700; border-radius:50%; padding:4px 7px; margin-left:6px; transition: transform var(--transition); box-shadow: 0 6px 18px rgba(182,110,65,0.18); }
+
+/* HAMBURGER */
+.hamburger { display:none; background:none; border:none; cursor:pointer; width:34px; height:26px; position:relative; }
+.hamburger span { display:block; width:100%; height:3px; background:var(--text); border-radius:3px; position:absolute; left:0; transition: all 220ms ease; opacity:0.9; }
+.hamburger span:nth-child(1){ top:0; }
+.hamburger span:nth-child(2){ top:11px; }
+.hamburger span:nth-child(3){ top:22px; }
+.hamburger.open span:nth-child(1){ transform:rotate(45deg); top:11px; }
+.hamburger.open span:nth-child(2){ opacity:0; transform:scaleX(.2); }
+.hamburger.open span:nth-child(3){ transform:rotate(-45deg); top:11px; }
+
+/* HERO */
+.hero { position: relative; height:86vh; display:flex; justify-content:center; align-items:center; text-align:center; margin-top:86px; overflow:hidden; border-bottom-left-radius:var(--radius); border-bottom-right-radius:var(--radius); }
+.hero::after {
+  content:""; position:absolute; inset:0; background: url('asset/bg25.jpg') center/cover no-repeat; transform:scale(1.05); z-index:-2; filter:contrast(.88) saturate(.85) brightness(.5);
 }
-.header-right a:hover::after { width:100%; }
-
-.hamburger { display:none; background:none; border:none; width:44px; height:40px; cursor:pointer; position:relative; z-index:1300; }
-.hamburger span { display:block; height:3px; width:26px; background:#B66E41; margin:6px auto; border-radius:2px; transition:all 0.3s ease; }
-.hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 6px); }
-.hamburger.open span:nth-child(2) { opacity: 0; }
-.hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(6px, -6px); }
-
-.hero-custom {
-  height: 90vh; display:flex; align-items:center; justify-content:center;
-  text-align:center; background:url("asset/bg25.jpg") center center/cover no-repeat;
-  position:relative; margin-top:0;
+.hero::before{
+  content:""; position:absolute; inset:0; background: linear-gradient(180deg, rgba(20,21,23,0.45), rgba(20,21,23,0.70)); z-index:-1;
 }
-.hero-custom::after {
-  content:""; position:absolute; top:0; left:0; right:0; bottom:0;
-  background:rgba(20,21,23,0.6);
-}
-.hero-custom .hero-text { position:relative; z-index:2; max-width:800px; padding:0 15px; }
-.hero-custom .hero-text h1 { font-family:"Playfair Display", serif; font-size:clamp(42px,6vw,72px); margin-bottom:18px; color:#B66E41; line-height:1.2; }
-.hero-custom .hero-text p { font-size:clamp(18px,2vw,26px); color:#F5F5F3; line-height:1.6; }
+.hero-text { position:relative; display:inline-block; color:var(--text); margin-bottom:12px; padding:24px; backdrop-filter: blur(4px); border-radius:10px; box-shadow: 0 10px 40px rgba(0,0,0,0.65); max-width:920px; }
+.hero-text h1 { font-family:"Playfair Display", serif; font-size:clamp(36px,6vw,64px); margin-bottom:12px; letter-spacing:0.6px; color:var(--text); }
+.hero-text p { font-size:clamp(15px,2vw,20px); color:var(--subtext); max-width:740px; }
 
-
-  
 /* CART SECTION */
 section.cart { padding:56px 18px; background: transparent; }
 .container { max-width:1100px; margin:auto; }
@@ -141,10 +137,9 @@ footer { text-align:center; padding:22px; background: transparent; color:var(--s
 
 /* MOBILE */
 @media (max-width:900px){
-  .header-right { display:none; flex-direction:column; background:#1d1f22; position:absolute; top:80px; right:0; width:220px; padding:20px; border-left:1px solid rgba(245,245,243,0.08); }
+  .header-right { display:none; flex-direction:column; background: rgba(0,0,0,0.45); position:absolute; top:78px; right:16px; width:220px; padding:16px; border-radius:10px; }
   .header-right.open { display:flex; }
   .hamburger { display:block; }
-
   .cart-item-header img { width:90px; height:90px; }
   .quantity-controls input { width:56px; }
   .hero { height:44vh; margin-top:78px; }
@@ -390,18 +385,6 @@ window.addEventListener('storage', (e)=>{
     updateCartCount();
   }
 });
-  
-// Change header background on scroll
-  window.addEventListener("scroll", () => {
-    const header = document.querySelector(".site-header");
-    if (window.scrollY > 50) {
-      header.classList.add("scrolled");
-    } else {
-      header.classList.remove("scrolled");
-    }
-  });
-  
-  
 </script>
 </body>
 </html>
