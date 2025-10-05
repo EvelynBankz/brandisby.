@@ -72,7 +72,14 @@ section.cart { padding:56px 18px; background: transparent; }
 .container { max-width:1100px; margin:auto; }
 h2 { text-align:center; font-size:26px; font-family:"Playfair Display", serif; margin-bottom:18px; color:#fff; }
 
-.currency-selector { text-align:right; margin-bottom:10px; }
+.currency-selector {
+  display: flex;               /* puts label and dropdown side by side */
+  justify-content: flex-end;   /* keeps both aligned to the right */
+  align-items: center;         /* vertically centers them */
+  gap: 6px;                    /* space between the label and button */
+  margin-bottom: 10px;
+}
+
 .currency-selector label { margin-right:8px; color:rgba(231,231,231,0.72); }
 
 .currency-selector select {
