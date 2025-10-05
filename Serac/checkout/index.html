@@ -97,6 +97,8 @@
       .brand-title{font-size:clamp(16px,7vw,22px)}
       .hero{height:40vh}
     }
+
+    .small-note{font-size:0.9rem;color:#bbb;margin-top:8px}
   </style>
 </head>
 <body>
@@ -106,7 +108,7 @@
       <div class="brand-title">Sérac</div>
     </div>
     <!-- Hamburger -->
-    <button class="hamburger" id="hamburger-btn">
+    <button class="hamburger" id="hamburger-btn" aria-label="Toggle menu">
       <span></span><span></span><span></span>
     </button>
     <nav class="header-right" id="nav-menu">
@@ -134,6 +136,7 @@
           <input type="tel" id="phone" required>
           <label for="address">Address</label>
           <textarea id="address" required></textarea>
+          <div class="small-note">Your billing details will be stored with the order record in Firestore</div>
         </form>
       </div>
 
@@ -159,11 +162,15 @@
 
   <footer><p>© 2025 Sérac</p></footer>
 
+  <!-- Flutterwave -->
   <script src="https://checkout.flutterwave.com/v3.js"></script>
+
+  <!-- Main script (embedded single-file) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
     import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
+    /* ---------------- FIREBASE CONFIG (SERAC) ---------------- */
     const firebaseConfig = {
       apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
       authDomain: "brandisby.firebaseapp.com",
@@ -175,7 +182,13 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // DOM elements
+    /* ---------------- FLUTTERWAVE PUBLIC KEY ----------------
+       A test-style public key is set so the flow can run in test mode.
+       Replace with your real FLWPUBK_TEST... or FLWPUBK_LIVE... key when ready.
+    --------------------------------------------------------- */
+    const FLW_PUBLIC_KEY = "FLWPUBK_TEST-xxxxxxxxxxxxxxxxxxxxx-X";
+
+    /* DOM elements */
     const cartCountElem = document.getElementById('cartCount');
     const orderItemsEl = document.getElementById('orderItems');
     const orderSubtotalEl = document.getElementById('orderSubtotal');
@@ -183,7 +196,7 @@
     const currencyWrapper = document.getElementById('currencySelectorWrapper');
     const payBtn = document.getElementById('payBtn');
 
-    // cart & quote
+    /* cart & quote */
     let rawCart = JSON.parse(localStorage.getItem('cart_serac')) || [];
     function mergeCartItems(cartArray){
       const merged=[];
@@ -197,11 +210,12 @@
     rawCart = mergeCartItems(rawCart);
 
     const urlParams = new URLSearchParams(window.location.search);
-    const quoteId = urlParams.get('quoteId');
+    const quoteId = urlParams.get('quoteId'); // if present we show currency selector and load quote from Firestore
     let quote = null;
     let selectedCurrency = localStorage.getItem('currency_serac') || 'NGN';
     currencySelect.value = selectedCurrency;
 
+    /* formatting */
     function formatPrice(value, currency){
       const localeMap = { USD:'en-US', EUR:'de-DE', GBP:'en-GB', NGN:'en-NG' };
       const minFrac = currency === 'NGN' ? 0 : 2;
@@ -212,6 +226,7 @@
       }
     }
 
+    /* unit price resolution */
     function getUnitPriceForCurrency(productDoc, cartItem, currency) {
       if(productDoc){
         if(currency === 'NGN' && productDoc.priceNGN != null) return Number(productDoc.priceNGN);
@@ -248,6 +263,7 @@
       return out;
     }
 
+    /* build normalized quote from client cart (when there's no quoteId) */
     async function buildQuoteFromCart(){
       const merged = mergeCartItems(rawCart);
       const byProduct = groupCartByProduct(merged);
@@ -291,108 +307,362 @@
       return { items };
     }
 
+    /* load checkout: either from a quoteId or from cart_serac */
     async function loadCheckout(){
       selectedCurrency = localStorage.getItem('currency_serac') || 'NGN';
       currencySelect.value = selectedCurrency;
       currencyWrapper.style.display = 'none';
 
       if(quoteId){
+        // fetch quote from serac quotes collection
         try{
           const qRef = doc(db, "brands", "serac", "quotes", quoteId);
           const snap = await getDoc(qRef);
-          if(!snap.exists()){ alert("Quote not found."); return; }
+          if(!snap.exists()){
+            alert("Quote not found.");
+            return;
+          }
           const rawQuote = snap.data();
           if(rawQuote.customer) document.getElementById('name').value = rawQuote.customer;
           if(rawQuote.email) document.getElementById('email').value = rawQuote.email;
 
+          // show currency selector for quotes
           currencyWrapper.style.display = 'block';
           selectedCurrency = localStorage.getItem('currency_serac') || rawQuote.currency || 'NGN';
           currencySelect.value = selectedCurrency;
 
-          const items = (Array.isArray(rawQuote.items)?rawQuote.items:[]).map(ci=>{
+          // normalize incoming quote items to the same structure used for rendering
+          const items = (Array.isArray(rawQuote.items) ? rawQuote.items : []).map(ci=>{
             if(Array.isArray(ci.variants) && ci.variants.length){
-              const variants = ci.variants.map(v=>({
-                id:v.id||ci.id||'',
-                color:v.color||'',
-                size:v.size||'',
-                quantity:Number(v.qty)||0,
-                unitPrices:{
-                  NGN:Number(v.priceNGN)||0,
-                  USD:Number(v.priceUSD)||0,
-                  EUR:Number(v.priceEUR)||0,
-                  GBP:Number(v.priceGBP)||0
+              const variants = ci.variants.map(v => ({
+                id: v.id || ci.id || '',
+                color: v.color || '',
+                size: v.size || '',
+                quantity: Number(v.qty) || 0,
+                unitPrices: {
+                  NGN: Number(v.priceNGN) || 0,
+                  USD: Number(v.priceUSD) || 0,
+                  EUR: Number(v.priceEUR) || 0,
+                  GBP: Number(v.priceGBP) || 0
                 },
-                linePrices:{
-                  NGN:(Number(v.priceNGN)||0)*(Number(v.qty)||0),
-                  USD:(Number(v.priceUSD)||0)*(Number(v.qty)||0),
-                  EUR:(Number(v.priceEUR)||0)*(Number(v.qty)||0),
-                  GBP:(Number(v.priceGBP)||0)*(Number(v.qty)||0)
+                linePrices: {
+                  NGN: (Number(v.priceNGN) || 0) * (Number(v.qty) || 0),
+                  USD: (Number(v.priceUSD) || 0) * (Number(v.qty) || 0),
+                  EUR: (Number(v.priceEUR) || 0) * (Number(v.qty) || 0),
+                  GBP: (Number(v.priceGBP) || 0) * (Number(v.qty) || 0)
                 }
               }));
-              return {...ci, variants};
-            } else return ci;
+              return {
+                productId: ci.id || '',
+                name: ci.name || '',
+                image: ci.image || '',
+                totalQuantity: variants.reduce((s,a)=>s+a.quantity,0),
+                totalPrices: {
+                  NGN: variants.reduce((s,a)=>s + (a.linePrices.NGN||0),0),
+                  USD: variants.reduce((s,a)=>s + (a.linePrices.USD||0),0),
+                  EUR: variants.reduce((s,a)=>s + (a.linePrices.EUR||0),0),
+                  GBP: variants.reduce((s,a)=>s + (a.linePrices.GBP||0),0)
+                },
+                variants
+              };
+            } else {
+              // single-line item
+              const qty = Number(ci.qty) || Number(ci.quantity) || 1;
+              const unitPrices = {
+                NGN: Number(ci.priceNGN) || Number(ci.price) || 0,
+                USD: Number(ci.priceUSD) || 0,
+                EUR: Number(ci.priceEUR) || 0,
+                GBP: Number(ci.priceGBP) || 0
+              };
+              return {
+                productId: ci.id || '',
+                name: ci.name || '',
+                image: ci.image || '',
+                totalQuantity: qty,
+                totalPrices: {
+                  NGN: (unitPrices.NGN || 0) * qty,
+                  USD: (unitPrices.USD || 0) * qty,
+                  EUR: (unitPrices.EUR || 0) * qty,
+                  GBP: (unitPrices.GBP || 0) * qty
+                },
+                variants: [{
+                  id: ci.id || '',
+                  color: '',
+                  size: '',
+                  quantity: qty,
+                  unitPrices,
+                  linePrices: {
+                    NGN: (unitPrices.NGN || 0) * qty,
+                    USD: (unitPrices.USD || 0) * qty,
+                    EUR: (unitPrices.EUR || 0) * qty,
+                    GBP: (unitPrices.GBP || 0) * qty
+                  }
+                }]
+              };
+            }
           });
 
           quote = { items };
           renderOrder();
-        } catch(e){ console.error(e); alert("Failed to load quote."); }
+        } catch(err){
+          console.error("Failed to load quote", err);
+          alert("Error loading quote. Please try again.");
+        }
       } else {
-        quote = await buildQuoteFromCart();
-        renderOrder();
+        // build from client cart
+        try {
+          const built = await buildQuoteFromCart();
+          quote = built;
+          renderOrder();
+        } catch(err){
+          console.error("Failed to build quote from cart", err);
+        }
       }
     }
 
+    /* render order: grouped product lines and per-variant rows when present */
     function renderOrder(){
-      if(!quote) return;
-      orderItemsEl.innerHTML='';
+      orderItemsEl.innerHTML = '';
+      if(!quote || !Array.isArray(quote.items)) return;
       let subtotal = 0;
+      const items = quote.items;
 
-      quote.items.forEach(prod=>{
+      items.forEach(item=>{
+        const lineTotal = (item.totalPrices && (item.totalPrices[selectedCurrency] ?? 0)) || 0;
+        subtotal += lineTotal;
+
         const li = document.createElement('li');
-        li.className='order-item';
-        li.innerHTML=`<div class="left">
-          <div class="title">${prod.name}</div>
-        </div>
-        <div class="right">${formatPrice(prod.totalPrices[selectedCurrency]||0, selectedCurrency)}</div>`;
+        li.className = 'order-item';
+
+        const left = document.createElement('div');
+        left.className = 'left';
+
+        // title + qty
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'title';
+        titleDiv.textContent = `${item.name} (x${item.totalQuantity})`;
+
+        // meta
+        const metaDiv = document.createElement('div');
+        metaDiv.className = 'meta';
+
+        // build header area with optional image + title + toggle
+        const headerWrapper = document.createElement('div');
+        headerWrapper.style.display = 'flex';
+        headerWrapper.style.alignItems = 'center';
+        headerWrapper.style.gap = '10px';
+
+        if(item.image){
+          const img = document.createElement('img');
+          img.src = item.image;
+          img.alt = item.name;
+          img.style.width = '56px';
+          img.style.height = '56px';
+          img.style.objectFit = 'cover';
+          img.style.borderRadius = '6px';
+          img.style.border = '1px solid rgba(0,0,0,0.06)';
+          headerWrapper.appendChild(img);
+        }
+
+        const textWrap = document.createElement('div');
+        textWrap.appendChild(titleDiv);
+
+        if(Array.isArray(item.variants) && item.variants.length > 1){
+          const info = document.createElement('div');
+          info.className = 'meta';
+          info.textContent = 'Multiple options selected';
+          textWrap.appendChild(info);
+        } else {
+          const singleV = item.variants && item.variants[0];
+          if(singleV && (singleV.color || singleV.size)){
+            const info = document.createElement('div');
+            info.className = 'meta';
+            info.textContent = `${singleV.color ? 'Color: ' + singleV.color : ''}${singleV.color && singleV.size ? ' · ' : ''}${singleV.size ? 'Size: ' + singleV.size : ''}`;
+            textWrap.appendChild(info);
+          }
+        }
+
+        headerWrapper.appendChild(textWrap);
+
+        // right column price
+        const right = document.createElement('div');
+        right.className = 'right';
+        right.style.minWidth = '120px';
+        right.style.textAlign = 'right';
+        right.innerHTML = `<div style="font-weight:600">${formatPrice(lineTotal, selectedCurrency)}</div>`;
+
+        // if more than one variant, add chevron toggle to show variant rows
+        if(Array.isArray(item.variants) && item.variants.length > 1){
+          const toggle = document.createElement('button');
+          toggle.className = 'variant-toggle';
+          toggle.type = 'button';
+          toggle.setAttribute('aria-expanded','false');
+          toggle.title = 'View variants';
+          toggle.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>`;
+
+          headerWrapper.appendChild(toggle);
+
+          left.appendChild(headerWrapper);
+
+          const variantsContainer = document.createElement('div');
+          variantsContainer.className = 'variants-container';
+          item.variants.forEach(v=>{
+            const row = document.createElement('div');
+            row.className = 'variant-row';
+            const leftRow = document.createElement('div');
+            leftRow.style.display = 'flex';
+            leftRow.style.gap = '8px';
+            leftRow.style.alignItems = 'center';
+            const attrs = document.createElement('div');
+            attrs.className = 'variant-attrs';
+            attrs.innerHTML = `${v.color ? `Color: ${v.color}` : ''}${v.color && v.size ? ' · ' : ''}${v.size ? `Size: ${v.size}` : ''} <span style="color:#bca589"> · qty: ${v.quantity}</span>`;
+            leftRow.appendChild(attrs);
+            const rightPrice = document.createElement('div');
+            rightPrice.className = 'variant-price';
+            const variantLinePrice = (v.linePrices && (v.linePrices[selectedCurrency] ?? 0)) || ((v.unitPrices && (v.unitPrices[selectedCurrency] ?? 0)) * v.quantity);
+            rightPrice.textContent = formatPrice(variantLinePrice, selectedCurrency);
+            row.appendChild(leftRow);
+            row.appendChild(rightPrice);
+            variantsContainer.appendChild(row);
+          });
+
+          left.appendChild(variantsContainer);
+
+          // toggle wiring
+          toggle.addEventListener('click', () => {
+            const isShown = variantsContainer.classList.toggle('show');
+            toggle.setAttribute('aria-expanded', isShown ? 'true' : 'false');
+          });
+
+        } else {
+          left.appendChild(headerWrapper);
+        }
+
+        li.appendChild(left);
+        li.appendChild(right);
         orderItemsEl.appendChild(li);
-        subtotal += prod.totalPrices[selectedCurrency]||0;
       });
 
-      orderSubtotalEl.textContent=`Subtotal: ${formatPrice(subtotal, selectedCurrency)}`;
-      cartCountElem.textContent = quote.items.reduce((s,a)=>s+a.totalQuantity,0);
+      orderSubtotalEl.textContent = `Subtotal: ${formatPrice(subtotal, selectedCurrency)}`;
+      // update cart count
+      const totalQty = quote.items.reduce((s,a) => s + (a.totalQuantity || 0), 0);
+      cartCountElem.textContent = totalQty;
     }
 
-    currencySelect.addEventListener('change',()=>{
+    /* Payment handling: uses FlutterwaveCheckout and saves order to Firestore on success */
+    payBtn.addEventListener('click', async function(){
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const address = document.getElementById('address').value.trim();
+      if(!name || !email || !phone || !address){
+        alert('Please fill in all billing details.');
+        return;
+      }
+
+      if(!quote || !Array.isArray(quote.items) || quote.items.length === 0){
+        alert('Cart is empty.');
+        return;
+      }
+
+      // compute subtotal
+      const itemsToSubmit = quote.items;
+      let subtotal = 0;
+      itemsToSubmit.forEach(it => {
+        subtotal += (it.totalPrices && (it.totalPrices[selectedCurrency] ?? 0)) || 0;
+      });
+
+      if(subtotal <= 0){
+        alert('Subtotal is zero.');
+        return;
+      }
+
+      // Build metadata payload saved with order
+      const orderPayload = {
+        name,
+        email,
+        phone,
+        address,
+        currency: selectedCurrency,
+        items: itemsToSubmit,
+        total: subtotal.toFixed(selectedCurrency === 'NGN' ? 0 : 2),
+        status: "pending",
+        createdAt: serverTimestamp()
+      };
+
+      // Flutterwave checkout config
+      const txRef = "serac_" + Date.now();
+      const fwConfig = {
+        public_key: FLW_PUBLIC_KEY,
+        tx_ref: txRef,
+        amount: parseFloat(subtotal),
+        currency: selectedCurrency,
+        customer: { email, phonenumber: phone, name },
+        customizations: { title: "Sérac", description: "Order Payment", logo: "../logo.png" },
+        callback: async function(data){
+          // data contains transaction details - store order as paid
+          try {
+            const paymentRef = data.tx_ref || data.txId || data.transaction_id || data.transactionId || data.flwRef || null;
+            const paidOrder = {
+              ...orderPayload,
+              paymentRef,
+              status: "paid",
+              paidAt: serverTimestamp()
+            };
+
+            // save under brands/serac/orders
+            await addDoc(collection(db, "brands", "serac", "orders"), paidOrder);
+
+            // clear local cart
+            try { localStorage.removeItem('cart_serac'); } catch(e){ console.warn('localStorage clear failed', e); }
+
+            // redirect to thank you page
+            window.location.href = "../serac/thankyou.html";
+          } catch(err){
+            console.error("Order save failed after payment:", err);
+            alert("Payment succeeded but saving order failed. Please contact support.");
+            // still attempt to clear cart and redirect
+            try { localStorage.removeItem('cart_serac'); } catch(e){ }
+            window.location.href = "../serac/thankyou.html";
+          }
+        },
+        onclose: function(){
+          console.log("Payment closed");
+        }
+      };
+
+      // open Flutterwave checkout
+      if (typeof FlutterwaveCheckout === 'function') {
+        FlutterwaveCheckout(fwConfig);
+      } else {
+        alert('Payment gateway not available. Please try again later.');
+      }
+    });
+
+    /* currency change */
+    currencySelect.addEventListener('change', ()=>{
       selectedCurrency = currencySelect.value;
       localStorage.setItem('currency_serac', selectedCurrency);
       renderOrder();
     });
 
-    payBtn.addEventListener('click',async()=>{
-      const customerName = document.getElementById('name').value.trim();
-      const email = document.getElementById('email').value.trim();
-      const phone = document.getElementById('phone').value.trim();
-      const address = document.getElementById('address').value.trim();
-      if(!customerName || !email || !phone || !address){ alert("Please fill all billing fields"); return; }
-
-      const paymentData = {
-        tx_ref: 'serac_'+Date.now(),
-        amount: quote.items.reduce((s,a)=>s+(a.totalPrices[selectedCurrency]||0),0),
-        currency: selectedCurrency,
-        customer:{name:customerName,email,phone_number:phone},
-        meta:{address},
-        callback: function(resp){ console.log(resp); alert("Payment status: "+resp.status) },
-        onclose:function(){ console.log("Payment closed") },
-        customizations:{title:"Sérac",description:"Sérac Checkout",logo:"../logo.png"}
-      };
-
-      FlutterwaveCheckout(paymentData);
+    /* listen for storage changes (cart updated in another tab) */
+    window.addEventListener('storage', async () => {
+      rawCart = JSON.parse(localStorage.getItem('cart_serac')) || [];
+      rawCart = mergeCartItems(rawCart);
+      await loadCheckout();
     });
 
-    loadCheckout();
+    /* init */
+    (async function init(){
+      // show currency selector only if quoteId is present
+      if(quoteId) currencyWrapper.style.display = 'block';
+      await loadCheckout();
+    })();
   </script>
 
   <script>
+    // hamburger toggle
     const hamburgerBtn = document.getElementById('hamburger-btn');
     const navMenu = document.getElementById('nav-menu');
     hamburgerBtn.addEventListener('click', ()=>{
