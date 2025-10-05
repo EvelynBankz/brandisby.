@@ -75,6 +75,34 @@ h2 { text-align:center; font-size:26px; font-family:"Playfair Display", serif; m
 .currency-selector { text-align:right; margin-bottom:12px; }
 .currency-selector label { margin-right:8px; color:rgba(231,231,231,0.72); }
 
+.currency-selector select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: #FFD6BA;
+  color: #112e1f;
+  border: 1px solid #112e1f;
+  border-radius: 30px;
+  padding: 8px 28px 8px 12px;
+  font-weight: 600;
+  font-family: "Montserrat", sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg width='10' height='6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='%23112e1f' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 10px 6px;
+}
+.currency-selector select:hover {
+  background-color: #fbdcb8;
+}
+.currency-selector select:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(17,46,31,0.15);
+}
+
+
 .cart-grid { display:flex; flex-direction:column; gap:clamp(10px,2vw,18px); }
 .cart-item {
   background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.03));
