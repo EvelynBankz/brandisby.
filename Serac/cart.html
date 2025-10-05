@@ -4,59 +4,74 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sérac - Cart</title>
-<!-- Fonts: Montserrat (body) + Playfair Display (headlines) -->
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
-
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
 <style>
+/* RESET */
+* { margin:0; padding:0; box-sizing:border-box; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+html,body { height:100%; }
+
+/* THEME COLOR PALETTE */
 :root{
-  --bg-dark: #141517;
-  --bg-mid: #4B4E54;
-  --gold: #B66E41;
-  --muted: #bdbdbd;
-  --surface: #1b1c1d;
-  --card-bg: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-  --radius: 12px;
-  --transition: 220ms cubic-bezier(.2,.9,.2,1);
-  --accent-strong: rgba(182,110,65,0.95);
+  --bg:#141517;
+  --panel:#4B4E54;
+  --accent:#B66E41;
+  --muted:rgba(255,255,255,0.08);
+  --text:#E7E7E7;
+  --subtext:rgba(231,231,231,0.72);
+  --glass: rgba(255,255,255,0.03);
+  --radius:12px;
+  --transition:250ms cubic-bezier(.2,.9,.3,1);
 }
 
-/* RESET & BASE */
-* { margin:0; padding:0; box-sizing:border-box; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;}
-body { font-family: "Montserrat", sans-serif; background: var(--bg-dark); color: #e6e6e6; line-height:1.6; }
+/* BASE */
+body { font-family: "Montserrat", sans-serif; background: linear-gradient(180deg, var(--bg) 0%, #0f1011 100%); color:var(--text); line-height:1.6; -webkit-tap-highlight-color: transparent; }
 a { text-decoration:none; color:inherit; }
+img { display:block; max-width:100%; }
 
 /* HEADER */
-.site-header { background: linear-gradient(180deg, rgba(0,0,0,0.35), rgba(0,0,0,0.25)); color: #e6e6e6; display:flex; justify-content:space-between; align-items:center; padding:18px 28px; position:fixed; top:0; left:0; right:0; z-index:1000; border-bottom:1px solid rgba(255,255,255,0.03); backdrop-filter: blur(6px); }
-.header-left { display:flex; align-items:center; gap:14px; }
-.brand-logo { height:60px; width:auto; object-fit:contain; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.6)); }
-.brand-title { font-family:"Playfair Display", serif; font-size:24px; font-weight:700; color:var(--gold); letter-spacing:0.6px; }
+header.site-header {
+  position: fixed; top:0; left:0; right:0;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 20px; z-index:1200;
+  background:transparent;
+  border-bottom:1px solid rgba(245,245,243,0.1);
+  transition:background 0.4s ease, box-shadow 0.4s ease;
+  height:80px;
+}
+.site-header.scrolled { background: rgba(20,21,23,0.95); box-shadow:0 4px 20px rgba(0,0,0,0.6); }
+.header-left { display:flex; align-items:center; gap:18px; }
+.brand-logo { height:80px; width:auto; }
+.brand-title { font-family:"Playfair Display", serif; font-weight:700; font-size:1.9rem; color:#B66E41; letter-spacing:1px; }
+.header-right { display:flex; gap:24px; font-weight:500; }
+.header-right a { color:#F5F5F3; position:relative; padding:6px 0; font-size:1rem; }
+.header-right a::after {
+  content:""; position:absolute; bottom:-4px; left:0; width:0; height:2px;
+  background:#B66E41; transition:width 0.3s ease;
+}
+.header-right a:hover::after { width:100%; }
 
-.header-right { display:flex; gap:22px; align-items:center; }
-.header-right a { font-weight:500; color:var(--muted); padding:6px 8px; border-radius:8px; transition: color var(--transition), transform var(--transition); }
-.header-right a:hover { color: #fff; transform:translateY(-2px); text-shadow: 0 4px 18px rgba(182,110,65,0.15); }
-.cart-count { background:var(--gold); color:var(--bg-dark); font-size:12px; font-weight:700; border-radius:50%; padding:3px 7px; margin-left:6px; box-shadow:0 4px 10px rgba(182,110,65,0.12); }
+.hamburger { display:none; background:none; border:none; width:44px; height:40px; cursor:pointer; position:relative; z-index:1300; }
+.hamburger span { display:block; height:3px; width:26px; background:#B66E41; margin:6px auto; border-radius:2px; transition:all 0.3s ease; }
+.hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 6px); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(6px, -6px); }
 
-.hamburger { display:none; background:none; border:none; cursor:pointer; width:34px; height:26px; position:relative; }
-.hamburger span { display:block; width:100%; height:3px; background:var(--muted); border-radius:3px; position:absolute; left:0; transition: all 200ms ease; }
-.hamburger span:nth-child(1){ top:0; }
-.hamburger span:nth-child(2){ top:11px; width:70%; }
-.hamburger span:nth-child(3){ top:22px; }
-.hamburger.open span:nth-child(1){ transform:rotate(45deg); top:11px; background:var(--gold); }
-.hamburger.open span:nth-child(2){ opacity:0; }
-.hamburger.open span:nth-child(3){ transform:rotate(-45deg); top:11px; background:var(--gold); }
+.hero-custom {
+  height: 90vh; display:flex; align-items:center; justify-content:center;
+  text-align:center; background:url("asset/bg25.jpg") center center/cover no-repeat;
+  position:relative; margin-top:0;
+}
+.hero-custom::after {
+  content:""; position:absolute; top:0; left:0; right:0; bottom:0;
+  background:rgba(20,21,23,0.6);
+}
+.hero-custom .hero-text { position:relative; z-index:2; max-width:800px; padding:0 15px; }
+.hero-custom .hero-text h1 { font-family:"Playfair Display", serif; font-size:clamp(42px,6vw,72px); margin-bottom:18px; color:#B66E41; line-height:1.2; }
+.hero-custom .hero-text p { font-size:clamp(18px,2vw,26px); color:#F5F5F3; line-height:1.6; }
 
-/* HERO */
-.hero { position: relative; height:90vh; display:flex; justify-content:center; align-items:center; text-align:center; margin-top:82px; overflow:hidden; padding:20px; }
-.hero::after { content:""; position:absolute; inset:0; background: url('asset/bg25.jpg') center/cover no-repeat; transform: scale(1.05); z-index:-1; mix-blend-mode: multiply; border-radius:14px; box-shadow: inset 0 0 0 1200px rgba(20,21,23,0.55); filter: contrast(0.95) saturate(0.85); }
-.hero-text { position:relative; display:inline-block; color:var(--gold); margin-bottom:12px; padding:18px 26px; border-radius:10px; background: linear-gradient(90deg, rgba(182,110,65,0.06), rgba(255,255,255,0.01)); backdrop-filter: blur(2px); box-shadow: 0 10px 40px rgba(11,12,13,0.6); transition: transform var(--transition); }
-.hero-text:hover{ transform: translateY(-6px); }
-.hero-text h1 { font-family:"Playfair Display", serif; font-size:clamp(36px,5vw,64px); margin-bottom:10px; color:var(--gold); text-shadow: 0 6px 30px rgba(182,110,65,0.08); }
-.hero-text p { font-size:clamp(15px,2vw,20px); max-width:760px; color: #d0c8c2; }
-@keyframes shimmer {0% {filter: brightness(1); transform: translateY(0);} 50% {filter: brightness(1.02); transform: translateY(-2px);} 100% {filter: brightness(1); transform: translateY(0);}}
-.hero-text { animation: shimmer 6s ease-in-out infinite; }
 
+  
 /* CART SECTION */
 section.cart { padding:56px 18px; background: transparent; }
 .container { max-width:1100px; margin:auto; }
@@ -126,9 +141,10 @@ footer { text-align:center; padding:22px; background: transparent; color:var(--s
 
 /* MOBILE */
 @media (max-width:900px){
-  .header-right { display:none; flex-direction:column; background: rgba(0,0,0,0.45); position:absolute; top:78px; right:16px; width:220px; padding:16px; border-radius:10px; }
+  .header-right { display:none; flex-direction:column; background:#1d1f22; position:absolute; top:80px; right:0; width:220px; padding:20px; border-left:1px solid rgba(245,245,243,0.08); }
   .header-right.open { display:flex; }
   .hamburger { display:block; }
+
   .cart-item-header img { width:90px; height:90px; }
   .quantity-controls input { width:56px; }
   .hero { height:44vh; margin-top:78px; }
@@ -374,6 +390,18 @@ window.addEventListener('storage', (e)=>{
     updateCartCount();
   }
 });
+  
+// Change header background on scroll
+  window.addEventListener("scroll", () => {
+    const header = document.querySelector(".site-header");
+    if (window.scrollY > 50) {
+      header.classList.add("scrolled");
+    } else {
+      header.classList.remove("scrolled");
+    }
+  });
+  
+  
 </script>
 </body>
 </html>
