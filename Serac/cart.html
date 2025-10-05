@@ -25,13 +25,13 @@ html,body { height:100%; }
 }
 
 /* BASE */
-body { font-family: "Montserrat", sans-serif; background: linear-gradient(180deg, var(--bg) 0%, #0f1011 100%); color:var(--text); line-height:1.6; -webkit-tap-highlight-color: transparent; }
+body { font-family: "Montserrat", sans-serif; background: var(--bg); color:var(--text); line-height:1.6; }
 a { text-decoration:none; color:inherit; }
 img { display:block; max-width:100%; }
 
-/* ================= HEADER (transparent like shop.html) ================= */
+/* ================= HEADER ================= */
 header.site-header {
-  position: fixed; top:0; left:0; right:0;
+  position:fixed; top:0; left:0; right:0;
   display:flex; align-items:center; justify-content:space-between;
   padding:10px 20px; z-index:1200;
   background:transparent;
@@ -45,34 +45,21 @@ header.site-header.scrolled { background: rgba(20,21,23,0.95); box-shadow:0 4px 
 .brand-title { font-family:"Playfair Display", serif; font-weight:700; font-size:1.9rem; color:var(--accent); letter-spacing:1px; }
 .header-right { display:flex; gap:24px; font-weight:500; }
 .header-right a { color:#F5F5F3; position:relative; padding:6px 0; font-size:1rem; }
-.header-right a::after {
-  content:""; position:absolute; bottom:-4px; left:0; width:0; height:2px;
-  background:var(--accent); transition:width 0.3s ease;
-}
+.header-right a::after { content:""; position:absolute; bottom:-4px; left:0; width:0; height:2px; background:var(--accent); transition:width 0.3s ease; }
 .header-right a:hover::after { width:100%; }
-
-/* HAMBURGER */
 .hamburger { display:none; background:none; border:none; width:44px; height:40px; cursor:pointer; position:relative; z-index:1300; }
 .hamburger span { display:block; height:3px; width:26px; background:var(--accent); margin:6px auto; border-radius:2px; transition:all 0.3s ease; }
 .hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 6px); }
 .hamburger.open span:nth-child(2) { opacity: 0; }
 .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(6px, -6px); }
 
-/* ================= HERO SECTION (fade-in like shop.html) ================= */
+/* ================= HERO ================= */
 .hero {
-  position: relative;
+  position:relative;
   height:86vh;
-  display:flex;
-  justify-content:center;
-  align-items:center;
+  display:flex; justify-content:center; align-items:center;
   text-align:center;
-  margin-top:80px;
   overflow:hidden;
-  border-bottom-left-radius:var(--radius);
-  border-bottom-right-radius:var(--radius);
-  opacity:0;
-  transform:translateY(20px);
-  animation:fadeInUp 1s forwards;
 }
 .hero::after {
   content:""; position:absolute; inset:0; background: url('asset/bg25.jpg') center/cover no-repeat; transform:scale(1.05); z-index:-2;
@@ -85,14 +72,11 @@ header.site-header.scrolled { background: rgba(20,21,23,0.95); box-shadow:0 4px 
 .hero-text h1 { font-family:"Playfair Display", serif; font-size:clamp(42px,6vw,72px); margin-bottom:18px; color:var(--accent); line-height:1.2; }
 .hero-text p { font-size:clamp(18px,2vw,26px); color:#F5F5F3; line-height:1.6; }
 
-@keyframes fadeInUp { to { opacity:1; transform:translateY(0); } }
-
-/* ================= CART SECTION (preserve all original cart styles) ================= */
-section.cart { padding:56px 18px; background: transparent; }
+/* ================= CART ================= */
+section.cart { padding:56px 18px; background:transparent; }
 .container { max-width:1100px; margin:auto; }
 h2 { text-align:center; font-size:26px; font-family:"Playfair Display", serif; margin-bottom:18px; color:var(--text); }
 
-/* currency select */
 .currency-selector { text-align:right; margin-bottom:12px; }
 .currency-selector select {
   padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.06);
@@ -100,7 +84,6 @@ h2 { text-align:center; font-size:26px; font-family:"Playfair Display", serif; m
   color:var(--text); transition: all var(--transition);
 }
 
-/* Cart grid & items */
 .cart-grid { display:flex; flex-direction:column; gap:18px; }
 .cart-item {
   background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.03));
@@ -115,7 +98,6 @@ h2 { text-align:center; font-size:26px; font-family:"Playfair Display", serif; m
 .variant-summary { font-size:0.95rem; color:var(--subtext); margin-bottom:6px; }
 .price { font-weight:700; margin-bottom:10px; color:var(--accent); font-size:1.05rem; }
 
-/* quantity controls */
 .quantity-controls { display:flex; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap; }
 .quantity-controls button {
   background: transparent; color:var(--text); border:1px solid rgba(255,255,255,0.06);
@@ -124,7 +106,7 @@ h2 { text-align:center; font-size:26px; font-family:"Playfair Display", serif; m
 .quantity-controls button:hover { transform:translateY(-3px); border-color:var(--accent); color:var(--accent); box-shadow: 0 8px 20px rgba(182,110,65,0.08); }
 .quantity-controls input { width:64px; text-align:center; padding:8px; border-radius:8px; border:1px solid rgba(255,255,255,0.06); background:transparent; color:var(--text); }
 
-/* Show Variants Button */
+/* Variants button */
 .show-variants-btn {
   background: transparent;
   color:var(--text);
@@ -142,7 +124,6 @@ h2 { text-align:center; font-size:26px; font-family:"Playfair Display", serif; m
 
 .variants-container { display:none; flex-direction:column; gap:8px; margin-top:8px; padding-left:8px; border-left:2px dashed rgba(255,255,255,0.03); }
 
-/* subtotal & buttons */
 .cart-subtotal { text-align:right; font-weight:700; margin-top:10px; color:var(--text); font-size:1.05rem; }
 .cart-empty { text-align:center; font-size:18px; margin-top:20px; color:var(--subtext); display:none; }
 .cart-buttons { margin-top:20px; display:flex; justify-content:flex-end; gap:12px; flex-wrap:wrap; }
@@ -151,7 +132,6 @@ h2 { text-align:center; font-size:26px; font-family:"Playfair Display", serif; m
 .cart-buttons .continue-btn { background:transparent; color:var(--text); border:1px solid rgba(255,255,255,0.04); }
 .cart-buttons .checkout-btn { background: linear-gradient(180deg, var(--accent), #a55a36); color:#fff; border:none; }
 
-/* FOOTER */
 footer { text-align:center; padding:22px; background: transparent; color:var(--subtext); margin-top:60px; border-top:1px solid rgba(255,255,255,0.02); }
 
 /* MOBILE */
@@ -161,7 +141,7 @@ footer { text-align:center; padding:22px; background: transparent; color:var(--s
   .hamburger { display:block; }
   .cart-item-header img { width:90px; height:90px; }
   .quantity-controls input { width:56px; }
-  .hero { height:44vh; margin-top:78px; }
+  .hero { height:44vh; }
   .hero-text h1 { font-size: clamp(26px,6vw,40px); }
   .hero-text p { font-size: clamp(13px,2vw,16px); max-width:90%; }
 }
@@ -298,7 +278,7 @@ async function renderCart(){
     const product = await fetchProductData(pid);
     const variants = groupVariants(pid);
     const totalQty = totalQuantityByProduct(pid);
-    let thumbnail = product?.images?.[0] || product?.imageUrl || 'placeholder.jpg';
+    let thumbnail = product?.images?.[0] || product?.imageUrl || 'asset/placeholder.jpg';
     let lineTotal = variants.reduce((sum,v)=>sum+v.quantity*((product && product[`price${currency}`])||v.price||0),0);
     subtotal+=lineTotal;
 
@@ -309,49 +289,81 @@ async function renderCart(){
         <div class="cart-item-details">
           <h3>${product?.name||''}</h3>
           <div class="variant-summary">Total Quantity: ${totalQty}</div>
-          <div class="price">${formatPrice(lineTotal,currency)}</div>
-          <div class="quantity-controls"></div>
-          <button class="show-variants-btn">Show Variants</button>
+          <div class="price">${formatPrice(lineTotal, currency)}</div>
+          ${variants.length>1?'<button class="show-variants-btn">Show Choices</button>':''}
           <div class="variants-container"></div>
         </div>
       </div>
     `;
-    const qc = div.querySelector('.quantity-controls');
-    variants.forEach((v,idx)=>{
-      const btnDec = document.createElement('button'); btnDec.textContent='−';
-      const btnInc = document.createElement('button'); btnInc.textContent='+';
-      const input = document.createElement('input'); input.type='number'; input.min=1; input.value=v.quantity||1;
-      btnDec.onclick=()=>{ if(v.quantity>1){v.quantity--; input.value=v.quantity; updateCart(); renderCart(); } };
-      btnInc.onclick=()=>{ v.quantity++; input.value=v.quantity; updateCart(); renderCart(); };
-      input.onchange=()=>{ let val=Number(input.value)||1; v.quantity=val; updateCart(); renderCart(); };
-      qc.appendChild(btnDec); qc.appendChild(input); qc.appendChild(btnInc);
-    });
-    const showBtn = div.querySelector('.show-variants-btn');
+
     const variantsContainer = div.querySelector('.variants-container');
-    showBtn.onclick = ()=>{ variantsContainer.style.display = variantsContainer.style.display==='flex'?'none':'flex'; };
-    variants.forEach(v=>{
-      const varDiv = document.createElement('div');
-      varDiv.textContent = `${v.color||''} ${v.size||''} × ${v.quantity||1} = ${formatPrice((product && product[`price${currency}`])||v.price||0 * (v.quantity||1),currency)}`;
-      variantsContainer.appendChild(varDiv);
-    });
+    if(variants.length>1){
+      variants.forEach(v=>{
+        const vDiv = document.createElement('div'); 
+        vDiv.className='quantity-controls';
+        vDiv.style.flexWrap='wrap';
+        vDiv.innerHTML=`
+          ${v.color?`<span>Color: ${v.color}</span>`:''}
+          ${v.size?`<span>Size: ${v.size}</span>`:''}
+          <button class="minus" data-id="${v.id}" data-idx="${cart.indexOf(v)}"><i class="fa-solid fa-minus"></i></button>
+          <input type="number" min="1" value="${v.quantity}" data-idx="${cart.indexOf(v)}">
+          <button class="plus" data-id="${v.id}" data-idx="${cart.indexOf(v)}"><i class="fa-solid fa-plus"></i></button>
+        `;
+        variantsContainer.appendChild(vDiv);
+      });
+      div.querySelector('.show-variants-btn').addEventListener('click', e=>{
+        variantsContainer.style.display = variantsContainer.style.display==='flex'?'none':'flex';
+      });
+    } else {
+      const singleV = variants[0];
+      const qcDiv = document.createElement('div'); qcDiv.className='quantity-controls';
+      qcDiv.innerHTML=`
+        <button class="minus" data-id="${singleV.id}" data-idx="${cart.indexOf(singleV)}"><i class="fa-solid fa-minus"></i></button>
+        <input type="number" min="1" value="${singleV.quantity}" data-idx="${cart.indexOf(singleV)}">
+        <button class="plus" data-id="${singleV.id}" data-idx="${cart.indexOf(singleV)}"><i class="fa-solid fa-plus"></i></button>
+      `;
+      div.querySelector('.cart-item-details').appendChild(qcDiv);
+    }
 
     cartGrid.appendChild(div);
   }
-  cartSubtotalElem.textContent = `Subtotal: ${formatPrice(subtotal,currency)}`;
-  cartCountElem.textContent = cart.reduce((sum,i)=>sum+(i.quantity||0),0);
+
+  cartSubtotalElem.textContent = `Subtotal: ${formatPrice(subtotal, currency)}`;
+  cartCountElem.textContent = cart.reduce((sum,i)=>sum+i.quantity,0);
 }
+renderCart();
 
-function updateCart(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(cart)); }
-currencySelect.onchange=()=>{ localStorage.setItem(CURRENCY_KEY,currencySelect.value); renderCart(); };
+currencySelect.addEventListener('change',()=>{
+  localStorage.setItem(CURRENCY_KEY, currencySelect.value);
+  renderCart();
+});
 
-document.addEventListener('DOMContentLoaded',()=>{ renderCart(); });
+document.body.addEventListener('click', e=>{
+  if(e.target.matches('.plus,i.fa-plus')){ 
+    const btn = e.target.closest('button'); 
+    const idx = btn.dataset.idx; cart[idx].quantity++; 
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
+    renderCart();
+  }
+  if(e.target.matches('.minus,i.fa-minus')){
+    const btn = e.target.closest('button'); 
+    const idx = btn.dataset.idx; 
+    if(cart[idx].quantity>1){ cart[idx].quantity--; } 
+    else{ cart.splice(idx,1); }
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
+    renderCart();
+  }
+});
 
-document.getElementById('hamburger').onclick=function(){
-  this.classList.toggle('open'); document.querySelector('.header-right').classList.toggle('open');
-};
+const hamburger = document.getElementById('hamburger');
+const nav = document.querySelector('.header-right');
+hamburger.addEventListener('click',()=>{
+  hamburger.classList.toggle('open');
+  nav.classList.toggle('open');
+});
 
-window.addEventListener('scroll',()=>{
-  document.querySelector('header.site-header').classList.toggle('scrolled', window.scrollY>20);
+window.addEventListener('scroll', ()=>{
+  document.querySelector('header.site-header').classList.toggle('scrolled', window.scrollY>10);
 });
 </script>
 
