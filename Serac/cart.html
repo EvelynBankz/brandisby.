@@ -1,326 +1,414 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SÉRAC | Cart</title>
-  <link rel="stylesheet" href="../styles/style.css" />
-  <style>
-    /* ========== GLOBAL RESET ========== */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      font-family: "Poppins", sans-serif;
-      background-color: #000;
-      color: #fff;
-      overflow-x: hidden;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sérac - Cart</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+/* RESET */
+* { margin:0; padding:0; box-sizing:border-box; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+html,body { height:100%; }
 
-    /* ========== HEADER (From customization.html) ========== */
-    header {
-      width: 100%;
-      position: fixed;
-      top: 0;
-      left: 0;
-      background-color: rgba(0, 0, 0, 0.95);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      z-index: 999;
-    }
+/* THEME COLOR PALETTE */
+:root{
+  --bg:#141517;
+  --panel:#4B4E54;
+  --accent:#B66E41;
+  --muted:rgba(255,255,255,0.08);
+  --text:#E7E7E7;
+  --subtext:rgba(231,231,231,0.72);
+  --glass: rgba(255,255,255,0.03);
+  --radius:12px;
+  --transition:250ms cubic-bezier(.2,.9,.3,1);
+}
 
-    .nav-container {
-      max-width: 1200px;
-      margin: auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 1.2rem 1.5rem;
-    }
+/* BASE */
+body { font-family: "Montserrat", sans-serif; background: linear-gradient(180deg, var(--bg) 0%, #0f1011 100%); color:var(--text); line-height:1.6; -webkit-tap-highlight-color: transparent; }
+a { text-decoration:none; color:inherit; }
+img { display:block; max-width:100%; }
 
-    .logo {
-      font-size: 1.8rem;
-      font-weight: 700;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: #fff;
-      text-decoration: none;
-    }
+/* ================= HEADER (matched to customization.html) ================= */
+header.site-header {
+  position: fixed; top:0; left:0; right:0;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 20px; z-index:1200;
+  background:transparent;
+  border-bottom:1px solid rgba(245,245,243,0.1);
+  transition:background 0.4s ease, box-shadow 0.4s ease;
+  height:80px;
+}
+header.site-header.scrolled { background: rgba(20,21,23,0.95); box-shadow:0 4px 20px rgba(0,0,0,0.6); }
+.header-left { display:flex; align-items:center; gap:18px; }
+.brand-logo { height:80px; width:auto; }
+.brand-title { font-family:"Playfair Display", serif; font-weight:700; font-size:1.9rem; color:var(--accent); letter-spacing:1px; }
+.header-right { display:flex; gap:24px; font-weight:500; }
+.header-right a { color:#F5F5F3; position:relative; padding:6px 0; font-size:1rem; }
+.header-right a::after {
+  content:""; position:absolute; bottom:-4px; left:0; width:0; height:2px;
+  background:var(--accent); transition:width 0.3s ease;
+}
+.header-right a:hover::after { width:100%; }
 
-    nav {
-      display: flex;
-      gap: 2.5rem;
-    }
+/* HAMBURGER (customization style) */
+.hamburger { display:none; background:none; border:none; width:44px; height:40px; cursor:pointer; position:relative; z-index:1300; }
+.hamburger span { display:block; height:3px; width:26px; background:var(--accent); margin:6px auto; border-radius:2px; transition:all 0.3s ease; }
+.hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 6px); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(6px, -6px); }
 
-    nav a {
-      color: #fff;
-      text-decoration: none;
-      text-transform: uppercase;
-      font-size: 0.9rem;
-      letter-spacing: 1px;
-      transition: color 0.3s ease;
-    }
+/* ================= HERO (matched to customization.html) ================= */
+.hero {
+  position: relative;
+  height:86vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  margin-top:86px; /* push below fixed header */
+  overflow:hidden;
+  border-bottom-left-radius:var(--radius);
+  border-bottom-right-radius:var(--radius);
+}
+.hero::after {
+  content:""; position:absolute; inset:0; background: url('asset/bg25.jpg') center/cover no-repeat; transform:scale(1.05); z-index:-2;
+  filter:contrast(.88) saturate(.85) brightness(.5);
+}
+.hero::before{
+  content:""; position:absolute; inset:0; background: rgba(20,21,23,0.6); z-index:-1;
+}
+.hero-text { position:relative; z-index:2; max-width:800px; padding:0 15px; }
+.hero-text h1 { font-family:"Playfair Display", serif; font-size:clamp(42px,6vw,72px); margin-bottom:18px; color:var(--accent); line-height:1.2; }
+.hero-text p { font-size:clamp(18px,2vw,26px); color:#F5F5F3; line-height:1.6; }
 
-    nav a:hover {
-      color: #999;
-    }
+/* ================= CART & PAGE (original cart styles preserved) ================= */
 
-    .hamburger {
-      display: none;
-      flex-direction: column;
-      cursor: pointer;
-      gap: 5px;
-    }
+/* CART SECTION */
+section.cart { padding:56px 18px; background: transparent; }
+.container { max-width:1100px; margin:auto; }
+h2 { text-align:center; font-size:26px; font-family:"Playfair Display", serif; margin-bottom:18px; color:var(--text); }
 
-    .hamburger span {
-      width: 25px;
-      height: 2px;
-      background-color: #fff;
-    }
+/* currency select */
+.currency-selector { text-align:right; margin-bottom:12px; }
+.currency-selector select {
+  padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.06);
+  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));
+  color:var(--text); transition: all var(--transition);
+}
 
-    @media (max-width: 768px) {
-      nav {
-        position: absolute;
-        top: 70px;
-        left: 0;
-        background-color: rgba(0, 0, 0, 0.98);
-        width: 100%;
-        flex-direction: column;
-        align-items: center;
-        gap: 1.5rem;
-        padding: 2rem 0;
-        transform: translateY(-100%);
-        opacity: 0;
-        transition: all 0.4s ease;
-      }
+/* Cart grid & items */
+.cart-grid { display:flex; flex-direction:column; gap:18px; }
+.cart-item {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.03));
+  padding:18px; border-radius:12px; display:flex; flex-direction:column; gap:12px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+  border:1px solid rgba(255,255,255,0.03);
+}
+.cart-item-header { display:flex; align-items:center; gap:16px; }
+.cart-item-header img { width:120px; height:120px; object-fit:cover; border-radius:10px; border:1px solid var(--muted); box-shadow: 0 8px 24px rgba(0,0,0,0.6); }
+.cart-item-details { flex:1; display:flex; flex-direction:column; color:var(--text); }
+.cart-item-details h3 { font-family:"Playfair Display", serif; margin-bottom:8px; font-size:20px; color:var(--text); }
+.variant-summary { font-size:0.95rem; color:var(--subtext); margin-bottom:6px; }
+.price { font-weight:700; margin-bottom:10px; color:var(--accent); font-size:1.05rem; }
 
-      nav.active {
-        transform: translateY(0);
-        opacity: 1;
-      }
+/* quantity controls */
+.quantity-controls { display:flex; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap; }
+.quantity-controls button {
+  background: transparent; color:var(--text); border:1px solid rgba(255,255,255,0.06);
+  border-radius:8px; padding:8px 12px; cursor:pointer; font-weight:700; transition: all var(--transition);
+}
+.quantity-controls button:hover { transform:translateY(-3px); border-color:var(--accent); color:var(--accent); box-shadow: 0 8px 20px rgba(182,110,65,0.08); }
+.quantity-controls input { width:64px; text-align:center; padding:8px; border-radius:8px; border:1px solid rgba(255,255,255,0.06); background:transparent; color:var(--text); }
 
-      .hamburger {
-        display: flex;
-      }
-    }
+/* Show Variants Button */
+.show-variants-btn {
+  background: transparent;
+  color:var(--text);
+  border: 1px solid rgba(255,255,255,0.05);
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  font-weight: 700;
+  margin-top: 6px;
+  display: inline-block;
+  font-size: 14px;
+  transition: all var(--transition);
+}
+.show-variants-btn:hover { background: rgba(182,110,65,0.06); border-color: var(--accent); color: var(--accent); transform:translateY(-3px); }
 
-    /* ========== HERO SECTION (From customization.html) ========== */
-    .hero {
-      background: linear-gradient(to bottom, rgba(0, 0, 0, 0.6), #000), url('../images/serac-bg.jpg') center/cover no-repeat;
-      height: 65vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      margin-bottom: 4rem;
-    }
+.variants-container { display:none; flex-direction:column; gap:8px; margin-top:8px; padding-left:8px; border-left:2px dashed rgba(255,255,255,0.03); }
 
-    .hero h1 {
-      font-size: 3rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 3px;
-      color: #fff;
-      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
-    }
+/* subtotal & buttons */
+.cart-subtotal { text-align:right; font-weight:700; margin-top:10px; color:var(--text); font-size:1.05rem; }
+.cart-empty { text-align:center; font-size:18px; margin-top:20px; color:var(--subtext); display:none; }
+.cart-buttons { margin-top:20px; display:flex; justify-content:flex-end; gap:12px; flex-wrap:wrap; }
+.cart-buttons a { padding:12px 20px; border-radius:10px; font-weight:700; text-decoration:none; transition: all var(--transition); display:inline-block; }
+.cart-buttons a:hover { transform:translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.6); }
+.cart-buttons .continue-btn { background:transparent; color:var(--text); border:1px solid rgba(255,255,255,0.04); }
+.cart-buttons .checkout-btn { background: linear-gradient(180deg, var(--accent), #a55a36); color:#fff; border:none; }
 
-    /* ========== CART SECTION ========== */
-    .cart-container {
-      max-width: 1200px;
-      margin: 0 auto 5rem;
-      padding: 0 1.5rem;
-    }
+/* FOOTER */
+footer { text-align:center; padding:22px; background: transparent; color:var(--subtext); margin-top:60px; border-top:1px solid rgba(255,255,255,0.02); }
 
-    .cart-items {
-      display: flex;
-      flex-direction: column;
-      gap: 2rem;
-    }
+/* MOBILE */
+@media (max-width:900px){
+  .header-right { display:none; flex-direction:column; background: rgba(0,0,0,0.45); position:absolute; top:80px; right:16px; width:220px; padding:16px; border-radius:10px; }
+  .header-right.open { display:flex; }
+  .hamburger { display:block; }
+  .cart-item-header img { width:90px; height:90px; }
+  .quantity-controls input { width:56px; }
+  .hero { height:44vh; margin-top:78px; }
+  .hero-text h1 { font-size: clamp(26px,6vw,40px); }
+  .hero-text p { font-size: clamp(13px,2vw,16px); max-width:90%; }
+}
 
-    .cart-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      padding-bottom: 1rem;
-    }
-
-    .cart-item img {
-      width: 90px;
-      border-radius: 6px;
-    }
-
-    .item-details {
-      flex: 1;
-      margin-left: 1.2rem;
-    }
-
-    .item-details h3 {
-      font-size: 1rem;
-      font-weight: 600;
-      margin-bottom: 0.4rem;
-    }
-
-    .item-details p {
-      font-size: 0.9rem;
-      color: #bbb;
-    }
-
-    .cart-item .remove-btn {
-      background: none;
-      color: #fff;
-      border: 1px solid #fff;
-      padding: 0.4rem 0.8rem;
-      font-size: 0.8rem;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    .cart-item .remove-btn:hover {
-      background-color: #fff;
-      color: #000;
-    }
-
-    .cart-summary {
-      margin-top: 3rem;
-      text-align: right;
-    }
-
-    .cart-summary h2 {
-      font-size: 1.4rem;
-      margin-bottom: 1rem;
-    }
-
-    .checkout-btn {
-      background-color: #fff;
-      color: #000;
-      border: none;
-      padding: 0.8rem 2rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      font-weight: 600;
-      border-radius: 30px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .checkout-btn:hover {
-      background-color: #999;
-    }
-
-    /* ========== FOOTER ========== */
-    footer {
-      text-align: center;
-      padding: 2rem 0;
-      font-size: 0.85rem;
-      color: #777;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-    }
-  </style>
+@media (max-width:480px){
+  .brand-title{ font-size:18px; }
+  .brand-logo{ height:48px; }
+  .cart-buttons{ justify-content:center; }
+}
+</style>
 </head>
-
 <body>
-  <!-- HEADER -->
-  <header>
-    <div class="nav-container">
-      <a href="../Serac/index.html" class="logo">SÉRAC</a>
-      <nav id="navMenu">
-        <a href="../Serac/index.html">Home</a>
-        <a href="../Serac/shop.html">Shop</a>
-        <a href="../Serac/customization.html">Customization</a>
-        <a href="../Serac/about.html">About</a>
-        <a href="../Serac/cart.html">Cart</a>
-      </nav>
-      <div class="hamburger" id="hamburger">
-        <span></span><span></span><span></span>
-      </div>
-    </div>
-  </header>
 
-  <!-- HERO -->
-  <section class="hero">
+<header class="site-header">
+  <div class="header-left">
+    <img src="logo.png" alt="Sérac Logo" class="brand-logo">
+    <div class="brand-title">Sérac</div>
+  </div>
+  <nav class="header-right">
+    <a href="index.html">Home</a>
+    <a href="shop.html">Shop</a>
+    <a href="about.html">About</a>
+    <a href="cart.html">Cart <span class="cart-count" id="cartCount">0</span></a>
+    <a href="customization.html">Customize</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+  <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+</header>
+
+<section class="hero">
+  <div class="hero-text">
     <h1>Your Cart</h1>
-  </section>
+    <p>Review your items before checkout</p>
+  </div>
+</section>
 
-  <!-- CART SECTION -->
-  <div class="cart-container">
-    <div class="cart-items" id="cartItems"></div>
-    <div class="cart-summary">
-      <h2>Total: <span id="cartTotal">₦0</span></h2>
-      <button class="checkout-btn" id="checkoutBtn">Proceed to Checkout</button>
+<section class="cart">
+  <div class="container">
+    <h2>Shopping Cart</h2>
+    <div class="currency-selector">
+      <label for="currency">Currency: </label>
+      <select id="currency">
+        <option value="NGN">NGN</option>
+        <option value="USD">USD</option>
+        <option value="EUR">EUR</option>
+        <option value="GBP">GBP</option>
+      </select>
+    </div>
+    <div class="cart-grid" id="cartGrid"></div>
+    <div class="cart-empty" id="cartEmpty">Your cart is empty.</div>
+    <div class="cart-subtotal" id="cartSubtotal"></div>
+    <div class="cart-buttons">
+      <a href="shop.html" class="continue-btn">Continue Shopping</a>
+      <a href="checkout/index.html" class="checkout-btn" id="checkoutBtn">Proceed to Checkout</a>
     </div>
   </div>
+</section>
 
-  <!-- FOOTER -->
-  <footer>
-    <p>© 2025 SÉRAC. All rights reserved.</p>
-  </footer>
+<footer>
+  <p>© 2025 Sérac</p>
+</footer>
 
-  <!-- SCRIPT -->
-  <script>
-    // ====== NAV TOGGLE ======
-    const hamburger = document.getElementById("hamburger");
-    const navMenu = document.getElementById("navMenu");
-    hamburger.addEventListener("click", () => {
-      navMenu.classList.toggle("active");
-    });
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-    // ====== CART LOGIC ======
-    const cartItemsEl = document.getElementById("cartItems");
-    const cartTotalEl = document.getElementById("cartTotal");
-    const checkoutBtn = document.getElementById("checkoutBtn");
+const firebaseConfig = {
+  apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
+  authDomain: "brandisby.firebaseapp.com",
+  projectId: "brandisby",
+  storageBucket: "brandisby.firebasestorage.app",
+  messagingSenderId: "87213267039",
+  appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-    let cart = JSON.parse(localStorage.getItem("serac_cart")) || [];
+const cartGrid = document.getElementById('cartGrid');
+const cartEmpty = document.getElementById('cartEmpty');
+const cartCountElem = document.getElementById('cartCount');
+const cartSubtotalElem = document.getElementById('cartSubtotal');
+const checkoutBtn = document.getElementById('checkoutBtn');
+const currencySelect = document.getElementById('currency');
 
-    function renderCart() {
-      cartItemsEl.innerHTML = "";
-      let total = 0;
+const STORAGE_KEY = 'seracCart';
+const CURRENCY_KEY = 'seracCurrency';
 
-      if (cart.length === 0) {
-        cartItemsEl.innerHTML = "<p>Your cart is empty.</p>";
-        cartTotalEl.textContent = "₦0";
-        return;
-      }
+let cart = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+if(localStorage.getItem(CURRENCY_KEY)) currencySelect.value = localStorage.getItem(CURRENCY_KEY);
 
-      cart.forEach((item, index) => {
-        const itemTotal = item.price * item.quantity;
-        total += itemTotal;
-        const itemEl = document.createElement("div");
-        itemEl.classList.add("cart-item");
-        itemEl.innerHTML = `
-          <img src="${item.image}" alt="${item.name}" />
-          <div class="item-details">
-            <h3>${item.name}</h3>
-            <p>₦${item.price.toLocaleString()} × ${item.quantity}</p>
-          </div>
-          <button class="remove-btn" data-index="${index}">Remove</button>
+function formatPrice(value, currency){
+  const localeMap = { USD:'en-US', EUR:'de-DE', GBP:'en-GB', NGN:'en-NG' };
+  const minFrac = currency === 'NGN' ? 0 : 2;
+  return new Intl.NumberFormat(localeMap[currency] || 'en-US', { style:'currency', currency, minimumFractionDigits:minFrac }).format(Number(value||0));
+}
+
+function mergeCartItems(cartArray){
+  const merged = [];
+  cartArray.forEach(item=>{
+    const idx = merged.findIndex(i => i.id === item.id && (i.color||'')=== (item.color||'') && (i.size||'')=== (item.size||''));
+    if(idx===-1) merged.push({...item});
+    else merged[idx].quantity = (merged[idx].quantity||0) + (item.quantity||0);
+  });
+  return merged;
+}
+
+function totalQuantityByProduct(productId){
+  return cart.filter(i=>i.id===productId).reduce((sum,i)=>sum+(i.quantity||0),0);
+}
+
+function groupVariants(productId){
+  return cart.filter(i=>i.id===productId);
+}
+
+async function fetchProductData(productId){
+  try{
+    const dref = doc(db,"brands","serac","products",productId);
+    const snap = await getDoc(dref);
+    if(snap.exists()) return snap.data();
+  }catch(e){ console.warn("Fetch product failed", productId, e); }
+  return null;
+}
+
+async function renderCart(){
+  cartGrid.innerHTML = '';
+  if(!cart.length){ cartEmpty.style.display='block'; cartSubtotalElem.textContent=''; checkoutBtn.style.display='none'; return; }
+  cartEmpty.style.display='none'; checkoutBtn.style.display='inline-block';
+
+  const currency = currencySelect.value || 'NGN';
+  let subtotal = 0;
+  const productIds = [...new Set(cart.map(i=>i.id))];
+
+  for(const pid of productIds){
+    const product = await fetchProductData(pid);
+    const variants = groupVariants(pid);
+    const totalQty = totalQuantityByProduct(pid);
+    let thumbnail = product?.images?.[0] || product?.imageUrl || 'placeholder.jpg';
+    let lineTotal = variants.reduce((sum,v)=>sum+v.quantity*((product && product[`price${currency}`])||v.price||0),0);
+    subtotal+=lineTotal;
+
+    const div = document.createElement('div'); div.className='cart-item';
+    div.innerHTML=`
+      <div class="cart-item-header">
+        <img src="${thumbnail}" alt="${product?.name||''}">
+        <div class="cart-item-details">
+          <h3>${product?.name||''}</h3>
+          <div class="variant-summary">Total Quantity: ${totalQty}</div>
+          <div class="price">${formatPrice(lineTotal, currency)}</div>
+          ${variants.length>1?'<button class="show-variants-btn">Show Choices</button>':''}
+          <div class="variants-container"></div>
+        </div>
+      </div>
+    `;
+
+    const variantsContainer = div.querySelector('.variants-container');
+    if(variants.length>1){
+      variants.forEach(v=>{
+        const vDiv = document.createElement('div'); 
+        vDiv.className='quantity-controls';
+        vDiv.style.flexWrap='wrap';
+        vDiv.innerHTML=`
+          ${v.color?`<span>Color:${v.color}</span>`:''}
+          ${v.size?`<span>Size:${v.size}</span>`:''}
+          <button class="minus" data-id="${v.id}" data-color="${v.color||''}" data-size="${v.size||''}">–</button>
+          <input type="number" value="${v.quantity}" data-id="${v.id}" data-color="${v.color||''}" data-size="${v.size||''}">
+          <button class="plus" data-id="${v.id}" data-color="${v.color||''}" data-size="${v.size||''}">+</button>
         `;
-        cartItemsEl.appendChild(itemEl);
+        variantsContainer.appendChild(vDiv);
       });
-
-      cartTotalEl.textContent = `₦${total.toLocaleString()}`;
-      attachRemoveEvents();
+    } else if(variants.length===1){
+      const v = variants[0];
+      const qDiv = div.querySelector('.cart-item-details');
+      qDiv.innerHTML+=`
+        <div class="quantity-controls">
+          <button class="minus" data-id="${v.id}" data-color="${v.color||''}" data-size="${v.size||''}">–</button>
+          <input type="number" value="${v.quantity}" data-id="${v.id}" data-color="${v.color||''}" data-size="${v.size||''}">
+          <button class="plus" data-id="${v.id}" data-color="${v.color||''}" data-size="${v.size||''}">+</button>
+        </div>
+      `;
     }
 
-    function attachRemoveEvents() {
-      document.querySelectorAll(".remove-btn").forEach(btn => {
-        btn.addEventListener("click", e => {
-          const index = e.target.dataset.index;
-          cart.splice(index, 1);
-          localStorage.setItem("serac_cart", JSON.stringify(cart));
-          renderCart();
-        });
-      });
-    }
+    cartGrid.appendChild(div);
+  }
+  cartSubtotalElem.textContent = `Subtotal: ${formatPrice(subtotal, currency)}`;
 
-    checkoutBtn.addEventListener("click", () => {
-      if (cart.length === 0) return alert("Your cart is empty!");
-      window.location.href = `/checkout/index.html?quoteId=serac-${Date.now()}`;
+  cartGrid.querySelectorAll('.show-variants-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ btn.nextElementSibling.style.display=btn.nextElementSibling.style.display==='flex'?'none':'flex'; });
+  });
+
+  cartGrid.querySelectorAll('.plus').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id=btn.dataset.id, color=btn.dataset.color||'', size=btn.dataset.size||'';
+      const idx = cart.findIndex(i=>i.id===id && (i.color||'')===color && (i.size||'')===size);
+      if(idx!==-1){ cart[idx].quantity+=1; localStorage.setItem(STORAGE_KEY, JSON.stringify(cart)); renderCart(); updateCartCount(); }
     });
+  });
+  cartGrid.querySelectorAll('.minus').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id=btn.dataset.id, color=btn.dataset.color||'', size=btn.dataset.size||'';
+      const idx = cart.findIndex(i=>i.id===id && (i.color||'')===color && (i.size||'')===size);
+      if(idx!==-1){
+        cart[idx].quantity-=1;
+        if(cart[idx].quantity<=0) cart.splice(idx,1);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(cart)); renderCart(); updateCartCount();
+      }
+    });
+  });
+  cartGrid.querySelectorAll('input[type=number]').forEach(input=>{
+    input.addEventListener('input', ()=>{ 
+      let val=parseInt(input.value,10); if(isNaN(val)||val<0) val=0;
+      const id=input.dataset.id, color=input.dataset.color||'', size=input.dataset.size||'';
+      const idx = cart.findIndex(i=>i.id===id && (i.color||'')===color && (i.size||'')===size);
+      if(idx!==-1){ cart[idx].quantity=val; if(val===0) cart.splice(idx,1); localStorage.setItem(STORAGE_KEY, JSON.stringify(cart)); renderCart(); updateCartCount();}
+    });
+  });
+}
 
+function updateCartCount(){
+  const total = cart.reduce((sum,i)=>sum+(i.quantity||0),0);
+  cartCountElem.textContent=total;
+}
+
+currencySelect.addEventListener('change', ()=>{
+  localStorage.setItem(CURRENCY_KEY, currencySelect.value);
+  renderCart();
+});
+
+document.getElementById('hamburger').addEventListener('click', ()=>{
+  document.querySelector('.header-right').classList.toggle('open');
+  document.getElementById('hamburger').classList.toggle('open');
+});
+
+/* Keep your original init and storage sync logic intact */
+(async function init(){ cart=mergeCartItems(cart); await renderCart(); updateCartCount(); })();
+
+window.addEventListener('storage', (e)=>{
+  if(e.key === STORAGE_KEY || e.key === CURRENCY_KEY){
+    cart = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    cart = mergeCartItems(cart);
     renderCart();
-  </script>
+    updateCartCount();
+  }
+});
+
+/* -- Add header scrolled behavior (from customization.html) -- */
+window.addEventListener("scroll", () => {
+  const header = document.querySelector(".site-header");
+  if (window.scrollY > 50) header.classList.add("scrolled");
+  else header.classList.remove("scrolled");
+});
+</script>
 </body>
 </html>
