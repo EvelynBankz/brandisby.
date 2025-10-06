@@ -16,10 +16,9 @@
   --gold: #B66E41;
   --muted: #bdbdbd;
   --accent-strong: rgba(182,110,65,0.95);
-  --radius: 16px;
+  --radius: 14px;
   --transition: 0.25s cubic-bezier(.2,.9,.2,1);
   --card-bg: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.02));
-  --card-border: rgba(255,255,255,0.03);
 }
 
 /* RESET */
@@ -43,14 +42,14 @@ a { text-decoration:none; color:inherit; transition: color var(--transition); }
 .cart-count { background:var(--gold); color:var(--bg-dark); font-size:12px; font-weight:700; border-radius:50%; padding:3px 7px; margin-left:6px; box-shadow:0 4px 10px rgba(182,110,65,0.12); }
 
 /* Hamburger */
-.hamburger { display:none; background:none; border:none; cursor:pointer; width:36px; height:30px; position:relative; z-index:1200; }
+.hamburger { display:none; background:none; border:none; cursor:pointer; width:38px; height:32px; position:relative; z-index:1200; }
 .hamburger span { display:block; width:100%; height:3px; background:var(--gold); border-radius:2px; position:absolute; left:0; transition:0.3s; }
 .hamburger span:nth-child(1){ top:6px; }
-.hamburger span:nth-child(2){ top:13px; }
-.hamburger span:nth-child(3){ top:20px; }
-.hamburger.open span:nth-child(1){ transform:rotate(45deg); top:13px; }
+.hamburger span:nth-child(2){ top:14px; }
+.hamburger span:nth-child(3){ top:22px; }
+.hamburger.open span:nth-child(1){ transform:rotate(45deg); top:14px; }
 .hamburger.open span:nth-child(2){ opacity:0; }
-.hamburger.open span:nth-child(3){ transform:rotate(-45deg); top:13px; }
+.hamburger.open span:nth-child(3){ transform:rotate(-45deg); top:14px; }
 
 /* HERO */
 .hero { position: relative; height: 90vh; display: flex; justify-content: center; align-items: center; text-align: center; margin-top: 0px; overflow: hidden; padding-top:72px; border-bottom-left-radius: 12px; border-bottom-right-radius:12px; }
@@ -59,140 +58,125 @@ a { text-decoration:none; color:inherit; transition: color var(--transition); }
 .hero-text h1 { font-family:"Playfair Display", serif; font-size: clamp(28px,5vw,48px); margin-bottom:12px; color:var(--gold); }
 .hero-text p { font-size: clamp(14px,2vw,18px); max-width:900px; color:#F5F5F3}
 
-/* MAIN CHECKOUT LAYOUT - MATCH FLEURDE VIE GRID */
-section.checkout { padding:56px 18px; }
+/* MAIN CHECKOUT LAYOUT - reworked to match Fleur De Vie structure */
+section.checkout { padding:56px 18px; background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.0)); }
 
-/* Use fixed left column (form) and flexible right column (order summary) to mimic Fleur De Vie proportions */
+/* container + two-column like Fleur De Vie */
 .checkout-inner {
   max-width:1100px;
   margin:0 auto;
   display:grid;
-  grid-template-columns: 420px 1fr;
+  grid-template-columns: 1fr 1.4fr;
   gap:28px;
   align-items:start;
   transition: all 0.3s ease;
 }
 
-/* On narrower screens stack vertically */
+/* On smaller screens stack like Fleur */
 @media (max-width:980px){
   .checkout-inner { grid-template-columns: 1fr; padding: 0 12px; }
   .hero { height: 30vh; }
 }
 
-/* Card styling (Sérac theme preserved) */
-.card { border-radius: var(--radius); background: var(--card-bg); padding:20px; border:1px solid var(--card-border); box-shadow: 0 8px 30px rgba(0,0,0,0.6); }
+/* Card styling kept in Sérac theme but with large rounded corners and soft shadow as Fleur */
+.card {
+  border-radius: 16px;
+  background: var(--card-bg);
+  padding:22px;
+  border:1px solid rgba(255,255,255,0.03);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.55);
+}
 
-.checkout-form h2, .order-summary h2 { font-family:"Playfair Display", serif; color:#fff; margin-bottom:12px; }
+/* We'll add subtle inner panel where Fleur shows lighter inner box for items */
+.inner-panel {
+  border-radius:12px;
+  padding:12px;
+  background: rgba(255,255,255,0.02);
+  border:1px solid rgba(255,255,255,0.02);
+}
+
+/* Titles */
+.checkout-form h2, .order-summary h2 { font-family:"Playfair Display", serif; color:#fff; margin-bottom:12px; font-size:22px; }
 
 /* Form inputs */
 label { display:block; margin-bottom:6px; color:#e9e9e9; font-weight:600; }
-input[type="text"], input[type="email"], input[type="tel"], textarea, select { width:100%; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.06); background: transparent; color:#e9e9e9; font-family:inherit; margin-bottom:12px; }
-textarea { min-height:100px; resize:vertical; }
+input[type="text"], input[type="email"], input[type="tel"], textarea, select { width:100%; padding:12px; border-radius:10px; border:1px solid rgba(255,255,255,0.06); background: transparent; color:#e9e9e9; font-family:inherit; margin-bottom:12px; }
+textarea { min-height:120px; resize:vertical; }
 
-/* ORDER SUMMARY - make layout and spacing match Fleur De Vie structure while keeping Sérac theme */
-.order-summary { display:flex; flex-direction:column; gap:12px; }
-.currency-selector { display:flex; justify-content:flex-end; gap:8px; align-items:center; margin-bottom:6px; }
+/* Order summary list */
+.order-summary ul { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:12px; }
+
+.order-item { display:flex; gap:12px; align-items:center; justify-content:space-between; padding:12px; border-radius:12px; background: rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.02); transition: all var(--transition); }
+.order-item:hover { background: rgba(182,110,65,0.03); border-color: rgba(182,110,65,0.04); transform: translateY(-1px); }
+
+.order-item .left { display:flex; gap:12px; align-items:center; flex:1; min-width:0; padding-left:0; }
+.order-item img { width:56px; height:56px; object-fit:cover; border-radius:8px; border:1px solid rgba(255,255,255,0.04); transition: all var(--transition); }
+.order-item .meta { font-size:0.95rem; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.order-item .price { font-weight:700; color:var(--gold); min-width:110px; text-align:right; }
+
+/* Variant toggle & container */
+.show-variants-btn { background: transparent; color:var(--muted); border: 1px solid rgba(255,255,255,0.04); border-radius: 8px; padding:6px 8px; cursor: pointer; font-weight:700; transition: all var(--transition); font-size:13px; margin-top:8px; }
+.show-variants-btn:hover { color:var(--gold); border-color:var(--gold); transform:translateY(-2px); }
+.variants-container { display:none; flex-direction:column; gap:8px; margin-top:8px; padding-left:0; border-left:2px dashed rgba(255,255,255,0.03); }
+.variants-container.show { display:flex; }
+.variant-line { display:flex; justify-content:space-between; gap:12px; align-items:center; padding:8px 10px; border-radius:8px; background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.02); color:var(--muted); font-size:0.95rem; }
+
+/* Currency selector */
+.currency-selector { display:flex; justify-content:flex-end; gap:8px; align-items:center; margin-bottom:12px; }
 .currency-selector label { color: rgba(231,231,231,0.72); font-weight:600; }
 .currency-selector select { appearance:none; background:transparent; color:#e7e7e7; border:1px solid rgba(231,231,231,0.18); border-radius:8px; padding:8px 12px; }
 
-/* Order items list - each product row gets an inner light panel like Fleur De Vie */
-.order-summary ul { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:12px; }
-
-.order-item {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:0; /* outer li has no padding, inner panel provides the background */
-  background:transparent;
-}
-
-.order-item .inner {
-  display:flex;
-  gap:12px;
-  align-items:center;
-  padding:14px;
-  border-radius:12px;
-  background: rgba(255,255,255,0.02); /* subtle panel */
-  border:1px solid rgba(255,255,255,0.02);
-  width:100%;
-  box-shadow: inset 0 -1px 0 rgba(255,255,255,0.01);
-}
-
-.order-item .left { display:flex; gap:12px; align-items:center; flex:1; min-width:0; }
-.order-item img { width:64px; height:64px; object-fit:cover; border-radius:8px; border:1px solid rgba(255,255,255,0.04); transition: all var(--transition); }
-.order-item .meta { font-size:0.95rem; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.order-item .title { font-weight:700; color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-
-/* price aligned right */
-.order-item .price-wrap { min-width:140px; text-align:right; display:flex; justify-content:flex-end; align-items:center; gap:12px; }
-.order-item .price { font-weight:700; color:var(--gold); }
-
-/* small variant toggle (rounded square) */
-.variant-toggle {
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  width:36px;
-  height:36px;
-  border-radius:8px;
-  border:1px solid rgba(255,255,255,0.06);
-  background: rgba(182,110,65,0.06);
-  color:var(--gold);
-  cursor:pointer;
-  margin-left:8px;
-  font-weight:700;
-}
-
-/* variants container hidden by default, slides down when shown */
-.variants-container { display:none; flex-direction:column; gap:8px; margin-top:10px; padding-left:12px; border-left:2px dashed rgba(255,255,255,0.03); }
-.variants-container.show { display:flex; }
-
-/* variant line */
-.variant-line { display:flex; justify-content:space-between; gap:12px; align-items:center; padding:8px; border-radius:8px; background: rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.02); color:var(--muted); font-size:0.92rem; }
-
-/* totals + pay button (match FleurDeVie's spacing) */
-.totals { margin-top:6px; text-align:right; font-weight:700; color:#fff; font-size:1.05rem; }
-.pay-btn { display:block; width:100%; margin-top:8px; padding:14px; border-radius:12px; background: linear-gradient(180deg, var(--gold), #a55a36); color:#fff; border:none; font-weight:800; cursor:pointer; transition: transform var(--transition); }
+/* Totals + pay button */
+.totals { margin-top:12px; text-align:right; font-weight:700; color:#fff; font-size:18px; }
+.pay-btn { display:block; width:100%; margin-top:16px; padding:14px; border-radius:12px; background: linear-gradient(180deg, var(--gold), #a55a36); color:#fff; border:none; font-weight:800; cursor:pointer; transition: transform var(--transition); }
 .pay-btn:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
 
-/* error banner */
+/* Error banner */
 .error-banner { display:none; margin-bottom:12px; padding:12px; border-radius:8px; background: linear-gradient(180deg, rgba(255,50,50,0.12), rgba(255,30,30,0.06)); color:#ffd6d6; border:1px solid rgba(255,30,30,0.12); }
 
-/* spinner overlay */
+/* Spinner overlay */
 .spinner-backdrop { display:none; position:fixed; inset:0; z-index:9999; background: rgba(0,0,0,0.6); align-items:center; justify-content:center; }
 .spinner { background: rgba(255,255,255,0.03); padding:22px; border-radius:12px; display:flex; gap:12px; align-items:center; box-shadow: 0 8px 40px rgba(0,0,0,0.7); border:1px solid rgba(255,255,255,0.03); }
 .spinner .dot { width:14px; height:14px; border-radius:50%; background:var(--gold); animation: spin 1.1s linear infinite; }
 @keyframes spin { 0% { transform: scale(0.9) } 50% { transform: scale(1.3) } 100% { transform: scale(0.9) } }
 
-/* small text note */
-.note { font-size:0.9rem; color:var(--muted); margin-top:8px; }
+/* Small text note */
+.note { font-size:0.95rem; color:var(--muted); margin-top:8px; }
 
 /* Footer */
 footer { text-align:center; padding:22px; background:transparent; color:var(--muted); margin-top:36px; border-top:1px solid rgba(255,255,255,0.02); }
 
-/* Mobile adjustments for order summary & form */
+/* Quote checkout: remove image space & align name/details */
+.order-item .left { display: flex; flex-direction: column; gap: 6px; min-width:0; }
+.order-item .left > div { min-width: 0; }
+
+/* Show details button styling (quote view) */
+.show-details-btn { background: none; border: none; color: #ccc; cursor: pointer; font-size: 0.95rem; padding: 6px 0; text-align: left; }
+
+/* Details container used for quote items */
+.details-container { flex-direction: column; padding-left: 0; padding-right: 0; margin-bottom: 8px; border-left: 2px solid rgba(255,255,255,0.03); display: none; }
+.details-container.show { display: flex; }
+.details-container div { display: flex; justify-content: space-between; font-size: 0.95rem; color: #bbb; padding: 6px 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+/* Mobile adjustments */
 @media (max-width:680px){
-  .order-item img { width:56px; height:56px; }
+  .order-item img { width:48px; height:48px; }
   .brand-logo { height:48px; }
-  .hero { height:24vh; }
-  .checkout-inner { grid-template-columns:1fr; padding:0 12px; }
-  textarea { min-height:80px; }
-  .order-item .price-wrap { min-width:80px; }
-  .variant-toggle { width:34px; height:34px; }
+  .hero { height:40vh; }
+  .checkout-inner { grid-template-columns:1fr; gap:20px; padding: 12px; }
+  .order-item .meta { font-size:0.92rem; }
+  .order-item .price { min-width:60px; font-size:0.95rem; }
+  textarea { min-height:100px; }
 }
 
-/* Quote checkout details container (kept and visually consistent) */
-.details-container { display:none; flex-direction:column; padding-left:0; padding-right:0; margin-top:8px; border-left: 2px solid rgba(255,255,255,0.03); gap:8px; }
-.details-container.show { display:flex; }
-.details-container div { display:flex; justify-content:space-between; font-size:0.95rem; color:var(--muted); padding:6px 8px; }
-
-/* Show hamburger at narrower breakpoints */
+/* Make hamburger visible and header-right responsive on smaller screens */
 @media (max-width:900px){
   .hamburger { display:block; }
-  .header-right { transition: transform 0.25s ease; }
-  .header-right.open { display:flex; position:absolute; top:64px; right:12px; background: rgba(20,20,20,0.95); flex-direction:column; gap:8px; padding:14px; border-radius:8px; width:220px; }
+  .header-right { display:none; position:absolute; top:64px; right:12px; background:rgba(20,20,20,0.98); flex-direction:column; padding:18px; gap:10px; border-radius:10px; width:220px; z-index:1100; border:1px solid rgba(255,255,255,0.03); }
+  .header-right.open { display:flex; }
 }
 </style>
+
 </head>
 <body>
 
@@ -201,7 +185,6 @@ footer { text-align:center; padding:22px; background:transparent; color:var(--mu
     <img src="../asset/logo.png" alt="Sérac Logo" class="brand-logo">
     <div class="brand-title">Sérac</div>
   </div>
-
   <nav class="header-right" id="headerRight">
     <a href="../index.html">Home</a>
     <a href="../shop.html">Shop</a>
@@ -209,12 +192,11 @@ footer { text-align:center; padding:22px; background:transparent; color:var(--mu
     <a href="../cart.html">Cart <span class="cart-count" id="cartCount">0</span></a>
     <a href="../contact.html">Contact</a>
   </nav>
-
   <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
 </header>
 
-<!-- Hero: inline CSS variable to ensure exact image path is used -->
-<section class="hero" style="--hero-bg: url('assets/img/serac-cart-bg.jpg');">
+<!-- Hero: inline CSS variable to ensure exact image path is used (as you requested) -->
+<section class="hero" style="--hero-bg: url('../asset/bg25.jpg');">
   <div class="hero-text">
     <h1>Checkout</h1>
     <p>Complete your order — secure payment and quick processing</p>
@@ -223,7 +205,7 @@ footer { text-align:center; padding:22px; background:transparent; color:var(--mu
 
 <section class="checkout">
   <div class="checkout-inner">
-    <!-- Left: Billing form (keeps Sérac styling, layout like Fleur De Vie) -->
+    <!-- left: billing form -->
     <div class="card checkout-form" id="checkoutCard">
       <h2>Billing Details</h2>
 
@@ -244,7 +226,7 @@ footer { text-align:center; padding:22px; background:transparent; color:var(--mu
       </form>
     </div>
 
-    <!-- Right: Order summary (restructured to match Fleur De Vie structure) -->
+    <!-- right: order summary -->
     <aside class="card order-summary" id="orderCard">
       <h2>Order Summary</h2>
 
@@ -513,11 +495,7 @@ function normalizeQuoteItems(rawQuote){
 /* Render the order summary; readonly (no editing quantities here) */
 function renderOrder(){
   orderItemsEl.innerHTML = '';
-  if(!quote || !Array.isArray(quote.items)) {
-    totalsText.textContent = `Subtotal: ${formatPrice(0, selectedCurrency)}`;
-    cartCountElem.textContent = 0;
-    return;
-  }
+  if(!quote || !Array.isArray(quote.items)) return;
   let subtotal = 0;
   const isQuoteCheckout = !!quoteId;
 
@@ -525,161 +503,92 @@ function renderOrder(){
     const value = (item.totalPrices && (item.totalPrices[selectedCurrency] ?? 0)) || 0;
     subtotal += value;
 
-    // create li
+    // main product row
     const li = document.createElement('li');
     li.className = 'order-item';
     li.dataset.idx = idx;
 
-    // inner panel (consistent for cart & quote)
-    const inner = document.createElement('div');
-    inner.className = 'inner';
+    if (isQuoteCheckout) {
+      // Quote checkout: NO image. Show product name and meta, add "Show Details" button
+      li.innerHTML = `
+        <div class="left">
+          <div style="min-width:0">
+            <div style="font-weight:700; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(item.name)}</div>
+            <div class="meta">${escapeHtml(String(item.totalQuantity) + ' item(s)')}</div>
+            <button class="show-details-btn" data-idx="${idx}">Show Details ▾</button>
+          </div>
+        </div>
+        <div class="price">${formatPrice(value, selectedCurrency)}</div>
+      `;
+      orderItemsEl.appendChild(li);
 
-    // left column (image + text)
-    const left = document.createElement('div');
-    left.className = 'left';
-
-    // image: include even for quotes (keeps layout identical and removes extra space)
-    const img = document.createElement('img');
-    img.src = item.image || '../asset/placeholder.jpg';
-    img.alt = item.name || 'Product';
-    left.appendChild(img);
-
-    const textWrap = document.createElement('div');
-    textWrap.style.minWidth = '0';
-    const titleDiv = document.createElement('div');
-    titleDiv.className = 'title';
-    titleDiv.textContent = `${item.name} (x${item.totalQuantity})`;
-    textWrap.appendChild(titleDiv);
-
-    const metaDiv = document.createElement('div');
-    metaDiv.className = 'meta';
-    // If multiple variants -> show "Multiple options selected", else show color/size when present
-    if(Array.isArray(item.variants) && item.variants.length > 1){
-      metaDiv.textContent = 'Multiple options selected';
-    } else {
-      const singleV = item.variants && item.variants[0];
-      if(singleV && (singleV.color || singleV.size)){
-        metaDiv.textContent = `${singleV.color ? 'Color: ' + singleV.color : ''}${singleV.color && singleV.size ? ' · ' : ''}${singleV.size ? 'Size: ' + singleV.size : ''}`;
-      } else if(item.description){
-        metaDiv.textContent = item.description;
-      } else {
-        metaDiv.textContent = `${String(item.totalQuantity)} item(s)`;
-      }
-    }
-    textWrap.appendChild(metaDiv);
-    left.appendChild(textWrap);
-
-    inner.appendChild(left);
-
-    // right: price & optional toggle
-    const priceWrap = document.createElement('div');
-    priceWrap.className = 'price-wrap';
-
-    // If there are multiple variants, show small toggle button (keeps functionality)
-    if(Array.isArray(item.variants) && item.variants.length > 1){
-      const toggle = document.createElement('button');
-      toggle.className = 'variant-toggle';
-      toggle.type = 'button';
-      toggle.setAttribute('aria-expanded','false');
-      toggle.title = 'View variants';
-      toggle.innerHTML = '<span style="font-size:16px;line-height:0">▾</span>';
-      // wire toggle to variants container after it's appended
-      priceWrap.appendChild(toggle);
-    }
-
-    const priceDiv = document.createElement('div');
-    priceDiv.className = 'price';
-    priceDiv.textContent = formatPrice(value, selectedCurrency);
-
-    priceWrap.appendChild(priceDiv);
-    inner.appendChild(priceWrap);
-
-    li.appendChild(inner);
-    orderItemsEl.appendChild(li);
-
-    // ----- variants container (for non-quote and quote where variants exist) -----
-    if(Array.isArray(item.variants) && item.variants.length){
-      const variantsContainer = document.createElement('div');
-      variantsContainer.className = 'variants-container';
-      variantsContainer.dataset.forIdx = idx;
-
-      item.variants.forEach(v=>{
-        const line = document.createElement('div');
-        line.className = 'variant-line';
-        let labelParts = [];
-        if (v.color) labelParts.push(escapeHtml(v.color));
-        if (v.size) labelParts.push(escapeHtml(v.size));
-        const qtyLabel = `×${v.quantity}`;
-        const label = labelParts.length ? `${labelParts.join(' · ')} ${qtyLabel}` : `${qtyLabel}`;
-
-        const leftLabel = document.createElement('div');
-        leftLabel.style.overflow = 'hidden';
-        leftLabel.style.textOverflow = 'ellipsis';
-        leftLabel.style.whiteSpace = 'nowrap';
-        leftLabel.textContent = label;
-
-        const rightPrice = document.createElement('div');
-        rightPrice.style.minWidth = '110px';
-        rightPrice.style.textAlign = 'right';
-        rightPrice.style.color = 'var(--muted)';
-        const linePrice = (v.linePrices && (v.linePrices[selectedCurrency] ?? 0)) || ((v.unitPrices && (v.unitPrices[selectedCurrency] ?? 0)) * v.quantity) || 0;
-        rightPrice.textContent = formatPrice(linePrice, selectedCurrency);
-
-        line.appendChild(leftLabel);
-        line.appendChild(rightPrice);
-        variantsContainer.appendChild(line);
-      });
-
-      // insert the variants container immediately after li (keeps the structure identical across cart/quote)
-      orderItemsEl.appendChild(variantsContainer);
-    }
-
-    // ----- details container for quotes (preserve previous Show Details) -----
-    // We keep a details container, but it will visually align identical with other items (no extra blank)
-    if(isQuoteCheckout){
+      // details container (description + quantity) inserted after product li (hidden by default)
       const detailsContainer = document.createElement('div');
-      detailsContainer.className = 'details-container';
+      detailsContainer.className = 'variants-container details-container';
       detailsContainer.dataset.forIdx = idx;
+      detailsContainer.style.display = 'none';
       const desc = item.description || '';
-      const detailRow = document.createElement('div');
-      detailRow.innerHTML = `<div style="flex:1;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(desc)}</div><div style="min-width:110px;text-align:right;color:var(--muted)">${escapeHtml(String(item.totalQuantity))}</div>`;
-      detailsContainer.appendChild(detailRow);
-      orderItemsEl.appendChild(detailsContainer);
+      detailsContainer.innerHTML = `<div style="padding:8px;display:flex;justify-content:space-between;gap:12px;">
+        <div style="flex:1;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(desc)}</div>
+        <div style="min-width:110px;text-align:right;color:var(--muted)">${escapeHtml(String(item.totalQuantity))}</div>
+      </div>`;
+      li.parentNode.insertBefore(detailsContainer, li.nextSibling);
 
-      // Add a Show Details button in the inner meta area (if not already present)
-      const showBtn = document.createElement('button');
-      showBtn.className = 'show-details-btn';
-      showBtn.style.background = 'none';
-      showBtn.style.border = 'none';
-      showBtn.style.color = 'var(--muted)';
-      showBtn.style.cursor = 'pointer';
-      showBtn.style.padding = '6px 0';
-      showBtn.textContent = 'Show Details ▾';
-      // Attach to the meta area (to the right of meta text)
-      metaDiv.appendChild(document.createTextNode(' '));
-      metaDiv.appendChild(showBtn);
+    } else {
+      // Normal cart checkout: keep image + variant toggle behavior unchanged
+      li.innerHTML = `
+        <div class="left" style="flex-direction:row; align-items:center;">
+          <img src="${escapeHtml(item.image || '../asset/placeholder.jpg')}" alt="${escapeHtml(item.name)}">
+          <div style="min-width:0">
+            <div style="font-weight:700; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(item.name)}</div>
+            <div class="meta">${escapeHtml(String(item.totalQuantity) + ' item(s)')}</div>
+            ${ (Array.isArray(item.variants) && item.variants.length > 1) ? `<button class="show-variants-btn" data-idx="${idx}">Show Choices ▾</button>` : '' }
+          </div>
+        </div>
+        <div class="price">${formatPrice(value, selectedCurrency)}</div>
+      `;
+      orderItemsEl.appendChild(li);
+
+      // variants container (hidden by default)
+      if(Array.isArray(item.variants) && item.variants.length){
+        const variantsContainer = document.createElement('div');
+        variantsContainer.className = 'variants-container';
+        variantsContainer.dataset.forIdx = idx;
+
+        item.variants.forEach(v=>{
+          const line = document.createElement('div');
+          line.className = 'variant-line';
+          let labelParts = [];
+          if (v.color) labelParts.push(escapeHtml(v.color));
+          if (v.size) labelParts.push(escapeHtml(v.size));
+          const label = labelParts.length ? `${labelParts.join(' · ')} ×${v.quantity}` : `×${v.quantity}`;
+          const linePrice = (v.linePrices && (v.linePrices[selectedCurrency] ?? 0)) || 0;
+          line.innerHTML = `<div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${label}</div><div style="min-width:110px;text-align:right;color:var(--muted)">${formatPrice(linePrice, selectedCurrency)}</div>`;
+          variantsContainer.appendChild(line);
+        });
+
+        li.parentNode.insertBefore(variantsContainer, li.nextSibling);
+      }
     }
   });
 
-  // AFTER DOM update: wire the toggles
-  document.querySelectorAll('.variant-toggle').forEach((btn, i) => {
-    btn.addEventListener('click', (ev) => {
-      const li = btn.closest('li.order-item');
-      if(!li) return;
-      const idx = li.dataset.idx;
+  // wire show/hide variant toggles (non-quote behavior)
+  document.querySelectorAll('.show-variants-btn').forEach(btn=>{
+    btn.addEventListener('click', (ev)=>{
+      const idx = btn.dataset.idx;
       const container = document.querySelector(`.variants-container[data-for-idx="${idx}"]`);
       if(!container) return;
       const isShown = container.classList.toggle('show');
       container.style.display = isShown ? 'flex' : 'none';
-      btn.setAttribute('aria-expanded', isShown ? 'true' : 'false');
-      btn.innerHTML = isShown ? '<span style="font-size:16px;line-height:0">▴</span>' : '<span style="font-size:16px;line-height:0">▾</span>';
+      btn.textContent = isShown ? 'Hide Choices ▴' : 'Show Choices ▾';
     });
   });
 
-  // wire details (quote) toggles
+  // wire show/hide details toggles (quote-only behavior)
   document.querySelectorAll('.show-details-btn').forEach(btn=>{
     btn.addEventListener('click', (ev)=>{
-      const container = btn.closest('.inner')?.parentNode ? document.querySelector(`.details-container[data-for-idx="${btn.closest('li.order-item').dataset.idx}"]`) : null;
+      const idx = btn.dataset.idx;
+      const container = document.querySelector(`.details-container[data-for-idx="${idx}"]`);
       if(!container) return;
       const isShown = container.classList.toggle('show');
       container.style.display = isShown ? 'flex' : 'none';
@@ -723,18 +632,6 @@ async function loadCheckout(){
 
       // normalize quote
       quote = normalizeQuoteItems(rawQuote);
-
-      // ensure each item has an image so layout identical
-      for(const it of quote.items){
-        if(!it.image || it.image === '') {
-          // try to fetch product doc if possible
-          try {
-            const docRef = it.productId ? await fetchProductData(it.productId) : null;
-            it.image = docRef?.images?.[0] || docRef?.imageUrl || it.image || '../asset/placeholder.jpg';
-          } catch(e){ it.image = it.image || '../asset/placeholder.jpg'; }
-        }
-      }
-
       renderOrder();
     } catch(err){
       showSpinner(false);
@@ -882,7 +779,7 @@ currencySelect.addEventListener('change', () => {
   renderOrder();
 });
 
-/* init */
+/* header & hamburger wiring + init */
 (async function init(){
   // header behavior from cart
   window.addEventListener('scroll', () => {
@@ -891,14 +788,13 @@ currencySelect.addEventListener('change', () => {
     if (window.scrollY > 50) header.classList.add('scrolled'); else header.classList.remove('scrolled');
   });
 
-  // hamburger
+  // hamburger toggle
   const hamburger = document.getElementById('hamburger');
   const headerRight = document.getElementById('headerRight');
-  hamburger.addEventListener('click', ()=> { hamburger.classList.toggle('open'); headerRight.classList.toggle('open'); });
-
-  // ensure cartCount initial
-  const localCart = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-  cartCountElem.textContent = localCart.reduce((s,i)=> s + (Number(i.quantity)||0), 0);
+  hamburger.addEventListener('click', ()=> {
+    hamburger.classList.toggle('open');
+    headerRight.classList.toggle('open');
+  });
 
   // load checkout data
   await loadCheckout();
