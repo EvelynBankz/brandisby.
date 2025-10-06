@@ -60,10 +60,19 @@ a { text-decoration:none; color:inherit; transition: color var(--transition); }
 .hamburger.open span:nth-child(2){ opacity:0; }
 .hamburger.open span:nth-child(3){ transform:rotate(-45deg); top:10px; background:var(--gold); }
 
-/* HERO */
+/* HERO - using a CSS variable for background so inline style can set exact image path */
 .hero { position: relative; height: 36vh; display: flex; justify-content: center; align-items: center; text-align: center; margin-top: 0px; overflow: hidden; padding-top:72px; border-bottom-left-radius: 12px; border-bottom-right-radius:12px; }
-.hero::after { content: ""; position: absolute; inset: 0; background: url("../asset/bg17.jpg") center/cover no-repeat; transform: scale(1.06); z-index: -1; border-radius: 12px; box-shadow: inset 0 0 0 2000px rgba(20,21,23,0.55); }
-.hero-text { position: relative; display: inline-block; margin-bottom:12px; }
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--hero-bg, url('../asset/bg17.jpg')) center/cover no-repeat;
+  transform: scale(1.06);
+  z-index: -1;
+  border-radius: 12px;
+  box-shadow: inset 0 0 0 2000px rgba(20,21,23,0.55);
+}
+.hero-text { position: relative; display: inline-block; margin-bottom:12px; z-index:1; }
 .hero-text h1 { font-family:"Playfair Display", serif; font-size: clamp(28px,5vw,48px); margin-bottom:12px; color:var(--gold); }
 .hero-text p { font-size: clamp(14px,2vw,18px); max-width:900px; color:#F5F5F3}
 
@@ -86,7 +95,6 @@ section.checkout { padding:56px 18px; }
 }
 
 .checkout-form h2, .order-summary h2 { font-family:"Playfair Display", serif; color:#fff; margin-bottom:12px; }
-.small-note { font-size:0.9rem; color:var(--muted); margin-top:8px; }
 
 /* form inputs */
 label { display:block; margin-bottom:6px; color:#e9e9e9; font-weight:600; }
@@ -97,12 +105,43 @@ input[type="text"], input[type="email"], input[type="tel"], textarea, select {
 textarea { min-height:100px; resize:vertical; }
 
 /* order summary list */
-.order-summary ul { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:12px; }
+.order-summary ul { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:6px; }
 .order-item { display:flex; gap:12px; align-items:center; justify-content:space-between; padding:10px; border-radius:10px; background: rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.02); }
 .order-item .left { display:flex; gap:12px; align-items:center; flex:1; min-width:0; }
 .order-item img { width:64px; height:64px; object-fit:cover; border-radius:8px; border:1px solid rgba(255,255,255,0.04); }
 .order-item .meta { font-size:0.92rem; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .order-item .price { font-weight:700; color:var(--gold); min-width:110px; text-align:right; }
+
+/* variant toggle & container */
+.show-variants-btn {
+  background: transparent;
+  color:var(--muted);
+  border: 1px solid rgba(255,255,255,0.04);
+  border-radius: 8px;
+  padding:6px 8px;
+  cursor: pointer;
+  font-weight:700;
+  transition: all var(--transition);
+  font-size:13px;
+  margin-top:8px;
+}
+.show-variants-btn:hover { color:var(--gold); border-color:var(--gold); transform:translateY(-2px); }
+
+.variants-container {
+  display:none;
+  flex-direction:column;
+  gap:6px;
+  margin-top:8px;
+  padding-left:8px;
+  border-left:2px dashed rgba(255,255,255,0.03);
+}
+.variants-container.show { display:flex; }
+
+.variant-line {
+  display:flex; justify-content:space-between; gap:12px; align-items:center;
+  padding:6px 8px; border-radius:8px; background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.02);
+  color:var(--muted); font-size:0.92rem;
+}
 
 /* currency selector (hidden unless quote) */
 .currency-selector { display:flex; justify-content:flex-end; gap:8px; align-items:center; margin-bottom:8px; }
@@ -155,7 +194,8 @@ footer { text-align:center; padding:22px; background:transparent; color:var(--mu
   <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
 </header>
 
-<section class="hero">
+<!-- Hero: inline CSS variable to ensure exact image path is used (as you requested) -->
+<section class="hero" style="--hero-bg: url('assets/img/serac-cart-bg.jpg');">
   <div class="hero-text">
     <h1>Checkout</h1>
     <p>Complete your order — secure payment and quick processing</p>
@@ -182,8 +222,6 @@ footer { text-align:center; padding:22px; background:transparent; color:var(--mu
 
         <label for="address">Address</label>
         <textarea id="address" placeholder="Street, City, Country" required></textarea>
-
-        <div class="small-note">Your billing details will be stored with the order record in Firestore.</div>
       </form>
     </div>
 
@@ -204,6 +242,7 @@ footer { text-align:center; padding:22px; background:transparent; color:var(--mu
       <ul id="orderItems" aria-live="polite"></ul>
 
       <div class="totals" id="totalsText">Subtotal: —</div>
+      <div class="note" id="feesNote">Fees does not include shipping</div>
 
       <div class="note">You will be redirected to payment after clicking Proceed to Payment.</div>
 
@@ -455,39 +494,62 @@ function renderOrder(){
   orderItemsEl.innerHTML = '';
   if(!quote || !Array.isArray(quote.items)) return;
   let subtotal = 0;
-  quote.items.forEach(item=>{
+  quote.items.forEach((item, idx)=>{
     const value = (item.totalPrices && (item.totalPrices[selectedCurrency] ?? 0)) || 0;
     subtotal += value;
+
+    // main product row
     const li = document.createElement('li');
     li.className = 'order-item';
+    li.dataset.idx = idx;
     li.innerHTML = `
       <div class="left">
         <img src="${escapeHtml(item.image || '../asset/placeholder.jpg')}" alt="${escapeHtml(item.name)}">
         <div style="min-width:0">
           <div style="font-weight:700; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(item.name)}</div>
           <div class="meta">${escapeHtml(item.totalQuantity + ' item(s)')}</div>
+          ${ (Array.isArray(item.variants) && item.variants.length > 1) ? `<button class="show-variants-btn" data-idx="${idx}">Show Choices ▾</button>` : '' }
         </div>
       </div>
       <div class="price">${formatPrice(value, selectedCurrency)}</div>
     `;
     orderItemsEl.appendChild(li);
 
-    // if variants present and more than 1, show small lines under the item
-    if(Array.isArray(item.variants) && item.variants.length > 1){
-      item.variants.forEach(v => {
-        const vli = document.createElement('li');
-        vli.className = 'order-item';
-        vli.style.background = 'transparent';
-        vli.style.border = 'none';
-        vli.style.padding = '6px 8px';
-        vli.innerHTML = `<div style="flex:1;color:var(--muted);font-size:0.92rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
-            ${v.color ? escapeHtml('Color: ' + v.color) : ''}${v.color && v.size ? ' · ' : ''}${v.size ? escapeHtml('Size: ' + v.size) : ''} · qty: ${v.quantity}
-          </div>
-          <div style="min-width:110px;text-align:right;color:var(--muted)">${formatPrice((v.linePrices && (v.linePrices[selectedCurrency] ?? 0)) || 0, selectedCurrency)}</div>`;
-        orderItemsEl.appendChild(vli);
+    // variants container (hidden by default)
+    if(Array.isArray(item.variants) && item.variants.length){
+      const variantsContainer = document.createElement('div');
+      variantsContainer.className = 'variants-container';
+      variantsContainer.dataset.forIdx = idx;
+
+      item.variants.forEach(v=>{
+        const line = document.createElement('div');
+        line.className = 'variant-line';
+        // label: "Red ×3" or "Size L ×2" or combination "Red · L ×3"
+        let labelParts = [];
+        if (v.color) labelParts.push(escapeHtml(v.color));
+        if (v.size) labelParts.push(escapeHtml(v.size));
+        const label = labelParts.length ? `${labelParts.join(' · ')} ×${v.quantity}` : `×${v.quantity}`;
+        const linePrice = (v.linePrices && (v.linePrices[selectedCurrency] ?? 0)) || 0;
+        line.innerHTML = `<div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${label}</div><div style="min-width:110px;text-align:right;color:var(--muted)">${formatPrice(linePrice, selectedCurrency)}</div>`;
+        variantsContainer.appendChild(line);
       });
+
+      // insert variantsContainer immediately after the product li
+      li.parentNode.insertBefore(variantsContainer, li.nextSibling);
     }
   });
+
+  // wire show/hide variant toggles
+  document.querySelectorAll('.show-variants-btn').forEach(btn=>{
+    btn.addEventListener('click', (ev)=>{
+      const idx = btn.dataset.idx;
+      const container = document.querySelector(`.variants-container[data-for-idx="${idx}"]`);
+      if(!container) return;
+      const isShown = container.classList.toggle('show');
+      btn.textContent = isShown ? 'Hide Choices ▴' : 'Show Choices ▾';
+    });
+  });
+
   totalsText.textContent = `Subtotal: ${formatPrice(subtotal, selectedCurrency)}`;
   cartCountElem.textContent = quote.items.reduce((s,a)=>s + (a.totalQuantity || 0), 0);
 }
@@ -509,6 +571,8 @@ async function loadCheckout(){
       showSpinner(false);
       if(!snap.exists()){
         showError("Quote not found. It might have been deleted.");
+        quote = { items: [] };
+        renderOrder();
         return;
       }
       const rawQuote = snap.data();
@@ -630,12 +694,12 @@ payBtn.addEventListener('click', async (ev) => {
 
         // success redirect to thank you
         showSpinner(false);
+        // user requested the thankyou.html already exists; redirect there
         window.location.href = "../serac/thankyou.html";
       } catch(saveErr){
         showSpinner(false);
         console.error("Failed saving paid order", saveErr);
         showError("Payment succeeded but saving the order failed. Please contact support.");
-        // still attempt to clear cart and redirect (optional)
         try { localStorage.removeItem(STORAGE_KEY); } catch(e){ }
         window.location.href = "../serac/thankyou.html";
       } finally {
