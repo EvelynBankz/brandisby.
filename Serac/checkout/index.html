@@ -175,6 +175,52 @@ footer { text-align:center; padding:22px; background:transparent; color:var(--mu
   .hero { height:24vh; }
   .checkout-inner { grid-template-columns: 1fr; padding:0 12px; }
 }
+
+/* Quote checkout: remove image space & align name/details */
+.order-item .left {
+  display: flex;
+  flex-direction: column; /* stack name and button vertically */
+  gap: 4px;
+}
+
+.order-item .left > div {
+  min-width: 0; /* allow ellipsis overflow */
+}
+
+.show-details-btn {
+  background: none;
+  border: none;
+  color: #ccc;
+  cursor: pointer;
+  font-size: 0.875rem;
+  padding: 2px 0;
+  text-align: left;
+}
+
+.details-container {
+  flex-direction: column;
+  padding-left: 0; /* no extra padding for missing image */
+  padding-right: 0;
+  margin-bottom: 8px;
+  border-left: 2px solid #444; /* subtle visual separation */
+  display: none; /* hidden by default, JS toggles */
+}
+
+.details-container.show {
+  display: flex;
+}
+
+.details-container div {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  color: #bbb;
+  padding: 4px 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
 </style>
 </head>
 <body>
@@ -267,7 +313,7 @@ footer { text-align:center; padding:22px; background:transparent; color:var(--mu
 <script src="https://checkout.flutterwave.com/v3.js"></script>
 
 <!-- Main logic -->
-<script type="module">
+<<script type="module">
 /* ---------- Firebase ---------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
 import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
@@ -403,7 +449,7 @@ async function buildQuoteFromCart(){
       GBP: variantDetails.reduce((s,a) => s + (a.linePrices.GBP||0), 0)
     };
 
-    items.push({ productId: pid, name, image, totalQuantity: totalQty, totalPrices, variants: variantDetails });
+    items.push({ productId: pid, name, image, totalQuantity: totalQty, totalPrices, variants: variantDetails, description: productDoc?.description || '' });
   }
 
   return { items };
@@ -447,7 +493,8 @@ function normalizeQuoteItems(rawQuote){
           EUR: variants.reduce((s,a) => s + (a.linePrices.EUR||0), 0),
           GBP: variants.reduce((s,a) => s + (a.linePrices.GBP||0), 0)
         },
-        variants
+        variants,
+        description: ci.description || ''
       };
     } else {
       // single line
@@ -481,7 +528,8 @@ function normalizeQuoteItems(rawQuote){
             EUR: (unitPrices.EUR || 0) * qty,
             GBP: (unitPrices.GBP || 0) * qty
           }
-        }]
+        }],
+        description: ci.description || ''
       };
     }
   });
@@ -494,6 +542,8 @@ function renderOrder(){
   orderItemsEl.innerHTML = '';
   if(!quote || !Array.isArray(quote.items)) return;
   let subtotal = 0;
+  const isQuoteCheckout = !!quoteId;
+
   quote.items.forEach((item, idx)=>{
     const value = (item.totalPrices && (item.totalPrices[selectedCurrency] ?? 0)) || 0;
     subtotal += value;
@@ -502,51 +552,96 @@ function renderOrder(){
     const li = document.createElement('li');
     li.className = 'order-item';
     li.dataset.idx = idx;
-    li.innerHTML = `
-      <div class="left">
-        <img src="${escapeHtml(item.image || '../asset/placeholder.jpg')}" alt="${escapeHtml(item.name)}">
-        <div style="min-width:0">
-          <div style="font-weight:700; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(item.name)}</div>
-          <div class="meta">${escapeHtml(item.totalQuantity + ' item(s)')}</div>
-          ${ (Array.isArray(item.variants) && item.variants.length > 1) ? `<button class="show-variants-btn" data-idx="${idx}">Show Choices ▾</button>` : '' }
+
+    if (isQuoteCheckout) {
+      // Quote checkout: NO image. Show product name and meta, add "Show Details" button
+      li.innerHTML = `
+        <div class="left">
+          <div style="min-width:0">
+            <div style="font-weight:700; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(item.name)}</div>
+            <div class="meta">${escapeHtml(String(item.totalQuantity) + ' item(s)')}</div>
+            <button class="show-details-btn" data-idx="${idx}">Show Details ▾</button>
+          </div>
         </div>
-      </div>
-      <div class="price">${formatPrice(value, selectedCurrency)}</div>
-    `;
-    orderItemsEl.appendChild(li);
+        <div class="price">${formatPrice(value, selectedCurrency)}</div>
+      `;
+      orderItemsEl.appendChild(li);
 
-    // variants container (hidden by default)
-    if(Array.isArray(item.variants) && item.variants.length){
-      const variantsContainer = document.createElement('div');
-      variantsContainer.className = 'variants-container';
-      variantsContainer.dataset.forIdx = idx;
+      // details container (description + quantity) inserted after product li (hidden by default)
+      const detailsContainer = document.createElement('div');
+      detailsContainer.className = 'variants-container details-container'; // reuse variants-container styling for consistent look
+      detailsContainer.dataset.forIdx = idx;
+      detailsContainer.style.display = 'none';
+      const desc = item.description || '';
+      detailsContainer.innerHTML = `<div style="padding:8px;display:flex;justify-content:space-between;gap:12px;">
+        <div style="flex:1;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(desc)}</div>
+        <div style="min-width:110px;text-align:right;color:var(--muted)">${escapeHtml(String(item.totalQuantity))}</div>
+      </div>`;
+      li.parentNode.insertBefore(detailsContainer, li.nextSibling);
 
-      item.variants.forEach(v=>{
-        const line = document.createElement('div');
-        line.className = 'variant-line';
-        // label: "Red ×3" or "Size L ×2" or combination "Red · L ×3"
-        let labelParts = [];
-        if (v.color) labelParts.push(escapeHtml(v.color));
-        if (v.size) labelParts.push(escapeHtml(v.size));
-        const label = labelParts.length ? `${labelParts.join(' · ')} ×${v.quantity}` : `×${v.quantity}`;
-        const linePrice = (v.linePrices && (v.linePrices[selectedCurrency] ?? 0)) || 0;
-        line.innerHTML = `<div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${label}</div><div style="min-width:110px;text-align:right;color:var(--muted)">${formatPrice(linePrice, selectedCurrency)}</div>`;
-        variantsContainer.appendChild(line);
-      });
+      // For quote checkouts we DO NOT inject the variants list here (user requested only name, description, quantity).
+    } else {
+      // Normal cart checkout: keep image + variant toggle behavior unchanged
+      li.innerHTML = `
+        <div class="left">
+          <img src="${escapeHtml(item.image || '../asset/placeholder.jpg')}" alt="${escapeHtml(item.name)}">
+          <div style="min-width:0">
+            <div style="font-weight:700; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(item.name)}</div>
+            <div class="meta">${escapeHtml(String(item.totalQuantity) + ' item(s)')}</div>
+            ${ (Array.isArray(item.variants) && item.variants.length > 1) ? `<button class="show-variants-btn" data-idx="${idx}">Show Choices ▾</button>` : '' }
+          </div>
+        </div>
+        <div class="price">${formatPrice(value, selectedCurrency)}</div>
+      `;
+      orderItemsEl.appendChild(li);
 
-      // insert variantsContainer immediately after the product li
-      li.parentNode.insertBefore(variantsContainer, li.nextSibling);
+      // variants container (hidden by default) — only for non-quote (preserves existing behavior)
+      if(Array.isArray(item.variants) && item.variants.length){
+        const variantsContainer = document.createElement('div');
+        variantsContainer.className = 'variants-container';
+        variantsContainer.dataset.forIdx = idx;
+
+        item.variants.forEach(v=>{
+          const line = document.createElement('div');
+          line.className = 'variant-line';
+          // label: "Red ×3" or "Size L ×2" or combination "Red · L ×3"
+          let labelParts = [];
+          if (v.color) labelParts.push(escapeHtml(v.color));
+          if (v.size) labelParts.push(escapeHtml(v.size));
+          const label = labelParts.length ? `${labelParts.join(' · ')} ×${v.quantity}` : `×${v.quantity}`;
+          const linePrice = (v.linePrices && (v.linePrices[selectedCurrency] ?? 0)) || 0;
+          line.innerHTML = `<div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${label}</div><div style="min-width:110px;text-align:right;color:var(--muted)">${formatPrice(linePrice, selectedCurrency)}</div>`;
+          variantsContainer.appendChild(line);
+        });
+
+        // insert variantsContainer immediately after the product li
+        li.parentNode.insertBefore(variantsContainer, li.nextSibling);
+      }
     }
   });
 
-  // wire show/hide variant toggles
+  // wire show/hide variant toggles (non-quote behavior, unchanged)
   document.querySelectorAll('.show-variants-btn').forEach(btn=>{
     btn.addEventListener('click', (ev)=>{
       const idx = btn.dataset.idx;
       const container = document.querySelector(`.variants-container[data-for-idx="${idx}"]`);
       if(!container) return;
       const isShown = container.classList.toggle('show');
+      // also toggle inline display for older browsers / immediate effect
+      container.style.display = isShown ? 'flex' : 'none';
       btn.textContent = isShown ? 'Hide Choices ▴' : 'Show Choices ▾';
+    });
+  });
+
+  // wire show/hide details toggles (quote-only behavior)
+  document.querySelectorAll('.show-details-btn').forEach(btn=>{
+    btn.addEventListener('click', (ev)=>{
+      const idx = btn.dataset.idx;
+      const container = document.querySelector(`.details-container[data-for-idx="${idx}"]`);
+      if(!container) return;
+      const isShown = container.classList.toggle('show');
+      container.style.display = isShown ? 'flex' : 'none';
+      btn.textContent = isShown ? 'Hide Details ▴' : 'Show Details ▾';
     });
   });
 
