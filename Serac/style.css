@@ -27,7 +27,7 @@ body.serac {
   justify-content: center;    /* Horizontal center */
   align-items: center;        /* Vertical center on desktop by default */
   position: relative;
-  background: url("asset/bg.jpg") center center / cover no-repeat;
+  background: url("asset/bg25.jpg") center center / cover no-repeat;
   filter: blur(var(--blur-strength));
 }
 .hero::after { 
