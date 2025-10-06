@@ -1,674 +1,693 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Sérac - Checkout</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:"Montserrat",sans-serif;background:#141517;color:#fff;line-height:1.6}
-    a{text-decoration:none;color:inherit}
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Sérac - Checkout</title>
 
-    /* header */
-    .site-header{background:#4B4E54;color:#B66E41;display:flex;justify-content:space-between;align-items:center;padding:16px 28px;position:fixed;top:0;left:0;right:0;z-index:1000}
-    .brand-logo{height:60px}
-    .brand-title{font-family:"Playfair Display",serif;font-weight:700;font-size:24px;color:#B66E41}
+<!-- Fonts + Icons (same as cart) -->
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    /* nav */
-    .header-right{display:flex;gap:18px;align-items:center}
-    .header-right a{font-weight:500;transition:color .2s}
-    .header-right a:hover{color:#B66E41}
-    .cart-count{background:#B66E41;color:#141517;border-radius:50%;padding:2px 6px;font-weight:600;font-size:12px;margin-left:6px}
+<style>
+:root{
+  --bg-dark: #141517;
+  --bg-mid: #2A2B30;
+  --gold: #B66E41;
+  --muted: #bdbdbd;
+  --accent-strong: rgba(182,110,65,0.95);
+  --radius: 12px;
+  --transition: 0.25s cubic-bezier(.2,.9,.2,1);
+}
 
-    /* hamburger */
-    .hamburger{display:none;background:none;border:none;width:44px;height:40px;cursor:pointer;position:relative;z-index:1300}
-    .hamburger span{display:block;height:2.5px;width:22px;background:#B66E41;margin:6px auto;border-radius:2px;transition:all 0.3s ease}
-    .hamburger.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
-    .hamburger.open span:nth-child(2){opacity:0}
-    .hamburger.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
+/* RESET */
+* { margin:0; padding:0; box-sizing:border-box; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+html,body { height:100%; }
+body { font-family:"Montserrat", sans-serif; background:var(--bg-dark); color:#e6e6e6; line-height:1.6; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+a { text-decoration:none; color:inherit; transition: color var(--transition); }
 
-    /* hero */
-    .hero{position:relative;height:90vh;display:flex;align-items:center;justify-content:center;margin-top:80px;text-align:center}
-    .hero::after{content:"";position:absolute;inset:0;background:url('../asset/bg17.jpg') center/cover no-repeat;transform:scale(1.08);z-index:-1;border-radius:12px;box-shadow:inset 0 0 0 2000px rgba(20,21,23,0.18)}
-    .hero-text h1{font-family:"Playfair Display",serif;color:#B66E41;font-size:clamp(28px,5vw,48px)}
+/* HEADER (from shop.html) */
+.site-header {
+  background: transparent;
+  transition: background 0.3s ease, border-bottom 0.3s ease;
+  color:#f5f5f5;
+  display:flex; justify-content:space-between; align-items:center;
+  padding:16px 28px;
+  position:fixed; top:0; left:0; right:0;
+  z-index:1000;
+  border-bottom:1px solid rgba(255,255,255,0.04);
+}
+.site-header.scrolled { background:var(--bg-dark); border-bottom:1px solid rgba(255,255,255,0.06); }
 
-    /* checkout grid */
-    section.checkout{padding:60px 20px}
-    .container{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1.6fr;gap:28px}
-    .checkout-form,.order-summary{border-radius:12px;padding:18px;box-shadow:0 4px 10px rgba(0,0,0,0.08)}
-    .checkout-form{background:#4B4E54;color:#fff}
-    .order-summary{background:#1f1f1f;color:#fff}
-    h2{font-family:"Playfair Display",serif;margin-bottom:12px;font-size:20px}
-    label{display:block;margin-bottom:6px;font-weight:500}
-    input,textarea,select{width:100%;padding:10px;border-radius:6px;border:1px solid #B66E41;margin-bottom:12px;font-family:inherit;background:#141517;color:#fff}
-    textarea{min-height:80px;resize:vertical}
-    .currency-selector{text-align:right;margin-bottom:12px}
-    .checkout-btn{display:block;width:100%;background:#B66E41;color:#141517;padding:14px;border-radius:6px;border:none;font-weight:700;cursor:pointer;transition:all 0.2s ease}
-    .checkout-btn:hover{background:#8a5533}
+.header-left { display:flex; align-items:center; gap:14px; }
+.brand-logo { height:56px; width:auto; object-fit:contain; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.6)); }
+.brand-title { font-family:"Playfair Display", serif; font-size:22px; font-weight:700; color:var(--gold); letter-spacing:0.6px; }
 
-    /* order summary */
-    .order-summary ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px}
-    .order-item{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;padding:10px;border-radius:8px;background:rgba(182,110,65,0.1)}
-    .order-item .left{flex:1 1 70%}
-    .order-item .right{flex:0 0 150px;text-align:right}
-    .order-item .title{font-weight:600}
-    .order-item .meta{font-size:0.95rem;color:#ccc;margin-top:6px}
+.header-right { display:flex; gap:20px; align-items:center; }
+.header-right a { font-weight:500; color:var(--muted); padding:6px 8px; border-radius:8px; transition: all var(--transition); }
+.header-right a:hover { color:#fff; transform:translateY(-2px); text-shadow: 0 4px 18px rgba(182,110,65,0.15); }
 
-    /* variant toggle */
-    .variant-toggle{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:6px;border:1px solid #B66E41;background:#141517;color:#B66E41;cursor:pointer;padding:0;margin-left:8px;transition:all 0.2s ease}
-    .variant-toggle svg{width:14px;height:14px;transition:transform .25s ease}
-    .variant-toggle[aria-expanded="true"] svg{transform:rotate(180deg)}
-    .variants-container{max-height:0;overflow:hidden;transition:max-height .28s ease,padding .28s ease;padding-left:12px;border-left:2px solid rgba(182,110,65,0.3);margin-top:8px}
-    .variants-container.show{max-height:500px;padding-top:8px;padding-bottom:8px}
-    .variant-row{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:6px 0;border-bottom:1px dashed rgba(182,110,65,0.2)}
-    .variant-attrs{font-size:0.95rem;color:#ccc}
-    .variant-price{font-weight:600;min-width:110px;text-align:right}
+/* cart count bubble */
+.cart-count { background:var(--gold); color:var(--bg-dark); font-size:12px; font-weight:700; border-radius:50%; padding:3px 7px; margin-left:6px; box-shadow:0 4px 10px rgba(182,110,65,0.12); }
 
-    .subtotal{font-weight:700;text-align:right;margin-top:12px}
-    .note{font-size:0.9rem;color:#aaa;margin-top:8px}
+/* Hamburger */
+.hamburger { display:none; background:none; border:none; cursor:pointer; width:30px; height:24px; position:relative; }
+.hamburger span { display:block; width:100%; height:3px; background:var(--gold); border-radius:2px; position:absolute; left:0; transition:0.3s; }
+.hamburger span:nth-child(1){ top:0; }
+.hamburger span:nth-child(2){ top:10px; }
+.hamburger span:nth-child(3){ top:20px; }
+.hamburger.open span:nth-child(1){ transform:rotate(45deg); top:10px; background:var(--gold); }
+.hamburger.open span:nth-child(2){ opacity:0; }
+.hamburger.open span:nth-child(3){ transform:rotate(-45deg); top:10px; background:var(--gold); }
 
-    footer{text-align:center;padding:20px;background:#4B4E54;color:#B66E41;margin-top:36px}
+/* HERO */
+.hero { position: relative; height: 36vh; display: flex; justify-content: center; align-items: center; text-align: center; margin-top: 0px; overflow: hidden; padding-top:72px; border-bottom-left-radius: 12px; border-bottom-right-radius:12px; }
+.hero::after { content: ""; position: absolute; inset: 0; background: url("../asset/bg17.jpg") center/cover no-repeat; transform: scale(1.06); z-index: -1; border-radius: 12px; box-shadow: inset 0 0 0 2000px rgba(20,21,23,0.55); }
+.hero-text { position: relative; display: inline-block; margin-bottom:12px; }
+.hero-text h1 { font-family:"Playfair Display", serif; font-size: clamp(28px,5vw,48px); margin-bottom:12px; color:var(--gold); }
+.hero-text p { font-size: clamp(14px,2vw,18px); max-width:900px; color:#F5F5F3}
 
-    /* responsive */
-    @media(max-width:900px){.container{grid-template-columns:1fr}}
+/* MAIN CHECKOUT LAYOUT */
+section.checkout { padding:56px 18px; }
+.checkout-inner { max-width:1100px; margin:0 auto; display:grid; grid-template-columns: 1fr 420px; gap:28px; align-items:start; }
 
-    @media(max-width:600px){
-      .header-right{
-        position:absolute;
-        top:70px;
-        right:0;
-        background:rgba(20,21,23,0.95);
-        flex-direction:column;
-        width:200px;
-        padding:20px;
-        display:none;
-        border-radius:0 0 0 10px;
-      }
-      .header-right.open{display:flex}
-      .hamburger{display:block}
-      section{padding:60px 20px}
-      .hero{height:40vh}
-    }
+@media (max-width:980px){
+  .checkout-inner { grid-template-columns: 1fr; padding: 0 12px; }
+  .hero { height: 30vh; }
+}
 
-    @media(max-width:420px){
-      .brand-logo{height:clamp(40px,15vw,80px)}
-      .brand-title{font-size:clamp(16px,7vw,22px)}
-      .hero{height:40vh}
-    }
+/* left form + right summary containers that match cart styles */
+.card {
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.02));
+  padding:20px;
+  border:1px solid rgba(255,255,255,0.03);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+}
 
-    .small-note{font-size:0.9rem;color:#bbb;margin-top:8px}
-  </style>
+.checkout-form h2, .order-summary h2 { font-family:"Playfair Display", serif; color:#fff; margin-bottom:12px; }
+.small-note { font-size:0.9rem; color:var(--muted); margin-top:8px; }
+
+/* form inputs */
+label { display:block; margin-bottom:6px; color:#e9e9e9; font-weight:600; }
+input[type="text"], input[type="email"], input[type="tel"], textarea, select {
+  width:100%; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);
+  background: transparent; color:#e9e9e9; font-family:inherit; margin-bottom:12px;
+}
+textarea { min-height:100px; resize:vertical; }
+
+/* order summary list */
+.order-summary ul { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:12px; }
+.order-item { display:flex; gap:12px; align-items:center; justify-content:space-between; padding:10px; border-radius:10px; background: rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.02); }
+.order-item .left { display:flex; gap:12px; align-items:center; flex:1; min-width:0; }
+.order-item img { width:64px; height:64px; object-fit:cover; border-radius:8px; border:1px solid rgba(255,255,255,0.04); }
+.order-item .meta { font-size:0.92rem; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.order-item .price { font-weight:700; color:var(--gold); min-width:110px; text-align:right; }
+
+/* currency selector (hidden unless quote) */
+.currency-selector { display:flex; justify-content:flex-end; gap:8px; align-items:center; margin-bottom:8px; }
+.currency-selector label { color: rgba(231,231,231,0.72); font-weight:600; }
+.currency-selector select { appearance:none; background:transparent; color:#e7e7e7; border:1px solid rgba(231,231,231,0.18); border-radius:8px; padding:8px 12px; }
+
+/* totals + pay button */
+.totals { margin-top:12px; text-align:right; font-weight:700; color:#fff; }
+.pay-btn { display:block; width:100%; margin-top:12px; padding:14px; border-radius:10px; background: linear-gradient(180deg, var(--gold), #a55a36); color:#fff; border:none; font-weight:800; cursor:pointer; transition: transform var(--transition); }
+.pay-btn:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
+
+/* error banner */
+.error-banner { display:none; margin-bottom:12px; padding:12px; border-radius:8px; background: linear-gradient(180deg, rgba(255,50,50,0.12), rgba(255,30,30,0.06)); color:#ffd6d6; border:1px solid rgba(255,30,30,0.12); }
+
+/* spinner overlay */
+.spinner-backdrop { display:none; position:fixed; inset:0; z-index:9999; background: rgba(0,0,0,0.6); align-items:center; justify-content:center; }
+.spinner { background: rgba(255,255,255,0.03); padding:22px; border-radius:12px; display:flex; gap:12px; align-items:center; box-shadow: 0 8px 40px rgba(0,0,0,0.7); border:1px solid rgba(255,255,255,0.03); }
+.spinner .dot { width:14px; height:14px; border-radius:50%; background:var(--gold); animation: spin 1.1s linear infinite; }
+@keyframes spin { 0% { transform: scale(0.9) } 50% { transform: scale(1.3) } 100% { transform: scale(0.9) } }
+
+/* small text note */
+.note { font-size:0.9rem; color:var(--muted); margin-top:8px; }
+
+/* footer */
+footer { text-align:center; padding:22px; background:transparent; color:var(--muted); margin-top:36px; border-top:1px solid rgba(255,255,255,0.02); }
+
+/* responsiveness tweaks */
+@media (max-width:600px){
+  .order-item img { width:56px; height:56px; }
+  .brand-logo { height:48px; }
+  .hero { height:24vh; }
+  .checkout-inner { grid-template-columns: 1fr; padding:0 12px; }
+}
+</style>
 </head>
 <body>
-  <header class="site-header">
-    <div style="display:flex;align-items:center;gap:14px">
-      <img src="../logo.png" alt="Sérac Logo" class="brand-logo">
-      <div class="brand-title">Sérac</div>
+
+<header class="site-header" id="siteHeader">
+  <div class="header-left">
+    <img src="../asset/logo.png" alt="Sérac Logo" class="brand-logo">
+    <div class="brand-title">Sérac</div>
+  </div>
+  <nav class="header-right" id="headerRight">
+    <a href="../index.html">Home</a>
+    <a href="../shop.html">Shop</a>
+    <a href="../about.html">About</a>
+    <a href="../cart.html">Cart <span class="cart-count" id="cartCount">0</span></a>
+    <a href="../contact.html">Contact</a>
+  </nav>
+  <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+</header>
+
+<section class="hero">
+  <div class="hero-text">
+    <h1>Checkout</h1>
+    <p>Complete your order — secure payment and quick processing</p>
+  </div>
+</section>
+
+<section class="checkout">
+  <div class="checkout-inner">
+    <!-- left: billing form -->
+    <div class="card checkout-form" id="checkoutCard">
+      <h2>Billing Details</h2>
+
+      <div class="error-banner" id="errorBanner"></div>
+
+      <form id="checkoutForm" autocomplete="off">
+        <label for="name">Full Name</label>
+        <input id="name" type="text" placeholder="Jane Doe" required>
+
+        <label for="email">Email</label>
+        <input id="email" type="email" placeholder="you@example.com" required>
+
+        <label for="phone">Phone</label>
+        <input id="phone" type="tel" placeholder="+2348000000000" required>
+
+        <label for="address">Address</label>
+        <textarea id="address" placeholder="Street, City, Country" required></textarea>
+
+        <div class="small-note">Your billing details will be stored with the order record in Firestore.</div>
+      </form>
     </div>
-    <!-- Hamburger -->
-    <button class="hamburger" id="hamburger-btn" aria-label="Toggle menu">
-      <span></span><span></span><span></span>
-    </button>
-    <nav class="header-right" id="nav-menu">
-      <a href="../index.html">Home</a>
-      <a href="../shop.html">Shop</a>
-      <a href="../about.html">About</a>
-      <a href="../contact.html">Contact</a>
-      <a href="../cart.html">Cart <span class="cart-count" id="cartCount">0</span></a>
-    </nav>
-  </header>
 
-  <section class="hero"><div class="hero-text"><h1>Checkout</h1></div></section>
+    <!-- right: order summary -->
+    <aside class="card order-summary" id="orderCard">
+      <h2>Order Summary</h2>
 
-  <section class="checkout">
-    <div class="container">
-      <!-- Billing Form -->
-      <div class="checkout-form">
-        <h2>Billing Details</h2>
-        <form id="checkoutForm">
-          <label for="name">Full Name</label>
-          <input type="text" id="name" required>
-          <label for="email">Email</label>
-          <input type="email" id="email" required>
-          <label for="phone">Phone</label>
-          <input type="tel" id="phone" required>
-          <label for="address">Address</label>
-          <textarea id="address" required></textarea>
-          <div class="small-note">Your billing details will be stored with the order record in Firestore</div>
-        </form>
+      <div class="currency-selector" id="currencySelector" style="display:none">
+        <label for="currency">Currency</label>
+        <select id="currency">
+          <option value="NGN">NGN</option>
+          <option value="USD">USD</option>
+          <option value="EUR">EUR</option>
+          <option value="GBP">GBP</option>
+        </select>
       </div>
 
-      <!-- Order Summary -->
-      <div class="order-summary">
-        <h2>Order Summary</h2>
-        <div class="currency-selector" id="currencySelectorWrapper" style="display:none">
-          <label for="currency">Currency:</label>
-          <select id="currency">
-            <option value="NGN">NGN</option>
-            <option value="USD">USD</option>
-            <option value="EUR">EUR</option>
-            <option value="GBP">GBP</option>
-          </select>
-        </div>
-        <ul id="orderItems"></ul>
-        <div class="subtotal" id="orderSubtotal"></div>
-        <div class="note">You will be redirected to payment after clicking Proceed to Payment.</div>
-        <button id="payBtn" class="checkout-btn">Proceed to Payment</button>
-      </div>
-    </div>
-  </section>
+      <ul id="orderItems" aria-live="polite"></ul>
 
-  <footer><p>© 2025 Sérac</p></footer>
+      <div class="totals" id="totalsText">Subtotal: —</div>
 
-  <!-- Flutterwave -->
-  <script src="https://checkout.flutterwave.com/v3.js"></script>
+      <div class="note">You will be redirected to payment after clicking Proceed to Payment.</div>
 
-  <!-- Main script (embedded single-file) -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-    import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+      <button id="payBtn" class="pay-btn">Proceed to Payment</button>
+    </aside>
+  </div>
+</section>
 
-    /* ---------------- FIREBASE CONFIG (SERAC) ---------------- */
-    const firebaseConfig = {
-      apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
-      authDomain: "brandisby.firebaseapp.com",
-      projectId: "brandisby",
-      storageBucket: "brandisby.firebasestorage.app",
-      messagingSenderId: "87213267039",
-      appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
+<footer>
+  <p>© 2025 Sérac</p>
+</footer>
+
+<!-- error / spinner overlays -->
+<div class="spinner-backdrop" id="spinnerBackdrop" role="status" aria-hidden="true">
+  <div class="spinner" id="spinnerBox">
+    <div class="dot" aria-hidden="true"></div>
+    <div style="color:#fff;font-weight:700">Processing... please wait</div>
+  </div>
+</div>
+
+<!-- Flutterwave script -->
+<script src="https://checkout.flutterwave.com/v3.js"></script>
+
+<!-- Main logic -->
+<script type="module">
+/* ---------- Firebase ---------- */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+/* CONFIG (same project as other Serac files) */
+const firebaseConfig = {
+  apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
+  authDomain: "brandisby.firebaseapp.com",
+  projectId: "brandisby",
+  storageBucket: "brandisby.firebasestorage.app",
+  messagingSenderId: "87213267039",
+  appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+/* Flutterwave public key (test) — replace with your real key when ready */
+const FLW_PUBLIC_KEY = "FLWPUBK_TEST-xxxxxxxxxxxxxxxxxxxxx-X";
+
+/* DOM refs */
+const cartCountElem = document.getElementById('cartCount');
+const orderItemsEl = document.getElementById('orderItems');
+const totalsText = document.getElementById('totalsText');
+const payBtn = document.getElementById('payBtn');
+const currencySelect = document.getElementById('currency');
+const currencySelector = document.getElementById('currencySelector');
+const spinnerBackdrop = document.getElementById('spinnerBackdrop');
+const errorBanner = document.getElementById('errorBanner');
+
+const nameInput = document.getElementById('name');
+const emailInput = document.getElementById('email');
+const phoneInput = document.getElementById('phone');
+const addressInput = document.getElementById('address');
+
+/* Local storage keys (match cart.html) */
+const STORAGE_KEY = 'seracCart';
+const CURRENCY_KEY = 'seracCurrency';
+
+/* state */
+let cart = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+let selectedCurrency = localStorage.getItem(CURRENCY_KEY) || 'NGN';
+let productCache = {};
+let quoteId = (new URLSearchParams(window.location.search)).get('quoteId') || null;
+let quote = null; // normalized quote structure { items: [...] }
+
+/* utilities */
+function showSpinner(show=true){
+  spinnerBackdrop.style.display = show ? 'flex' : 'none';
+  spinnerBackdrop.setAttribute('aria-hidden', show ? 'false' : 'true');
+}
+function showError(msg){
+  if(!msg){ errorBanner.style.display='none'; errorBanner.textContent=''; return; }
+  errorBanner.style.display = 'block';
+  errorBanner.textContent = msg;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function formatPrice(value, currency){
+  const localeMap = { USD:'en-US', EUR:'de-DE', GBP:'en-GB', NGN:'en-NG' };
+  const minFrac = currency === 'NGN' ? 0 : 2;
+  try {
+    return new Intl.NumberFormat(localeMap[currency] || 'en-US', { style:'currency', currency, minimumFractionDigits: minFrac }).format(Number(value || 0));
+  } catch(e) {
+    return `${currency} ${Number(value || 0).toFixed(minFrac)}`;
+  }
+}
+function escapeHtml(str){ if(!str && str !== 0) return ""; return String(str).replace(/[&<>"']/g, s => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[s])); }
+
+/* Reuse product fetching from Firestore (same path as cart) */
+async function fetchProductData(productId){
+  try {
+    if(productCache[productId]) return productCache[productId];
+    const dref = doc(db, "brands", "serac", "products", productId);
+    const snap = await getDoc(dref);
+    if(snap.exists()){
+      productCache[productId] = snap.data();
+      return productCache[productId];
+    }
+  } catch(e){ console.warn("Fetch product failed", productId, e); }
+  return null;
+}
+
+/* merge cart items (same logic as cart page) */
+function mergeCartItems(cartArray){
+  const merged = [];
+  (cartArray || []).forEach(item=>{
+    const idx = merged.findIndex(i => i.id === item.id && (i.color||'') === (item.color||'') && (i.size||'') === (item.size||''));
+    if(idx === -1) merged.push({...item});
+    else merged[idx].quantity = Number(merged[idx].quantity || 0) + Number(item.quantity || 0);
+  });
+  return merged;
+}
+
+/* build normalized quote from client cart (used when no quoteId) */
+async function buildQuoteFromCart(){
+  cart = mergeCartItems(cart);
+  const byProduct = new Map();
+  cart.forEach(row=>{
+    if(!byProduct.has(row.id)) byProduct.set(row.id, []);
+    byProduct.get(row.id).push(row);
+  });
+  const productIds = Array.from(byProduct.keys());
+  const productsData = await Promise.all(productIds.map(pid => fetchProductData(pid).then(d => [pid, d])));
+  const productsMap = Object.fromEntries(productsData.map(([id, doc]) => [id, doc]));
+
+  const items = [];
+  for(const pid of productIds){
+    const rows = byProduct.get(pid) || [];
+    const productDoc = productsMap[pid] || null;
+    const image = productDoc?.images?.[0] || productDoc?.imageUrl || rows[0]?.imageUrl || '../asset/placeholder.jpg';
+    const name = productDoc?.name || rows[0]?.name || 'Product';
+    const variantDetails = rows.map(r => {
+      const unitPrices = {
+        NGN: (productDoc && productDoc.priceNGN != null) ? Number(productDoc.priceNGN) : (r.price || 0),
+        USD: (productDoc && productDoc.priceUSD != null) ? Number(productDoc.priceUSD) : null,
+        EUR: (productDoc && productDoc.priceEUR != null) ? Number(productDoc.priceEUR) : null,
+        GBP: (productDoc && productDoc.priceGBP != null) ? Number(productDoc.priceGBP) : null
+      };
+      const quantity = Number(r.quantity) || 0;
+      const linePrices = {
+        NGN: (unitPrices.NGN || 0) * quantity,
+        USD: (unitPrices.USD || 0) * quantity,
+        EUR: (unitPrices.EUR || 0) * quantity,
+        GBP: (unitPrices.GBP || 0) * quantity
+      };
+      return { id: r.id || pid, color: r.color||'', size: r.size||'', quantity, unitPrices, linePrices };
+    });
+
+    const totalQty = variantDetails.reduce((s,a) => s + a.quantity, 0);
+    const totalPrices = {
+      NGN: variantDetails.reduce((s,a) => s + (a.linePrices.NGN||0), 0),
+      USD: variantDetails.reduce((s,a) => s + (a.linePrices.USD||0), 0),
+      EUR: variantDetails.reduce((s,a) => s + (a.linePrices.EUR||0), 0),
+      GBP: variantDetails.reduce((s,a) => s + (a.linePrices.GBP||0), 0)
     };
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
 
-    /* ---------------- FLUTTERWAVE PUBLIC KEY ----------------
-       A test-style public key is set so the flow can run in test mode.
-       Replace with your real FLWPUBK_TEST... or FLWPUBK_LIVE... key when ready.
-    --------------------------------------------------------- */
-    const FLW_PUBLIC_KEY = "FLWPUBK_TEST-xxxxxxxxxxxxxxxxxxxxx-X";
+    items.push({ productId: pid, name, image, totalQuantity: totalQty, totalPrices, variants: variantDetails });
+  }
 
-    /* DOM elements */
-    const cartCountElem = document.getElementById('cartCount');
-    const orderItemsEl = document.getElementById('orderItems');
-    const orderSubtotalEl = document.getElementById('orderSubtotal');
-    const currencySelect = document.getElementById('currency');
-    const currencyWrapper = document.getElementById('currencySelectorWrapper');
-    const payBtn = document.getElementById('payBtn');
+  return { items };
+}
 
-    /* cart & quote */
-    let rawCart = JSON.parse(localStorage.getItem('cart_serac')) || [];
-    function mergeCartItems(cartArray){
-      const merged=[];
-      cartArray.forEach(item=>{
-        const idx = merged.findIndex(i => i.id === item.id && (i.color||'') === (item.color||'') && (i.size||'') === (item.size||''));
-        if(idx === -1) merged.push({...item});
-        else merged[idx].quantity = Number(merged[idx].quantity||0) + Number(item.quantity||0);
-      });
-      return merged;
-    }
-    rawCart = mergeCartItems(rawCart);
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const quoteId = urlParams.get('quoteId'); // if present we show currency selector and load quote from Firestore
-    let quote = null;
-    let selectedCurrency = localStorage.getItem('currency_serac') || 'NGN';
-    currencySelect.value = selectedCurrency;
-
-    /* formatting */
-    function formatPrice(value, currency){
-      const localeMap = { USD:'en-US', EUR:'de-DE', GBP:'en-GB', NGN:'en-NG' };
-      const minFrac = currency === 'NGN' ? 0 : 2;
-      try {
-        return new Intl.NumberFormat(localeMap[currency] || 'en-US', { style:'currency', currency, minimumFractionDigits: minFrac }).format(Number(value || 0));
-      } catch(e) {
-        return `${currency} ${Number(value || 0).toFixed(minFrac)}`;
-      }
-    }
-
-    /* unit price resolution */
-    function getUnitPriceForCurrency(productDoc, cartItem, currency) {
-      if(productDoc){
-        if(currency === 'NGN' && productDoc.priceNGN != null) return Number(productDoc.priceNGN);
-        if(currency === 'USD' && productDoc.priceUSD != null) return Number(productDoc.priceUSD);
-        if(currency === 'EUR' && productDoc.priceEUR != null) return Number(productDoc.priceEUR);
-        if(currency === 'GBP' && productDoc.priceGBP != null) return Number(productDoc.priceGBP);
-        if(productDoc.price != null) return Number(productDoc.price);
-      }
-      if(cartItem && cartItem.price != null) return Number(cartItem.price);
-      return 0;
-    }
-
-    function groupCartByProduct(cartArr){
-      const map = new Map();
-      cartArr.forEach(row=>{
-        if(!map.has(row.id)) map.set(row.id, []);
-        map.get(row.id).push(row);
-      });
-      return map;
-    }
-
-    async function fetchProducts(productIds){
-      const out = {};
-      const promises = productIds.map(async id=>{
-        try {
-          const dref = doc(db, "brands", "serac", "products", id);
-          const snap = await getDoc(dref);
-          if(snap.exists()) out[id] = snap.data();
-        } catch(e){
-          console.warn("Failed fetch product", id, e);
-        }
-      });
-      await Promise.all(promises);
-      return out;
-    }
-
-    /* build normalized quote from client cart (when there's no quoteId) */
-    async function buildQuoteFromCart(){
-      const merged = mergeCartItems(rawCart);
-      const byProduct = groupCartByProduct(merged);
-      const productIds = Array.from(byProduct.keys());
-      const productsData = await fetchProducts(productIds);
-      const items = [];
-
-      for(const pid of productIds){
-        const rows = byProduct.get(pid) || [];
-        const productDoc = productsData[pid] || null;
-        const image = productDoc?.images?.[0] || productDoc?.imageUrl || rows[0]?.imageUrl || '';
-        const name = productDoc?.name || rows[0]?.name || 'Product';
-        const variantDetails = rows.map(r => {
-          const unitPrices = {
-            NGN: getUnitPriceForCurrency(productDoc, r, 'NGN'),
-            USD: getUnitPriceForCurrency(productDoc, r, 'USD'),
-            EUR: getUnitPriceForCurrency(productDoc, r, 'EUR'),
-            GBP: getUnitPriceForCurrency(productDoc, r, 'GBP')
-          };
-          const quantity = Number(r.quantity) || 0;
-          const linePrices = {
-            NGN: (unitPrices.NGN || 0) * quantity,
-            USD: (unitPrices.USD || 0) * quantity,
-            EUR: (unitPrices.EUR || 0) * quantity,
-            GBP: (unitPrices.GBP || 0) * quantity
-          };
-          return { id: r.id, color: r.color||'', size: r.size||'', quantity, unitPrices, linePrices };
-        });
-
-        const totalQty = variantDetails.reduce((s,a)=>s + a.quantity, 0);
-        const totalPrices = {
-          NGN: variantDetails.reduce((s,a) => s + (a.linePrices.NGN||0), 0),
-          USD: variantDetails.reduce((s,a) => s + (a.linePrices.USD||0), 0),
-          EUR: variantDetails.reduce((s,a) => s + (a.linePrices.EUR||0), 0),
-          GBP: variantDetails.reduce((s,a) => s + (a.linePrices.GBP||0), 0)
+/* Normalize server quote items into the same structure used above */
+function normalizeQuoteItems(rawQuote){
+  const arr = Array.isArray(rawQuote.items) ? rawQuote.items : [];
+  const items = arr.map(ci => {
+    if(Array.isArray(ci.variants) && ci.variants.length){
+      const variants = ci.variants.map(v => {
+        const qty = Number(v.qty || v.quantity) || 0;
+        const unitPrices = {
+          NGN: Number(v.priceNGN) || Number(v.price) || 0,
+          USD: Number(v.priceUSD) || 0,
+          EUR: Number(v.priceEUR) || 0,
+          GBP: Number(v.priceGBP) || 0
         };
-
-        items.push({ productId: pid, name, image, totalQuantity: totalQty, totalPrices, variants: variantDetails });
-      }
-
-      return { items };
-    }
-
-    /* load checkout: either from a quoteId or from cart_serac */
-    async function loadCheckout(){
-      selectedCurrency = localStorage.getItem('currency_serac') || 'NGN';
-      currencySelect.value = selectedCurrency;
-      currencyWrapper.style.display = 'none';
-
-      if(quoteId){
-        // fetch quote from serac quotes collection
-        try{
-          const qRef = doc(db, "brands", "serac", "quotes", quoteId);
-          const snap = await getDoc(qRef);
-          if(!snap.exists()){
-            alert("Quote not found.");
-            return;
+        return {
+          id: v.id || ci.id || '',
+          color: v.color || '',
+          size: v.size || '',
+          quantity: qty,
+          unitPrices,
+          linePrices: {
+            NGN: (unitPrices.NGN || 0) * qty,
+            USD: (unitPrices.USD || 0) * qty,
+            EUR: (unitPrices.EUR || 0) * qty,
+            GBP: (unitPrices.GBP || 0) * qty
           }
-          const rawQuote = snap.data();
-          if(rawQuote.customer) document.getElementById('name').value = rawQuote.customer;
-          if(rawQuote.email) document.getElementById('email').value = rawQuote.email;
-
-          // show currency selector for quotes
-          currencyWrapper.style.display = 'block';
-          selectedCurrency = localStorage.getItem('currency_serac') || rawQuote.currency || 'NGN';
-          currencySelect.value = selectedCurrency;
-
-          // normalize incoming quote items to the same structure used for rendering
-          const items = (Array.isArray(rawQuote.items) ? rawQuote.items : []).map(ci=>{
-            if(Array.isArray(ci.variants) && ci.variants.length){
-              const variants = ci.variants.map(v => ({
-                id: v.id || ci.id || '',
-                color: v.color || '',
-                size: v.size || '',
-                quantity: Number(v.qty) || 0,
-                unitPrices: {
-                  NGN: Number(v.priceNGN) || 0,
-                  USD: Number(v.priceUSD) || 0,
-                  EUR: Number(v.priceEUR) || 0,
-                  GBP: Number(v.priceGBP) || 0
-                },
-                linePrices: {
-                  NGN: (Number(v.priceNGN) || 0) * (Number(v.qty) || 0),
-                  USD: (Number(v.priceUSD) || 0) * (Number(v.qty) || 0),
-                  EUR: (Number(v.priceEUR) || 0) * (Number(v.qty) || 0),
-                  GBP: (Number(v.priceGBP) || 0) * (Number(v.qty) || 0)
-                }
-              }));
-              return {
-                productId: ci.id || '',
-                name: ci.name || '',
-                image: ci.image || '',
-                totalQuantity: variants.reduce((s,a)=>s+a.quantity,0),
-                totalPrices: {
-                  NGN: variants.reduce((s,a)=>s + (a.linePrices.NGN||0),0),
-                  USD: variants.reduce((s,a)=>s + (a.linePrices.USD||0),0),
-                  EUR: variants.reduce((s,a)=>s + (a.linePrices.EUR||0),0),
-                  GBP: variants.reduce((s,a)=>s + (a.linePrices.GBP||0),0)
-                },
-                variants
-              };
-            } else {
-              // single-line item
-              const qty = Number(ci.qty) || Number(ci.quantity) || 1;
-              const unitPrices = {
-                NGN: Number(ci.priceNGN) || Number(ci.price) || 0,
-                USD: Number(ci.priceUSD) || 0,
-                EUR: Number(ci.priceEUR) || 0,
-                GBP: Number(ci.priceGBP) || 0
-              };
-              return {
-                productId: ci.id || '',
-                name: ci.name || '',
-                image: ci.image || '',
-                totalQuantity: qty,
-                totalPrices: {
-                  NGN: (unitPrices.NGN || 0) * qty,
-                  USD: (unitPrices.USD || 0) * qty,
-                  EUR: (unitPrices.EUR || 0) * qty,
-                  GBP: (unitPrices.GBP || 0) * qty
-                },
-                variants: [{
-                  id: ci.id || '',
-                  color: '',
-                  size: '',
-                  quantity: qty,
-                  unitPrices,
-                  linePrices: {
-                    NGN: (unitPrices.NGN || 0) * qty,
-                    USD: (unitPrices.USD || 0) * qty,
-                    EUR: (unitPrices.EUR || 0) * qty,
-                    GBP: (unitPrices.GBP || 0) * qty
-                  }
-                }]
-              };
-            }
-          });
-
-          quote = { items };
-          renderOrder();
-        } catch(err){
-          console.error("Failed to load quote", err);
-          alert("Error loading quote. Please try again.");
-        }
-      } else {
-        // build from client cart
-        try {
-          const built = await buildQuoteFromCart();
-          quote = built;
-          renderOrder();
-        } catch(err){
-          console.error("Failed to build quote from cart", err);
-        }
-      }
-    }
-
-    /* render order: grouped product lines and per-variant rows when present */
-    function renderOrder(){
-      orderItemsEl.innerHTML = '';
-      if(!quote || !Array.isArray(quote.items)) return;
-      let subtotal = 0;
-      const items = quote.items;
-
-      items.forEach(item=>{
-        const lineTotal = (item.totalPrices && (item.totalPrices[selectedCurrency] ?? 0)) || 0;
-        subtotal += lineTotal;
-
-        const li = document.createElement('li');
-        li.className = 'order-item';
-
-        const left = document.createElement('div');
-        left.className = 'left';
-
-        // title + qty
-        const titleDiv = document.createElement('div');
-        titleDiv.className = 'title';
-        titleDiv.textContent = `${item.name} (x${item.totalQuantity})`;
-
-        // meta
-        const metaDiv = document.createElement('div');
-        metaDiv.className = 'meta';
-
-        // build header area with optional image + title + toggle
-        const headerWrapper = document.createElement('div');
-        headerWrapper.style.display = 'flex';
-        headerWrapper.style.alignItems = 'center';
-        headerWrapper.style.gap = '10px';
-
-        if(item.image){
-          const img = document.createElement('img');
-          img.src = item.image;
-          img.alt = item.name;
-          img.style.width = '56px';
-          img.style.height = '56px';
-          img.style.objectFit = 'cover';
-          img.style.borderRadius = '6px';
-          img.style.border = '1px solid rgba(0,0,0,0.06)';
-          headerWrapper.appendChild(img);
-        }
-
-        const textWrap = document.createElement('div');
-        textWrap.appendChild(titleDiv);
-
-        if(Array.isArray(item.variants) && item.variants.length > 1){
-          const info = document.createElement('div');
-          info.className = 'meta';
-          info.textContent = 'Multiple options selected';
-          textWrap.appendChild(info);
-        } else {
-          const singleV = item.variants && item.variants[0];
-          if(singleV && (singleV.color || singleV.size)){
-            const info = document.createElement('div');
-            info.className = 'meta';
-            info.textContent = `${singleV.color ? 'Color: ' + singleV.color : ''}${singleV.color && singleV.size ? ' · ' : ''}${singleV.size ? 'Size: ' + singleV.size : ''}`;
-            textWrap.appendChild(info);
-          }
-        }
-
-        headerWrapper.appendChild(textWrap);
-
-        // right column price
-        const right = document.createElement('div');
-        right.className = 'right';
-        right.style.minWidth = '120px';
-        right.style.textAlign = 'right';
-        right.innerHTML = `<div style="font-weight:600">${formatPrice(lineTotal, selectedCurrency)}</div>`;
-
-        // if more than one variant, add chevron toggle to show variant rows
-        if(Array.isArray(item.variants) && item.variants.length > 1){
-          const toggle = document.createElement('button');
-          toggle.className = 'variant-toggle';
-          toggle.type = 'button';
-          toggle.setAttribute('aria-expanded','false');
-          toggle.title = 'View variants';
-          toggle.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>`;
-
-          headerWrapper.appendChild(toggle);
-
-          left.appendChild(headerWrapper);
-
-          const variantsContainer = document.createElement('div');
-          variantsContainer.className = 'variants-container';
-          item.variants.forEach(v=>{
-            const row = document.createElement('div');
-            row.className = 'variant-row';
-            const leftRow = document.createElement('div');
-            leftRow.style.display = 'flex';
-            leftRow.style.gap = '8px';
-            leftRow.style.alignItems = 'center';
-            const attrs = document.createElement('div');
-            attrs.className = 'variant-attrs';
-            attrs.innerHTML = `${v.color ? `Color: ${v.color}` : ''}${v.color && v.size ? ' · ' : ''}${v.size ? `Size: ${v.size}` : ''} <span style="color:#bca589"> · qty: ${v.quantity}</span>`;
-            leftRow.appendChild(attrs);
-            const rightPrice = document.createElement('div');
-            rightPrice.className = 'variant-price';
-            const variantLinePrice = (v.linePrices && (v.linePrices[selectedCurrency] ?? 0)) || ((v.unitPrices && (v.unitPrices[selectedCurrency] ?? 0)) * v.quantity);
-            rightPrice.textContent = formatPrice(variantLinePrice, selectedCurrency);
-            row.appendChild(leftRow);
-            row.appendChild(rightPrice);
-            variantsContainer.appendChild(row);
-          });
-
-          left.appendChild(variantsContainer);
-
-          // toggle wiring
-          toggle.addEventListener('click', () => {
-            const isShown = variantsContainer.classList.toggle('show');
-            toggle.setAttribute('aria-expanded', isShown ? 'true' : 'false');
-          });
-
-        } else {
-          left.appendChild(headerWrapper);
-        }
-
-        li.appendChild(left);
-        li.appendChild(right);
-        orderItemsEl.appendChild(li);
+        };
       });
-
-      orderSubtotalEl.textContent = `Subtotal: ${formatPrice(subtotal, selectedCurrency)}`;
-      // update cart count
-      const totalQty = quote.items.reduce((s,a) => s + (a.totalQuantity || 0), 0);
-      cartCountElem.textContent = totalQty;
-    }
-
-    /* Payment handling: uses FlutterwaveCheckout and saves order to Firestore on success */
-    payBtn.addEventListener('click', async function(){
-      const name = document.getElementById('name').value.trim();
-      const email = document.getElementById('email').value.trim();
-      const phone = document.getElementById('phone').value.trim();
-      const address = document.getElementById('address').value.trim();
-      if(!name || !email || !phone || !address){
-        alert('Please fill in all billing details.');
-        return;
-      }
-
-      if(!quote || !Array.isArray(quote.items) || quote.items.length === 0){
-        alert('Cart is empty.');
-        return;
-      }
-
-      // compute subtotal
-      const itemsToSubmit = quote.items;
-      let subtotal = 0;
-      itemsToSubmit.forEach(it => {
-        subtotal += (it.totalPrices && (it.totalPrices[selectedCurrency] ?? 0)) || 0;
-      });
-
-      if(subtotal <= 0){
-        alert('Subtotal is zero.');
-        return;
-      }
-
-      // Build metadata payload saved with order
-      const orderPayload = {
-        name,
-        email,
-        phone,
-        address,
-        currency: selectedCurrency,
-        items: itemsToSubmit,
-        total: subtotal.toFixed(selectedCurrency === 'NGN' ? 0 : 2),
-        status: "pending",
-        createdAt: serverTimestamp()
-      };
-
-      // Flutterwave checkout config
-      const txRef = "serac_" + Date.now();
-      const fwConfig = {
-        public_key: FLW_PUBLIC_KEY,
-        tx_ref: txRef,
-        amount: parseFloat(subtotal),
-        currency: selectedCurrency,
-        customer: { email, phonenumber: phone, name },
-        customizations: { title: "Sérac", description: "Order Payment", logo: "../logo.png" },
-        callback: async function(data){
-          // data contains transaction details - store order as paid
-          try {
-            const paymentRef = data.tx_ref || data.txId || data.transaction_id || data.transactionId || data.flwRef || null;
-            const paidOrder = {
-              ...orderPayload,
-              paymentRef,
-              status: "paid",
-              paidAt: serverTimestamp()
-            };
-
-            // save under brands/serac/orders
-            await addDoc(collection(db, "brands", "serac", "orders"), paidOrder);
-
-            // clear local cart
-            try { localStorage.removeItem('cart_serac'); } catch(e){ console.warn('localStorage clear failed', e); }
-
-            // redirect to thank you page
-            window.location.href = "../serac/thankyou.html";
-          } catch(err){
-            console.error("Order save failed after payment:", err);
-            alert("Payment succeeded but saving order failed. Please contact support.");
-            // still attempt to clear cart and redirect
-            try { localStorage.removeItem('cart_serac'); } catch(e){ }
-            window.location.href = "../serac/thankyou.html";
-          }
+      return {
+        productId: ci.id || '',
+        name: ci.name || '',
+        image: ci.image || '',
+        totalQuantity: variants.reduce((s,a) => s + a.quantity, 0),
+        totalPrices: {
+          NGN: variants.reduce((s,a) => s + (a.linePrices.NGN||0), 0),
+          USD: variants.reduce((s,a) => s + (a.linePrices.USD||0), 0),
+          EUR: variants.reduce((s,a) => s + (a.linePrices.EUR||0), 0),
+          GBP: variants.reduce((s,a) => s + (a.linePrices.GBP||0), 0)
         },
-        onclose: function(){
-          console.log("Payment closed");
-        }
+        variants
       };
+    } else {
+      // single line
+      const qty = Number(ci.qty || ci.quantity) || 1;
+      const unitPrices = {
+        NGN: Number(ci.priceNGN) || Number(ci.price) || 0,
+        USD: Number(ci.priceUSD) || 0,
+        EUR: Number(ci.priceEUR) || 0,
+        GBP: Number(ci.priceGBP) || 0
+      };
+      return {
+        productId: ci.id || '',
+        name: ci.name || '',
+        image: ci.image || '',
+        totalQuantity: qty,
+        totalPrices: {
+          NGN: (unitPrices.NGN || 0) * qty,
+          USD: (unitPrices.USD || 0) * qty,
+          EUR: (unitPrices.EUR || 0) * qty,
+          GBP: (unitPrices.GBP || 0) * qty
+        },
+        variants: [{
+          id: ci.id || '',
+          color: '',
+          size: '',
+          quantity: qty,
+          unitPrices,
+          linePrices: {
+            NGN: (unitPrices.NGN || 0) * qty,
+            USD: (unitPrices.USD || 0) * qty,
+            EUR: (unitPrices.EUR || 0) * qty,
+            GBP: (unitPrices.GBP || 0) * qty
+          }
+        }]
+      };
+    }
+  });
 
-      // open Flutterwave checkout
-      if (typeof FlutterwaveCheckout === 'function') {
-        FlutterwaveCheckout(fwConfig);
-      } else {
-        alert('Payment gateway not available. Please try again later.');
+  return { items };
+}
+
+/* Render the order summary; readonly (no editing quantities here) */
+function renderOrder(){
+  orderItemsEl.innerHTML = '';
+  if(!quote || !Array.isArray(quote.items)) return;
+  let subtotal = 0;
+  quote.items.forEach(item=>{
+    const value = (item.totalPrices && (item.totalPrices[selectedCurrency] ?? 0)) || 0;
+    subtotal += value;
+    const li = document.createElement('li');
+    li.className = 'order-item';
+    li.innerHTML = `
+      <div class="left">
+        <img src="${escapeHtml(item.image || '../asset/placeholder.jpg')}" alt="${escapeHtml(item.name)}">
+        <div style="min-width:0">
+          <div style="font-weight:700; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(item.name)}</div>
+          <div class="meta">${escapeHtml(item.totalQuantity + ' item(s)')}</div>
+        </div>
+      </div>
+      <div class="price">${formatPrice(value, selectedCurrency)}</div>
+    `;
+    orderItemsEl.appendChild(li);
+
+    // if variants present and more than 1, show small lines under the item
+    if(Array.isArray(item.variants) && item.variants.length > 1){
+      item.variants.forEach(v => {
+        const vli = document.createElement('li');
+        vli.className = 'order-item';
+        vli.style.background = 'transparent';
+        vli.style.border = 'none';
+        vli.style.padding = '6px 8px';
+        vli.innerHTML = `<div style="flex:1;color:var(--muted);font-size:0.92rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+            ${v.color ? escapeHtml('Color: ' + v.color) : ''}${v.color && v.size ? ' · ' : ''}${v.size ? escapeHtml('Size: ' + v.size) : ''} · qty: ${v.quantity}
+          </div>
+          <div style="min-width:110px;text-align:right;color:var(--muted)">${formatPrice((v.linePrices && (v.linePrices[selectedCurrency] ?? 0)) || 0, selectedCurrency)}</div>`;
+        orderItemsEl.appendChild(vli);
+      });
+    }
+  });
+  totalsText.textContent = `Subtotal: ${formatPrice(subtotal, selectedCurrency)}`;
+  cartCountElem.textContent = quote.items.reduce((s,a)=>s + (a.totalQuantity || 0), 0);
+}
+
+/* Load checkout data: either from quoteId (Firestore) or from local cart (seracCart) */
+async function loadCheckout(){
+  selectedCurrency = localStorage.getItem(CURRENCY_KEY) || selectedCurrency || 'NGN';
+  currencySelect.value = selectedCurrency;
+
+  // hide currency selector by default, only show for quote
+  currencySelector.style.display = 'none';
+
+  if(quoteId){
+    // fetch the quote doc from brands/serac/quotes
+    try {
+      showSpinner(true);
+      const qRef = doc(db, "brands", "serac", "quotes", quoteId);
+      const snap = await getDoc(qRef);
+      showSpinner(false);
+      if(!snap.exists()){
+        showError("Quote not found. It might have been deleted.");
+        return;
       }
-    });
+      const rawQuote = snap.data();
+      if(rawQuote.customer) nameInput.value = rawQuote.customer;
+      if(rawQuote.email) emailInput.value = rawQuote.email;
 
-    /* currency change */
-    currencySelect.addEventListener('change', ()=>{
-      selectedCurrency = currencySelect.value;
-      localStorage.setItem('currency_serac', selectedCurrency);
+      // show currency selector for quotes
+      currencySelector.style.display = 'flex';
+      selectedCurrency = localStorage.getItem(CURRENCY_KEY) || rawQuote.currency || selectedCurrency;
+      currencySelect.value = selectedCurrency;
+
+      // normalize quote
+      quote = normalizeQuoteItems(rawQuote);
       renderOrder();
-    });
+    } catch(err){
+      showSpinner(false);
+      console.error("Failed to load quote", err);
+      showError("Failed to load quote. Please refresh the page and try again.");
+    }
+  } else {
+    // build from local cart (same key used by cart.html)
+    try {
+      cart = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+      cart = mergeCartItems(cart);
+      if(!cart.length){
+        quote = { items: [] };
+        renderOrder();
+        showError("Your cart is empty.");
+        return;
+      }
+      showSpinner(true);
+      quote = await buildQuoteFromCart();
+      showSpinner(false);
+      renderOrder();
+    } catch(err){
+      showSpinner(false);
+      console.error("Failed to build quote from cart", err);
+      showError("Failed to load cart items. Please refresh and try again.");
+    }
+  }
+}
 
-    /* listen for storage changes (cart updated in another tab) */
-    window.addEventListener('storage', async () => {
-      rawCart = JSON.parse(localStorage.getItem('cart_serac')) || [];
-      rawCart = mergeCartItems(rawCart);
-      await loadCheckout();
-    });
+/* Basic validation */
+function validateForm(){
+  showError('');
+  const name = nameInput.value.trim();
+  const email = emailInput.value.trim();
+  const phone = phoneInput.value.trim();
+  const address = addressInput.value.trim();
+  if(!name) return "Name is required.";
+  if(!email) return "Email is required.";
+  // simple email sanity
+  if(!/^\S+@\S+\.\S+$/.test(email)) return "Please provide a valid email.";
+  if(!phone) return "Phone is required.";
+  if(!address) return "Address is required.";
+  if(!quote || !Array.isArray(quote.items) || quote.items.length === 0) return "Cart is empty.";
+  return null;
+}
 
-    /* init */
-    (async function init(){
-      // show currency selector only if quoteId is present
-      if(quoteId) currencyWrapper.style.display = 'block';
-      await loadCheckout();
-    })();
-  </script>
+/* Payment & saving flow */
+payBtn.addEventListener('click', async (ev) => {
+  ev.preventDefault();
+  showError('');
+  const v = validateForm();
+  if(v){ showError(v); return; }
 
-  <script>
-    // hamburger toggle
-    const hamburgerBtn = document.getElementById('hamburger-btn');
-    const navMenu = document.getElementById('nav-menu');
-    hamburgerBtn.addEventListener('click', ()=>{
-      hamburgerBtn.classList.toggle('open');
-      navMenu.classList.toggle('open');
-    });
-  </script>
+  // compute subtotal
+  let subtotal = 0;
+  quote.items.forEach(it => subtotal += (it.totalPrices && (it.totalPrices[selectedCurrency] ?? 0)) || 0);
+  if(subtotal <= 0){ showError("Subtotal is zero. Cannot proceed."); return; }
+
+  // disable UI + show spinner
+  payBtn.disabled = true;
+  showSpinner(true);
+
+  const name = nameInput.value.trim();
+  const email = emailInput.value.trim();
+  const phone = phoneInput.value.trim();
+  const address = addressInput.value.trim();
+
+  // build order payload to save (status pending until payment confirms)
+  const baseOrder = {
+    name, email, phone, address,
+    currency: selectedCurrency,
+    items: quote.items,
+    total: subtotal,
+    status: "pending",
+    source: quoteId ? `quote:${quoteId}` : 'cart',
+    createdAt: serverTimestamp()
+  };
+
+  // prepare Flutterwave payload
+  const txRef = "serac_" + Date.now();
+  const fwConfig = {
+    public_key: FLW_PUBLIC_KEY,
+    tx_ref: txRef,
+    amount: Number(subtotal),
+    currency: selectedCurrency,
+    customer: { email: email, phonenumber: phone, name: name },
+    customizations: { title: "Sérac", description: "Order Payment", logo: "../asset/logo.png" },
+    callback: async function (data) {
+      // payment callback — try to save order as paid
+      try {
+        showSpinner(true);
+        const paymentRef = data.tx_ref || data.transaction_id || data.transactionId || data.flwRef || data.id || null;
+        const paidOrder = {
+          ...baseOrder,
+          paymentRef,
+          status: "paid",
+          paidAt: serverTimestamp()
+        };
+        // save in Firestore under brands/serac/orders
+        await addDoc(collection(db, "brands", "serac", "orders"), paidOrder);
+
+        // clear local cart if not a quote checkout
+        if(!quoteId){
+          try { localStorage.removeItem(STORAGE_KEY); } catch(e){ console.warn('localStorage clear failed', e); }
+        }
+
+        // success redirect to thank you
+        showSpinner(false);
+        window.location.href = "../serac/thankyou.html";
+      } catch(saveErr){
+        showSpinner(false);
+        console.error("Failed saving paid order", saveErr);
+        showError("Payment succeeded but saving the order failed. Please contact support.");
+        // still attempt to clear cart and redirect (optional)
+        try { localStorage.removeItem(STORAGE_KEY); } catch(e){ }
+        window.location.href = "../serac/thankyou.html";
+      } finally {
+        payBtn.disabled = false;
+      }
+    },
+    onclose: function () {
+      showSpinner(false);
+      payBtn.disabled = false;
+    }
+  };
+
+  // invoke Flutterwave
+  try {
+    if (typeof FlutterwaveCheckout === 'function') {
+      FlutterwaveCheckout(fwConfig);
+    } else {
+      throw new Error("Payment gateway not loaded");
+    }
+  } catch(err) {
+    showSpinner(false);
+    payBtn.disabled = false;
+    console.error("Flutterwave invocation failed", err);
+    showError("Payment gateway is unavailable. Please try again later.");
+  }
+});
+
+/* currency change (only active when visible) */
+currencySelect.addEventListener('change', () => {
+  selectedCurrency = currencySelect.value;
+  localStorage.setItem(CURRENCY_KEY, selectedCurrency);
+  renderOrder();
+});
+
+/* init */
+(async function init(){
+  // header behavior from cart
+  window.addEventListener('scroll', () => {
+    const header = document.querySelector('.site-header');
+    if (!header) return;
+    if (window.scrollY > 50) header.classList.add('scrolled'); else header.classList.remove('scrolled');
+  });
+
+  // hamburger
+  const hamburger = document.getElementById('hamburger');
+  const headerRight = document.getElementById('headerRight');
+  hamburger.addEventListener('click', ()=> { hamburger.classList.toggle('open'); headerRight.classList.toggle('open'); });
+
+  // load checkout data
+  await loadCheckout();
+})();
+</script>
+
 </body>
 </html>
