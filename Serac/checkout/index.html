@@ -286,7 +286,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* Flutterwave public key (test) — replace with your real key when ready */
+/* Flutterwave public key (test) */
 const FLW_PUBLIC_KEY = "FLWPUBK_TEST-07eb9d2da345c08dc4d54278c3bc86f7-X";
 
 /* DOM refs */
@@ -304,7 +304,7 @@ const emailInput = document.getElementById('email');
 const phoneInput = document.getElementById('phone');
 const addressInput = document.getElementById('address');
 
-/* Local storage keys (match cart.html) */
+/* Local storage keys */
 const STORAGE_KEY = 'seracCart';
 const CURRENCY_KEY = 'seracCurrency';
 
@@ -313,7 +313,7 @@ let cart = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
 let selectedCurrency = localStorage.getItem(CURRENCY_KEY) || 'NGN';
 let productCache = {};
 let quoteId = (new URLSearchParams(window.location.search)).get('quoteId') || null;
-let quote = null; // normalized quote structure { items: [...] }
+let quote = null;
 
 /* utilities */
 function showSpinner(show=true){
@@ -337,7 +337,7 @@ function formatPrice(value, currency){
 }
 function escapeHtml(str){ if(!str && str !== 0) return ""; return String(str).replace(/[&<>"']/g, s => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[s])); }
 
-/* Reuse product fetching from Firestore (same path as cart) */
+/* fetch product data */
 async function fetchProductData(productId){
   try {
     if(productCache[productId]) return productCache[productId];
@@ -351,7 +351,7 @@ async function fetchProductData(productId){
   return null;
 }
 
-/* merge cart items (same logic as cart page) */
+/* merge cart items */
 function mergeCartItems(cartArray){
   const merged = [];
   (cartArray || []).forEach(item=>{
@@ -362,7 +362,7 @@ function mergeCartItems(cartArray){
   return merged;
 }
 
-/* build normalized quote from client cart (used when no quoteId) */
+/* build quote from cart */
 async function buildQuoteFromCart(){
   cart = mergeCartItems(cart);
   const byProduct = new Map();
@@ -411,7 +411,7 @@ async function buildQuoteFromCart(){
   return { items };
 }
 
-/* Normalize server quote items into the same structure used above */
+/* normalize server quote */
 function normalizeQuoteItems(rawQuote){
   const arr = Array.isArray(rawQuote.items) ? rawQuote.items : [];
   const items = arr.map(ci => {
@@ -453,7 +453,6 @@ function normalizeQuoteItems(rawQuote){
         description: ci.description || ''
       };
     } else {
-      // single line
       const qty = Number(ci.qty || ci.quantity) || 1;
       const unitPrices = {
         NGN: Number(ci.priceNGN) || Number(ci.price) || 0,
@@ -493,7 +492,7 @@ function normalizeQuoteItems(rawQuote){
   return { items };
 }
 
-/* Render the order summary; readonly (no editing quantities here) */
+/* render order */
 function renderOrder(){
   orderItemsEl.innerHTML = '';
   if(!quote || !Array.isArray(quote.items)) return;
@@ -504,7 +503,6 @@ function renderOrder(){
     const value = (item.totalPrices && (item.totalPrices[selectedCurrency] ?? 0)) || 0;
     subtotal += value;
 
-    // main product row
     const li = document.createElement('li');
     li.className = 'order-item';
     li.dataset.idx = idx;
@@ -718,10 +716,12 @@ payBtn.addEventListener('click', async (ev) => {
         // Save order to Firestore
         const orderRef = await addDoc(collection(db, "brands", "serac", "orders"), paidOrder);
 
-        // Update quote status if it's a quote checkout
+        // Update quote status and add orderId
         if(quoteId){
           const qRef = doc(db, "brands", "serac", "quotes", quoteId);
-          try { await updateDoc(qRef, { status: "paid", paidAt: serverTimestamp() }); } catch(e){ console.warn("Quote status update failed", e); }
+          try {
+            await updateDoc(qRef, { status: "paid", paidAt: serverTimestamp(), orderId: orderRef.id });
+          } catch(e){ console.warn("Quote status update failed", e); }
         }
 
         if(!quoteId){
