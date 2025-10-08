@@ -116,7 +116,7 @@
       overflow: hidden;
       border-radius: 0 0 20px 20px;
       animation: fadeIn 1.5s ease;
-    }
+    /* }
     .hero::after {
       content: "";
       position: absolute;
@@ -137,7 +137,29 @@
       font-size: clamp(36px, 6vw, 60px);
       letter-spacing: 1px;
       text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    } */
+
+    /* ================= HERO ================= */
+    .hero-about {
+      height: 90vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      background: url("asset/bg25.jpg") center center / cover no-repeat;
+      margin-top: 0;
+      position:relative;
     }
+    .hero-about::after {
+      content:"";
+      position:absolute;
+      top:0;left:0;right:0;bottom:0;
+      background:rgba(20,21,23,0.6);
+    }
+    .hero-about .hero-text { position:relative; z-index:2; max-width:800px; padding:0 15px; }
+    .hero-about .hero-text h1 { font-family:"Playfair Display", serif; font-size: clamp(42px,6vw,72px); margin-bottom:18px; color:#B66E41; line-height:1.2; animation: fadeInDown 1s ease; }
+    .hero-about .hero-text p { font-size: clamp(18px,2vw,26px); color:#F5F5F3; line-height:1.6; animation: fadeInUp 1.2s ease; }
+
 
     /* THANK YOU SECTION */
     .thankyou-section {
