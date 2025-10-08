@@ -58,26 +58,20 @@ a { text-decoration:none; color:inherit; transition: color var(--transition); }
 .hero-text h1 { font-family:"Playfair Display", serif; font-size: clamp(28px,5vw,48px); margin-bottom:12px; color:var(--gold); }
 .hero-text p { font-size: clamp(14px,2vw,18px); max-width:900px; color:#F5F5F3}
 
-
 /* 🟢 When paid, hero background changes */
 .hero.paid {
-  background: url('../assets/orders-hero.jpg') center/cover no-repeat;
+  background: url('../asset/bg25.jpg') center/cover no-repeat;
 }
 
 /* 🟢 Paid button style */
-#pay-btn.paid-state {
+#payBtn.paid-state {
   background-color: #1faa59 !important;
   cursor: default;
   pointer-events: none;
 }
 
-
-
-  
-/* MAIN CHECKOUT LAYOUT - reworked to match Fleur De Vie structure */
+/* MAIN CHECKOUT LAYOUT */
 section.checkout { padding:56px 18px; background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.0)); }
-
-/* container + two-column like Fleur De Vie */
 .checkout-inner {
   max-width:1100px;
   margin:0 auto;
@@ -85,16 +79,11 @@ section.checkout { padding:56px 18px; background: linear-gradient(180deg, rgba(2
   grid-template-columns: 1fr 1.4fr;
   gap:28px;
   align-items:start;
-  transition: all 0.3s ease;
 }
-
-/* On smaller screens stack like Fleur */
 @media (max-width:980px){
   .checkout-inner { grid-template-columns: 1fr; padding: 0 12px; }
   .hero { height: 30vh; }
 }
-
-/* Card styling kept in Sérac theme but with large rounded corners and soft shadow as Fleur */
 .card {
   border-radius: 16px;
   background: var(--card-bg);
@@ -102,79 +91,36 @@ section.checkout { padding:56px 18px; background: linear-gradient(180deg, rgba(2
   border:1px solid rgba(255,255,255,0.03);
   box-shadow: 0 12px 30px rgba(0,0,0,0.55);
 }
-
-/* We'll add subtle inner panel where Fleur shows lighter inner box for items */
-.inner-panel {
-  border-radius:12px;
-  padding:12px;
-  background: rgba(255,255,255,0.02);
-  border:1px solid rgba(255,255,255,0.02);
-}
-
-/* Titles */
 .checkout-form h2, .order-summary h2 { font-family:"Playfair Display", serif; color:#fff; margin-bottom:12px; font-size:22px; }
-
-/* Form inputs */
 label { display:block; margin-bottom:6px; color:#e9e9e9; font-weight:600; }
 input[type="text"], input[type="email"], input[type="tel"], textarea, select { width:100%; padding:12px; border-radius:10px; border:1px solid rgba(255,255,255,0.06); background: transparent; color:#e9e9e9; font-family:inherit; margin-bottom:12px; }
 textarea { min-height:120px; resize:vertical; }
-
-/* Order summary list */
 .order-summary ul { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:12px; }
-
 .order-item { display:flex; gap:12px; align-items:center; justify-content:space-between; padding:12px; border-radius:12px; background: rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.02); transition: all var(--transition); }
-.order-item:hover { background: rgba(182,110,65,0.03); border-color: rgba(182,110,65,0.04); transform: translateY(-1px); }
-
 .order-item .left { display:flex; gap:12px; align-items:center; flex:1; min-width:0; padding-left:0; }
 .order-item img { width:56px; height:56px; object-fit:cover; border-radius:8px; border:1px solid rgba(255,255,255,0.04); transition: all var(--transition); }
 .order-item .meta { font-size:0.95rem; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .order-item .price { font-weight:700; color:var(--gold); min-width:110px; text-align:right; }
-
-/* Variant toggle & container */
 .show-variants-btn { background: transparent; color:var(--muted); border: 1px solid rgba(255,255,255,0.04); border-radius: 8px; padding:6px 8px; cursor: pointer; font-weight:700; transition: all var(--transition); font-size:13px; margin-top:8px; }
-.show-variants-btn:hover { color:var(--gold); border-color:var(--gold); transform:translateY(-2px); }
 .variants-container { display:none; flex-direction:column; gap:8px; margin-top:8px; padding-left:0; border-left:2px dashed rgba(255,255,255,0.03); }
 .variants-container.show { display:flex; }
 .variant-line { display:flex; justify-content:space-between; gap:12px; align-items:center; padding:8px 10px; border-radius:8px; background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.02); color:var(--muted); font-size:0.95rem; }
-
-/* Currency selector */
 .currency-selector { display:flex; justify-content:flex-end; gap:8px; align-items:center; margin-bottom:12px; }
-.currency-selector label { color: rgba(231,231,231,0.72); font-weight:600; }
-.currency-selector select { appearance:none; background:transparent; color:#e7e7e7; border:1px solid rgba(231,231,231,0.18); border-radius:8px; padding:8px 12px; }
-
-/* Totals + pay button */
 .totals { margin-top:12px; text-align:right; font-weight:700; color:#fff; font-size:18px; }
 .pay-btn { display:block; width:100%; margin-top:16px; padding:14px; border-radius:12px; background: linear-gradient(180deg, var(--gold), #a55a36); color:#fff; border:none; font-weight:800; cursor:pointer; transition: transform var(--transition); }
 .pay-btn:disabled { opacity:0.6; cursor:not-allowed; transform:none; }
-
-/* Error banner */
 .error-banner { display:none; margin-bottom:12px; padding:12px; border-radius:8px; background: linear-gradient(180deg, rgba(255,50,50,0.12), rgba(255,30,30,0.06)); color:#ffd6d6; border:1px solid rgba(255,30,30,0.12); }
-
-/* Spinner overlay */
 .spinner-backdrop { display:none; position:fixed; inset:0; z-index:9999; background: rgba(0,0,0,0.6); align-items:center; justify-content:center; }
 .spinner { background: rgba(255,255,255,0.03); padding:22px; border-radius:12px; display:flex; gap:12px; align-items:center; box-shadow: 0 8px 40px rgba(0,0,0,0.7); border:1px solid rgba(255,255,255,0.03); }
 .spinner .dot { width:14px; height:14px; border-radius:50%; background:var(--gold); animation: spin 1.1s linear infinite; }
 @keyframes spin { 0% { transform: scale(0.9) } 50% { transform: scale(1.3) } 100% { transform: scale(0.9) } }
-
-/* Small text note */
 .note { font-size:0.95rem; color:var(--muted); margin-top:8px; }
-
-/* Footer */
 footer { text-align:center; padding:22px; background:transparent; color:var(--muted); margin-top:36px; border-top:1px solid rgba(255,255,255,0.02); }
-
-/* Quote checkout: remove image space & align name/details */
 .order-item .left { display: flex; flex-direction: column; gap: 6px; min-width:0; }
-.order-item .left > div { min-width: 0; }
-
-/* Show details button styling (quote view) */
 .show-details-btn { background: none; border: none; color: #ccc; cursor: pointer; font-size: 0.95rem; padding: 6px 0; text-align: left; }
-
-/* Details container used for quote items */
 .details-container { flex-direction: column; padding-left: 0; padding-right: 0; margin-bottom: 8px; border-left: 2px solid rgba(255,255,255,0.03); display: none; }
 .details-container.show { display: flex; }
 .details-container div { display: flex; justify-content: space-between; font-size: 0.95rem; color: #bbb; padding: 6px 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-
-/* Mobile adjustments */
 @media (max-width:680px){
   .order-item img { width:48px; height:48px; }
   .brand-logo { height:48px; }
@@ -184,8 +130,6 @@ footer { text-align:center; padding:22px; background:transparent; color:var(--mu
   .order-item .price { min-width:60px; font-size:0.95rem; }
   textarea { min-height:100px; }
 }
-
-/* Make hamburger visible and header-right responsive on smaller screens */
 @media (max-width:900px){
   .hamburger { display:block; }
   .header-right { display:none; position:absolute; top:64px; right:12px; background:rgba(20,20,20,0.98); flex-direction:column; padding:18px; gap:10px; border-radius:10px; width:220px; z-index:1100; border:1px solid rgba(255,255,255,0.03); }
@@ -211,11 +155,11 @@ footer { text-align:center; padding:22px; background:transparent; color:var(--mu
   <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
 </header>
 
-<!-- Hero: inline CSS variable to ensure exact image path is used (as you requested) -->
-<section class="hero" style="--hero-bg: url('../asset/bg25.jpg');">
+<!-- Hero -->
+<section class="hero" id="heroSection" style="--hero-bg: url('../asset/bg25.jpg');">
   <div class="hero-text">
-    <h1>Checkout</h1>
-    <p>Complete your order — secure payment and quick processing</p>
+    <h1 id="heroH1">Checkout</h1>
+    <p id="heroP">Complete your order — secure payment and quick processing</p>
   </div>
 </section>
 
@@ -229,22 +173,22 @@ footer { text-align:center; padding:22px; background:transparent; color:var(--mu
 
       <form id="checkoutForm" autocomplete="off">
         <label for="name">Full Name</label>
-        <input id="name" type="text" placeholder="Jane Doe" required>
+        <input id="name" name="fullname" type="text" placeholder="Jane Doe" required>
 
         <label for="email">Email</label>
-        <input id="email" type="email" placeholder="you@example.com" required>
+        <input id="email" name="email" type="email" placeholder="you@example.com" required>
 
         <label for="phone">Phone</label>
-        <input id="phone" type="tel" placeholder="+2348000000000" required>
+        <input id="phone" name="phone" type="tel" placeholder="+2348000000000" required>
 
         <label for="address">Address</label>
-        <textarea id="address" placeholder="Street, City, Country" required></textarea>
+        <textarea id="address" name="address" placeholder="Street, City, Country" required></textarea>
       </form>
     </div>
 
     <!-- right: order summary -->
     <aside class="card order-summary" id="orderCard">
-      <h2>Order Summary</h2>
+      <h2 id="orderCardTitle">Order Summary</h2>
 
       <div class="currency-selector" id="currencySelector" style="display:none">
         <label for="currency">Currency</label>
@@ -280,7 +224,6 @@ footer { text-align:center; padding:22px; background:transparent; color:var(--mu
   </div>
 </div>
 
-
 <!-- Flutterwave script -->
 <script src="https://checkout.flutterwave.com/v3.js"></script>
 
@@ -302,7 +245,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* Flutterwave public key (test) */
+/* Flutterwave public key (test) — use your real key in production */
 const FLW_PUBLIC_KEY = "FLWPUBK_TEST-07eb9d2da345c08dc4d54278c3bc86f7-X";
 
 /* DOM refs */
@@ -320,6 +263,10 @@ const emailInput = document.getElementById('email');
 const phoneInput = document.getElementById('phone');
 const addressInput = document.getElementById('address');
 
+const hero = document.getElementById('heroSection');
+const heroH1 = document.getElementById('heroH1');
+const heroP = document.getElementById('heroP');
+
 /* Local storage keys */
 const STORAGE_KEY = 'seracCart';
 const CURRENCY_KEY = 'seracCurrency';
@@ -333,96 +280,12 @@ const urlParams = new URLSearchParams(window.location.search);
 const quoteId = urlParams.get("quoteId") || null;
 const orderId = urlParams.get("orderId") || null;
 
-let activeData = null;
-let isPaidOrder = false;
+let activeQuoteRaw = null;   // raw quote doc (if loaded)
+let activeOrderRaw = null;   // raw order doc (if loaded)
+let isPaidOrder = false;     // true when we are viewing a paid order summary
+let quote = null;            // normalized structure used by renderOrder()
 
-async function loadCheckoutData() {
-  try {
-    // 🟢 Try loading order first (for paid summaries)
-    if (orderId) {
-      const orderSnap = await getDoc(doc(db, "brands", "serac", "orders", orderId));
-      if (orderSnap.exists()) {
-        activeData = orderSnap.data();
-        isPaidOrder = true;
-        console.log("✅ Loaded paid order data:", activeData);
-      }
-    }
-
-    // 🟠 If no order found, load from quote (for unpaid checkouts)
-    if (!activeData && quoteId) {
-      const quoteSnap = await getDoc(doc(db, "brands", "serac", "quotes", quoteId));
-      if (quoteSnap.exists()) {
-        activeData = quoteSnap.data();
-        console.log("✅ Loaded quote data:", activeData);
-      } else {
-        console.warn("⚠️ Quote not found:", quoteId);
-      }
-    }
-
-    if (!activeData) {
-      alert("❌ Unable to load order or quote data.");
-      return;
-    }
-
-    fillCheckoutUI(activeData, isPaidOrder);
-  } catch (err) {
-    console.error("💥 Failed to load data:", err);
-  }
-}
-
-loadCheckoutData();
-
-// 🧩 Populate billing + order summary
-function fillCheckoutUI(data, paid) {
-  // Fill billing form
-  document.querySelector('[name="fullname"]').value = data.fullName || "";
-  document.querySelector('[name="email"]').value = data.email || "";
-  document.querySelector('[name="phone"]').value = data.phone || "";
-  document.querySelector('[name="address"]').value = data.address || "";
-
-  // Fill order summary
-  const summary = document.querySelector("#order-summary");
-  summary.innerHTML = (data.items || [])
-    .map(
-      (item) => `
-        <div class="summary-item">
-          <span>${item.name}</span>
-          <span>₦${item.price.toLocaleString()}</span>
-        </div>
-      `
-    )
-    .join("");
-
-  document.querySelector("#subtotal").textContent =
-    `₦${(data.subtotal || 0).toLocaleString()}`;
-
-  function fillCheckoutUI(data, paid) {
-  // Existing code that fills the billing + order summary fields...
-  
-  const payBtn = document.getElementById("pay-btn");
-  const hero = document.getElementById("hero-section");
-  const heroHeading = hero.querySelector("h2");
-  const heroParagraph = hero.querySelector("p");
-
-  if (paid) {
-    hero.classList.add("paid");
-    heroHeading.textContent = "Order Summary";
-    heroParagraph.textContent = "Your order has been paid successfully.";
-    payBtn.textContent = "Paid ✅";
-    payBtn.disabled = true;
-    payBtn.classList.add("paid-state");
-  } else {
-    hero.classList.remove("paid");
-    heroHeading.textContent = "Checkout";
-    heroParagraph.textContent = "Review your quote and proceed to payment.";
-    payBtn.textContent = "Proceed to Payment";
-    payBtn.disabled = false;
-    payBtn.classList.remove("paid-state");
-  }
-}
-
-
-/* utilities */
+/* ---------- Utilities ---------- */
 function showSpinner(show=true){
   spinnerBackdrop.style.display = show ? 'flex' : 'none';
   spinnerBackdrop.setAttribute('aria-hidden', show ? 'false' : 'true');
@@ -444,7 +307,7 @@ function formatPrice(value, currency){
 }
 function escapeHtml(str){ if(!str && str !== 0) return ""; return String(str).replace(/[&<>"']/g, s => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[s])); }
 
-/* fetch product data */
+/* Reuse product fetching from Firestore (same path as cart) */
 async function fetchProductData(productId){
   try {
     if(productCache[productId]) return productCache[productId];
@@ -458,7 +321,7 @@ async function fetchProductData(productId){
   return null;
 }
 
-/* merge cart items */
+/* merge cart items (same logic as cart page) */
 function mergeCartItems(cartArray){
   const merged = [];
   (cartArray || []).forEach(item=>{
@@ -469,7 +332,7 @@ function mergeCartItems(cartArray){
   return merged;
 }
 
-/* build quote from cart */
+/* build normalized quote from client cart (used when no quoteId) */
 async function buildQuoteFromCart(){
   cart = mergeCartItems(cart);
   const byProduct = new Map();
@@ -518,7 +381,7 @@ async function buildQuoteFromCart(){
   return { items };
 }
 
-/* normalize server quote */
+/* Normalize server quote items into the same structure used above */
 function normalizeQuoteItems(rawQuote){
   const arr = Array.isArray(rawQuote.items) ? rawQuote.items : [];
   const items = arr.map(ci => {
@@ -560,6 +423,7 @@ function normalizeQuoteItems(rawQuote){
         description: ci.description || ''
       };
     } else {
+      // single line
       const qty = Number(ci.qty || ci.quantity) || 1;
       const unitPrices = {
         NGN: Number(ci.priceNGN) || Number(ci.price) || 0,
@@ -599,36 +463,42 @@ function normalizeQuoteItems(rawQuote){
   return { items };
 }
 
-/* render order */
-function renderOrder(){
+/* ---------------- Render / UI ---------------- */
+function renderOrderFromQuoteNormalized(quoteNormalized, currency = 'NGN', paid=false){
+  // quoteNormalized: { items: [...] }
   orderItemsEl.innerHTML = '';
-  if(!quote || !Array.isArray(quote.items)) return;
-  let subtotal = 0;
-  const isQuoteCheckout = !!quoteId;
+  if(!quoteNormalized || !Array.isArray(quoteNormalized.items)) {
+    orderItemsEl.innerHTML = '<li class="small-note">No items</li>';
+    totalsText.textContent = `Subtotal: —`;
+    return;
+  }
 
-  quote.items.forEach((item, idx)=>{
-    const value = (item.totalPrices && (item.totalPrices[selectedCurrency] ?? 0)) || 0;
+  let subtotal = 0;
+
+  quoteNormalized.items.forEach((item, idx) => {
+    const value = (item.totalPrices && (item.totalPrices[currency] ?? 0)) || 0;
     subtotal += value;
 
     const li = document.createElement('li');
     li.className = 'order-item';
     li.dataset.idx = idx;
 
-    if (isQuoteCheckout) {
+    if (paid) {
+      // compact display for paid order (no image, details with toggle)
       li.innerHTML = `
         <div class="left">
           <div style="min-width:0">
-            <div style="font-weight:700; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(item.name)}</div>
+            <div style="font-weight:700; color:#fff;">${escapeHtml(item.name)}</div>
             <div class="meta">${escapeHtml(String(item.totalQuantity) + ' item(s)')}</div>
             <button class="show-details-btn" data-idx="${idx}">Show Details ▾</button>
           </div>
         </div>
-        <div class="price">${formatPrice(value, selectedCurrency)}</div>
+        <div class="price">${formatPrice(value, currency)}</div>
       `;
       orderItemsEl.appendChild(li);
 
       const detailsContainer = document.createElement('div');
-      detailsContainer.className = 'variants-container details-container';
+      detailsContainer.className = 'details-container';
       detailsContainer.dataset.forIdx = idx;
       detailsContainer.style.display = 'none';
       const desc = item.description || '';
@@ -637,18 +507,18 @@ function renderOrder(){
         <div style="min-width:110px;text-align:right;color:var(--muted)">${escapeHtml(String(item.totalQuantity))}</div>
       </div>`;
       li.parentNode.insertBefore(detailsContainer, li.nextSibling);
-
     } else {
+      // regular checkout style show image + optional variants
       li.innerHTML = `
         <div class="left" style="flex-direction:row; align-items:center;">
           <img src="${escapeHtml(item.image || '../asset/placeholder.jpg')}" alt="${escapeHtml(item.name)}">
           <div style="min-width:0">
-            <div style="font-weight:700; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(item.name)}</div>
+            <div style="font-weight:700; color:#fff;">${escapeHtml(item.name)}</div>
             <div class="meta">${escapeHtml(String(item.totalQuantity) + ' item(s)')}</div>
             ${ (Array.isArray(item.variants) && item.variants.length > 1) ? `<button class="show-variants-btn" data-idx="${idx}">Show Choices ▾</button>` : '' }
           </div>
         </div>
-        <div class="price">${formatPrice(value, selectedCurrency)}</div>
+        <div class="price">${formatPrice(value, currency)}</div>
       `;
       orderItemsEl.appendChild(li);
 
@@ -674,6 +544,7 @@ function renderOrder(){
     }
   });
 
+  // wire toggles
   document.querySelectorAll('.show-variants-btn').forEach(btn=>{
     btn.addEventListener('click', (ev)=>{
       const idx = btn.dataset.idx;
@@ -686,9 +557,9 @@ function renderOrder(){
   });
 
   document.querySelectorAll('.show-details-btn').forEach(btn=>{
-    const idx = btn.dataset.idx;
-    const container = document.querySelector(`.details-container[data-for-idx="${idx}"]`);
-    btn.addEventListener('click', ()=>{
+    btn.addEventListener('click', (ev)=>{
+      const idx = btn.dataset.idx;
+      const container = document.querySelector(`.details-container[data-for-idx="${idx}"]`);
       if(!container) return;
       const isShown = container.classList.toggle('show');
       container.style.display = isShown ? 'flex' : 'none';
@@ -697,66 +568,209 @@ function renderOrder(){
   });
 
   totalsText.textContent = `Subtotal: ${formatPrice(subtotal, selectedCurrency)}`;
-  cartCountElem.textContent = quote.items.reduce((s,a)=>s + (a.totalQuantity || 0), 0);
+  // cart count for UI continuity
+  try { cartCountElem.textContent = quote ? quote.items.reduce((s,a)=>s + (a.totalQuantity || 0), 0) : 0; } catch(e){}
 }
 
-/* Load checkout data */
-async function loadCheckout(){
+/* ----------------- Load checkout data (quote or order) ----------------- */
+async function loadCheckoutData(){
   selectedCurrency = localStorage.getItem(CURRENCY_KEY) || selectedCurrency || 'NGN';
   currencySelect.value = selectedCurrency;
 
-  currencySelector.style.display = 'none';
+  // hide currency selector unless quote present
+  currencySelector.style.display = quoteId ? 'flex' : 'none';
 
-  if(quoteId){
-    try {
-      showSpinner(true);
-      const qRef = doc(db, "brands", "serac", "quotes", quoteId);
-      const snap = await getDoc(qRef);
-      showSpinner(false);
-      if(!snap.exists()){
+  try {
+    showSpinner(true);
+
+    // If orderId param present, prefer the order document (paid order summary)
+    if (orderId) {
+      const orderSnap = await getDoc(doc(db, "brands", "serac", "orders", orderId));
+      if (orderSnap.exists()){
+        activeOrderRaw = orderSnap.data();
+        isPaidOrder = true;
+        // Fill billing fields from order doc (if available)
+        nameInput.value = activeOrderRaw.name || activeOrderRaw.customer || "";
+        emailInput.value = activeOrderRaw.email || activeOrderRaw.customerEmail || "";
+        phoneInput.value = activeOrderRaw.phone || "";
+        addressInput.value = activeOrderRaw.address || "";
+        // Build a normalized quote structure from order.items if possible
+        if (Array.isArray(activeOrderRaw.items)) {
+          // Convert order.items (which may already be normalized) into the normalized structure expected by render
+          const ordItems = activeOrderRaw.items.map(it => {
+            // If item already has variants/totalPrices, use as-is; otherwise assume simple
+            if (it.variants || it.totalPrices) return it;
+            const qty = Number(it.qty || it.quantity) || 1;
+            const unitPrices = {
+              NGN: Number(it.priceNGN || it.price || 0),
+              USD: Number(it.priceUSD || 0),
+              EUR: Number(it.priceEUR || 0),
+              GBP: Number(it.priceGBP || 0),
+            };
+            return {
+              productId: it.id || '',
+              name: it.name || '',
+              image: it.image || '',
+              totalQuantity: qty,
+              totalPrices: {
+                NGN: (unitPrices.NGN || 0) * qty,
+                USD: (unitPrices.USD || 0) * qty,
+                EUR: (unitPrices.EUR || 0) * qty,
+                GBP: (unitPrices.GBP || 0) * qty
+              },
+              variants: [{
+                id: it.id || '',
+                color: it.color || '',
+                size: it.size || '',
+                quantity: qty,
+                unitPrices,
+                linePrices: {
+                  NGN: (unitPrices.NGN || 0) * qty,
+                  USD: (unitPrices.USD || 0) * qty,
+                  EUR: (unitPrices.EUR || 0) * qty,
+                  GBP: (unitPrices.GBP || 0) * qty
+                }
+              }],
+              description: it.description || ''
+            };
+          });
+          quote = { items: ordItems };
+          renderOrderFromQuoteNormalized(quote, selectedCurrency, true);
+          // set hero and button state for paid
+          hero.classList.add('paid');
+          heroH1.textContent = "Order Summary";
+          heroP.textContent = "Your order has been paid successfully.";
+          payBtn.textContent = "Paid ✅";
+          payBtn.disabled = true;
+          payBtn.classList.add('paid-state');
+          showSpinner(false);
+          return;
+        }
+      } else {
+        console.warn("Order not found for orderId:", orderId);
+      }
+    }
+
+    // If we reach here, either no orderId or order didn't exist. Try quoteId.
+    if (quoteId) {
+      const quoteSnap = await getDoc(doc(db, "brands", "serac", "quotes", quoteId));
+      if (!quoteSnap.exists()) {
+        showSpinner(false);
         showError("Quote not found. It might have been deleted.");
-        quote = { items: [] };
-        renderOrder();
         return;
       }
-      const rawQuote = snap.data();
-      if(rawQuote.customer) nameInput.value = rawQuote.customer;
-      if(rawQuote.email) emailInput.value = rawQuote.email;
-
-      currencySelector.style.display = 'flex';
-      selectedCurrency = localStorage.getItem(CURRENCY_KEY) || rawQuote.currency || selectedCurrency;
-      currencySelect.value = selectedCurrency;
-
-      quote = normalizeQuoteItems(rawQuote);
-      renderOrder();
-    } catch(err){
-      showSpinner(false);
-      console.error("Failed to load quote", err);
-      showError("Failed to load quote. Please refresh the page and try again.");
-    }
-  } else {
-    try {
-      cart = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-      cart = mergeCartItems(cart);
-      if(!cart.length){
-        quote = { items: [] };
-        renderOrder();
-        showError("Your cart is empty.");
-        return;
+      activeQuoteRaw = quoteSnap.data();
+      // If quote has status 'paid' and an orderId, try to load that order and show summary instead of checkout
+      const qStatus = (activeQuoteRaw.status || "").toLowerCase();
+      if (qStatus === 'paid' && activeQuoteRaw.orderId) {
+        // try to load order doc
+        const linkedOrderSnap = await getDoc(doc(db, "brands", "serac", "orders", activeQuoteRaw.orderId));
+        if (linkedOrderSnap.exists()){
+          activeOrderRaw = linkedOrderSnap.data();
+          isPaidOrder = true;
+          // fill billing from order
+          nameInput.value = activeOrderRaw.name || activeOrderRaw.customer || "";
+          emailInput.value = activeOrderRaw.email || activeOrderRaw.customerEmail || "";
+          phoneInput.value = activeOrderRaw.phone || "";
+          addressInput.value = activeOrderRaw.address || "";
+          // normalize items from order
+          if (Array.isArray(activeOrderRaw.items)) {
+            const ordItems = activeOrderRaw.items.map(it => {
+              if (it.variants || it.totalPrices) return it;
+              const qty = Number(it.qty || it.quantity) || 1;
+              const unitPrices = {
+                NGN: Number(it.priceNGN || it.price || 0),
+                USD: Number(it.priceUSD || 0),
+                EUR: Number(it.priceEUR || 0),
+                GBP: Number(it.priceGBP || 0),
+              };
+              return {
+                productId: it.id || '',
+                name: it.name || '',
+                image: it.image || '',
+                totalQuantity: qty,
+                totalPrices: {
+                  NGN: (unitPrices.NGN || 0) * qty,
+                  USD: (unitPrices.USD || 0) * qty,
+                  EUR: (unitPrices.EUR || 0) * qty,
+                  GBP: (unitPrices.GBP || 0) * qty
+                },
+                variants: [{
+                  id: it.id || '',
+                  color: it.color || '',
+                  size: it.size || '',
+                  quantity: qty,
+                  unitPrices,
+                  linePrices: {
+                    NGN: (unitPrices.NGN || 0) * qty,
+                    USD: (unitPrices.USD || 0) * qty,
+                    EUR: (unitPrices.EUR || 0) * qty,
+                    GBP: (unitPrices.GBP || 0) * qty
+                  }
+                }],
+                description: it.description || ''
+              };
+            });
+            quote = { items: ordItems };
+            renderOrderFromQuoteNormalized(quote, selectedCurrency, true);
+            // UI: hero and disabled pay
+            hero.classList.add('paid');
+            heroH1.textContent = "Order Summary";
+            heroP.textContent = "Your order has been paid successfully.";
+            payBtn.textContent = "Paid ✅";
+            payBtn.disabled = true;
+            payBtn.classList.add('paid-state');
+            showSpinner(false);
+            return;
+          }
+        } else {
+          // Quote says paid but linked order doc not found — still show the quote items but disable pay
+          console.warn("Quote status paid but order doc not found for id:", activeQuoteRaw.orderId);
+        }
       }
-      showSpinner(true);
-      quote = await buildQuoteFromCart();
+
+      // If quote is unpaid (or paid but no linked order), show quote items for checkout
+      // Fill billing inputs with quote customer info (if available)
+      if (activeQuoteRaw.customer) nameInput.value = activeQuoteRaw.customer;
+      if (activeQuoteRaw.email) emailInput.value = activeQuoteRaw.email;
+
+      // Normalize quote items into same structure expected by render function
+      quote = normalizeQuoteItems(activeQuoteRaw);
+      renderOrderFromQuoteNormalized(quote, selectedCurrency, false);
+
+      // set hero to checkout mode
+      hero.classList.remove('paid');
+      heroH1.textContent = "Checkout";
+      heroP.textContent = "Review your quote and proceed to payment.";
+      payBtn.textContent = "Proceed to Payment";
+      payBtn.disabled = false;
+      payBtn.classList.remove('paid-state');
       showSpinner(false);
-      renderOrder();
-    } catch(err){
-      showSpinner(false);
-      console.error("Failed to build quote from cart", err);
-      showError("Failed to load cart items. Please refresh and try again.");
+      return;
     }
+
+    // No quoteId and no orderId -> load from local cart
+    cart = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    cart = mergeCartItems(cart);
+    if (!cart.length) {
+      quote = { items: [] };
+      renderOrderFromQuoteNormalized(quote, selectedCurrency, false);
+      showSpinner(false);
+      showError("Your cart is empty.");
+      return;
+    }
+    // build quote from local cart
+    quote = await buildQuoteFromCart();
+    renderOrderFromQuoteNormalized(quote, selectedCurrency, false);
+    showSpinner(false);
+  } catch(err){
+    showSpinner(false);
+    console.error("Failed to load checkout data:", err);
+    showError("Failed to load checkout data. Please refresh and try again.");
   }
 }
 
-/* Basic validation */
+/* ---------- Basic validation ---------- */
 function validateForm(){
   showError('');
   const name = nameInput.value.trim();
@@ -772,13 +786,18 @@ function validateForm(){
   return null;
 }
 
-/* Payment & saving flow */
+/* ---------- Payment & saving flow ---------- */
 payBtn.addEventListener('click', async (ev) => {
   ev.preventDefault();
+
+  // If this is a paid order view, don't allow payment
+  if (isPaidOrder) return;
+
   showError('');
   const v = validateForm();
   if (v) { showError(v); return; }
 
+  // compute subtotal
   let subtotal = 0;
   quote.items.forEach(it => subtotal += (it.totalPrices && (it.totalPrices[selectedCurrency] ?? 0)) || 0);
   if (subtotal <= 0) { showError("Subtotal is zero. Cannot proceed."); return; }
@@ -807,27 +826,17 @@ payBtn.addEventListener('click', async (ev) => {
     tx_ref: txRef,
     amount: Number(subtotal),
     currency: selectedCurrency,
-    customer: { email, phonenumber: phone, name },
-    customizations: { 
-      title: "Sérac", 
-      description: "Order Payment", 
-      logo: "../asset/logo.png" 
-    },
+    customer: { email: email, phonenumber: phone, name: name },
+    customizations: { title: "Sérac", description: "Order Payment", logo: "../asset/logo.png" },
 
     callback: async function (data) {
       try {
         showSpinner(true);
-        console.log("💰 Payment success callback triggered:", data);
+        console.log("Payment callback data:", data);
 
         const paymentRef = data.tx_ref || data.transaction_id || data.transactionId || data.flwRef || data.id || "no_ref";
 
-        if (!baseOrder || typeof baseOrder !== 'object') {
-          console.error("❌ baseOrder is missing or invalid:", baseOrder);
-          alert("Order data missing. Please contact support.");
-          showSpinner(false);
-          return;
-        }
-
+        // Build paid order object to save
         const paidOrder = {
           ...baseOrder,
           paymentRef,
@@ -835,42 +844,42 @@ payBtn.addEventListener('click', async (ev) => {
           paidAt: serverTimestamp(),
           createdAt: serverTimestamp(),
           customer: baseOrder.name || "",
-          customerEmail: baseOrder.email || "",
+          customerEmail: baseOrder.email || ""
         };
 
-        console.log("📦 Writing order to Firestore:", paidOrder);
-
+        // Save order to Firestore (brands/serac/orders)
         const orderRef = await addDoc(collection(db, "brands", "serac", "orders"), paidOrder);
-        console.log("✅ Order saved with ID:", orderRef.id);
+        console.log("Order saved with ID:", orderRef.id);
 
-        // Update linked quote
+        // If this payment came from a quote, update that quote doc: status=paid + orderId + paidAt
         if (quoteId) {
           const qRef = doc(db, "brands", "serac", "quotes", quoteId);
           try {
-            console.log("🔄 Updating linked quote:", quoteId);
             await updateDoc(qRef, {
               status: "paid",
               paidAt: serverTimestamp(),
               orderId: orderRef.id,
               orderLink: `../checkout/index.html?quoteId=${quoteId}&orderId=${orderRef.id}`
             });
-            console.log("✅ Quote updated to paid successfully");
+            console.log("Quote updated to paid + linked orderId.");
           } catch (e) {
-            console.warn("❌ Quote update failed:", e);
+            console.warn("Failed to update quote after payment:", e);
           }
         }
 
-        try { localStorage.removeItem(STORAGE_KEY); } 
-        catch (e) { console.warn('localStorage clear failed', e); }
+        // clear local cart if checkout originated from cart
+        if (!quoteId) {
+          try { localStorage.removeItem(STORAGE_KEY); } catch(e){ console.warn("localStorage clear failed", e); }
+        }
 
         showSpinner(false);
-        alert("✅ Order saved successfully! Redirecting...");
+        // Redirect to thank you page OR show order summary. We'll redirect as before.
         window.location.href = "../thankyou.html";
-
       } catch (saveErr) {
         showSpinner(false);
-        console.error("💥 Failed saving paid order:", saveErr);
-        alert("Payment succeeded but saving failed. Please contact support.");
+        console.error("Failed saving paid order:", saveErr);
+        showError("Payment succeeded but saving the order failed. Please contact support.");
+        // still redirect to thank you because payment succeeded
         window.location.href = "../thankyou.html";
       } finally {
         payBtn.disabled = false;
@@ -878,42 +887,54 @@ payBtn.addEventListener('click', async (ev) => {
     },
 
     onclose: () => {
-      console.log("❌ Payment window closed by user");
+      // user closed the payment window
+      console.log("Payment window closed by user");
       payBtn.disabled = false;
       showSpinner(false);
     }
   };
 
-  // 🔹 Launch Flutterwave Checkout
-  FlutterwaveCheckout(fwConfig);
+  try {
+    if (typeof FlutterwaveCheckout === 'function') {
+      FlutterwaveCheckout(fwConfig);
+    } else {
+      throw new Error("Payment gateway not loaded");
+    }
+  } catch(err) {
+    showSpinner(false);
+    payBtn.disabled = false;
+    console.error("Flutterwave invocation failed", err);
+    showError("Payment gateway is unavailable. Please try again later.");
+  }
 });
 
-
-
-/* currency change */
+/* currency change (affects displayed totals) */
 currencySelect.addEventListener('change', () => {
   selectedCurrency = currencySelect.value;
   localStorage.setItem(CURRENCY_KEY, selectedCurrency);
-  renderOrder();
+  // re-render current quote/order summary
+  if (quote) renderOrderFromQuoteNormalized(quote, selectedCurrency, isPaidOrder);
 });
 
 /* header & hamburger wiring + init */
+window.addEventListener('scroll', () => {
+  const header = document.querySelector('.site-header');
+  if (!header) return;
+  if (window.scrollY > 50) header.classList.add('scrolled'); else header.classList.remove('scrolled');
+});
+const hamburger = document.getElementById('hamburger');
+const headerRight = document.getElementById('headerRight');
+hamburger.addEventListener('click', ()=> {
+  hamburger.classList.toggle('open');
+  headerRight.classList.toggle('open');
+});
+
+/* Initialize */
 (async function init(){
-  window.addEventListener('scroll', () => {
-    const header = document.querySelector('.site-header');
-    if (!header) return;
-    if (window.scrollY > 50) header.classList.add('scrolled'); else header.classList.remove('scrolled');
-  });
-
-  const hamburger = document.getElementById('hamburger');
-  const headerRight = document.getElementById('headerRight');
-  hamburger.addEventListener('click', ()=> {
-    hamburger.classList.toggle('open');
-    headerRight.classList.toggle('open');
-  });
-
-  await loadCheckout();
-})();}
+  // Ensure currency select matches stored value
+  try { currencySelect.value = selectedCurrency; } catch(e){}
+  await loadCheckoutData();
+})();
 </script>
 
 </body>
