@@ -58,6 +58,22 @@ a { text-decoration:none; color:inherit; transition: color var(--transition); }
 .hero-text h1 { font-family:"Playfair Display", serif; font-size: clamp(28px,5vw,48px); margin-bottom:12px; color:var(--gold); }
 .hero-text p { font-size: clamp(14px,2vw,18px); max-width:900px; color:#F5F5F3}
 
+
+/* 🟢 When paid, hero background changes */
+.hero.paid {
+  background: url('../assets/orders-hero.jpg') center/cover no-repeat;
+}
+
+/* 🟢 Paid button style */
+#pay-btn.paid-state {
+  background-color: #1faa59 !important;
+  cursor: default;
+  pointer-events: none;
+}
+
+
+
+  
 /* MAIN CHECKOUT LAYOUT - reworked to match Fleur De Vie structure */
 section.checkout { padding:56px 18px; background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.0)); }
 
@@ -312,8 +328,99 @@ const CURRENCY_KEY = 'seracCurrency';
 let cart = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
 let selectedCurrency = localStorage.getItem(CURRENCY_KEY) || 'NGN';
 let productCache = {};
-let quoteId = (new URLSearchParams(window.location.search)).get('quoteId') || null;
-let quote = null;
+
+const urlParams = new URLSearchParams(window.location.search);
+const quoteId = urlParams.get("quoteId") || null;
+const orderId = urlParams.get("orderId") || null;
+
+let activeData = null;
+let isPaidOrder = false;
+
+async function loadCheckoutData() {
+  try {
+    // 🟢 Try loading order first (for paid summaries)
+    if (orderId) {
+      const orderSnap = await getDoc(doc(db, "brands", "serac", "orders", orderId));
+      if (orderSnap.exists()) {
+        activeData = orderSnap.data();
+        isPaidOrder = true;
+        console.log("✅ Loaded paid order data:", activeData);
+      }
+    }
+
+    // 🟠 If no order found, load from quote (for unpaid checkouts)
+    if (!activeData && quoteId) {
+      const quoteSnap = await getDoc(doc(db, "brands", "serac", "quotes", quoteId));
+      if (quoteSnap.exists()) {
+        activeData = quoteSnap.data();
+        console.log("✅ Loaded quote data:", activeData);
+      } else {
+        console.warn("⚠️ Quote not found:", quoteId);
+      }
+    }
+
+    if (!activeData) {
+      alert("❌ Unable to load order or quote data.");
+      return;
+    }
+
+    fillCheckoutUI(activeData, isPaidOrder);
+  } catch (err) {
+    console.error("💥 Failed to load data:", err);
+  }
+}
+
+loadCheckoutData();
+
+// 🧩 Populate billing + order summary
+function fillCheckoutUI(data, paid) {
+  // Fill billing form
+  document.querySelector('[name="fullname"]').value = data.fullName || "";
+  document.querySelector('[name="email"]').value = data.email || "";
+  document.querySelector('[name="phone"]').value = data.phone || "";
+  document.querySelector('[name="address"]').value = data.address || "";
+
+  // Fill order summary
+  const summary = document.querySelector("#order-summary");
+  summary.innerHTML = (data.items || [])
+    .map(
+      (item) => `
+        <div class="summary-item">
+          <span>${item.name}</span>
+          <span>₦${item.price.toLocaleString()}</span>
+        </div>
+      `
+    )
+    .join("");
+
+  document.querySelector("#subtotal").textContent =
+    `₦${(data.subtotal || 0).toLocaleString()}`;
+
+  function fillCheckoutUI(data, paid) {
+  // Existing code that fills the billing + order summary fields...
+  
+  const payBtn = document.getElementById("pay-btn");
+  const hero = document.getElementById("hero-section");
+  const heroHeading = hero.querySelector("h2");
+  const heroParagraph = hero.querySelector("p");
+
+  if (paid) {
+    hero.classList.add("paid");
+    heroHeading.textContent = "Order Summary";
+    heroParagraph.textContent = "Your order has been paid successfully.";
+    payBtn.textContent = "Paid ✅";
+    payBtn.disabled = true;
+    payBtn.classList.add("paid-state");
+  } else {
+    hero.classList.remove("paid");
+    heroHeading.textContent = "Checkout";
+    heroParagraph.textContent = "Review your quote and proceed to payment.";
+    payBtn.textContent = "Proceed to Payment";
+    payBtn.disabled = false;
+    payBtn.classList.remove("paid-state");
+  }
+}
+
 
 /* utilities */
 function showSpinner(show=true){
