@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Thank You - Sérac</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     /* RESET */
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -21,8 +21,7 @@
     a { text-decoration: none; color: inherit; }
 
     /* HEADER */
-    
-    header.site-header {
+    .site-header {
       position: fixed; top:0; left:0; right:0;
       display:flex; align-items:center; justify-content:space-between;
       padding:10px 20px; z-index:1200;
@@ -42,7 +41,6 @@
       background:#B66E41; transition:width 0.3s ease;
     }
     .header-right a:hover::after { width:100%; }
-
     
     .hamburger {
       display: none;
@@ -70,7 +68,6 @@
     .hamburger.open span:nth-child(2){opacity:0;}
     .hamburger.open span:nth-child(3){transform:rotate(-45deg);top:10px;}
 
-    
     /* HERO */
     .hero {
       position: relative;
@@ -105,9 +102,6 @@
       letter-spacing: 1px;
       text-shadow: 0 4px 10px rgba(0,0,0,0.5);
     }
-
-    
-
 
     /* THANK YOU SECTION */
     .thankyou-section {
@@ -212,8 +206,14 @@
     }
 
     /* ANIMATIONS */
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
     /* RESPONSIVE */
     @media(max-width: 900px) {
@@ -232,6 +232,7 @@
       .hamburger { display: block; }
       .thankyou-box { padding: 30px; }
     }
+
     @media(max-width: 600px) {
       .hero { height: 50vh; margin-top: 0; padding-top: 90px; }
       .hero-text h1 { font-size: clamp(26px, 6vw, 36px); line-height: 1.2; }
@@ -241,9 +242,9 @@
 <body>
 
   <!-- HEADER -->
-  <header class="site-header" id="siteHeader">
+  <header class="site-header">
     <div class="header-left">
-      <img src="asset/logo.png" alt="Sérac Logo" class="brand-logo" />
+      <img src="asset/logo.png" alt="Sérac Logo" class="brand-logo">
       <div class="brand-title">Sérac</div>
     </div>
     <nav class="header-right">
@@ -257,7 +258,9 @@
 
   <!-- HERO -->
   <section class="hero">
-    <div class="hero-text"><h1>Thank You</h1></div>
+    <div class="hero-text">
+      <h1>Thank You</h1>
+    </div>
   </section>
 
   <!-- THANK YOU SECTION -->
@@ -267,6 +270,7 @@
       <p>Thank you for shopping with <strong>Sérac</strong>.  
       Your order is being processed and you’ll receive a confirmation email shortly.</p>
 
+      <!-- ORDER DETAILS -->
       <div class="order-details" id="orderDetails"></div>
 
       <a href="shop.html" class="btn btn-primary">Continue Shopping</a>
@@ -275,25 +279,18 @@
   </section>
 
   <!-- FOOTER -->
-  <footer><p>© 2025 Sérac</p></footer>
+  <footer>
+    <p>© 2025 Sérac</p>
+  </footer>
 
   <script>
     // Hamburger toggle
-    const hamburger = document.getElementById('hamburger');
-    const navMenu = document.querySelector('.header-right');
-    hamburger.addEventListener('click', () => {
-      navMenu.classList.toggle('open');
-      hamburger.classList.toggle('open');
+    document.getElementById('hamburger').addEventListener('click',()=>{
+      document.querySelector('.header-right').classList.toggle('open');
+      document.getElementById('hamburger').classList.toggle('open');
     });
 
-    // Header scroll background toggle
-    const header = document.getElementById('siteHeader');
-    window.addEventListener('scroll', () => {
-      if (window.scrollY > 60) header.classList.add('scrolled');
-      else header.classList.remove('scrolled');
-    });
-
-    // Load order details
+    // Load order details from localStorage (set in checkout.html)
     const orderData = JSON.parse(localStorage.getItem('lastOrder_serac'));
     if(orderData){
       const detailsDiv = document.getElementById('orderDetails');
