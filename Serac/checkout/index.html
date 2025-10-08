@@ -746,7 +746,7 @@ payBtn.addEventListener('click', async (ev) => {
         console.error("Failed saving paid order", saveErr);
         showError("Payment succeeded but saving the order failed. Please contact support.");
         try { localStorage.removeItem(STORAGE_KEY); } catch(e){ }
-        window.location.href = "../serac/thankyou.html";
+        window.location.href = "../thankyou.html";
       } finally {
         payBtn.disabled = false;
       }
