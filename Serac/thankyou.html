@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Thank You - Sérac</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
     /* RESET */
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -22,7 +22,7 @@
 
     /* HEADER */
     .site-header {
-      background: rgba(20, 21, 23, 0.95);
+      background: transparent;
       backdrop-filter: blur(10px);
       color: #fff;
       display: flex;
@@ -35,8 +35,13 @@
       right: 0;
       z-index: 1000;
       border-bottom: 1px solid rgba(255,255,255,0.05);
-      transition: background 0.3s ease;
+      transition: background 0.4s ease, box-shadow 0.4s ease;
     }
+    .site-header.scrolled {
+      background: rgba(20,21,23,0.95);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+    }
+
     .header-left { display: flex; align-items: center; gap: 12px; }
     .brand-logo { height: 56px; }
     .brand-title {
@@ -116,7 +121,7 @@
       content: "";
       position: absolute;
       inset: 0;
-      background: url('asset/bg25.jpg') center/cover no-repeat;
+      background: url('asset/bg2.jpg') center/cover no-repeat;
       transform: scale(1.1);
       z-index: -1;
       box-shadow: inset 0 0 0 2000px rgba(20,21,23,0.6);
@@ -237,14 +242,8 @@
     }
 
     /* ANIMATIONS */
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
 
     /* RESPONSIVE */
     @media(max-width: 900px) {
@@ -263,7 +262,6 @@
       .hamburger { display: block; }
       .thankyou-box { padding: 30px; }
     }
-
     @media(max-width: 600px) {
       .hero { height: 50vh; margin-top: 0; padding-top: 90px; }
       .hero-text h1 { font-size: clamp(26px, 6vw, 36px); line-height: 1.2; }
@@ -273,9 +271,9 @@
 <body>
 
   <!-- HEADER -->
-  <header class="site-header">
+  <header class="site-header" id="siteHeader">
     <div class="header-left">
-      <img src="asset/logo.png" alt="Sérac Logo" class="brand-logo">
+      <img src="asset/logo.png" alt="Sérac Logo" class="brand-logo" />
       <div class="brand-title">Sérac</div>
     </div>
     <nav class="header-right">
@@ -289,9 +287,7 @@
 
   <!-- HERO -->
   <section class="hero">
-    <div class="hero-text">
-      <h1>Thank You</h1>
-    </div>
+    <div class="hero-text"><h1>Thank You</h1></div>
   </section>
 
   <!-- THANK YOU SECTION -->
@@ -301,7 +297,6 @@
       <p>Thank you for shopping with <strong>Sérac</strong>.  
       Your order is being processed and you’ll receive a confirmation email shortly.</p>
 
-      <!-- ORDER DETAILS -->
       <div class="order-details" id="orderDetails"></div>
 
       <a href="shop.html" class="btn btn-primary">Continue Shopping</a>
@@ -310,18 +305,25 @@
   </section>
 
   <!-- FOOTER -->
-  <footer>
-    <p>© 2025 Sérac</p>
-  </footer>
+  <footer><p>© 2025 Sérac</p></footer>
 
   <script>
     // Hamburger toggle
-    document.getElementById('hamburger').addEventListener('click',()=>{
-      document.querySelector('.header-right').classList.toggle('open');
-      document.getElementById('hamburger').classList.toggle('open');
+    const hamburger = document.getElementById('hamburger');
+    const navMenu = document.querySelector('.header-right');
+    hamburger.addEventListener('click', () => {
+      navMenu.classList.toggle('open');
+      hamburger.classList.toggle('open');
     });
 
-    // Load order details from localStorage (set in checkout.html)
+    // Header scroll background toggle
+    const header = document.getElementById('siteHeader');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 60) header.classList.add('scrolled');
+      else header.classList.remove('scrolled');
+    });
+
+    // Load order details
     const orderData = JSON.parse(localStorage.getItem('lastOrder_serac'));
     if(orderData){
       const detailsDiv = document.getElementById('orderDetails');
