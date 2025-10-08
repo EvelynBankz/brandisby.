@@ -264,6 +264,7 @@ footer { text-align:center; padding:22px; background:transparent; color:var(--mu
   </div>
 </div>
 
+
 <!-- Flutterwave script -->
 <script src="https://checkout.flutterwave.com/v3.js"></script>
 
@@ -271,7 +272,7 @@ footer { text-align:center; padding:22px; background:transparent; color:var(--mu
 <script type="module">
 /* ---------- Firebase ---------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, collection, addDoc, updateDoc, serverTimestamp, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
 /* CONFIG (same project as other Serac files) */
 const firebaseConfig = {
@@ -509,7 +510,6 @@ function renderOrder(){
     li.dataset.idx = idx;
 
     if (isQuoteCheckout) {
-      // Quote checkout: NO image. Show product name and meta, add "Show Details" button
       li.innerHTML = `
         <div class="left">
           <div style="min-width:0">
@@ -522,7 +522,6 @@ function renderOrder(){
       `;
       orderItemsEl.appendChild(li);
 
-      // details container (description + quantity) inserted after product li (hidden by default)
       const detailsContainer = document.createElement('div');
       detailsContainer.className = 'variants-container details-container';
       detailsContainer.dataset.forIdx = idx;
@@ -535,7 +534,6 @@ function renderOrder(){
       li.parentNode.insertBefore(detailsContainer, li.nextSibling);
 
     } else {
-      // Normal cart checkout: keep image + variant toggle behavior unchanged
       li.innerHTML = `
         <div class="left" style="flex-direction:row; align-items:center;">
           <img src="${escapeHtml(item.image || '../asset/placeholder.jpg')}" alt="${escapeHtml(item.name)}">
@@ -549,7 +547,6 @@ function renderOrder(){
       `;
       orderItemsEl.appendChild(li);
 
-      // variants container (hidden by default)
       if(Array.isArray(item.variants) && item.variants.length){
         const variantsContainer = document.createElement('div');
         variantsContainer.className = 'variants-container';
@@ -572,7 +569,6 @@ function renderOrder(){
     }
   });
 
-  // wire show/hide variant toggles (non-quote behavior)
   document.querySelectorAll('.show-variants-btn').forEach(btn=>{
     btn.addEventListener('click', (ev)=>{
       const idx = btn.dataset.idx;
@@ -584,11 +580,10 @@ function renderOrder(){
     });
   });
 
-  // wire show/hide details toggles (quote-only behavior)
   document.querySelectorAll('.show-details-btn').forEach(btn=>{
-    btn.addEventListener('click', (ev)=>{
-      const idx = btn.dataset.idx;
-      const container = document.querySelector(`.details-container[data-for-idx="${idx}"]`);
+    const idx = btn.dataset.idx;
+    const container = document.querySelector(`.details-container[data-for-idx="${idx}"]`);
+    btn.addEventListener('click', ()=>{
       if(!container) return;
       const isShown = container.classList.toggle('show');
       container.style.display = isShown ? 'flex' : 'none';
@@ -600,16 +595,14 @@ function renderOrder(){
   cartCountElem.textContent = quote.items.reduce((s,a)=>s + (a.totalQuantity || 0), 0);
 }
 
-/* Load checkout data: either from quoteId (Firestore) or from local cart (seracCart) */
+/* Load checkout data */
 async function loadCheckout(){
   selectedCurrency = localStorage.getItem(CURRENCY_KEY) || selectedCurrency || 'NGN';
   currencySelect.value = selectedCurrency;
 
-  // hide currency selector by default, only show for quote
   currencySelector.style.display = 'none';
 
   if(quoteId){
-    // fetch the quote doc from brands/serac/quotes
     try {
       showSpinner(true);
       const qRef = doc(db, "brands", "serac", "quotes", quoteId);
@@ -625,12 +618,10 @@ async function loadCheckout(){
       if(rawQuote.customer) nameInput.value = rawQuote.customer;
       if(rawQuote.email) emailInput.value = rawQuote.email;
 
-      // show currency selector for quotes
       currencySelector.style.display = 'flex';
       selectedCurrency = localStorage.getItem(CURRENCY_KEY) || rawQuote.currency || selectedCurrency;
       currencySelect.value = selectedCurrency;
 
-      // normalize quote
       quote = normalizeQuoteItems(rawQuote);
       renderOrder();
     } catch(err){
@@ -639,7 +630,6 @@ async function loadCheckout(){
       showError("Failed to load quote. Please refresh the page and try again.");
     }
   } else {
-    // build from local cart (same key used by cart.html)
     try {
       cart = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
       cart = mergeCartItems(cart);
@@ -670,7 +660,6 @@ function validateForm(){
   const address = addressInput.value.trim();
   if(!name) return "Name is required.";
   if(!email) return "Email is required.";
-  // simple email sanity
   if(!/^\S+@\S+\.\S+$/.test(email)) return "Please provide a valid email.";
   if(!phone) return "Phone is required.";
   if(!address) return "Address is required.";
@@ -685,12 +674,10 @@ payBtn.addEventListener('click', async (ev) => {
   const v = validateForm();
   if(v){ showError(v); return; }
 
-  // compute subtotal
   let subtotal = 0;
   quote.items.forEach(it => subtotal += (it.totalPrices && (it.totalPrices[selectedCurrency] ?? 0)) || 0);
   if(subtotal <= 0){ showError("Subtotal is zero. Cannot proceed."); return; }
 
-  // disable UI + show spinner
   payBtn.disabled = true;
   showSpinner(true);
 
@@ -699,18 +686,16 @@ payBtn.addEventListener('click', async (ev) => {
   const phone = phoneInput.value.trim();
   const address = addressInput.value.trim();
 
-  // build order payload to save (status pending until payment confirms)
   const baseOrder = {
     name, email, phone, address,
     currency: selectedCurrency,
     items: quote.items,
     total: subtotal,
-    status: "pending",
+    status: "placed",
     source: quoteId ? `quote:${quoteId}` : 'cart',
     createdAt: serverTimestamp()
   };
 
-  // prepare Flutterwave payload
   const txRef = "serac_" + Date.now();
   const fwConfig = {
     public_key: FLW_PUBLIC_KEY,
@@ -720,7 +705,6 @@ payBtn.addEventListener('click', async (ev) => {
     customer: { email: email, phonenumber: phone, name: name },
     customizations: { title: "Sérac", description: "Order Payment", logo: "../asset/logo.png" },
     callback: async function (data) {
-      // payment callback — try to save order as paid
       try {
         showSpinner(true);
         const paymentRef = data.tx_ref || data.transaction_id || data.transactionId || data.flwRef || data.id || null;
@@ -730,15 +714,20 @@ payBtn.addEventListener('click', async (ev) => {
           status: "paid",
           paidAt: serverTimestamp()
         };
-        // save in Firestore under brands/serac/orders
-        await addDoc(collection(db, "brands", "serac", "orders"), paidOrder);
 
-        // clear local cart if not a quote checkout
+        // Save order to Firestore
+        const orderRef = await addDoc(collection(db, "brands", "serac", "orders"), paidOrder);
+
+        // Update quote status if it's a quote checkout
+        if(quoteId){
+          const qRef = doc(db, "brands", "serac", "quotes", quoteId);
+          try { await updateDoc(qRef, { status: "paid", paidAt: serverTimestamp() }); } catch(e){ console.warn("Quote status update failed", e); }
+        }
+
         if(!quoteId){
           try { localStorage.removeItem(STORAGE_KEY); } catch(e){ console.warn('localStorage clear failed', e); }
         }
 
-        // success redirect to thank you
         showSpinner(false);
         window.location.href = "../thankyou.html";
       } catch(saveErr){
@@ -757,7 +746,6 @@ payBtn.addEventListener('click', async (ev) => {
     }
   };
 
-  // invoke Flutterwave
   try {
     if (typeof FlutterwaveCheckout === 'function') {
       FlutterwaveCheckout(fwConfig);
@@ -772,7 +760,7 @@ payBtn.addEventListener('click', async (ev) => {
   }
 });
 
-/* currency change (only active when visible) */
+/* currency change */
 currencySelect.addEventListener('change', () => {
   selectedCurrency = currencySelect.value;
   localStorage.setItem(CURRENCY_KEY, selectedCurrency);
@@ -781,14 +769,12 @@ currencySelect.addEventListener('change', () => {
 
 /* header & hamburger wiring + init */
 (async function init(){
-  // header behavior from cart
   window.addEventListener('scroll', () => {
     const header = document.querySelector('.site-header');
     if (!header) return;
     if (window.scrollY > 50) header.classList.add('scrolled'); else header.classList.remove('scrolled');
   });
 
-  // hamburger toggle
   const hamburger = document.getElementById('hamburger');
   const headerRight = document.getElementById('headerRight');
   hamburger.addEventListener('click', ()=> {
@@ -796,7 +782,6 @@ currencySelect.addEventListener('change', () => {
     headerRight.classList.toggle('open');
   });
 
-  // load checkout data
   await loadCheckout();
 })();
 </script>
