@@ -21,63 +21,29 @@
     a { text-decoration: none; color: inherit; }
 
     /* HEADER */
-    .site-header {
-      background: transparent;
-      backdrop-filter: blur(10px);
-      color: #fff;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 18px 36px;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-      transition: background 0.4s ease, box-shadow 0.4s ease;
+    
+    header.site-header {
+      position: fixed; top:0; left:0; right:0;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:10px 20px; z-index:1200;
+      background:transparent;
+      border-bottom:1px solid rgba(245,245,243,0.1);
+      transition:background 0.4s ease, box-shadow 0.4s ease;
+      height:80px;
     }
-    .site-header.scrolled {
-      background: rgba(20,21,23,0.95);
-      box-shadow: 0 2px 10px rgba(0,0,0,0.4);
-    }
-
-    .header-left { display: flex; align-items: center; gap: 12px; }
-    .brand-logo { height: 56px; }
-    .brand-title {
-      font-family: "Playfair Display", serif;
-      font-size: 26px;
-      font-weight: 700;
-      letter-spacing: 1px;
-      color: #B66E41;
-    }
-    .header-right {
-      display: flex;
-      gap: 28px;
-      align-items: center;
-    }
-    .header-right a {
-      font-weight: 500;
-      font-size: 15px;
-      position: relative;
-      transition: color 0.3s ease;
-    }
+    .site-header.scrolled { background: rgba(20,21,23,0.95); box-shadow:0 4px 20px rgba(0,0,0,0.6); }
+    .header-left { display:flex; align-items:center; gap:18px; }
+    .brand-logo { height:80px; width:auto; }
+    .brand-title { font-family:"Playfair Display", serif; font-weight:700; font-size:1.9rem; color:#B66E41; letter-spacing:1px; }
+    .header-right { display:flex; gap:24px; font-weight:500; }
+    .header-right a { color:#F5F5F3; position:relative; padding:6px 0; font-size:1rem; }
     .header-right a::after {
-      content: "";
-      position: absolute;
-      bottom: -4px;
-      left: 0;
-      width: 0;
-      height: 2px;
-      background-color: #B66E41;
-      transition: width 0.3s ease;
+      content:""; position:absolute; bottom:-4px; left:0; width:0; height:2px;
+      background:#B66E41; transition:width 0.3s ease;
     }
-    .header-right a:hover {
-      color: #B66E41;
-    }
-    .header-right a:hover::after {
-      width: 100%;
-    }
+    .header-right a:hover::after { width:100%; }
+
+    
     .hamburger {
       display: none;
       background: none;
@@ -104,6 +70,7 @@
     .hamburger.open span:nth-child(2){opacity:0;}
     .hamburger.open span:nth-child(3){transform:rotate(-45deg);top:10px;}
 
+    
     /* HERO */
     .hero {
       position: relative;
@@ -116,7 +83,7 @@
       overflow: hidden;
       border-radius: 0 0 20px 20px;
       animation: fadeIn 1.5s ease;
-    /* }
+    }
     .hero::after {
       content: "";
       position: absolute;
@@ -137,28 +104,9 @@
       font-size: clamp(36px, 6vw, 60px);
       letter-spacing: 1px;
       text-shadow: 0 4px 10px rgba(0,0,0,0.5);
-    } */
+    }
 
-    /* ================= HERO ================= */
-    .hero-about {
-      height: 90vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      background: url("asset/bg25.jpg") center center / cover no-repeat;
-      margin-top: 0;
-      position:relative;
-    }
-    .hero-about::after {
-      content:"";
-      position:absolute;
-      top:0;left:0;right:0;bottom:0;
-      background:rgba(20,21,23,0.6);
-    }
-    .hero-about .hero-text { position:relative; z-index:2; max-width:800px; padding:0 15px; }
-    .hero-about .hero-text h1 { font-family:"Playfair Display", serif; font-size: clamp(42px,6vw,72px); margin-bottom:18px; color:#B66E41; line-height:1.2; animation: fadeInDown 1s ease; }
-    .hero-about .hero-text p { font-size: clamp(18px,2vw,26px); color:#F5F5F3; line-height:1.6; animation: fadeInUp 1.2s ease; }
+    
 
 
     /* THANK YOU SECTION */
