@@ -736,17 +736,23 @@ payBtn.addEventListener('click', async (ev) => {
     console.log("✅ Order saved with ID:", orderRef.id);
 
     // Update quote if present
-    if (quoteId) {
-      console.log("🔄 Updating linked quote:", quoteId);
-      const qRef = doc(db, "brands", "serac", "quotes", quoteId);
-      await updateDoc(qRef, {
-        status: "Paid",
-        paidAt: serverTimestamp(),
-        orderId: orderRef.id,
-        orderLink: `../checkout/index.html?quoteId=${quoteId}&orderId=${orderRef.id}`
-      });
-      console.log("✅ Quote updated with orderId link.");
-    }
+    // ✅ Update quote status if this order originated from one
+if (quoteId) {
+  const qRef = doc(db, "brands", "serac", "quotes", quoteId);
+  try {
+    console.log("🔄 Updating linked quote:", quoteId);
+    await updateDoc(qRef, {
+      status: "paid", // keep consistent lowercase for logic checks
+      paidAt: serverTimestamp(),
+      orderId: orderRef.id,
+      orderLink: `../checkout/index.html?quoteId=${quoteId}&orderId=${orderRef.id}`
+    });
+    console.log("✅ Quote updated to paid successfully");
+  } catch (e) {
+    console.warn("❌ Quote update failed:", e);
+  }
+}
+
 
     try { localStorage.removeItem(STORAGE_KEY); } catch (e) { console.warn('localStorage clear failed', e); }
 
