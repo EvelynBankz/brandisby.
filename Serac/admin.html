@@ -293,9 +293,9 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, getDoc, query } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-/* ---------------- FIREBASE CONFIG (SERAC) ---------------- */
+/* ---------------- FIREBASE CONFIG ---------------- */
 const firebaseConfig = {
   apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
   authDomain: "brandisby.firebaseapp.com",
@@ -308,24 +308,19 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-/* ---------------- ALLOWED ADMIN(S) ---------------- */
-const allowedAdmins = ["stonecold.serac@gmail.com"].map(e => e.toLowerCase().trim());
-
 /* ---------------- STATE ---------------- */
 let currentEditingProductId = null;
-let productsCache = []; // array of product objects {id, ...}
-let quotesCache = [];   // array of quote objects {id, ...}
-let allOrders = [];     // array of orders
+let productsCache = [];
+let quotesCache = [];
+let allOrders = [];
 let quoteDraftItems = [];
 
-/* ---------------- DOM REFS ---------------- */
-/* Auth + UI */
+/* ---------------- DOM ---------------- */
 const loginForm = document.getElementById("loginForm");
 const loginMessage = document.getElementById("loginMessage");
 const loginContainer = document.getElementById("loginContainer");
 const dashboardContainer = document.getElementById("dashboardContainer");
 
-/* Products */
 const productForm = document.getElementById("productForm");
 const productMessage = document.getElementById("productMessage");
 const productsTableBody = document.getElementById("productsTableBody");
@@ -337,7 +332,6 @@ const addSizeBtn = document.getElementById("addSizeBtn");
 const addColorBtn = document.getElementById("addColorBtn");
 const addImageBtn = document.getElementById("addImageBtn");
 
-/* Quotes */
 const quoteForm = document.getElementById("quoteForm");
 const quoteItemsDiv = document.getElementById("quoteItems");
 const addQuoteItemBtn = document.getElementById("addQuoteItem");
@@ -350,7 +344,6 @@ const addItemPanel = document.getElementById("addItemPanel");
 const ai_add = document.getElementById("ai_add");
 const ai_cancel = document.getElementById("ai_cancel");
 
-/* Orders */
 const ordersTableBody = document.querySelector("#ordersTable tbody");
 const orderSearch = document.getElementById("orderSearch");
 const orderStatusFilter = document.getElementById("orderStatusFilter");
@@ -359,13 +352,12 @@ const exportCurrency = document.getElementById("exportCurrency");
 const exportFrom = document.getElementById("exportFrom");
 const exportTo = document.getElementById("exportTo");
 
-/* Modal */
 const quoteModalBackdrop = document.getElementById("quoteModalBackdrop");
 const quoteModalBody = document.getElementById("quoteModalBody");
 const closeModalBtn = document.getElementById("closeModalBtn");
 const openCheckoutBtn = document.getElementById("openCheckoutBtn");
 
-/* ---------------- UTIL FUNCTIONS ---------------- */
+/* ---------------- UTIL ---------------- */
 function formatCurrency(value, currency){
   const localeMap = { NGN:'en-NG', USD:'en-US', EUR:'de-DE', GBP:'en-GB' };
   const minFrac = currency === 'NGN' ? 0 : 2;
@@ -377,747 +369,199 @@ function formatCurrency(value, currency){
 }
 function escapeHtml(str){ if (!str && str !== 0) return ""; return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[s])); }
 
-/* ---------------- REPEATABLE FIELDS HELPERS ---------------- */
+/* ---------------- REPEATABLE FIELDS ---------------- */
 function createRepeatRow(value='', placeholder='') {
   const row = document.createElement('div');
   row.className = 'row';
-  row.innerHTML = `
-    <input type="text" value="${escapeHtml(value)}" placeholder="${escapeHtml(placeholder)}" />
-    <button type="button" class="remove-row">Remove</button>
-  `;
-  row.querySelector('.remove-row').addEventListener('click', () => row.remove());
+  row.innerHTML = `<input type="text" value="${escapeHtml(value)}" placeholder="${escapeHtml(placeholder)}" /> <button type="button" class="remove-row">Remove</button>`;
+  row.querySelector('.remove-row').addEventListener('click',()=>row.remove());
   return row;
 }
 function addSizeInput(val=''){ sizesRepeat.appendChild(createRepeatRow(val,'Size e.g. S, M, L')); }
 function addColorInput(val=''){ colorsRepeat.appendChild(createRepeatRow(val,'Color e.g. Olive')); }
 function addImageInput(val=''){ imagesRepeat.appendChild(createRepeatRow(val,'https://.../image.jpg')); }
-
-addSizeBtn?.addEventListener('click', () => addSizeInput());
-addColorBtn?.addEventListener('click', () => addColorInput());
-addImageBtn?.addEventListener('click', () => addImageInput());
-
-/* ensure at least one blank field on start */
-addSizeInput();
-addColorInput();
-addImageInput();
+addSizeBtn?.addEventListener('click',()=>addSizeInput());
+addColorBtn?.addEventListener('click',()=>addColorInput());
+addImageBtn?.addEventListener('click',()=>addImageInput());
+addSizeInput(); addColorInput(); addImageInput();
 
 /* ---------------- AUTH ---------------- */
+const allowedAdmins = ["stonecold.serac@gmail.com"].map(e=>e.toLowerCase().trim());
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   loginMessage.textContent = "";
   try {
     const email = document.getElementById("loginEmail").value;
     const password = document.getElementById("loginPassword").value;
-    const userCred = await signInWithEmailAndPassword(auth, email, password);
-    const normalized = (userCred.user.email || "").toLowerCase().trim();
-    if (allowedAdmins.includes(normalized)) {
-      loginContainer.style.display = "none";
-      dashboardContainer.style.display = "block";
+    const userCred = await signInWithEmailAndPassword(auth,email,password);
+    if (allowedAdmins.includes((userCred.user.email||"").toLowerCase().trim())){
+      loginContainer.style.display="none";
+      dashboardContainer.style.display="block";
       startSubscriptions();
       showSection("productsSection");
     } else {
-      loginMessage.textContent = "❌ Not authorized.";
-      loginMessage.style.color = "red";
+      loginMessage.textContent="❌ Not authorized.";
+      loginMessage.style.color="red";
       await signOut(auth);
     }
-  } catch (err) {
-    console.error("Login error:", err);
-    loginMessage.textContent = `❌ ${err.code || ""}: ${err.message || err}`;
-    loginMessage.style.color = "red";
-  }
+  } catch(err){ loginMessage.textContent=`❌ ${err.message||err}`; loginMessage.style.color="red"; }
 });
-
-onAuthStateChanged(auth, user => {
-  if (user && allowedAdmins.includes((user.email || "").toLowerCase().trim())) {
-    loginContainer.style.display = "none";
-    dashboardContainer.style.display = "block";
-    startSubscriptions();
-    showSection("productsSection");
-  } else {
-    loginContainer.style.display = "block";
-    dashboardContainer.style.display = "none";
-  }
+onAuthStateChanged(auth,user=>{
+  if(user && allowedAdmins.includes((user.email||"").toLowerCase().trim())){
+    loginContainer.style.display="none"; dashboardContainer.style.display="block"; startSubscriptions(); showSection("productsSection");
+  } else { loginContainer.style.display="block"; dashboardContainer.style.display="none"; }
 });
+document.querySelectorAll(".dashboard-nav button").forEach(btn=>btn.addEventListener("click",()=>showSection(btn.dataset.target)));
+function showSection(id){ document.querySelectorAll(".section").forEach(s=>s.classList.remove("active")); document.getElementById(id).classList.add("active"); }
 
-/* Navigation */
-document.querySelectorAll(".dashboard-nav button").forEach(btn => {
-  btn.addEventListener("click", () => showSection(btn.dataset.target));
-});
-function showSection(id) {
-  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-}
-
-/* ---------------- PRODUCTS: render + helpers ---------------- */
-function renderProductsTable() {
-  const currency = productCurrencySelect.value || 'NGN';
-  productsTableBody.innerHTML = "";
-  productsCache.forEach(p => {
-    const priceMap = { NGN: p.priceNGN || 0, USD: p.priceUSD || 0, EUR: p.priceEUR || 0, GBP: p.priceGBP || 0 };
-    const priceVal = priceMap[currency] || 0;
-    const firstImg = (p.images && p.images.length) ? p.images[0] : (p.imageUrl || "");
-    const imagesCount = (p.images && p.images.length) ? ` (${p.images.length})` : "";
-    const tr = document.createElement("tr");
-    tr.dataset.id = p.id;
-    tr.innerHTML = `
-      <td>${escapeHtml(p.name || '')}</td>
-      <td class="product-price">${formatCurrency(priceVal, currency)}</td>
-      <td>${ firstImg ? `<img src="${firstImg}" alt="${escapeHtml(p.name)}">` : '' }${imagesCount}</td>
-      <td>${p.customizationAvailable ? "Yes" : "No"}</td>
-      <td>${p.published ? "Yes" : "No"}</td>
-      <td class="actions">
-        <button class="delete-product" data-id="${p.id}">Delete</button>
-        <button class="edit-product" data-id="${p.id}">Edit</button>
-      </td>
-    `;
-    productsTableBody.appendChild(tr);
-
-    // wire handlers
-    tr.querySelector(".edit-product").addEventListener("click", () => editProduct(p.id));
-    tr.querySelector(".delete-product").addEventListener("click", async () => {
-      if (!confirm("Delete this product?")) return;
-      try {
-        await deleteDoc(doc(db, "brands", "serac", "products", p.id));
-      } catch (err) {
-        console.error("Delete product error", err);
-        alert("Delete failed: " + (err.message || err));
-      }
-    });
-  });
-}
-
-/* update only prices in table when currency changes */
-function updateTablePrices() {
-  const currency = productCurrencySelect.value || 'NGN';
-  productsCache.forEach(product => {
-    const tr = productsTableBody.querySelector(`tr[data-id="${product.id}"]`);
-    if (tr) {
-      const priceMap = { NGN: product.priceNGN || 0, USD: product.priceUSD || 0, EUR: product.priceEUR || 0, GBP: product.priceGBP || 0 };
-      const priceCell = tr.querySelector(".product-price");
-      if (priceCell) priceCell.textContent = formatCurrency(priceMap[currency] || 0, currency);
-    }
-  });
-}
-
-/* called to highlight and refresh a single row after add/edit */
-function refreshProductRow(product) {
-  // update or create in productsCache
-  const idx = productsCache.findIndex(p => p.id === product.id);
-  if (idx === -1) productsCache.push(product); else productsCache[idx] = product;
-
-  // try to find existing table row
+/* ---------------- PRODUCTS ---------------- */
+function refreshProductRow(product){
+  const idx = productsCache.findIndex(p=>p.id===product.id); if(idx===-1) productsCache.push(product); else productsCache[idx]=product;
   let existing = productsTableBody.querySelector(`tr[data-id="${product.id}"]`);
   const currency = productCurrencySelect.value || 'NGN';
-  const priceMap = { NGN: product.priceNGN || 0, USD: product.priceUSD || 0, EUR: product.priceEUR || 0, GBP: product.priceGBP || 0 };
-  const price = priceMap[currency] || 0;
-  const firstImg = (product.images && product.images.length) ? product.images[0] : (product.imageUrl || "");
-  const imagesCount = (product.images && product.images.length) ? ` (${product.images.length})` : "";
-
-  const trHtml = `
-    <td>${escapeHtml(product.name||'')}</td>
-    <td class="product-price">${formatCurrency(price, currency)}</td>
-    <td>${ firstImg ? `<img src="${firstImg}" alt="${escapeHtml(product.name)}" style="height:50px;width:auto;border-radius:6px;">` : '' }${imagesCount}</td>
-    <td>${product.customizationAvailable ? 'Yes' : 'No'}</td>
-    <td>${product.published ? 'Yes' : 'No'}</td>
-    <td>
-      <button data-id="${product.id}" class="edit-product">Edit</button>
-      <button data-id="${product.id}" class="delete-product">Delete</button>
-    </td>
-  `;
-
-  if (existing) {
-    existing.innerHTML = trHtml;
-  } else {
-    existing = document.createElement("tr");
-    existing.dataset.id = product.id;
-    existing.innerHTML = trHtml;
-    productsTableBody.appendChild(existing);
-  }
-
-  // highlight only the changed row
-  existing.classList.add('row-highlight');
-  setTimeout(()=> existing.classList.remove('row-highlight'), 700);
-
-  // wire handlers
-  existing.querySelector(".edit-product").onclick = () => editProduct(product.id);
-  existing.querySelector(".delete-product").onclick = async () => {
-    if (!confirm("Delete this product?")) return;
-    try {
-      await deleteDoc(doc(db, "brands", "serac", "products", product.id));
-      existing.remove();
-      productsCache = productsCache.filter(p => p.id !== product.id);
-    } catch (err) {
-      console.error("Failed to delete", err);
-      alert("Delete failed: " + (err.message || err));
-    }
+  const priceMap={NGN:product.priceNGN||0,USD:product.priceUSD||0,EUR:product.priceEUR||0,GBP:product.priceGBP||0};
+  const price = priceMap[currency]||0;
+  const firstImg = (product.images&&product.images.length)?product.images[0]:(product.imageUrl||"");
+  const imagesCount = (product.images&&product.images.length)?` (${product.images.length})`:"";
+  const trHtml=`<td>${escapeHtml(product.name||'')}</td>
+    <td class="product-price">${formatCurrency(price,currency)}</td>
+    <td>${firstImg?`<img src="${firstImg}" style="height:50px;width:auto;border-radius:6px;">`:""}${imagesCount}</td>
+    <td>${product.customizationAvailable?'Yes':'No'}</td>
+    <td>${product.published?'Yes':'No'}</td>
+    <td><button class="edit-product" data-id="${product.id}">Edit</button> <button class="delete-product" data-id="${product.id}">Delete</button></td>`;
+  if(existing){ existing.innerHTML=trHtml; } else { existing=document.createElement("tr"); existing.dataset.id=product.id; existing.innerHTML=trHtml; productsTableBody.appendChild(existing); }
+  existing.classList.add('row-highlight'); setTimeout(()=>existing.classList.remove('row-highlight'),700);
+  existing.querySelector(".edit-product").onclick=()=>editProduct(product.id);
+  existing.querySelector(".delete-product").onclick=async()=>{
+    if(!confirm("Delete this product?")) return;
+    try{ await deleteDoc(doc(db,"brands","serac","products",product.id)); existing.remove(); productsCache=productsCache.filter(p=>p.id!==product.id); } catch(e){ alert("Delete failed"); }
   };
 }
-
-/* populate product form for editing */
-async function editProduct(id){
-  try {
-    const docRef = doc(db, "brands", "serac", "products", id);
-    const snap = await getDoc(docRef);
-    if (!snap.exists()) return alert("Product not found");
-    const p = snap.data();
-    currentEditingProductId = id;
-
-    document.getElementById("productName").value = p.name || "";
-    document.getElementById("productPriceNGN").value = p.priceNGN != null ? p.priceNGN : "";
-    document.getElementById("productPriceUSD").value = p.priceUSD != null ? p.priceUSD : "";
-    document.getElementById("productPriceEUR").value = p.priceEUR != null ? p.priceEUR : "";
-    document.getElementById("productPriceGBP").value = p.priceGBP != null ? p.priceGBP : "";
-    document.getElementById("productDesc").value = p.description || "";
-    document.getElementById("productCustom").value = p.customizationAvailable ? "true" : "false";
-    document.getElementById("productPublished").value = p.published ? "true" : "false";
-
-    sizesRepeat.innerHTML = "";
-    (p.sizes || []).forEach(s => addSizeInput(s));
-    if ((p.sizes || []).length === 0) addSizeInput();
-
-    colorsRepeat.innerHTML = "";
-    (p.colors || []).forEach(c => addColorInput(c));
-    if ((p.colors || []).length === 0) addColorInput();
-
-    imagesRepeat.innerHTML = "";
-    (p.images || []).forEach(i => addImageInput(i));
-    if ((p.images || []).length === 0) addImageInput();
-
-    productForm.scrollIntoView({behavior:"smooth"});
-    productForm.querySelector("button[type='submit']").textContent = "Save Product";
-  } catch (err) {
-    console.error("Edit product failed", err);
-    alert("Failed to load product for edit.");
-  }
+function renderProductsTable(){ productsTableBody.innerHTML=""; productsCache.forEach(p=>refreshProductRow(p)); }
+function updateTablePrices(){ productsCache.forEach(p=>{ const tr=productsTableBody.querySelector(`tr[data-id="${p.id}"]`); if(tr){ tr.querySelector(".product-price").textContent=formatCurrency((p.priceNGN||0)*(productCurrencySelect.value==='NGN'?1:1),productCurrencySelect.value); } }); }
+async function editProduct(id){ try{
+  const snap=await getDoc(doc(db,"brands","serac","products",id)); if(!snap.exists()){ alert("Not found"); return; }
+  const p=snap.data(); currentEditingProductId=id;
+  document.getElementById("productName").value=p.name||"";
+  document.getElementById("productPriceNGN").value=p.priceNGN||0;
+  document.getElementById("productPriceUSD").value=p.priceUSD||0;
+  document.getElementById("productPriceEUR").value=p.priceEUR||0;
+  document.getElementById("productPriceGBP").value=p.priceGBP||0;
+  document.getElementById("productDesc").value=p.description||"";
+  document.getElementById("productCustom").value=p.customizationAvailable?"true":"false";
+  document.getElementById("productPublished").value=p.published?"true":"false";
+  sizesRepeat.innerHTML=""; (p.sizes||[]).forEach(s=>addSizeInput(s)); if(!(p.sizes||[]).length) addSizeInput();
+  colorsRepeat.innerHTML=""; (p.colors||[]).forEach(c=>addColorInput(c)); if(!(p.colors||[]).length) addColorInput();
+  imagesRepeat.innerHTML=""; (p.images||[]).forEach(i=>addImageInput(i)); if(!(p.images||[]).length) addImageInput();
+  productForm.scrollIntoView({behavior:"smooth"});
+  productForm.querySelector("button[type='submit']").textContent="Save Product";
+}catch(err){ alert("Failed to load product"); }
 }
-
-/* ---------------- PRODUCTS: SUBSCRIBE ---------------- */
-function subscribeProducts() {
-  const productsRef = collection(db, "brands", "serac", "products");
-  onSnapshot(productsRef, snap => {
-    // rebuild cache and table but aim to update row-by-row
-    productsCache = [];
-    const seenIds = new Set();
-    snap.forEach(docSnap => {
-      const p = { id: docSnap.id, ...docSnap.data() };
-      productsCache.push(p);
-      refreshProductRow(p);
-      seenIds.add(p.id);
-    });
-    // remove any orphan rows
-    productsTableBody.querySelectorAll("tr[data-id]").forEach(tr => {
-      if (!seenIds.has(tr.dataset.id)) tr.remove();
-    });
-  }, err => {
-    console.error("Products snapshot error:", err);
-    productMessage.textContent = `❌ ${err.code || ""}: ${err.message || err}`;
-    productMessage.style.color = "red";
-  });
-}
-
-/* ---------------- PRODUCT FORM SUBMIT ---------------- */
-productForm.addEventListener("submit", async (e) => {
+function subscribeProducts(){ const ref=collection(db,"brands","serac","products"); onSnapshot(ref,snap=>{ productsCache=[]; snap.forEach(docSnap=>{ refreshProductRow({id:docSnap.id,...docSnap.data()}); }); }, err=>console.error(err)); }
+productForm.addEventListener("submit",async(e)=>{
   e.preventDefault();
-  const data = {
+  const data={
     name: document.getElementById("productName").value.trim(),
-    priceNGN: parseFloat(document.getElementById("productPriceNGN").value) || 0,
-    priceUSD: parseFloat(document.getElementById("productPriceUSD").value) || 0,
-    priceEUR: parseFloat(document.getElementById("productPriceEUR").value) || 0,
-    priceGBP: parseFloat(document.getElementById("productPriceGBP").value) || 0,
-    description: document.getElementById("productDesc").value || "",
-    customizationAvailable: document.getElementById("productCustom").value === "true",
-    published: document.getElementById("productPublished").value === "true",
+    priceNGN: parseFloat(document.getElementById("productPriceNGN").value)||0,
+    priceUSD: parseFloat(document.getElementById("productPriceUSD").value)||0,
+    priceEUR: parseFloat(document.getElementById("productPriceEUR").value)||0,
+    priceGBP: parseFloat(document.getElementById("productPriceGBP").value)||0,
+    description: document.getElementById("productDesc").value||"",
+    customizationAvailable: document.getElementById("productCustom").value==="true",
+    published: document.getElementById("productPublished").value==="true",
+    sizes: Array.from(sizesRepeat.querySelectorAll('input')).map(i=>i.value.trim()).filter(Boolean),
+    colors: Array.from(colorsRepeat.querySelectorAll('input')).map(i=>i.value.trim()).filter(Boolean),
+    images: Array.from(imagesRepeat.querySelectorAll('input')).map(i=>i.value.trim()).filter(Boolean),
     updatedAt: new Date().toISOString()
   };
-
-  const sizes = Array.from(sizesRepeat.querySelectorAll('input')).map(i => i.value.trim()).filter(Boolean);
-  const colors = Array.from(colorsRepeat.querySelectorAll('input')).map(i => i.value.trim()).filter(Boolean);
-  const images = Array.from(imagesRepeat.querySelectorAll('input')).map(i => i.value.trim()).filter(Boolean);
-
-  data.sizes = sizes;
-  data.colors = colors;
-  data.images = images;
-  data.imageUrl = images[0] || "";
-
-  try {
+  data.imageUrl=data.images[0]||"";
+  try{
     let productId;
-    if (currentEditingProductId) {
-      await updateDoc(doc(db, "brands", "serac", "products", currentEditingProductId), data);
-      productMessage.textContent = "✅ Product updated.";
-      productMessage.style.color = "green";
-      productId = currentEditingProductId;
-      currentEditingProductId = null;
-      productForm.querySelector("button[type='submit']").textContent = "Add Product";
+    if(currentEditingProductId){
+      await updateDoc(doc(db,"brands","serac","products",currentEditingProductId),data);
+      productMessage.textContent="✅ Product updated."; productMessage.style.color="green";
+      productId=currentEditingProductId; currentEditingProductId=null; productForm.querySelector("button[type='submit']").textContent="Add Product";
     } else {
-      const docRef = await addDoc(collection(db, "brands", "serac", "products"), data);
-      productMessage.textContent = "✅ Product added.";
-      productMessage.style.color = "green";
-      productId = docRef.id;
+      const docRef=await addDoc(collection(db,"brands","serac","products"),data);
+      productMessage.textContent="✅ Product added."; productMessage.style.color="green";
+      productId=docRef.id;
     }
-
-    // reset form & repeatable fields
-    productForm.reset();
-    sizesRepeat.innerHTML = ""; colorsRepeat.innerHTML = ""; imagesRepeat.innerHTML = "";
+    productForm.reset(); sizesRepeat.innerHTML=""; colorsRepeat.innerHTML=""; imagesRepeat.innerHTML="";
     addSizeInput(); addColorInput(); addImageInput();
-
-    // update cache and refresh single row
-    const newProduct = { id: productId, ...data };
-    const existingIndex = productsCache.findIndex(p => p.id === productId);
-    if (existingIndex > -1) productsCache[existingIndex] = newProduct; else productsCache.push(newProduct);
-    refreshProductRow(newProduct);
-
-  } catch (err) {
-    console.error(err);
-    productMessage.textContent = "❌ Error saving product.";
-    productMessage.style.color = "red";
-  }
+    refreshProductRow({id:productId,...data});
+  } catch(err){ productMessage.textContent="❌ Error saving product."; productMessage.style.color="red"; }
 });
 
-/* ---------------- QUOTES: DRAFT ITEMS UI ---------------- */
-function renderDraftItems(){
-  quoteItemsDiv.innerHTML = '';
-  if(!quoteDraftItems.length){ quoteItemsDiv.innerHTML = '<div class="small-note">No items added yet.</div>'; return; }
-  quoteDraftItems.forEach((it, idx) => {
-    const div = document.createElement("div");
-    div.className = "quote-item";
-    div.innerHTML = `<div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;">
-      <div style="flex:1;"><strong>${escapeHtml(it.name)}</strong> × ${it.qty}<br><small>${escapeHtml(it.desc||'')}</small>
-      <div style="margin-top:8px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
-        <div>NGN: ${it.priceNGN!=null?formatCurrency(it.priceNGN,'NGN'):'-'}</div>
-        <div>USD: ${it.priceUSD!=null?formatCurrency(it.priceUSD,'USD'):'-'}</div>
-        <div>EUR: ${it.priceEUR!=null?formatCurrency(it.priceEUR,'EUR'):'-'}</div>
-        <div>GBP: ${it.priceGBP!=null?formatCurrency(it.priceGBP,'GBP'):'-'}</div>
-      </div></div>
-      <div style="min-width:90px;text-align:right;"><button data-idx="${idx}" class="remove-draft">Remove</button></div>
-    </div>`;
-    quoteItemsDiv.appendChild(div);
-  });
-  document.querySelectorAll(".remove-draft").forEach(btn => btn.addEventListener("click", () => { 
-    quoteDraftItems.splice(parseInt(btn.dataset.idx), 1); renderDraftItems(); 
-  }));
-}
+/* ---------------- QUOTES ---------------- */
+function renderDraftItems(){ quoteItemsDiv.innerHTML=""; if(!quoteDraftItems.length){ quoteItemsDiv.innerHTML='<div class="small-note">No items added yet.</div>'; return; } quoteDraftItems.forEach((it,idx)=>{ const div=document.createElement("div"); div.className="quote-item"; div.innerHTML=`<div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;">
+  <div style="flex:1;"><strong>${escapeHtml(it.name)}</strong> × ${it.qty}<br><small>${escapeHtml(it.desc||'')}</small>
+  <div style="margin-top:8px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+    <div>NGN: ${it.priceNGN!=null?formatCurrency(it.priceNGN,'NGN'):'-'}</div>
+    <div>USD: ${it.priceUSD!=null?formatCurrency(it.priceUSD,'USD'):'-'}</div>
+    <div>EUR: ${it.priceEUR!=null?formatCurrency(it.priceEUR,'EUR'):'-'}</div>
+    <div>GBP: ${it.priceGBP!=null?formatCurrency(it.priceGBP,'GBP'):'-'}</div>
+  </div></div>
+  <div style="min-width:90px;text-align:right;"><button data-idx="${idx}" class="remove-draft">Remove</button></div>
+</div>`; quoteItemsDiv.appendChild(div); }); document.querySelectorAll(".remove-draft").forEach(btn=>btn.addEventListener("click",()=>{ quoteDraftItems.splice(parseInt(btn.dataset.idx),1); renderDraftItems(); })); }
 
-/* Add Item panel toggles & handlers (same UX as FleurDeVie) */
-addQuoteItemBtn.addEventListener("click", () => {
-  addItemPanel.style.display = addItemPanel.style.display === "none" ? "block" : "none";
-  if (addItemPanel.style.display === "block") document.getElementById("ai_name").focus();
-});
-ai_cancel?.addEventListener("click", () => {
-  addItemPanel.style.display = "none";
-  document.getElementById("ai_name").value = "";
-  document.getElementById("ai_qty").value = 1;
-  document.getElementById("ai_desc").value = "";
-  document.getElementById("ai_price_ngn").value = "";
-  document.getElementById("ai_price_usd").value = "";
-  document.getElementById("ai_price_eur").value = "";
-  document.getElementById("ai_price_gbp").value = "";
-});
-ai_add?.addEventListener("click", () => {
-  const name = document.getElementById("ai_name").value.trim();
-  const qty = parseInt(document.getElementById("ai_qty").value) || 0;
-  if (!name || qty <= 0) { alert("Please enter item name and quantity."); return; }
-  const item = {
-    name,
-    qty,
-    desc: document.getElementById("ai_desc").value || "",
-    priceNGN: document.getElementById("ai_price_ngn").value ? parseFloat(document.getElementById("ai_price_ngn").value) : null,
-    priceUSD: document.getElementById("ai_price_usd").value ? parseFloat(document.getElementById("ai_price_usd").value) : null,
-    priceEUR: document.getElementById("ai_price_eur").value ? parseFloat(document.getElementById("ai_price_eur").value) : null,
-    priceGBP: document.getElementById("ai_price_gbp").value ? parseFloat(document.getElementById("ai_price_gbp").value) : null
-  };
-  quoteDraftItems.push(item);
-  // clear panel & hide
-  document.getElementById("ai_name").value = "";
-  document.getElementById("ai_qty").value = 1;
-  document.getElementById("ai_desc").value = "";
-  document.getElementById("ai_price_ngn").value = "";
-  document.getElementById("ai_price_usd").value = "";
-  document.getElementById("ai_price_eur").value = "";
-  document.getElementById("ai_price_gbp").value = "";
-  addItemPanel.style.display = "none";
-  renderDraftItems();
+addQuoteItemBtn.addEventListener("click",()=>{ addItemPanel.style.display=addItemPanel.style.display==="none"?"block":"none"; if(addItemPanel.style.display==="block") document.getElementById("ai_name").focus(); });
+ai_cancel?.addEventListener("click",()=>{ addItemPanel.style.display="none"; document.getElementById("ai_name").value=""; document.getElementById("ai_qty").value=1; document.getElementById("ai_desc").value=""; document.getElementById("ai_price_ngn").value=""; document.getElementById("ai_price_usd").value=""; document.getElementById("ai_price_eur").value=""; document.getElementById("ai_price_gbp").value=""; });
+ai_add?.addEventListener("click",()=>{ const name=document.getElementById("ai_name").value.trim(); const qty=parseInt(document.getElementById("ai_qty").value)||0; if(!name||qty<=0){ alert("Enter item name and qty"); return; }
+const item={ name, qty, desc:document.getElementById("ai_desc").value||"", priceNGN:document.getElementById("ai_price_ngn").value?parseFloat(document.getElementById("ai_price_ngn").value):null, priceUSD:document.getElementById("ai_price_usd").value?parseFloat(document.getElementById("ai_price_usd").value):null, priceEUR:document.getElementById("ai_price_eur").value?parseFloat(document.getElementById("ai_price_eur").value):null, priceGBP:document.getElementById("ai_price_gbp").value?parseFloat(document.getElementById("ai_price_gbp").value):null };
+quoteDraftItems.push(item); document.getElementById("ai_name").value=""; document.getElementById("ai_qty").value=1; document.getElementById("ai_desc").value=""; document.getElementById("ai_price_ngn").value=""; document.getElementById("ai_price_usd").value=""; document.getElementById("ai_price_eur").value=""; document.getElementById("ai_price_gbp").value=""; addItemPanel.style.display="none"; renderDraftItems(); });
+
+generateQuoteLinkBtn.addEventListener("click",async()=>{
+  const customer=document.getElementById("quoteCustomer").value.trim(); const email=document.getElementById("quoteEmail").value.trim();
+  if(!customer||!email){ alert("Customer and email required"); return; }
+  if(!quoteDraftItems.length){ alert("Add at least one item"); return; }
+  const data={ customer,email,items:quoteDraftItems,status:"Unpaid",createdAt:new Date().toISOString() };
+  try{
+    const docRef=await addDoc(collection(db,"brands","serac","quotes"),data);
+    const id=docRef.id; const link=`./checkout/index.html?quoteId=${id}`;
+    try{ localStorage.setItem(id,JSON.stringify(data)); } catch(e){ console.warn(e); }
+    generatedQuoteLink.innerHTML=`<a href="${link}" target="_blank">${link}</a><button class="copy-btn" id="copyGeneratedBtn" data-link="${link}">📋</button>`;
+    document.getElementById("copyGeneratedBtn").addEventListener("click",async()=>{ await navigator.clipboard.writeText(link); const btn=document.getElementById("copyGeneratedBtn"); btn.textContent="✅"; setTimeout(()=>btn.textContent="📋",1000); });
+    quoteMessage.textContent="✅ Quote saved"; quoteMessage.style.color="green"; quoteForm.reset(); quoteDraftItems=[]; renderDraftItems();
+  }catch(err){ quoteMessage.textContent="❌ Error saving quote"; quoteMessage.style.color="red"; console.error(err); }
 });
 
-/* Generate Quote Link (store quote in Firestore and also in localStorage keyed by id) */
-generateQuoteLinkBtn.addEventListener("click", async () => {
-  const customer = document.getElementById("quoteCustomer").value.trim();
-  const email = document.getElementById("quoteEmail").value.trim();
-  if (!customer || !email) { alert("Customer name and email required."); return; }
-  if (!quoteDraftItems.length) { alert("Add at least one item."); return; }
+/* ---------------- COMPUTE TOTAL ---------------- */
+function computeTotalFromItems(items=[],currency='NGN'){ let total=0; items.forEach(it=>{ const qty=parseFloat(it.qty)||0; let price=0; if(currency==='NGN')price=it.priceNGN||0; else if(currency==='USD')price=it.priceUSD||0; else if(currency==='EUR')price=it.priceEUR||0; else if(currency==='GBP')price=it.priceGBP||0; total+=price*qty; }); return total; }
 
-  const data = {
-    customer: customer,
-    email: email,
-    items: quoteDraftItems,
-    status: "Unpaid",
-    createdAt: new Date().toISOString()
-  };
-
-  try {
-    const docRef = await addDoc(collection(db, "brands", "serac", "quotes"), data);
-    const id = docRef.id;
-    const link = `./checkout/index.html?quoteId=${id}`;
-
-    try { localStorage.setItem(id, JSON.stringify(data)); } catch(e){ console.warn("localStorage set failed", e); }
-
-    generatedQuoteLink.innerHTML = `
-      <a href="${link}" target="_blank" id="gqlink">${link}</a>
-      <button class="copy-btn" id="copyGeneratedBtn" data-link="${link}">📋</button>
-    `;
-    document.getElementById("copyGeneratedBtn").addEventListener("click", async () => {
-      await navigator.clipboard.writeText(link);
-      const btn = document.getElementById("copyGeneratedBtn");
-      btn.textContent = "✅";
-      setTimeout(() => btn.textContent = "📋", 1000);
-    });
-
-    quoteMessage.textContent = "✅ Quote saved and link generated.";
-    quoteMessage.style.color = "green";
-    quoteForm.reset();
-    quoteDraftItems = [];
-    renderDraftItems();
-  } catch (err) {
-    console.error("Save quote failed", err);
-    quoteMessage.textContent = "❌ Error saving quote.";
-    quoteMessage.style.color = "red";
-  }
-});
-
-/* compute total from items in a given currency */
-function computeTotalFromItems(items = [], currency = 'NGN') {
-  let total = 0;
-  if (!items || !items.length) return 0;
-  items.forEach(it => {
-    const qty = parseFloat(it.qty) || 0;
-    let price = 0;
-    if (currency === 'NGN') price = it.priceNGN || 0;
-    if (currency === 'USD') price = it.priceUSD || 0;
-    if (currency === 'EUR') price = it.priceEUR || 0;
-    if (currency === 'GBP') price = it.priceGBP || 0;
-    total += (price * qty);
-  });
-  return total;
-}
-
-/* ---------------- QUOTES: subscribe & render ---------------- */
-function subscribeQuotes() {
-  const quotesRef = collection(db, "brands", "serac", "quotes");
-  onSnapshot(quotesRef, snap => {
-    quotesCache = [];
-    quotesTableBody.innerHTML = "";
-    snap.forEach(docSnap => {
-      const q = { id: docSnap.id, ...docSnap.data() };
-      quotesCache.push(q);
-    });
-    renderQuotesTable();
-  }, err => {
-    console.error("Quotes snapshot error:", err);
-    quoteMessage.textContent = `❌ ${err.code || ""}: ${err.message || err}`;
-    quoteMessage.style.color = "red";
-  });
-}
-
-function renderQuotesTable() {
-  const displayCurrency = quotesDisplayCurrency.value || 'NGN';
-  quotesTableBody.innerHTML = "";
-
-  quotesCache.forEach(q => {
-    const id = q.id;
-    const computedTotal = computeTotalFromItems(q.items || [], displayCurrency);
-    let displayTotal = "—";
-    if (computedTotal > 0) {
-      displayTotal = formatCurrency(computedTotal, displayCurrency);
-    } else if (q.total != null) {
-      displayTotal = `${formatCurrency(q.total, q.currency || displayCurrency)} (${q.currency || displayCurrency})`;
-    }
-
-    const link = `./checkout/index.html?quoteId=${id}`;
-    const status = q.status || "Unpaid";
-
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${escapeHtml(q.customer || "")}</td>
-      <td>${escapeHtml(q.email || "")}</td>
-      <td style="max-width:60%;"><a href="${link}" target="_blank" style="display:inline-block; max-width:100%; overflow:hidden; text-overflow:ellipsis;">${link}</a> <button class="copy-btn" data-link="${link}">📋</button></td>
-      <td>${displayTotal}</td>
-      <td>
-        <select data-id="${id}" class="quote-status-select">
-          <option ${status === 'Unpaid' ? 'selected' : ''}>Unpaid</option>
-          <option ${status === 'Pending' ? 'selected' : ''}>Pending</option>
-          <option ${status === 'Paid' ? 'selected' : ''}>Paid</option>
-          <option ${status === 'Processing' ? 'selected' : ''}>Processing</option>
-          <option ${status === 'Completed' ? 'selected' : ''}>Completed</option>
-          <option ${status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
-        </select>
-      </td>
-      <td class="actions">
-        <button class="view-quote" data-id="${id}">View</button>
-        <button class="delete-quote" data-id="${id}">Delete</button>
-      </td>
-    `;
-    quotesTableBody.appendChild(row);
-
-    // copy button
-    row.querySelectorAll(".copy-btn").forEach(btn => {
-      btn.addEventListener("click", async () => {
-        try {
-          await navigator.clipboard.writeText(btn.dataset.link);
-          const prev = btn.textContent;
-          btn.textContent = "✅";
-          setTimeout(() => btn.textContent = prev, 1000);
-        } catch (e) {
-          alert("Copy failed. Link: " + btn.dataset.link);
-        }
-      });
-    });
-
-    // view
-    row.querySelector(".view-quote").addEventListener("click", () => openQuoteModal(q));
-
-    // delete
-    row.querySelector(".delete-quote").addEventListener("click", async () => {
-      if (!confirm("Delete this quote?")) return;
-      try { await deleteDoc(doc(db, "brands", "serac", "quotes", q.id)); }
-      catch (err) { console.error(err); alert("Delete failed"); }
-    });
-
-    // status select change wiring (update Firestore)
-    row.querySelector(".quote-status-select").addEventListener("change", async (ev) => {
-      const newStatus = ev.target.value;
-      const id = ev.target.dataset.id;
-      try {
-        await updateDoc(doc(db, "brands", "serac", "quotes", id), { status: newStatus });
-      } catch (err) {
-        console.error("Failed to update quote status", err);
-        alert("Failed to update status: " + (err.message || err));
-      }
-    });
-  });
-}
+/* ---------------- QUOTES TABLE ---------------- */
+function subscribeQuotes(){ const ref=collection(db,"brands","serac","quotes"); onSnapshot(ref,snap=>{ quotesCache=[]; snap.forEach(docSnap=>{ quotesCache.push({id:docSnap.id,...docSnap.data()}); }); renderQuotesTable(); }, err=>console.error(err)); }
+function renderQuotesTable(){ const displayCurrency=quotesDisplayCurrency.value||'NGN'; quotesTableBody.innerHTML=""; quotesCache.forEach(q=>{ const computedTotal=computeTotalFromItems(q.items||[],displayCurrency); const displayTotal=computedTotal>0?formatCurrency(computedTotal,displayCurrency):q.total!=null?`${formatCurrency(q.total,q.currency||displayCurrency)} (${q.currency||displayCurrency})`:"—"; const link=`./checkout/index.html?quoteId=${q.id}`; const status=q.status||"Unpaid"; const row=document.createElement("tr"); row.innerHTML=`<td>${escapeHtml(q.customer||"")}</td><td>${escapeHtml(q.email||"")}</td><td><a href="${link}" target="_blank">${link}</a> <button class="copy-btn" data-link="${link}">📋</button></td><td>${displayTotal}</td><td><select data-id="${q.id}" class="quote-status-select"><option ${status==='Unpaid'?'selected':''}>Unpaid</option><option ${status==='Pending'?'selected':''}>Pending</option><option ${status==='Paid'?'selected':''}>Paid</option><option ${status==='Processing'?'selected':''}>Processing</option><option ${status==='Completed'?'selected':''}>Completed</option><option ${status==='Cancelled'?'selected':''}>Cancelled</option></select></td><td><button class="view-quote" data-id="${q.id}">View</button> <button class="delete-quote" data-id="${q.id}">Delete</button></td>`; quotesTableBody.appendChild(row);
+row.querySelectorAll(".copy-btn").forEach(btn=>btn.addEventListener("click",async()=>{ try{ await navigator.clipboard.writeText(btn.dataset.link); const prev=btn.textContent; btn.textContent="✅"; setTimeout(()=>btn.textContent=prev,1000); }catch(e){ alert("Copy failed: "+btn.dataset.link); } }));
+row.querySelector(".view-quote").addEventListener("click",()=>openQuoteModal(q));
+row.querySelector(".delete-quote").addEventListener("click",async()=>{ if(!confirm("Delete quote?"))return; try{ await deleteDoc(doc(db,"brands","serac","quotes",q.id)); } catch(err){ console.error(err); alert("Delete failed"); } });
+row.querySelector(".quote-status-select").addEventListener("change",async(ev)=>{ try{ await updateDoc(doc(db,"brands","serac","quotes",ev.target.dataset.id),{status:ev.target.value}); }catch(err){ console.error(err); alert("Update failed"); } });
+}); }
 
 /* ---------------- QUOTE MODAL ---------------- */
-function openQuoteModal(q) {
-  quoteModalBody.innerHTML = "";
-  const displayCurrency = quotesDisplayCurrency.value || 'NGN';
-  const link = `./checkout/index.html?quoteId=${q.id}`;
+function openQuoteModal(q){ quoteModalBody.innerHTML=""; const displayCurrency=quotesDisplayCurrency.value||'NGN'; const link=`./checkout/index.html?quoteId=${q.id}`;
+const header=document.createElement("div"); header.style.display="flex"; header.style.justifyContent="space-between"; header.innerHTML=`<div><strong>${escapeHtml(q.customer||'')}</strong><br><small>${escapeHtml(q.email||'')}</small><br><small>Currency: ${q.currency||displayCurrency}</small></div><div style="text-align:right;"><a href="${link}" target="_blank">${link}</a><button class="copy-btn" id="modalCopyBtn" data-link="${link}">📋</button></div>`; quoteModalBody.appendChild(header); quoteModalBody.appendChild(document.createElement("hr"));
+let computedTotal=0; (q.items||[]).forEach(it=>{ const qty=parseFloat(it.qty)||0; let price=0; if(displayCurrency==='NGN')price=it.priceNGN||0; else if(displayCurrency==='USD')price=it.priceUSD||0; else if(displayCurrency==='EUR')price=it.priceEUR||0; else if(displayCurrency==='GBP')price=it.priceGBP||0; const line=price*qty; computedTotal+=line; const div=document.createElement("div"); div.style.border="1px solid #222"; div.style.padding="8px"; div.style.marginBottom="8px"; div.style.borderRadius="6px"; div.innerHTML=`<strong>${escapeHtml(it.name)}</strong> × ${qty}<br><small>${escapeHtml(it.desc||'')}</small><div style="margin-top:6px;">${formatCurrency(price,displayCurrency)} each — Line total: ${formatCurrency(line,displayCurrency)}</div>`; quoteModalBody.appendChild(div); });
+const totalDiv=document.createElement("div"); totalDiv.style.marginTop="8px"; totalDiv.innerHTML=`<strong>Total: ${computedTotal>0?formatCurrency(computedTotal,displayCurrency):q.total!=null?formatCurrency(q.total,q.currency||displayCurrency):'—'}</strong>`; quoteModalBody.appendChild(totalDiv);
+const modalCopyBtn=document.getElementById("modalCopyBtn"); modalCopyBtn?.addEventListener("click",async()=>{ try{ await navigator.clipboard.writeText(modalCopyBtn.dataset.link); modalCopyBtn.textContent="✅"; setTimeout(()=>modalCopyBtn.textContent="📋",1000); }catch(e){ alert("Copy failed"); } });
+quoteModalBackdrop.dataset.currentId=q.id; quoteModalBackdrop.style.display="flex"; }
+closeModalBtn.addEventListener("click",()=>{ quoteModalBackdrop.style.display="none"; quoteModalBackdrop.dataset.currentId=""; });
+quoteModalBackdrop.addEventListener("click",(ev)=>{ if(ev.target===quoteModalBackdrop){ quoteModalBackdrop.style.display="none"; quoteModalBackdrop.dataset.currentId=""; } });
+openCheckoutBtn.addEventListener("click",()=>{ const id=quoteModalBackdrop.dataset.currentId; if(id) window.open(`./checkout/index.html?quoteId=${id}`,'_blank'); });
 
-  const header = document.createElement("div");
-  header.style.display = "flex";
-  header.style.justifyContent = "space-between";
-  header.style.gap = "12px";
-  header.innerHTML = `
-    <div>
-      <strong>${escapeHtml(q.customer || '')}</strong><br><small>${escapeHtml(q.email || '')}</small><br><small>Quote currency: ${q.currency || displayCurrency}</small>
-    </div>
-    <div style="text-align:right;">
-      <a href="${link}" target="_blank">${link}</a>
-      <button class="copy-btn" id="modalCopyBtn" data-link="${link}">📋</button>
-    </div>
-  `;
-  quoteModalBody.appendChild(header);
-  quoteModalBody.appendChild(document.createElement("hr"));
+/* ---------------- ORDERS ---------------- */
+function subscribeOrders(){ const ref=collection(db,"brands","serac","orders"); onSnapshot(ref,snap=>{ allOrders=[]; snap.forEach(docSnap=>{ allOrders.push({id:docSnap.id,...docSnap.data()}); }); renderOrders(allOrders); }, err=>console.error(err)); }
+function renderOrders(orders){ const term=(orderSearch.value||"").toLowerCase(); const status=orderStatusFilter.value; const tbody=document.querySelector("#ordersTable tbody"); tbody.innerHTML=""; orders.filter(o=>(!status||o.status===status)&&(!term||(o.customer||"").toLowerCase().includes(term)||(o.email||"").toLowerCase().includes(term))).forEach(o=>{ const row=document.createElement("tr"); row.innerHTML=`<td>${escapeHtml(o.id)}</td><td>${escapeHtml(o.customer||'')}</td><td>${escapeHtml(o.email||'')}</td><td>${formatCurrency(parseFloat(o.total||0),o.currency||'NGN')}</td><td>${escapeHtml(o.status||'')}</td><td></td>`; tbody.appendChild(row); }); }
+orderSearch.addEventListener("input",()=>renderOrders(allOrders));
+orderStatusFilter.addEventListener("change",()=>renderOrders(allOrders));
 
-  let computedTotal = 0;
-  (q.items || []).forEach(it => {
-    const qty = parseFloat(it.qty) || 0;
-    let price = 0;
-    if (displayCurrency === 'NGN') price = it.priceNGN || 0;
-    if (displayCurrency === 'USD') price = it.priceUSD || 0;
-    if (displayCurrency === 'EUR') price = it.priceEUR || 0;
-    if (displayCurrency === 'GBP') price = it.priceGBP || 0;
-    const line = price * qty;
-    computedTotal += line;
+async function fetchRates(base='NGN'){ try{ const res=await fetch(`https://api.exchangerate.host/latest?base=${base}&symbols=USD,EUR,GBP,NGN`); const data=await res.json(); return data.rates||{NGN:1,USD:0.0022,EUR:0.002,GBP:0.0018}; }catch(e){ return {NGN:1,USD:0.0022,EUR:0.002,GBP:0.0018}; } }
 
-    const div = document.createElement("div");
-    div.style.border = "1px solid #222";
-    div.style.padding = "8px";
-    div.style.marginBottom = "8px";
-    div.style.borderRadius = "6px";
-    div.innerHTML = `<strong>${escapeHtml(it.name)}</strong> × ${qty} <br><small>${escapeHtml(it.desc||'')}</small><div style="margin-top:6px;">${formatCurrency(price, displayCurrency)} each — Line total: ${formatCurrency(line, displayCurrency)}</div>`;
-    quoteModalBody.appendChild(div);
-  });
+async function exportOrdersCSV(e){ e.preventDefault(); const from=exportFrom.value||null; const to=exportTo.value||null; const targetCurrency=exportCurrency.value||'NGN'; const toExport=allOrders.filter(o=>{ if(!o.createdAt) return true; const d=new Date(o.createdAt); if(isNaN(d)) return true; if(from&&d<new Date(from)) return false; if(to){ const toD=new Date(to); toD.setHours(23,59,59,999); if(d>toD) return false; } return true; }); const rates=await fetchRates('NGN'); const rows=[['orderId','customer','email','createdAt','status','originalCurrency','originalTotal',`total_${targetCurrency}`]]; for(const o of toExport){ const origCurrency=o.currency||'NGN'; const origTotal=parseFloat(o.total||0); let converted=origTotal; if(origCurrency!==targetCurrency){ if(origCurrency==='NGN') converted=origTotal*(rates[targetCurrency]||1); else{ const rateOrder=rates[origCurrency]; const rateTarget=rates[targetCurrency]; if(rateOrder&&rateTarget) converted=(origTotal/rateOrder)*rateTarget; else try{ const res=await fetch(`https://api.exchangerate.host/convert?from=${origCurrency}&to=${targetCurrency}&amount=${origTotal}`); const d=await res.json(); if(d&&typeof d.result==='number') converted=d.result; }catch(e){console.warn(e);} } } rows.push([o.id||'',o.customer||'',o.email||'',o.createdAt||'',o.status||'',origCurrency,origTotal,converted]); } const csv=rows.map(r=>r.map(c=>{ if(c==null)return''; const s=String(c); return s.includes(',')||s.includes('"')||s.includes('\n')?`"${s.replace(/"/g,'""')}"`:s; }).join(',')).join('\n'); const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`serac_orders_export_${targetCurrency}_${new Date().toISOString().slice(0,10)}.csv`; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }
+exportBtn?.addEventListener("click",exportOrdersCSV);
 
-  if (computedTotal > 0) {
-    const totalDiv = document.createElement("div");
-    totalDiv.style.marginTop = "8px";
-    totalDiv.innerHTML = `<strong>Total: ${formatCurrency(computedTotal, displayCurrency)}</strong>`;
-    quoteModalBody.appendChild(totalDiv);
-  } else if (q.total != null) {
-    const totalDiv = document.createElement("div");
-    totalDiv.style.marginTop = "8px";
-    totalDiv.innerHTML = `<strong>Total (explicit): ${formatCurrency(q.total, q.currency || displayCurrency)} (${q.currency || displayCurrency})</strong>`;
-    quoteModalBody.appendChild(totalDiv);
-  } else {
-    const totalDiv = document.createElement("div");
-    totalDiv.style.marginTop = "8px";
-    totalDiv.innerHTML = `<strong>Total: —</strong>`;
-    quoteModalBody.appendChild(totalDiv);
-  }
+/* ---------------- START ---------------- */
+function startSubscriptions(){ subscribeProducts(); subscribeQuotes(); subscribeOrders(); }
+document.addEventListener("DOMContentLoaded",()=>{ productCurrencySelect?.addEventListener("change",updateTablePrices); renderDraftItems(); quotesDisplayCurrency.addEventListener("change",()=>{ renderQuotesTable(); if(quoteModalBackdrop.style.display==='flex'){ const curId=quoteModalBackdrop.dataset.currentId; if(curId){ const q=quotesCache.find(x=>x.id===curId); if(q) openQuoteModal(q); } } }); });
 
-  // wire modal copy button
-  const modalCopyBtn = document.getElementById('modalCopyBtn');
-  if (modalCopyBtn) {
-    modalCopyBtn.addEventListener('click', async () => {
-      try {
-        await navigator.clipboard.writeText(modalCopyBtn.dataset.link);
-        modalCopyBtn.textContent = "✅";
-        setTimeout(() => modalCopyBtn.textContent = "📋", 1000);
-      } catch (e) {
-        alert("Copy failed. Link: " + modalCopyBtn.dataset.link);
-      }
-    });
-  }
-
-  // open
-  quoteModalBackdrop.dataset.currentId = q.id;
-  quoteModalBackdrop.style.display = "flex";
-}
-closeModalBtn.addEventListener('click', () => { quoteModalBackdrop.style.display = 'none'; quoteModalBackdrop.dataset.currentId = ''; });
-quoteModalBackdrop.addEventListener('click', (ev) => { if (ev.target === quoteModalBackdrop) { quoteModalBackdrop.style.display = 'none'; quoteModalBackdrop.dataset.currentId = ''; } });
-openCheckoutBtn.addEventListener('click', () => {
-  const id = quoteModalBackdrop.dataset.currentId;
-  if (id) window.open(`./checkout/index.html?quoteId=${id}`, '_blank');
-});
-
-/* ---------------- ORDERS: subscribe + render + export ---------------- */
-function subscribeOrders() {
-  const ordersRef = collection(db, "brands", "serac", "orders");
-  onSnapshot(ordersRef, snap => {
-    allOrders = [];
-    snap.forEach(docSnap => {
-      const o = { id: docSnap.id, ...docSnap.data() };
-      allOrders.push(o);
-    });
-    renderOrders(allOrders);
-  }, err => {
-    console.error("Orders snapshot error:", err);
-  });
-}
-
-function renderOrders(orders) {
-  const term = (orderSearch.value || "").toLowerCase();
-  const status = orderStatusFilter.value;
-  const tbody = document.querySelector("#ordersTable tbody");
-  tbody.innerHTML = "";
-
-  const filtered = orders.filter(o => {
-    const matchesStatus = !status || o.status === status;
-    const matchesTerm = !term || (o.customer || "").toLowerCase().includes(term) || (o.email || "").toLowerCase().includes(term) || (o.customerName || "").toLowerCase().includes(term) || (o.customerEmail || "").toLowerCase().includes(term);
-    return matchesStatus && matchesTerm;
-  });
-
-  filtered.forEach(o => {
-    const row = document.createElement("tr");
-    row.innerHTML = `<td>${escapeHtml(o.id)}</td><td>${escapeHtml(o.customer || o.customerName || '')}</td><td>${escapeHtml(o.email || o.customerEmail || '')}</td><td>${formatCurrency(parseFloat(o.total||0), o.currency || 'NGN')}</td><td>${escapeHtml(o.status||'')}</td><td></td>`;
-    tbody.appendChild(row);
-  });
-}
-orderSearch.addEventListener("input", () => renderOrders(allOrders));
-orderStatusFilter.addEventListener("change", () => renderOrders(allOrders));
-
-/* Exchange rates helper for export (fallback default rates included) */
-async function fetchRates(base='NGN'){
-  try {
-    const symbols = 'USD,EUR,GBP,NGN';
-    const res = await fetch(`https://api.exchangerate.host/latest?base=${encodeURIComponent(base)}&symbols=${symbols}`);
-    const data = await res.json();
-    if (data && data.rates) return data.rates;
-  } catch (e) { console.warn('Failed to fetch rates', e); }
-  return { NGN:1, USD:0.0022, EUR:0.0020, GBP:0.0018 };
-}
-
-async function exportOrdersCSV(e){
-  e.preventDefault();
-  const from = exportFrom.value || null;
-  const to = exportTo.value || null;
-  const targetCurrency = exportCurrency.value || 'NGN';
-  const toExport = allOrders.filter(o => {
-    if (!o.createdAt) return true;
-    const d = new Date(o.createdAt);
-    if (isNaN(d)) return true;
-    if (from) { const fromD = new Date(from); if (d < fromD) return false; }
-    if (to) { const toD = new Date(to); toD.setHours(23,59,59,999); if (d > toD) return false; }
-    return true;
-  });
-
-  const ratesFromNGN = await fetchRates('NGN');
-  const rows = [];
-  rows.push(['orderId','customer','email','createdAt','status','originalCurrency','originalTotal', `total_${targetCurrency}`]);
-  for (const o of toExport) {
-    const origCurrency = o.currency || 'NGN';
-    const origTotal = parseFloat(o.total || 0);
-    let converted = origTotal;
-    if (origCurrency === targetCurrency) converted = origTotal;
-    else {
-      if (origCurrency === 'NGN') {
-        converted = origTotal * (ratesFromNGN[targetCurrency] || 1);
-      } else {
-        const rateOrder = ratesFromNGN[origCurrency];
-        const rateTarget = ratesFromNGN[targetCurrency];
-        if (rateOrder && rateTarget) converted = (origTotal / rateOrder) * rateTarget;
-        else {
-          try {
-            const res = await fetch(`https://api.exchangerate.host/convert?from=${encodeURIComponent(origCurrency)}&to=${encodeURIComponent(targetCurrency)}&amount=${encodeURIComponent(origTotal)}`);
-            const d = await res.json();
-            if (d && typeof d.result === 'number') converted = d.result;
-          } catch(e){ console.warn('fallback convert failed', e); }
-        }
-      }
-    }
-    rows.push([ o.id || '', o.customer || o.customerName || '', o.email || o.customerEmail || '', o.createdAt || '', o.status || '', origCurrency, origTotal, converted ]);
-  }
-
-  const csv = rows.map(r => r.map(cell => {
-    if (cell === null || cell === undefined) return '';
-    const s = String(cell);
-    if (s.includes(',') || s.includes('"') || s.includes('\n')) return `"${s.replace(/"/g, '""')}"`;
-    return s;
-  }).join(',')).join('\n');
-
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  const fileName = `serac_orders_export_${targetCurrency}_${new Date().toISOString().slice(0,10)}.csv`;
-  a.download = fileName;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-}
-exportBtn?.addEventListener("click", exportOrdersCSV);
-
-/* ---------------- QUOTE FORM (alternate quick add via small inputs) ---------------- */
-/* This replicates the quote form behaviour from FleurDeVie including add-item panel and saving to Firestore which we implemented above. */
-/* keep existing add-item panel & draft flow */
-
-/* ---------------- START SUBSCRIPTIONS ---------------- */
-function startSubscriptions(){
-  subscribeProducts();
-  subscribeQuotes();
-  subscribeOrders();
-}
-
-/* initialize UI event wiring after DOM loaded */
-document.addEventListener("DOMContentLoaded", () => {
-  // ensure product currency select updates only price cells
-  productCurrencySelect?.addEventListener("change", updateTablePrices);
-
-  // wire small add-quote-item (the small button which opens the addItemPanel is already wired above)
-  renderDraftItems();
-
-  // quotes display currency change should re-render quotes and modal if opened
-  quotesDisplayCurrency.addEventListener('change', () => {
-    renderQuotesTable();
-    if (quoteModalBackdrop.style.display === 'flex') {
-      const curId = quoteModalBackdrop.dataset.currentId;
-      if (curId) {
-        const q = quotesCache.find(x => x.id === curId);
-        if (q) openQuoteModal(q);
-      }
-    }
-  });
-});
-</script>
 </body>
 </html>
