@@ -702,67 +702,67 @@ payBtn.addEventListener('click', async (ev) => {
     currency: selectedCurrency,
     customer: { email: email, phonenumber: phone, name: name },
     customizations: { title: "Sérac", description: "Order Payment", logo: "../asset/logo.png" },
+    
     callback: async function (data) {
-      try {
-        showSpinner(true);
-        const paymentRef = data.tx_ref || data.transaction_id || data.transactionId || data.flwRef || data.id || null;
-        const paidOrder = {
-          ...baseOrder,
-          paymentRef,
-          status: "paid",
-          paidAt: serverTimestamp(),
-          customer: baseOrder.name,
-          customerEmail: baseOrder.email,
-        };
-        
-        console.log("📦 Writing order to Firestore:", paidOrder);
-         // Save order to Firestore
-        const orderRef = await addDoc(collection(db, "brands", "serac", "orders"), paidOrder);
-        console.log("✅ Order saved with ID:", orderRef.id);
-        
-        // Update quote status and add orderId
-        if(quoteId){
-          const qRef = doc(db, "brands", "serac", "quotes", quoteId);
-          try {
-            await updateDoc(qRef, { status: "paid", paidAt: serverTimestamp(), orderId: orderRef.id });
-          } catch(e){ console.warn("Quote status update failed", e); }
-        }
-
-        if(!quoteId){
-          try { localStorage.removeItem(STORAGE_KEY); } catch(e){ console.warn('localStorage clear failed', e); }
-        }
-
-        showSpinner(false);
-        window.location.href = "../thankyou.html";
-      } catch(saveErr){
-        showSpinner(false);
-        console.error("Failed saving paid order", saveErr);
-        showError("Payment succeeded but saving the order failed. Please contact support.");
-        try { localStorage.removeItem(STORAGE_KEY); } catch(e){ }
-        window.location.href = "../thankyou.html";
-      } finally {
-        payBtn.disabled = false;
-      }
-    },
-    onclose: function () {
-      showSpinner(false);
-      payBtn.disabled = false;
-    }
-  };
-
   try {
-    if (typeof FlutterwaveCheckout === 'function') {
-      FlutterwaveCheckout(fwConfig);
-    } else {
-      throw new Error("Payment gateway not loaded");
+    showSpinner(true);
+    console.log("💰 Payment success callback triggered:", data);
+
+    const paymentRef = data.tx_ref || data.transaction_id || data.transactionId || data.flwRef || data.id || "no_ref";
+
+    // Reconfirm base order data
+    if (!baseOrder || typeof baseOrder !== 'object') {
+      console.error("❌ baseOrder is missing or invalid:", baseOrder);
+      alert("Order data missing. Please contact support.");
+      showSpinner(false);
+      return;
     }
-  } catch(err) {
+
+    // Construct the order data
+    const paidOrder = {
+      ...baseOrder,
+      paymentRef,
+      status: "paid",
+      paidAt: serverTimestamp(),
+      createdAt: serverTimestamp(),
+      customer: baseOrder.name || baseOrder.customer || "",
+      customerEmail: baseOrder.email || baseOrder.customerEmail || "",
+    };
+
+    console.log("📦 Writing order to Firestore:", paidOrder);
+
+    // Save to Firestore
+    const orderRef = await addDoc(collection(db, "brands", "serac", "orders"), paidOrder);
+    console.log("✅ Order saved with ID:", orderRef.id);
+
+    // Update quote if present
+    if (quoteId) {
+      console.log("🔄 Updating linked quote:", quoteId);
+      const qRef = doc(db, "brands", "serac", "quotes", quoteId);
+      await updateDoc(qRef, {
+        status: "Paid",
+        paidAt: serverTimestamp(),
+        orderId: orderRef.id,
+        orderLink: `../checkout/index.html?quoteId=${quoteId}&orderId=${orderRef.id}`
+      });
+      console.log("✅ Quote updated with orderId link.");
+    }
+
+    try { localStorage.removeItem(STORAGE_KEY); } catch (e) { console.warn('localStorage clear failed', e); }
+
     showSpinner(false);
+    alert("✅ Order saved successfully! Redirecting...");
+    window.location.href = "../thankyou.html";
+  } catch (saveErr) {
+    showSpinner(false);
+    console.error("💥 Failed saving paid order:", saveErr);
+    alert("Payment succeeded but saving failed. Please contact support.");
+    window.location.href = "../thankyou.html";
+  } finally {
     payBtn.disabled = false;
-    console.error("Flutterwave invocation failed", err);
-    showError("Payment gateway is unavailable. Please try again later.");
   }
-});
+},
+
 
 /* currency change */
 currencySelect.addEventListener('change', () => {
