@@ -777,11 +777,11 @@ payBtn.addEventListener('click', async (ev) => {
   ev.preventDefault();
   showError('');
   const v = validateForm();
-  if(v){ showError(v); return; }
+  if (v) { showError(v); return; }
 
   let subtotal = 0;
   quote.items.forEach(it => subtotal += (it.totalPrices && (it.totalPrices[selectedCurrency] ?? 0)) || 0);
-  if(subtotal <= 0){ showError("Subtotal is zero. Cannot proceed."); return; }
+  if (subtotal <= 0) { showError("Subtotal is zero. Cannot proceed."); return; }
 
   payBtn.disabled = true;
   showSpinner(true);
@@ -807,74 +807,87 @@ payBtn.addEventListener('click', async (ev) => {
     tx_ref: txRef,
     amount: Number(subtotal),
     currency: selectedCurrency,
-    customer: { email: email, phonenumber: phone, name: name },
-    customizations: { title: "Sérac", description: "Order Payment", logo: "../asset/logo.png" },
-    
+    customer: { email, phonenumber: phone, name },
+    customizations: { 
+      title: "Sérac", 
+      description: "Order Payment", 
+      logo: "../asset/logo.png" 
+    },
+
     callback: async function (data) {
-  try {
-    showSpinner(true);
-    console.log("💰 Payment success callback triggered:", data);
+      try {
+        showSpinner(true);
+        console.log("💰 Payment success callback triggered:", data);
 
-    const paymentRef = data.tx_ref || data.transaction_id || data.transactionId || data.flwRef || data.id || "no_ref";
+        const paymentRef = data.tx_ref || data.transaction_id || data.transactionId || data.flwRef || data.id || "no_ref";
 
-    // Reconfirm base order data
-    if (!baseOrder || typeof baseOrder !== 'object') {
-      console.error("❌ baseOrder is missing or invalid:", baseOrder);
-      alert("Order data missing. Please contact support.");
+        if (!baseOrder || typeof baseOrder !== 'object') {
+          console.error("❌ baseOrder is missing or invalid:", baseOrder);
+          alert("Order data missing. Please contact support.");
+          showSpinner(false);
+          return;
+        }
+
+        const paidOrder = {
+          ...baseOrder,
+          paymentRef,
+          status: "paid",
+          paidAt: serverTimestamp(),
+          createdAt: serverTimestamp(),
+          customer: baseOrder.name || "",
+          customerEmail: baseOrder.email || "",
+        };
+
+        console.log("📦 Writing order to Firestore:", paidOrder);
+
+        const orderRef = await addDoc(collection(db, "brands", "serac", "orders"), paidOrder);
+        console.log("✅ Order saved with ID:", orderRef.id);
+
+        // Update linked quote
+        if (quoteId) {
+          const qRef = doc(db, "brands", "serac", "quotes", quoteId);
+          try {
+            console.log("🔄 Updating linked quote:", quoteId);
+            await updateDoc(qRef, {
+              status: "paid",
+              paidAt: serverTimestamp(),
+              orderId: orderRef.id,
+              orderLink: `../checkout/index.html?quoteId=${quoteId}&orderId=${orderRef.id}`
+            });
+            console.log("✅ Quote updated to paid successfully");
+          } catch (e) {
+            console.warn("❌ Quote update failed:", e);
+          }
+        }
+
+        try { localStorage.removeItem(STORAGE_KEY); } 
+        catch (e) { console.warn('localStorage clear failed', e); }
+
+        showSpinner(false);
+        alert("✅ Order saved successfully! Redirecting...");
+        window.location.href = "../thankyou.html";
+
+      } catch (saveErr) {
+        showSpinner(false);
+        console.error("💥 Failed saving paid order:", saveErr);
+        alert("Payment succeeded but saving failed. Please contact support.");
+        window.location.href = "../thankyou.html";
+      } finally {
+        payBtn.disabled = false;
+      }
+    },
+
+    onclose: () => {
+      console.log("❌ Payment window closed by user");
+      payBtn.disabled = false;
       showSpinner(false);
-      return;
     }
+  };
 
-    // Construct the order data
-    const paidOrder = {
-      ...baseOrder,
-      paymentRef,
-      status: "paid",
-      paidAt: serverTimestamp(),
-      createdAt: serverTimestamp(),
-      customer: baseOrder.name || baseOrder.customer || "",
-      customerEmail: baseOrder.email || baseOrder.customerEmail || "",
-    };
+  // 🔹 Launch Flutterwave Checkout
+  FlutterwaveCheckout(fwConfig);
+});
 
-    console.log("📦 Writing order to Firestore:", paidOrder);
-
-    // Save to Firestore
-    const orderRef = await addDoc(collection(db, "brands", "serac", "orders"), paidOrder);
-    console.log("✅ Order saved with ID:", orderRef.id);
-
-    // Update quote if present
-    // ✅ Update quote status if this order originated from one
-if (quoteId) {
-  const qRef = doc(db, "brands", "serac", "quotes", quoteId);
-  try {
-    console.log("🔄 Updating linked quote:", quoteId);
-    await updateDoc(qRef, {
-      status: "paid", // keep consistent lowercase for logic checks
-      paidAt: serverTimestamp(),
-      orderId: orderRef.id,
-      orderLink: `../checkout/index.html?quoteId=${quoteId}&orderId=${orderRef.id}`
-    });
-    console.log("✅ Quote updated to paid successfully");
-  } catch (e) {
-    console.warn("❌ Quote update failed:", e);
-  }
-}
-
-
-    try { localStorage.removeItem(STORAGE_KEY); } catch (e) { console.warn('localStorage clear failed', e); }
-
-    showSpinner(false);
-    alert("✅ Order saved successfully! Redirecting...");
-    window.location.href = "../thankyou.html";
-  } catch (saveErr) {
-    showSpinner(false);
-    console.error("💥 Failed saving paid order:", saveErr);
-    alert("Payment succeeded but saving failed. Please contact support.");
-    window.location.href = "../thankyou.html";
-  } finally {
-    payBtn.disabled = false;
-  }
-},
 
 
 /* currency change */
