@@ -710,12 +710,16 @@ payBtn.addEventListener('click', async (ev) => {
           ...baseOrder,
           paymentRef,
           status: "paid",
-          paidAt: serverTimestamp()
+          paidAt: serverTimestamp(),
+          customer: baseOrder.name,
+          customerEmail: baseOrder.email,
         };
-
-        // Save order to Firestore
+        
+        console.log("📦 Writing order to Firestore:", paidOrder);
+         // Save order to Firestore
         const orderRef = await addDoc(collection(db, "brands", "serac", "orders"), paidOrder);
-
+        console.log("✅ Order saved with ID:", orderRef.id);
+        
         // Update quote status and add orderId
         if(quoteId){
           const qRef = doc(db, "brands", "serac", "quotes", quoteId);
