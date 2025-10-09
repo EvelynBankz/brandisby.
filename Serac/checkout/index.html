@@ -216,7 +216,7 @@ footer { text-align:center; padding:22px; background:transparent; color:var(--mu
     <div class="card checkout-form" id="checkoutCard">
       <h2>Billing Details</h2>
 
-      <div class="error-banner" id="errorBanner"></div>
+      <div class="error-banner" id="errorBanner" role="alert"></div>
 
       <form id="checkoutForm" autocomplete="off">
         <label for="name">Full Name</label>
@@ -263,7 +263,6 @@ footer { text-align:center; padding:22px; background:transparent; color:var(--mu
   <p>© 2025 Sérac</p>
 </footer>
 
-
 <!-- floating top-right 3-dot spinner -->
 <div class="spinner-backdrop" id="spinnerBackdrop" role="status" aria-hidden="true">
   <div class="spinner" id="spinnerBox">
@@ -273,18 +272,16 @@ footer { text-align:center; padding:22px; background:transparent; color:var(--mu
   </div>
 </div>
 
-
-
 <!-- Flutterwave script -->
 <script src="https://checkout.flutterwave.com/v3.js"></script>
 
 <!-- Main logic -->
 <script type="module">
-/* ---------- Firebase (client read-only used for retrieving product/quote/order docs) ---------- */
+/* ---------- Firebase (client used for reading product/quote/order docs and saving verified orders) ---------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-import { getFirestore, doc, getDoc, collection, addDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-/* CONFIG (same project as other Serac files) */
+/* ---------- Configuration (from your original file) ---------- */
 const firebaseConfig = {
   apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
   authDomain: "brandisby.firebaseapp.com",
@@ -293,34 +290,15 @@ const firebaseConfig = {
   messagingSenderId: "87213267039",
   appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
 };
+const FLW_PUBLIC_KEY = "FLWPUBK_TEST-07eb9d2da345c08dc4d54278c3bc86f7-X";
+const CLOUD_FN_BASE = "https://verifypayment.brandisby.workers.dev"; // base from your code (we'll call /verify)
+const CLOUD_FN_VERIFY = `${CLOUD_FN_BASE}/verify`;
+
+/* Initialize Firebase */
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-
-/* ---------- processPaidOrder: save verified order to Firestore ---------- */
-async function processPaidOrder(orderData) {
-  try {
-    const orderRef = await addDoc(collection(db, "brands", "serac", "orders"), {
-      ...orderData,
-      createdAt: serverTimestamp(),
-      verifiedAt: serverTimestamp(),
-      status: "paid"
-    });
-    console.log("Order saved to Firestore with ID:", orderRef.id);
-    return orderRef.id;
-  } catch (err) {
-    console.error("Failed to save paid order:", err);
-    return null;
-  }
-}
-
-/* Flutterwave public key (test) — replace with live public key in production */
-const FLW_PUBLIC_KEY = "FLWPUBK_TEST-07eb9d2da345c08dc4d54278c3bc86f7-X";
-
-/* Cloudflare Worker verification endpoint — NO PLACEHOLDERS (your provided URL) */
-const CLOUD_FN_VERIFY = "https://verifypayment.brandisby.workers.dev/";
-
-/* DOM refs */
+/* ---------- DOM refs ---------- */
 const cartCountElem = document.getElementById('cartCount');
 const orderItemsEl = document.getElementById('orderItems');
 const totalsText = document.getElementById('totalsText');
@@ -339,11 +317,14 @@ const hero = document.getElementById('heroSection');
 const heroH1 = document.getElementById('heroH1');
 const heroP = document.getElementById('heroP');
 
+const hamburger = document.getElementById('hamburger');
+const headerRight = document.getElementById('headerRight');
+
 /* Local storage keys */
 const STORAGE_KEY = 'seracCart';
 const CURRENCY_KEY = 'seracCurrency';
 
-/* state */
+/* State */
 let cart = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
 let selectedCurrency = localStorage.getItem(CURRENCY_KEY) || 'NGN';
 let productCache = {};
@@ -352,12 +333,12 @@ const urlParams = new URLSearchParams(window.location.search);
 const quoteId = urlParams.get("quoteId") || null;
 const orderId = urlParams.get("orderId") || null;
 
-let activeQuoteRaw = null;   // raw quote doc (if loaded)
-let activeOrderRaw = null;   // raw order doc (if loaded)
-let isPaidOrder = false;     // true when we are viewing a paid order summary
-let quote = null;            // normalized structure used by renderOrder()
+let activeQuoteRaw = null;
+let activeOrderRaw = null;
+let isPaidOrder = false;
+let quote = null;
 
-/* ---------- Utilities ---------- */
+/* ---------- Helpers ---------- */
 function showSpinner(show=true){
   if (!spinnerBackdrop) return;
   spinnerBackdrop.style.display = show ? 'flex' : 'none';
@@ -381,7 +362,7 @@ function formatPrice(value, currency){
 }
 function escapeHtml(str){ if(!str && str !== 0) return ""; return String(str).replace(/[&<>"']/g, s => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[s])); }
 
-/* Reuse product fetching from Firestore (same path as cart) */
+/* ---------- Firestore helpers ---------- */
 async function fetchProductData(productId){
   try {
     if(productCache[productId]) return productCache[productId];
@@ -395,7 +376,25 @@ async function fetchProductData(productId){
   return null;
 }
 
-/* merge cart items (same logic as cart page) */
+/* Add verified order to Firestore (only called after worker verified) */
+async function saveVerifiedOrderToFirestore(orderData) {
+  try {
+    const docRef = await addDoc(collection(db, "brands", "serac", "orders"), {
+      ...orderData,
+      createdAt: serverTimestamp(),
+      verifiedAt: serverTimestamp(),
+      status: "paid"
+    });
+    console.log("Saved order to Firestore:", docRef.id);
+    // Return a minimal order doc representation
+    return { id: docRef.id, ...orderData };
+  } catch (err) {
+    console.error("Failed to save verified order:", err);
+    throw err;
+  }
+}
+
+/* ---------- Cart / Quote utilities ---------- */
 function mergeCartItems(cartArray){
   const merged = [];
   (cartArray || []).forEach(item=>{
@@ -406,7 +405,6 @@ function mergeCartItems(cartArray){
   return merged;
 }
 
-/* build normalized quote from client cart (used when no quoteId) */
 async function buildQuoteFromCart(){
   cart = mergeCartItems(cart);
   const byProduct = new Map();
@@ -422,10 +420,9 @@ async function buildQuoteFromCart(){
   for(const pid of productIds){
     const rows = byProduct.get(pid) || [];
     const productDoc = productsMap[pid] || null;
-    // IMPORTANT: do not use placeholders. Only use image if real image exists.
     const image = (productDoc && productDoc.images && productDoc.images.length) ? productDoc.images[0] :
                   (productDoc && productDoc.imageUrl) ? productDoc.imageUrl :
-                  null; // null means don't show an image
+                  null;
     const name = productDoc?.name || rows[0]?.name || 'Product';
     const variantDetails = rows.map(r => {
       const unitPrices = {
@@ -458,7 +455,6 @@ async function buildQuoteFromCart(){
   return { items };
 }
 
-/* Normalize server quote items into the same structure used above */
 function normalizeQuoteItems(rawQuote){
   const arr = Array.isArray(rawQuote.items) ? rawQuote.items : [];
   const items = arr.map(ci => {
@@ -500,7 +496,6 @@ function normalizeQuoteItems(rawQuote){
         description: ci.description || ''
       };
     } else {
-      // single line
       const qty = Number(ci.qty || ci.quantity) || 1;
       const unitPrices = {
         NGN: Number(ci.priceNGN) || Number(ci.price) || 0,
@@ -542,9 +537,8 @@ function normalizeQuoteItems(rawQuote){
 
 /* ---------------- Render / UI ---------------- */
 function renderOrderFromQuoteNormalized(quoteNormalized, currency = 'NGN', paid=false){
-  // quoteNormalized: { items: [...] }
   orderItemsEl.innerHTML = '';
-  if(!quoteNormalized || !Array.isArray(quoteNormalized.items)) {
+  if(!quoteNormalized || !Array.isArray(quoteNormalized.items) || quoteNormalized.items.length === 0) {
     orderItemsEl.innerHTML = '<li class="small-note">No items</li>';
     totalsText.textContent = `Subtotal: —`;
     return;
@@ -560,12 +554,9 @@ function renderOrderFromQuoteNormalized(quoteNormalized, currency = 'NGN', paid=
     li.className = 'order-item';
     li.dataset.idx = idx;
 
-    // Always align name to left (css handles it)
-    // Only show image if item.image exists (no placeholders)
     const imageHtml = item.image ? `<img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}">` : '';
 
     if (paid) {
-      // compact display for paid order (no placeholder images)
       li.innerHTML = `
         <div class="left" style="flex-direction:row; align-items:center;">
           ${imageHtml}
@@ -579,7 +570,6 @@ function renderOrderFromQuoteNormalized(quoteNormalized, currency = 'NGN', paid=
       `;
       orderItemsEl.appendChild(li);
 
-      // details container includes description from admin quote (item.description)
       const detailsContainer = document.createElement('div');
       detailsContainer.className = 'details-container';
       detailsContainer.dataset.forIdx = idx;
@@ -592,7 +582,6 @@ function renderOrderFromQuoteNormalized(quoteNormalized, currency = 'NGN', paid=
       li.parentNode.insertBefore(detailsContainer, li.nextSibling);
 
     } else {
-      // regular checkout style show image (only when exists) + optional variants + details button
       li.innerHTML = `
         <div class="left" style="flex-direction:row; align-items:center;">
           ${imageHtml}
@@ -627,7 +616,6 @@ function renderOrderFromQuoteNormalized(quoteNormalized, currency = 'NGN', paid=
         li.parentNode.insertBefore(variantsContainer, li.nextSibling);
       }
 
-      // details container for unpaid items (description from admin)
       const detailsContainer = document.createElement('div');
       detailsContainer.className = 'details-container';
       detailsContainer.dataset.forIdx = idx;
@@ -664,7 +652,6 @@ function renderOrderFromQuoteNormalized(quoteNormalized, currency = 'NGN', paid=
   });
 
   totalsText.textContent = `Subtotal: ${formatPrice(subtotal, selectedCurrency)}`;
-  // cart count for UI continuity
   try { cartCountElem.textContent = quote ? quote.items.reduce((s,a)=>s + (a.totalQuantity || 0), 0) : 0; } catch(e){}
 }
 
@@ -672,24 +659,21 @@ function renderOrderFromQuoteNormalized(quoteNormalized, currency = 'NGN', paid=
 async function loadCheckoutData(){
   selectedCurrency = localStorage.getItem(CURRENCY_KEY) || selectedCurrency || 'NGN';
   try { currencySelect.value = selectedCurrency; } catch(e){}
-  // hide currency selector unless quote present
   if (currencySelector) currencySelector.style.display = quoteId ? 'flex' : 'none';
 
   try {
     showSpinner(true);
 
-    // If orderId param present, prefer the order document (paid order summary)
+    // If orderId param present -> display paid order summary
     if (orderId) {
       const orderSnap = await getDoc(doc(db, "brands", "serac", "orders", orderId));
       if (orderSnap.exists()){
         activeOrderRaw = orderSnap.data();
         isPaidOrder = true;
-        // Fill billing fields from order doc (if available)
         if (nameInput) nameInput.value = activeOrderRaw.name || activeOrderRaw.customer || "";
         if (emailInput) emailInput.value = activeOrderRaw.email || activeOrderRaw.customerEmail || "";
         if (phoneInput) phoneInput.value = activeOrderRaw.phone || "";
         if (addressInput) addressInput.value = activeOrderRaw.address || "";
-        // Build a normalized quote structure from order.items if possible
         if (Array.isArray(activeOrderRaw.items)) {
           const ordItems = activeOrderRaw.items.map(it => {
             if (it.variants || it.totalPrices) return it;
@@ -729,7 +713,6 @@ async function loadCheckoutData(){
           });
           quote = { items: ordItems };
           renderOrderFromQuoteNormalized(quote, selectedCurrency, true);
-          // set hero and button state for paid
           if (hero) hero.classList.add('paid');
           if (heroH1) heroH1.textContent = "Order Summary";
           if (heroP) heroP.textContent = "Your order has been paid successfully.";
@@ -742,7 +725,7 @@ async function loadCheckoutData(){
       }
     }
 
-    // If we reach here, either no orderId or order didn't exist. Try quoteId.
+    // Try quoteId if present
     if (quoteId) {
       const quoteSnap = await getDoc(doc(db, "brands", "serac", "quotes", quoteId));
       if (!quoteSnap.exists()) {
@@ -751,20 +734,16 @@ async function loadCheckoutData(){
         return;
       }
       activeQuoteRaw = quoteSnap.data();
-      // If quote has status 'paid' and an orderId, try to load that order and show summary instead of checkout
       const qStatus = (activeQuoteRaw.status || "").toLowerCase();
       if (qStatus === 'paid' && activeQuoteRaw.orderId) {
-        // try to load order doc
         const linkedOrderSnap = await getDoc(doc(db, "brands", "serac", "orders", activeQuoteRaw.orderId));
         if (linkedOrderSnap.exists()){
           activeOrderRaw = linkedOrderSnap.data();
           isPaidOrder = true;
-          // fill billing from order
           if (nameInput) nameInput.value = activeOrderRaw.name || activeOrderRaw.customer || "";
           if (emailInput) emailInput.value = activeOrderRaw.email || activeOrderRaw.customerEmail || "";
           if (phoneInput) phoneInput.value = activeOrderRaw.phone || "";
           if (addressInput) addressInput.value = activeOrderRaw.address || "";
-          // normalize items from order
           if (Array.isArray(activeOrderRaw.items)) {
             const ordItems = activeOrderRaw.items.map(it => {
               if (it.variants || it.totalPrices) return it;
@@ -804,7 +783,6 @@ async function loadCheckoutData(){
             });
             quote = { items: ordItems };
             renderOrderFromQuoteNormalized(quote, selectedCurrency, true);
-            // UI: hero and disabled pay
             if (hero) hero.classList.add('paid');
             if (heroH1) heroH1.textContent = "Order Summary";
             if (heroP) heroP.textContent = "Your order has been paid successfully.";
@@ -813,21 +791,15 @@ async function loadCheckoutData(){
             return;
           }
         } else {
-          // Quote says paid but linked order doc not found — still show the quote items but disable pay
           console.warn("Quote status paid but order doc not found for id:", activeQuoteRaw.orderId);
         }
       }
 
-      // If quote is unpaid (or paid but no linked order), show quote items for checkout
-      // Fill billing inputs with quote customer info (if available)
+      // Show quote for checkout
       if (activeQuoteRaw.customer && nameInput) nameInput.value = activeQuoteRaw.customer;
       if (activeQuoteRaw.email && emailInput) emailInput.value = activeQuoteRaw.email;
-
-      // Normalize quote items into same structure expected by render function
       quote = normalizeQuoteItems(activeQuoteRaw);
       renderOrderFromQuoteNormalized(quote, selectedCurrency, false);
-
-      // set hero to checkout mode
       if (hero) hero.classList.remove('paid');
       if (heroH1) heroH1.textContent = "Checkout";
       if (heroP) heroP.textContent = "Review your quote and proceed to payment.";
@@ -836,7 +808,7 @@ async function loadCheckoutData(){
       return;
     }
 
-    // No quoteId and no orderId -> load from local cart
+    // No quote or order -> local cart
     cart = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
     cart = mergeCartItems(cart);
     if (!cart.length) {
@@ -846,7 +818,6 @@ async function loadCheckoutData(){
       showError("Your cart is empty.");
       return;
     }
-    // build quote from local cart
     quote = await buildQuoteFromCart();
     renderOrderFromQuoteNormalized(quote, selectedCurrency, false);
     showSpinner(false);
@@ -900,17 +871,10 @@ async function postToWorkerWithRetries(payload, maxAttempts = 3, initialDelay = 
   throw lastErr || new Error('Worker verification failed after retries');
 }
 
-/* ---------- Payment & saving flow (IMPROVED) ----------
-   - Calls Cloudflare Worker inside Flutterwave callback (with retries)
-   - Adds fallback poll in case callback never fires (common with test flows)
-------------------------------------------- */
-
-payBtn.addEventListener('click', async (ev) => {
-  ev.preventDefault();
-
-  // If this is a paid order view, don't allow payment
+/* ---------- Payment flow (single, clear handler) ---------- */
+async function initiatePaymentFlow(){
+  // Prevent double clicks
   if (isPaidOrder) return;
-
   showError('');
   const v = validateForm();
   if (v) { showError(v); return; }
@@ -920,7 +884,8 @@ payBtn.addEventListener('click', async (ev) => {
   quote.items.forEach(it => subtotal += (it.totalPrices && (it.totalPrices[selectedCurrency] ?? 0)) || 0);
   if (subtotal <= 0) { showError("Subtotal is zero. Cannot proceed."); return; }
 
-  if (payBtn) payBtn.disabled = true;
+  // UI lock
+  payBtn.disabled = true;
   showSpinner(true);
 
   const name = nameInput.value.trim();
@@ -939,48 +904,57 @@ payBtn.addEventListener('click', async (ev) => {
   };
 
   const txRef = "serac_" + Date.now();
-
-  // Flag so fallback poll can detect callback action
   let paymentCallbackHandled = false;
 
-  // Helper to finalize UI and redirect after worker success
-  function finalizeAfterSuccess(workerResp) {
-    try { localStorage.removeItem(STORAGE_KEY); } catch(e){ console.warn("localStorage clear failed", e); }
-    try { cartCountElem.textContent = '0'; } catch(e){}
-    if (workerResp.orderDoc && Array.isArray(workerResp.orderDoc.items)) {
-      activeOrderRaw = workerResp.orderDoc;
-      quote = { items: activeOrderRaw.items };
-      isPaidOrder = true;
-      renderOrderFromQuoteNormalized(quote, selectedCurrency, true);
-    } else {
-      activeOrderRaw = { ...baseOrder, status: "paid" };
-      quote = { items: baseOrder.items };
-      isPaidOrder = true;
-      renderOrderFromQuoteNormalized(quote, selectedCurrency, true);
-    }
-    if (hero) hero.classList.add('paid');
-    if (heroH1) heroH1.textContent = "Order Summary";
-    if (heroP) heroP.textContent = "Your order has been paid successfully.";
-    if (payBtn) { payBtn.textContent = "Paid ✅"; payBtn.disabled = true; payBtn.classList.add('paid-state'); }
-    showSpinner(false);
-
-    // safe redirect — include orderId if worker returned it
-    const oid = (workerResp && (workerResp.orderId || (workerResp.orderDoc && workerResp.orderDoc.id))) || '';
-    const qs = oid ? `?orderId=${encodeURIComponent(oid)}` : '';
-    window.location.href = "../thankyou.html" + qs;
-  }
-
-  // function that tries to call the worker with given payload
-  async function callWorker(payload) {
+  // finalize after worker success: save to Firestore (client) and update UI then redirect
+  async function finalizeAfterWorkerSuccess(workerResp) {
     try {
-      const resJson = await postToWorkerWithRetries(payload, 3);
-      return resJson;
+      // Save verified order to Firestore — only now
+      let savedOrderDoc = null;
+      try {
+        savedOrderDoc = await saveVerifiedOrderToFirestore({
+          ...baseOrder,
+          workerVerification: workerResp,
+        });
+      } catch (saveErr) {
+        console.warn("Failed saving to Firestore after verification (will still proceed)", saveErr);
+      }
+
+      // Clean local cart and update UI
+      try { localStorage.removeItem(STORAGE_KEY); } catch(e){ console.warn("localStorage clear failed", e); }
+      try { cartCountElem.textContent = '0'; } catch(e){}
+
+      // Use returned worker orderDoc if present, otherwise savedOrderDoc, otherwise baseOrder
+      activeOrderRaw = workerResp.orderDoc || savedOrderDoc || { ...baseOrder, status: "paid" };
+      quote = { items: activeOrderRaw.items || baseOrder.items };
+      isPaidOrder = true;
+      renderOrderFromQuoteNormalized(quote, selectedCurrency, true);
+
+      if (hero) hero.classList.add('paid');
+      if (heroH1) heroH1.textContent = "Order Summary";
+      if (heroP) heroP.textContent = "Your order has been paid successfully.";
+      if (payBtn) { payBtn.textContent = "Paid ✅"; payBtn.disabled = true; payBtn.classList.add('paid-state'); }
+
+      showSpinner(false);
+
+      // Redirect to thankyou with orderId if available
+      const oid = workerResp.orderId || (savedOrderDoc && savedOrderDoc.id) || '';
+      const qs = oid ? `?orderId=${encodeURIComponent(oid)}` : '';
+      window.location.href = "../thankyou.html" + qs;
     } catch (err) {
-      throw err;
+      console.error("Finalize error:", err);
+      showSpinner(false);
+      showError("Payment verified but an error occurred finalizing your order. Contact support with tx_ref: " + txRef);
+      if (payBtn) payBtn.disabled = false;
     }
   }
 
-  // Flutterwave configuration
+  // Worker call wrapper
+  async function callWorkerVerify(payload) {
+    return await postToWorkerWithRetries(payload, 3);
+  }
+
+  // Configure Flutterwave
   const fwConfig = {
     public_key: FLW_PUBLIC_KEY,
     tx_ref: txRef,
@@ -989,101 +963,73 @@ payBtn.addEventListener('click', async (ev) => {
     customer: { email: email, phonenumber: phone, name: name },
     customizations: { title: "Sérac", description: "Order Payment", logo: "../asset/logo.png" },
 
-  callback: async function (data) {
-  paymentCallbackHandled = true;
-  showSpinner(true);
-  console.log("Payment callback data:", data);
+    callback: async function (data) {
+      paymentCallbackHandled = true;
+      showSpinner(true);
+      try {
+        const returnedTxRef = data.tx_ref || data.data?.tx_ref || txRef;
+        const flwRef =
+          data.flw_ref ||
+          data.transaction_id ||
+          data.transactionId ||
+          data.data?.id ||
+          null;
 
-  try {
-    // Extract tx_ref and flwRef safely
-    const returnedTxRef = data.tx_ref || data.data?.tx_ref || txRef;
-    const flwRef =
-      data.flw_ref ||
-      data.transaction_id ||
-      data.transactionId ||
-      data.data?.id ||
-      null;
+        const payload = {
+          tx_ref: returnedTxRef,
+          flwRef,
+          orderData: baseOrder,
+          quoteId: quoteId || null,
+          expectedAmount: Number(subtotal),
+          currency: selectedCurrency,
+        };
 
-    // Build payload to send to your Cloudflare Worker
-    const payload = {
-      tx_ref: returnedTxRef,
-      flwRef: flwRef,
-      orderData: baseOrder,
-      quoteId: quoteId || null,
-      userId: null,
-      expectedAmount: Number(subtotal),
-      currency: selectedCurrency,
-    };
+        // Send to Worker verify endpoint (CORS mode)
+        let verifyJson;
+        try {
+          verifyJson = await callWorkerVerify(payload);
+        } catch (err) {
+          console.error("Worker verification failed after retries:", err);
+          throw new Error("Payment succeeded but verification failed. Please contact support with tx_ref: " + returnedTxRef);
+        }
 
-    console.log("Sending verification payload to Worker:", payload);
-
-    // ✅ Send verification request to your Worker endpoint
-    const verifyResponse = await fetch(
-      "https://verifypayment.brandisby.workers.dev/verify",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        if (verifyJson && (verifyJson.status === "success" || verifyJson.success === true)) {
+          // finalize (save to firestore & redirect)
+          await finalizeAfterWorkerSuccess(verifyJson);
+        } else {
+          throw new Error(verifyJson?.message || "Worker returned unsuccessful verification.");
+        }
+      } catch (err) {
+        console.error("Verification or finalize error:", err);
+        showSpinner(false);
+        showError("Payment succeeded but verification failed. Please contact support with your transaction reference.");
+        if (payBtn) payBtn.disabled = false;
       }
-    );
+    },
 
-    const resJson = await verifyResponse.json();
-    console.log("Worker verification response:", resJson);
-
-    // ✅ If the Worker confirms success
-    if (resJson && (resJson.status === "success" || resJson.success === true)) {
-  // Save order to Firestore (if needed)
-  const orderId = await processPaidOrder(baseOrder);
-  if (orderId) resJson.orderId = orderId; // attach to workerResp for finalize
-  finalizeAfterSuccess(resJson);
-} else {
-  throw new Error(resJson.message || "Payment verification failed on Worker.");
-}
-
-  } catch (err) {
-    console.error("Verification or finalize error:", err);
-    showSpinner(false);
-    if (payBtn) payBtn.disabled = false;
-    showError(
-      "Payment succeeded but verification failed. Please contact support with your transaction reference."
-    );
-  }
-},
-
-onclose: function () {
-  console.log("Payment window closed by user");
-  if (payBtn) payBtn.disabled = false;
-  showSpinner(false);
-}
-}; // ✅ this closes the fwConfig object properly
-
-  
-// ✅ Launch Flutterwave checkout only when user clicks "Pay"
-if (payBtn) {
-  payBtn.addEventListener("click", async function () {
-    showSpinner(true);
-    payBtn.disabled = true;
-
-    try {
-      if (typeof FlutterwaveCheckout === "function") {
-        FlutterwaveCheckout(fwConfig);
-      } else {
-        throw new Error("Payment gateway not loaded");
-      }
-    } catch (err) {
+    onclose: function () {
+      console.log("Payment window closed by user");
+      if (payBtn) payBtn.disabled = false;
       showSpinner(false);
-      payBtn.disabled = false;
-      console.error("Flutterwave invocation failed", err);
-      showError("Payment gateway is unavailable. Please try again later.");
-      return;
     }
-  });
-}
+  };
 
+  // Launch Flutterwave checkout (guarded)
+  try {
+    if (typeof FlutterwaveCheckout === "function") {
+      FlutterwaveCheckout(fwConfig);
+    } else {
+      throw new Error("FlutterwaveCheckout function not available");
+    }
+  } catch (err) {
+    console.error("Flutterwave invocation failed", err);
+    showSpinner(false);
+    showError("Payment gateway is unavailable. Please try again later.");
+    payBtn.disabled = false;
+    return;
+  }
 
-  // ---------------- Fallback poll
-  // Some test modes/popups sometimes show success but the callback is not reliably invoked.
-  // This fallback will poll the Cloudflare worker (using txRef) a few times to detect a verified payment.
+  // ---------------- Fallback poll (in case callback not invoked) ----------------
   let fallbackAttempts = 0;
   const maxFallbackAttempts = 6;
   const fallbackIntervalMs = 3000;
@@ -1092,55 +1038,50 @@ if (payBtn) {
     flwRef: null,
     orderData: baseOrder,
     quoteId: quoteId || null,
-    userId: null,
     expectedAmount: Number(subtotal),
     currency: selectedCurrency
   };
 
   const fallbackTimer = setInterval(async () => {
-    if (paymentCallbackHandled) {
-      clearInterval(fallbackTimer);
-      return;
-    }
+    if (paymentCallbackHandled) { clearInterval(fallbackTimer); return; }
     fallbackAttempts++;
-    console.log("Fallback attempt", fallbackAttempts, "for txRef", txRef);
     try {
       const res = await postToWorkerWithRetries(fallbackPayload, 1);
       if (res && (res.status === 'success' || res.success === true)) {
         clearInterval(fallbackTimer);
         paymentCallbackHandled = true;
-        finalizeAfterSuccess(res);
+        await finalizeAfterWorkerSuccess(res);
       }
     } catch (err) {
-      console.warn("Fallback attempt failed (expected in many test flows):", err);
-      // continue polling until attempts exhausted
+      console.warn("Fallback attempt failed (expected sometimes):", err);
       if (fallbackAttempts >= maxFallbackAttempts) {
         clearInterval(fallbackTimer);
-        // Don't immediately show error — let user use UI to try again. Show helpful banner
         showSpinner(false);
         if (payBtn) payBtn.disabled = false;
-        showError("We couldn't confirm your payment automatically. If your payment was successful, please contact support with your tx_ref: " + txRef);
+        showError("We couldn't confirm your payment automatically. If your payment was successful, contact support with tx_ref: " + txRef);
       }
     }
   }, fallbackIntervalMs);
+}
+
+/* ---------- Event wiring ---------- */
+if (payBtn) payBtn.addEventListener('click', (ev) => {
+  ev.preventDefault();
+  initiatePaymentFlow();
 });
 
-/* currency change (affects displayed totals) */
 if (currencySelect) currencySelect.addEventListener('change', () => {
   selectedCurrency = currencySelect.value;
   localStorage.setItem(CURRENCY_KEY, selectedCurrency);
-  // re-render current quote/order summary
   if (quote) renderOrderFromQuoteNormalized(quote, selectedCurrency, isPaidOrder);
 });
 
-/* header & hamburger wiring + init */
 window.addEventListener('scroll', () => {
   const header = document.querySelector('.site-header');
   if (!header) return;
   if (window.scrollY > 50) header.classList.add('scrolled'); else header.classList.remove('scrolled');
 });
-const hamburger = document.getElementById('hamburger');
-const headerRight = document.getElementById('headerRight');
+
 if (hamburger) hamburger.addEventListener('click', ()=> {
   hamburger.classList.toggle('open');
   if (headerRight) headerRight.classList.toggle('open');
@@ -1148,9 +1089,7 @@ if (hamburger) hamburger.addEventListener('click', ()=> {
 
 /* Initialize */
 (async function init(){
-  // Ensure currency select matches stored value
   try { currencySelect.value = selectedCurrency; } catch(e){}
-  // initialize cart count from localStorage
   try { cartCountElem.textContent = (JSON.parse(localStorage.getItem(STORAGE_KEY)) || []).reduce((s,i)=>s + Number(i.quantity || 0), 0); } catch(e){ if (cartCountElem) cartCountElem.textContent = '0'; }
   await loadCheckoutData();
 })();
