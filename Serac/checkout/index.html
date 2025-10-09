@@ -979,7 +979,12 @@ payBtn.addEventListener('click', async (ev) => {
   try {
     // Extract tx_ref and flwRef safely
     const returnedTxRef = data.tx_ref || data.data?.tx_ref || txRef;
-    const flwRef = data.flw_ref || data.transaction_id || data.transactionId || data.data?.id || null;
+    const flwRef =
+      data.flw_ref ||
+      data.transaction_id ||
+      data.transactionId ||
+      data.data?.id ||
+      null;
 
     // Build payload to send to your Cloudflare Worker
     const payload = {
@@ -989,17 +994,20 @@ payBtn.addEventListener('click', async (ev) => {
       quoteId: quoteId || null,
       userId: null,
       expectedAmount: Number(subtotal),
-      currency: selectedCurrency
+      currency: selectedCurrency,
     };
 
     console.log("Sending verification payload to Worker:", payload);
 
     // ✅ Send verification request to your Worker endpoint
-    const verifyResponse = await fetch("https://verifypayment.brandisby.workers.dev", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
+    const verifyResponse = await fetch(
+      "https://verifypayment.brandisby.workers.dev",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      }
+    );
 
     const resJson = await verifyResponse.json();
     console.log("Worker verification response:", resJson);
@@ -1010,21 +1018,22 @@ payBtn.addEventListener('click', async (ev) => {
     } else {
       throw new Error(resJson.message || "Payment verification failed on Worker.");
     }
-
   } catch (err) {
     console.error("Verification or finalize error:", err);
     showSpinner(false);
     if (payBtn) payBtn.disabled = false;
-    showError("Payment succeeded but verification failed. Please contact support with your transaction reference.");
+    showError(
+      "Payment succeeded but verification failed. Please contact support with your transaction reference."
+    );
   }
 },
 
-      // user closed the payment window
-      console.log("Payment window closed by user");
-      if (payBtn) payBtn.disabled = false;
-      showSpinner(false);
-    }
-  };
+onclose: function () {
+  console.log("Payment window closed by user");
+  if (payBtn) payBtn.disabled = false;
+  showSpinner(false);
+},
+
 
   // Launch Flutterwave checkout
   try {
