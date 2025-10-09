@@ -971,47 +971,54 @@ payBtn.addEventListener('click', async (ev) => {
     customer: { email: email, phonenumber: phone, name: name },
     customizations: { title: "Sérac", description: "Order Payment", logo: "../asset/logo.png" },
 
-    callback: async function (data) {
-      paymentCallbackHandled = true;
-      try {
-        showSpinner(true);
-        console.log("Payment callback data:", data);
+   callback: async function (data) {
+  paymentCallbackHandled = true;
+  showSpinner(true);
+  console.log("Payment callback data:", data);
 
-        // Flutterwave returns the tx_ref in different shapes
-        const returnedTxRef = data.tx_ref || data.data?.tx_ref || txRef;
-        const flwRef = data.flw_ref || data.transaction_id || data.transactionId || data.data?.id || null;
+  try {
+    // Extract tx_ref and flwRef safely
+    const returnedTxRef = data.tx_ref || data.data?.tx_ref || txRef;
+    const flwRef = data.flw_ref || data.transaction_id || data.transactionId || data.data?.id || null;
 
-        const payload = {
-          tx_ref: returnedTxRef,
-          flwRef: flwRef,
-          orderData: baseOrder,
-          quoteId: quoteId || null,
-          userId: null,
-          expectedAmount: Number(subtotal),
-          currency: selectedCurrency
-        };
+    // Build payload to send to your Cloudflare Worker
+    const payload = {
+      tx_ref: returnedTxRef,
+      flwRef: flwRef,
+      orderData: baseOrder,
+      quoteId: quoteId || null,
+      userId: null,
+      expectedAmount: Number(subtotal),
+      currency: selectedCurrency
+    };
 
-        const resJson = await callWorker(payload);
+    console.log("Sending verification payload to Worker:", payload);
 
-        console.log("Verification function response:", resJson);
+    // ✅ Send verification request to your Worker endpoint
+    const verifyResponse = await fetch("https://verifypayment.brandisby.workers.dev", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
 
-        // their worker returns { status: 'success', orderId, orderDoc } in your posted script
-        if (resJson && (resJson.status === 'success' || resJson.success === true)) {
-          finalizeAfterSuccess(resJson);
-          return;
-        } else {
-          throw new Error(resJson.message || 'Payment verification failed on server.');
-        }
+    const resJson = await verifyResponse.json();
+    console.log("Worker verification response:", resJson);
 
-      } catch (err) {
-        console.error("Payment verification or finalize failed:", err);
-        showSpinner(false);
-        if (payBtn) payBtn.disabled = false;
-        showError("Payment possibly succeeded but verification failed. Please contact support with your transaction reference.");
-      }
-    },
+    // ✅ If the Worker confirms success
+    if (resJson && (resJson.status === "success" || resJson.success === true)) {
+      finalizeAfterSuccess(resJson);
+    } else {
+      throw new Error(resJson.message || "Payment verification failed on Worker.");
+    }
 
-    onclose: () => {
+  } catch (err) {
+    console.error("Verification or finalize error:", err);
+    showSpinner(false);
+    if (payBtn) payBtn.disabled = false;
+    showError("Payment succeeded but verification failed. Please contact support with your transaction reference.");
+  }
+},
+
       // user closed the payment window
       console.log("Payment window closed by user");
       if (payBtn) payBtn.disabled = false;
