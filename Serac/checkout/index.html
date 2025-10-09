@@ -855,9 +855,36 @@ function validateForm(){
   return null;
 }
 
-/* ---------- Payment & saving flow ----------
-  NEW: On callback, we call your Cloudflare Worker endpoint with tx_ref and order data.
-  The Worker will verify with Flutterwave server-side and (recommended) write to Firestore.
+/* ---------- Worker POST helper with retry ---------- */
+async function postToWorkerWithRetries(payload, maxAttempts = 3, initialDelay = 700) {
+  let attempt = 0;
+  let lastErr = null;
+  while (attempt < maxAttempts) {
+    try {
+      const res = await fetch(CLOUD_FN_VERIFY, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        mode: 'cors',
+        body: JSON.stringify(payload),
+      });
+      const json = await res.json();
+      if (res.ok && json && (json.status === 'success' || json.success === true)) {
+        return json;
+      } else {
+        lastErr = new Error(json?.message || `Worker returned failure: ${res.status}`);
+      }
+    } catch (err) {
+      lastErr = err;
+    }
+    attempt++;
+    await new Promise(r => setTimeout(r, initialDelay * attempt));
+  }
+  throw lastErr || new Error('Worker verification failed after retries');
+}
+
+/* ---------- Payment & saving flow (IMPROVED) ----------
+   - Calls Cloudflare Worker inside Flutterwave callback (with retries)
+   - Adds fallback poll in case callback never fires (common with test flows)
 ------------------------------------------- */
 
 payBtn.addEventListener('click', async (ev) => {
@@ -895,6 +922,47 @@ payBtn.addEventListener('click', async (ev) => {
 
   const txRef = "serac_" + Date.now();
 
+  // Flag so fallback poll can detect callback action
+  let paymentCallbackHandled = false;
+
+  // Helper to finalize UI and redirect after worker success
+  function finalizeAfterSuccess(workerResp) {
+    try { localStorage.removeItem(STORAGE_KEY); } catch(e){ console.warn("localStorage clear failed", e); }
+    try { cartCountElem.textContent = '0'; } catch(e){}
+    if (workerResp.orderDoc && Array.isArray(workerResp.orderDoc.items)) {
+      activeOrderRaw = workerResp.orderDoc;
+      quote = { items: activeOrderRaw.items };
+      isPaidOrder = true;
+      renderOrderFromQuoteNormalized(quote, selectedCurrency, true);
+    } else {
+      activeOrderRaw = { ...baseOrder, status: "paid" };
+      quote = { items: baseOrder.items };
+      isPaidOrder = true;
+      renderOrderFromQuoteNormalized(quote, selectedCurrency, true);
+    }
+    if (hero) hero.classList.add('paid');
+    if (heroH1) heroH1.textContent = "Order Summary";
+    if (heroP) heroP.textContent = "Your order has been paid successfully.";
+    if (payBtn) { payBtn.textContent = "Paid ✅"; payBtn.disabled = true; payBtn.classList.add('paid-state'); }
+    showSpinner(false);
+
+    // safe redirect — include orderId if worker returned it
+    const oid = (workerResp && (workerResp.orderId || (workerResp.orderDoc && workerResp.orderDoc.id))) || '';
+    const qs = oid ? `?orderId=${encodeURIComponent(oid)}` : '';
+    window.location.href = "../thankyou.html" + qs;
+  }
+
+  // function that tries to call the worker with given payload
+  async function callWorker(payload) {
+    try {
+      const resJson = await postToWorkerWithRetries(payload, 3);
+      return resJson;
+    } catch (err) {
+      throw err;
+    }
+  }
+
+  // Flutterwave configuration
   const fwConfig = {
     public_key: FLW_PUBLIC_KEY,
     tx_ref: txRef,
@@ -904,69 +972,32 @@ payBtn.addEventListener('click', async (ev) => {
     customizations: { title: "Sérac", description: "Order Payment", logo: "../asset/logo.png" },
 
     callback: async function (data) {
+      paymentCallbackHandled = true;
       try {
         showSpinner(true);
         console.log("Payment callback data:", data);
 
-        // Flutterwave returns a reference in different places; ensure we pick the tx_ref used
+        // Flutterwave returns the tx_ref in different shapes
         const returnedTxRef = data.tx_ref || data.data?.tx_ref || txRef;
+        const flwRef = data.flw_ref || data.transaction_id || data.transactionId || data.data?.id || null;
 
-        // Build payload for verification worker:
-        // include explicit expectedAmount and currency so worker can validate
         const payload = {
           tx_ref: returnedTxRef,
-          flwRef: data.flw_ref || data.transaction_id || data.transactionId || data.data?.id || null,
+          flwRef: flwRef,
           orderData: baseOrder,
           quoteId: quoteId || null,
+          userId: null,
           expectedAmount: Number(subtotal),
           currency: selectedCurrency
         };
 
-        // call Cloudflare Worker (POST)
-        const res = await fetch(CLOUD_FN_VERIFY, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-          mode: 'cors'
-        });
+        const resJson = await callWorker(payload);
 
-        if (!res.ok) {
-          const errText = await res.text();
-          throw new Error(`Server error: ${res.status} — ${errText}`);
-        }
-
-        const resJson = await res.json();
         console.log("Verification function response:", resJson);
 
-        if (resJson.status === 'success' && resJson.orderId) {
-          // Success: server verified payment and created order
-          // Clear client cart (localStorage) and set UI to paid summary view
-          try { localStorage.removeItem(STORAGE_KEY); } catch(e){ console.warn("localStorage clear failed", e); }
-          try { cartCountElem.textContent = '0'; } catch(e){}
-
-          // Update UI: show paid order summary — server may return orderDoc for immediate render
-          if (resJson.orderDoc && Array.isArray(resJson.orderDoc.items)) {
-            activeOrderRaw = resJson.orderDoc;
-            quote = { items: activeOrderRaw.items };
-            isPaidOrder = true;
-            renderOrderFromQuoteNormalized(quote, selectedCurrency, true);
-          } else {
-            // fallback: show the local baseOrder as summary
-            activeOrderRaw = { ...baseOrder, status: "paid" };
-            quote = { items: baseOrder.items };
-            isPaidOrder = true;
-            renderOrderFromQuoteNormalized(quote, selectedCurrency, true);
-          }
-
-          // UI changes (hero etc)
-          if (hero) hero.classList.add('paid');
-          if (heroH1) heroH1.textContent = "Order Summary";
-          if (heroP) heroP.textContent = "Your order has been paid successfully.";
-          if (payBtn) { payBtn.textContent = "Paid ✅"; payBtn.disabled = true; payBtn.classList.add('paid-state'); }
-
-          showSpinner(false);
-          // Redirect to thank-you page optionally
-          window.location.href = "../thankyou.html";
+        // their worker returns { status: 'success', orderId, orderDoc } in your posted script
+        if (resJson && (resJson.status === 'success' || resJson.success === true)) {
+          finalizeAfterSuccess(resJson);
           return;
         } else {
           throw new Error(resJson.message || 'Payment verification failed on server.');
@@ -988,6 +1019,7 @@ payBtn.addEventListener('click', async (ev) => {
     }
   };
 
+  // Launch Flutterwave checkout
   try {
     if (typeof FlutterwaveCheckout === 'function') {
       FlutterwaveCheckout(fwConfig);
@@ -999,7 +1031,51 @@ payBtn.addEventListener('click', async (ev) => {
     if (payBtn) payBtn.disabled = false;
     console.error("Flutterwave invocation failed", err);
     showError("Payment gateway is unavailable. Please try again later.");
+    return;
   }
+
+  // ---------------- Fallback poll
+  // Some test modes/popups sometimes show success but the callback is not reliably invoked.
+  // This fallback will poll the Cloudflare worker (using txRef) a few times to detect a verified payment.
+  let fallbackAttempts = 0;
+  const maxFallbackAttempts = 6;
+  const fallbackIntervalMs = 3000;
+  const fallbackPayload = {
+    tx_ref: txRef,
+    flwRef: null,
+    orderData: baseOrder,
+    quoteId: quoteId || null,
+    userId: null,
+    expectedAmount: Number(subtotal),
+    currency: selectedCurrency
+  };
+
+  const fallbackTimer = setInterval(async () => {
+    if (paymentCallbackHandled) {
+      clearInterval(fallbackTimer);
+      return;
+    }
+    fallbackAttempts++;
+    console.log("Fallback attempt", fallbackAttempts, "for txRef", txRef);
+    try {
+      const res = await postToWorkerWithRetries(fallbackPayload, 1);
+      if (res && (res.status === 'success' || res.success === true)) {
+        clearInterval(fallbackTimer);
+        paymentCallbackHandled = true;
+        finalizeAfterSuccess(res);
+      }
+    } catch (err) {
+      console.warn("Fallback attempt failed (expected in many test flows):", err);
+      // continue polling until attempts exhausted
+      if (fallbackAttempts >= maxFallbackAttempts) {
+        clearInterval(fallbackTimer);
+        // Don't immediately show error — let user use UI to try again. Show helpful banner
+        showSpinner(false);
+        if (payBtn) payBtn.disabled = false;
+        showError("We couldn't confirm your payment automatically. If your payment was successful, please contact support with your tx_ref: " + txRef);
+      }
+    }
+  }, fallbackIntervalMs);
 });
 
 /* currency change (affects displayed totals) */
