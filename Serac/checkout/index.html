@@ -234,7 +234,7 @@ footer { text-align:center; padding:22px; background:transparent; color:var(--mu
 
 <!-- Main logic -->
 <script type="module">
-/* ---------- Firebase ---------- */
+/* ---------- Firebase (client read-only used for retrieving product/quote/order docs) ---------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
 import { getFirestore, doc, getDoc, collection, addDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
@@ -250,12 +250,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* Flutterwave public key (test) — use your real key in production */
+/* Flutterwave public key (test) — replace with live public key in production */
 const FLW_PUBLIC_KEY = "FLWPUBK_TEST-07eb9d2da345c08dc4d54278c3bc86f7-X";
 
-/* Cloud Function endpoint (replace with your deployed HTTPS function URL) */
-const CLOUD_FN_VERIFY = "https://<REGION>-<PROJECT>.cloudfunctions.net/verifyPayment"; 
-// NOTE: replace the placeholder above with your deployed function URL when you deploy. (This is the only place to replace with a real URL.)
+/* Cloudflare Worker verification endpoint — NO PLACEHOLDERS (your provided URL) */
+const CLOUD_FN_VERIFY = "https://verifypayment.brandisby.workers.dev/";
 
 /* DOM refs */
 const cartCountElem = document.getElementById('cartCount');
@@ -296,10 +295,12 @@ let quote = null;            // normalized structure used by renderOrder()
 
 /* ---------- Utilities ---------- */
 function showSpinner(show=true){
+  if (!spinnerBackdrop) return;
   spinnerBackdrop.style.display = show ? 'flex' : 'none';
   spinnerBackdrop.setAttribute('aria-hidden', show ? 'false' : 'true');
 }
 function showError(msg){
+  if(!errorBanner) { alert(msg || ''); return; }
   if(!msg){ errorBanner.style.display='none'; errorBanner.textContent=''; return; }
   errorBanner.style.display = 'block';
   errorBanner.textContent = msg;
@@ -606,10 +607,9 @@ function renderOrderFromQuoteNormalized(quoteNormalized, currency = 'NGN', paid=
 /* ----------------- Load checkout data (quote or order) ----------------- */
 async function loadCheckoutData(){
   selectedCurrency = localStorage.getItem(CURRENCY_KEY) || selectedCurrency || 'NGN';
-  currencySelect.value = selectedCurrency;
-
+  try { currencySelect.value = selectedCurrency; } catch(e){}
   // hide currency selector unless quote present
-  currencySelector.style.display = quoteId ? 'flex' : 'none';
+  if (currencySelector) currencySelector.style.display = quoteId ? 'flex' : 'none';
 
   try {
     showSpinner(true);
@@ -621,10 +621,10 @@ async function loadCheckoutData(){
         activeOrderRaw = orderSnap.data();
         isPaidOrder = true;
         // Fill billing fields from order doc (if available)
-        nameInput.value = activeOrderRaw.name || activeOrderRaw.customer || "";
-        emailInput.value = activeOrderRaw.email || activeOrderRaw.customerEmail || "";
-        phoneInput.value = activeOrderRaw.phone || "";
-        addressInput.value = activeOrderRaw.address || "";
+        if (nameInput) nameInput.value = activeOrderRaw.name || activeOrderRaw.customer || "";
+        if (emailInput) emailInput.value = activeOrderRaw.email || activeOrderRaw.customerEmail || "";
+        if (phoneInput) phoneInput.value = activeOrderRaw.phone || "";
+        if (addressInput) addressInput.value = activeOrderRaw.address || "";
         // Build a normalized quote structure from order.items if possible
         if (Array.isArray(activeOrderRaw.items)) {
           const ordItems = activeOrderRaw.items.map(it => {
@@ -666,12 +666,10 @@ async function loadCheckoutData(){
           quote = { items: ordItems };
           renderOrderFromQuoteNormalized(quote, selectedCurrency, true);
           // set hero and button state for paid
-          hero.classList.add('paid');
-          heroH1.textContent = "Order Summary";
-          heroP.textContent = "Your order has been paid successfully.";
-          payBtn.textContent = "Paid ✅";
-          payBtn.disabled = true;
-          payBtn.classList.add('paid-state');
+          if (hero) hero.classList.add('paid');
+          if (heroH1) heroH1.textContent = "Order Summary";
+          if (heroP) heroP.textContent = "Your order has been paid successfully.";
+          if (payBtn) { payBtn.textContent = "Paid ✅"; payBtn.disabled = true; payBtn.classList.add('paid-state'); }
           showSpinner(false);
           return;
         }
@@ -698,10 +696,10 @@ async function loadCheckoutData(){
           activeOrderRaw = linkedOrderSnap.data();
           isPaidOrder = true;
           // fill billing from order
-          nameInput.value = activeOrderRaw.name || activeOrderRaw.customer || "";
-          emailInput.value = activeOrderRaw.email || activeOrderRaw.customerEmail || "";
-          phoneInput.value = activeOrderRaw.phone || "";
-          addressInput.value = activeOrderRaw.address || "";
+          if (nameInput) nameInput.value = activeOrderRaw.name || activeOrderRaw.customer || "";
+          if (emailInput) emailInput.value = activeOrderRaw.email || activeOrderRaw.customerEmail || "";
+          if (phoneInput) phoneInput.value = activeOrderRaw.phone || "";
+          if (addressInput) addressInput.value = activeOrderRaw.address || "";
           // normalize items from order
           if (Array.isArray(activeOrderRaw.items)) {
             const ordItems = activeOrderRaw.items.map(it => {
@@ -743,12 +741,10 @@ async function loadCheckoutData(){
             quote = { items: ordItems };
             renderOrderFromQuoteNormalized(quote, selectedCurrency, true);
             // UI: hero and disabled pay
-            hero.classList.add('paid');
-            heroH1.textContent = "Order Summary";
-            heroP.textContent = "Your order has been paid successfully.";
-            payBtn.textContent = "Paid ✅";
-            payBtn.disabled = true;
-            payBtn.classList.add('paid-state');
+            if (hero) hero.classList.add('paid');
+            if (heroH1) heroH1.textContent = "Order Summary";
+            if (heroP) heroP.textContent = "Your order has been paid successfully.";
+            if (payBtn) { payBtn.textContent = "Paid ✅"; payBtn.disabled = true; payBtn.classList.add('paid-state'); }
             showSpinner(false);
             return;
           }
@@ -760,20 +756,18 @@ async function loadCheckoutData(){
 
       // If quote is unpaid (or paid but no linked order), show quote items for checkout
       // Fill billing inputs with quote customer info (if available)
-      if (activeQuoteRaw.customer) nameInput.value = activeQuoteRaw.customer;
-      if (activeQuoteRaw.email) emailInput.value = activeQuoteRaw.email;
+      if (activeQuoteRaw.customer && nameInput) nameInput.value = activeQuoteRaw.customer;
+      if (activeQuoteRaw.email && emailInput) emailInput.value = activeQuoteRaw.email;
 
       // Normalize quote items into same structure expected by render function
       quote = normalizeQuoteItems(activeQuoteRaw);
       renderOrderFromQuoteNormalized(quote, selectedCurrency, false);
 
       // set hero to checkout mode
-      hero.classList.remove('paid');
-      heroH1.textContent = "Checkout";
-      heroP.textContent = "Review your quote and proceed to payment.";
-      payBtn.textContent = "Proceed to Payment";
-      payBtn.disabled = false;
-      payBtn.classList.remove('paid-state');
+      if (hero) hero.classList.remove('paid');
+      if (heroH1) heroH1.textContent = "Checkout";
+      if (heroP) heroP.textContent = "Review your quote and proceed to payment.";
+      if (payBtn) { payBtn.textContent = "Proceed to Payment"; payBtn.disabled = false; payBtn.classList.remove('paid-state'); }
       showSpinner(false);
       return;
     }
@@ -816,9 +810,8 @@ function validateForm(){
 }
 
 /* ---------- Payment & saving flow ----------
-  NEW: On callback, we call the Cloud Function endpoint with tx_ref and order data.
-  The Cloud Function will verify with Flutterwave server-side, update Firestore,
-  create order doc, update quote doc, and return a JSON result.
+  NEW: On callback, we call your Cloudflare Worker endpoint with tx_ref and order data.
+  The Worker will verify with Flutterwave server-side and (recommended) write to Firestore.
 ------------------------------------------- */
 
 payBtn.addEventListener('click', async (ev) => {
@@ -836,7 +829,7 @@ payBtn.addEventListener('click', async (ev) => {
   quote.items.forEach(it => subtotal += (it.totalPrices && (it.totalPrices[selectedCurrency] ?? 0)) || 0);
   if (subtotal <= 0) { showError("Subtotal is zero. Cannot proceed."); return; }
 
-  payBtn.disabled = true;
+  if (payBtn) payBtn.disabled = true;
   showSpinner(true);
 
   const name = nameInput.value.trim();
@@ -872,21 +865,23 @@ payBtn.addEventListener('click', async (ev) => {
         // Flutterwave returns a reference in different places; ensure we pick the tx_ref used
         const returnedTxRef = data.tx_ref || data.data?.tx_ref || txRef;
 
-        // Instead of writing to Firestore here, call the Cloud Function to verify + finalize
-        // POST body includes tx_ref and the baseOrder and optional quoteId so the server can create order & update quote
+        // Build payload for verification worker:
+        // include explicit expectedAmount and currency so worker can validate
         const payload = {
           tx_ref: returnedTxRef,
-          // Include optional Flutterwave identifiers if present (helps server verify exact transaction)
           flwRef: data.flw_ref || data.transaction_id || data.transactionId || data.data?.id || null,
           orderData: baseOrder,
-          quoteId: quoteId || null
+          quoteId: quoteId || null,
+          expectedAmount: Number(subtotal),
+          currency: selectedCurrency
         };
 
-        // call cloud function (POST)
+        // call Cloudflare Worker (POST)
         const res = await fetch(CLOUD_FN_VERIFY, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
+          mode: 'cors'
         });
 
         if (!res.ok) {
@@ -901,17 +896,16 @@ payBtn.addEventListener('click', async (ev) => {
           // Success: server verified payment and created order
           // Clear client cart (localStorage) and set UI to paid summary view
           try { localStorage.removeItem(STORAGE_KEY); } catch(e){ console.warn("localStorage clear failed", e); }
-          cartCountElem.textContent = '0';
+          try { cartCountElem.textContent = '0'; } catch(e){}
 
-          // Update UI: show paid order summary — try to load the saved order doc to show details
+          // Update UI: show paid order summary — server may return orderDoc for immediate render
           if (resJson.orderDoc && Array.isArray(resJson.orderDoc.items)) {
-            // server returned order doc for immediate render
             activeOrderRaw = resJson.orderDoc;
             quote = { items: activeOrderRaw.items };
             isPaidOrder = true;
             renderOrderFromQuoteNormalized(quote, selectedCurrency, true);
           } else {
-            // fallback: show the local baseOrder as summary (server is source of truth; but we still show)
+            // fallback: show the local baseOrder as summary
             activeOrderRaw = { ...baseOrder, status: "paid" };
             quote = { items: baseOrder.items };
             isPaidOrder = true;
@@ -919,12 +913,10 @@ payBtn.addEventListener('click', async (ev) => {
           }
 
           // UI changes (hero etc)
-          hero.classList.add('paid');
-          heroH1.textContent = "Order Summary";
-          heroP.textContent = "Your order has been paid successfully.";
-          payBtn.textContent = "Paid ✅";
-          payBtn.disabled = true;
-          payBtn.classList.add('paid-state');
+          if (hero) hero.classList.add('paid');
+          if (heroH1) heroH1.textContent = "Order Summary";
+          if (heroP) heroP.textContent = "Your order has been paid successfully.";
+          if (payBtn) { payBtn.textContent = "Paid ✅"; payBtn.disabled = true; payBtn.classList.add('paid-state'); }
 
           showSpinner(false);
           // Redirect to thank-you page optionally
@@ -937,7 +929,7 @@ payBtn.addEventListener('click', async (ev) => {
       } catch (err) {
         console.error("Payment verification or finalize failed:", err);
         showSpinner(false);
-        payBtn.disabled = false;
+        if (payBtn) payBtn.disabled = false;
         showError("Payment possibly succeeded but verification failed. Please contact support with your transaction reference.");
       }
     },
@@ -945,7 +937,7 @@ payBtn.addEventListener('click', async (ev) => {
     onclose: () => {
       // user closed the payment window
       console.log("Payment window closed by user");
-      payBtn.disabled = false;
+      if (payBtn) payBtn.disabled = false;
       showSpinner(false);
     }
   };
@@ -958,14 +950,14 @@ payBtn.addEventListener('click', async (ev) => {
     }
   } catch(err) {
     showSpinner(false);
-    payBtn.disabled = false;
+    if (payBtn) payBtn.disabled = false;
     console.error("Flutterwave invocation failed", err);
     showError("Payment gateway is unavailable. Please try again later.");
   }
 });
 
 /* currency change (affects displayed totals) */
-currencySelect.addEventListener('change', () => {
+if (currencySelect) currencySelect.addEventListener('change', () => {
   selectedCurrency = currencySelect.value;
   localStorage.setItem(CURRENCY_KEY, selectedCurrency);
   // re-render current quote/order summary
@@ -980,9 +972,9 @@ window.addEventListener('scroll', () => {
 });
 const hamburger = document.getElementById('hamburger');
 const headerRight = document.getElementById('headerRight');
-hamburger.addEventListener('click', ()=> {
+if (hamburger) hamburger.addEventListener('click', ()=> {
   hamburger.classList.toggle('open');
-  headerRight.classList.toggle('open');
+  if (headerRight) headerRight.classList.toggle('open');
 });
 
 /* Initialize */
@@ -990,162 +982,10 @@ hamburger.addEventListener('click', ()=> {
   // Ensure currency select matches stored value
   try { currencySelect.value = selectedCurrency; } catch(e){}
   // initialize cart count from localStorage
-  try { cartCountElem.textContent = (JSON.parse(localStorage.getItem(STORAGE_KEY)) || []).reduce((s,i)=>s + Number(i.quantity || 0), 0); } catch(e){ cartCountElem.textContent = '0'; }
+  try { cartCountElem.textContent = (JSON.parse(localStorage.getItem(STORAGE_KEY)) || []).reduce((s,i)=>s + Number(i.quantity || 0), 0); } catch(e){ if (cartCountElem) cartCountElem.textContent = '0'; }
   await loadCheckoutData();
 })();
 </script>
-
-// functions/index.js
-const functions = require("firebase-functions");
-const admin = require("firebase-admin");
-const axios = require("axios");
-
-admin.initializeApp();
-const db = admin.firestore();
-
-// Expect FLW_SECRET_KEY to be set in functions config or env
-// e.g., firebase functions:config:set flutterwave.secret="FLW_SECRET_KEY_HERE"
-// We'll fallback to process.env.FLW_SECRET_KEY if present.
-const FLW_SECRET_KEY = (functions.config && functions.config().flutterwave && functions.config().flutterwave.secret) || process.env.FLW_SECRET_KEY;
-if (!FLW_SECRET_KEY) {
-  console.warn("FLW_SECRET_KEY not set. Set functions config or environment var.");
-}
-
-/**
- * verifyPayment - HTTPS Cloud Function
- * POST payload expected:
- * {
- *   tx_ref: "serac_...",
- *   transaction_id: "...", // optional
- *   expectedAmount: 12345,
- *   currency: "NGN",
- *   quoteId: "optionalQuoteId",
- *   customer: { name, email, phone, address },
- *   items: [...],
- *   source: "quote:..." or "cart"
- * }
- */
-exports.verifyPayment = functions.https.onRequest(async (req, res) => {
-  try {
-    if (req.method !== 'POST') {
-      return res.status(405).json({ error: 'Method not allowed' });
-    }
-
-    const body = req.body || {};
-    const { tx_ref, transaction_id, expectedAmount, currency, quoteId, customer, items, source } = body;
-
-    if (!tx_ref) return res.status(400).json({ error: 'tx_ref required' });
-    if (typeof expectedAmount === 'undefined') return res.status(400).json({ error: 'expectedAmount required' });
-
-    // Call Flutterwave verify-by-reference endpoint
-    // Docs: GET https://api.flutterwave.com/v3/transactions/verify_by_reference?tx_ref=<tx_ref>
-    const verifyUrl = `https://api.flutterwave.com/v3/transactions/verify_by_reference?tx_ref=${encodeURIComponent(tx_ref)}`;
-
-    const fwResp = await axios.get(verifyUrl, {
-      headers: {
-        Authorization: `Bearer ${FLW_SECRET_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      timeout: 15000
-    });
-
-    if (!fwResp || !fwResp.data) {
-      return res.status(502).json({ error: 'No response from payment gateway' });
-    }
-
-    // Flutterwave returns an object with status and data
-    // Example: { status: "success", message:"", data: { id, tx_ref, amount, currency, status } }
-    const fwData = fwResp.data;
-    if (fwData.status !== 'success') {
-      return res.status(400).json({ error: 'Payment gateway returned non-success status', details: fwData });
-    }
-
-    const txData = fwData.data || {};
-    const txStatus = (txData.status || '').toLowerCase();
-
-    // Ensure transaction is successful on Flutterwave side
-    if (txStatus !== 'successful') {
-      return res.status(400).json({ error: 'Transaction not successful', status: txStatus, details: txData });
-    }
-
-    // Validate amount and currency match expected values
-    const paidAmount = Number(txData.amount || txData.amount_paid || 0);
-    const paidCurrency = txData.currency || currency || 'NGN';
-
-    if (Number(expectedAmount) !== Number(paidAmount) || (currency && paidCurrency !== currency)) {
-      // amounts or currency mismatch - warn but proceed only if you wish.
-      return res.status(400).json({
-        error: 'Amount or currency mismatch between expected and payment gateway',
-        expectedAmount, paidAmount, currency, paidCurrency
-      });
-    }
-
-    // Build order to save to Firestore
-    const baseOrder = {
-      name: (customer && customer.name) || '',
-      email: (customer && customer.email) || '',
-      phone: (customer && customer.phone) || '',
-      address: (customer && customer.address) || '',
-      currency: paidCurrency,
-      items: items || [],
-      total: paidAmount,
-      status: "paid",
-      source: source || (quoteId ? `quote:${quoteId}` : 'cart'),
-      paymentDetails: {
-        tx_ref: tx_ref,
-        transaction_id: transaction_id || txData.id || null,
-        gateway: 'flutterwave',
-        gatewayResponse: txData
-      },
-      paidAt: admin.firestore.FieldValue.serverTimestamp(),
-      createdAt: admin.firestore.FieldValue.serverTimestamp()
-    };
-
-    // Save order
-    const ordersRef = db.collection("brands").doc("serac").collection("orders");
-    const orderDocRef = await ordersRef.add(baseOrder);
-    const orderId = orderDocRef.id;
-
-    // If quoteId provided, update the quote document
-    if (quoteId) {
-      const qRef = db.collection("brands").doc("serac").collection("quotes").doc(quoteId);
-      try {
-        await qRef.update({
-          status: "paid",
-          paidAt: admin.firestore.FieldValue.serverTimestamp(),
-          orderId,
-          orderLink: `../checkout/index.html?quoteId=${quoteId}&orderId=${orderId}`
-        });
-      } catch (e) {
-        // if update fails, log but don't block order creation
-        console.warn("Failed to update quote:", e);
-      }
-    }
-
-    // Reset cart count server-side for the customer
-    // We will write a document brands/serac/cartCounts/{sanitizedEmail} = { count: 0 }
-    // NOTE: this is a generic approach. If you store cart counts elsewhere, adapt accordingly.
-    if (customer && customer.email) {
-      const sanitized = String(customer.email).replace(/[.#$[\]\/]/g, "_");
-      try {
-        await db.collection("brands").doc("serac").collection("cartCounts").doc(sanitized).set({ count: 0 }, { merge: true });
-      } catch (e) {
-        console.warn("Failed to reset cart count:", e);
-      }
-    }
-
-    // TODO: insert webhook call here to notify other systems (e.g., ERP / slack / fulfillment)
-    // Example: call axios.post('<your-webhook>', { orderId, tx_ref, ... })
-    // Keep webhook call out of critical path or retry safely as needed.
-
-    return res.status(200).json({ status: "success", orderId });
-  } catch (err) {
-    console.error("verifyPayment error:", err && err.response ? err.response.data || err.response : err);
-    const message = err && err.response && err.response.data ? err.response.data : (err.message || 'Unknown');
-    return res.status(500).json({ error: 'Server verification failed', details: message });
-  }
-});
-
 
 </body>
 </html>
