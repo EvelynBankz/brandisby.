@@ -1036,19 +1036,26 @@ onclose: function () {
 }; // ✅ this closes the fwConfig object properly
 
   
-// Launch Flutterwave checkout
-try {
-  if (typeof FlutterwaveCheckout === 'function') {
-    FlutterwaveCheckout(fwConfig);
-  } else {
-    throw new Error("Payment gateway not loaded");
-  }
-} catch (err) {
-  showSpinner(false);
-  if (payBtn) payBtn.disabled = false;
-  console.error("Flutterwave invocation failed", err);
-  showError("Payment gateway is unavailable. Please try again later.");
-  return;
+// ✅ Launch Flutterwave checkout only when user clicks "Pay"
+if (payBtn) {
+  payBtn.addEventListener("click", async function () {
+    showSpinner(true);
+    payBtn.disabled = true;
+
+    try {
+      if (typeof FlutterwaveCheckout === "function") {
+        FlutterwaveCheckout(fwConfig);
+      } else {
+        throw new Error("Payment gateway not loaded");
+      }
+    } catch (err) {
+      showSpinner(false);
+      payBtn.disabled = false;
+      console.error("Flutterwave invocation failed", err);
+      showError("Payment gateway is unavailable. Please try again later.");
+      return;
+    }
+  });
 }
 
   // ---------------- Fallback poll
