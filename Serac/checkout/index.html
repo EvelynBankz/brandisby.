@@ -99,7 +99,9 @@ textarea { min-height:120px; resize:vertical; }
 .order-item { display:flex; gap:12px; align-items:center; justify-content:space-between; padding:12px; border-radius:12px; background: rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.02); transition: all var(--transition); }
 .order-item .left { display:flex; gap:12px; align-items:center; flex:1; min-width:0; padding-left:0; }
 .order-item img { width:56px; height:56px; object-fit:cover; border-radius:8px; border:1px solid rgba(255,255,255,0.04); transition: all var(--transition); }
-.order-item .meta { font-size:0.95rem; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+/* ensure names are left aligned */
+.order-item .meta, .order-item .title { font-size:0.95rem; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:left; }
+.order-item .title { font-weight:700; color:#fff; text-align:left; }
 .order-item .price { font-weight:700; color:var(--gold); min-width:110px; text-align:right; }
 .show-variants-btn { background: transparent; color:var(--muted); border: 1px solid rgba(255,255,255,0.04); border-radius: 8px; padding:6px 8px; cursor: pointer; font-weight:700; transition: all var(--transition); font-size:13px; margin-top:8px; }
 .variants-container { display:none; flex-direction:column; gap:8px; margin-top:8px; padding-left:0; border-left:2px dashed rgba(255,255,255,0.03); }
@@ -135,6 +137,9 @@ footer { text-align:center; padding:22px; background:transparent; color:var(--mu
   .header-right { display:none; position:absolute; top:64px; right:12px; background:rgba(20,20,20,0.98); flex-direction:column; padding:18px; gap:10px; border-radius:10px; width:220px; z-index:1100; border:1px solid rgba(255,255,255,0.03); }
   .header-right.open { display:flex; }
 }
+
+/* small helper */
+.small-note { color:var(--muted); padding:8px; text-align:center; }
 </style>
 
 </head>
@@ -231,7 +236,7 @@ footer { text-align:center; padding:22px; background:transparent; color:var(--mu
 <script type="module">
 /* ---------- Firebase ---------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-import { getFirestore, doc, getDoc, collection, addDoc, updateDoc, serverTimestamp, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, collection, addDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
 /* CONFIG (same project as other Serac files) */
 const firebaseConfig = {
@@ -247,6 +252,10 @@ const db = getFirestore(app);
 
 /* Flutterwave public key (test) — use your real key in production */
 const FLW_PUBLIC_KEY = "FLWPUBK_TEST-07eb9d2da345c08dc4d54278c3bc86f7-X";
+
+/* Cloud Function endpoint (replace with your deployed HTTPS function URL) */
+const CLOUD_FN_VERIFY = "https://<REGION>-<PROJECT>.cloudfunctions.net/verifyPayment"; 
+// NOTE: replace the placeholder above with your deployed function URL when you deploy. (This is the only place to replace with a real URL.)
 
 /* DOM refs */
 const cartCountElem = document.getElementById('cartCount');
@@ -348,7 +357,10 @@ async function buildQuoteFromCart(){
   for(const pid of productIds){
     const rows = byProduct.get(pid) || [];
     const productDoc = productsMap[pid] || null;
-    const image = productDoc?.images?.[0] || productDoc?.imageUrl || rows[0]?.imageUrl || '../asset/placeholder.jpg';
+    // IMPORTANT: do not use placeholders. Only use image if real image exists.
+    const image = (productDoc && productDoc.images && productDoc.images.length) ? productDoc.images[0] :
+                  (productDoc && productDoc.imageUrl) ? productDoc.imageUrl :
+                  null; // null means don't show an image
     const name = productDoc?.name || rows[0]?.name || 'Product';
     const variantDetails = rows.map(r => {
       const unitPrices = {
@@ -411,7 +423,7 @@ function normalizeQuoteItems(rawQuote){
       return {
         productId: ci.id || '',
         name: ci.name || '',
-        image: ci.image || '',
+        image: (ci.image && ci.image !== '../asset/placeholder.jpg') ? ci.image : null,
         totalQuantity: variants.reduce((s,a) => s + a.quantity, 0),
         totalPrices: {
           NGN: variants.reduce((s,a) => s + (a.linePrices.NGN||0), 0),
@@ -434,7 +446,7 @@ function normalizeQuoteItems(rawQuote){
       return {
         productId: ci.id || '',
         name: ci.name || '',
-        image: ci.image || '',
+        image: (ci.image && ci.image !== '../asset/placeholder.jpg') ? ci.image : null,
         totalQuantity: qty,
         totalPrices: {
           NGN: (unitPrices.NGN || 0) * qty,
@@ -483,12 +495,17 @@ function renderOrderFromQuoteNormalized(quoteNormalized, currency = 'NGN', paid=
     li.className = 'order-item';
     li.dataset.idx = idx;
 
+    // Always align name to left (css handles it)
+    // Only show image if item.image exists (no placeholders)
+    const imageHtml = item.image ? `<img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}">` : '';
+
     if (paid) {
-      // compact display for paid order (no image, details with toggle)
+      // compact display for paid order (no placeholder images)
       li.innerHTML = `
-        <div class="left">
+        <div class="left" style="flex-direction:row; align-items:center;">
+          ${imageHtml}
           <div style="min-width:0">
-            <div style="font-weight:700; color:#fff;">${escapeHtml(item.name)}</div>
+            <div class="title">${escapeHtml(item.name)}</div>
             <div class="meta">${escapeHtml(String(item.totalQuantity) + ' item(s)')}</div>
             <button class="show-details-btn" data-idx="${idx}">Show Details ▾</button>
           </div>
@@ -497,25 +514,28 @@ function renderOrderFromQuoteNormalized(quoteNormalized, currency = 'NGN', paid=
       `;
       orderItemsEl.appendChild(li);
 
+      // details container includes description from admin quote (item.description)
       const detailsContainer = document.createElement('div');
       detailsContainer.className = 'details-container';
       detailsContainer.dataset.forIdx = idx;
       detailsContainer.style.display = 'none';
       const desc = item.description || '';
-      detailsContainer.innerHTML = `<div style="padding:8px;display:flex;justify-content:space-between;gap:12px;">
-        <div style="flex:1;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(desc)}</div>
-        <div style="min-width:110px;text-align:right;color:var(--muted)">${escapeHtml(String(item.totalQuantity))}</div>
+      detailsContainer.innerHTML = `<div style="padding:8px;display:flex;flex-direction:column;gap:8px;">
+        <div style="color:var(--muted);">${escapeHtml(desc)}</div>
+        <div style="display:flex;justify-content:flex-end;color:var(--muted)">${escapeHtml(String(item.totalQuantity))} ×</div>
       </div>`;
       li.parentNode.insertBefore(detailsContainer, li.nextSibling);
+
     } else {
-      // regular checkout style show image + optional variants
+      // regular checkout style show image (only when exists) + optional variants + details button
       li.innerHTML = `
         <div class="left" style="flex-direction:row; align-items:center;">
-          <img src="${escapeHtml(item.image || '../asset/placeholder.jpg')}" alt="${escapeHtml(item.name)}">
+          ${imageHtml}
           <div style="min-width:0">
-            <div style="font-weight:700; color:#fff;">${escapeHtml(item.name)}</div>
+            <div class="title">${escapeHtml(item.name)}</div>
             <div class="meta">${escapeHtml(String(item.totalQuantity) + ' item(s)')}</div>
             ${ (Array.isArray(item.variants) && item.variants.length > 1) ? `<button class="show-variants-btn" data-idx="${idx}">Show Choices ▾</button>` : '' }
+            <button class="show-details-btn" data-idx="${idx}" style="margin-top:6px;">Show Details ▾</button>
           </div>
         </div>
         <div class="price">${formatPrice(value, currency)}</div>
@@ -541,6 +561,17 @@ function renderOrderFromQuoteNormalized(quoteNormalized, currency = 'NGN', paid=
 
         li.parentNode.insertBefore(variantsContainer, li.nextSibling);
       }
+
+      // details container for unpaid items (description from admin)
+      const detailsContainer = document.createElement('div');
+      detailsContainer.className = 'details-container';
+      detailsContainer.dataset.forIdx = idx;
+      detailsContainer.style.display = 'none';
+      const desc = item.description || '';
+      detailsContainer.innerHTML = `<div style="padding:8px;display:flex;flex-direction:column;gap:8px;">
+        <div style="color:var(--muted);">${escapeHtml(desc)}</div>
+      </div>`;
+      li.parentNode.insertBefore(detailsContainer, li.nextSibling);
     }
   });
 
@@ -596,9 +627,7 @@ async function loadCheckoutData(){
         addressInput.value = activeOrderRaw.address || "";
         // Build a normalized quote structure from order.items if possible
         if (Array.isArray(activeOrderRaw.items)) {
-          // Convert order.items (which may already be normalized) into the normalized structure expected by render
           const ordItems = activeOrderRaw.items.map(it => {
-            // If item already has variants/totalPrices, use as-is; otherwise assume simple
             if (it.variants || it.totalPrices) return it;
             const qty = Number(it.qty || it.quantity) || 1;
             const unitPrices = {
@@ -610,7 +639,7 @@ async function loadCheckoutData(){
             return {
               productId: it.id || '',
               name: it.name || '',
-              image: it.image || '',
+              image: (it.image && it.image !== '../asset/placeholder.jpg') ? it.image : null,
               totalQuantity: qty,
               totalPrices: {
                 NGN: (unitPrices.NGN || 0) * qty,
@@ -687,7 +716,7 @@ async function loadCheckoutData(){
               return {
                 productId: it.id || '',
                 name: it.name || '',
-                image: it.image || '',
+                image: (it.image && it.image !== '../asset/placeholder.jpg') ? it.image : null,
                 totalQuantity: qty,
                 totalPrices: {
                   NGN: (unitPrices.NGN || 0) * qty,
@@ -786,7 +815,12 @@ function validateForm(){
   return null;
 }
 
-/* ---------- Payment & saving flow ---------- */
+/* ---------- Payment & saving flow ----------
+  NEW: On callback, we call the Cloud Function endpoint with tx_ref and order data.
+  The Cloud Function will verify with Flutterwave server-side, update Firestore,
+  create order doc, update quote doc, and return a JSON result.
+------------------------------------------- */
+
 payBtn.addEventListener('click', async (ev) => {
   ev.preventDefault();
 
@@ -817,10 +851,11 @@ payBtn.addEventListener('click', async (ev) => {
     total: subtotal,
     status: "placed",
     source: quoteId ? `quote:${quoteId}` : 'cart',
-    createdAt: serverTimestamp()
+    createdAt: new Date().toISOString()
   };
 
   const txRef = "serac_" + Date.now();
+
   const fwConfig = {
     public_key: FLW_PUBLIC_KEY,
     tx_ref: txRef,
@@ -834,55 +869,76 @@ payBtn.addEventListener('click', async (ev) => {
         showSpinner(true);
         console.log("Payment callback data:", data);
 
-        const paymentRef = data.tx_ref || data.transaction_id || data.transactionId || data.flwRef || data.id || "no_ref";
+        // Flutterwave returns a reference in different places; ensure we pick the tx_ref used
+        const returnedTxRef = data.tx_ref || data.data?.tx_ref || txRef;
 
-        // Build paid order object to save
-        const paidOrder = {
-          ...baseOrder,
-          paymentRef,
-          status: "paid",
-          paidAt: serverTimestamp(),
-          createdAt: serverTimestamp(),
-          customer: baseOrder.name || "",
-          customerEmail: baseOrder.email || ""
+        // Instead of writing to Firestore here, call the Cloud Function to verify + finalize
+        // POST body includes tx_ref and the baseOrder and optional quoteId so the server can create order & update quote
+        const payload = {
+          tx_ref: returnedTxRef,
+          // Include optional Flutterwave identifiers if present (helps server verify exact transaction)
+          flwRef: data.flw_ref || data.transaction_id || data.transactionId || data.data?.id || null,
+          orderData: baseOrder,
+          quoteId: quoteId || null
         };
 
-        // Save order to Firestore (brands/serac/orders)
-        const orderRef = await addDoc(collection(db, "brands", "serac", "orders"), paidOrder);
-        console.log("Order saved with ID:", orderRef.id);
+        // call cloud function (POST)
+        const res = await fetch(CLOUD_FN_VERIFY, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
 
-        // If this payment came from a quote, update that quote doc: status=paid + orderId + paidAt
-        if (quoteId) {
-          const qRef = doc(db, "brands", "serac", "quotes", quoteId);
-          try {
-            await updateDoc(qRef, {
-              status: "paid",
-              paidAt: serverTimestamp(),
-              orderId: orderRef.id,
-              orderLink: `../checkout/index.html?quoteId=${quoteId}&orderId=${orderRef.id}`
-            });
-            console.log("Quote updated to paid + linked orderId.");
-          } catch (e) {
-            console.warn("Failed to update quote after payment:", e);
-          }
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error(`Server error: ${res.status} — ${errText}`);
         }
 
-        // clear local cart if checkout originated from cart
-        if (!quoteId) {
+        const resJson = await res.json();
+        console.log("Verification function response:", resJson);
+
+        if (resJson.status === 'success' && resJson.orderId) {
+          // Success: server verified payment and created order
+          // Clear client cart (localStorage) and set UI to paid summary view
           try { localStorage.removeItem(STORAGE_KEY); } catch(e){ console.warn("localStorage clear failed", e); }
+          cartCountElem.textContent = '0';
+
+          // Update UI: show paid order summary — try to load the saved order doc to show details
+          if (resJson.orderDoc && Array.isArray(resJson.orderDoc.items)) {
+            // server returned order doc for immediate render
+            activeOrderRaw = resJson.orderDoc;
+            quote = { items: activeOrderRaw.items };
+            isPaidOrder = true;
+            renderOrderFromQuoteNormalized(quote, selectedCurrency, true);
+          } else {
+            // fallback: show the local baseOrder as summary (server is source of truth; but we still show)
+            activeOrderRaw = { ...baseOrder, status: "paid" };
+            quote = { items: baseOrder.items };
+            isPaidOrder = true;
+            renderOrderFromQuoteNormalized(quote, selectedCurrency, true);
+          }
+
+          // UI changes (hero etc)
+          hero.classList.add('paid');
+          heroH1.textContent = "Order Summary";
+          heroP.textContent = "Your order has been paid successfully.";
+          payBtn.textContent = "Paid ✅";
+          payBtn.disabled = true;
+          payBtn.classList.add('paid-state');
+
+          showSpinner(false);
+          // Redirect to thank-you page optionally
+          window.location.href = "../thankyou.html";
+          return;
+        } else {
+          throw new Error(resJson.message || 'Payment verification failed on server.');
         }
 
+      } catch (err) {
+        console.error("Payment verification or finalize failed:", err);
         showSpinner(false);
-        // Redirect to thank you page OR show order summary. We'll redirect as before.
-        window.location.href = "../thankyou.html";
-      } catch (saveErr) {
-        showSpinner(false);
-        console.error("Failed saving paid order:", saveErr);
-        showError("Payment succeeded but saving the order failed. Please contact support.");
-        // still redirect to thank you because payment succeeded
-        window.location.href = "../thankyou.html";
-      } finally {
         payBtn.disabled = false;
+        showError("Payment possibly succeeded but verification failed. Please contact support with your transaction reference.");
       }
     },
 
@@ -933,6 +989,8 @@ hamburger.addEventListener('click', ()=> {
 (async function init(){
   // Ensure currency select matches stored value
   try { currencySelect.value = selectedCurrency; } catch(e){}
+  // initialize cart count from localStorage
+  try { cartCountElem.textContent = (JSON.parse(localStorage.getItem(STORAGE_KEY)) || []).reduce((s,i)=>s + Number(i.quantity || 0), 0); } catch(e){ cartCountElem.textContent = '0'; }
   await loadCheckoutData();
 })();
 </script>
