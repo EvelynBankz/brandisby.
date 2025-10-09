@@ -1020,7 +1020,7 @@ payBtn.addEventListener('click', async (ev) => {
 
     // ✅ Send verification request to your Worker endpoint
     const verifyResponse = await fetch(
-      "https://verifypayment.brandisby.workers.dev",
+      "https://verifypayment.brandisby.workers.dev/verify",
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
