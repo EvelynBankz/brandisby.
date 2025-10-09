@@ -296,6 +296,25 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+const db = getFirestore(app);
+
+/* ---------- processPaidOrder: save verified order to Firestore ---------- */
+async function processPaidOrder(orderData) {
+  try {
+    const orderRef = await addDoc(collection(db, "brands", "serac", "orders"), {
+      ...orderData,
+      createdAt: serverTimestamp(),
+      verifiedAt: serverTimestamp(),
+      status: "paid"
+    });
+    console.log("Order saved to Firestore with ID:", orderRef.id);
+    return orderRef.id;
+  } catch (err) {
+    console.error("Failed to save paid order:", err);
+    return null;
+  }
+}
+
 /* Flutterwave public key (test) — replace with live public key in production */
 const FLW_PUBLIC_KEY = "FLWPUBK_TEST-07eb9d2da345c08dc4d54278c3bc86f7-X";
 
@@ -1014,10 +1033,14 @@ payBtn.addEventListener('click', async (ev) => {
 
     // ✅ If the Worker confirms success
     if (resJson && (resJson.status === "success" || resJson.success === true)) {
-      finalizeAfterSuccess(resJson);
-    } else {
-      throw new Error(resJson.message || "Payment verification failed on Worker.");
-    }
+  // Save order to Firestore (if needed)
+  const orderId = await processPaidOrder(baseOrder);
+  if (orderId) resJson.orderId = orderId; // attach to workerResp for finalize
+  finalizeAfterSuccess(resJson);
+} else {
+  throw new Error(resJson.message || "Payment verification failed on Worker.");
+}
+
   } catch (err) {
     console.error("Verification or finalize error:", err);
     showSpinner(false);
