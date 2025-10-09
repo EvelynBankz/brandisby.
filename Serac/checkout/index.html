@@ -971,7 +971,7 @@ payBtn.addEventListener('click', async (ev) => {
     customer: { email: email, phonenumber: phone, name: name },
     customizations: { title: "Sérac", description: "Order Payment", logo: "../asset/logo.png" },
 
-   callback: async function (data) {
+  callback: async function (data) {
   paymentCallbackHandled = true;
   showSpinner(true);
   console.log("Payment callback data:", data);
@@ -1032,23 +1032,24 @@ onclose: function () {
   console.log("Payment window closed by user");
   if (payBtn) payBtn.disabled = false;
   showSpinner(false);
-},
+}
+}; // ✅ this closes the fwConfig object properly
 
-
-  // Launch Flutterwave checkout
-  try {
-    if (typeof FlutterwaveCheckout === 'function') {
-      FlutterwaveCheckout(fwConfig);
-    } else {
-      throw new Error("Payment gateway not loaded");
-    }
-  } catch(err) {
-    showSpinner(false);
-    if (payBtn) payBtn.disabled = false;
-    console.error("Flutterwave invocation failed", err);
-    showError("Payment gateway is unavailable. Please try again later.");
-    return;
+  
+// Launch Flutterwave checkout
+try {
+  if (typeof FlutterwaveCheckout === 'function') {
+    FlutterwaveCheckout(fwConfig);
+  } else {
+    throw new Error("Payment gateway not loaded");
   }
+} catch (err) {
+  showSpinner(false);
+  if (payBtn) payBtn.disabled = false;
+  console.error("Flutterwave invocation failed", err);
+  showError("Payment gateway is unavailable. Please try again later.");
+  return;
+}
 
   // ---------------- Fallback poll
   // Some test modes/popups sometimes show success but the callback is not reliably invoked.
