@@ -97,6 +97,28 @@
 
   /* highlight animation for edited row */
   .row-highlight { transition: background-color 0.6s ease; background-color: #ffeeba; }
+.status-tag {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.status-tag.paid { background: #0fa958; color: white; }
+.status-tag.unpaid { background: #d9534f; color: white; }
+.small-note { color: #888; font-size: 0.85rem; }
+
+ .dim-text {
+  color: #999;
+  font-size: 0.9rem;
+}
+.quote-stage-select {
+  padding: 4px 6px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 0.9rem;
+}
+ 
 </style>
 </head>
 <body>
@@ -762,9 +784,9 @@ generateQuoteLinkBtn.addEventListener("click", async () => {
     const id = docRef.id;
 
     // Generate link depending on status
-    const link = data.status === "Paid" && data.orderId 
-      ? `./order-details.html?orderId=${data.orderId}` 
-      : `./checkout/index.html?quoteId=${id}`;
+    // Always link to checkout — it will handle displaying 'paid' state automatically
+    const link = `./checkout/index.html?quoteId=${id}`;
+
 
     try { localStorage.setItem(id, JSON.stringify(data)); } catch(e){ console.warn("localStorage set failed", e); }
 
@@ -840,12 +862,26 @@ function renderQuotesTable() {
       displayTotal = `${formatCurrency(q.total, q.currency || displayCurrency)} (${q.currency || displayCurrency})`;
     }
 
-    // Updated link: points to order-details if paid, otherwise checkout
-    const link = (q.status === "Paid" && q.orderId) 
-      ? `./order-details.html?orderId=${q.orderId}` 
-      : `./checkout/index.html?quoteId=${id}`;
+    const link = `./checkout/index.html?quoteId=${id}`;
+    const status = (q.status || "Unpaid").toLowerCase();
+    const stage = q.stage || "Processing";
 
-    const status = q.status || "Unpaid";
+    // Build status display (non-editable if paid)
+    const statusDisplay = status === "paid"
+      ? `<span class="status-tag paid">Paid ✅</span>`
+      : `<span class="status-tag unpaid">Unpaid ⏳</span>`;
+
+    // Stage dropdown (only visible when Paid)
+    const stageDropdown = status === "paid"
+      ? `
+        <select data-id="${id}" class="quote-stage-select">
+          <option ${stage === 'Processing' ? 'selected' : ''}>Processing</option>
+          <option ${stage === 'Packaging' ? 'selected' : ''}>Packaging</option>
+          <option ${stage === 'Shipped' ? 'selected' : ''}>Shipped</option>
+          <option ${stage === 'Delivered' ? 'selected' : ''}>Delivered</option>
+        </select>
+      `
+      : `<span class="dim-text">—</span>`;
 
     const row = document.createElement("tr");
     row.innerHTML = `
@@ -856,16 +892,8 @@ function renderQuotesTable() {
         <button class="copy-btn" data-link="${link}">📋</button>
       </td>
       <td>${displayTotal}</td>
-      <td>
-        <select data-id="${id}" class="quote-status-select">
-          <option ${status === 'Unpaid' ? 'selected' : ''}>Unpaid</option>
-          <option ${status === 'Pending' ? 'selected' : ''}>Pending</option>
-          <option ${status === 'Paid' ? 'selected' : ''}>Paid</option>
-          <option ${status === 'Processing' ? 'selected' : ''}>Processing</option>
-          <option ${status === 'Completed' ? 'selected' : ''}>Completed</option>
-          <option ${status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
-        </select>
-      </td>
+      <td>${statusDisplay}</td>
+      <td>${stageDropdown}</td>
       <td class="actions">
         <button class="view-quote" data-id="${id}">View</button>
         <button class="delete-quote" data-id="${id}">Delete</button>
@@ -873,7 +901,7 @@ function renderQuotesTable() {
     `;
     quotesTableBody.appendChild(row);
 
-    // copy button
+    // Copy link
     row.querySelectorAll(".copy-btn").forEach(btn => {
       btn.addEventListener("click", async () => {
         try {
@@ -881,34 +909,40 @@ function renderQuotesTable() {
           const prev = btn.textContent;
           btn.textContent = "✅";
           setTimeout(() => btn.textContent = prev, 1000);
-        } catch (e) {
+        } catch {
           alert("Copy failed. Link: " + btn.dataset.link);
         }
       });
     });
 
-    // view
+    // View button
     row.querySelector(".view-quote").addEventListener("click", () => openQuoteModal(q));
 
-    // delete
+    // Delete button
     row.querySelector(".delete-quote").addEventListener("click", async () => {
       if (!confirm("Delete this quote?")) return;
-      try { await deleteDoc(doc(db, "brands", "serac", "quotes", q.id)); }
-      catch (err) { console.error(err); alert("Delete failed"); }
-    });
-
-    // status select change wiring (update Firestore)
-    row.querySelector(".quote-status-select").addEventListener("change", async (ev) => {
-      const newStatus = ev.target.value;
-      const id = ev.target.dataset.id;
       try {
-        await updateDoc(doc(db, "brands", "serac", "quotes", id), { status: newStatus });
-        // Optional: If changing to Paid manually, admin can also set orderId to link to order-details
+        await deleteDoc(doc(db, "brands", "serac", "quotes", q.id));
       } catch (err) {
-        console.error("Failed to update quote status", err);
-        alert("Failed to update status: " + (err.message || err));
+        console.error(err);
+        alert("Delete failed");
       }
     });
+
+    // Stage dropdown update (if present)
+    const stageSelect = row.querySelector(".quote-stage-select");
+    if (stageSelect) {
+      stageSelect.addEventListener("change", async (ev) => {
+        const newStage = ev.target.value;
+        const id = ev.target.dataset.id;
+        try {
+          await updateDoc(doc(db, "brands", "serac", "quotes", id), { stage: newStage });
+        } catch (err) {
+          console.error("Failed to update stage", err);
+          alert("Failed to update stage: " + (err.message || err));
+        }
+      });
+    }
   });
 }
 
@@ -918,10 +952,9 @@ function openQuoteModal(q) {
   quoteModalBody.innerHTML = "";
   const displayCurrency = quotesDisplayCurrency.value || 'NGN';
 
-  // Updated link: points to order-details if paid, otherwise checkout
-  const link = (q.status === "Paid" && q.orderId) 
-    ? `./order-details.html?orderId=${q.orderId}` 
-    : `./checkout/index.html?quoteId=${q.id}`;
+  // Always point to checkout — it will show paid or unpaid accordingly
+  const link = `./checkout/index.html?quoteId=${q.id}`;
+
 
   const header = document.createElement("div");
   header.style.display = "flex";
