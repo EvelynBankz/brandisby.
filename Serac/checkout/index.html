@@ -495,7 +495,8 @@ function normalizeQuoteItems(rawQuote){
           GBP: variants.reduce((s,a) => s + (a.linePrices.GBP||0), 0)
         },
         variants,
-        description: ci.description || ''
+        // 👇 updated line — include both 'desc' and 'description'
+        description: ci.desc || ci.description || ''
       };
     } else {
       // single line
@@ -530,7 +531,8 @@ function normalizeQuoteItems(rawQuote){
             GBP: (unitPrices.GBP || 0) * qty
           }
         }],
-        description: ci.description || ''
+        // 👇 updated line — include both 'desc' and 'description'
+        description: ci.desc || ci.description || ''
       };
     }
   });
