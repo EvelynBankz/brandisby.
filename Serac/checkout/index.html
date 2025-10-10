@@ -1029,7 +1029,16 @@ async function initiatePaymentFlow(ev){
         console.log("Sending verification payload to Worker:", payload);
 
         // Send verification request to your Worker endpoint (root)
-        const verifyResponse = await callWorker(payload);
+        // Send verification request to your Worker endpoint directly
+        const verifyResponseRaw = await fetch("https://verifypayment.brandisby.workers.dev/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+          cache: "no-store", // helps avoid cached QUIC sessions
+          mode: "cors",
+        });
+        
+        const verifyResponse = await verifyResponseRaw.json();
 
         console.log("Worker verification response:", verifyResponse);
 
