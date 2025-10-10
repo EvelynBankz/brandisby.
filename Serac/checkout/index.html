@@ -277,15 +277,8 @@ footer { text-align:center; padding:22px; background:transparent; color:var(--mu
 <script src="https://checkout.flutterwave.com/v3.js"></script>
 
 <script type="module">
-/* ===========================
-   Checkout script — Full rewrite
-   Uses Vercel serverless verify: /api/verify
-   Preserves all existing UI + Firestore reads + payment flow
-   =========================== */
-
-/* ---------- Firebase client imports (keep these as in your page) ---------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-import { getFirestore, doc, getDoc, collection, addDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, collection, addDoc, updateDoc, serverTimestamp, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
 /* ---------- CONFIG ---------- */
 const firebaseConfig = {
@@ -299,49 +292,12 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* ---------- processPaidOrder: save verified order to Firestore ---------- */
-async function processPaidOrder(orderData){
-  try {
-    const orderRef = await addDoc(collection(db, "brands", "serac", "orders"), {
-      ...orderData,
-      createdAt: serverTimestamp(),
-      verifiedAt: serverTimestamp(),
-      status: "paid"
-    });
-    console.log("Order saved to Firestore with ID:", orderRef.id);
-    // Also: if this was a quote source, update the quote doc to point to orderId and mark status paid
-    try {
-      if (orderData.source && orderData.source.startsWith("quote:")) {
-        const qid = orderData.source.split("quote:")[1];
-        if (qid) {
-          await updateDoc(doc(db, "brands", "serac", "quotes", qid), {
-            status: "Paid",
-            orderId: orderRef.id,
-            paidAt: serverTimestamp()
-          });
-        }
-      }
-    } catch(e) { console.warn("Failed to update quote status after saving order", e); }
-    return orderRef.id;
-  } catch (err) {
-    console.error("Failed to save paid order:", err);
-    return null;
-  }
-}
-
-/* Flutterwave public key (test) — replace with live in production */
-const FLW_PUBLIC_KEY = "FLWPUBK_TEST-07eb9d2da345c08dc4d54278c3bc86f7-X";
-
-/* Serverless verification endpoint (Vercel) */
-const SERVERLESS_VERIFY = `${window.location.origin}/api/verify`;
-
 /* ---------- DOM refs ---------- */
 const cartCountElem = document.getElementById('cartCount');
 const orderItemsEl = document.getElementById('orderItems');
 const totalsText = document.getElementById('totalsText');
 const payBtn = document.getElementById('payBtn');
 const currencySelect = document.getElementById('currency');
-const currencySelector = document.getElementById('currencySelector');
 const spinnerBackdrop = document.getElementById('spinnerBackdrop');
 const errorBanner = document.getElementById('errorBanner');
 
@@ -360,709 +316,148 @@ const CURRENCY_KEY = 'seracCurrency';
 
 let cart = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
 let selectedCurrency = localStorage.getItem(CURRENCY_KEY) || 'NGN';
-let productCache = {};
-
-const urlParams = new URLSearchParams(window.location.search);
-const quoteId = urlParams.get("quoteId") || null;
-const orderId = urlParams.get("orderId") || null;
-
-let activeQuoteRaw = null;
-let activeOrderRaw = null;
-let isPaidOrder = false;
 let quote = null;
+let isPaidOrder = false;
 
 /* ---------- Utilities ---------- */
-function showSpinner(show=true){
-  if (!spinnerBackdrop) return;
-  spinnerBackdrop.style.display = show ? 'flex' : 'none';
-  spinnerBackdrop.setAttribute('aria-hidden', show ? 'false' : 'true');
-}
-function showError(msg){
-  if(!errorBanner) { alert(msg || ''); return; }
-  if(!msg){ errorBanner.style.display='none'; errorBanner.textContent=''; return; }
-  errorBanner.style.display = 'block';
-  errorBanner.textContent = msg;
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-function formatPrice(value, currency){
-  const localeMap = { USD:'en-US', EUR:'de-DE', GBP:'en-GB', NGN:'en-NG' };
-  const minFrac = currency === 'NGN' ? 0 : 2;
-  try {
-    return new Intl.NumberFormat(localeMap[currency] || 'en-US', { style:'currency', currency, minimumFractionDigits: minFrac }).format(Number(value || 0));
-  } catch(e) {
-    return `${currency} ${Number(value || 0).toFixed(minFrac)}`;
-  }
-}
-function escapeHtml(str){ if(!str && str !== 0) return ""; return String(str).replace(/[&<>"']/g, s => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[s])); }
+function showSpinner(show=true){ if (!spinnerBackdrop) return; spinnerBackdrop.style.display = show ? 'flex' : 'none'; }
+function showError(msg){ if(!errorBanner) { alert(msg || ''); return; } errorBanner.style.display = msg ? 'block' : 'none'; errorBanner.textContent = msg || ''; }
+function formatPrice(value, currency){ return new Intl.NumberFormat('en-US', { style:'currency', currency, minimumFractionDigits: currency==='NGN'?0:2 }).format(Number(value||0)); }
+function escapeHtml(str){ return String(str||'').replace(/[&<>"']/g, s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[s])); }
 
-/* ---------- Firestore product fetch (used when building cart quote) ---------- */
+/* ---------- Firestore product fetch ---------- */
+const productCache = {};
 async function fetchProductData(productId){
-  try {
-    if(productCache[productId]) return productCache[productId];
-    const dref = doc(db, "brands", "serac", "products", productId);
-    const snap = await getDoc(dref);
-    if(snap.exists()){
-      productCache[productId] = snap.data();
-      return productCache[productId];
-    }
-  } catch(e){ console.warn("Fetch product failed", productId, e); }
+  if(productCache[productId]) return productCache[productId];
+  const snap = await getDoc(doc(db, "brands","serac","products",productId));
+  if(snap.exists()){ productCache[productId]=snap.data(); return snap.data(); }
   return null;
 }
 
-/* ---------- merge cart items ---------- */
-function mergeCartItems(cartArray){
-  const merged = [];
-  (cartArray || []).forEach(item=>{
-    const idx = merged.findIndex(i => i.id === item.id && (i.color||'') === (item.color||'') && (i.size||'') === (item.size||''));
-    if(idx === -1) merged.push({...item});
-    else merged[idx].quantity = Number(merged[idx].quantity || 0) + Number(item.quantity || 0);
-  });
-  return merged;
-}
+/* ---------- Cart merge & quote build ---------- */
+function mergeCartItems(cartArray){ const merged=[]; cartArray.forEach(item=>{ const idx=merged.findIndex(i=>i.id===item.id && (i.color||'')=== (item.color||'') && (i.size||'')=== (item.size||'')); if(idx===-1) merged.push({...item}); else merged[idx].quantity += Number(item.quantity||0); }); return merged; }
 
-/* ---------- build normalized quote from client cart ---------- */
 async function buildQuoteFromCart(){
   cart = mergeCartItems(cart);
-  const byProduct = new Map();
-  cart.forEach(row=>{
-    if(!byProduct.has(row.id)) byProduct.set(row.id, []);
-    byProduct.get(row.id).push(row);
-  });
-  const productIds = Array.from(byProduct.keys());
-  const productsData = await Promise.all(productIds.map(pid => fetchProductData(pid).then(d => [pid, d])));
-  const productsMap = Object.fromEntries(productsData.map(([id, doc]) => [id, doc]));
-
   const items = [];
-  for(const pid of productIds){
-    const rows = byProduct.get(pid) || [];
-    const productDoc = productsMap[pid] || null;
-    const image = (productDoc && productDoc.images && productDoc.images.length) ? productDoc.images[0] :
-                  (productDoc && productDoc.imageUrl) ? productDoc.imageUrl :
-                  null;
-    const name = productDoc?.name || rows[0]?.name || 'Product';
-    const variantDetails = rows.map(r => {
+  const grouped = new Map();
+  cart.forEach(c=>{ if(!grouped.has(c.id)) grouped.set(c.id,[]); grouped.get(c.id).push(c); });
+  for(const [pid, rows] of grouped){
+    const pd = await fetchProductData(pid);
+    const variants = rows.map(r=>{
+      const qty = Number(r.quantity||0);
       const unitPrices = {
-        NGN: (productDoc && productDoc.priceNGN != null) ? Number(productDoc.priceNGN) : (r.price || 0),
-        USD: (productDoc && productDoc.priceUSD != null) ? Number(productDoc.priceUSD) : null,
-        EUR: (productDoc && productDoc.priceEUR != null) ? Number(productDoc.priceEUR) : null,
-        GBP: (productDoc && productDoc.priceGBP != null) ? Number(productDoc.priceGBP) : null
+        NGN: pd?.priceNGN||r.price||0,
+        USD: pd?.priceUSD||0,
+        EUR: pd?.priceEUR||0,
+        GBP: pd?.priceGBP||0
       };
-      const quantity = Number(r.quantity) || 0;
-      const linePrices = {
-        NGN: (unitPrices.NGN || 0) * quantity,
-        USD: (unitPrices.USD || 0) * quantity,
-        EUR: (unitPrices.EUR || 0) * quantity,
-        GBP: (unitPrices.GBP || 0) * quantity
-      };
-      return { id: r.id || pid, color: r.color||'', size: r.size||'', quantity, unitPrices, linePrices };
+      return { id:r.id, color:r.color||'', size:r.size||'', quantity:qty, unitPrices, linePrices:{
+        NGN:unitPrices.NGN*qty, USD:unitPrices.USD*qty, EUR:unitPrices.EUR*qty, GBP:unitPrices.GBP*qty
+      }};
     });
-
-    const totalQty = variantDetails.reduce((s,a) => s + a.quantity, 0);
-    const totalPrices = {
-      NGN: variantDetails.reduce((s,a) => s + (a.linePrices.NGN||0), 0),
-      USD: variantDetails.reduce((s,a) => s + (a.linePrices.USD||0), 0),
-      EUR: variantDetails.reduce((s,a) => s + (a.linePrices.EUR||0), 0),
-      GBP: variantDetails.reduce((s,a) => s + (a.linePrices.GBP||0), 0)
-    };
-
-    items.push({ productId: pid, name, image, totalQuantity: totalQty, totalPrices, variants: variantDetails, description: productDoc?.description || '' });
+    const totalPrices={NGN:0,USD:0,EUR:0,GBP:0};
+    variants.forEach(v=>{ Object.keys(totalPrices).forEach(k=>totalPrices[k]+=v.linePrices[k]||0); });
+    items.push({ productId: pid, name: pd?.name||rows[0].name||'Product', image: pd?.images?.[0]||pd?.imageUrl||null, totalQuantity: variants.reduce((s,a)=>s+a.quantity,0), totalPrices, variants, description: pd?.description||'' });
   }
-
   return { items };
 }
 
-/* ---------- normalizeQuoteItems (server -> UI structure) ---------- */
-function normalizeQuoteItems(rawQuote){
-  const arr = Array.isArray(rawQuote.items) ? rawQuote.items : [];
-  const items = arr.map(ci => {
-    if(Array.isArray(ci.variants) && ci.variants.length){
-      const variants = ci.variants.map(v => {
-        const qty = Number(v.qty || v.quantity) || 0;
-        const unitPrices = {
-          NGN: Number(v.priceNGN) || Number(v.price) || 0,
-          USD: Number(v.priceUSD) || 0,
-          EUR: Number(v.priceEUR) || 0,
-          GBP: Number(v.priceGBP) || 0
-        };
-        return {
-          id: v.id || ci.id || '',
-          color: v.color || '',
-          size: v.size || '',
-          quantity: qty,
-          unitPrices,
-          linePrices: {
-            NGN: (unitPrices.NGN || 0) * qty,
-            USD: (unitPrices.USD || 0) * qty,
-            EUR: (unitPrices.EUR || 0) * qty,
-            GBP: (unitPrices.GBP || 0) * qty
-          }
-        };
-      });
-      return {
-        productId: ci.id || '',
-        name: ci.name || '',
-        image: (ci.image && ci.image !== '../asset/placeholder.jpg') ? ci.image : null,
-        totalQuantity: variants.reduce((s,a) => s + a.quantity, 0),
-        totalPrices: {
-          NGN: variants.reduce((s,a) => s + (a.linePrices.NGN||0), 0),
-          USD: variants.reduce((s,a) => s + (a.linePrices.USD||0), 0),
-          EUR: variants.reduce((s,a) => s + (a.linePrices.EUR||0), 0),
-          GBP: variants.reduce((s,a) => s + (a.linePrices.GBP||0), 0)
-        },
-        variants,
-        description: ci.desc || ci.description || ''
-      };
-    } else {
-      const qty = Number(ci.qty || ci.quantity) || 1;
-      const unitPrices = {
-        NGN: Number(ci.priceNGN) || Number(ci.price) || 0,
-        USD: Number(ci.priceUSD) || 0,
-        EUR: Number(ci.priceEUR) || 0,
-        GBP: Number(ci.priceGBP) || 0
-      };
-      return {
-        productId: ci.id || '',
-        name: ci.name || '',
-        image: (ci.image && ci.image !== '../asset/placeholder.jpg') ? ci.image : null,
-        totalQuantity: qty,
-        totalPrices: {
-          NGN: (unitPrices.NGN || 0) * qty,
-          USD: (unitPrices.USD || 0) * qty,
-          EUR: (unitPrices.EUR || 0) * qty,
-          GBP: (unitPrices.GBP || 0) * qty
-        },
-        variants: [{
-          id: ci.id || '',
-          color: '',
-          size: '',
-          quantity: qty,
-          unitPrices,
-          linePrices: {
-            NGN: (unitPrices.NGN || 0) * qty,
-            USD: (unitPrices.USD || 0) * qty,
-            EUR: (unitPrices.EUR || 0) * qty,
-            GBP: (unitPrices.GBP || 0) * qty
-          }
-        }],
-        description: ci.desc || ci.description || ''
-      };
-    }
+/* ---------- Render ---------- */
+function renderOrder(quoteData, currency='NGN', paid=false){
+  orderItemsEl.innerHTML='';
+  if(!quoteData || !Array.isArray(quoteData.items) || !quoteData.items.length){ orderItemsEl.innerHTML='<li>No items</li>'; totalsText.textContent=`Subtotal: —`; return; }
+  let subtotal=0;
+  quoteData.items.forEach((item, idx)=>{
+    const value=item.totalPrices[currency]||0; subtotal+=value;
+    const li=document.createElement('li'); li.className='order-item';
+    const imgHtml=item.image?`<img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}">`:'';
+    li.innerHTML=`<div class="left">${imgHtml}<div><div class="title">${escapeHtml(item.name)}</div><div>${item.totalQuantity} item(s)</div></div></div><div>${formatPrice(value,currency)}</div>`;
+    orderItemsEl.appendChild(li);
   });
-
-  return { items };
+  totalsText.textContent=`Subtotal: ${formatPrice(subtotal,currency)}`;
+  try{ cartCountElem.textContent=quoteData.items.reduce((s,a)=>s+a.totalQuantity,0); }catch(e){}
 }
 
-/* ---------- Render / UI ---------- */
-function renderOrderFromQuoteNormalized(quoteNormalized, currency = 'NGN', paid=false){
-  orderItemsEl.innerHTML = '';
-  if(!quoteNormalized || !Array.isArray(quoteNormalized.items)) {
-    orderItemsEl.innerHTML = '<li class="small-note">No items</li>';
-    totalsText.textContent = `Subtotal: —`;
-    return;
-  }
-
-  let subtotal = 0;
-
-  quoteNormalized.items.forEach((item, idx) => {
-    const value = (item.totalPrices && (item.totalPrices[currency] ?? 0)) || 0;
-    subtotal += value;
-
-    const li = document.createElement('li');
-    li.className = 'order-item';
-    li.dataset.idx = idx;
-
-    const imageHtml = item.image ? `<img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}">` : '';
-
-    if (paid) {
-      li.innerHTML = `
-        <div class="left" style="flex-direction:row; align-items:center;">
-          ${imageHtml}
-          <div style="min-width:0">
-            <div class="title">${escapeHtml(item.name)}</div>
-            <div class="meta">${escapeHtml(String(item.totalQuantity) + ' item(s)')}</div>
-            <button class="show-details-btn" data-idx="${idx}">Show Details ▾</button>
-          </div>
-        </div>
-        <div class="price">${formatPrice(value, currency)}</div>
-      `;
-      orderItemsEl.appendChild(li);
-
-      const detailsContainer = document.createElement('div');
-      detailsContainer.className = 'details-container';
-      detailsContainer.dataset.forIdx = idx;
-      detailsContainer.style.display = 'none';
-      const desc = item.description || '';
-      detailsContainer.innerHTML = `<div style="padding:8px;display:flex;flex-direction:column;gap:8px;">
-        <div style="color:var(--muted);">${escapeHtml(desc)}</div>
-        <div style="display:flex;justify-content:flex-end;color:var(--muted)">${escapeHtml(String(item.totalQuantity))} ×</div>
-      </div>`;
-      li.parentNode.insertBefore(detailsContainer, li.nextSibling);
-
-    } else {
-      li.innerHTML = `
-        <div class="left" style="flex-direction:row; align-items:center;">
-          ${imageHtml}
-          <div style="min-width:0">
-            <div class="title">${escapeHtml(item.name)}</div>
-            <div class="meta">${escapeHtml(String(item.totalQuantity) + ' item(s)')}</div>
-            ${ (Array.isArray(item.variants) && item.variants.length > 1) ? `<button class="show-variants-btn" data-idx="${idx}">Show Choices ▾</button>` : '' }
-            <button class="show-details-btn" data-idx="${idx}" style="margin-top:6px;">Show Details ▾</button>
-          </div>
-        </div>
-        <div class="price">${formatPrice(value, currency)}</div>
-      `;
-      orderItemsEl.appendChild(li);
-
-      if(Array.isArray(item.variants) && item.variants.length){
-        const variantsContainer = document.createElement('div');
-        variantsContainer.className = 'variants-container';
-        variantsContainer.dataset.forIdx = idx;
-
-        item.variants.forEach(v=>{
-          const line = document.createElement('div');
-          line.className = 'variant-line';
-          let labelParts = [];
-          if (v.color) labelParts.push(escapeHtml(v.color));
-          if (v.size) labelParts.push(escapeHtml(v.size));
-          const label = labelParts.length ? `${labelParts.join(' · ')} ×${v.quantity}` : `×${v.quantity}`;
-          const linePrice = (v.linePrices && (v.linePrices[selectedCurrency] ?? 0)) || 0;
-          line.innerHTML = `<div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${label}</div><div style="min-width:110px;text-align:right;color:var(--muted)">${formatPrice(linePrice, selectedCurrency)}</div>`;
-          variantsContainer.appendChild(line);
-        });
-
-        li.parentNode.insertBefore(variantsContainer, li.nextSibling);
-      }
-
-      const detailsContainer = document.createElement('div');
-      detailsContainer.className = 'details-container';
-      detailsContainer.dataset.forIdx = idx;
-      detailsContainer.style.display = 'none';
-      const desc = item.description || '';
-      detailsContainer.innerHTML = `<div style="padding:8px;display:flex;flex-direction:column;gap:8px;">
-        <div style="color:var(--muted);">${escapeHtml(desc)}</div>
-      </div>`;
-      li.parentNode.insertBefore(detailsContainer, li.nextSibling);
-    }
-  });
-
-  // wire toggles
-  document.querySelectorAll('.show-variants-btn').forEach(btn=>{
-    btn.addEventListener('click', (ev)=>{
-      const idx = btn.dataset.idx;
-      const container = document.querySelector(`.variants-container[data-for-idx="${idx}"]`);
-      if(!container) return;
-      const isShown = container.classList.toggle('show');
-      container.style.display = isShown ? 'flex' : 'none';
-      btn.textContent = isShown ? 'Hide Choices ▴' : 'Show Choices ▾';
-    });
-  });
-
-  document.querySelectorAll('.show-details-btn').forEach(btn=>{
-    btn.addEventListener('click', (ev)=>{
-      const idx = btn.dataset.idx;
-      const container = document.querySelector(`.details-container[data-for-idx="${idx}"]`);
-      if(!container) return;
-      const isShown = container.classList.toggle('show');
-      container.style.display = isShown ? 'flex' : 'none';
-      btn.textContent = isShown ? 'Hide Details ▴' : 'Show Details ▾';
-    });
-  });
-
-  totalsText.textContent = `Subtotal: ${formatPrice(subtotal, selectedCurrency)}`;
-  try { cartCountElem.textContent = quote ? quote.items.reduce((s,a)=>s + (a.totalQuantity || 0), 0) : 0; } catch(e){}
+/* ---------- Process order once paid ---------- */
+async function processPaidOrder(orderData){
+  try{
+    const orderRef=await addDoc(collection(db,"brands","serac","orders"),{...orderData, status:"paid", createdAt: serverTimestamp(), verifiedAt: serverTimestamp()});
+    // update linked quote if any
+    try{ if(orderData.source?.startsWith("quote:")){ const qid=orderData.source.split("quote:")[1]; if(qid) await updateDoc(doc(db,"brands","serac","quotes",qid), { status:"Paid", orderId: orderRef.id, paidAt: serverTimestamp() }); } }catch(e){}
+    return orderRef.id;
+  }catch(e){ console.error("Failed saving paid order:", e); return null; }
 }
 
-/* ---------- loadCheckoutData (quote or order) ---------- */
-async function loadCheckoutData() {
-  selectedCurrency = localStorage.getItem(CURRENCY_KEY) || selectedCurrency || 'NGN';
-  try { currencySelect.value = selectedCurrency; } catch (e) {}
-  if (currencySelector) currencySelector.style.display = quoteId ? 'flex' : 'none';
-
-  try {
-    showSpinner(true);
-
-    // Case 1: orderId (show paid order summary)
-    if (orderId) {
-      const orderSnap = await getDoc(doc(db, "brands", "serac", "orders", orderId));
-      if (orderSnap.exists()) {
-        const data = orderSnap.data();
-        isPaidOrder = true;
-        fillBillingFields(data);
-        quote = { items: normalizeOrderItems(data.items || []) };
-        renderPaidOrderUI(quote);
-        showSpinner(false);
-        return;
-      }
-    }
-
-    // Case 2: quoteId
-    if (quoteId) {
-      const quoteRef = doc(db, "brands", "serac", "quotes", quoteId);
-      const quoteSnap = await getDoc(quoteRef);
-      if (!quoteSnap.exists()) {
-        showSpinner(false);
-        showError("Quote not found or deleted.");
-        return;
-      }
-
-      activeQuoteRaw = quoteSnap.data();
-      const qStatus = (activeQuoteRaw.status || "").toLowerCase();
-
-      if (qStatus === "paid" && activeQuoteRaw.orderId) {
-        const linkedOrderSnap = await getDoc(doc(db, "brands", "serac", "orders", activeQuoteRaw.orderId));
-        if (linkedOrderSnap.exists()) {
-          const orderData = linkedOrderSnap.data();
-          isPaidOrder = true;
-          fillBillingFields(orderData);
-          quote = { items: normalizeOrderItems(orderData.items || []) };
-          renderPaidOrderUI(quote);
-          showSpinner(false);
-          return;
-        } else {
-          // mark paid but order missing: still show quote as paid (disable pay)
-          isPaidOrder = true;
-          // try show quote items if available
-        }
-      }
-
-      // if unpaid or paid but no order doc, show quote items for checkout
-      if (activeQuoteRaw.customer && nameInput) nameInput.value = activeQuoteRaw.customer;
-      if (activeQuoteRaw.email && emailInput) emailInput.value = activeQuoteRaw.email;
-      quote = normalizeQuoteItems(activeQuoteRaw);
-      renderOrderFromQuoteNormalized(quote, selectedCurrency, false);
-      setCheckoutUI();
-      showSpinner(false);
-      return;
-    }
-
-    // Case 3: cart
-    cart = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-    cart = mergeCartItems(cart);
-    if (!cart.length) {
-      quote = { items: [] };
-      renderOrderFromQuoteNormalized(quote, selectedCurrency, false);
-      showSpinner(false);
-      showError("Your cart is empty.");
-      return;
-    }
-
-    quote = await buildQuoteFromCart();
-    renderOrderFromQuoteNormalized(quote, selectedCurrency, false);
-    showSpinner(false);
-  } catch (err) {
-    showSpinner(false);
-    console.error("Failed to load checkout data:", err);
-    showError("Failed to load checkout data. Please refresh and try again.");
-  }
-}
-
-/* ---------- small helpers ---------- */
-function fillBillingFields(data) {
-  if (nameInput) nameInput.value = data.name || data.customer || "";
-  if (emailInput) emailInput.value = data.email || data.customerEmail || "";
-  if (phoneInput) phoneInput.value = data.phone || "";
-  if (addressInput) addressInput.value = data.address || "";
-}
-function normalizeOrderItems(items) {
-  return items.map(it => ({
-    productId: it.id || '',
-    name: it.name || '',
-    image: (it.image && it.image !== '../asset/placeholder.jpg') ? it.image : null,
-    totalQuantity: Number(it.qty || it.quantity) || 1,
-    description: it.description || '',
-    totalPrices: it.totalPrices || {},
-    variants: it.variants || [],
-  }));
-}
-function renderPaidOrderUI(quote) {
-  renderOrderFromQuoteNormalized(quote, selectedCurrency, true);
-  if (hero) hero.classList.add('paid');
-  if (heroH1) heroH1.textContent = "Order Summary";
-  if (heroP) heroP.textContent = "Your order has been paid successfully.";
-  if (payBtn) {
-    payBtn.textContent = "Paid ✅";
-    payBtn.disabled = true;
-    payBtn.classList.add('paid-state');
-  }
-}
-function setCheckoutUI() {
-  if (hero) hero.classList.remove('paid');
-  if (heroH1) heroH1.textContent = "Checkout";
-  if (heroP) heroP.textContent = "Review your quote and proceed to payment.";
-  if (payBtn) {
-    payBtn.textContent = "Proceed to Payment";
-    payBtn.disabled = false;
-    payBtn.classList.remove('paid-state');
-  }
-}
-
-/* ---------- Basic validation ---------- */
-function validateForm(){
-  showError('');
-  const name = nameInput.value.trim();
-  const email = emailInput.value.trim();
-  const phone = phoneInput.value.trim();
-  const address = addressInput.value.trim();
-  if(!name) return "Name is required.";
-  if(!email) return "Email is required.";
-  if(!/^\S+@\S+\.\S+$/.test(email)) return "Please provide a valid email.";
-  if(!phone) return "Phone is required.";
-  if(!address) return "Address is required.";
-  if(!quote || !Array.isArray(quote.items) || quote.items.length === 0) return "Cart is empty.";
-  return null;
-}
-
-/* ---------- Verification with retry (calls SERVERLESS_VERIFY) ---------- */
-async function fetchWithRetry(url, options = {}, retries = 1, backoff = 500) {
-  try {
-    const res = await fetch(url, options);
-    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-    return res;
-  } catch (err) {
-    if (retries > 0) {
-      console.warn("Fetch failed, retrying...", err);
-      await new Promise(r => setTimeout(r, backoff));
-      return fetchWithRetry(url, options, retries - 1, backoff * 1.5);
-    } else {
-      throw err;
-    }
-  }
-}
-
-async function verifyPayment(payload) {
-  try {
-    // Add 'Connection: close' to try to avoid QUIC reuse issues in some environments
-    const opts = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Connection": "close"
-      },
-      body: JSON.stringify(payload),
-      cache: "no-store",
-      mode: "cors",
-      credentials: "omit",
-      keepalive: true
-    };
-    const res = await fetchWithRetry(SERVERLESS_VERIFY, opts, 1);
-    const json = await res.json();
-    return json;
-  } catch (err) {
-    console.error("verifyPayment error:", err);
-    throw err;
-  }
-}
+/* ---------- Checkout / Flutterwave flow ---------- */
+const FLW_PUBLIC_KEY="FLWPUBK_TEST-07eb9d2da345c08dc4d54278c3bc86f7-X";
 
 async function initiatePaymentFlow(ev){
-  if (ev && ev.preventDefault) ev.preventDefault();
-  if (isPaidOrder) return;
+  if(ev?.preventDefault) ev.preventDefault();
+  if(isPaidOrder) return;
 
   showError('');
-  const validationError = validateForm();
-  if (validationError) { showError(validationError); return; }
+  const name=nameInput.value.trim(), email=emailInput.value.trim(), phone=phoneInput.value.trim(), address=addressInput.value.trim();
+  if(!name||!email||!phone||!address){ showError("All fields required"); return; }
+  if(!quote || !quote.items?.length){ showError("Cart empty"); return; }
 
-  // compute subtotal
-  let subtotal = 0;
-  quote.items.forEach(it => subtotal += (it.totalPrices && (it.totalPrices[selectedCurrency] ?? 0)) || 0);
-  if (subtotal <= 0) { showError("Subtotal is zero. Cannot proceed."); return; }
+  let subtotal=0; quote.items.forEach(it=>subtotal+=(it.totalPrices[selectedCurrency]||0));
+  if(subtotal<=0){ showError("Subtotal is zero"); return; }
 
-  if (payBtn) payBtn.disabled = true;
-  showSpinner(true);
+  const baseOrder={ name,email,phone,address, currency:selectedCurrency, items:quote.items, total:subtotal, status:"placed", source:"cart", createdAt:new Date().toISOString() };
 
-  const name = nameInput.value.trim();
-  const email = emailInput.value.trim();
-  const phone = phoneInput.value.trim();
-  const address = addressInput.value.trim();
-
-  const baseOrder = {
-    name, email, phone, address,
-    currency: selectedCurrency,
-    items: quote.items,
-    total: subtotal,
-    status: "placed",
-    source: quoteId ? `quote:${quoteId}` : 'cart',
-    createdAt: new Date().toISOString()
-  };
-
-  const txRef = "serac_" + Date.now();       // Your system tx_ref
-  let flwRef = null;                         // Will be populated by Flutterwave callback
-  let paymentCallbackHandled = false;
-
-  async function finalizeAfterSuccess(workerResp) {
-    try {
-      const orderId = await processPaidOrder(baseOrder);
-      if (orderId) workerResp = { ...workerResp, orderId };
-
-      try { localStorage.removeItem(STORAGE_KEY); } catch(e){ console.warn("localStorage clear failed", e); }
-      try { cartCountElem.textContent = '0'; } catch(e){}
-
-      if (workerResp.orderDoc && Array.isArray(workerResp.orderDoc.items)) {
-        activeOrderRaw = workerResp.orderDoc;
-        quote = { items: activeOrderRaw.items };
-      } else {
-        activeOrderRaw = { ...baseOrder, status: "paid" };
-        quote = { items: baseOrder.items };
-      }
-
-      isPaidOrder = true;
-      renderOrderFromQuoteNormalized(quote, selectedCurrency, true);
-
-      if (hero) hero.classList.add('paid');
-      if (heroH1) heroH1.textContent = "Order Summary";
-      if (heroP) heroP.textContent = "Your order has been paid successfully.";
-      if (payBtn) { payBtn.textContent = "Paid ✅"; payBtn.disabled = true; payBtn.classList.add('paid-state'); }
-      showSpinner(false);
-
-      const oid = (workerResp && (workerResp.orderId || (workerResp.orderDoc && workerResp.orderDoc.id))) || '';
-      const qs = oid ? `?orderId=${encodeURIComponent(oid)}` : '';
-      window.location.href = "../thankyou.html" + qs;
-    } catch (err) {
-      console.error("Finalize error:", err);
-      showSpinner(false);
-      showError("Payment verified but an error occurred finalizing your order. Contact support with tx_ref: " + txRef);
-      if (payBtn) payBtn.disabled = false;
-    }
-  }
+  const txRef="serac_"+Date.now();
 
   // Flutterwave config
-  const fwConfig = {
+  const fwConfig={
     public_key: FLW_PUBLIC_KEY,
     tx_ref: txRef,
-    amount: Number(subtotal),
-    currency: selectedCurrency,
-    payment_options: "card",
-    customer: { email, phonenumber: phone, name },
-    customizations: { title: "Sérac", description: "Order Payment", logo: "https://brandisby.com/assets/logo.png" },
-    is_sandbox: true,   // Sandbox mode
-    callback: async function (data) {
-      paymentCallbackHandled = true;
+    amount:Number(subtotal),
+    currency:selectedCurrency,
+    customer:{email,phonenumber:phone,name},
+    customizations:{title:"Sérac",description:"Order Payment",logo:"https://brandisby.com/assets/logo.png"},
+    is_sandbox:true,
+    callback:function(data){
       showSpinner(true);
-
-      try {
-        flwRef = data.flw_ref || data.transaction_id || data.transactionId || data.data?.id || null;
-        if (!flwRef) throw new Error("Missing Flutterwave transaction id (flw_ref). Verification cannot proceed.");
-
-        const payload = {
-          transaction_id: flwRef,
-          tx_ref: txRef,
-          orderData: baseOrder,
-          quoteId: quoteId || null,
-          expectedAmount: Number(subtotal),
-          currency: selectedCurrency,
-        };
-
-        const verifyResponse = await verifyPayment(payload);
-
-        if (verifyResponse && (verifyResponse.status === "success" || verifyResponse.success === true)) {
-          await finalizeAfterSuccess(verifyResponse);
-        } else {
-          throw new Error(verifyResponse.message || "Payment verification failed on serverless.");
-        }
-      } catch (err) {
-        console.error("Verification or finalize error:", err);
-        showSpinner(false);
-        if (payBtn) payBtn.disabled = false;
-        showError("Payment succeeded but verification failed. Contact support with tx_ref: " + txRef);
-      }
+      console.log("Flutterwave success callback:",data);
+      showError("Payment received. Waiting for verification via webhook...");
+      // OPTIONAL: real-time listener on Firestore to update UI when webhook writes paid order
+      const ordersRef=collection(db,"brands","serac","orders");
+      const q=query(ordersRef, where("tx_ref","==",txRef));
+      const unsub=onSnapshot(q,(snap)=>{
+        snap.docChanges().forEach(change=>{
+          if(change.type==="added" || change.type==="modified"){
+            const paidOrder=change.doc.data();
+            if(paidOrder.status==="paid"){
+              processPaidOrder(baseOrder); // save again if needed
+              quote={items:paidOrder.items}; isPaidOrder=true;
+              renderOrder(quote, selectedCurrency,true);
+              if(hero){hero.classList.add('paid');} if(heroH1)heroH1.textContent="Order Summary"; if(heroP)heroP.textContent="Paid successfully"; if(payBtn){payBtn.textContent="Paid ✅";payBtn.disabled=true;}
+              unsub(); // stop listening
+              try{localStorage.removeItem(STORAGE_KEY); cartCountElem.textContent='0';}catch(e){}
+            }
+          }
+        });
+      });
     },
-    onclose: function () {
-      console.log("Payment window closed by user");
-      if (payBtn) payBtn.disabled = false;
-      showSpinner(false);
-    }
+    onclose:function(){ showError("Payment window closed"); showSpinner(false);}
   };
 
-  try {
-    if (typeof FlutterwaveCheckout === "function") {
-      FlutterwaveCheckout(fwConfig);
-    } else {
-      throw new Error("Payment gateway not loaded");
-    }
-  } catch (err) {
-    showSpinner(false);
-    payBtn.disabled = false;
-    console.error("Flutterwave invocation failed", err);
-    showError("Payment gateway is unavailable. Please try again later.");
-    return;
-  }
-
-  // Fallback polling ONLY runs if we have flwRef
-  const maxFallbackAttempts = 6;
-  const fallbackIntervalMs = 3000;
-  let fallbackAttempts = 0;
-  const fallbackTimer = setInterval(async () => {
-    if (paymentCallbackHandled || !flwRef) { clearInterval(fallbackTimer); return; }
-    fallbackAttempts++;
-    console.log("Fallback attempt", fallbackAttempts, "for txRef", txRef);
-    try {
-      const res = await verifyPayment({
-        transaction_id: flwRef,
-        tx_ref: txRef,
-        orderData: baseOrder,
-        quoteId: quoteId || null,
-        expectedAmount: Number(subtotal),
-        currency: selectedCurrency
-      });
-      if (res && (res.status === 'success' || res.success === true)) {
-        clearInterval(fallbackTimer);
-        paymentCallbackHandled = true;
-        await finalizeAfterSuccess(res);
-      }
-    } catch (err) {
-      console.warn("Fallback attempt failed:", err);
-      if (fallbackAttempts >= maxFallbackAttempts) {
-        clearInterval(fallbackTimer);
-        showSpinner(false);
-        if (payBtn) payBtn.disabled = false;
-        showError("Unable to confirm your payment automatically. Contact support with tx_ref: " + txRef);
-      }
-    }
-  }, fallbackIntervalMs);
+  try{ FlutterwaveCheckout(fwConfig); }catch(err){ console.error(err); showError("Payment gateway unavailable"); }
 }
 
-/* ---------- currency change ---------- */
-if (currencySelect) currencySelect.addEventListener('change', () => {
-  selectedCurrency = currencySelect.value;
-  localStorage.setItem(CURRENCY_KEY, selectedCurrency);
-  if (quote) renderOrderFromQuoteNormalized(quote, selectedCurrency, isPaidOrder);
-});
+/* ---------- Currency switch ---------- */
+if(currencySelect) currencySelect.addEventListener('change',()=>{ selectedCurrency=currencySelect.value; localStorage.setItem(CURRENCY_KEY,selectedCurrency); if(quote) renderOrder(quote,selectedCurrency,isPaidOrder); });
 
-/* header & hamburger wiring + init */
-window.addEventListener('scroll', () => {
-  const header = document.querySelector('.site-header');
-  if (!header) return;
-  if (window.scrollY > 50) header.classList.add('scrolled'); else header.classList.remove('scrolled');
-});
-const hamburger = document.getElementById('hamburger');
-const headerRight = document.getElementById('headerRight');
-if (hamburger) hamburger.addEventListener('click', ()=> {
-  hamburger.classList.toggle('open');
-  if (headerRight) headerRight.classList.toggle('open');
-});
+/* ---------- Pay button binding ---------- */
+if(payBtn) payBtn.addEventListener('click', initiatePaymentFlow);
 
-/* Bind pay button */
-if (payBtn) {
-  payBtn.addEventListener('click', initiatePaymentFlow);
-}
-
-/* Initialize */
+/* ---------- Init ---------- */
 (async function init(){
-  try { currencySelect.value = selectedCurrency; } catch(e){}
-  try { cartCountElem.textContent = (JSON.parse(localStorage.getItem(STORAGE_KEY)) || []).reduce((s,i)=>s + Number(i.quantity || 0), 0); } catch(e){ if (cartCountElem) cartCountElem.textContent = '0'; }
-  await loadCheckoutData();
+  cart = mergeCartItems(cart);
+  quote = await buildQuoteFromCart();
+  renderOrder(quote,selectedCurrency,false);
 })();
-
-/* Quietly suppress the known Flutterwave/fpjs noise (do not hide other errors) */
-window.addEventListener('error', (e) => {
-  try {
-    const msg = (e && e.message) ? e.message.toLowerCase() : "";
-    const file = (e && e.filename) ? e.filename.toLowerCase() : "";
-    if (msg.includes('api key not found') || file.includes('metrics.flutterwave.com') || file.includes('loader_v') || file.includes('initfingerprint') || msg.includes('fpjs')) {
-      console.warn("Suppressed Flutterwave/fingerprint error:", e.message || e.filename);
-      e.preventDefault && e.preventDefault();
-    }
-  } catch(err) {}
-});
 </script>
 
 
