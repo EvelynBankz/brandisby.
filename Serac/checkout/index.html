@@ -974,31 +974,77 @@ async function initiatePaymentFlow(ev){
           try {
             const res = await fetch(url, options);
             if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-            return res; // success
+            return res;
           } catch (err) {
             if (retries > 0) {
               console.warn("Fetch failed, retrying once...", err);
-              return fetchWithRetry(url, options, retries - 1); // retry
+              return fetchWithRetry(url, options, retries - 1);
             } else {
-              throw err; // failed after retry
+              throw err;
             }
           }
         }
         
-        // 2️⃣ Replace your fetch with this
-        const verifyResponseRaw = await fetchWithRetry("https://verifypayment.brandisby.workers.dev/verify", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-          cache: "no-store",
-          mode: "cors",
-          keepalive: true,
-          credentials: "omit",
-          priority: "high",
-        });
+        // Payment verification function
+        async function verifyPayment(payload) {
+          try {
+            console.log("Sending verification payload to Worker:", payload);
         
-        const verifyResponse = await verifyResponseRaw.json();
-        console.log("Worker verification response:", verifyResponse);
+            const verifyResponseRaw = await fetchWithRetry(
+              "https://verifypayment.brandisby.workers.dev/verify",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Connection": "close" // Force HTTP/1.1, avoids QUIC errors
+                },
+                body: JSON.stringify(payload),
+                cache: "no-store",
+                mode: "cors",
+                keepalive: true,
+                credentials: "omit",
+                priority: "high",
+              }
+            );
+        
+            const verifyResponse = await verifyResponseRaw.json();
+            console.log("Worker verification response:", verifyResponse);
+        
+            // Handle response
+            if (verifyResponse.status === "success") {
+              // Payment verified, continue with order fulfillment
+              alert("Payment verified successfully!");
+              return verifyResponse;
+            } else {
+              throw new Error(verifyResponse.message || "Payment verification failed");
+            }
+          } catch (err) {
+            console.error("Verification or finalize error:", err);
+            alert("Payment verification failed. Please try again.");
+            throw err; // rethrow if needed
+          }
+        }
+        
+        // Example usage after payment callback
+        // callbackData is the object you get from Flutterwave / Paystack / etc.
+        async function paymentCallbackHandler(callbackData, quoteId, orderData, expectedAmount) {
+          const payload = {
+            transaction_id: callbackData.flw_ref || callbackData.transaction_id,
+            tx_ref: callbackData.tx_ref,
+            orderData,
+            quoteId,
+            expectedAmount
+          };
+        
+          try {
+            const result = await verifyPayment(payload);
+            console.log("Payment verified result:", result);
+            // Continue with updating Firestore or marking quote as Paid
+          } catch (e) {
+            console.warn("Payment verification failed", e);
+          }
+        }
+
 
 
         if (verifyResponse && (verifyResponse.status === "success" || verifyResponse.success === true)) {
