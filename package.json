@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {},
   "dependencies": {
-    "firebase-admin": "^11.12.0"
+    "firebase-admin": "^11.11.0",
+    "node-fetch": "^3.3.1"
   }
 }
