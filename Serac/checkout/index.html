@@ -969,22 +969,37 @@ async function initiatePaymentFlow(ev){
 
         // Send verification request to your Worker endpoint (root)
         // Send verification request to your Worker endpoint directly, I fixed it now to ensure verifying
-       const verifyResponseRaw = await fetch("https://verifypayment.brandisby.workers.dev/verify", {
+       // 1️⃣ Retry wrapper
+        async function fetchWithRetry(url, options = {}, retries = 1) {
+          try {
+            const res = await fetch(url, options);
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+            return res; // success
+          } catch (err) {
+            if (retries > 0) {
+              console.warn("Fetch failed, retrying once...", err);
+              return fetchWithRetry(url, options, retries - 1); // retry
+            } else {
+              throw err; // failed after retry
+            }
+          }
+        }
+        
+        // 2️⃣ Replace your fetch with this
+        const verifyResponseRaw = await fetchWithRetry("https://verifypayment.brandisby.workers.dev/verify", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
           cache: "no-store",
           mode: "cors",
           keepalive: true,
-          credentials: "omit", // important: prevents some QUIC edge bugs
-          priority: "high", // hint for Chrome
+          credentials: "omit",
+          priority: "high",
         });
-
-
         
         const verifyResponse = await verifyResponseRaw.json();
-
         console.log("Worker verification response:", verifyResponse);
+
 
         if (verifyResponse && (verifyResponse.status === "success" || verifyResponse.success === true)) {
           // finalize (save to firestore & redirect)
