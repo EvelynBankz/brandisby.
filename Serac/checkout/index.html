@@ -935,42 +935,42 @@ async function initiatePaymentFlow(ev){
     customizations: { title: "Sérac", description: "Order Payment", logo: "https://brandisby.com/assets/logo.png" },
 
     callback: async function (data) {
-      paymentCallbackHandled = true;
-      showSpinner(true);
-      console.log("Payment callback data:", data);
+  paymentCallbackHandled = true;
+  showSpinner(true);
+  console.log("Payment callback data:", data);
 
-      try {
-        const returnedTxRef = data.tx_ref || data.data?.tx_ref || txRef;
-        const flwRef = data.flw_ref || data.transaction_id || data.transactionId || data.data?.id || null;
-        if (!flwRef) throw new Error("Missing Flutterwave transaction id (flwRef). Verification cannot proceed.");
+  try {
+    const returnedTxRef = data.tx_ref || data.data?.tx_ref || txRef;
+    const flwRef = data.flw_ref || data.transaction_id || data.transactionId || data.data?.id || null;
+    if (!flwRef) throw new Error("Missing Flutterwave transaction id (flwRef). Verification cannot proceed.");
 
-        const payload = {
-          transaction_id: flwRef,
-          tx_ref: returnedTxRef,
-          orderData: baseOrder,
-          quoteId: quoteId || null,
-          expectedAmount: Number(subtotal),
-          currency: selectedCurrency,
-        };
+    const payload = {
+      transaction_id: flwRef,
+      tx_ref: returnedTxRef,
+      orderData: baseOrder,
+      quoteId: quoteId || null,
+      expectedAmount: Number(subtotal),
+      currency: selectedCurrency,
+    };
 
-        console.log("Sending verification payload to serverless verify:", payload);
+    console.log("Sending verification payload to serverless verify:", payload);
 
-        const verifyResponse = await verifyPayment(payload);
+    const verifyResponse = await verifyPayment(payload);
 
-        console.log("Serverless verification response:", verifyResponse);
+    console.log("Serverless verification response:", verifyResponse);
 
-        if (verifyResponse && (verifyResponse.status === "success" || verifyResponse.success === true)) {
-          await finalizeAfterSuccess(verifyResponse);
-        } else {
-          throw new Error(verifyResponse.message || "Payment verification failed on serverless.");
-        }
-      } catch (err) {
-        console.error("Verification or finalize error:", err);
-        showSpinner(false);
-        if (payBtn) payBtn.disabled = false;
-        showError("Payment succeeded but verification failed. Please contact support with your transaction reference.");
-      }
-    },
+    if (verifyResponse && (verifyResponse.status === "success" || verifyResponse.success === true)) {
+      await finalizeAfterSuccess(verifyResponse);
+    } else {
+      throw new Error(verifyResponse.message || "Payment verification failed on serverless.");
+    }
+  } catch (err) {
+    console.error("Verification or finalize error:", err);
+    showSpinner(false);
+    if (payBtn) payBtn.disabled = false;
+    showError("Payment succeeded but verification failed. Please contact support with your transaction reference.");
+  }
+},
 
     onclose: function () {
       console.log("Payment window closed by user");
