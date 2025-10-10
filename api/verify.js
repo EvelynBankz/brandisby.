@@ -1,5 +1,5 @@
 import admin from 'firebase-admin';
-import fetch from 'node-fetch'; // Vercel allows fetch but explicit import is fine
+// Vercel allows fetch but explicit import is fine
 
 // Initialize Firebase Admin
 if (!admin.apps.length) {
