@@ -853,14 +853,13 @@ async function verifyPayment(payload) {
   }
 }
 
-/* ---------- Payment flow (single, consistent handler) ---------- */
 async function initiatePaymentFlow(ev){
   if (ev && ev.preventDefault) ev.preventDefault();
   if (isPaidOrder) return;
 
   showError('');
-  const v = validateForm();
-  if (v) { showError(v); return; }
+  const validationError = validateForm();
+  if (validationError) { showError(validationError); return; }
 
   // compute subtotal
   let subtotal = 0;
@@ -885,10 +884,10 @@ async function initiatePaymentFlow(ev){
     createdAt: new Date().toISOString()
   };
 
-  const txRef = "serac_" + Date.now();
+  const txRef = "serac_" + Date.now();       // Your system tx_ref
+  let flwRef = null;                         // Will be populated by Flutterwave callback
   let paymentCallbackHandled = false;
 
-  // finalize helper
   async function finalizeAfterSuccess(workerResp) {
     try {
       const orderId = await processPaidOrder(baseOrder);
@@ -925,63 +924,54 @@ async function initiatePaymentFlow(ev){
     }
   }
 
- // Flutterwave config
-const fwConfig = {
-  public_key: FLW_PUBLIC_KEY,
-  tx_ref: txRef,
-  amount: Number(subtotal),
-  currency: selectedCurrency,
-  payment_options: "card",             // force card for sandbox testing
-  customer: { email: email, phonenumber: phone, name: name },
-  customizations: { title: "Sérac", description: "Order Payment", logo: "https://brandisby.com/assets/logo.png" },
-  is_sandbox: true,                    // <-- enables sandbox mode
-  callback: async function (data) {
-    paymentCallbackHandled = true;
-    showSpinner(true);
-    console.log("Payment callback data:", data);
+  // Flutterwave config
+  const fwConfig = {
+    public_key: FLW_PUBLIC_KEY,
+    tx_ref: txRef,
+    amount: Number(subtotal),
+    currency: selectedCurrency,
+    payment_options: "card",
+    customer: { email, phonenumber: phone, name },
+    customizations: { title: "Sérac", description: "Order Payment", logo: "https://brandisby.com/assets/logo.png" },
+    is_sandbox: true,   // Sandbox mode
+    callback: async function (data) {
+      paymentCallbackHandled = true;
+      showSpinner(true);
 
-    try {
-      const returnedTxRef = data.tx_ref || data.data?.tx_ref || txRef;
-      const flwRef = data.flw_ref || data.transaction_id || data.transactionId || data.data?.id || null;
-      if (!flwRef) throw new Error("Missing Flutterwave transaction id (flwRef). Verification cannot proceed.");
+      try {
+        flwRef = data.flw_ref || data.transaction_id || data.transactionId || data.data?.id || null;
+        if (!flwRef) throw new Error("Missing Flutterwave transaction id (flw_ref). Verification cannot proceed.");
 
-      const payload = {
-        transaction_id: flwRef,
-        tx_ref: returnedTxRef,
-        orderData: baseOrder,
-        quoteId: quoteId || null,
-        expectedAmount: Number(subtotal),
-        currency: selectedCurrency,
-      };
+        const payload = {
+          transaction_id: flwRef,
+          tx_ref: txRef,
+          orderData: baseOrder,
+          quoteId: quoteId || null,
+          expectedAmount: Number(subtotal),
+          currency: selectedCurrency,
+        };
 
-      console.log("Sending verification payload to serverless verify:", payload);
+        const verifyResponse = await verifyPayment(payload);
 
-      const verifyResponse = await verifyPayment(payload);
-
-      console.log("Serverless verification response:", verifyResponse);
-
-      if (verifyResponse && (verifyResponse.status === "success" || verifyResponse.success === true)) {
-        await finalizeAfterSuccess(verifyResponse);
-      } else {
-        throw new Error(verifyResponse.message || "Payment verification failed on serverless.");
+        if (verifyResponse && (verifyResponse.status === "success" || verifyResponse.success === true)) {
+          await finalizeAfterSuccess(verifyResponse);
+        } else {
+          throw new Error(verifyResponse.message || "Payment verification failed on serverless.");
+        }
+      } catch (err) {
+        console.error("Verification or finalize error:", err);
+        showSpinner(false);
+        if (payBtn) payBtn.disabled = false;
+        showError("Payment succeeded but verification failed. Contact support with tx_ref: " + txRef);
       }
-    } catch (err) {
-      console.error("Verification or finalize error:", err);
-      showSpinner(false);
+    },
+    onclose: function () {
+      console.log("Payment window closed by user");
       if (payBtn) payBtn.disabled = false;
-      showError("Payment succeeded but verification failed. Please contact support with your transaction reference.");
+      showSpinner(false);
     }
-  },
+  };
 
-  onclose: function () {
-    console.log("Payment window closed by user");
-    if (payBtn) payBtn.disabled = false;
-    showSpinner(false);
-  }
-};
-
-
-  // Launch Flutterwave checkout
   try {
     if (typeof FlutterwaveCheckout === "function") {
       FlutterwaveCheckout(fwConfig);
@@ -996,37 +986,35 @@ const fwConfig = {
     return;
   }
 
-  // Fallback poll (tx_ref)
-  let fallbackAttempts = 0;
+  // Fallback polling ONLY runs if we have flwRef
   const maxFallbackAttempts = 6;
   const fallbackIntervalMs = 3000;
-  const fallbackPayload = {
-    tx_ref: txRef,
-    flwRef: null,
-    orderData: baseOrder,
-    quoteId: quoteId || null,
-    expectedAmount: Number(subtotal),
-    currency: selectedCurrency
-  };
-
+  let fallbackAttempts = 0;
   const fallbackTimer = setInterval(async () => {
-    if (paymentCallbackHandled) { clearInterval(fallbackTimer); return; }
+    if (paymentCallbackHandled || !flwRef) { clearInterval(fallbackTimer); return; }
     fallbackAttempts++;
     console.log("Fallback attempt", fallbackAttempts, "for txRef", txRef);
     try {
-      const res = await verifyPayment(fallbackPayload);
+      const res = await verifyPayment({
+        transaction_id: flwRef,
+        tx_ref: txRef,
+        orderData: baseOrder,
+        quoteId: quoteId || null,
+        expectedAmount: Number(subtotal),
+        currency: selectedCurrency
+      });
       if (res && (res.status === 'success' || res.success === true)) {
         clearInterval(fallbackTimer);
         paymentCallbackHandled = true;
         await finalizeAfterSuccess(res);
       }
     } catch (err) {
-      console.warn("Fallback attempt failed (expected in some flows):", err);
+      console.warn("Fallback attempt failed:", err);
       if (fallbackAttempts >= maxFallbackAttempts) {
         clearInterval(fallbackTimer);
         showSpinner(false);
         if (payBtn) payBtn.disabled = false;
-        showError("We couldn't confirm your payment automatically. If your payment was successful, please contact support with your tx_ref: " + txRef);
+        showError("Unable to confirm your payment automatically. Contact support with tx_ref: " + txRef);
       }
     }
   }, fallbackIntervalMs);
