@@ -666,175 +666,69 @@ function renderOrderFromQuoteNormalized(quoteNormalized, currency = 'NGN', paid=
   try { cartCountElem.textContent = quote ? quote.items.reduce((s,a)=>s + (a.totalQuantity || 0), 0) : 0; } catch(e){}
 }
 
-/* ----------------- Load checkout data (quote or order) ----------------- */
-async function loadCheckoutData(){
+/* ----------------- Load checkout data (quote or order) 
+this is where we update so that the quote link 
+shows if order has been paid or not paid ----------------- */ 
+async function loadCheckoutData() {
   selectedCurrency = localStorage.getItem(CURRENCY_KEY) || selectedCurrency || 'NGN';
-  try { currencySelect.value = selectedCurrency; } catch(e){}
-  // hide currency selector unless quote present
+  try { currencySelect.value = selectedCurrency; } catch (e) {}
   if (currencySelector) currencySelector.style.display = quoteId ? 'flex' : 'none';
 
   try {
     showSpinner(true);
 
-    // If orderId param present, prefer the order document (paid order summary)
+    /* ---------- Case 1: Load order directly ---------- */
     if (orderId) {
       const orderSnap = await getDoc(doc(db, "brands", "serac", "orders", orderId));
-      if (orderSnap.exists()){
-        activeOrderRaw = orderSnap.data();
+      if (orderSnap.exists()) {
+        const data = orderSnap.data();
         isPaidOrder = true;
-        // Fill billing fields from order doc (if available)
-        if (nameInput) nameInput.value = activeOrderRaw.name || activeOrderRaw.customer || "";
-        if (emailInput) emailInput.value = activeOrderRaw.email || activeOrderRaw.customerEmail || "";
-        if (phoneInput) phoneInput.value = activeOrderRaw.phone || "";
-        if (addressInput) addressInput.value = activeOrderRaw.address || "";
-        // Build a normalized quote structure from order.items if possible
-        if (Array.isArray(activeOrderRaw.items)) {
-          const ordItems = activeOrderRaw.items.map(it => {
-            if (it.variants || it.totalPrices) return it;
-            const qty = Number(it.qty || it.quantity) || 1;
-            const unitPrices = {
-              NGN: Number(it.priceNGN || it.price || 0),
-              USD: Number(it.priceUSD || 0),
-              EUR: Number(it.priceEUR || 0),
-              GBP: Number(it.priceGBP || 0)
-            };
-            return {
-              productId: it.id || '',
-              name: it.name || '',
-              image: (it.image && it.image !== '../asset/placeholder.jpg') ? it.image : null,
-              totalQuantity: qty,
-              totalPrices: {
-                NGN: (unitPrices.NGN || 0) * qty,
-                USD: (unitPrices.USD || 0) * qty,
-                EUR: (unitPrices.EUR || 0) * qty,
-                GBP: (unitPrices.GBP || 0) * qty
-              },
-              variants: [{
-                id: it.id || '',
-                color: it.color || '',
-                size: it.size || '',
-                quantity: qty,
-                unitPrices,
-                linePrices: {
-                  NGN: (unitPrices.NGN || 0) * qty,
-                  USD: (unitPrices.USD || 0) * qty,
-                  EUR: (unitPrices.EUR || 0) * qty,
-                  GBP: (unitPrices.GBP || 0) * qty
-                }
-              }],
-              description: it.description || ''
-            };
-          });
-          quote = { items: ordItems };
-          renderOrderFromQuoteNormalized(quote, selectedCurrency, true);
-          // set hero and button state for paid
-          if (hero) hero.classList.add('paid');
-          if (heroH1) heroH1.textContent = "Order Summary";
-          if (heroP) heroP.textContent = "Your order has been paid successfully.";
-          if (payBtn) { payBtn.textContent = "Paid ✅"; payBtn.disabled = true; payBtn.classList.add('paid-state'); }
-          showSpinner(false);
-          return;
-        }
-      } else {
-        console.warn("Order not found for orderId:", orderId);
+        fillBillingFields(data);
+        quote = { items: normalizeOrderItems(data.items || []) };
+        renderPaidOrderUI(quote);
+        showSpinner(false);
+        return;
       }
     }
 
-    // If we reach here, either no orderId or order didn't exist. Try quoteId.
+    /* ---------- Case 2: Load quote ---------- */
     if (quoteId) {
-      const quoteSnap = await getDoc(doc(db, "brands", "serac", "quotes", quoteId));
+      const quoteRef = doc(db, "brands", "serac", "quotes", quoteId);
+      const quoteSnap = await getDoc(quoteRef);
       if (!quoteSnap.exists()) {
         showSpinner(false);
-        showError("Quote not found. It might have been deleted.");
+        showError("Quote not found or deleted.");
         return;
       }
+
       activeQuoteRaw = quoteSnap.data();
-      // If quote has status 'paid' and an orderId, try to load that order and show summary instead of checkout
       const qStatus = (activeQuoteRaw.status || "").toLowerCase();
-      if (qStatus === 'paid' && activeQuoteRaw.orderId) {
-        // try to load order doc
+
+      // ✅ If already paid, load the linked order or show summary as paid
+      if (qStatus === "paid" && activeQuoteRaw.orderId) {
         const linkedOrderSnap = await getDoc(doc(db, "brands", "serac", "orders", activeQuoteRaw.orderId));
-        if (linkedOrderSnap.exists()){
-          activeOrderRaw = linkedOrderSnap.data();
+        if (linkedOrderSnap.exists()) {
+          const orderData = linkedOrderSnap.data();
           isPaidOrder = true;
-          // fill billing from order
-          if (nameInput) nameInput.value = activeOrderRaw.name || activeOrderRaw.customer || "";
-          if (emailInput) emailInput.value = activeOrderRaw.email || activeOrderRaw.customerEmail || "";
-          if (phoneInput) phoneInput.value = activeOrderRaw.phone || "";
-          if (addressInput) addressInput.value = activeOrderRaw.address || "";
-          // normalize items from order
-          if (Array.isArray(activeOrderRaw.items)) {
-            const ordItems = activeOrderRaw.items.map(it => {
-              if (it.variants || it.totalPrices) return it;
-              const qty = Number(it.qty || it.quantity) || 1;
-              const unitPrices = {
-                NGN: Number(it.priceNGN || it.price || 0),
-                USD: Number(it.priceUSD || 0),
-                EUR: Number(it.priceEUR || 0),
-                GBP: Number(it.priceGBP || 0)
-              };
-              return {
-                productId: it.id || '',
-                name: it.name || '',
-                image: (it.image && it.image !== '../asset/placeholder.jpg') ? it.image : null,
-                totalQuantity: qty,
-                totalPrices: {
-                  NGN: (unitPrices.NGN || 0) * qty,
-                  USD: (unitPrices.USD || 0) * qty,
-                  EUR: (unitPrices.EUR || 0) * qty,
-                  GBP: (unitPrices.GBP || 0) * qty
-                },
-                variants: [{
-                  id: it.id || '',
-                  color: it.color || '',
-                  size: it.size || '',
-                  quantity: qty,
-                  unitPrices,
-                  linePrices: {
-                    NGN: (unitPrices.NGN || 0) * qty,
-                    USD: (unitPrices.USD || 0) * qty,
-                    EUR: (unitPrices.EUR || 0) * qty,
-                    GBP: (unitPrices.GBP || 0) * qty
-                  }
-                }],
-                description: it.description || ''
-              };
-            });
-            quote = { items: ordItems };
-            renderOrderFromQuoteNormalized(quote, selectedCurrency, true);
-            // UI: hero and disabled pay
-            if (hero) hero.classList.add('paid');
-            if (heroH1) heroH1.textContent = "Order Summary";
-            if (heroP) heroP.textContent = "Your order has been paid successfully.";
-            if (payBtn) { payBtn.textContent = "Paid ✅"; payBtn.disabled = true; payBtn.classList.add('paid-state'); }
-            showSpinner(false);
-            return;
-          }
-        } else {
-          // Quote says paid but linked order doc not found — still show the quote items but disable pay
-          console.warn("Quote status paid but order doc not found for id:", activeQuoteRaw.orderId);
+          fillBillingFields(orderData);
+          quote = { items: normalizeOrderItems(orderData.items || []) };
+          renderPaidOrderUI(quote);
+          showSpinner(false);
+          return;
         }
       }
 
-      // If quote is unpaid (or paid but no linked order), show quote items for checkout
-      // Fill billing inputs with quote customer info (if available)
+      // ✅ If unpaid, display quote for checkout
       if (activeQuoteRaw.customer && nameInput) nameInput.value = activeQuoteRaw.customer;
       if (activeQuoteRaw.email && emailInput) emailInput.value = activeQuoteRaw.email;
-
-      // Normalize quote items into same structure expected by render function
       quote = normalizeQuoteItems(activeQuoteRaw);
       renderOrderFromQuoteNormalized(quote, selectedCurrency, false);
-
-      // set hero to checkout mode
-      if (hero) hero.classList.remove('paid');
-      if (heroH1) heroH1.textContent = "Checkout";
-      if (heroP) heroP.textContent = "Review your quote and proceed to payment.";
-      if (payBtn) { payBtn.textContent = "Proceed to Payment"; payBtn.disabled = false; payBtn.classList.remove('paid-state'); }
+      setCheckoutUI();
       showSpinner(false);
       return;
     }
 
-    // No quoteId and no orderId -> load from local cart
+    /* ---------- Case 3: Load from cart ---------- */
     cart = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
     cart = mergeCartItems(cart);
     if (!cart.length) {
@@ -844,14 +738,57 @@ async function loadCheckoutData(){
       showError("Your cart is empty.");
       return;
     }
-    // build quote from local cart
+
     quote = await buildQuoteFromCart();
     renderOrderFromQuoteNormalized(quote, selectedCurrency, false);
     showSpinner(false);
-  } catch(err){
+  } catch (err) {
     showSpinner(false);
     console.error("Failed to load checkout data:", err);
     showError("Failed to load checkout data. Please refresh and try again.");
+  }
+}
+
+/* ----------------- Helpers ----------------- */
+function fillBillingFields(data) {
+  if (nameInput) nameInput.value = data.name || data.customer || "";
+  if (emailInput) emailInput.value = data.email || data.customerEmail || "";
+  if (phoneInput) phoneInput.value = data.phone || "";
+  if (addressInput) addressInput.value = data.address || "";
+}
+
+function normalizeOrderItems(items) {
+  return items.map(it => ({
+    productId: it.id || '',
+    name: it.name || '',
+    image: (it.image && it.image !== '../asset/placeholder.jpg') ? it.image : null,
+    totalQuantity: Number(it.qty || it.quantity) || 1,
+    description: it.description || '', // ✅ keep description
+    totalPrices: it.totalPrices || {},
+    variants: it.variants || [],
+  }));
+}
+
+function renderPaidOrderUI(quote) {
+  renderOrderFromQuoteNormalized(quote, selectedCurrency, true);
+  if (hero) hero.classList.add('paid');
+  if (heroH1) heroH1.textContent = "Order Summary";
+  if (heroP) heroP.textContent = "Your order has been paid successfully.";
+  if (payBtn) {
+    payBtn.textContent = "Paid ✅";
+    payBtn.disabled = true;
+    payBtn.classList.add('paid-state');
+  }
+}
+
+function setCheckoutUI() {
+  if (hero) hero.classList.remove('paid');
+  if (heroH1) heroH1.textContent = "Checkout";
+  if (heroP) heroP.textContent = "Review your quote and proceed to payment.";
+  if (payBtn) {
+    payBtn.textContent = "Proceed to Payment";
+    payBtn.disabled = false;
+    payBtn.classList.remove('paid-state');
   }
 }
 
