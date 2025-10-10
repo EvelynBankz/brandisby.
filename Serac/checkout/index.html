@@ -278,9 +278,9 @@ footer { text-align:center; padding:22px; background:transparent; color:var(--mu
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-import { getFirestore, doc, getDoc, collection, addDoc, updateDoc, serverTimestamp, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, collection, addDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-/* ---------- CONFIG ---------- */
+/* ---------- Firebase Config ---------- */
 const firebaseConfig = {
   apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
   authDomain: "brandisby.firebaseapp.com",
@@ -292,7 +292,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* ---------- DOM refs ---------- */
+/* ---------- DOM References ---------- */
 const cartCountElem = document.getElementById('cartCount');
 const orderItemsEl = document.getElementById('orderItems');
 const totalsText = document.getElementById('totalsText');
@@ -310,155 +310,67 @@ const hero = document.getElementById('heroSection');
 const heroH1 = document.getElementById('heroH1');
 const heroP = document.getElementById('heroP');
 
-/* ---------- Local storage keys & state ---------- */
+/* ---------- Local Storage Keys & State ---------- */
 const STORAGE_KEY = 'seracCart';
 const CURRENCY_KEY = 'seracCurrency';
 
 let cart = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
 let selectedCurrency = localStorage.getItem(CURRENCY_KEY) || 'NGN';
-let quote = null;
+let productCache = {};
+
+const urlParams = new URLSearchParams(window.location.search);
+const quoteId = urlParams.get("quoteId") || null;
+const orderId = urlParams.get("orderId") || null;
+
+let activeQuoteRaw = null;
+let activeOrderRaw = null;
 let isPaidOrder = false;
+let quote = null;
 
-/* ---------- Utilities ---------- */
-function showSpinner(show=true){ if (!spinnerBackdrop) return; spinnerBackdrop.style.display = show ? 'flex' : 'none'; }
-function showError(msg){ if(!errorBanner) { alert(msg || ''); return; } errorBanner.style.display = msg ? 'block' : 'none'; errorBanner.textContent = msg || ''; }
-function formatPrice(value, currency){ return new Intl.NumberFormat('en-US', { style:'currency', currency, minimumFractionDigits: currency==='NGN'?0:2 }).format(Number(value||0)); }
-function escapeHtml(str){ return String(str||'').replace(/[&<>"']/g, s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[s])); }
+/* ---------- Utility Functions ---------- */
+function showSpinner(show=true){ if(!spinnerBackdrop) return; spinnerBackdrop.style.display = show ? 'flex' : 'none'; }
+function showError(msg){ if(!errorBanner) { alert(msg || ''); return; } if(!msg){ errorBanner.style.display='none'; errorBanner.textContent=''; return; } errorBanner.style.display='block'; errorBanner.textContent=msg; window.scrollTo({ top: 0, behavior: 'smooth' }); }
+function formatPrice(value, currency){ const localeMap = { USD:'en-US', EUR:'de-DE', GBP:'en-GB', NGN:'en-NG' }; const minFrac = currency==='NGN'?0:2; try { return new Intl.NumberFormat(localeMap[currency]||'en-US',{style:'currency',currency,minimumFractionDigits:minFrac}).format(Number(value||0)); } catch(e){ return `${currency} ${Number(value||0).toFixed(minFrac)}`; } }
+function escapeHtml(str){ if(!str && str!==0) return ""; return String(str).replace(/[&<>"']/g, s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[s])); }
 
-/* ---------- Firestore product fetch ---------- */
-const productCache = {};
-async function fetchProductData(productId){
-  if(productCache[productId]) return productCache[productId];
-  const snap = await getDoc(doc(db, "brands","serac","products",productId));
-  if(snap.exists()){ productCache[productId]=snap.data(); return snap.data(); }
-  return null;
-}
+/* ---------- Firestore Product Fetch ---------- */
+async function fetchProductData(productId){ try { if(productCache[productId]) return productCache[productId]; const snap = await getDoc(doc(db,"brands","serac","products",productId)); if(snap.exists()){ productCache[productId]=snap.data(); return productCache[productId]; } } catch(e){ console.warn("Fetch product failed",productId,e); } return null; }
 
-/* ---------- Cart merge & quote build ---------- */
-function mergeCartItems(cartArray){ const merged=[]; cartArray.forEach(item=>{ const idx=merged.findIndex(i=>i.id===item.id && (i.color||'')=== (item.color||'') && (i.size||'')=== (item.size||'')); if(idx===-1) merged.push({...item}); else merged[idx].quantity += Number(item.quantity||0); }); return merged; }
+/* ---------- Merge Cart Items ---------- */
+function mergeCartItems(cartArray){ const merged=[]; (cartArray||[]).forEach(item=>{ const idx=merged.findIndex(i=>i.id===item.id && (i.color||'')===(item.color||'') && (i.size||'')===(item.size||'')); if(idx===-1) merged.push({...item}); else merged[idx].quantity=Number(merged[idx].quantity||0)+Number(item.quantity||0); }); return merged; }
 
-async function buildQuoteFromCart(){
-  cart = mergeCartItems(cart);
-  const items = [];
-  const grouped = new Map();
-  cart.forEach(c=>{ if(!grouped.has(c.id)) grouped.set(c.id,[]); grouped.get(c.id).push(c); });
-  for(const [pid, rows] of grouped){
-    const pd = await fetchProductData(pid);
-    const variants = rows.map(r=>{
-      const qty = Number(r.quantity||0);
-      const unitPrices = {
-        NGN: pd?.priceNGN||r.price||0,
-        USD: pd?.priceUSD||0,
-        EUR: pd?.priceEUR||0,
-        GBP: pd?.priceGBP||0
-      };
-      return { id:r.id, color:r.color||'', size:r.size||'', quantity:qty, unitPrices, linePrices:{
-        NGN:unitPrices.NGN*qty, USD:unitPrices.USD*qty, EUR:unitPrices.EUR*qty, GBP:unitPrices.GBP*qty
-      }};
-    });
-    const totalPrices={NGN:0,USD:0,EUR:0,GBP:0};
-    variants.forEach(v=>{ Object.keys(totalPrices).forEach(k=>totalPrices[k]+=v.linePrices[k]||0); });
-    items.push({ productId: pid, name: pd?.name||rows[0].name||'Product', image: pd?.images?.[0]||pd?.imageUrl||null, totalQuantity: variants.reduce((s,a)=>s+a.quantity,0), totalPrices, variants, description: pd?.description||'' });
-  }
-  return { items };
-}
+/* ---------- Build Quote From Cart ---------- */
+async function buildQuoteFromCart(){ cart=mergeCartItems(cart); const byProduct=new Map(); cart.forEach(row=>{ if(!byProduct.has(row.id)) byProduct.set(row.id,[]); byProduct.get(row.id).push(row); }); const productIds=Array.from(byProduct.keys()); const productsData=await Promise.all(productIds.map(pid=>fetchProductData(pid).then(d=>[pid,d]))); const productsMap=Object.fromEntries(productsData.map(([id,doc])=>[id,doc])); const items=[]; for(const pid of productIds){ const rows=byProduct.get(pid)||[]; const productDoc=productsMap[pid]||null; const image=(productDoc?.images?.length)?productDoc.images[0]:(productDoc?.imageUrl)?productDoc.imageUrl:null; const name=productDoc?.name||rows[0]?.name||'Product'; const variantDetails=rows.map(r=>{ const unitPrices={ NGN:(productDoc?.priceNGN!=null)?Number(productDoc.priceNGN):(r.price||0), USD:(productDoc?.priceUSD!=null)?Number(productDoc.priceUSD):null, EUR:(productDoc?.priceEUR!=null)?Number(productDoc.priceEUR):null, GBP:(productDoc?.priceGBP!=null)?Number(productDoc.priceGBP):null }; const quantity=Number(r.quantity)||0; const linePrices={ NGN:(unitPrices.NGN||0)*quantity, USD:(unitPrices.USD||0)*quantity, EUR:(unitPrices.EUR||0)*quantity, GBP:(unitPrices.GBP||0)*quantity }; return { id:r.id||pid, color:r.color||'', size:r.size||'', quantity, unitPrices, linePrices }; }); const totalQty=variantDetails.reduce((s,a)=>s+a.quantity,0); const totalPrices={ NGN:variantDetails.reduce((s,a)=>s+(a.linePrices.NGN||0),0), USD:variantDetails.reduce((s,a)=>s+(a.linePrices.USD||0),0), EUR:variantDetails.reduce((s,a)=>s+(a.linePrices.EUR||0),0), GBP:variantDetails.reduce((s,a)=>s+(a.linePrices.GBP||0),0) }; items.push({ productId:pid, name, image, totalQuantity:totalQty, totalPrices, variants:variantDetails, description:productDoc?.description||'' }); } return { items }; }
 
-/* ---------- Render ---------- */
-function renderOrder(quoteData, currency='NGN', paid=false){
-  orderItemsEl.innerHTML='';
-  if(!quoteData || !Array.isArray(quoteData.items) || !quoteData.items.length){ orderItemsEl.innerHTML='<li>No items</li>'; totalsText.textContent=`Subtotal: —`; return; }
-  let subtotal=0;
-  quoteData.items.forEach((item, idx)=>{
-    const value=item.totalPrices[currency]||0; subtotal+=value;
-    const li=document.createElement('li'); li.className='order-item';
-    const imgHtml=item.image?`<img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}">`:'';
-    li.innerHTML=`<div class="left">${imgHtml}<div><div class="title">${escapeHtml(item.name)}</div><div>${item.totalQuantity} item(s)</div></div></div><div>${formatPrice(value,currency)}</div>`;
-    orderItemsEl.appendChild(li);
-  });
-  totalsText.textContent=`Subtotal: ${formatPrice(subtotal,currency)}`;
-  try{ cartCountElem.textContent=quoteData.items.reduce((s,a)=>s+a.totalQuantity,0); }catch(e){}
-}
+/* ---------- Normalize Quote Items ---------- */
+function normalizeQuoteItems(rawQuote){ const arr=Array.isArray(rawQuote.items)?rawQuote.items:[]; const items=arr.map(ci=>{ if(Array.isArray(ci.variants)&&ci.variants.length){ const variants=ci.variants.map(v=>{ const qty=Number(v.qty||v.quantity)||0; const unitPrices={ NGN:Number(v.priceNGN)||Number(v.price)||0, USD:Number(v.priceUSD)||0, EUR:Number(v.priceEUR)||0, GBP:Number(v.priceGBP)||0 }; return { id:v.id||ci.id||'', color:v.color||'', size:v.size||'', quantity:qty, unitPrices, linePrices:{ NGN:(unitPrices.NGN||0)*qty, USD:(unitPrices.USD||0)*qty, EUR:(unitPrices.EUR||0)*qty, GBP:(unitPrices.GBP||0)*qty } }; }); return { productId:ci.id||'', name:ci.name||'', image:(ci.image && ci.image!=='../asset/placeholder.jpg')?ci.image:null, totalQuantity:variants.reduce((s,a)=>s+a.quantity,0), totalPrices:{ NGN:variants.reduce((s,a)=>s+(a.linePrices.NGN||0),0), USD:variants.reduce((s,a)=>s+(a.linePrices.USD||0),0), EUR:variants.reduce((s,a)=>s+(a.linePrices.EUR||0),0), GBP:variants.reduce((s,a)=>s+(a.linePrices.GBP||0),0) }, variants, description:ci.desc||ci.description||'' }; } else{ const qty=Number(ci.qty||ci.quantity)||1; const unitPrices={ NGN:Number(ci.priceNGN)||Number(ci.price)||0, USD:Number(ci.priceUSD)||0, EUR:Number(ci.priceEUR)||0, GBP:Number(ci.priceGBP)||0 }; return { productId:ci.id||'', name:ci.name||'', image:(ci.image && ci.image!=='../asset/placeholder.jpg')?ci.image:null, totalQuantity:qty, totalPrices:{ NGN:(unitPrices.NGN||0)*qty, USD:(unitPrices.USD||0)*qty, EUR:(unitPrices.EUR||0)*qty, GBP:(unitPrices.GBP||0)*qty }, variants:[{ id:ci.id||'', color:'', size:'', quantity:qty, unitPrices, linePrices:{ NGN:(unitPrices.NGN||0)*qty, USD:(unitPrices.USD||0)*qty, EUR:(unitPrices.EUR||0)*qty, GBP:(unitPrices.GBP||0)*qty } }], description:ci.desc||ci.description||'' }; } }); return { items }; }
 
-/* ---------- Process order once paid ---------- */
-async function processPaidOrder(orderData){
-  try{
-    const orderRef=await addDoc(collection(db,"brands","serac","orders"),{...orderData, status:"paid", createdAt: serverTimestamp(), verifiedAt: serverTimestamp()});
-    // update linked quote if any
-    try{ if(orderData.source?.startsWith("quote:")){ const qid=orderData.source.split("quote:")[1]; if(qid) await updateDoc(doc(db,"brands","serac","quotes",qid), { status:"Paid", orderId: orderRef.id, paidAt: serverTimestamp() }); } }catch(e){}
-    return orderRef.id;
-  }catch(e){ console.error("Failed saving paid order:", e); return null; }
-}
+/* ---------- Render Checkout ---------- */
+function renderOrderFromQuoteNormalized(quoteNormalized, currency='NGN', paid=false, isQuote=false){ orderItemsEl.innerHTML=''; if(!quoteNormalized||!Array.isArray(quoteNormalized.items)){ orderItemsEl.innerHTML='<li class="small-note">No items</li>'; totalsText.textContent='Subtotal: —'; return; } let subtotal=0; quoteNormalized.items.forEach((item,idx)=>{ const value=(item.totalPrices&&(item.totalPrices[currency]??0))||0; subtotal+=value; const li=document.createElement('li'); li.className='order-item'; li.dataset.idx=idx; if(!isQuote){ const imageHtml=item.image?`<img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}">`:'';
+li.innerHTML=`<div class="left" style="flex-direction:row; align-items:center;">${imageHtml}<div style="min-width:0"><div class="title">${escapeHtml(item.name)}</div><div class="meta">${escapeHtml(String(item.totalQuantity)+' item(s)')}</div><button class="show-details-btn" data-idx="${idx}">Show Details ▾</button></div></div><div class="price">${formatPrice(value,currency)}</div>`; orderItemsEl.appendChild(li); const detailsContainer=document.createElement('div'); detailsContainer.className='details-container'; detailsContainer.dataset.forIdx=idx; detailsContainer.style.display='none'; const desc=item.description||''; detailsContainer.innerHTML=`<div style="padding:8px;display:flex;flex-direction:column;gap:8px;"><div style="color:var(--muted);">${escapeHtml(desc)}</div><div style="display:flex;justify-content:flex-end;color:var(--muted)">${escapeHtml(String(item.totalQuantity))} ×</div></div>`; li.parentNode.insertBefore(detailsContainer,li.nextSibling); } else{ // Quote layout li.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;"><div style="flex:1">${escapeHtml(item.name)}</div><div>${escapeHtml(String(item.totalQuantity))}</div><div style="flex:2;color:var(--muted)">${escapeHtml(item.description||'')}</div><div>${formatPrice(value,currency)}</div></div>`; orderItemsEl.appendChild(li); } }); totalsText.textContent=`Subtotal: ${formatPrice(subtotal,currency)}`; if(currencySelect && isQuote) currencySelect.style.display='inline'; else if(currencySelect) currencySelect.style.display='none'; }
 
-/* ---------- Checkout / Flutterwave flow ---------- */
-const FLW_PUBLIC_KEY="FLWPUBK_TEST-07eb9d2da345c08dc4d54278c3bc86f7-X";
+/* ---------- Validation ---------- */
+function validateForm(){ showError(''); const name=nameInput.value.trim(), email=emailInput.value.trim(), phone=phoneInput.value.trim(), address=addressInput.value.trim(); if(!name) return "Name is required."; if(!email) return "Email is required."; if(!/^\S+@\S+\.\S+$/.test(email)) return "Please provide a valid email."; if(!phone) return "Phone is required."; if(!address) return "Address is required."; if(!quote||!Array.isArray(quote.items)||quote.items.length===0) return "Cart is empty."; return null; }
 
-async function initiatePaymentFlow(ev){
-  if(ev?.preventDefault) ev.preventDefault();
-  if(isPaidOrder) return;
+/* ---------- Process Paid Order & Save to Firestore ---------- */
+async function processPaidOrder(orderData){ try{ const orderRef=await addDoc(collection(db,"brands","serac","orders"),{...orderData,createdAt:serverTimestamp(),verifiedAt:serverTimestamp(),status:"paid"}); if(orderData.source&&orderData.source.startsWith("quote:")){ const qid=orderData.source.split("quote:")[1]; if(qid) await updateDoc(doc(db,"brands","serac","quotes",qid),{status:"Paid",orderId:orderRef.id,paidAt:serverTimestamp()}); } return orderRef.id; } catch(err){ console.error("Failed to save paid order:",err); return null; } }
 
-  showError('');
-  const name=nameInput.value.trim(), email=emailInput.value.trim(), phone=phoneInput.value.trim(), address=addressInput.value.trim();
-  if(!name||!email||!phone||!address){ showError("All fields required"); return; }
-  if(!quote || !quote.items?.length){ showError("Cart empty"); return; }
+/* ---------- Checkout Data Load ---------- */
+async function loadCheckoutData(){ selectedCurrency=localStorage.getItem(CURRENCY_KEY)||selectedCurrency||'NGN'; if(currencySelect) currencySelect.value=selectedCurrency; try{ showSpinner(true); if(orderId){ const orderSnap=await getDoc(doc(db,"brands","serac","orders",orderId)); if(orderSnap.exists()){ activeOrderRaw=orderSnap.data(); isPaidOrder=true; quote={items:normalizeQuoteItems(activeOrderRaw).items}; renderOrderFromQuoteNormalized(quote,selectedCurrency,true,quoteId!=null); showSpinner(false); return; } } if(quoteId){ const quoteSnap=await getDoc(doc(db,"brands","serac","quotes",quoteId)); if(!quoteSnap.exists()){ showSpinner(false); showError("Quote not found or deleted."); return; } activeQuoteRaw=quoteSnap.data(); const qStatus=(activeQuoteRaw.status||"").toLowerCase(); if(qStatus==="paid"&&activeQuoteRaw.orderId){ const linkedOrderSnap=await getDoc(doc(db,"brands","serac","orders",activeQuoteRaw.orderId)); if(linkedOrderSnap.exists()){ const orderData=linkedOrderSnap.data(); isPaidOrder=true; quote={items:normalizeQuoteItems(orderData).items}; renderOrderFromQuoteNormalized(quote,selectedCurrency,true,true); showSpinner(false); return; } } if(activeQuoteRaw.customer&&nameInput) nameInput.value=activeQuoteRaw.customer; if(activeQuoteRaw.email&&emailInput) emailInput.value=activeQuoteRaw.email; quote=normalizeQuoteItems(activeQuoteRaw); renderOrderFromQuoteNormalized(quote,selectedCurrency,false,true); showSpinner(false); return; } cart=JSON.parse(localStorage.getItem(STORAGE_KEY))||[]; cart=mergeCartItems(cart); if(!cart.length){ quote={items:[]}; renderOrderFromQuoteNormalized(quote,selectedCurrency,false,false); showSpinner(false); showError("Your cart is empty."); return; } quote=await buildQuoteFromCart(); renderOrderFromQuoteNormalized(quote,selectedCurrency,false,false); showSpinner(false); } catch(err){ showSpinner(false); console.error("Failed to load checkout data:",err); showError("Error loading checkout data."); } }
 
-  let subtotal=0; quote.items.forEach(it=>subtotal+=(it.totalPrices[selectedCurrency]||0));
-  if(subtotal<=0){ showError("Subtotal is zero"); return; }
+/* ---------- Payment Flow ---------- */
+async function handlePayment(){ const validationError=validateForm(); if(validationError){ showError(validationError); return; } showSpinner(true); const txRef='tx_'+Date.now(); const orderData={ source: quoteId?`quote:${quoteId}`:'cart', customer:{name:nameInput.value,email:emailInput.value,phone:phoneInput.value,address:addressInput.value}, items:quote.items.map(i=>({productId:i.productId,name:i.name,variants:i.variants,totalQuantity:i.totalQuantity,totalPrices:i.totalPrices,description:i.description})), currency:selectedCurrency, amount:quote.items.reduce((s,i)=>s+(i.totalPrices[selectedCurrency]||0),0), txRef }; FlutterwaveCheckout({ public_key: "FLWPUBK_TEST-XXXXXXXXXXXXXXX-X", tx_ref: txRef, amount: orderData.amount, currency: orderData.currency, customer: orderData.customer, callback: async function(resp){ if(resp.status==="successful"){ // Placeholder webhook call can go here await processPaidOrder(orderData); showSpinner(false); window.location.href="thankyou.html"; } else{ showSpinner(false); showError("Payment failed or cancelled."); } }, onclose:function(){ showSpinner(false); showError("Payment cancelled."); }, customizations:{title:"Serac Checkout"} }); }
 
-  const baseOrder={ name,email,phone,address, currency:selectedCurrency, items:quote.items, total:subtotal, status:"placed", source:"cart", createdAt:new Date().toISOString() };
+/* ---------- Event Listeners ---------- */
+payBtn?.addEventListener('click',handlePayment);
+currencySelect?.addEventListener('change',e=>{ selectedCurrency=e.target.value; localStorage.setItem(CURRENCY_KEY,selectedCurrency); renderOrderFromQuoteNormalized(quote,selectedCurrency, isPaidOrder, quoteId!=null); });
 
-  const txRef="serac_"+Date.now();
-
-  // Flutterwave config
-  const fwConfig={
-    public_key: FLW_PUBLIC_KEY,
-    tx_ref: txRef,
-    amount:Number(subtotal),
-    currency:selectedCurrency,
-    customer:{email,phonenumber:phone,name},
-    customizations:{title:"Sérac",description:"Order Payment",logo:"https://brandisby.com/assets/logo.png"},
-    is_sandbox:true,
-    callback:function(data){
-      showSpinner(true);
-      console.log("Flutterwave success callback:",data);
-      showError("Payment received. Waiting for verification via webhook...");
-      // OPTIONAL: real-time listener on Firestore to update UI when webhook writes paid order
-      const ordersRef=collection(db,"brands","serac","orders");
-      const q=query(ordersRef, where("tx_ref","==",txRef));
-      const unsub=onSnapshot(q,(snap)=>{
-        snap.docChanges().forEach(change=>{
-          if(change.type==="added" || change.type==="modified"){
-            const paidOrder=change.doc.data();
-            if(paidOrder.status==="paid"){
-              processPaidOrder(baseOrder); // save again if needed
-              quote={items:paidOrder.items}; isPaidOrder=true;
-              renderOrder(quote, selectedCurrency,true);
-              if(hero){hero.classList.add('paid');} if(heroH1)heroH1.textContent="Order Summary"; if(heroP)heroP.textContent="Paid successfully"; if(payBtn){payBtn.textContent="Paid ✅";payBtn.disabled=true;}
-              unsub(); // stop listening
-              try{localStorage.removeItem(STORAGE_KEY); cartCountElem.textContent='0';}catch(e){}
-            }
-          }
-        });
-      });
-    },
-    onclose:function(){ showError("Payment window closed"); showSpinner(false);}
-  };
-
-  try{ FlutterwaveCheckout(fwConfig); }catch(err){ console.error(err); showError("Payment gateway unavailable"); }
-}
-
-/* ---------- Currency switch ---------- */
-if(currencySelect) currencySelect.addEventListener('change',()=>{ selectedCurrency=currencySelect.value; localStorage.setItem(CURRENCY_KEY,selectedCurrency); if(quote) renderOrder(quote,selectedCurrency,isPaidOrder); });
-
-/* ---------- Pay button binding ---------- */
-if(payBtn) payBtn.addEventListener('click', initiatePaymentFlow);
+orderItemsEl?.addEventListener('click',e=>{ if(e.target.classList.contains('show-details-btn')){ const idx=e.target.dataset.idx; const detailsContainer=document.querySelector(`.details-container[data-for-idx="${idx}"]`); if(detailsContainer) detailsContainer.style.display=(detailsContainer.style.display==='none')?'block':'none'; } });
 
 /* ---------- Init ---------- */
-(async function init(){
-  cart = mergeCartItems(cart);
-  quote = await buildQuoteFromCart();
-  renderOrder(quote,selectedCurrency,false);
-})();
+loadCheckoutData();
 </script>
+
 
 
 </body>
