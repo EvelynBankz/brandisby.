@@ -1,0 +1,10 @@
+{
+  "name": "serac-checkout-api",
+  "version": "1.0.0",
+  "description": "Serverless functions for checkout",
+  "main": "index.js",
+  "scripts": {},
+  "dependencies": {
+    "firebase-admin": "^11.12.0"
+  }
+}
