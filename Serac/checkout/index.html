@@ -1015,23 +1015,6 @@ async function initiatePaymentFlow(ev) {
           }
         }
 
-
-        if (verifyResponse && (verifyResponse.status === "success" || verifyResponse.success === true)) {
-          // finalize (save to firestore & redirect)
-          await finalizeAfterSuccess(verifyResponse);
-        } else {
-          throw new Error(verifyResponse.message || "Payment verification failed on Worker.");
-        }
-      } catch (err) {
-        console.error("Verification or finalize error:", err);
-        showSpinner(false);
-        if (payBtn) payBtn.disabled = false;
-        showError(
-          "Payment succeeded but verification failed. Please contact support with your transaction reference."
-        );
-      }
-    },
-
     onclose: function () {
       console.log("Payment window closed by user");
       if (payBtn) payBtn.disabled = false;
