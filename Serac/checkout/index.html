@@ -1034,10 +1034,13 @@ async function initiatePaymentFlow(ev){
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
-          cache: "no-store",     // avoid cached QUIC sessions
+          cache: "no-store",
           mode: "cors",
-          keepalive: true,       // ensure request completes even on redirect or tab close
+          keepalive: true,
+          credentials: "omit", // important: prevents some QUIC edge bugs
+          priority: "high", // hint for Chrome
         });
+
 
         
         const verifyResponse = await verifyResponseRaw.json();
