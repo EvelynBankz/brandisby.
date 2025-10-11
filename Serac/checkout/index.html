@@ -742,6 +742,43 @@ async function initiatePaymentFlow(ev) {
     return;
   }
 
+  // ✅ Restore saved checkout data (if returning from cancelled payment)
+  (function restoreCheckoutData() {
+    const saved = localStorage.getItem("checkout_user_data");
+    if (!saved) return;
+
+    try {
+      const { name, email, phone, address, selectedCurrency: savedCurrency } = JSON.parse(saved);
+
+      if (nameInput) nameInput.value = name || "";
+      if (emailInput) emailInput.value = email || "";
+      if (phoneInput) phoneInput.value = phone || "";
+      if (addressInput) addressInput.value = address || "";
+
+      if (savedCurrency && currencySelect) {
+        selectedCurrency = savedCurrency;
+        currencySelect.value = savedCurrency;
+
+        // Disable currency selector if order already paid
+        if (isPaidOrder) {
+          currencySelect.disabled = true;
+        }
+      }
+    } catch (err) {
+      console.warn("Failed to restore checkout data:", err);
+    }
+  })();
+
+  // ✅ Save current user inputs to localStorage
+  const userData = {
+    name: (nameInput && nameInput.value || "").trim(),
+    email: (emailInput && emailInput.value || "").trim(),
+    phone: (phoneInput && phoneInput.value || "").trim(),
+    address: (addressInput && addressInput.value || "").trim(),
+    selectedCurrency
+  };
+  localStorage.setItem("checkout_user_data", JSON.stringify(userData));
+
   let subtotal = 0;
   try {
     quote.items.forEach(it => {
@@ -763,10 +800,10 @@ async function initiatePaymentFlow(ev) {
 
   showSpinner(true);
 
-  const name = (nameInput && nameInput.value || "").trim();
-  const email = (emailInput && emailInput.value || "").trim();
-  const phone = (phoneInput && phoneInput.value || "").trim();
-  const address = (addressInput && addressInput.value || "").trim();
+  const name = userData.name;
+  const email = userData.email;
+  const phone = userData.phone;
+  const address = userData.address;
 
   const baseOrder = {
     name,
@@ -806,6 +843,9 @@ async function initiatePaymentFlow(ev) {
         payBtn.classList.add("paid-state");
       }
 
+      // Disable currency selector after payment
+      if (currencySelect) currencySelect.disabled = true;
+
       showSpinner(false);
 
       const oid = workerResp.orderId || workerResp.orderDoc?.id || "";
@@ -841,9 +881,6 @@ async function initiatePaymentFlow(ev) {
       showSpinner(true);
 
       try {
-        console.log("Flutterwave callback data:", data);
-
-        // ✅ Use numeric transaction ID from Flutterwave
         const flwId =
           (data?.data && data.data.id) ||
           data.id ||
@@ -853,7 +890,7 @@ async function initiatePaymentFlow(ev) {
         if (!flwId) throw new Error("Missing transaction ID from Flutterwave");
 
         const payload = {
-          transaction_id: flwId, // ✅ numeric ID
+          transaction_id: flwId,
           tx_ref: data.tx_ref || txRef,
           expectedAmount: Number(subtotal),
           currency: selectedCurrency,
@@ -870,9 +907,6 @@ async function initiatePaymentFlow(ev) {
             verifyResponse.verified === true)
         ) {
           await finalizeAfterSuccess(verifyResponse);
-          localStorage.removeItem(STORAGE_KEY);
-          if (cartCountElem) cartCountElem.textContent = "0";
-          window.location.href = "../thankyou.html";
         } else {
           console.warn("Verification failed:", verifyResponse);
           showSpinner(false);
@@ -900,12 +934,31 @@ async function initiatePaymentFlow(ev) {
       showSpinner(false);
       showError("Payment was cancelled. Please complete your checkout to continue.");
 
+      // ✅ Restore user data on cancel
+      const saved = localStorage.getItem("checkout_user_data");
+      if (saved) {
+        try {
+          const { name, email, phone, address, selectedCurrency: savedCurrency } = JSON.parse(saved);
+          if (nameInput) nameInput.value = name || "";
+          if (emailInput) emailInput.value = email || "";
+          if (phoneInput) phoneInput.value = phone || "";
+          if (addressInput) addressInput.value = address || "";
+          if (savedCurrency && currencySelect) {
+            selectedCurrency = savedCurrency;
+            currencySelect.value = savedCurrency;
+          }
+        } catch (err) {
+          console.warn("Failed to restore checkout data on cancel:", err);
+        }
+      }
+
       if (payBtn) {
         payBtn.disabled = false;
         payBtn.dataset.processing = "0";
       }
 
-      window.location.href = "../checkout.html";
+      // ✅ Redirect to correct checkout page
+      window.location.href = "../checkout/index.html";
     }
   };
 
@@ -957,7 +1010,7 @@ async function initiatePaymentFlow(ev) {
     }
   }, 3000);
 }
-
+  
   
 /* currency change */
 if (currencySelect) {
