@@ -632,8 +632,8 @@ function normalizeOrderItems(items) {
 function renderPaidOrderUI(quoteData) {
   if (!quoteData) return;
 
-  // Render the quote/order items (paid view)
-  renderOrderFromQuoteNormalized(quoteData, quoteData.currency || selectedCurrency, true);
+  // Render the quote/order items
+  renderOrderFromQuoteNormalized(quoteData, selectedCurrency, true);
 
   // Mark hero section as paid
   if (hero) hero.classList.add('paid');
@@ -648,13 +648,13 @@ function renderPaidOrderUI(quoteData) {
   }
 
   // -------------------- LOCK CURRENCY SELECTOR --------------------
-  const currencyWrapper = document.querySelector("#currencySelector");
+  const currencySelectorWrapper = document.querySelector("#currencySelector");
   const currencySelector = document.querySelector("#currency");
-  if (currencyWrapper && currencySelector) {
+  if (currencySelectorWrapper && currencySelector) {
     currencySelector.value = quoteData.currency || selectedCurrency;
     currencySelector.disabled = true;
-    currencyWrapper.style.opacity = 0.6;
-    currencyWrapper.style.pointerEvents = "none";
+    currencySelectorWrapper.style.opacity = 0.6;
+    currencySelectorWrapper.style.pointerEvents = "none";
   }
 
   // -------------------- LOCK BILLING DETAILS --------------------
@@ -663,7 +663,7 @@ function renderPaidOrderUI(quoteData) {
     if (field) {
       field.value = quoteData[field.id] || field.value;
       field.disabled = true;
-      field.style.backgroundColor = "#202223";
+      field.style.backgroundColor = "#202223"; // match order item background
     }
   });
 
@@ -682,13 +682,14 @@ function renderPaidOrderUI(quoteData) {
       hero.appendChild(trackingElem);
     }
   }
-  trackingElem.textContent = quoteData.trackingRef
-    ? "Your Order Reference: " + quoteData.trackingRef
-    : "";
-  
+  if (quoteData.trackingRef) {
+    trackingElem.textContent = "Your Order Reference: " + quoteData.trackingRef;
+  }
+
+  // -------------------- SYNC CART COUNT --------------------
   updateCartCount();
 
-  // -------------------- STORE PAID QUOTE INFO --------------------
+  // -------------------- STORE PAID QUOTE INFO FOR PAGE SYNC --------------------
   localStorage.setItem("paidQuoteInfo", JSON.stringify({
     quoteId: quoteData.id,
     currency: quoteData.currency,
@@ -698,71 +699,36 @@ function renderPaidOrderUI(quoteData) {
       phone: quoteData.phone,
       address: quoteData.address
     },
-    trackingRef: quoteData.trackingRef,
-    verified: true
+    trackingRef: quoteData.trackingRef
   }));
 }
 
-// -------------------- LOAD UNPAID QUOTE UI --------------------
-async function loadQuoteUI() {
-  if (!quoteId) return;
-
-  // Fetch quote from Firestore
-  try {
-    const docRef = doc(db, "brands", "serac", "quotes", quoteId);
-    const docSnap = await getDoc(docRef);
-    if (!docSnap.exists()) {
-      showError("Quote not found.");
-      return;
-    }
-
-    const quoteData = docSnap.data();
-    quote = quoteData;
-    quote.id = quoteId;
-
-    // Render unpaid quote view
-    renderOrderFromQuoteNormalized(quoteData, selectedCurrency, false);
-
-    // Unlock billing & currency fields
-    const currencySelector = document.querySelector("#currency");
-    const currencyWrapper = document.querySelector("#currencySelector");
-    if (currencySelector) currencySelector.disabled = false;
-    if (currencyWrapper) {
-      currencyWrapper.style.opacity = 1;
-      currencyWrapper.style.pointerEvents = "auto";
-    }
-
-    [nameInput, emailInput, phoneInput, addressInput].forEach(field => {
-      if (field) field.disabled = false;
-      if (field) field.style.backgroundColor = "";
-    });
-
-    setCheckoutUI(); // reset hero and button to unpaid state
-
-  } catch (err) {
-    console.error("Failed to load quote:", err);
-    showError("Failed to load quote. Try again later.");
-  }
+// -------------------- UPDATE CART COUNT FUNCTION --------------------
+function updateCartCount() {
+  const cartItems = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+  const cartTotal = cartItems.reduce((acc, item) => acc + (item.quantity || 1), 0);
+  if (cartCountElem) cartCountElem.textContent = cartTotal;
 }
 
 // -------------------- SYNC PAID QUOTE ON PAGE LOAD OR RETURN --------------------
 async function syncPaidQuoteUI() {
   const paidQuoteInfo = JSON.parse(localStorage.getItem("paidQuoteInfo") || "null");
-  if (!paidQuoteInfo || !paidQuoteInfo.verified) return;
+  if (!paidQuoteInfo) return;
 
-  // Render immediately from localStorage to avoid flash
-  renderPaidOrderUI({
+  // --- Immediately render from localStorage to avoid empty flash ---
+  const localQuoteData = {
     id: paidQuoteInfo.quoteId,
-    currency: paidQuoteInfo.currency,
     trackingRef: paidQuoteInfo.trackingRef,
+    currency: paidQuoteInfo.currency,
     name: paidQuoteInfo.billing?.name,
     email: paidQuoteInfo.billing?.email,
     phone: paidQuoteInfo.billing?.phone,
     address: paidQuoteInfo.billing?.address,
-    items: quote?.items || []
-  });
+    items: [] // optional: you can store items in localStorage if needed
+  };
+  renderPaidOrderUI(localQuoteData);
 
-  // Fetch fresh data from Firestore
+  // --- Fetch fresh data from Firestore ---
   try {
     const docRef = doc(db, "brands", "serac", "quotes", paidQuoteInfo.quoteId);
     const docSnap = await getDoc(docRef);
@@ -779,18 +745,23 @@ async function syncPaidQuoteUI() {
   }
 }
 
+
 // -------------------- PAGE LOAD & RETURN EVENTS --------------------
 document.addEventListener("DOMContentLoaded", () => {
   const paidQuoteInfo = JSON.parse(localStorage.getItem("paidQuoteInfo") || "null");
+
+  // ✅ Only run paid quote sync if the localStorage entry exists AND has a verified payment status
   if (paidQuoteInfo && paidQuoteInfo.verified) {
     syncPaidQuoteUI();
   } else {
-    loadQuoteUI();
+    // ✅ Otherwise, load the unpaid quote normally
+    loadQuoteUI(); // This is your normal unpaid quote loader
   }
 });
 
 window.addEventListener("pageshow", () => {
   const paidQuoteInfo = JSON.parse(localStorage.getItem("paidQuoteInfo") || "null");
+
   if (paidQuoteInfo && paidQuoteInfo.verified) {
     syncPaidQuoteUI();
   } else {
@@ -798,10 +769,13 @@ window.addEventListener("pageshow", () => {
   }
 });
 
-// -------------------- REALTIME CART UPDATE --------------------
-window.addEventListener("storage", updateCartCount);
 
-// -------------------- HELPER: RESET CHECKOUT UI --------------------
+// -------------------- REALTIME CART UPDATE --------------------
+window.addEventListener("storage", () => updateCartCount());
+
+
+  
+  
 function setCheckoutUI() {
   if (hero) hero.classList.remove('paid');
   if (heroH1) heroH1.textContent = "Checkout";
@@ -813,6 +787,111 @@ function setCheckoutUI() {
   }
 }
 
+/* Validation */
+function validateForm(){
+  showError('');
+  const name = (nameInput && nameInput.value || '').trim();
+  const email = (emailInput && emailInput.value || '').trim();
+  const phone = (phoneInput && phoneInput.value || '').trim();
+  const address = (addressInput && addressInput.value || '').trim();
+  if(!name) return "Name is required.";
+  if(!email) return "Email is required.";
+  if(!/^\S+@\S+\.\S+$/.test(email)) return "Please provide a valid email.";
+  if(!phone) return "Phone is required.";
+  if(!address) return "Address is required.";
+  if(!quote || !Array.isArray(quote.items) || quote.items.length === 0) return "Cart is empty.";
+  return null;
+}
+
+/* fetch with retry */
+async function fetchWithRetry(url, options = {}, retries = 1, backoff = 500) {
+  try {
+    const res = await fetch(url, options);
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    return res;
+  } catch (err) {
+    if (retries > 0) {
+      await new Promise(r => setTimeout(r, backoff));
+      return fetchWithRetry(url, options, retries - 1, Math.round(backoff * 1.5));
+    } else throw err;
+  }
+}
+
+/* serverless verify */
+const FLW_PUBLIC_KEY = "FLWPUBK_TEST-07eb9d2da345c08dc4d54278c3bc86f7-X";
+const SERVERLESS_VERIFY = `${window.location.origin}/api/verify`;
+
+async function verifyPayment(payload) {
+  try {
+    const opts = {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Connection": "close" },
+      body: JSON.stringify(payload),
+      cache: "no-store",
+      mode: "cors",
+      credentials: "omit",
+      keepalive: true
+    };
+    const res = await fetchWithRetry(SERVERLESS_VERIFY, opts, 1);
+    return await res.json();
+  } catch (err) {
+    console.error("verifyPayment error:", err);
+    throw err;
+  }
+}
+
+// -------------------- ORDER REFERENCE GENERATOR --------------------
+function generateOrderReference(email, orderId, txRef) {
+  const rand = () => Math.random().toString(36).substring(2, 6).toUpperCase();
+  const now = new Date();
+  const day = String(now.getDate()).padStart(2, "0");
+  const month = now.toLocaleString("en", { month: "short" }).toUpperCase();
+  const year = String(now.getFullYear()).slice(-2);
+
+  const emailPrefix = email ? email.split('@')[0].slice(0, 3).toUpperCase() : "SR";
+  const shortTx = txRef ? txRef.slice(-4).toUpperCase() : rand();
+
+  // Example: SRCHE-10OCT25-A1B2
+  return `${emailPrefix}-${day}${month}${year}-${shortTx}`;
+}
+
+
+/* ✅ save verified order to Firestore */
+async function processPaidOrder(orderData, txRef) {
+  try {
+    const trackingRef = generateOrderReference(orderData.email, orderData.id || "", txRef);
+
+    const orderRef = await addDoc(collection(db, "brands", "serac", "orders"), {
+      ...orderData,
+      createdAt: serverTimestamp(),
+      verifiedAt: serverTimestamp(),
+      status: "paid",
+      trackingRef: trackingRef, // ✅ added tracking ref
+    });
+
+    try {
+      // ✅ If it’s a quote-based checkout, update the quote document too
+      if (orderData.source && orderData.source.startsWith("quote:")) {
+        const qid = orderData.source.split("quote:")[1];
+        if (qid) {
+          await updateDoc(doc(db, "brands", "serac", "quotes", qid), {
+            status: "Paid",
+            orderId: orderRef.id,
+            paidAt: serverTimestamp(),
+            trackingRef: trackingRef, // ✅ add same tracking ref here too
+          });
+        }
+      }
+    } catch (e) {
+      console.warn("Failed to update quote status after saving order", e);
+    }
+
+    return orderRef.id;
+  } catch (err) {
+    console.error("Failed to save paid order:", err);
+    return null;
+  }
+}
 
 
 
