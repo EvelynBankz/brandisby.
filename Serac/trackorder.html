@@ -1,0 +1,168 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sérac - Track Order</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root{
+  --bg:#141517;
+  --bg-2:#4B4E54;
+  --accent:#B66E41;
+  --muted:#9aa0a4;
+  --surface:#1b1c1d;
+  --radius:12px;
+  --transition:200ms cubic-bezier(.2,.8,.2,1);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:"Montserrat",sans-serif;
+  background:linear-gradient(180deg,var(--bg) 0%,#0f1011 100%);
+  color:#E7E7E7;
+  padding-top:84px;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* Header reused */
+.site-header{background:linear-gradient(90deg,rgba(0,0,0,0.25),rgba(0,0,0,0.15));color:#E7E7E7;
+display:flex;justify-content:space-between;align-items:center;padding:18px 28px;position:fixed;top:0;left:0;right:0;
+z-index:1100;backdrop-filter:blur(6px);border-bottom:1px solid rgba(255,255,255,0.03);}
+.header-left{display:flex;align-items:center;gap:14px;}
+.brand-logo{height:56px;}
+.brand-title{font-family:"Playfair Display",serif;font-size:22px;font-weight:700;color:#fff;}
+.header-right{display:flex;gap:20px;align-items:center;}
+.header-right a{color:var(--muted);font-weight:500;padding:8px 10px;border-radius:8px;transition:color var(--transition),transform var(--transition);}
+.header-right a:hover{color:var(--accent);transform:translateY(-2px);}
+.cart-count{background:var(--accent);color:#111;font-size:12px;font-weight:700;border-radius:999px;padding:4px 7px;margin-left:6px;}
+
+/* Layout */
+main{
+  max-width:500px;
+  margin:60px auto;
+  background:var(--surface);
+  border-radius:var(--radius);
+  padding:36px 28px;
+  box-shadow:0 14px 36px rgba(0,0,0,0.55);
+  text-align:center;
+}
+main h1{
+  font-family:"Playfair Display",serif;
+  font-size:26px;
+  color:#fff;
+  margin-bottom:18px;
+}
+main p{
+  color:var(--muted);
+  font-size:15px;
+  margin-bottom:28px;
+}
+form{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+input{
+  background:#191A1B;
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:10px;
+  padding:12px 14px;
+  color:#fff;
+  font-size:15px;
+  transition:border-color var(--transition);
+}
+input:focus{
+  outline:none;
+  border-color:var(--accent);
+}
+button{
+  background:linear-gradient(90deg,var(--accent),#a85a35);
+  color:#111;
+  border:none;
+  border-radius:12px;
+  padding:14px;
+  font-weight:600;
+  cursor:pointer;
+  transition:transform var(--transition),box-shadow var(--transition);
+}
+button:hover{transform:translateY(-3px);box-shadow:0 18px 48px rgba(182,110,65,0.18);}
+
+/* Order Status */
+.order-status{
+  margin-top:30px;
+  background:rgba(255,255,255,0.02);
+  border:1px solid rgba(255,255,255,0.05);
+  border-radius:12px;
+  padding:20px;
+  display:none;
+  text-align:left;
+}
+.order-status h3{
+  font-family:"Playfair Display",serif;
+  color:#fff;
+  margin-bottom:10px;
+}
+.status-line{
+  margin-top:6px;
+  font-size:15px;
+  color:var(--muted);
+}
+.status-line span{
+  color:#fff;
+}
+
+/* Footer */
+footer{
+  text-align:center;
+  padding:28px 14px;
+  color:var(--muted);
+  margin-top:40px;
+  border-top:1px solid rgba(255,255,255,0.03);
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-left">
+    <img src="serac-logo.png" alt="Sérac Logo" class="brand-logo">
+    <div class="brand-title">Sérac</div>
+  </div>
+  <nav class="header-right">
+    <a href="index.html">Home</a>
+    <a href="shop.html">Shop</a>
+    <a href="about.html">About</a>
+    <a href="cart.html">Cart <span class="cart-count" id="cartCount">0</span></a>
+    <a href="customization.html">Customize</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+</header>
+
+<main>
+  <h1>Track Your Order</h1>
+  <p>Enter your Order Reference Number below to check the status of your order.</p>
+  <form id="trackOrderForm">
+    <input type="text" id="orderRef" placeholder="Enter your order reference" required>
+    <button type="submit">Check Status</button>
+  </form>
+
+  <div class="order-status" id="orderStatus">
+    <h3>Order Details</h3>
+    <div class="status-line">Status: <span id="statusText"></span></div>
+    <div class="status-line">Date: <span id="orderDate"></span></div>
+    <div class="status-line">Email: <span id="orderEmail"></span></div>
+    <div class="status-line">Amount: <span id="orderAmount"></span></div>
+  </div>
+</main>
+
+<footer>
+  © <span id="year"></span> Sérac. All rights reserved.
+</footer>
+
+<script>
+document.getElementById("year").textContent = new Date().getFullYear();
+</script>
+
+</body>
+</html>
