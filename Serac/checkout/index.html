@@ -715,6 +715,20 @@ async function syncPaidQuoteUI() {
   const paidQuoteInfo = JSON.parse(localStorage.getItem("paidQuoteInfo") || "null");
   if (!paidQuoteInfo) return;
 
+  // --- Immediately render from localStorage to avoid empty flash ---
+  const localQuoteData = {
+    id: paidQuoteInfo.quoteId,
+    trackingRef: paidQuoteInfo.trackingRef,
+    currency: paidQuoteInfo.currency,
+    name: paidQuoteInfo.billing?.name,
+    email: paidQuoteInfo.billing?.email,
+    phone: paidQuoteInfo.billing?.phone,
+    address: paidQuoteInfo.billing?.address,
+    items: [] // optional: you can store items in localStorage if needed
+  };
+  renderPaidOrderUI(localQuoteData);
+
+  // --- Fetch fresh data from Firestore ---
   try {
     const docRef = doc(db, "brands", "serac", "quotes", paidQuoteInfo.quoteId);
     const docSnap = await getDoc(docRef);
@@ -726,7 +740,6 @@ async function syncPaidQuoteUI() {
     quoteData.currency = paidQuoteInfo.currency;
 
     renderPaidOrderUI(quoteData);
-
   } catch (err) {
     console.error("Failed to fetch quote for paid UI:", err);
   }
@@ -738,6 +751,7 @@ window.addEventListener("pageshow", syncPaidQuoteUI);
 
 // -------------------- REALTIME CART UPDATE --------------------
 window.addEventListener("storage", () => updateCartCount());
+
 
   
   
