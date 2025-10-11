@@ -627,9 +627,11 @@ function normalizeOrderItems(items) {
     variants: it.variants || [],
   }));
 }
-  // -------------------- RENDER PAID QUOTE UI --------------------
+ // -------------------- RENDER PAID QUOTE UI --------------------
 function renderPaidOrderUI(quoteData) {
-  // Render the quote order
+  if (!quoteData) return;
+
+  // Render the quote/order items
   renderOrderFromQuoteNormalized(quoteData, selectedCurrency, true);
 
   // Mark hero section as paid
@@ -637,7 +639,7 @@ function renderPaidOrderUI(quoteData) {
   if (heroH1) heroH1.textContent = "Order Summary";
   if (heroP) heroP.textContent = "Your order has been paid successfully.";
 
-  // Update the pay button to reflect paid state
+  // Update pay button state
   if (payBtn) {
     payBtn.textContent = "Paid ✅";
     payBtn.disabled = true;
@@ -648,34 +650,31 @@ function renderPaidOrderUI(quoteData) {
   const currencySelectorWrapper = document.querySelector("#currencySelector");
   const currencySelector = document.querySelector("#currency");
   if (currencySelectorWrapper && currencySelector) {
-    currencySelector.value = quoteData.currency || selectedCurrency; // paid currency
-    currencySelector.disabled = true;                                 // lock selection
-    currencySelectorWrapper.style.opacity = 0.6;                      // indicate disabled
-    currencySelectorWrapper.style.pointerEvents = "none";             // prevent click
+    currencySelector.value = quoteData.currency || selectedCurrency;
+    currencySelector.disabled = true;
+    currencySelectorWrapper.style.opacity = 0.6;
+    currencySelectorWrapper.style.pointerEvents = "none";
   }
 
   // -------------------- LOCK BILLING DETAILS --------------------
   const billingFields = [nameInput, emailInput, phoneInput, addressInput];
   billingFields.forEach(field => {
     if (field) {
-      field.value = quoteData[field.id] || field.value; // populate from quote
-      field.disabled = true;                             // lock input
-      field.style.backgroundColor = "#202223";          // keep consistent background
+      field.value = quoteData[field.id] || field.value;
+      field.disabled = true;
+      field.style.backgroundColor = "#202223"; // match order item background
     }
   });
 
   // -------------------- DISPLAY TRACKING REFERENCE --------------------
   let trackingElem = document.querySelector("#trackingRefDisplay");
   if (!trackingElem) {
-    // Create the element if it doesn't exist
     trackingElem = document.createElement("div");
     trackingElem.id = "trackingRefDisplay";
     trackingElem.style.display = "block";
     trackingElem.style.marginTop = "12px";
     trackingElem.style.color = "var(--accent)";
     trackingElem.style.fontWeight = "600";
-
-    // Append it after hero paragraph if possible
     if (heroP && heroP.parentNode) {
       heroP.parentNode.insertBefore(trackingElem, heroP.nextSibling);
     } else if (hero && hero.parentNode) {
@@ -710,40 +709,32 @@ function updateCartCount() {
   if (cartCountElem) cartCountElem.textContent = cartTotal;
 }
 
-
-// -------------------- ON PAGE LOAD OR RETURN --------------------
-function syncPaidQuoteUI() {
+// -------------------- SYNC PAID QUOTE ON PAGE LOAD OR RETURN --------------------
+async function syncPaidQuoteUI() {
   const paidQuoteInfo = JSON.parse(localStorage.getItem("paidQuoteInfo") || "null");
   if (!paidQuoteInfo) return;
 
-  // Lock currency selector
-  const currencySelectorWrapper = document.querySelector("#currencySelector");
-  const currencySelector = document.querySelector("#currency");
-  if (currencySelectorWrapper && currencySelector) {
-    currencySelector.value = paidQuoteInfo.currency;
-    currencySelector.disabled = true;
-    currencySelectorWrapper.style.opacity = 0.6;
-    currencySelectorWrapper.style.pointerEvents = "none";
+  try {
+    const docRef = doc(db, "brands", "serac", "quotes", paidQuoteInfo.quoteId);
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) return;
+
+    const quoteData = docSnap.data();
+    quoteData.id = paidQuoteInfo.quoteId;
+    quoteData.trackingRef = paidQuoteInfo.trackingRef;
+    quoteData.currency = paidQuoteInfo.currency;
+
+    renderPaidOrderUI(quoteData);
+
+  } catch (err) {
+    console.error("Failed to fetch quote for paid UI:", err);
   }
-
-  // Lock billing fields
-  const billingFields = [nameInput, emailInput, phoneInput, addressInput];
-  billingFields.forEach(field => {
-    if (field && paidQuoteInfo.billing[field.id]) {
-      field.value = paidQuoteInfo.billing[field.id];
-      field.disabled = true;
-      field.style.backgroundColor = "#202223";
-    }
-  });
-
-  // Update cart count dynamically
-  updateCartCount();
 }
 
 // Call on page load
 document.addEventListener("DOMContentLoaded", syncPaidQuoteUI);
 
-// Also call when user returns to checkout page after navigation
+// Call when user navigates back
 window.addEventListener("pageshow", syncPaidQuoteUI);
 
 
