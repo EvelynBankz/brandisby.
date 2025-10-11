@@ -744,7 +744,9 @@ async function initiatePaymentFlow(ev) {
 
   let subtotal = 0;
   try {
-    quote.items.forEach(it => subtotal += (it.totalPrices && (it.totalPrices[selectedCurrency] ?? 0)) || 0);
+    quote.items.forEach(it => {
+      subtotal += (it.totalPrices && (it.totalPrices[selectedCurrency] ?? 0)) || 0;
+    });
   } catch (e) {
     subtotal = 0;
   }
@@ -790,14 +792,8 @@ async function initiatePaymentFlow(ev) {
       localStorage.removeItem(STORAGE_KEY);
       if (cartCountElem) cartCountElem.textContent = "0";
 
-      if (workerResp.orderDoc && Array.isArray(workerResp.orderDoc.items)) {
-        activeOrderRaw = workerResp.orderDoc;
-        quote = { items: activeOrderRaw.items };
-      } else {
-        activeOrderRaw = { ...baseOrder, status: "paid" };
-        quote = { items: baseOrder.items };
-      }
-
+      activeOrderRaw = workerResp.orderDoc || { ...baseOrder, status: "paid" };
+      quote = { items: activeOrderRaw.items || baseOrder.items };
       isPaidOrder = true;
       renderOrderFromQuoteNormalized(quote, selectedCurrency, true);
 
@@ -812,9 +808,7 @@ async function initiatePaymentFlow(ev) {
 
       showSpinner(false);
 
-      const oid =
-        (workerResp && (workerResp.orderId || (workerResp.orderDoc && workerResp.orderDoc.id))) ||
-        "";
+      const oid = workerResp.orderId || workerResp.orderDoc?.id || "";
       const qs = oid ? `?orderId=${encodeURIComponent(oid)}` : "";
       window.location.href = "../thankyou.html" + qs;
     } catch (err) {
@@ -847,17 +841,19 @@ async function initiatePaymentFlow(ev) {
       showSpinner(true);
 
       try {
-        const flwRef =
-          data.flw_ref ||
+        console.log("Flutterwave callback data:", data);
+
+        // ✅ Use numeric transaction ID from Flutterwave
+        const flwId =
+          (data?.data && data.data.id) ||
+          data.id ||
           data.transaction_id ||
-          data.transactionId ||
-          data.data?.id ||
           null;
 
-        if (!flwRef) throw new Error("Missing transaction ID from Flutterwave");
+        if (!flwId) throw new Error("Missing transaction ID from Flutterwave");
 
         const payload = {
-          transaction_id: flwRef,
+          transaction_id: flwId, // ✅ numeric ID
           tx_ref: data.tx_ref || txRef,
           expectedAmount: Number(subtotal),
           currency: selectedCurrency,
@@ -874,9 +870,9 @@ async function initiatePaymentFlow(ev) {
             verifyResponse.verified === true)
         ) {
           await finalizeAfterSuccess(verifyResponse);
-          localStorage.removeItem(STORAGE_KEY); // ✅ Clear cart
+          localStorage.removeItem(STORAGE_KEY);
           if (cartCountElem) cartCountElem.textContent = "0";
-          window.location.href = "../thankyou.html"; // ✅ Redirect
+          window.location.href = "../thankyou.html";
         } else {
           console.warn("Verification failed:", verifyResponse);
           showSpinner(false);
@@ -901,7 +897,6 @@ async function initiatePaymentFlow(ev) {
     onclose: function () {
       if (paymentCallbackHandled) return;
       paymentCallbackHandled = true;
-
       showSpinner(false);
       showError("Payment was cancelled. Please complete your checkout to continue.");
 
@@ -910,7 +905,7 @@ async function initiatePaymentFlow(ev) {
         payBtn.dataset.processing = "0";
       }
 
-      window.location.href = "../checkout.html"; // ✅ Return to checkout
+      window.location.href = "../checkout.html";
     }
   };
 
@@ -963,7 +958,7 @@ async function initiatePaymentFlow(ev) {
   }, 3000);
 }
 
-
+  
 /* currency change */
 if (currencySelect) {
   currencySelect.addEventListener('change', () => {
