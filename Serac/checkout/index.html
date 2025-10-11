@@ -629,12 +629,15 @@ function normalizeOrderItems(items) {
 }
   
 function renderPaidOrderUI(quoteData) {
+  // Render the paid order in the main UI
   renderOrderFromQuoteNormalized(quoteData, selectedCurrency, true);
-  
+
+  // Mark the hero section as paid and update headings
   if (hero) hero.classList.add('paid');
   if (heroH1) heroH1.textContent = "Order Summary";
   if (heroP) heroP.textContent = "Your order has been paid successfully.";
 
+  // Update the pay button to reflect paid state
   if (payBtn) {
     payBtn.textContent = "Paid ✅";
     payBtn.disabled = true;
@@ -642,16 +645,32 @@ function renderPaidOrderUI(quoteData) {
   }
 
   // -------------------- LOCK CURRENCY SELECTOR --------------------
-  const currencySelectorDiv = document.getElementById("currencySelector");
-  const currencySelector = document.getElementById("currency");
-  if (currencySelectorDiv && currencySelector) {
-    currencySelector.value = selectedCurrency; // set to the currency user paid in
-    currencySelector.disabled = true;           // disable changing it
-    currencySelectorDiv.style.display = "block"; // show the div if hidden
-    currencySelector.style.opacity = 0.6;       // optional: visually indicate disabled
+  const currencySelector = document.querySelector("#currencySelector");
+  if (currencySelector) {
+    currencySelector.value = selectedCurrency; // Show the currency user paid in
+    currencySelector.disabled = true;           // Disable changing it
+    currencySelector.style.opacity = 0.6;       // Optional: visually indicate disabled
+  }
+
+  // -------------------- UPDATE CART COUNT --------------------
+  // Reflect the actual number of items currently in the cart
+  let cartItems = [];
+  try {
+    const storedCart = localStorage.getItem(STORAGE_KEY);
+    cartItems = storedCart ? JSON.parse(storedCart).items || [] : [];
+  } catch (e) {
+    cartItems = [];
+  }
+
+  const totalCartCount = cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
+
+  if (cartCountElem) {
+    cartCountElem.textContent = totalCartCount;
   }
 }
 
+
+  
 function setCheckoutUI() {
   if (hero) hero.classList.remove('paid');
   if (heroH1) heroH1.textContent = "Checkout";
