@@ -730,38 +730,52 @@ async function processPaidOrder(orderData){
   }
 }
 
-/* payment flow */
-let lastPaymentStart = 0;
+/* -------------------- PAYMENT FLOW -------------------- */
 async function initiatePaymentFlow(ev) {
   if (ev && ev.preventDefault) ev.preventDefault();
   if (isPaidOrder) return;
-  // prevent double starts (2 sec)
-  if (Date.now() - lastPaymentStart < 2000) return;
-  lastPaymentStart = Date.now();
 
-  showError('');
+  showError("");
   const v = validateForm();
-  if (v) { showError(v); return; }
+  if (v) {
+    showError(v);
+    return;
+  }
 
   let subtotal = 0;
-  try { quote.items.forEach(it => subtotal += (it.totalPrices && (it.totalPrices[selectedCurrency] ?? 0)) || 0); } catch(e){ subtotal = 0; }
-  if (subtotal <= 0) { showError("Subtotal is zero. Cannot proceed."); return; }
+  try {
+    quote.items.forEach(it => subtotal += (it.totalPrices && (it.totalPrices[selectedCurrency] ?? 0)) || 0);
+  } catch (e) {
+    subtotal = 0;
+  }
+  if (subtotal <= 0) {
+    showError("Subtotal is zero. Cannot proceed.");
+    return;
+  }
 
-  if (payBtn) payBtn.disabled = true;
+  if (payBtn && payBtn.dataset.processing === "1") return;
+  if (payBtn) {
+    payBtn.dataset.processing = "1";
+    payBtn.disabled = true;
+  }
+
   showSpinner(true);
 
-  const name = (nameInput && nameInput.value || '').trim();
-  const email = (emailInput && emailInput.value || '').trim();
-  const phone = (phoneInput && phoneInput.value || '').trim();
-  const address = (addressInput && addressInput.value || '').trim();
+  const name = (nameInput && nameInput.value || "").trim();
+  const email = (emailInput && emailInput.value || "").trim();
+  const phone = (phoneInput && phoneInput.value || "").trim();
+  const address = (addressInput && addressInput.value || "").trim();
 
   const baseOrder = {
-    name, email, phone, address,
+    name,
+    email,
+    phone,
+    address,
     currency: selectedCurrency,
     items: quote.items,
     total: subtotal,
     status: "placed",
-    source: quoteId ? `quote:${quoteId}` : 'cart',
+    source: quoteId ? `quote:${quoteId}` : "cart",
     createdAt: new Date().toISOString()
   };
 
@@ -773,8 +787,8 @@ async function initiatePaymentFlow(ev) {
       const orderId = await processPaidOrder(baseOrder);
       if (orderId) workerResp = { ...workerResp, orderId };
 
-      try { localStorage.removeItem(STORAGE_KEY); } catch(e){ console.warn("localStorage clear failed", e); }
-      try { if (cartCountElem) cartCountElem.textContent = '0'; } catch(e){}
+      localStorage.removeItem(STORAGE_KEY);
+      if (cartCountElem) cartCountElem.textContent = "0";
 
       if (workerResp.orderDoc && Array.isArray(workerResp.orderDoc.items)) {
         activeOrderRaw = workerResp.orderDoc;
@@ -787,20 +801,30 @@ async function initiatePaymentFlow(ev) {
       isPaidOrder = true;
       renderOrderFromQuoteNormalized(quote, selectedCurrency, true);
 
-      if (hero) hero.classList.add('paid');
+      if (hero) hero.classList.add("paid");
       if (heroH1) heroH1.textContent = "Order Summary";
       if (heroP) heroP.textContent = "Your order has been paid successfully.";
-      if (payBtn) { payBtn.textContent = "Paid ✅"; payBtn.disabled = true; payBtn.classList.add('paid-state'); }
+      if (payBtn) {
+        payBtn.textContent = "Paid ✅";
+        payBtn.disabled = true;
+        payBtn.classList.add("paid-state");
+      }
+
       showSpinner(false);
 
-      const oid = (workerResp && (workerResp.orderId || (workerResp.orderDoc && workerResp.orderDoc.id))) || '';
-      const qs = oid ? `?orderId=${encodeURIComponent(oid)}` : '';
+      const oid =
+        (workerResp && (workerResp.orderId || (workerResp.orderDoc && workerResp.orderDoc.id))) ||
+        "";
+      const qs = oid ? `?orderId=${encodeURIComponent(oid)}` : "";
       window.location.href = "../thankyou.html" + qs;
     } catch (err) {
       console.error("Finalize error:", err);
       showSpinner(false);
-      showError("Payment verified but an error occurred finalizing your order. Contact support with tx_ref: " + txRef);
-      if (payBtn) payBtn.disabled = false;
+      showError("Payment verified but finalization failed. Contact support with tx_ref: " + txRef);
+      if (payBtn) {
+        payBtn.disabled = false;
+        payBtn.dataset.processing = "0";
+      }
     }
   }
 
@@ -809,95 +833,123 @@ async function initiatePaymentFlow(ev) {
     tx_ref: txRef,
     amount: Number(subtotal),
     currency: selectedCurrency,
-    customer: { email: email, phonenumber: phone, name: name },
-    customizations: { title: "Sérac", description: "Order Payment", logo: "https://brandisby.com/assets/logo.png" },
-
+    customer: { email, phonenumber: phone, name },
+    customizations: {
+      title: "Sérac",
+      description: "Order Payment",
+      logo: "../assets/logo.png"
+    },
     callback: async function (data) {
       paymentCallbackHandled = true;
       showSpinner(true);
+
       try {
-        const returnedTxRef = data.tx_ref || data.data?.tx_ref || txRef;
-        const flwRef = data.flw_ref || data.transaction_id || data.transactionId || data.data?.id || null;
-        if (!flwRef) throw new Error("Missing Flutterwave transaction id (flwRef). Verification cannot proceed.");
+        const flwRef =
+          data.flw_ref ||
+          data.transaction_id ||
+          data.transactionId ||
+          data.data?.id ||
+          null;
+
+        if (!flwRef) throw new Error("Missing transaction ID from Flutterwave");
 
         const payload = {
           transaction_id: flwRef,
-          tx_ref: returnedTxRef,
-          orderData: baseOrder,
-          quoteId: quoteId || null,
+          tx_ref: data.tx_ref || txRef,
           expectedAmount: Number(subtotal),
           currency: selectedCurrency,
+          orderData: baseOrder,
+          quoteId: quoteId || null
         };
 
         const verifyResponse = await verifyPayment(payload);
 
-        if (verifyResponse && (verifyResponse.status === "success" || verifyResponse.success === true)) {
+        if (
+          verifyResponse &&
+          (verifyResponse.status === "success" || verifyResponse.success === true) &&
+          ((verifyResponse.data && verifyResponse.data.status === "successful") ||
+            verifyResponse.verified === true)
+        ) {
           await finalizeAfterSuccess(verifyResponse);
         } else {
-          throw new Error(verifyResponse && (verifyResponse.message || verifyResponse.error) ? (verifyResponse.message || verifyResponse.error) : "Payment verification failed on serverless.");
+          console.warn("Verification failed:", verifyResponse);
+          showSpinner(false);
+          showError(
+            "Payment verification failed. If funds were deducted, contact support with tx_ref: " + txRef
+          );
+          if (payBtn) {
+            payBtn.disabled = false;
+            payBtn.dataset.processing = "0";
+          }
         }
       } catch (err) {
-        console.error("Verification or finalize error:", err);
+        console.error("Verification error:", err);
         showSpinner(false);
-        if (payBtn) payBtn.disabled = false;
-        showError("Payment succeeded but verification failed. Please contact support with your transaction reference.");
+        showError("Payment succeeded but could not be verified. Contact support.");
+        if (payBtn) {
+          payBtn.disabled = false;
+          payBtn.dataset.processing = "0";
+        }
       }
     },
-
     onclose: function () {
-      if (payBtn) payBtn.disabled = false;
+      paymentCallbackHandled = true;
       showSpinner(false);
+      showError("Payment window closed or cancelled.");
+      if (payBtn) {
+        payBtn.disabled = false;
+        payBtn.dataset.processing = "0";
+      }
     }
   };
 
   try {
-    if (typeof window.FlutterwaveCheckout === "function" || typeof window.FlutterwaveCheckout === "object") {
-      // FlutterwaveCheckout may be a function or a callable object depending on embed version
-      window.FlutterwaveCheckout(fwConfig);
-    } else {
-      throw new Error("Payment gateway not loaded");
-    }
+    FlutterwaveCheckout(fwConfig);
   } catch (err) {
     showSpinner(false);
-    if (payBtn) payBtn.disabled = false;
-    console.error("Flutterwave invocation failed", err);
-    showError("Payment gateway is unavailable. Please try again later.");
-    return;
+    if (payBtn) {
+      payBtn.disabled = false;
+      payBtn.dataset.processing = "0";
+    }
+    console.error("Flutterwave failed:", err);
+    showError("Payment gateway unavailable. Try again later.");
   }
 
-  /* Fallback poll (if callback not received) */
-  let fallbackAttempts = 0;
-  const maxFallbackAttempts = 6;
-  const fallbackIntervalMs = 3000;
-  const fallbackPayload = {
-    tx_ref: txRef,
-    flwRef: null,
-    orderData: baseOrder,
-    quoteId: quoteId || null,
-    expectedAmount: Number(subtotal),
-    currency: selectedCurrency
-  };
-
-  const fallbackTimer = setInterval(async () => {
-    if (paymentCallbackHandled) { clearInterval(fallbackTimer); return; }
-    fallbackAttempts++;
+  let attempts = 0;
+  const maxAttempts = 6;
+  const poll = setInterval(async () => {
+    if (paymentCallbackHandled) return clearInterval(poll);
+    attempts++;
     try {
-      const res = await verifyPayment(fallbackPayload);
-      if (res && (res.status === 'success' || res.success === true)) {
-        clearInterval(fallbackTimer);
+      const res = await verifyPayment({
+        tx_ref: txRef,
+        orderData: baseOrder,
+        expectedAmount: Number(subtotal),
+        currency: selectedCurrency
+      });
+      if (
+        res &&
+        (res.status === "success" || res.success === true) &&
+        ((res.data && res.data.status === "successful") || res.verified === true)
+      ) {
+        clearInterval(poll);
         paymentCallbackHandled = true;
         await finalizeAfterSuccess(res);
       }
     } catch (err) {
-      if (fallbackAttempts >= maxFallbackAttempts) {
-        clearInterval(fallbackTimer);
+      if (attempts >= maxAttempts) {
+        clearInterval(poll);
         showSpinner(false);
-        if (payBtn) payBtn.disabled = false;
-        showError("We couldn't confirm your payment automatically. If your payment was successful, please contact support with your tx_ref: " + txRef);
+        showError("We couldn't confirm payment automatically. Contact support with tx_ref: " + txRef);
+        if (payBtn) {
+          payBtn.disabled = false;
+          payBtn.dataset.processing = "0";
+        }
       }
     }
-  }, fallbackIntervalMs);
+  }, 3000);
 }
+
 
 /* currency change */
 if (currencySelect) {
