@@ -240,6 +240,18 @@
     }
   </style>
 </head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thank You - Sérac</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* ... your existing CSS unchanged ... */
+  </style>
+</head>
 <body>
 
   <!-- HEADER -->
@@ -261,6 +273,7 @@
   <section class="hero">
     <div class="hero-text">
       <h1>Thank You</h1>
+      <div id="trackingRefDisplay" style="margin-top:12px;font-weight:600;color:#B66E41;"></div>
     </div>
   </section>
 
@@ -284,36 +297,87 @@
     <p>© 2025 Sérac</p>
   </footer>
 
-  <script>
+  <script type="module">
     // Hamburger toggle
     document.getElementById('hamburger').addEventListener('click',()=>{
       document.querySelector('.header-right').classList.toggle('open');
       document.getElementById('hamburger').classList.toggle('open');
     });
 
-    // Load order details from localStorage (set in checkout.html)
-    const orderData = JSON.parse(localStorage.getItem('lastOrder_serac'));
-    if(orderData){
-      const detailsDiv = document.getElementById('orderDetails');
+    // -------------------- FIRESTORE SETUP --------------------
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-app.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // -------------------- DISPLAY ORDER --------------------
+    async function displayOrder() {
+      const orderDetailsDiv = document.getElementById('orderDetails');
+      const trackingDiv = document.getElementById('trackingRefDisplay');
+
+      // First, try lastOrder from localStorage (immediate)
+      const localOrder = JSON.parse(localStorage.getItem('lastOrder_serac'));
+      if (localOrder) {
+        renderOrder(localOrder, orderDetailsDiv, trackingDiv);
+        localStorage.removeItem('lastOrder_serac'); // clear after display
+      }
+
+      // Check URL query for orderId
+      const params = new URLSearchParams(window.location.search);
+      const orderId = params.get('orderId');
+      if (orderId) {
+        try {
+          const docRef = doc(db, "brands", "serac", "orders", orderId);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            const orderData = docSnap.data();
+            orderData.orderId = orderId;
+            renderOrder(orderData, orderDetailsDiv, trackingDiv);
+          }
+        } catch(err) {
+          console.error("Failed to fetch order from Firestore:", err);
+        }
+      }
+    }
+
+    // -------------------- RENDER ORDER --------------------
+    function renderOrder(order, detailsDiv, trackingDiv){
+      // Show tracking/order reference
+      if (order.trackingRef) {
+        trackingDiv.textContent = "Order Reference: " + order.trackingRef;
+      } else if (order.orderId) {
+        trackingDiv.textContent = "Order ID: " + order.orderId;
+      }
+
+      // Show order details
       let html = `
         <h3>Order Details</h3>
         <ul>
-          <li><strong>Name:</strong> ${orderData.name}</li>
-          <li><strong>Email:</strong> ${orderData.email}</li>
-          <li><strong>Phone:</strong> ${orderData.phone}</li>
-          <li><strong>Address:</strong> ${orderData.address}</li>
-          <li><strong>Currency:</strong> ${orderData.currency}</li>
-          <li><strong>Total Paid:</strong> ${orderData.currency} ${orderData.total}</li>
+          <li><strong>Name:</strong> ${order.name}</li>
+          <li><strong>Email:</strong> ${order.email}</li>
+          <li><strong>Phone:</strong> ${order.phone}</li>
+          <li><strong>Address:</strong> ${order.address}</li>
+          <li><strong>Currency:</strong> ${order.currency}</li>
+          <li><strong>Total Paid:</strong> ${order.currency} ${order.total}</li>
         </ul>
         <h3>Items</h3>
         <ul>`;
-      orderData.items.forEach(item=>{
-        html+=`<li>${item.name} (x${item.quantity})</li>`;
+      (order.items || []).forEach(item=>{
+        html+=`<li>${item.name} (x${item.quantity || 1})</li>`;
       });
       html+=`</ul>`;
       detailsDiv.innerHTML = html;
-      localStorage.removeItem('lastOrder_serac');
     }
+
+    // Call on page load
+    document.addEventListener('DOMContentLoaded', displayOrder);
   </script>
 </body>
 </html>
+
