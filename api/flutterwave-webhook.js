@@ -1,86 +1,88 @@
 import crypto from "crypto";
 import admin from "firebase-admin";
 
-// Initialize Firestore admin SDK (reuse connection if already set)
 if (!admin.apps.length) {
   admin.initializeApp({
-    credential: admin.credential.cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT))
+    credential: admin.credential.cert({
+      private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+      client_email: process.env.FIREBASE_CLIENT_EMAIL,
+      project_id: process.env.FIREBASE_PROJECT_ID
+    })
   });
 }
 
 const db = admin.firestore();
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ status: "error", message: "Method not allowed" });
-  }
+  if (req.method !== "POST") return res.status(405).json({ message: "Method not allowed" });
 
   try {
-    const secretHash = process.env.FLW_WEBHOOK_SECRET; // Set this in your Flutterwave dashboard and Vercel env
+    // Flutterwave sends a 'verif-hash' header for security
+    const secretHash = process.env.FLW_WEBHOOK_SECRET;
     const signature = req.headers["verif-hash"];
 
     if (!signature || signature !== secretHash) {
-      console.warn("⚠️ Invalid webhook signature. Possible spoofed call.");
-      return res.status(401).json({ status: "error", message: "Unauthorized webhook" });
+      console.warn("⚠️ Invalid Flutterwave webhook signature");
+      return res.status(401).json({ message: "Invalid signature" });
     }
 
     const event = req.body;
-
     if (!event || !event.data) {
-      return res.status(400).json({ status: "error", message: "Invalid payload" });
+      return res.status(400).json({ message: "Invalid webhook payload" });
     }
 
     const data = event.data;
-    const transaction_id = data.id;
-    const tx_ref = data.tx_ref;
+    const transactionId = data.id;
+    const txRef = data.tx_ref;
+    const status = data.status;
+    const amount = Number(data.amount);
+    const currency = data.currency;
 
-    // Process only successful transactions
-    if (data.status !== "successful") {
-      console.log(`Ignoring non-successful transaction ${transaction_id}`);
-      return res.status(200).json({ status: "ignored" });
-    }
-
+    // Reference to Firestore collection
     const ordersRef = db.collection("brands").doc("serac").collection("orders");
 
-    // Check for duplicate
-    const existing = await ordersRef.where("transaction_id", "==", transaction_id).limit(1).get();
+    // Check if this transaction already exists (idempotent)
+    const existing = await ordersRef.where("transaction_id", "==", transactionId).limit(1).get();
+
     if (!existing.empty) {
-      console.log("Duplicate webhook ignored: ", transaction_id);
-      return res.status(200).json({ status: "duplicate" });
+      console.log(`✅ Transaction ${transactionId} already processed.`);
+      return res.status(200).json({ message: "Already processed" });
+    }
+
+    if (status !== "successful") {
+      console.warn(`⚠️ Transaction ${transactionId} not successful.`);
+      return res.status(200).json({ message: "Ignored: not successful" });
     }
 
     const orderPayload = {
-      transaction_id,
-      tx_ref,
-      amount: data.amount,
-      currency: data.currency,
+      transaction_id: transactionId,
+      tx_ref: txRef || "",
+      amount,
+      currency,
       status: "paid",
-      source: "webhook",
-      payment_type: data.payment_type || "unknown",
-      flutterwave_response: data,
+      flutterwave_webhook: event,
       createdAt: admin.firestore.FieldValue.serverTimestamp()
     };
 
     const newOrder = await ordersRef.add(orderPayload);
 
-    // Update matching quote if tx_ref links to it
-    if (tx_ref && tx_ref.startsWith("quote_")) {
-      const quoteId = tx_ref.replace("quote_", "");
-      try {
-        await db.collection("brands").doc("serac").collection("quotes").doc(quoteId).update({
-          status: "Paid",
-          orderId: newOrder.id,
-          paidAt: admin.firestore.FieldValue.serverTimestamp()
-        });
-      } catch (e) {
-        console.warn("Quote update failed in webhook:", e.message);
-      }
+    // Optional: If tx_ref matches an existing quote, mark it paid
+    const quotesRef = db.collection("brands").doc("serac").collection("quotes");
+    const matchingQuote = await quotesRef.where("tx_ref", "==", txRef).limit(1).get();
+
+    if (!matchingQuote.empty) {
+      const docId = matchingQuote.docs[0].id;
+      await quotesRef.doc(docId).update({
+        status: "Paid",
+        orderId: newOrder.id,
+        paidAt: admin.firestore.FieldValue.serverTimestamp()
+      });
     }
 
-    console.log(`✅ Webhook verified and recorded for tx_ref: ${tx_ref}`);
-    return res.status(200).json({ status: "success" });
+    console.log(`✅ Webhook processed for tx_ref ${txRef}`);
+    return res.status(200).json({ message: "Webhook received", orderId: newOrder.id });
   } catch (err) {
-    console.error("Webhook error:", err);
-    return res.status(500).json({ status: "error", message: err.message });
+    console.error("❌ Webhook error:", err);
+    return res.status(500).json({ message: "Server error", error: err.message });
   }
 }
