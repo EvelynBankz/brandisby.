@@ -865,80 +865,49 @@ async function initiatePaymentFlow(ev) {
 
   showError("");
 
-  // Validate form
+  // -------------------- VALIDATE FORM --------------------
   const v = validateForm();
-  if (v) {
-    showError(v);
-    return;
-  }
+  if (v) { showError(v); return; }
 
   // -------------------- RESTORE CHECKOUT DATA --------------------
-  (function restoreCheckoutData() {
-    const saved = localStorage.getItem("checkout_user_data");
-    if (!saved) return;
-
+  const savedData = localStorage.getItem("checkout_user_data");
+  if (savedData) {
     try {
-      const { name, email, phone, address, selectedCurrency: savedCurrency } = JSON.parse(saved);
-
+      const { name, email, phone, address, selectedCurrency: savedCurrency } = JSON.parse(savedData);
       if (nameInput) nameInput.value = name || "";
       if (emailInput) emailInput.value = email || "";
       if (phoneInput) phoneInput.value = phone || "";
       if (addressInput) addressInput.value = address || "";
-
-      if (savedCurrency && currencySelect) {
-        selectedCurrency = savedCurrency;
-        currencySelect.value = savedCurrency;
-
-        // Lock currency selector if already paid
-        if (isPaidOrder) currencySelect.disabled = true;
-      }
-    } catch (err) {
-      console.warn("Failed to restore checkout data:", err);
-    }
-  })();
+      if (savedCurrency && currencySelect) { selectedCurrency = savedCurrency; currencySelect.value = savedCurrency; }
+    } catch (err) { console.warn("Failed to restore checkout data:", err); }
+  }
 
   // -------------------- SAVE CURRENT USER DATA --------------------
   const userData = {
-    name: (nameInput && nameInput.value || "").trim(),
-    email: (emailInput && emailInput.value || "").trim(),
-    phone: (phoneInput && phoneInput.value || "").trim(),
-    address: (addressInput && addressInput.value || "").trim(),
+    name: (nameInput?.value || "").trim(),
+    email: (emailInput?.value || "").trim(),
+    phone: (phoneInput?.value || "").trim(),
+    address: (addressInput?.value || "").trim(),
     selectedCurrency
   };
   localStorage.setItem("checkout_user_data", JSON.stringify(userData));
 
   // -------------------- CALCULATE SUBTOTAL --------------------
   let subtotal = 0;
-  try {
-    quote.items.forEach(it => {
-      subtotal += (it.totalPrices && (it.totalPrices[selectedCurrency] ?? 0)) || 0;
-    });
-  } catch (e) {
-    subtotal = 0;
-  }
-  if (subtotal <= 0) {
-    showError("Subtotal is zero. Cannot proceed.");
-    return;
-  }
+  try { quote.items.forEach(it => { subtotal += (it.totalPrices?.[selectedCurrency] ?? 0); }); }
+  catch (e) { subtotal = 0; }
+  if (subtotal <= 0) { showError("Subtotal is zero. Cannot proceed."); return; }
 
-  if (payBtn && payBtn.dataset.processing === "1") return;
-  if (payBtn) {
-    payBtn.dataset.processing = "1";
-    payBtn.disabled = true;
-  }
+  if (payBtn?.dataset.processing === "1") return;
+  if (payBtn) { payBtn.dataset.processing = "1"; payBtn.disabled = true; }
 
   showSpinner(true);
 
-  const name = userData.name;
-  const email = userData.email;
-  const phone = userData.phone;
-  const address = userData.address;
-
   const baseOrder = {
-    name,
-    email,
-    phone,
-    address,
+    name: userData.name,
+    email: userData.email,
+    phone: userData.phone,
+    address: userData.address,
     currency: selectedCurrency,
     items: quote.items,
     total: subtotal,
@@ -953,40 +922,38 @@ async function initiatePaymentFlow(ev) {
   // -------------------- FINALIZE AFTER SUCCESS --------------------
   async function finalizeAfterSuccess(workerResp) {
     try {
-      const orderId = await processPaidOrder(baseOrder);
+      const orderId = await processPaidOrder(baseOrder, txRef);
       if (orderId) workerResp = { ...workerResp, orderId };
 
-      // Clear only quote-related items, not the cart
+      // Clear only cart items if not quote checkout
       if (!quoteId) localStorage.removeItem(STORAGE_KEY);
 
-      activeOrderRaw = workerResp.orderDoc || { ...baseOrder, status: "paid" };
+      activeOrderRaw = workerResp.orderDoc || { ...baseOrder, status: "paid", trackingRef: generateOrderReference(baseOrder.email, orderId || "", txRef) };
       quote = { items: activeOrderRaw.items || baseOrder.items };
       isPaidOrder = true;
 
-      // Render Order Summary
+      // Render order summary
       renderPaidOrderUI(activeOrderRaw);
 
       // Store paid quote info for page sync
       localStorage.setItem("paidQuoteInfo", JSON.stringify({
         quoteId,
         currency: selectedCurrency,
-        billing: { name, email, phone, address }
+        billing: { name: baseOrder.name, email: baseOrder.email, phone: baseOrder.phone, address: baseOrder.address },
+        trackingRef: activeOrderRaw.trackingRef
       }));
 
-      // Show spinner off
       showSpinner(false);
 
-      const oid = workerResp.orderId || workerResp.orderDoc?.id || "";
-      const qs = oid ? `?orderId=${encodeURIComponent(oid)}` : "";
+      // Redirect to thank you page with order ID
+      const qs = activeOrderRaw.orderId ? `?orderId=${encodeURIComponent(activeOrderRaw.orderId)}` : "";
       window.location.href = "../thankyou.html" + qs;
+
     } catch (err) {
       console.error("Finalize error:", err);
       showSpinner(false);
       showError("Payment verified but finalization failed. Contact support with tx_ref: " + txRef);
-      if (payBtn) {
-        payBtn.disabled = false;
-        payBtn.dataset.processing = "0";
-      }
+      if (payBtn) { payBtn.disabled = false; payBtn.dataset.processing = "0"; }
     }
   }
 
@@ -996,57 +963,44 @@ async function initiatePaymentFlow(ev) {
     tx_ref: txRef,
     amount: Number(subtotal),
     currency: selectedCurrency,
-    customer: { email, phonenumber: phone, name },
+    customer: { email: baseOrder.email, phonenumber: baseOrder.phone, name: baseOrder.name },
     customizations: { title: "Sérac", description: "Order Payment", logo: "../assets/logo.png" },
 
-    async function finalizeAfterSuccess(workerResp) {
-  try {
-    const orderId = await processPaidOrder(baseOrder, txRef); // ✅ updated line
-    if (orderId) workerResp = { ...workerResp, orderId };
+    callback: async function (data) {
+      if (paymentCallbackHandled) return;
+      paymentCallbackHandled = true;
+      showSpinner(true);
 
-    localStorage.removeItem(STORAGE_KEY);
-    if (cartCountElem) cartCountElem.textContent = "0";
+      try {
+        const flwId = data?.data?.id || data.id || data.transaction_id || null;
+        if (!flwId) throw new Error("Missing transaction ID from Flutterwave");
 
-    activeOrderRaw = workerResp.orderDoc || { ...baseOrder, status: "paid" };
-    quote = { items: activeOrderRaw.items || baseOrder.items };
-    isPaidOrder = true;
-    renderOrderFromQuoteNormalized(quote, selectedCurrency, true);
+        const payload = { transaction_id: flwId, tx_ref: data.tx_ref || txRef, expectedAmount: subtotal, currency: selectedCurrency, orderData: baseOrder, quoteId: quoteId || null };
+        const verifyResponse = await verifyPayment(payload);
 
-    if (hero) hero.classList.add("paid");
-    if (heroH1) heroH1.textContent = "Order Summary";
-    if (heroP) heroP.textContent = "Your order has been paid successfully.";
-    if (payBtn) {
-      payBtn.textContent = "Paid ✅";
-      payBtn.disabled = true;
-      payBtn.classList.add("paid-state");
-    }
+        if (verifyResponse && (verifyResponse.status === "success" || verifyResponse.success === true) && ((verifyResponse.data?.status === "successful") || verifyResponse.verified === true)) {
+          await finalizeAfterSuccess(verifyResponse);
+        } else {
+          showSpinner(false);
+          showError("Payment verification failed. Contact support with tx_ref: " + txRef);
+          if (payBtn) { payBtn.disabled = false; payBtn.dataset.processing = "0"; }
+        }
 
-    // Disable currency selector after payment
-    if (currencySelect) currencySelect.disabled = true;
+      } catch (err) {
+        console.error("Verification error:", err);
+        showSpinner(false);
+        showError("Payment succeeded but could not be verified. Contact support.");
+        if (payBtn) { payBtn.disabled = false; payBtn.dataset.processing = "0"; }
+      }
+    },
 
-    showSpinner(false);
-
-    const oid = workerResp.orderId || workerResp.orderDoc?.id || "";
-    const qs = oid ? `?orderId=${encodeURIComponent(oid)}` : "";
-    window.location.href = "../thankyou.html" + qs;
-  } catch (err) {
-    console.error("Finalize error:", err);
-    showSpinner(false);
-    showError("Payment verified but finalization failed. Contact support with tx_ref: " + txRef);
-    if (payBtn) {
-      payBtn.disabled = false;
-      payBtn.dataset.processing = "0";
-    }
-  }
-}
-
-
-    /* ❌ Payment cancelled handler */
     onclose: function () {
       if (paymentCallbackHandled) return;
       paymentCallbackHandled = true;
       showSpinner(false);
-      showError("Payment was cancelled. Please complete your checkout to continue.");
+      showError("Payment was cancelled. Please complete your checkout.");
+
+      if (payBtn) { payBtn.disabled = false; payBtn.dataset.processing = "0"; }
 
       // Restore checkout user data
       const saved = localStorage.getItem("checkout_user_data");
@@ -1061,9 +1015,7 @@ async function initiatePaymentFlow(ev) {
         } catch (err) { console.warn("Failed to restore checkout data on cancel:", err); }
       }
 
-      if (payBtn) { payBtn.disabled = false; payBtn.dataset.processing = "0"; }
-
-      // ✅ Redirect to correct checkout page
+      // Redirect back to checkout
       window.location.href = "../checkout/index.html";
     }
   };
@@ -1084,8 +1036,8 @@ async function initiatePaymentFlow(ev) {
     if (paymentCallbackHandled) return clearInterval(poll);
     attempts++;
     try {
-      const res = await verifyPayment({ tx_ref: txRef, orderData: baseOrder, expectedAmount: Number(subtotal), currency: selectedCurrency });
-      if (res && (res.status === "success" || res.success === true) && ((res.data && res.data.status === "successful") || res.verified === true)) {
+      const res = await verifyPayment({ tx_ref: txRef, orderData: baseOrder, expectedAmount: subtotal, currency: selectedCurrency });
+      if (res && (res.status === "success" || res.success === true) && ((res.data?.status === "successful") || res.verified === true)) {
         clearInterval(poll);
         paymentCallbackHandled = true;
         await finalizeAfterSuccess(res);
@@ -1094,15 +1046,13 @@ async function initiatePaymentFlow(ev) {
       if (attempts >= maxAttempts) {
         clearInterval(poll);
         showSpinner(false);
-        showError("We couldn't confirm payment automatically. Contact support with tx_ref: " + txRef);
+        showError("Automatic verification failed. Contact support with tx_ref: " + txRef);
         if (payBtn) { payBtn.disabled = false; payBtn.dataset.processing = "0"; }
       }
     }
   }, 3000);
 }
-
-  
-  
+    
 /* currency change */
 if (currencySelect) {
   currencySelect.addEventListener('change', () => {
