@@ -745,9 +745,30 @@ async function syncPaidQuoteUI() {
   }
 }
 
+
 // -------------------- PAGE LOAD & RETURN EVENTS --------------------
-document.addEventListener("DOMContentLoaded", syncPaidQuoteUI);
-window.addEventListener("pageshow", syncPaidQuoteUI);
+document.addEventListener("DOMContentLoaded", () => {
+  const paidQuoteInfo = JSON.parse(localStorage.getItem("paidQuoteInfo") || "null");
+
+  // ✅ Only run paid quote sync if the localStorage entry exists AND has a verified payment status
+  if (paidQuoteInfo && paidQuoteInfo.verified) {
+    syncPaidQuoteUI();
+  } else {
+    // ✅ Otherwise, load the unpaid quote normally
+    loadQuoteUI(); // This is your normal unpaid quote loader
+  }
+});
+
+window.addEventListener("pageshow", () => {
+  const paidQuoteInfo = JSON.parse(localStorage.getItem("paidQuoteInfo") || "null");
+
+  if (paidQuoteInfo && paidQuoteInfo.verified) {
+    syncPaidQuoteUI();
+  } else {
+    loadQuoteUI();
+  }
+});
+
 
 // -------------------- REALTIME CART UPDATE --------------------
 window.addEventListener("storage", () => updateCartCount());
