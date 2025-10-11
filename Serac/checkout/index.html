@@ -645,12 +645,24 @@ function renderPaidOrderUI(quoteData) {
   }
 
   // -------------------- LOCK CURRENCY SELECTOR --------------------
-  const currencySelector = document.querySelector("#currencySelector");
-  if (currencySelector) {
+  const currencySelectorWrapper = document.querySelector("#currencySelector");
+  const currencySelector = document.querySelector("#currency");
+  if (currencySelectorWrapper && currencySelector) {
     currencySelector.value = selectedCurrency; // Show the currency user paid in
     currencySelector.disabled = true;           // Disable changing it
-    currencySelector.style.opacity = 0.6;       // Optional: visually indicate disabled
+    currencySelectorWrapper.style.opacity = 0.6; // Optional: visually indicate disabled
+    // Optionally hide it completely if you prefer
+    // currencySelectorWrapper.style.display = "none";
   }
+
+  // -------------------- LOCK BILLING DETAILS --------------------
+  const inputsToLock = [nameInput, emailInput, phoneInput, addressInput];
+  inputsToLock.forEach(input => {
+    if (input) {
+      input.disabled = true; // Make input read-only
+      input.style.opacity = 0.6; // Optional visual indication
+    }
+  });
 
   // -------------------- UPDATE CART COUNT --------------------
   // Reflect the actual number of items currently in the cart
@@ -668,6 +680,7 @@ function renderPaidOrderUI(quoteData) {
     cartCountElem.textContent = totalCartCount;
   }
 }
+
 
 
   
