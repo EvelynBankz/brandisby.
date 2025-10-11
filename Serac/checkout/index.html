@@ -627,8 +627,6 @@ function normalizeOrderItems(items) {
     variants: it.variants || [],
   }));
 }
-
-  
 // -------------------- RENDER PAID QUOTE UI --------------------
 function renderPaidOrderUI(quoteData) {
   if (!quoteData) return;
@@ -677,15 +675,37 @@ function renderPaidOrderUI(quoteData) {
     trackingElem.style.marginTop = "12px";
     trackingElem.style.color = "var(--accent)";
     trackingElem.style.fontWeight = "600";
-    if (heroP && heroP.parentNode) heroP.parentNode.insertBefore(trackingElem, heroP.nextSibling);
-    else if (hero && hero.parentNode) hero.appendChild(trackingElem);
+
+    // Insert in a safe order
+    if (heroH1 && heroH1.parentNode) {
+      heroH1.parentNode.insertBefore(trackingElem, heroH1.nextSibling);
+    } else if (heroP && heroP.parentNode) {
+      heroP.parentNode.insertBefore(trackingElem, heroP.nextSibling);
+    } else if (hero && hero.parentNode) {
+      hero.appendChild(trackingElem);
+    } else {
+      document.body.insertBefore(trackingElem, document.body.firstChild);
+    }
   }
-  if (quoteData.trackingRef) {
-    trackingElem.textContent = "Your Order Reference: " + quoteData.trackingRef;
-  }
+  trackingElem.textContent = quoteData.trackingRef
+    ? "Your Order Reference: " + quoteData.trackingRef
+    : "Order reference not available yet.";
 
   // -------------------- SYNC CART COUNT --------------------
   updateCartCount();
+
+  // -------------------- STORE PAID QUOTE INFO FOR PAGE SYNC --------------------
+  localStorage.setItem("paidQuoteInfo", JSON.stringify({
+    quoteId: quoteData.id,
+    currency: quoteData.currency,
+    billing: {
+      name: quoteData.name,
+      email: quoteData.email,
+      phone: quoteData.phone,
+      address: quoteData.address
+    },
+    trackingRef: quoteData.trackingRef
+  }));
 }
 
 // -------------------- UPDATE CART COUNT FUNCTION --------------------
@@ -695,10 +715,10 @@ function updateCartCount() {
   if (cartCountElem) cartCountElem.textContent = cartTotal;
 }
 
-// -------------------- SYNC PAID QUOTE & CART IN REAL-TIME --------------------
+// -------------------- SYNC PAID QUOTE ON PAGE LOAD OR RETURN --------------------
 async function syncPaidQuoteUI() {
   const paidQuoteInfo = JSON.parse(localStorage.getItem("paidQuoteInfo") || "null");
-  if (!paidQuoteInfo || !paidQuoteInfo.quoteId) return;
+  if (!paidQuoteInfo) return;
 
   try {
     const docRef = doc(db, "brands", "serac", "quotes", paidQuoteInfo.quoteId);
@@ -707,33 +727,22 @@ async function syncPaidQuoteUI() {
 
     const quoteData = docSnap.data();
     quoteData.id = paidQuoteInfo.quoteId;
-    quoteData.trackingRef = quoteData.trackingRef || paidQuoteInfo.trackingRef;
-    quoteData.currency = quoteData.currency || paidQuoteInfo.currency;
+    quoteData.trackingRef = paidQuoteInfo.trackingRef;
+    quoteData.currency = paidQuoteInfo.currency;
 
     renderPaidOrderUI(quoteData);
+
   } catch (err) {
-    console.error("Failed to fetch paid quote:", err);
+    console.error("Failed to fetch quote for paid UI:", err);
   }
 }
 
-// -------------------- REAL-TIME CART SYNC --------------------
-window.addEventListener("storage", (e) => {
-  if (e.key === STORAGE_KEY) {
-    updateCartCount();
-  }
-});
+// -------------------- PAGE LOAD & RETURN EVENTS --------------------
+document.addEventListener("DOMContentLoaded", syncPaidQuoteUI);
+window.addEventListener("pageshow", syncPaidQuoteUI);
 
-// Call on page load
-document.addEventListener("DOMContentLoaded", () => {
-  syncPaidQuoteUI();
-  updateCartCount(); // ensure cart count shows immediately
-});
-
-// Also call when user navigates back
-window.addEventListener("pageshow", () => {
-  syncPaidQuoteUI();
-  updateCartCount(); // ensure cart count updates
-});
+// -------------------- REALTIME CART UPDATE --------------------
+window.addEventListener("storage", () => updateCartCount());
 
 
   
