@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import admin from "firebase-admin";
 
 // ✅ Initialize Firebase Admin once
