@@ -4,10 +4,10 @@ import admin from "firebase-admin";
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert({
-      private_key: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+      private_key: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
       client_email: process.env.FIREBASE_CLIENT_EMAIL,
-      project_id: process.env.FIREBASE_PROJECT_ID
-    })
+      project_id: process.env.FIREBASE_PROJECT_ID,
+    }),
   });
 }
 
@@ -19,74 +19,103 @@ export default async function handler(req, res) {
 
   try {
     const { transaction_id, tx_ref, expectedAmount, currency, orderData, quoteId } = req.body || {};
-    if (!transaction_id)
-      return res.status(400).json({ status: "error", message: "Missing transaction_id" });
+
+    // 🧩 Validation
+    if (!transaction_id && !tx_ref)
+      return res.status(400).json({ status: "error", message: "Missing transaction_id or tx_ref" });
 
     const FLW_SECRET_KEY = process.env.FLW_SECRET_KEY;
     if (!FLW_SECRET_KEY)
       return res.status(500).json({ status: "error", message: "Missing Flutterwave secret key" });
 
-    // 🛡️ Check if already processed (idempotency protection)
     const ordersRef = db.collection("brands").doc("serac").collection("orders");
-    const existing = await ordersRef.where("transaction_id", "==", transaction_id).limit(1).get();
-    if (!existing.empty) {
-      const doc = existing.docs[0].data();
-      return res.status(200).json({
-        status: "success",
-        verified: true,
-        alreadyProcessed: true,
-        orderDoc: doc
-      });
+
+    // 🛡️ Idempotency check
+    if (transaction_id) {
+      const existing = await ordersRef.where("transaction_id", "==", transaction_id).limit(1).get();
+      if (!existing.empty) {
+        const doc = existing.docs[0].data();
+        return res.status(200).json({
+          status: "success",
+          verified: true,
+          alreadyProcessed: true,
+          orderDoc: doc,
+        });
+      }
     }
 
-    // 🔍 Verify transaction directly with Flutterwave
-    const verifyRes = await fetch(
-      `https://api.flutterwave.com/v3/transactions/${transaction_id}/verify`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${FLW_SECRET_KEY}`,
-          "Content-Type": "application/json"
-        }
-      }
-    );
+    // 🛰️ Flutterwave verification call
+    let verifyUrl = "";
+    if (transaction_id) {
+      verifyUrl = `https://api.flutterwave.com/v3/transactions/${transaction_id}/verify`;
+    } else if (tx_ref) {
+      // fallback if transaction_id is missing (rare)
+      verifyUrl = `https://api.flutterwave.com/v3/transactions/verify_by_reference?tx_ref=${tx_ref}`;
+    }
+
+    const verifyRes = await fetch(verifyUrl, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${FLW_SECRET_KEY}`,
+        "Content-Type": "application/json",
+      },
+    });
 
     const result = await verifyRes.json();
-    if (!verifyRes.ok || result.status !== "success" || !result.data) {
-      console.error("Flutterwave verify failed:", result);
-      return res.status(400).json({ status: "failed", message: "Verification failed", data: result });
+
+    if (!verifyRes.ok || !result.data) {
+      console.error("❌ Flutterwave verify failed:", result);
+      return res.status(400).json({
+        status: "failed",
+        message: result.message || "Verification failed",
+        data: result,
+      });
     }
 
     const data = result.data;
 
-    // ✅ Validate transaction details
-    if (data.status !== "successful") {
-      return res.status(400).json({ status: "failed", message: "Transaction not successful", data });
+    // ✅ Ensure the transaction is successful
+    if (data.status?.toLowerCase() !== "successful") {
+      return res.status(400).json({
+        status: "failed",
+        message: "Transaction not successful",
+        data,
+      });
     }
 
+    // ✅ Validate amount & currency
     if (expectedAmount && Number(data.amount) !== Number(expectedAmount)) {
-      return res.status(400).json({ status: "failed", message: "Amount mismatch", data });
+      return res.status(400).json({
+        status: "failed",
+        message: `Amount mismatch (expected ${expectedAmount}, got ${data.amount})`,
+        data,
+      });
     }
 
     if (currency && data.currency && data.currency !== currency) {
-      return res.status(400).json({ status: "failed", message: "Currency mismatch", data });
+      return res.status(400).json({
+        status: "failed",
+        message: `Currency mismatch (expected ${currency}, got ${data.currency})`,
+        data,
+      });
     }
 
-    // 🧾 Build and save order
+    // 🧾 Build order payload
     const orderPayload = {
-      transaction_id,
-      tx_ref: tx_ref || data.tx_ref || "",
+      transaction_id: data.id || transaction_id,
+      tx_ref: data.tx_ref || tx_ref || "",
       amount: data.amount,
       currency: data.currency,
       status: "paid",
       flutterwave_response: data,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      ...(orderData || {})
+      ...(orderData || {}),
     };
 
+    // 💾 Save to Firestore
     const newOrderRef = await ordersRef.add(orderPayload);
 
-    // 🔄 Update quote (if applicable)
+    // 🔄 Optional: update related quote
     if (quoteId) {
       try {
         await db
@@ -97,7 +126,7 @@ export default async function handler(req, res) {
           .update({
             status: "Paid",
             orderId: newOrderRef.id,
-            paidAt: admin.firestore.FieldValue.serverTimestamp()
+            paidAt: admin.firestore.FieldValue.serverTimestamp(),
           });
       } catch (err) {
         console.warn("Quote update failed:", err);
@@ -110,14 +139,14 @@ export default async function handler(req, res) {
       status: "success",
       verified: true,
       orderId: newOrderRef.id,
-      data
+      data,
     });
   } catch (err) {
     console.error("Verification error:", err);
     return res.status(500).json({
       status: "error",
       message: "Internal server error",
-      details: err.message
+      details: err.message,
     });
   }
 }
