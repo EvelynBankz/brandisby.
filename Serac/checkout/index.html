@@ -627,8 +627,7 @@ function normalizeOrderItems(items) {
     variants: it.variants || [],
   }));
 }
-  
-// -------------------- RENDER PAID QUOTE UI --------------------
+  // -------------------- RENDER PAID QUOTE UI --------------------
 function renderPaidOrderUI(quoteData) {
   // Render the quote order
   renderOrderFromQuoteNormalized(quoteData, selectedCurrency, true);
@@ -661,9 +660,31 @@ function renderPaidOrderUI(quoteData) {
     if (field) {
       field.value = quoteData[field.id] || field.value; // populate from quote
       field.disabled = true;                             // lock input
-      field.style.backgroundColor = "#202223";          // optional: visually indicate locked
+      field.style.backgroundColor = "#202223";          // keep consistent background
     }
   });
+
+  // -------------------- DISPLAY TRACKING REFERENCE --------------------
+  let trackingElem = document.querySelector("#trackingRefDisplay");
+  if (!trackingElem) {
+    // Create the element if it doesn't exist
+    trackingElem = document.createElement("div");
+    trackingElem.id = "trackingRefDisplay";
+    trackingElem.style.display = "block";
+    trackingElem.style.marginTop = "12px";
+    trackingElem.style.color = "var(--accent)";
+    trackingElem.style.fontWeight = "600";
+
+    // Append it after hero paragraph if possible
+    if (heroP && heroP.parentNode) {
+      heroP.parentNode.insertBefore(trackingElem, heroP.nextSibling);
+    } else if (hero && hero.parentNode) {
+      hero.appendChild(trackingElem);
+    }
+  }
+  if (quoteData.trackingRef) {
+    trackingElem.textContent = "Your Order Reference: " + quoteData.trackingRef;
+  }
 
   // -------------------- SYNC CART COUNT --------------------
   updateCartCount();
@@ -677,7 +698,8 @@ function renderPaidOrderUI(quoteData) {
       email: quoteData.email,
       phone: quoteData.phone,
       address: quoteData.address
-    }
+    },
+    trackingRef: quoteData.trackingRef
   }));
 }
 
@@ -687,6 +709,7 @@ function updateCartCount() {
   const cartTotal = cartItems.reduce((acc, item) => acc + (item.quantity || 1), 0);
   if (cartCountElem) cartCountElem.textContent = cartTotal;
 }
+
 
 // -------------------- ON PAGE LOAD OR RETURN --------------------
 function syncPaidQuoteUI() {
@@ -789,33 +812,60 @@ async function verifyPayment(payload) {
   }
 }
 
-/* save verified order to Firestore */
-async function processPaidOrder(orderData){
+// -------------------- ORDER REFERENCE GENERATOR --------------------
+function generateOrderReference(email, orderId, txRef) {
+  const rand = () => Math.random().toString(36).substring(2, 6).toUpperCase();
+  const now = new Date();
+  const day = String(now.getDate()).padStart(2, "0");
+  const month = now.toLocaleString("en", { month: "short" }).toUpperCase();
+  const year = String(now.getFullYear()).slice(-2);
+
+  const emailPrefix = email ? email.split('@')[0].slice(0, 3).toUpperCase() : "SR";
+  const shortTx = txRef ? txRef.slice(-4).toUpperCase() : rand();
+
+  // Example: SRCHE-10OCT25-A1B2
+  return `${emailPrefix}-${day}${month}${year}-${shortTx}`;
+}
+
+
+/* ✅ save verified order to Firestore */
+async function processPaidOrder(orderData, txRef) {
   try {
+    const trackingRef = generateOrderReference(orderData.email, orderData.id || "", txRef);
+
     const orderRef = await addDoc(collection(db, "brands", "serac", "orders"), {
       ...orderData,
       createdAt: serverTimestamp(),
       verifiedAt: serverTimestamp(),
-      status: "paid"
+      status: "paid",
+      trackingRef: trackingRef, // ✅ added tracking ref
     });
+
     try {
+      // ✅ If it’s a quote-based checkout, update the quote document too
       if (orderData.source && orderData.source.startsWith("quote:")) {
         const qid = orderData.source.split("quote:")[1];
         if (qid) {
           await updateDoc(doc(db, "brands", "serac", "quotes", qid), {
             status: "Paid",
             orderId: orderRef.id,
-            paidAt: serverTimestamp()
+            paidAt: serverTimestamp(),
+            trackingRef: trackingRef, // ✅ add same tracking ref here too
           });
         }
       }
-    } catch(e) { console.warn("Failed to update quote status after saving order", e); }
+    } catch (e) {
+      console.warn("Failed to update quote status after saving order", e);
+    }
+
     return orderRef.id;
   } catch (err) {
     console.error("Failed to save paid order:", err);
     return null;
   }
 }
+
+
 
 /* -------------------- PAYMENT FLOW -------------------- */
 async function initiatePaymentFlow(ev) {
@@ -958,34 +1008,47 @@ async function initiatePaymentFlow(ev) {
     customer: { email, phonenumber: phone, name },
     customizations: { title: "Sérac", description: "Order Payment", logo: "../assets/logo.png" },
 
-    /* ✅ Payment success handler */
-    callback: async function (data) {
-      if (paymentCallbackHandled) return;
-      paymentCallbackHandled = true;
-      showSpinner(true);
+    async function finalizeAfterSuccess(workerResp) {
+  try {
+    const orderId = await processPaidOrder(baseOrder, txRef); // ✅ updated line
+    if (orderId) workerResp = { ...workerResp, orderId };
 
-      try {
-        const flwId = (data?.data && data.data.id) || data.id || data.transaction_id || null;
-        if (!flwId) throw new Error("Missing transaction ID from Flutterwave");
+    localStorage.removeItem(STORAGE_KEY);
+    if (cartCountElem) cartCountElem.textContent = "0";
 
-        const payload = { transaction_id: flwId, tx_ref: data.tx_ref || txRef, expectedAmount: Number(subtotal), currency: selectedCurrency, orderData: baseOrder, quoteId: quoteId || null };
-        const verifyResponse = await verifyPayment(payload);
+    activeOrderRaw = workerResp.orderDoc || { ...baseOrder, status: "paid" };
+    quote = { items: activeOrderRaw.items || baseOrder.items };
+    isPaidOrder = true;
+    renderOrderFromQuoteNormalized(quote, selectedCurrency, true);
 
-        if (verifyResponse && (verifyResponse.status === "success" || verifyResponse.success === true) && ((verifyResponse.data && verifyResponse.data.status === "successful") || verifyResponse.verified === true)) {
-          await finalizeAfterSuccess(verifyResponse);
-        } else {
-          console.warn("Verification failed:", verifyResponse);
-          showSpinner(false);
-          showError("Payment verification failed. If funds were deducted, contact support with tx_ref: " + txRef);
-          if (payBtn) { payBtn.disabled = false; payBtn.dataset.processing = "0"; }
-        }
-      } catch (err) {
-        console.error("Verification error:", err);
-        showSpinner(false);
-        showError("Payment succeeded but could not be verified. Contact support.");
-        if (payBtn) { payBtn.disabled = false; payBtn.dataset.processing = "0"; }
-      }
-    },
+    if (hero) hero.classList.add("paid");
+    if (heroH1) heroH1.textContent = "Order Summary";
+    if (heroP) heroP.textContent = "Your order has been paid successfully.";
+    if (payBtn) {
+      payBtn.textContent = "Paid ✅";
+      payBtn.disabled = true;
+      payBtn.classList.add("paid-state");
+    }
+
+    // Disable currency selector after payment
+    if (currencySelect) currencySelect.disabled = true;
+
+    showSpinner(false);
+
+    const oid = workerResp.orderId || workerResp.orderDoc?.id || "";
+    const qs = oid ? `?orderId=${encodeURIComponent(oid)}` : "";
+    window.location.href = "../thankyou.html" + qs;
+  } catch (err) {
+    console.error("Finalize error:", err);
+    showSpinner(false);
+    showError("Payment verified but finalization failed. Contact support with tx_ref: " + txRef);
+    if (payBtn) {
+      payBtn.disabled = false;
+      payBtn.dataset.processing = "0";
+    }
+  }
+}
+
 
     /* ❌ Payment cancelled handler */
     onclose: function () {
