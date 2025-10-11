@@ -628,11 +628,12 @@ function normalizeOrderItems(items) {
   }));
 }
   
+// -------------------- RENDER PAID QUOTE UI --------------------
 function renderPaidOrderUI(quoteData) {
-  // Render the paid order in the main UI
+  // Render the quote order
   renderOrderFromQuoteNormalized(quoteData, selectedCurrency, true);
 
-  // Mark the hero section as paid and update headings
+  // Mark hero section as paid
   if (hero) hero.classList.add('paid');
   if (heroH1) heroH1.textContent = "Order Summary";
   if (heroP) heroP.textContent = "Your order has been paid successfully.";
@@ -648,39 +649,79 @@ function renderPaidOrderUI(quoteData) {
   const currencySelectorWrapper = document.querySelector("#currencySelector");
   const currencySelector = document.querySelector("#currency");
   if (currencySelectorWrapper && currencySelector) {
-    currencySelector.value = selectedCurrency; // Show the currency user paid in
-    currencySelector.disabled = true;           // Disable changing it
-    currencySelectorWrapper.style.opacity = 0.6; // Optional: visually indicate disabled
-    // Optionally hide it completely if you prefer
-    // currencySelectorWrapper.style.display = "none";
+    currencySelector.value = quoteData.currency || selectedCurrency; // paid currency
+    currencySelector.disabled = true;                                 // lock selection
+    currencySelectorWrapper.style.opacity = 0.6;                      // indicate disabled
+    currencySelectorWrapper.style.pointerEvents = "none";             // prevent click
   }
 
   // -------------------- LOCK BILLING DETAILS --------------------
-  const inputsToLock = [nameInput, emailInput, phoneInput, addressInput];
-  inputsToLock.forEach(input => {
-    if (input) {
-      input.disabled = true; // Make input read-only
-      input.style.opacity = 0.6; // Optional visual indication
+  const billingFields = [nameInput, emailInput, phoneInput, addressInput];
+  billingFields.forEach(field => {
+    if (field) {
+      field.value = quoteData[field.id] || field.value; // populate from quote
+      field.disabled = true;                             // lock input
+      field.style.backgroundColor = "#f5f5f5";          // optional: visually indicate locked
     }
   });
 
-  // -------------------- UPDATE CART COUNT --------------------
-  // Reflect the actual number of items currently in the cart
-  let cartItems = [];
-  try {
-    const storedCart = localStorage.getItem(STORAGE_KEY);
-    cartItems = storedCart ? JSON.parse(storedCart).items || [] : [];
-  } catch (e) {
-    cartItems = [];
-  }
+  // -------------------- SYNC CART COUNT --------------------
+  updateCartCount();
 
-  const totalCartCount = cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0);
-
-  if (cartCountElem) {
-    cartCountElem.textContent = totalCartCount;
-  }
+  // -------------------- STORE PAID QUOTE INFO FOR PAGE SYNC --------------------
+  localStorage.setItem("paidQuoteInfo", JSON.stringify({
+    quoteId: quoteData.id,
+    currency: quoteData.currency,
+    billing: {
+      name: quoteData.name,
+      email: quoteData.email,
+      phone: quoteData.phone,
+      address: quoteData.address
+    }
+  }));
 }
 
+// -------------------- UPDATE CART COUNT FUNCTION --------------------
+function updateCartCount() {
+  const cartItems = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+  const cartTotal = cartItems.reduce((acc, item) => acc + (item.quantity || 1), 0);
+  if (cartCountElem) cartCountElem.textContent = cartTotal;
+}
+
+// -------------------- ON PAGE LOAD OR RETURN --------------------
+function syncPaidQuoteUI() {
+  const paidQuoteInfo = JSON.parse(localStorage.getItem("paidQuoteInfo") || "null");
+  if (!paidQuoteInfo) return;
+
+  // Lock currency selector
+  const currencySelectorWrapper = document.querySelector("#currencySelector");
+  const currencySelector = document.querySelector("#currency");
+  if (currencySelectorWrapper && currencySelector) {
+    currencySelector.value = paidQuoteInfo.currency;
+    currencySelector.disabled = true;
+    currencySelectorWrapper.style.opacity = 0.6;
+    currencySelectorWrapper.style.pointerEvents = "none";
+  }
+
+  // Lock billing fields
+  const billingFields = [nameInput, emailInput, phoneInput, addressInput];
+  billingFields.forEach(field => {
+    if (field && paidQuoteInfo.billing[field.id]) {
+      field.value = paidQuoteInfo.billing[field.id];
+      field.disabled = true;
+      field.style.backgroundColor = "#f5f5f5";
+    }
+  });
+
+  // Update cart count dynamically
+  updateCartCount();
+}
+
+// Call on page load
+document.addEventListener("DOMContentLoaded", syncPaidQuoteUI);
+
+// Also call when user returns to checkout page after navigation
+window.addEventListener("pageshow", syncPaidQuoteUI);
 
 
   
@@ -782,13 +823,15 @@ async function initiatePaymentFlow(ev) {
   if (isPaidOrder) return;
 
   showError("");
+
+  // Validate form
   const v = validateForm();
   if (v) {
     showError(v);
     return;
   }
 
-  // ✅ Restore saved checkout data (if returning from cancelled payment)
+  // -------------------- RESTORE CHECKOUT DATA --------------------
   (function restoreCheckoutData() {
     const saved = localStorage.getItem("checkout_user_data");
     if (!saved) return;
@@ -805,17 +848,15 @@ async function initiatePaymentFlow(ev) {
         selectedCurrency = savedCurrency;
         currencySelect.value = savedCurrency;
 
-        // Disable currency selector if order already paid
-        if (isPaidOrder) {
-          currencySelect.disabled = true;
-        }
+        // Lock currency selector if already paid
+        if (isPaidOrder) currencySelect.disabled = true;
       }
     } catch (err) {
       console.warn("Failed to restore checkout data:", err);
     }
   })();
 
-  // ✅ Save current user inputs to localStorage
+  // -------------------- SAVE CURRENT USER DATA --------------------
   const userData = {
     name: (nameInput && nameInput.value || "").trim(),
     email: (emailInput && emailInput.value || "").trim(),
@@ -825,6 +866,7 @@ async function initiatePaymentFlow(ev) {
   };
   localStorage.setItem("checkout_user_data", JSON.stringify(userData));
 
+  // -------------------- CALCULATE SUBTOTAL --------------------
   let subtotal = 0;
   try {
     quote.items.forEach(it => {
@@ -867,31 +909,30 @@ async function initiatePaymentFlow(ev) {
   const txRef = "serac_" + Date.now();
   let paymentCallbackHandled = false;
 
+  // -------------------- FINALIZE AFTER SUCCESS --------------------
   async function finalizeAfterSuccess(workerResp) {
     try {
       const orderId = await processPaidOrder(baseOrder);
       if (orderId) workerResp = { ...workerResp, orderId };
 
-      localStorage.removeItem(STORAGE_KEY);
-      if (cartCountElem) cartCountElem.textContent = "0";
+      // Clear only quote-related items, not the cart
+      if (!quoteId) localStorage.removeItem(STORAGE_KEY);
 
       activeOrderRaw = workerResp.orderDoc || { ...baseOrder, status: "paid" };
       quote = { items: activeOrderRaw.items || baseOrder.items };
       isPaidOrder = true;
-      renderOrderFromQuoteNormalized(quote, selectedCurrency, true);
 
-      if (hero) hero.classList.add("paid");
-      if (heroH1) heroH1.textContent = "Order Summary";
-      if (heroP) heroP.textContent = "Your order has been paid successfully.";
-      if (payBtn) {
-        payBtn.textContent = "Paid ✅";
-        payBtn.disabled = true;
-        payBtn.classList.add("paid-state");
-      }
+      // Render Order Summary
+      renderPaidOrderUI(activeOrderRaw);
 
-      // Disable currency selector after payment
-      if (currencySelect) currencySelect.disabled = true;
+      // Store paid quote info for page sync
+      localStorage.setItem("paidQuoteInfo", JSON.stringify({
+        quoteId,
+        currency: selectedCurrency,
+        billing: { name, email, phone, address }
+      }));
 
+      // Show spinner off
       showSpinner(false);
 
       const oid = workerResp.orderId || workerResp.orderDoc?.id || "";
@@ -908,17 +949,14 @@ async function initiatePaymentFlow(ev) {
     }
   }
 
+  // -------------------- FLUTTERWAVE CONFIG --------------------
   const fwConfig = {
     public_key: FLW_PUBLIC_KEY,
     tx_ref: txRef,
     amount: Number(subtotal),
     currency: selectedCurrency,
     customer: { email, phonenumber: phone, name },
-    customizations: {
-      title: "Sérac",
-      description: "Order Payment",
-      logo: "../assets/logo.png"
-    },
+    customizations: { title: "Sérac", description: "Order Payment", logo: "../assets/logo.png" },
 
     /* ✅ Payment success handler */
     callback: async function (data) {
@@ -927,49 +965,25 @@ async function initiatePaymentFlow(ev) {
       showSpinner(true);
 
       try {
-        const flwId =
-          (data?.data && data.data.id) ||
-          data.id ||
-          data.transaction_id ||
-          null;
-
+        const flwId = (data?.data && data.data.id) || data.id || data.transaction_id || null;
         if (!flwId) throw new Error("Missing transaction ID from Flutterwave");
 
-        const payload = {
-          transaction_id: flwId,
-          tx_ref: data.tx_ref || txRef,
-          expectedAmount: Number(subtotal),
-          currency: selectedCurrency,
-          orderData: baseOrder,
-          quoteId: quoteId || null
-        };
-
+        const payload = { transaction_id: flwId, tx_ref: data.tx_ref || txRef, expectedAmount: Number(subtotal), currency: selectedCurrency, orderData: baseOrder, quoteId: quoteId || null };
         const verifyResponse = await verifyPayment(payload);
 
-        if (
-          verifyResponse &&
-          (verifyResponse.status === "success" || verifyResponse.success === true) &&
-          ((verifyResponse.data && verifyResponse.data.status === "successful") ||
-            verifyResponse.verified === true)
-        ) {
+        if (verifyResponse && (verifyResponse.status === "success" || verifyResponse.success === true) && ((verifyResponse.data && verifyResponse.data.status === "successful") || verifyResponse.verified === true)) {
           await finalizeAfterSuccess(verifyResponse);
         } else {
           console.warn("Verification failed:", verifyResponse);
           showSpinner(false);
           showError("Payment verification failed. If funds were deducted, contact support with tx_ref: " + txRef);
-          if (payBtn) {
-            payBtn.disabled = false;
-            payBtn.dataset.processing = "0";
-          }
+          if (payBtn) { payBtn.disabled = false; payBtn.dataset.processing = "0"; }
         }
       } catch (err) {
         console.error("Verification error:", err);
         showSpinner(false);
         showError("Payment succeeded but could not be verified. Contact support.");
-        if (payBtn) {
-          payBtn.disabled = false;
-          payBtn.dataset.processing = "0";
-        }
+        if (payBtn) { payBtn.disabled = false; payBtn.dataset.processing = "0"; }
       }
     },
 
@@ -980,7 +994,7 @@ async function initiatePaymentFlow(ev) {
       showSpinner(false);
       showError("Payment was cancelled. Please complete your checkout to continue.");
 
-      // ✅ Restore user data on cancel
+      // Restore checkout user data
       const saved = localStorage.getItem("checkout_user_data");
       if (saved) {
         try {
@@ -989,56 +1003,35 @@ async function initiatePaymentFlow(ev) {
           if (emailInput) emailInput.value = email || "";
           if (phoneInput) phoneInput.value = phone || "";
           if (addressInput) addressInput.value = address || "";
-          if (savedCurrency && currencySelect) {
-            selectedCurrency = savedCurrency;
-            currencySelect.value = savedCurrency;
-          }
-        } catch (err) {
-          console.warn("Failed to restore checkout data on cancel:", err);
-        }
+          if (savedCurrency && currencySelect) { selectedCurrency = savedCurrency; currencySelect.value = savedCurrency; }
+        } catch (err) { console.warn("Failed to restore checkout data on cancel:", err); }
       }
 
-      if (payBtn) {
-        payBtn.disabled = false;
-        payBtn.dataset.processing = "0";
-      }
+      if (payBtn) { payBtn.disabled = false; payBtn.dataset.processing = "0"; }
 
       // ✅ Redirect to correct checkout page
       window.location.href = "../checkout/index.html";
     }
   };
 
-  /* 🟦 Launch Flutterwave */
-  try {
-    FlutterwaveCheckout(fwConfig);
-  } catch (err) {
+  // -------------------- LAUNCH FLUTTERWAVE --------------------
+  try { FlutterwaveCheckout(fwConfig); }
+  catch (err) {
     showSpinner(false);
-    if (payBtn) {
-      payBtn.disabled = false;
-      payBtn.dataset.processing = "0";
-    }
+    if (payBtn) { payBtn.disabled = false; payBtn.dataset.processing = "0"; }
     console.error("Flutterwave failed:", err);
     showError("Payment gateway unavailable. Try again later.");
   }
 
-  /* 🟨 Poll fallback to recheck payment if callback not triggered */
+  // -------------------- POLL FOR VERIFICATION FALLBACK --------------------
   let attempts = 0;
   const maxAttempts = 6;
   const poll = setInterval(async () => {
     if (paymentCallbackHandled) return clearInterval(poll);
     attempts++;
     try {
-      const res = await verifyPayment({
-        tx_ref: txRef,
-        orderData: baseOrder,
-        expectedAmount: Number(subtotal),
-        currency: selectedCurrency
-      });
-      if (
-        res &&
-        (res.status === "success" || res.success === true) &&
-        ((res.data && res.data.status === "successful") || res.verified === true)
-      ) {
+      const res = await verifyPayment({ tx_ref: txRef, orderData: baseOrder, expectedAmount: Number(subtotal), currency: selectedCurrency });
+      if (res && (res.status === "success" || res.success === true) && ((res.data && res.data.status === "successful") || res.verified === true)) {
         clearInterval(poll);
         paymentCallbackHandled = true;
         await finalizeAfterSuccess(res);
@@ -1048,14 +1041,12 @@ async function initiatePaymentFlow(ev) {
         clearInterval(poll);
         showSpinner(false);
         showError("We couldn't confirm payment automatically. Contact support with tx_ref: " + txRef);
-        if (payBtn) {
-          payBtn.disabled = false;
-          payBtn.dataset.processing = "0";
-        }
+        if (payBtn) { payBtn.disabled = false; payBtn.dataset.processing = "0"; }
       }
     }
   }, 3000);
 }
+
   
   
 /* currency change */
