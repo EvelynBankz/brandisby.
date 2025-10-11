@@ -1,703 +1,947 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Checkout</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Sérac - Checkout</title>
 
-  <!-- Flutterwave Inline SDK -->
-  <script src="https://checkout.flutterwave.com/v3.js"></script>
+<!-- Fonts + Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <!-- Page styles (combined CSS) -->
-  <style>
-    /* --- Basic reset & type --- */
-    :root{
-      --bg:#f6f7fb;
-      --card:#ffffff;
-      --muted:#6b7280;
-      --accent:#0ea5a3;
-      --danger:#ef4444;
-      --shadow: 0 6px 20px rgba(15,23,42,0.08);
-      --radius:12px;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0;background:var(--bg);color:#0f172a}
-    a{color:inherit}
-    /* page container */
-    .container{
-      max-width:1150px;
-      margin:36px auto;
-      padding:28px;
-      display:grid;
-      grid-template-columns: 1fr 360px;
-      gap:24px;
-      align-items:start;
-    }
+<style>
+:root{
+  --bg-dark: #141517;
+  --gold: #B66E41;
+  --muted: #bdbdbd;
+  --transition: 0.25s cubic-bezier(.2,.9,.2,1);
+  --card-bg: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.02));
+}
 
-    /* left column — checkout form */
-    .checkout-card{
-      background:var(--card);
-      border-radius:var(--radius);
-      padding:22px;
-      box-shadow:var(--shadow);
-      overflow:hidden;
-      display:flex;
-      flex-direction:column;
-      gap:18px;
-    }
-    .section-title{
-      font-weight:600;
-      font-size:16px;
-      margin-bottom:6px;
-    }
+/* RESET */
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:"Montserrat",sans-serif;background:var(--bg-dark);color:#e6e6e6;line-height:1.6}
+a{color:inherit;text-decoration:none;transition:color var(--transition)}
 
-    /* cart list */
-    .cart-list{display:flex;flex-direction:column;gap:12px}
-    .cart-item{
-      display:flex;gap:12px;align-items:center;padding:12px;border-radius:10px;border:1px solid rgba(15,23,42,0.04);
-      transition:transform .12s ease, box-shadow .12s ease;
-    }
-    .cart-item:hover{transform:translateY(-3px);box-shadow:0 8px 30px rgba(15,23,42,0.06)}
-    .cart-item img{width:72px;height:72px;object-fit:cover;border-radius:8px}
-    .cart-item .meta{flex:1}
-    .cart-item .meta .name{font-weight:600}
-    .cart-item .meta .sku{font-size:12px;color:var(--muted);margin-top:6px}
-    .qty-controls{display:flex;align-items:center;gap:8px}
-    .qty-controls button{width:30px;height:30px;border-radius:8px;border:1px solid rgba(15,23,42,0.06);background:#fff;cursor:pointer}
-    .remove-item{background:transparent;border:none;color:var(--danger);cursor:pointer;font-size:13px;padding:4px 6px}
+/* HEADER */
+.site-header{background:transparent;transition:background .3s,border-bottom .3s;color:#f5f5f5;display:flex;justify-content:space-between;align-items:center;padding:16px 28px;position:fixed;top:0;left:0;right:0;z-index:1000;border-bottom:1px solid rgba(255,255,255,0.04)}
+.site-header.scrolled{background:var(--bg-dark);border-bottom:1px solid rgba(255,255,255,0.06)}
+.header-left{display:flex;align-items:center;gap:14px}
+.brand-logo{height:56px;object-fit:contain}
+.brand-title{font-family:"Playfair Display",serif;font-size:22px;font-weight:700;color:var(--gold)}
+.header-right{display:flex;gap:20px;align-items:center}
+.header-right a{font-weight:500;color:var(--muted);padding:6px 8px;border-radius:8px;transition:all var(--transition)}
+.header-right a:hover{color:#fff;transform:translateY(-2px)}
+.cart-count{background:var(--gold);color:#141517;font-size:12px;font-weight:700;border-radius:50%;padding:3px 7px;margin-left:6px;box-shadow:0 4px 10px rgba(182,110,65,0.12)}
+.hamburger{display:none;background:none;border:none;cursor:pointer;width:38px;height:32px;position:relative;z-index:1200}
+.hamburger span{display:block;width:100%;height:3px;background:var(--gold);border-radius:2px;position:absolute;left:0;transition:.3s}
+.hamburger span:nth-child(1){top:6px} .hamburger span:nth-child(2){top:14px} .hamburger span:nth-child(3){top:22px}
+.hamburger.open span:nth-child(1){transform:rotate(45deg);top:14px} .hamburger.open span:nth-child(2){opacity:0} .hamburger.open span:nth-child(3){transform:rotate(-45deg);top:14px}
 
-    /* forms */
-    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .field{display:flex;flex-direction:column;gap:6px}
-    label{font-size:13px;color:var(--muted)}
-    input[type="text"], input[type="email"], input[type="tel"], select, textarea{
-      padding:10px 12px;border-radius:10px;border:1px solid rgba(15,23,42,0.06);outline:none;font-size:14px;
-      transition:box-shadow .12s ease, border-color .12s ease;
-    }
-    input:focus, select:focus, textarea:focus{box-shadow:0 6px 20px rgba(14,165,164,0.06);border-color:rgba(14,165,164,0.3)}
-    .muted{color:var(--muted);font-size:13px}
+/* HERO */
+.hero{position:relative;height:90vh;display:flex;justify-content:center;align-items:center;text-align:center;padding-top:72px;border-bottom-left-radius:12px;border-bottom-right-radius:12px;overflow:hidden}
+.hero::after{content:"";position:absolute;inset:0;background:var(--hero-bg,url('asset/bg25.jpg')) center/cover no-repeat;transform:scale(1.06);z-index:-1;border-radius:12px;box-shadow:inset 0 0 0 2000px rgba(20,21,23,0.55)}
+.hero-text{position:relative;display:inline-block;z-index:1}
+.hero-text h1{font-family:"Playfair Display",serif;font-size:clamp(28px,5vw,48px);margin-bottom:12px;color:var(--gold)}
+.hero-text p{font-size:clamp(14px,2vw,18px);max-width:900px;color:#F5F5F3}
 
-    /* promo */
-    .promo-row{display:flex;gap:8px;align-items:center}
-    .promo-row input{flex:1}
-    .apply-btn{background:var(--accent);color:#fff;border:none;padding:10px 14px;border-radius:10px;cursor:pointer}
+/* Paid state */
+.hero.paid{background:url('../asset/bg25.jpg') center/cover no-repeat}
+#payBtn.paid-state{background-color:#1faa59 !important;cursor:default;pointer-events:none}
 
-    /* delivery options */
-    .delivery-options{display:flex;gap:8px;flex-wrap:wrap}
-    .delivery-option{border:1px solid rgba(15,23,42,0.06);padding:10px 12px;border-radius:10px;cursor:pointer;min-width:140px}
-    .delivery-option.active{border-color:var(--accent);box-shadow:0 6px 18px rgba(14,165,164,0.06)}
-
-    /* right column — summary */
-    .summary-card{
-      background:var(--card);
-      border-radius:var(--radius);
-      padding:22px;
-      box-shadow:var(--shadow);
-      position:sticky;top:28px;
-    }
-    .summary-line{display:flex;justify-content:space-between;align-items:center;padding:8px 0}
-    .summary-line.total{font-weight:700;font-size:18px;border-top:1px dashed rgba(15,23,42,0.04);padding-top:14px;margin-top:8px}
-
-    .pay-btn{
-      display:block;width:100%;margin-top:14px;padding:12px;border-radius:10px;border:none;background:linear-gradient(90deg,#0ea5a3,#06b6d4);color:white;font-weight:700;font-size:16px;cursor:pointer;
-    }
-    .pay-btn[disabled]{opacity:.6;cursor:not-allowed}
-
-    /* small helpers */
-    .note{font-size:13px;color:var(--muted)}
-    .success{color:green}
-    .error{color:var(--danger)}
-
-    /* modals (simple) */
-    .modal-backdrop{position:fixed;inset:0;background:rgba(2,6,23,0.45);display:flex;align-items:center;justify-content:center;z-index:60}
-    .modal{
-      background:#fff;border-radius:12px;padding:20px;min-width:320px;max-width:720px;box-shadow:0 36px 60px rgba(2,6,23,0.5)
-    }
-    .modal h3{margin:0 0 10px 0}
-    .modal .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
-
-    /* responsive */
-    @media (max-width:1000px){
-      .container{grid-template-columns:1fr; padding:18px}
-      .summary-card{position:relative;top:0}
-    }
-  </style>
+/* LAYOUT */
+section.checkout{padding:56px 18px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0))}
+.checkout-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1.4fr;gap:28px;align-items:start}
+@media(max-width:980px){.checkout-inner{grid-template-columns:1fr;padding:0 12px}.hero{height:30vh}}
+.card{border-radius:16px;background:var(--card-bg);padding:22px;border:1px solid rgba(255,255,255,0.03);box-shadow:0 12px 30px rgba(0,0,0,0.55)}
+.checkout-form h2,.order-summary h2{font-family:"Playfair Display",serif;color:#fff;margin-bottom:12px;font-size:22px}
+label{display:block;margin-bottom:6px;color:#e9e9e9;font-weight:600}
+input[type="text"],input[type="email"],input[type="tel"],textarea,select{width:100%;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:#e6e6e6;font-family:inherit;margin-bottom:12px}
+textarea{min-height:120px;resize:vertical}
+.order-summary ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px}
+.order-item{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px;border-radius:12px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.02);transition:all var(--transition)}
+.order-item .left{display:flex;gap:12px;align-items:center;flex:1;min-width:0;padding-left:0}
+.order-item img{width:56px;height:56px;object-fit:cover;border-radius:8px;border:1px solid rgba(255,255,255,0.04)}
+.order-item .meta,.order-item .title{font-size:0.95rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}
+.order-item .title{font-weight:700;color:#fff}
+.order-item .price{font-weight:700;color:var(--gold);min-width:110px;text-align:right}
+.show-variants-btn{background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.04);border-radius:8px;padding:6px 8px;cursor:pointer;font-weight:700;transition:all var(--transition);font-size:13px;margin-top:8px}
+.variants-container{display:none;flex-direction:column;gap:8px;margin-top:8px;padding-left:0;border-left:2px dashed rgba(255,255,255,0.03)}
+.variant-line{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,0.01);border:1px solid rgba(255,255,255,0.02);color:var(--muted);font-size:0.95rem}
+.currency-selector{display:flex;justify-content:flex-end;gap:8px;align-items:center;margin-bottom:12px}
+.totals{margin-top:12px;text-align:right;font-weight:700;color:#fff;font-size:18px}
+.pay-btn{display:block;width:100%;margin-top:16px;padding:14px;border-radius:12px;background:linear-gradient(180deg,var(--gold),#a55a36);color:#fff;border:none;font-weight:800;cursor:pointer;transition:transform var(--transition)}
+.pay-btn:disabled{opacity:0.6;cursor:not-allowed;transform:none}
+.error-banner{display:none;margin-bottom:12px;padding:12px;border-radius:8px;background:linear-gradient(180deg, rgba(255,50,50,0.12), rgba(255,30,30,0.06));color:#ffd6d6;border:1px solid rgba(255,30,30,0.12)}
+.spinner-backdrop{display:none;position:fixed;top:20px;right:20px;z-index:9999;pointer-events:none;display:flex;align-items:center;justify-content:center}
+.spinner{display:flex;gap:6px;padding:6px;background:rgba(0,0,0,0.6);border-radius:24px;box-shadow:0 4px 12px rgba(0,0,0,0.5);align-items:center;justify-content:center}
+.spinner .dot{width:8px;height:8px;border-radius:50%;background:var(--gold);animation:bounce 1s infinite ease-in-out}
+.spinner .dot:nth-child(2){animation-delay:0.2s}.spinner .dot:nth-child(3){animation-delay:0.4s}
+@keyframes bounce{0%,80%,100%{transform:scale(0.8);opacity:0.6}40%{transform:scale(1.3);opacity:1}}
+.note{font-size:0.95rem;color:var(--muted);margin-top:8px}
+footer{text-align:center;padding:22px;background:transparent;color:var(--muted);margin-top:36px;border-top:1px solid rgba(255,255,255,0.02)}
+.order-item .left{display:flex;flex-direction:column;gap:6px;min-width:0}
+.show-details-btn{background:none;border:none;color:#ccc;cursor:pointer;font-size:0.95rem;padding:6px 0;text-align:left}
+.details-container{flex-direction:column;padding-left:0;padding-right:0;margin-bottom:8px;border-left:2px solid rgba(255,255,255,0.03);display:none}
+.details-container.show{display:flex}
+.details-container div{display:flex;justify-content:space-between;font-size:0.95rem;color:#bbb;padding:6px 0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+@media(max-width:680px){.order-item img{width:48px;height:48px}.brand-logo{height:48px}.hero{height:40vh}.checkout-inner{grid-template-columns:1fr;gap:20px;padding:12px}.order-item .meta{font-size:0.92rem}.order-item .price{min-width:60px;font-size:0.95rem}textarea{min-height:100px}}
+@media(max-width:900px){.hamburger{display:block}.header-right{display:none;position:absolute;top:64px;right:12px;background:rgba(20,20,20,0.98);flex-direction:column;padding:18px;gap:10px;border-radius:10px;width:220px;z-index:1100;border:1px solid rgba(255,255,255,0.03)}.header-right.open{display:flex}}
+.small-note{color:var(--muted);padding:8px;text-align:center}
+</style>
 </head>
 <body>
-  <div class="container">
-    <!-- LEFT: Checkout content -->
-    <div class="checkout-card" id="checkout-card">
-      <div>
-        <div class="section-title">Your cart</div>
-        <div class="muted">Review items and edit quantities before checkout</div>
-      </div>
 
-      <div class="cart-list" id="cart-list">
-        <!-- Cart items inserted via JS. Uses asset paths like /assets/... -->
-      </div>
+<header class="site-header" id="siteHeader">
+  <div class="header-left">
+    <img src="../asset/logo.png" alt="Sérac Logo" class="brand-logo">
+    <div class="brand-title">Sérac</div>
+  </div>
+  <nav class="header-right" id="headerRight">
+    <a href="../index.html">Home</a>
+    <a href="../shop.html">Shop</a>
+    <a href="../about.html">About</a>
+    <a href="../cart.html">Cart <span class="cart-count" id="cartCount">0</span></a>
+    <a href="../contact.html">Contact</a>
+  </nav>
+  <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
+</header>
 
-      <div>
-        <div class="section-title">Shipping information</div>
-        <div class="muted">Where should we deliver your order?</div>
+<section class="hero" id="heroSection" style="--hero-bg: url('../asset/bg25.jpg');">
+  <div class="hero-text">
+    <h1 id="heroH1">Checkout</h1>
+    <p id="heroP">Complete your order — secure payment and quick processing</p>
+  </div>
+</section>
 
-        <div class="grid-2" style="margin-top:10px">
-          <div class="field">
-            <label for="firstName">First name</label>
-            <input id="firstName" name="firstName" type="text" placeholder="Jane" />
-            <div class="field-error muted" id="err-firstName"></div>
-          </div>
-          <div class="field">
-            <label for="lastName">Last name</label>
-            <input id="lastName" name="lastName" type="text" placeholder="Doe" />
-            <div class="field-error muted" id="err-lastName"></div>
-          </div>
-        </div>
+<section class="checkout">
+  <div class="checkout-inner">
+    <div class="card checkout-form" id="checkoutCard">
+      <h2>Billing Details</h2>
+      <div class="error-banner" id="errorBanner" role="alert"></div>
+      <form id="checkoutForm" autocomplete="off" onsubmit="return false;">
+        <label for="name">Full Name</label>
+        <input id="name" name="fullname" type="text" placeholder="Jane Doe" required>
 
-        <div class="field" style="margin-top:10px">
-          <label for="email">Email</label>
-          <input id="email" name="email" type="email" placeholder="you@example.com" />
-          <div class="field-error muted" id="err-email"></div>
-        </div>
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" placeholder="you@example.com" required>
 
-        <div class="field" style="margin-top:10px">
-          <label for="address">Address</label>
-          <input id="address" name="address" type="text" placeholder="123 Example St" />
-          <div class="field-error muted" id="err-address"></div>
-        </div>
+        <label for="phone">Phone</label>
+        <input id="phone" name="phone" type="tel" placeholder="+2348000000000" required>
 
-        <div class="grid-2" style="margin-top:10px">
-          <div class="field">
-            <label for="city">City</label>
-            <input id="city" type="text" />
-            <div class="field-error muted" id="err-city"></div>
-          </div>
-          <div class="field">
-            <label for="postcode">Postal code</label>
-            <input id="postcode" type="text" />
-            <div class="field-error muted" id="err-postcode"></div>
-          </div>
-        </div>
-
-        <div class="grid-2" style="margin-top:10px">
-          <div class="field">
-            <label for="country">Country</label>
-            <select id="country">
-              <option value="NG">Nigeria</option>
-              <option value="GH">Ghana</option>
-              <option value="US">United States</option>
-              <option value="GB">United Kingdom</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="phone">Phone</label>
-            <input id="phone" type="tel" placeholder="+2348012345678" />
-            <div class="field-error muted" id="err-phone"></div>
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <div class="section-title">Delivery method</div>
-        <div class="muted">Choose a delivery speed</div>
-        <div class="delivery-options" style="margin-top:10px" id="delivery-options">
-          <div class="delivery-option active" data-id="standard" data-cost="500">
-            <div style="font-weight:600">Standard — 3–5 days</div>
-            <div class="muted">₦500</div>
-          </div>
-          <div class="delivery-option" data-id="express" data-cost="1500">
-            <div style="font-weight:600">Express — 1–2 days</div>
-            <div class="muted">₦1,500</div>
-          </div>
-          <div class="delivery-option" data-id="pickup" data-cost="0">
-            <div style="font-weight:600">Pickup</div>
-            <div class="muted">Free</div>
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <div class="section-title">Promo code</div>
-        <div class="muted">Add a coupon to receive a discount</div>
-        <div style="margin-top:10px" class="promo-row">
-          <input id="promo-code" placeholder="SUMMER20" />
-          <button class="apply-btn" id="apply-promo">Apply</button>
-        </div>
-        <div class="muted" id="promo-feedback" style="margin-top:8px"></div>
-      </div>
-
-      <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:10px">
-        <div class="note">Order notes (optional)</div>
-        <textarea id="order-notes" placeholder="Leave a note for the seller..." style="width:60%;border-radius:8px;padding:10px;border:1px solid rgba(15,23,42,0.06)"></textarea>
-      </div>
-
+        <label for="address">Address</label>
+        <textarea id="address" name="address" placeholder="Street, City, Country" required></textarea>
+      </form>
     </div>
 
-    <!-- RIGHT: Order Summary -->
-    <aside class="summary-card" aria-labelledby="summary-title">
-      <div>
-        <div id="summary-title" class="section-title">Order summary</div>
-        <div class="muted">Review before paying</div>
+    <aside class="card order-summary" id="orderCard">
+      <h2 id="orderCardTitle">Order Summary</h2>
+
+      <div class="currency-selector" id="currencySelector" style="display:none">
+        <label for="currency">Currency</label>
+        <select id="currency" aria-label="Currency">
+          <option value="NGN">NGN</option>
+          <option value="USD">USD</option>
+          <option value="EUR">EUR</option>
+          <option value="GBP">GBP</option>
+        </select>
       </div>
 
-      <div style="margin-top:12px">
-        <div class="summary-line"><div>Subtotal</div><div id="summary-subtotal">₦0</div></div>
-        <div class="summary-line"><div>Delivery</div><div id="summary-delivery">₦500</div></div>
-        <div class="summary-line"><div>Tax (VAT)</div><div id="summary-tax">₦0</div></div>
-        <div class="summary-line"><div>Discount</div><div id="summary-discount">₦0</div></div>
-        <div class="summary-line total"><div>Total</div><div id="summary-total">₦0</div></div>
+      <ul id="orderItems" aria-live="polite"></ul>
 
-        <button class="pay-btn" id="pay-button">Pay with Flutterwave</button>
+      <div class="totals" id="totalsText">Subtotal: —</div>
+      <div class="note" id="feesNote">Fees does not include shipping</div>
+      <div class="note">You will be redirected to payment after clicking Proceed to Payment.</div>
 
-        <div style="margin-top:10px">
-          <div class="muted">Payment powered by Flutterwave. All payments are verified before storing your order in Firestore.</div>
-        </div>
-      </div>
+      <button id="payBtn" class="pay-btn" type="button">Proceed to Payment</button>
     </aside>
   </div>
+</section>
 
-  <!-- Simple modal placeholders -->
-  <div id="modal-root" style="display:none"></div>
+<footer><p>© 2025 Sérac</p></footer>
 
-  <!-- External JS -->
-  <script type="module">>
-    /* checkout.js
-   Pure JS checkout logic:
-   - Cart management (localStorage)
-   - DOM updates
-   - Form validation
-   - Firebase v9 modular SDK usage
-   - Flutterwave inline integration
-   - POST to /api/verify-payment for verification
-   - Firestore order write (collection: orders)
-*/
+<div class="spinner-backdrop" id="spinnerBackdrop" role="status" aria-hidden="true">
+  <div class="spinner" id="spinnerBox">
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+  </div>
+</div>
 
-/* ====================
-   CONFIGURATION
-   ==================== */
+<!-- Flutterwave -->
+<script src="https://checkout.flutterwave.com/v3.js"></script>
 
-/* Replace this firebaseConfig object with the one from your Firebase project.
-   The sample original used this variable name, so we keep it identical.
-*/
+<script type="module">
+/* Firebase imports */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+import { getFirestore, doc, getDoc, collection, addDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+/* CONFIG */
 const firebaseConfig = {
- apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
+  apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
   authDomain: "brandisby.firebaseapp.com",
   projectId: "brandisby",
   storageBucket: "brandisby.firebasestorage.app",
   messagingSenderId: "87213267039",
   appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
 };
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-/* Flutterwave public key placeholder - replace with your live/test key */
-const FLW_PUBLIC_KEY = "FLWPUBK_TEST-07eb9d2da345c08dc4d54278c3bc86f7-X";
-
-/* Firestore collection names and field keys must match the original:
-   - orders collection (document contains: user, items, totals, payment, createdAt)
-*/
-const ORDERS_COLLECTION = "orders";
-
-/* ====================
-   IMPORTS & INIT FIREBASE (v9 modular)
-   ==================== */
-
-/* Note: on static sites you must load firebase via CDN or bundler; below uses dynamic import of modular SDK
-   For production, include <script type="module"> to import from https://www.gstatic.com/firebasejs/9.x.x/firebase-app.js etc.
-   For simplicity and to match "single file + separate JS file", we use dynamic imports here.
-*/
-async function initFirebase() {
-  if (window.__firebaseInitialized) return window.__firebaseInitialized;
-  // dynamic imports
-  const [{ initializeApp }, { getFirestore, serverTimestamp, collection, addDoc, doc, setDoc, updateDoc, getDoc } ] = await Promise.all([
-    import("https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"),
-    import("https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js")
-  ]);
-
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  window.__firebase = { app, db, serverTimestamp, collection, addDoc, doc, setDoc, updateDoc, getDoc };
-  window.__firebaseInitialized = true;
-  return window.__firebase;
+/* helpers to safely parse localStorage */
+function safeParseJSON(val, fallback) {
+  try { return JSON.parse(val || 'null') || fallback; } catch(e){ return fallback; }
 }
 
-/* ====================
-   CART & UI UTILITIES
-   ==================== */
+/* DOM */
+const cartCountElem = document.getElementById('cartCount');
+const orderItemsEl = document.getElementById('orderItems');
+const totalsText = document.getElementById('totalsText');
+const payBtn = document.getElementById('payBtn');
+const currencySelect = document.getElementById('currency');
+const currencySelector = document.getElementById('currencySelector');
+const spinnerBackdrop = document.getElementById('spinnerBackdrop');
+const errorBanner = document.getElementById('errorBanner');
 
-const $ = (id) => document.getElementById(id);
+const nameInput = document.getElementById('name');
+const emailInput = document.getElementById('email');
+const phoneInput = document.getElementById('phone');
+const addressInput = document.getElementById('address');
 
-const currencyFormat = (n) => {
-  // assume NGN for display; adapt as needed
-  return "₦" + Number(n || 0).toLocaleString();
-};
+const hero = document.getElementById('heroSection');
+const heroH1 = document.getElementById('heroH1');
+const heroP = document.getElementById('heroP');
 
-let CART_KEY = "cart_v1";
+/* state */
+const STORAGE_KEY = 'seracCart';
+const CURRENCY_KEY = 'seracCurrency';
 
-/* sample product data structure (if user hasn't seeded cart). The original sample used /assets/... references. */
-const sampleProducts = [
-  { id: "prod_001", name: "Classic Leather Bag", price: 15000, qty: 1, sku: "CLB-001", img: "/assets/bag-1.jpg" },
-  { id: "prod_002", name: "Canvas Sneakers", price: 8000, qty: 2, sku: "CS-010", img: "/assets/shoe-1.jpg" }
-];
+let cart = safeParseJSON(localStorage.getItem(STORAGE_KEY), []);
+let selectedCurrency = localStorage.getItem(CURRENCY_KEY) || 'NGN';
+let productCache = {};
 
-function loadCart() {
-  const raw = localStorage.getItem(CART_KEY);
-  if (!raw) {
-    localStorage.setItem(CART_KEY, JSON.stringify(sampleProducts));
-    return sampleProducts.slice();
-  }
+const urlParams = new URLSearchParams(window.location.search);
+const quoteId = urlParams.get("quoteId") || null;
+const orderId = urlParams.get("orderId") || null;
+
+let activeQuoteRaw = null;
+let activeOrderRaw = null;
+let isPaidOrder = false;
+let quote = null;
+
+/* utility UI functions */
+function showSpinner(show = true) {
+  if (!spinnerBackdrop) return;
+  spinnerBackdrop.style.display = show ? 'flex' : 'none';
+  spinnerBackdrop.setAttribute('aria-hidden', show ? 'false' : 'true');
+}
+function showError(msg) {
+  if (!errorBanner) { if(msg) alert(msg); return; }
+  if (!msg) { errorBanner.style.display = 'none'; errorBanner.textContent = ''; return; }
+  errorBanner.style.display = 'block';
+  errorBanner.textContent = msg;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function formatPrice(value, currency) {
+  const localeMap = { USD:'en-US', EUR:'de-DE', GBP:'en-GB', NGN:'en-NG' };
+  const minFrac = currency === 'NGN' ? 0 : 2;
   try {
-    return JSON.parse(raw);
-  } catch (e) {
-    localStorage.setItem(CART_KEY, JSON.stringify(sampleProducts));
-    return sampleProducts.slice();
+    return new Intl.NumberFormat(localeMap[currency] || 'en-US', { style:'currency', currency, minimumFractionDigits: minFrac }).format(Number(value || 0));
+  } catch(e) {
+    return `${currency} ${Number(value || 0).toFixed(minFrac)}`;
   }
 }
+function escapeHtml(str) { if(!str && str !== 0) return ""; return String(str).replace(/[&<>"']/g, s => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[s])); }
 
-function saveCart(cart) {
-  localStorage.setItem(CART_KEY, JSON.stringify(cart));
+/* Firestore product fetch */
+async function fetchProductData(productId) {
+  try {
+    if (productCache[productId]) return productCache[productId];
+    const dref = doc(db, "brands", "serac", "products", productId);
+    const snap = await getDoc(dref);
+    if (snap.exists()) { productCache[productId] = snap.data(); return productCache[productId]; }
+  } catch (e) {
+    console.warn("Fetch product failed", productId, e);
+  }
+  return null;
 }
 
-/* UI render cart items */
-function renderCart() {
-  const cart = window.__cart = loadCart();
-  const container = $("cart-list");
-  container.innerHTML = "";
-  cart.forEach(item => {
-    const el = document.createElement("div");
-    el.className = "cart-item";
-    el.innerHTML = `
-      <img src="${item.img || '/assets/placeholder.png'}" alt="${item.name}" />
-      <div class="meta">
-        <div class="name">${item.name}</div>
-        <div class="sku">SKU: ${item.sku}</div>
-        <div class="muted" style="margin-top:6px">Unit: ${currencyFormat(item.price)}</div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end">
-        <div class="qty-controls" data-id="${item.id}">
-          <button class="dec" data-id="${item.id}">-</button>
-          <div class="qty">${item.qty}</div>
-          <button class="inc" data-id="${item.id}">+</button>
-        </div>
-        <button class="remove-item" data-id="${item.id}">Remove</button>
-      </div>
-    `;
-    container.appendChild(el);
+/* merge cart items */
+function mergeCartItems(cartArray){
+  const merged = [];
+  (cartArray || []).forEach(item=>{
+    const idx = merged.findIndex(i => i.id === item.id && (i.color||'') === (item.color||'') && (i.size||'') === (item.size||''));
+    if (idx === -1) merged.push({...item});
+    else merged[idx].quantity = Number(merged[idx].quantity || 0) + Number(item.quantity || 0);
   });
-
-  // attach events
-  container.querySelectorAll(".dec").forEach(btn => btn.addEventListener("click", onQtyDecrease));
-  container.querySelectorAll(".inc").forEach(btn => btn.addEventListener("click", onQtyIncrease));
-  container.querySelectorAll(".remove-item").forEach(btn => btn.addEventListener("click", onRemoveItem));
-
-  updateSummary();
+  return merged;
 }
 
-/* quantity handlers */
-function onQtyDecrease(e) {
-  const id = e.currentTarget.dataset.id;
-  let cart = loadCart();
-  cart = cart.map(it => it.id === id ? { ...it, qty: Math.max(1, it.qty - 1) } : it);
-  saveCart(cart);
-  renderCart();
-}
-function onQtyIncrease(e) {
-  const id = e.currentTarget.dataset.id;
-  let cart = loadCart();
-  cart = cart.map(it => it.id === id ? { ...it, qty: it.qty + 1 } : it);
-  saveCart(cart);
-  renderCart();
-}
-function onRemoveItem(e) {
-  const id = e.currentTarget.dataset.id;
-  let cart = loadCart();
-  cart = cart.filter(it => it.id !== id);
-  saveCart(cart);
-  renderCart();
-}
+/* Build quote from client cart */
+async function buildQuoteFromCart(){
+  cart = mergeCartItems(cart || []);
+  const byProduct = new Map();
+  cart.forEach(row => {
+    if (!byProduct.has(row.id)) byProduct.set(row.id, []);
+    byProduct.get(row.id).push(row);
+  });
+  const productIds = Array.from(byProduct.keys());
+  const productsData = await Promise.all(productIds.map(pid => fetchProductData(pid).then(d => [pid, d])));
+  const productsMap = Object.fromEntries(productsData.map(([id, doc]) => [id, doc]));
 
-/* Summary calculations */
-function calcSubtotal(items) {
-  return items.reduce((s,i) => s + (i.price * (i.qty || 1)), 0);
-}
-function calcTax(amount) {
-  // sample VAT 7.5%
-  return Math.round(amount * 0.075);
-}
-function getSelectedDelivery() {
-  const active = document.querySelector(".delivery-option.active");
-  return { id: active?.dataset?.id || "standard", cost: Number(active?.dataset?.cost || 0) };
-}
-
-/* Update summary UI */
-function updateSummary() {
-  const cart = loadCart();
-  const subtotal = calcSubtotal(cart);
-  const delivery = getSelectedDelivery().cost;
-  const tax = calcTax(subtotal);
-  const discount = window.__appliedDiscount || 0;
-  const total = subtotal + delivery + tax - discount;
-
-  $("summary-subtotal").textContent = currencyFormat(subtotal);
-  $("summary-delivery").textContent = currencyFormat(delivery);
-  $("summary-tax").textContent = currencyFormat(tax);
-  $("summary-discount").textContent = currencyFormat(discount);
-  $("summary-total").textContent = currencyFormat(total);
-
-  window.__orderTotals = { subtotal, delivery, tax, discount, total, currency: "NGN" };
-}
-
-/* Delivery selection handling */
-function initDeliveryOptions() {
-  document.querySelectorAll(".delivery-option").forEach(opt => {
-    opt.addEventListener("click", () => {
-      document.querySelectorAll(".delivery-option").forEach(o => o.classList.remove("active"));
-      opt.classList.add("active");
-      updateSummary();
+  const items = [];
+  for (const pid of productIds) {
+    const rows = byProduct.get(pid) || [];
+    const productDoc = productsMap[pid] || null;
+    const image = (productDoc && productDoc.images && productDoc.images.length) ? productDoc.images[0] : (productDoc && productDoc.imageUrl) ? productDoc.imageUrl : null;
+    const name = productDoc?.name || rows[0]?.name || 'Product';
+    const variantDetails = rows.map(r => {
+      const unitPrices = {
+        NGN: (productDoc && productDoc.priceNGN != null) ? Number(productDoc.priceNGN) : (r.price || 0),
+        USD: (productDoc && productDoc.priceUSD != null) ? Number(productDoc.priceUSD) : null,
+        EUR: (productDoc && productDoc.priceEUR != null) ? Number(productDoc.priceEUR) : null,
+        GBP: (productDoc && productDoc.priceGBP != null) ? Number(productDoc.priceGBP) : null
+      };
+      const quantity = Number(r.quantity) || 0;
+      const linePrices = {
+        NGN: (unitPrices.NGN || 0) * quantity,
+        USD: (unitPrices.USD || 0) * quantity,
+        EUR: (unitPrices.EUR || 0) * quantity,
+        GBP: (unitPrices.GBP || 0) * quantity
+      };
+      return { id: r.id || pid, color: r.color||'', size: r.size||'', quantity, unitPrices, linePrices };
     });
+
+    const totalQty = variantDetails.reduce((s,a) => s + a.quantity, 0);
+    const totalPrices = { NGN:0, USD:0, EUR:0, GBP:0 };
+    variantDetails.forEach(v => {
+      totalPrices.NGN += (v.linePrices.NGN||0);
+      totalPrices.USD += (v.linePrices.USD||0);
+      totalPrices.EUR += (v.linePrices.EUR||0);
+      totalPrices.GBP += (v.linePrices.GBP||0);
+    });
+
+    items.push({ productId: pid, name, image, totalQuantity: totalQty, totalPrices, variants: variantDetails, description: productDoc?.description || '' });
+  }
+
+  return { items };
+}
+
+/* normalizeQuoteItems (server -> UI) */
+function normalizeQuoteItems(rawQuote){
+  const arr = Array.isArray(rawQuote.items) ? rawQuote.items : [];
+  const items = arr.map(ci => {
+    if (Array.isArray(ci.variants) && ci.variants.length) {
+      const variants = ci.variants.map(v => {
+        const qty = Number(v.qty || v.quantity) || 0;
+        const unitPrices = {
+          NGN: Number(v.priceNGN) || Number(v.price) || 0,
+          USD: Number(v.priceUSD) || 0,
+          EUR: Number(v.priceEUR) || 0,
+          GBP: Number(v.priceGBP) || 0
+        };
+        return {
+          id: v.id || ci.id || '',
+          color: v.color || '',
+          size: v.size || '',
+          quantity: qty,
+          unitPrices,
+          linePrices: {
+            NGN: (unitPrices.NGN || 0) * qty,
+            USD: (unitPrices.USD || 0) * qty,
+            EUR: (unitPrices.EUR || 0) * qty,
+            GBP: (unitPrices.GBP || 0) * qty
+          }
+        };
+      });
+      return {
+        productId: ci.id || '',
+        name: ci.name || '',
+        image: (ci.image && ci.image !== '../asset/placeholder.jpg') ? ci.image : null,
+        totalQuantity: variants.reduce((s,a) => s + a.quantity, 0),
+        totalPrices: {
+          NGN: variants.reduce((s,a) => s + (a.linePrices.NGN||0), 0),
+          USD: variants.reduce((s,a) => s + (a.linePrices.USD||0), 0),
+          EUR: variants.reduce((s,a) => s + (a.linePrices.EUR||0), 0),
+          GBP: variants.reduce((s,a) => s + (a.linePrices.GBP||0), 0)
+        },
+        variants,
+        description: ci.desc || ci.description || ''
+      };
+    } else {
+      const qty = Number(ci.qty || ci.quantity) || 1;
+      const unitPrices = {
+        NGN: Number(ci.priceNGN) || Number(ci.price) || 0,
+        USD: Number(ci.priceUSD) || 0,
+        EUR: Number(ci.priceEUR) || 0,
+        GBP: Number(ci.priceGBP) || 0
+      };
+      return {
+        productId: ci.id || '',
+        name: ci.name || '',
+        image: (ci.image && ci.image !== '../asset/placeholder.jpg') ? ci.image : null,
+        totalQuantity: qty,
+        totalPrices: {
+          NGN: (unitPrices.NGN || 0) * qty,
+          USD: (unitPrices.USD || 0) * qty,
+          EUR: (unitPrices.EUR || 0) * qty,
+          GBP: (unitPrices.GBP || 0) * qty
+        },
+        variants: [{
+          id: ci.id || '',
+          color: '',
+          size: '',
+          quantity: qty,
+          unitPrices,
+          linePrices: {
+            NGN: (unitPrices.NGN || 0) * qty,
+            USD: (unitPrices.USD || 0) * qty,
+            EUR: (unitPrices.EUR || 0) * qty,
+            GBP: (unitPrices.GBP || 0) * qty
+          }
+        }],
+        description: ci.desc || ci.description || ''
+      };
+    }
   });
+
+  return { items };
 }
 
-/* Promo code logic */
-const PROMO_CODES = {
-  "SUMMER20": { type: "percent", value: 20 }, // 20% off
-  "FLAT1000": { type: "flat", value: 1000 }
-};
-
-function applyPromo(code) {
-  const normalized = (code || "").trim().toUpperCase();
-  const feedback = $("promo-feedback");
-  if (!normalized) { feedback.textContent = "Enter a promo code."; feedback.className = "muted"; return; }
-  const promo = PROMO_CODES[normalized];
-  if (!promo) { feedback.textContent = "Invalid code."; feedback.className = "error"; return; }
-
-  const totals = window.__orderTotals || {};
-  let discount = 0;
-  if (promo.type === "percent") discount = Math.round((promo.value/100) * (totals.subtotal || 0));
-  else discount = promo.value;
-
-  window.__appliedDiscount = discount;
-  feedback.textContent = `Applied ${normalized} — Saved ${currencyFormat(discount)}.`;
-  feedback.className = "success";
-  updateSummary();
-}
-
-/* Form validation (basic live feedback) */
-function validateField(id, validatorFn, errId) {
-  const el = $(id);
-  const val = (el.value || "").trim();
-  const errEl = $(errId);
-  const ok = validatorFn(val);
-  errEl.textContent = ok ? "" : `Invalid ${id}`;
-  return ok;
-}
-function validateForm() {
-  const checks = [
-    validateField("firstName", v => v.length >= 1, "err-firstName"),
-    validateField("lastName", v => v.length >= 1, "err-lastName"),
-    validateField("email", v => /\S+@\S+\.\S+/.test(v), "err-email"),
-    validateField("address", v => v.length >= 4, "err-address"),
-    validateField("city", v => v.length >= 2, "err-city"),
-    validateField("postcode", v => v.length >= 2, "err-postcode"),
-    validateField("phone", v => v.length >= 7, "err-phone")
-  ];
-  return checks.every(Boolean);
-}
-
-/* Modal helpers (simple) */
-function showModal(htmlContent) {
-  const root = $("modal-root");
-  root.innerHTML = `
-    <div class="modal-backdrop" id="modal-backdrop">
-      <div class="modal">
-        ${htmlContent}
-      </div>
-    </div>
-  `;
-  root.style.display = "block";
-  document.getElementById("modal-backdrop").addEventListener("click", (ev) => {
-    if (ev.target.id === "modal-backdrop") closeModal();
-  });
-}
-function closeModal() { const root = $("modal-root"); root.style.display = "none"; root.innerHTML = ""; }
-
-/* ====================
-   Payment flow (Flutterwave)
-   ==================== */
-
-async function payWithFlutterwave() {
-  if (!validateForm()) {
-    showModal(`<h3>Validation error</h3><div>Please fix the highlighted fields before proceeding.</div><div class="actions"><button onclick="closeModal()">Close</button></div>`);
+/* render UI from normalized quote */
+function renderOrderFromQuoteNormalized(quoteNormalized, currency = 'NGN', paid = false) {
+  orderItemsEl.innerHTML = '';
+  if (!quoteNormalized || !Array.isArray(quoteNormalized.items)) {
+    orderItemsEl.innerHTML = '<li class="small-note">No items</li>';
+    totalsText.textContent = `Subtotal: —`;
     return;
   }
 
-  const totals = window.__orderTotals;
-  if (!totals) { alert("Unable to calculate totals."); return; }
+  let subtotal = 0;
 
-  // Build customer & order payload
-  const customer = {
-    email: $("email").value.trim(),
-    phonenumber: $("phone").value.trim(),
-    name: ($("firstName").value.trim() + " " + $("lastName").value.trim()).trim()
+  quoteNormalized.items.forEach((item, idx) => {
+    const value = (item.totalPrices && (item.totalPrices[currency] ?? 0)) || 0;
+    subtotal += value;
+
+    const li = document.createElement('li');
+    li.className = 'order-item';
+    li.dataset.idx = idx.toString();
+
+    const imageHtml = item.image ? `<img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.name)}">` : '';
+
+    if (paid) {
+      li.innerHTML = `
+        <div class="left" style="flex-direction:row;align-items:center;">
+          ${imageHtml}
+          <div style="min-width:0">
+            <div class="title">${escapeHtml(item.name)}</div>
+            <div class="meta">${escapeHtml(String(item.totalQuantity) + ' item(s)')}</div>
+            <button class="show-details-btn" data-idx="${idx}">Show Details ▾</button>
+          </div>
+        </div>
+        <div class="price">${formatPrice(value, currency)}</div>
+      `;
+      orderItemsEl.appendChild(li);
+
+      const detailsContainer = document.createElement('div');
+      detailsContainer.className = 'details-container';
+      detailsContainer.setAttribute('data-for-idx', String(idx));
+      detailsContainer.style.display = 'none';
+      const desc = item.description || '';
+      detailsContainer.innerHTML = `<div style="padding:8px;display:flex;flex-direction:column;gap:8px;"><div style="color:var(--muted);">${escapeHtml(desc)}</div><div style="display:flex;justify-content:flex-end;color:var(--muted)">${escapeHtml(String(item.totalQuantity))} ×</div></div>`;
+      li.insertAdjacentElement('afterend', detailsContainer);
+
+    } else {
+      li.innerHTML = `
+        <div class="left" style="flex-direction:row;align-items:center;">
+          ${imageHtml}
+          <div style="min-width:0">
+            <div class="title">${escapeHtml(item.name)}</div>
+            <div class="meta">${escapeHtml(String(item.totalQuantity) + ' item(s)')}</div>
+            ${ (Array.isArray(item.variants) && item.variants.length > 1) ? `<button class="show-variants-btn" data-idx="${idx}">Show Choices ▾</button>` : '' }
+            <button class="show-details-btn" data-idx="${idx}" style="margin-top:6px;">Show Details ▾</button>
+          </div>
+        </div>
+        <div class="price">${formatPrice(value, currency)}</div>
+      `;
+      orderItemsEl.appendChild(li);
+
+      if (Array.isArray(item.variants) && item.variants.length) {
+        const variantsContainer = document.createElement('div');
+        variantsContainer.className = 'variants-container';
+        variantsContainer.setAttribute('data-for-idx', String(idx));
+
+        item.variants.forEach(v => {
+          const line = document.createElement('div');
+          line.className = 'variant-line';
+          let labelParts = [];
+          if (v.color) labelParts.push(escapeHtml(v.color));
+          if (v.size) labelParts.push(escapeHtml(v.size));
+          const label = labelParts.length ? `${labelParts.join(' · ')} ×${v.quantity}` : `×${v.quantity}`;
+          const linePrice = (v.linePrices && (v.linePrices[selectedCurrency] ?? 0)) || 0;
+          line.innerHTML = `<div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${label}</div><div style="min-width:110px;text-align:right;color:var(--muted)">${formatPrice(linePrice, selectedCurrency)}</div>`;
+          variantsContainer.appendChild(line);
+        });
+
+        li.insertAdjacentElement('afterend', variantsContainer);
+      }
+
+      const detailsContainer = document.createElement('div');
+      detailsContainer.className = 'details-container';
+      detailsContainer.setAttribute('data-for-idx', String(idx));
+      detailsContainer.style.display = 'none';
+      const desc = item.description || '';
+      detailsContainer.innerHTML = `<div style="padding:8px;display:flex;flex-direction:column;gap:8px;"><div style="color:var(--muted);">${escapeHtml(desc)}</div></div>`;
+      li.insertAdjacentElement('afterend', detailsContainer);
+    }
+  });
+
+  // wire toggles (delegated approach is safer but we keep simple wiring)
+  document.querySelectorAll('.show-variants-btn').forEach(btn=>{
+    btn.removeEventListener('click', onShowVariants); // safe remove
+    btn.addEventListener('click', onShowVariants);
+  });
+  document.querySelectorAll('.show-details-btn').forEach(btn=>{
+    btn.removeEventListener('click', onShowDetails);
+    btn.addEventListener('click', onShowDetails);
+  });
+
+  totalsText.textContent = `Subtotal: ${formatPrice(subtotal, selectedCurrency)}`;
+  try { if (cartCountElem) cartCountElem.textContent = quote ? quote.items.reduce((s,a)=>s + (a.totalQuantity || 0), 0) : 0; } catch(e){}
+}
+
+/* toggle handlers */
+function onShowVariants(ev){
+  const idx = ev.currentTarget.dataset.idx;
+  const container = document.querySelector(`.variants-container[data-for-idx="${idx}"]`);
+  if (!container) return;
+  const isShown = container.classList.toggle('show');
+  container.style.display = isShown ? 'flex' : 'none';
+  ev.currentTarget.textContent = isShown ? 'Hide Choices ▴' : 'Show Choices ▾';
+}
+function onShowDetails(ev){
+  const idx = ev.currentTarget.dataset.idx;
+  const container = document.querySelector(`.details-container[data-for-idx="${idx}"]`);
+  if (!container) return;
+  const isShown = container.classList.toggle('show');
+  container.style.display = isShown ? 'flex' : 'none';
+  ev.currentTarget.textContent = isShown ? 'Hide Details ▴' : 'Show Details ▾';
+}
+
+/* load checkout data (order -> quote -> cart) */
+async function loadCheckoutData() {
+  selectedCurrency = localStorage.getItem(CURRENCY_KEY) || selectedCurrency || 'NGN';
+  try { if (currencySelect) currencySelect.value = selectedCurrency; } catch(e){}
+  if (currencySelector) currencySelector.style.display = quoteId ? 'flex' : 'none';
+
+  try {
+    showSpinner(true);
+
+    // CASE 1: orderId -> show paid order
+    if (orderId) {
+      const orderSnap = await getDoc(doc(db, "brands", "serac", "orders", orderId));
+      if (orderSnap.exists()) {
+        const data = orderSnap.data();
+        isPaidOrder = true;
+        fillBillingFields(data);
+        quote = { items: normalizeOrderItems(data.items || []) };
+        renderPaidOrderUI(quote);
+        showSpinner(false);
+        return;
+      }
+    }
+
+    // CASE 2: quoteId
+    if (quoteId) {
+      const quoteRef = doc(db, "brands", "serac", "quotes", quoteId);
+      const quoteSnap = await getDoc(quoteRef);
+      if (!quoteSnap.exists()) {
+        showSpinner(false);
+        showError("Quote not found or deleted.");
+        return;
+      }
+      activeQuoteRaw = quoteSnap.data();
+      const qStatus = (activeQuoteRaw.status || "").toLowerCase();
+
+      if (qStatus === "paid" && activeQuoteRaw.orderId) {
+        const linkedOrderSnap = await getDoc(doc(db, "brands", "serac", "orders", activeQuoteRaw.orderId));
+        if (linkedOrderSnap.exists()) {
+          const orderData = linkedOrderSnap.data();
+          isPaidOrder = true;
+          fillBillingFields(orderData);
+          quote = { items: normalizeOrderItems(orderData.items || []) };
+          renderPaidOrderUI(quote);
+          showSpinner(false);
+          return;
+        } else {
+          // mark paid but order missing: still show quote as paid (disable pay)
+          isPaidOrder = true;
+        }
+      }
+
+      // show quote items for checkout
+      if (activeQuoteRaw.customer && nameInput) nameInput.value = activeQuoteRaw.customer;
+      if (activeQuoteRaw.email && emailInput) emailInput.value = activeQuoteRaw.email;
+      quote = normalizeQuoteItems(activeQuoteRaw);
+      renderOrderFromQuoteNormalized(quote, selectedCurrency, false);
+      setCheckoutUI();
+      showSpinner(false);
+      return;
+    }
+
+    // CASE 3: cart
+    cart = safeParseJSON(localStorage.getItem(STORAGE_KEY), []) || [];
+    cart = mergeCartItems(cart);
+    if (!cart.length) {
+      quote = { items: [] };
+      renderOrderFromQuoteNormalized(quote, selectedCurrency, false);
+      showSpinner(false);
+      showError("Your cart is empty.");
+      return;
+    }
+
+    quote = await buildQuoteFromCart();
+    renderOrderFromQuoteNormalized(quote, selectedCurrency, false);
+    showSpinner(false);
+  } catch (err) {
+    showSpinner(false);
+    console.error("Failed to load checkout data:", err);
+    showError("Failed to load checkout data. Please refresh and try again.");
+  }
+}
+
+/* small helpers */
+function fillBillingFields(data) {
+  if (nameInput) nameInput.value = data.name || data.customer || "";
+  if (emailInput) emailInput.value = data.email || data.customerEmail || "";
+  if (phoneInput) phoneInput.value = data.phone || "";
+  if (addressInput) addressInput.value = data.address || "";
+}
+function normalizeOrderItems(items) {
+  return (items || []).map(it => ({
+    productId: it.id || '',
+    name: it.name || '',
+    image: (it.image && it.image !== '../asset/placeholder.jpg') ? it.image : null,
+    totalQuantity: Number(it.qty || it.quantity) || 1,
+    description: it.description || '',
+    totalPrices: it.totalPrices || {},
+    variants: it.variants || [],
+  }));
+}
+function renderPaidOrderUI(quoteData) {
+  renderOrderFromQuoteNormalized(quoteData, selectedCurrency, true);
+  if (hero) hero.classList.add('paid');
+  if (heroH1) heroH1.textContent = "Order Summary";
+  if (heroP) heroP.textContent = "Your order has been paid successfully.";
+  if (payBtn) {
+    payBtn.textContent = "Paid ✅";
+    payBtn.disabled = true;
+    payBtn.classList.add('paid-state');
+  }
+}
+function setCheckoutUI() {
+  if (hero) hero.classList.remove('paid');
+  if (heroH1) heroH1.textContent = "Checkout";
+  if (heroP) heroP.textContent = "Review your quote and proceed to payment.";
+  if (payBtn) {
+    payBtn.textContent = "Proceed to Payment";
+    payBtn.disabled = false;
+    payBtn.classList.remove('paid-state');
+  }
+}
+
+/* Validation */
+function validateForm(){
+  showError('');
+  const name = (nameInput && nameInput.value || '').trim();
+  const email = (emailInput && emailInput.value || '').trim();
+  const phone = (phoneInput && phoneInput.value || '').trim();
+  const address = (addressInput && addressInput.value || '').trim();
+  if(!name) return "Name is required.";
+  if(!email) return "Email is required.";
+  if(!/^\S+@\S+\.\S+$/.test(email)) return "Please provide a valid email.";
+  if(!phone) return "Phone is required.";
+  if(!address) return "Address is required.";
+  if(!quote || !Array.isArray(quote.items) || quote.items.length === 0) return "Cart is empty.";
+  return null;
+}
+
+/* fetch with retry */
+async function fetchWithRetry(url, options = {}, retries = 1, backoff = 500) {
+  try {
+    const res = await fetch(url, options);
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    return res;
+  } catch (err) {
+    if (retries > 0) {
+      await new Promise(r => setTimeout(r, backoff));
+      return fetchWithRetry(url, options, retries - 1, Math.round(backoff * 1.5));
+    } else throw err;
+  }
+}
+
+/* serverless verify */
+const FLW_PUBLIC_KEY = "FLWPUBK_TEST-07eb9d2da345c08dc4d54278c3bc86f7-X";
+const SERVERLESS_VERIFY = `${window.location.origin}/api/verify`;
+
+async function verifyPayment(payload) {
+  try {
+    const opts = {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Connection": "close" },
+      body: JSON.stringify(payload),
+      cache: "no-store",
+      mode: "cors",
+      credentials: "omit",
+      keepalive: true
+    };
+    const res = await fetchWithRetry(SERVERLESS_VERIFY, opts, 1);
+    return await res.json();
+  } catch (err) {
+    console.error("verifyPayment error:", err);
+    throw err;
+  }
+}
+
+/* save verified order to Firestore */
+async function processPaidOrder(orderData){
+  try {
+    const orderRef = await addDoc(collection(db, "brands", "serac", "orders"), {
+      ...orderData,
+      createdAt: serverTimestamp(),
+      verifiedAt: serverTimestamp(),
+      status: "paid"
+    });
+    try {
+      if (orderData.source && orderData.source.startsWith("quote:")) {
+        const qid = orderData.source.split("quote:")[1];
+        if (qid) {
+          await updateDoc(doc(db, "brands", "serac", "quotes", qid), {
+            status: "Paid",
+            orderId: orderRef.id,
+            paidAt: serverTimestamp()
+          });
+        }
+      }
+    } catch(e) { console.warn("Failed to update quote status after saving order", e); }
+    return orderRef.id;
+  } catch (err) {
+    console.error("Failed to save paid order:", err);
+    return null;
+  }
+}
+
+/* payment flow */
+let lastPaymentStart = 0;
+async function initiatePaymentFlow(ev) {
+  if (ev && ev.preventDefault) ev.preventDefault();
+  if (isPaidOrder) return;
+  // prevent double starts (2 sec)
+  if (Date.now() - lastPaymentStart < 2000) return;
+  lastPaymentStart = Date.now();
+
+  showError('');
+  const v = validateForm();
+  if (v) { showError(v); return; }
+
+  let subtotal = 0;
+  try { quote.items.forEach(it => subtotal += (it.totalPrices && (it.totalPrices[selectedCurrency] ?? 0)) || 0); } catch(e){ subtotal = 0; }
+  if (subtotal <= 0) { showError("Subtotal is zero. Cannot proceed."); return; }
+
+  if (payBtn) payBtn.disabled = true;
+  showSpinner(true);
+
+  const name = (nameInput && nameInput.value || '').trim();
+  const email = (emailInput && emailInput.value || '').trim();
+  const phone = (phoneInput && phoneInput.value || '').trim();
+  const address = (addressInput && addressInput.value || '').trim();
+
+  const baseOrder = {
+    name, email, phone, address,
+    currency: selectedCurrency,
+    items: quote.items,
+    total: subtotal,
+    status: "placed",
+    source: quoteId ? `quote:${quoteId}` : 'cart',
+    createdAt: new Date().toISOString()
   };
 
-  const cart = loadCart();
+  const txRef = "serac_" + Date.now();
+  let paymentCallbackHandled = false;
 
-  // Disable pay button while initializing
-  const payBtn = $("pay-button");
-  payBtn.disabled = true;
-  payBtn.textContent = "Initializing...";
+  async function finalizeAfterSuccess(workerResp) {
+    try {
+      const orderId = await processPaidOrder(baseOrder);
+      if (orderId) workerResp = { ...workerResp, orderId };
 
-  // Flutterwave inline setup
-  try {
-    // Use tx_ref as a unique ref (you can replace with your own scheme)
-    const tx_ref = `tx_${Date.now()}_${Math.floor(Math.random()*10000)}`;
+      try { localStorage.removeItem(STORAGE_KEY); } catch(e){ console.warn("localStorage clear failed", e); }
+      try { if (cartCountElem) cartCountElem.textContent = '0'; } catch(e){}
 
-    const paymentOptions = {
-      public_key: FLW_PUBLIC_KEY,
-      tx_ref: tx_ref,
-      amount: totals.total,
-      currency: totals.currency || "NGN",
-      payment_options: "card,banktransfer,ussd",
-      customer,
-      customizations: {
-        title: "Your Store",
-        description: "Order Payment",
-        logo: "/assets/logo.png"
-      },
-      meta: {
-        order_data: {
-          items: cart,
-          subtotal: totals.subtotal,
-          delivery: totals.delivery,
-          tax: totals.tax,
-          discount: totals.discount
-        }
-      },
-      callback: async function (data) {
-        // data contains transaction_id / tx_ref / status
-        // We will verify server-side
-        try {
-          showModal(`<h3>Verifying payment</h3><div>Please wait while we verify your payment...</div>`);
-          const transaction_id = data.transaction_id || data.id || data.tx_id || data.flw_ref || data.trxref;
-          // POST to serverless verify endpoint
-          const resp = await fetch("/api/verify-payment", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ transaction_id })
-          });
-          const json = await resp.json();
-          if (json.verified) {
-            await onPaymentVerified(json.data, transaction_id, tx_ref);
-          } else {
-            closeModal();
-            showModal(`<h3>Payment not verified</h3><div class="muted">${json.error || 'Verification failed.'}</div><div class="actions"><button onclick="closeModal()">Close</button></div>`);
-          }
-        } catch (err) {
-          closeModal();
-          showModal(`<h3>Error</h3><div class="error">${err.message}</div><div class="actions"><button onclick="closeModal()">Close</button></div>`);
-        } finally {
-          payBtn.disabled = false;
-          payBtn.textContent = "Pay with Flutterwave";
-        }
-      },
-      onclose: function() {
-        // modal closed by user
-        payBtn.disabled = false;
-        payBtn.textContent = "Pay with Flutterwave";
+      if (workerResp.orderDoc && Array.isArray(workerResp.orderDoc.items)) {
+        activeOrderRaw = workerResp.orderDoc;
+        quote = { items: activeOrderRaw.items };
+      } else {
+        activeOrderRaw = { ...baseOrder, status: "paid" };
+        quote = { items: baseOrder.items };
       }
-    };
 
-    // Launch Flutterwave inline
-    getpaidSetup(paymentOptions);
+      isPaidOrder = true;
+      renderOrderFromQuoteNormalized(quote, selectedCurrency, true);
 
-  } catch (err) {
-    alert("Payment initialization failed: " + err.message);
-    payBtn.disabled = false;
-    payBtn.textContent = "Pay with Flutterwave";
+      if (hero) hero.classList.add('paid');
+      if (heroH1) heroH1.textContent = "Order Summary";
+      if (heroP) heroP.textContent = "Your order has been paid successfully.";
+      if (payBtn) { payBtn.textContent = "Paid ✅"; payBtn.disabled = true; payBtn.classList.add('paid-state'); }
+      showSpinner(false);
+
+      const oid = (workerResp && (workerResp.orderId || (workerResp.orderDoc && workerResp.orderDoc.id))) || '';
+      const qs = oid ? `?orderId=${encodeURIComponent(oid)}` : '';
+      window.location.href = "../thankyou.html" + qs;
+    } catch (err) {
+      console.error("Finalize error:", err);
+      showSpinner(false);
+      showError("Payment verified but an error occurred finalizing your order. Contact support with tx_ref: " + txRef);
+      if (payBtn) payBtn.disabled = false;
+    }
   }
-}
 
-/* After server-side verification success, write order to Firestore */
-async function onPaymentVerified(verificationData, transaction_id, tx_ref) {
-  // verificationData should contain keys like status, amount, currency, customer, etc.
+  const fwConfig = {
+    public_key: FLW_PUBLIC_KEY,
+    tx_ref: txRef,
+    amount: Number(subtotal),
+    currency: selectedCurrency,
+    customer: { email: email, phonenumber: phone, name: name },
+    customizations: { title: "Sérac", description: "Order Payment", logo: "https://brandisby.com/assets/logo.png" },
+
+    callback: async function (data) {
+      paymentCallbackHandled = true;
+      showSpinner(true);
+      try {
+        const returnedTxRef = data.tx_ref || data.data?.tx_ref || txRef;
+        const flwRef = data.flw_ref || data.transaction_id || data.transactionId || data.data?.id || null;
+        if (!flwRef) throw new Error("Missing Flutterwave transaction id (flwRef). Verification cannot proceed.");
+
+        const payload = {
+          transaction_id: flwRef,
+          tx_ref: returnedTxRef,
+          orderData: baseOrder,
+          quoteId: quoteId || null,
+          expectedAmount: Number(subtotal),
+          currency: selectedCurrency,
+        };
+
+        const verifyResponse = await verifyPayment(payload);
+
+        if (verifyResponse && (verifyResponse.status === "success" || verifyResponse.success === true)) {
+          await finalizeAfterSuccess(verifyResponse);
+        } else {
+          throw new Error(verifyResponse && (verifyResponse.message || verifyResponse.error) ? (verifyResponse.message || verifyResponse.error) : "Payment verification failed on serverless.");
+        }
+      } catch (err) {
+        console.error("Verification or finalize error:", err);
+        showSpinner(false);
+        if (payBtn) payBtn.disabled = false;
+        showError("Payment succeeded but verification failed. Please contact support with your transaction reference.");
+      }
+    },
+
+    onclose: function () {
+      if (payBtn) payBtn.disabled = false;
+      showSpinner(false);
+    }
+  };
+
   try {
-    showModal(`<h3>Saving order</h3><div>Finalizing and saving your order. This will only happen once we confirm the payment.</div>`);
-    await initFirebase();
-    const { db, serverTimestamp, collection, addDoc } = window.__firebase;
-
-    const orderPayload = {
-      user: {
-        firstName: $("firstName").value.trim(),
-        lastName: $("lastName").value.trim(),
-        email: $("email").value.trim(),
-        phone: $("phone").value.trim(),
-        address: $("address").value.trim(),
-        city: $("city").value.trim(),
-        postcode: $("postcode").value.trim(),
-        country: $("country").value
-      },
-      items: loadCart(),
-      notes: $("order-notes").value.trim(),
-      totals: window.__orderTotals,
-      payment: {
-        verified: true,
-        transaction_id: transaction_id,
-        tx_ref: tx_ref,
-        gateway: "flutterwave",
-        raw: verificationData
-      },
-      createdAt: serverTimestamp()
-    };
-
-    // Keep same collection names & field keys as original sample: orders collection
-    const ordersRef = collection(db, ORDERS_COLLECTION);
-    const docRef = await addDoc(ordersRef, orderPayload);
-
-    // Clear cart after successful order save
-    localStorage.removeItem(CART_KEY);
-    renderCart(); // re-render empty cart state
-    closeModal();
-    showModal(`<h3>Payment successful</h3><div>Your payment was verified and order has been placed. Order ID: <strong>${docRef.id}</strong></div><div class="actions"><button onclick="closeModal()">Close</button></div>`);
+    if (typeof window.FlutterwaveCheckout === "function" || typeof window.FlutterwaveCheckout === "object") {
+      // FlutterwaveCheckout may be a function or a callable object depending on embed version
+      window.FlutterwaveCheckout(fwConfig);
+    } else {
+      throw new Error("Payment gateway not loaded");
+    }
   } catch (err) {
-    closeModal();
-    showModal(`<h3>Error saving order</h3><div class="error">${err.message}</div><div class="actions"><button onclick="closeModal()">Close</button></div>`);
+    showSpinner(false);
+    if (payBtn) payBtn.disabled = false;
+    console.error("Flutterwave invocation failed", err);
+    showError("Payment gateway is unavailable. Please try again later.");
+    return;
   }
+
+  /* Fallback poll (if callback not received) */
+  let fallbackAttempts = 0;
+  const maxFallbackAttempts = 6;
+  const fallbackIntervalMs = 3000;
+  const fallbackPayload = {
+    tx_ref: txRef,
+    flwRef: null,
+    orderData: baseOrder,
+    quoteId: quoteId || null,
+    expectedAmount: Number(subtotal),
+    currency: selectedCurrency
+  };
+
+  const fallbackTimer = setInterval(async () => {
+    if (paymentCallbackHandled) { clearInterval(fallbackTimer); return; }
+    fallbackAttempts++;
+    try {
+      const res = await verifyPayment(fallbackPayload);
+      if (res && (res.status === 'success' || res.success === true)) {
+        clearInterval(fallbackTimer);
+        paymentCallbackHandled = true;
+        await finalizeAfterSuccess(res);
+      }
+    } catch (err) {
+      if (fallbackAttempts >= maxFallbackAttempts) {
+        clearInterval(fallbackTimer);
+        showSpinner(false);
+        if (payBtn) payBtn.disabled = false;
+        showError("We couldn't confirm your payment automatically. If your payment was successful, please contact support with your tx_ref: " + txRef);
+      }
+    }
+  }, fallbackIntervalMs);
 }
 
-/* Attach listeners */
-function initListeners() {
-  // promo apply
-  $("apply-promo").addEventListener("click", () => applyPromo($("promo-code").value));
-
-  // pay button
-  $("pay-button").addEventListener("click", payWithFlutterwave);
-
-  // live validation on inputs
-  ["firstName","lastName","email","address","city","postcode","phone"].forEach(id => {
-    const el = $(id);
-    if (!el) return;
-    el.addEventListener("input", () => {
-      // lightweight validators
-      if (id === "email") validateField(id, v => /\S+@\S+\.\S+/.test(v), `err-${id}`);
-      else validateField(id, v => v.length >= 1, `err-${id}`);
-    });
+/* currency change */
+if (currencySelect) {
+  currencySelect.addEventListener('change', () => {
+    selectedCurrency = currencySelect.value;
+    localStorage.setItem(CURRENCY_KEY, selectedCurrency);
+    if (quote) renderOrderFromQuoteNormalized(quote, selectedCurrency, isPaidOrder);
   });
 }
 
-/* Initialize default UI state */
-async function init() {
-  renderCart();
-  initDeliveryOptions();
-  initListeners();
-  updateSummary();
-}
+/* header & hamburger */
+window.addEventListener('scroll', () => {
+  const header = document.querySelector('.site-header');
+  if (!header) return;
+  if (window.scrollY > 50) header.classList.add('scrolled'); else header.classList.remove('scrolled');
+});
+const hamburger = document.getElementById('hamburger');
+const headerRight = document.getElementById('headerRight');
+if (hamburger) hamburger.addEventListener('click', ()=> {
+  hamburger.classList.toggle('open');
+  if (headerRight) headerRight.classList.toggle('open');
+});
 
-/* Run init */
-init();
+/* bind pay button */
+if (payBtn) payBtn.addEventListener('click', initiatePaymentFlow);
 
-/* Expose closeModal to global scope for modal buttons inline */
-window.closeModal = closeModal;
+/* init */
+(async function init(){
+  try { if (currencySelect) currencySelect.value = selectedCurrency; } catch(e){}
+  try { if (cartCountElem) cartCountElem.textContent = (safeParseJSON(localStorage.getItem(STORAGE_KEY), []) || []).reduce((s,i)=>s + Number(i.quantity || 0), 0); } catch(e){ if (cartCountElem) cartCountElem.textContent = '0'; }
+  await loadCheckoutData();
+})();
 
+/* suppress noisy FP/Flutterwave errors (only known noise) */
+window.addEventListener('error', (e) => {
+  try {
+    const msg = (e && e.message) ? e.message.toLowerCase() : "";
+    const file = (e && e.filename) ? e.filename.toLowerCase() : "";
+    if (msg.includes('api key not found') || file.includes('metrics.flutterwave.com') || file.includes('loader_v') || file.includes('initfingerprint') || msg.includes('fpjs')) {
+      console.warn("Suppressed Flutterwave/fingerprint error:", e.message || e.filename);
+      e.preventDefault && e.preventDefault();
+    }
+  } catch(err) {}
+});
 </script>
-  
 </body>
 </html>
