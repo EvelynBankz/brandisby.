@@ -628,6 +628,7 @@ function normalizeOrderItems(items) {
   }));
 }
 // -------------------- RENDER PAID QUOTE UI --------------------
+// -------------------- RENDER PAID QUOTE UI --------------------
 function renderPaidOrderUI(quoteData) {
   if (!quoteData) return;
 
@@ -675,21 +676,15 @@ function renderPaidOrderUI(quoteData) {
     trackingElem.style.marginTop = "12px";
     trackingElem.style.color = "var(--accent)";
     trackingElem.style.fontWeight = "600";
-
-    // Insert in a safe order
-    if (heroH1 && heroH1.parentNode) {
-      heroH1.parentNode.insertBefore(trackingElem, heroH1.nextSibling);
-    } else if (heroP && heroP.parentNode) {
+    if (heroP && heroP.parentNode) {
       heroP.parentNode.insertBefore(trackingElem, heroP.nextSibling);
     } else if (hero && hero.parentNode) {
       hero.appendChild(trackingElem);
-    } else {
-      document.body.insertBefore(trackingElem, document.body.firstChild);
     }
   }
-  trackingElem.textContent = quoteData.trackingRef
-    ? "Your Order Reference: " + quoteData.trackingRef
-    : "Order reference not available yet.";
+  if (quoteData.trackingRef) {
+    trackingElem.textContent = "Your Order Reference: " + quoteData.trackingRef;
+  }
 
   // -------------------- SYNC CART COUNT --------------------
   updateCartCount();
@@ -744,7 +739,7 @@ window.addEventListener("pageshow", syncPaidQuoteUI);
 // -------------------- REALTIME CART UPDATE --------------------
 window.addEventListener("storage", () => updateCartCount());
 
-
+  
   
 function setCheckoutUI() {
   if (hero) hero.classList.remove('paid');
