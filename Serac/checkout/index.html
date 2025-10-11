@@ -627,17 +627,31 @@ function normalizeOrderItems(items) {
     variants: it.variants || [],
   }));
 }
+  
 function renderPaidOrderUI(quoteData) {
   renderOrderFromQuoteNormalized(quoteData, selectedCurrency, true);
+  
   if (hero) hero.classList.add('paid');
   if (heroH1) heroH1.textContent = "Order Summary";
   if (heroP) heroP.textContent = "Your order has been paid successfully.";
+
   if (payBtn) {
     payBtn.textContent = "Paid ✅";
     payBtn.disabled = true;
     payBtn.classList.add('paid-state');
   }
+
+  // -------------------- LOCK CURRENCY SELECTOR --------------------
+  const currencySelectorDiv = document.getElementById("currencySelector");
+  const currencySelector = document.getElementById("currency");
+  if (currencySelectorDiv && currencySelector) {
+    currencySelector.value = selectedCurrency; // set to the currency user paid in
+    currencySelector.disabled = true;           // disable changing it
+    currencySelectorDiv.style.display = "block"; // show the div if hidden
+    currencySelector.style.opacity = 0.6;       // optional: visually indicate disabled
+  }
 }
+
 function setCheckoutUI() {
   if (hero) hero.classList.remove('paid');
   if (heroH1) heroH1.textContent = "Checkout";
