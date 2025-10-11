@@ -839,7 +839,10 @@ async function initiatePaymentFlow(ev) {
       description: "Order Payment",
       logo: "../assets/logo.png"
     },
+
+    /* ✅ Payment success handler */
     callback: async function (data) {
+      if (paymentCallbackHandled) return;
       paymentCallbackHandled = true;
       showSpinner(true);
 
@@ -871,12 +874,13 @@ async function initiatePaymentFlow(ev) {
             verifyResponse.verified === true)
         ) {
           await finalizeAfterSuccess(verifyResponse);
+          localStorage.removeItem(STORAGE_KEY); // ✅ Clear cart
+          if (cartCountElem) cartCountElem.textContent = "0";
+          window.location.href = "../thankyou.html"; // ✅ Redirect
         } else {
           console.warn("Verification failed:", verifyResponse);
           showSpinner(false);
-          showError(
-            "Payment verification failed. If funds were deducted, contact support with tx_ref: " + txRef
-          );
+          showError("Payment verification failed. If funds were deducted, contact support with tx_ref: " + txRef);
           if (payBtn) {
             payBtn.disabled = false;
             payBtn.dataset.processing = "0";
@@ -892,17 +896,25 @@ async function initiatePaymentFlow(ev) {
         }
       }
     },
+
+    /* ❌ Payment cancelled handler */
     onclose: function () {
+      if (paymentCallbackHandled) return;
       paymentCallbackHandled = true;
+
       showSpinner(false);
-      showError("Payment window closed or cancelled.");
+      showError("Payment was cancelled. Please complete your checkout to continue.");
+
       if (payBtn) {
         payBtn.disabled = false;
         payBtn.dataset.processing = "0";
       }
+
+      window.location.href = "../checkout.html"; // ✅ Return to checkout
     }
   };
 
+  /* 🟦 Launch Flutterwave */
   try {
     FlutterwaveCheckout(fwConfig);
   } catch (err) {
@@ -915,6 +927,7 @@ async function initiatePaymentFlow(ev) {
     showError("Payment gateway unavailable. Try again later.");
   }
 
+  /* 🟨 Poll fallback to recheck payment if callback not triggered */
   let attempts = 0;
   const maxAttempts = 6;
   const poll = setInterval(async () => {
