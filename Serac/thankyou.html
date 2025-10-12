@@ -205,87 +205,162 @@
   <footer><p>© 2025 Sérac</p></footer>
 
   <script type="module">
-    // Hamburger toggle
-    document.getElementById('hamburger').addEventListener('click',()=>{
-      document.querySelector('.header-right').classList.toggle('open');
-      document.getElementById('hamburger').classList.toggle('open');
-    });
+  // Hamburger toggle
+  document.getElementById('hamburger').addEventListener('click', () => {
+    document.querySelector('.header-right').classList.toggle('open');
+    document.getElementById('hamburger').classList.toggle('open');
+  });
 
-    // Firestore setup
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-app.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-firestore.js";
+  // Firebase setup
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-app.js";
+  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-firestore.js";
 
-        /* CONFIG */
-    const firebaseConfig = {
-      apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
-      authDomain: "brandisby.firebaseapp.com",
-      projectId: "brandisby",
-      storageBucket: "brandisby.firebasestorage.app",
-      messagingSenderId: "87213267039",
-      appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
-    };
-    
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+  const firebaseConfig = {
+    apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
+    authDomain: "brandisby.firebaseapp.com",
+    projectId: "brandisby",
+    storageBucket: "brandisby.firebasestorage.app",
+    messagingSenderId: "87213267039",
+    appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
+  };
 
-    // Display order
-    async function displayOrder() {
-      const detailsDiv = document.getElementById('orderDetails');
-      const refBox = document.getElementById('orderReferenceBox');
-      const refNote = document.getElementById('orderReferenceNote');
-      const trackBtn = document.getElementById('trackOrderBtn');
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
-      let order = JSON.parse(localStorage.getItem('lastOrder_serac'));
+  async function displayOrder() {
+    const detailsDiv = document.getElementById("orderDetails");
+    const refBox = document.getElementById("orderReferenceBox");
+    const refNote = document.getElementById("orderReferenceNote");
+    const trackBtn = document.getElementById("trackOrderBtn");
 
-      if (!order) {
-        const params = new URLSearchParams(window.location.search);
-        const orderId = params.get('orderId');
-        if (orderId) {
-          try {
-            const docSnap = await getDoc(doc(db, "brands", "serac", "orders", orderId));
-            if (docSnap.exists()) order = { orderId, ...docSnap.data() };
-          } catch (err) {
-            console.error("Error loading order:", err);
-          }
+    let order = JSON.parse(localStorage.getItem("lastOrder_serac"));
+    let paidQuoteInfo = JSON.parse(localStorage.getItem("paidQuoteInfo") || "null");
+
+    // Try to load from quote
+    if (!order && paidQuoteInfo?.quoteId) {
+      try {
+        const quoteRef = doc(db, "brands", "serac", "quotes", paidQuoteInfo.quoteId);
+        const quoteSnap = await getDoc(quoteRef);
+        if (quoteSnap.exists()) {
+          const quoteData = quoteSnap.data();
+          order = {
+            ...quoteData,
+            orderId: quoteData.orderId || paidQuoteInfo.quoteId,
+            trackingRef: quoteData.trackingRef || paidQuoteInfo.trackingRef,
+            source: "quote",
+          };
         }
+      } catch (err) {
+        console.error("Error loading quote data:", err);
       }
-
-      if (!order) {
-        detailsDiv.innerHTML = "<p>Unable to load your order details.</p>";
-        refBox.textContent = "No order reference available.";
-        trackBtn.style.display = "none";
-        return;
-      }
-
-      // Order Reference
-      const ref = order.trackingRef || order.orderId || "N/A";
-      refBox.textContent = "Order Reference: " + ref;
-      refNote.textContent = "Track your order anytime using this reference.";
-      trackBtn.href = "trackorder.html?ref=" + encodeURIComponent(ref);
-
-      // Details
-      let html = `
-        <h3>Order Details</h3>
-        <ul>
-          <li><strong>Name:</strong> ${order.name || "-"}</li>
-          <li><strong>Email:</strong> ${order.email || "-"}</li>
-          <li><strong>Phone:</strong> ${order.phone || "-"}</li>
-          <li><strong>Address:</strong> ${order.address || "-"}</li>
-          <li><strong>Currency:</strong> ${order.currency || "-"}</li>
-          <li><strong>Total Paid:</strong> ${order.currency || ""} ${order.total || "-"}</li>
-        </ul>
-        <h3>Items</h3>
-        <ul>`;
-      (order.items || []).forEach(item=>{
-        html += `<li>${item.name} (x${item.quantity || 1})</li>`;
-      });
-      html += `</ul>`;
-      detailsDiv.innerHTML = html;
-
-      localStorage.removeItem('lastOrder_serac');
     }
 
-    document.addEventListener('DOMContentLoaded', displayOrder);
-  </script>
+    // Try to load from Firestore if ?orderId param
+    if (!order) {
+      const params = new URLSearchParams(window.location.search);
+      const orderId = params.get("orderId");
+      if (orderId) {
+        try {
+          const orderSnap = await getDoc(doc(db, "brands", "serac", "orders", orderId));
+          if (orderSnap.exists()) order = { orderId, ...orderSnap.data() };
+        } catch (err) {
+          console.error("Error loading order:", err);
+        }
+      }
+    }
+
+    // Handle no order
+    if (!order) {
+      detailsDiv.innerHTML = "<p>Unable to load your order details.</p>";
+      refBox.textContent = "No order reference available.";
+      trackBtn.style.display = "none";
+      return;
+    }
+
+    // Display order reference
+    const ref = order.trackingRef || order.orderId || "N/A";
+    refBox.textContent = ref;
+    refNote.textContent = "Track your order anytime using this reference number.";
+    trackBtn.href = "trackorder.html?ref=" + encodeURIComponent(ref);
+
+    // Copy reference on click + animate
+    refBox.style.cursor = "pointer";
+    refBox.title = "Click to copy order reference";
+    refBox.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(ref);
+        showCopyPopup("Copied!");
+        flashHighlight(refBox);
+      } catch (e) {
+        console.error("Clipboard copy failed:", e);
+      }
+    });
+
+    // Display order details
+    let html = `
+      <h3>Order Details</h3>
+      <ul>
+        <li><strong>Name:</strong> ${order.name || "-"}</li>
+        <li><strong>Email:</strong> ${order.email || "-"}</li>
+        <li><strong>Phone:</strong> ${order.phone || "-"}</li>
+        <li><strong>Address:</strong> ${order.address || "-"}</li>
+        <li><strong>Currency:</strong> ${order.currency || "-"}</li>
+        <li><strong>Total Paid:</strong> ${order.currency || ""} ${order.total || "-"}</li>
+      </ul>
+      <h3>Items</h3>
+      <ul>`;
+    (order.items || []).forEach(item => {
+      html += `<li>${item.name} (x${item.quantity || 1})</li>`;
+    });
+    html += `</ul>`;
+    detailsDiv.innerHTML = html;
+
+    localStorage.removeItem("lastOrder_serac");
+  }
+
+  // Small popup animation
+  function showCopyPopup(text) {
+    let popup = document.createElement("div");
+    popup.textContent = text;
+    popup.style.position = "fixed";
+    popup.style.bottom = "40px";
+    popup.style.left = "50%";
+    popup.style.transform = "translateX(-50%)";
+    popup.style.background = "#333";
+    popup.style.color = "#fff";
+    popup.style.padding = "10px 18px";
+    popup.style.borderRadius = "8px";
+    popup.style.boxShadow = "0 2px 6px rgba(0,0,0,0.2)";
+    popup.style.fontSize = "14px";
+    popup.style.zIndex = "9999";
+    popup.style.opacity = "0";
+    popup.style.transition = "opacity 0.3s ease";
+    document.body.appendChild(popup);
+
+    requestAnimationFrame(() => (popup.style.opacity = "1"));
+    setTimeout(() => {
+      popup.style.opacity = "0";
+      setTimeout(() => popup.remove(), 300);
+    }, 2000);
+  }
+
+  // Flash highlight animation
+  function flashHighlight(element) {
+    const accent = getComputedStyle(document.documentElement)
+      .getPropertyValue("--accent") || "#4CAF50";
+
+    const originalBg = element.style.backgroundColor;
+    element.style.transition = "background-color 0.4s ease";
+    element.style.backgroundColor = accent.trim() || "#4CAF50";
+    element.style.color = "#fff";
+
+    setTimeout(() => {
+      element.style.backgroundColor = originalBg || "";
+      element.style.color = "";
+    }, 400);
+  }
+
+  document.addEventListener("DOMContentLoaded", displayOrder);
+</script>
 </body>
 </html>
