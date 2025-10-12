@@ -190,10 +190,12 @@
   <section class="thankyou-section">
     <div class="thankyou-box">
       <h2>We’ve received your order 🎉</h2>
-      <p>Thank you for shopping with <strong>Sérac</strong>. Your order is being processed and you’ll receive a confirmation email shortly.</p>
+      <p>Thank you for shopping with <strong>Sérac</strong>. Your order is now being processed.</p>
 
       <div id="orderReferenceBox"></div>
       <p id="orderReferenceNote"></p>
+
+      <button id="sendEmailBtn" class="btn-secondary">Send to my email</button>
 
       <div class="order-details" id="orderDetails"></div>
 
@@ -204,14 +206,25 @@
 
   <footer><p>© 2025 Sérac</p></footer>
 
- <script type="module">
-  // ✅ Hamburger toggle
-  document.getElementById("hamburger").addEventListener("click", () => {
-    document.querySelector(".header-right").classList.toggle("open");
-    document.getElementById("hamburger").classList.toggle("open");
+<script type="module">
+  /* ------------------ HAMBURGER MENU ------------------ */
+  const hamburger = document.getElementById("hamburger");
+  const headerRight = document.querySelector(".header-right");
+
+  hamburger.addEventListener("click", (e) => {
+    e.stopPropagation();
+    hamburger.classList.toggle("open");
+    headerRight.classList.toggle("open");
   });
 
-  // ✅ Firebase setup
+  document.addEventListener("click", (e) => {
+    if (!headerRight.contains(e.target) && !hamburger.contains(e.target)) {
+      headerRight.classList.remove("open");
+      hamburger.classList.remove("open");
+    }
+  });
+
+  /* ------------------ FIREBASE INIT ------------------ */
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-app.js";
   import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-firestore.js";
 
@@ -227,17 +240,18 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  // ✅ Main display logic
+  /* ------------------ DISPLAY ORDER ------------------ */
   async function displayOrder() {
     const detailsDiv = document.getElementById("orderDetails");
     const refBox = document.getElementById("orderReferenceBox");
     const refNote = document.getElementById("orderReferenceNote");
     const trackBtn = document.getElementById("trackOrderBtn");
+    const sendEmailBtn = document.getElementById("sendEmailBtn"); // ✅ new button
 
     let order = JSON.parse(localStorage.getItem("lastOrder_serac"));
     let paidQuoteInfo = JSON.parse(localStorage.getItem("paidQuoteInfo") || "null");
 
-    // --- Try loading QUOTE-based order ---
+    // --- QUOTE-based order ---
     if (!order && paidQuoteInfo?.quoteId) {
       try {
         const quoteRef = doc(db, "brands", "serac", "quotes", paidQuoteInfo.quoteId);
@@ -254,7 +268,7 @@
             address: q.address || q.shippingAddress || "-",
             currency: q.currency || "USD",
             total: q.total || q.amount || "-",
-            items: q.items || q.products || []
+            items: q.items || q.products || [],
           };
         }
       } catch (err) {
@@ -262,7 +276,7 @@
       }
     }
 
-    // --- Try loading CART-based order ---
+    // --- CART-based order ---
     if (!order) {
       const params = new URLSearchParams(window.location.search);
       const orderId = params.get("orderId");
@@ -281,7 +295,7 @@
               address: o.address || o.customer?.address || "-",
               currency: o.currency || "USD",
               total: o.total || "-",
-              items: o.items || []
+              items: o.items || [],
             };
           }
         } catch (err) {
@@ -295,16 +309,17 @@
       detailsDiv.innerHTML = "<p>Unable to load your order details.</p>";
       refBox.textContent = "No order reference available.";
       trackBtn.style.display = "none";
+      sendEmailBtn.style.display = "none";
       return;
     }
 
-    // --- Order Reference Display ---
+    // --- Reference Display ---
     const ref = order.trackingRef || order.id || "N/A";
     refBox.textContent = ref;
     refNote.textContent = "Track your order anytime using this reference number.";
     trackBtn.href = "trackorder.html?ref=" + encodeURIComponent(ref);
 
-    // --- Copy reference on click ---
+    // --- Copy Reference ---
     refBox.style.cursor = "pointer";
     refBox.title = "Click to copy order reference";
     refBox.addEventListener("click", async () => {
@@ -314,6 +329,36 @@
         flashHighlight(refBox);
       } catch (e) {
         console.error("Clipboard copy failed:", e);
+      }
+    });
+
+    // --- Send to Email (via Vercel serverless endpoint) ---
+    sendEmailBtn.addEventListener("click", async () => {
+      sendEmailBtn.disabled = true;
+      sendEmailBtn.textContent = "Sending...";
+      try {
+        const response = await fetch("/api/sendTrackingEmail", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: order.email,
+            name: order.name,
+            trackingRef: ref,
+            type: order.type || "order"
+          })
+        });
+
+        if (response.ok) {
+          showCopyPopup("Tracking number sent to your email!");
+        } else {
+          showCopyPopup("Failed to send email. Try again.");
+        }
+      } catch (err) {
+        console.error("Error sending email:", err);
+        showCopyPopup("Error occurred while sending.");
+      } finally {
+        sendEmailBtn.disabled = false;
+        sendEmailBtn.textContent = "Send to my email";
       }
     });
 
@@ -340,14 +385,14 @@
     html += `</ul>`;
     detailsDiv.innerHTML = html;
 
-    // --- Clean up storage ---
+    // --- Clean up localStorage ---
     localStorage.removeItem("lastOrder_serac");
     localStorage.removeItem("paidQuoteInfo");
   }
 
-  // ✅ Popup feedback
+  /* ------------------ UTILITIES ------------------ */
   function showCopyPopup(text) {
-    let popup = document.createElement("div");
+    const popup = document.createElement("div");
     popup.textContent = text;
     popup.style.position = "fixed";
     popup.style.bottom = "40px";
@@ -370,13 +415,12 @@
     }, 2000);
   }
 
-  // ✅ Highlight animation
   function flashHighlight(element) {
     const accent = getComputedStyle(document.documentElement)
-      .getPropertyValue("--accent") || "#4CAF50";
+      .getPropertyValue("--accent") || "#B66E41";
     const originalBg = element.style.backgroundColor;
     element.style.transition = "background-color 0.4s ease";
-    element.style.backgroundColor = accent.trim() || "#4CAF50";
+    element.style.backgroundColor = accent.trim();
     element.style.color = "#fff";
     setTimeout(() => {
       element.style.backgroundColor = originalBg || "";
@@ -385,15 +429,6 @@
   }
 
   document.addEventListener("DOMContentLoaded", displayOrder);
-
-    // Hamburger toggle
-  const hamburger = document.getElementById('hamburger');
-  const navMenu = document.querySelector('.header-right');
-  hamburger.addEventListener('click', () => {
-    navMenu.classList.toggle('open');
-    hamburger.classList.toggle('open');
-  });
-   
 </script>
 </body>
 </html>
