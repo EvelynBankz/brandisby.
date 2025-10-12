@@ -118,7 +118,26 @@
   border: 1px solid #ccc;
   font-size: 0.9rem;
 }
- 
+
+
+ .toggleTable {
+  background: #8A4D2B;
+  color: #fff;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin: 10px 0;
+  font-size: 14px;
+  transition: background 0.3s, transform 0.3s;
+}
+.toggleTable:hover {
+  background: #A35D39;
+  transform: scale(1.05);
+}
+.collapsed {
+  display: none;
+}
 </style>
 </head>
 <body>
@@ -197,6 +216,7 @@
       <option value="GBP">GBP</option>
     </select>
 
+   <button class="toggleTable" data-target="productsTable">˅ Hide Table</button>
     <table id="productsTable">
       <thead>
         <tr><th>Name</th><th>Price</th><th>Image</th><th>Customization</th><th>Published</th><th>Actions</th></tr>
@@ -252,7 +272,8 @@
       <option value="EUR">EUR</option>
       <option value="GBP">GBP</option>
     </select>
-
+   
+    <button class="toggleTable" data-target="quotesTable">˅ Hide Table</button>
     <table id="quotesTable">
       <thead>
         <tr><th>Customer</th><th>Email</th><th>Checkout Link</th><th>Total</th><th>Status</th><th>Actions</th></tr>
@@ -302,7 +323,8 @@
       <input type="date" id="exportTo">
       <button id="exportOrders">Export Orders CSV</button>
     </div>
-
+   
+     <button class="toggleTable" data-target="ordersTable">˅ Hide Table</button>
       <table id="ordersTable">
     <thead>
       <tr>
@@ -1377,6 +1399,23 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   startSubscriptions();
+});
+
+
+document.querySelectorAll(".toggleTable").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const targetId = btn.dataset.target;
+    const table = document.getElementById(targetId);
+    if (!table) return;
+
+    table.classList.toggle("collapsed");
+
+    if (table.classList.contains("collapsed")) {
+      btn.textContent = "˄ Show Table";
+    } else {
+      btn.textContent = "˅ Hide Table";
+    }
+  });
 });
 </script>
 
