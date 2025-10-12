@@ -207,24 +207,17 @@
   <footer><p>© 2025 Sérac</p></footer>
 
 <script type="module">
-  /* ------------------ HAMBURGER MENU ------------------ */
+  // ------------------ Hamburger toggle ------------------
   const hamburger = document.getElementById("hamburger");
   const headerRight = document.querySelector(".header-right");
+  if (hamburger) {
+    hamburger.addEventListener("click", () => {
+      headerRight.classList.toggle("open");
+      hamburger.classList.toggle("open");
+    });
+  }
 
-  hamburger.addEventListener("click", (e) => {
-    e.stopPropagation();
-    hamburger.classList.toggle("open");
-    headerRight.classList.toggle("open");
-  });
-
-  document.addEventListener("click", (e) => {
-    if (!headerRight.contains(e.target) && !hamburger.contains(e.target)) {
-      headerRight.classList.remove("open");
-      hamburger.classList.remove("open");
-    }
-  });
-
-  /* ------------------ FIREBASE INIT ------------------ */
+  // ------------------ Firebase setup ------------------
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-app.js";
   import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-firestore.js";
 
@@ -240,67 +233,66 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  /* ------------------ DISPLAY ORDER ------------------ */
+  // ------------------ Display Order ------------------
   async function displayOrder() {
     const detailsDiv = document.getElementById("orderDetails");
     const refBox = document.getElementById("orderReferenceBox");
     const refNote = document.getElementById("orderReferenceNote");
     const trackBtn = document.getElementById("trackOrderBtn");
-    const sendEmailBtn = document.getElementById("sendEmailBtn"); // ✅ new button
+    const sendEmailBtn = document.getElementById("sendToEmailBtn");
 
     let order = JSON.parse(localStorage.getItem("lastOrder_serac"));
-    let paidQuoteInfo = JSON.parse(localStorage.getItem("paidQuoteInfo") || "null");
+    const paidQuoteInfo = JSON.parse(localStorage.getItem("paidQuoteInfo") || "null");
+    const params = new URLSearchParams(window.location.search);
+    const orderId = params.get("orderId");
+    const quoteId = params.get("quoteId");
 
-    // --- QUOTE-based order ---
-    if (!order && paidQuoteInfo?.quoteId) {
+    // --- Try loading from quote ---
+    if (!order && (quoteId || paidQuoteInfo?.quoteId)) {
+      const qid = quoteId || paidQuoteInfo.quoteId;
       try {
-        const quoteRef = doc(db, "brands", "serac", "quotes", paidQuoteInfo.quoteId);
-        const quoteSnap = await getDoc(quoteRef);
-        if (quoteSnap.exists()) {
-          const q = quoteSnap.data();
+        const qSnap = await getDoc(doc(db, "brands", "serac", "quotes", qid));
+        if (qSnap.exists()) {
+          const q = qSnap.data();
           order = {
-            id: paidQuoteInfo.quoteId,
-            trackingRef: q.trackingRef || paidQuoteInfo.trackingRef,
+            id: qid,
             type: "quote",
+            trackingRef: q.trackingRef || paidQuoteInfo?.trackingRef,
             name: q.name || q.fullName || "-",
             email: q.email || "-",
             phone: q.phone || q.phoneNumber || "-",
             address: q.address || q.shippingAddress || "-",
             currency: q.currency || "USD",
-            total: q.total || q.amount || "-",
-            items: q.items || q.products || [],
+            total: q.amount || q.total || "-",
+            items: q.items || q.products || []
           };
         }
       } catch (err) {
-        console.error("Error loading quote order:", err);
+        console.error("Error loading quote:", err);
       }
     }
 
-    // --- CART-based order ---
-    if (!order) {
-      const params = new URLSearchParams(window.location.search);
-      const orderId = params.get("orderId");
-      if (orderId) {
-        try {
-          const docSnap = await getDoc(doc(db, "brands", "serac", "orders", orderId));
-          if (docSnap.exists()) {
-            const o = docSnap.data();
-            order = {
-              id: orderId,
-              trackingRef: o.trackingRef,
-              type: "order",
-              name: o.name || o.customer?.name || "-",
-              email: o.email || o.customer?.email || "-",
-              phone: o.phone || o.customer?.phone || "-",
-              address: o.address || o.customer?.address || "-",
-              currency: o.currency || "USD",
-              total: o.total || "-",
-              items: o.items || [],
-            };
-          }
-        } catch (err) {
-          console.error("Error loading order:", err);
+    // --- Try loading from order ---
+    if (!order && orderId) {
+      try {
+        const oSnap = await getDoc(doc(db, "brands", "serac", "orders", orderId));
+        if (oSnap.exists()) {
+          const o = oSnap.data();
+          order = {
+            id: orderId,
+            type: "order",
+            trackingRef: o.trackingRef,
+            name: o.name || "-",
+            email: o.email || "-",
+            phone: o.phone || "-",
+            address: o.address || "-",
+            currency: o.currency || "USD",
+            total: o.amount || o.total || "-",
+            items: o.items || []
+          };
         }
+      } catch (err) {
+        console.error("Error loading order:", err);
       }
     }
 
@@ -313,13 +305,13 @@
       return;
     }
 
-    // --- Reference Display ---
+    // --- Order Reference ---
     const ref = order.trackingRef || order.id || "N/A";
     refBox.textContent = ref;
     refNote.textContent = "Track your order anytime using this reference number.";
     trackBtn.href = "trackorder.html?ref=" + encodeURIComponent(ref);
 
-    // --- Copy Reference ---
+    // --- Copy reference ---
     refBox.style.cursor = "pointer";
     refBox.title = "Click to copy order reference";
     refBox.addEventListener("click", async () => {
@@ -332,37 +324,7 @@
       }
     });
 
-    // --- Send to Email (via Vercel serverless endpoint) ---
-    sendEmailBtn.addEventListener("click", async () => {
-      sendEmailBtn.disabled = true;
-      sendEmailBtn.textContent = "Sending...";
-      try {
-        const response = await fetch("/api/sendTrackingEmail", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: order.email,
-            name: order.name,
-            trackingRef: ref,
-            type: order.type || "order"
-          })
-        });
-
-        if (response.ok) {
-          showCopyPopup("Tracking number sent to your email!");
-        } else {
-          showCopyPopup("Failed to send email. Try again.");
-        }
-      } catch (err) {
-        console.error("Error sending email:", err);
-        showCopyPopup("Error occurred while sending.");
-      } finally {
-        sendEmailBtn.disabled = false;
-        sendEmailBtn.textContent = "Send to my email";
-      }
-    });
-
-    // --- Render Order Details ---
+    // --- Render details ---
     let html = `
       <h3>Order Details</h3>
       <ul>
@@ -375,38 +337,47 @@
       </ul>
       <h3>Items</h3>
       <ul>`;
-
-    (order.items || []).forEach((item) => {
-      const itemName = item.name || item.productName || "Item";
-      const qty = item.quantity || item.qty || 1;
-      html += `<li>${itemName} (x${qty})</li>`;
+    (order.items || []).forEach(item => {
+      const n = item.name || item.productName || "Item";
+      const q = item.quantity || item.qty || 1;
+      html += `<li>${n} (x${q})</li>`;
     });
-
     html += `</ul>`;
     detailsDiv.innerHTML = html;
 
-    // --- Clean up localStorage ---
+    // --- Send to email button ---
+    sendEmailBtn.addEventListener("click", () => {
+      const subject = encodeURIComponent("Your Order Reference");
+      const body = encodeURIComponent(
+        `Thank you for your order!\n\nYour Order Reference: ${ref}\nYou can track it anytime at:\n${window.location.origin}/trackorder.html?ref=${ref}`
+      );
+      window.location.href = `mailto:${order.email}?subject=${subject}&body=${body}`;
+    });
+
+    // Cleanup
     localStorage.removeItem("lastOrder_serac");
     localStorage.removeItem("paidQuoteInfo");
   }
 
-  /* ------------------ UTILITIES ------------------ */
+  // ------------------ Helpers ------------------
   function showCopyPopup(text) {
     const popup = document.createElement("div");
     popup.textContent = text;
-    popup.style.position = "fixed";
-    popup.style.bottom = "40px";
-    popup.style.left = "50%";
-    popup.style.transform = "translateX(-50%)";
-    popup.style.background = "#333";
-    popup.style.color = "#fff";
-    popup.style.padding = "10px 18px";
-    popup.style.borderRadius = "8px";
-    popup.style.boxShadow = "0 2px 6px rgba(0,0,0,0.2)";
-    popup.style.fontSize = "14px";
-    popup.style.zIndex = "9999";
-    popup.style.opacity = "0";
-    popup.style.transition = "opacity 0.3s ease";
+    Object.assign(popup.style, {
+      position: "fixed",
+      bottom: "40px",
+      left: "50%",
+      transform: "translateX(-50%)",
+      background: "#333",
+      color: "#fff",
+      padding: "10px 18px",
+      borderRadius: "8px",
+      boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+      fontSize: "14px",
+      zIndex: "9999",
+      opacity: "0",
+      transition: "opacity 0.3s ease"
+    });
     document.body.appendChild(popup);
     requestAnimationFrame(() => (popup.style.opacity = "1"));
     setTimeout(() => {
@@ -416,19 +387,19 @@
   }
 
   function flashHighlight(element) {
-    const accent = getComputedStyle(document.documentElement)
-      .getPropertyValue("--accent") || "#B66E41";
-    const originalBg = element.style.backgroundColor;
+    const accent = getComputedStyle(document.documentElement).getPropertyValue("--accent") || "#4CAF50";
+    const original = element.style.backgroundColor;
     element.style.transition = "background-color 0.4s ease";
     element.style.backgroundColor = accent.trim();
     element.style.color = "#fff";
     setTimeout(() => {
-      element.style.backgroundColor = originalBg || "";
+      element.style.backgroundColor = original || "";
       element.style.color = "";
     }, 400);
   }
 
   document.addEventListener("DOMContentLoaded", displayOrder);
 </script>
+
 </body>
 </html>
