@@ -204,14 +204,14 @@
 
   <footer><p>© 2025 Sérac</p></footer>
 
-  <script type="module">
-  // Hamburger toggle
-  document.getElementById('hamburger').addEventListener('click', () => {
-    document.querySelector('.header-right').classList.toggle('open');
-    document.getElementById('hamburger').classList.toggle('open');
+ <script type="module">
+  // ✅ Hamburger toggle
+  document.getElementById("hamburger").addEventListener("click", () => {
+    document.querySelector(".header-right").classList.toggle("open");
+    document.getElementById("hamburger").classList.toggle("open");
   });
 
-  // Firebase setup
+  // ✅ Firebase setup
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-app.js";
   import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-firestore.js";
 
@@ -227,6 +227,7 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
+  // ✅ Main display logic
   async function displayOrder() {
     const detailsDiv = document.getElementById("orderDetails");
     const refBox = document.getElementById("orderReferenceBox");
@@ -236,40 +237,60 @@
     let order = JSON.parse(localStorage.getItem("lastOrder_serac"));
     let paidQuoteInfo = JSON.parse(localStorage.getItem("paidQuoteInfo") || "null");
 
-    // Try to load from quote
+    // --- Try loading QUOTE-based order ---
     if (!order && paidQuoteInfo?.quoteId) {
       try {
         const quoteRef = doc(db, "brands", "serac", "quotes", paidQuoteInfo.quoteId);
         const quoteSnap = await getDoc(quoteRef);
         if (quoteSnap.exists()) {
-          const quoteData = quoteSnap.data();
+          const q = quoteSnap.data();
           order = {
-            ...quoteData,
-            orderId: quoteData.orderId || paidQuoteInfo.quoteId,
-            trackingRef: quoteData.trackingRef || paidQuoteInfo.trackingRef,
-            source: "quote",
+            id: paidQuoteInfo.quoteId,
+            trackingRef: q.trackingRef || paidQuoteInfo.trackingRef,
+            type: "quote",
+            name: q.name || q.fullName || "-",
+            email: q.email || "-",
+            phone: q.phone || q.phoneNumber || "-",
+            address: q.address || q.shippingAddress || "-",
+            currency: q.currency || "USD",
+            total: q.total || q.amount || "-",
+            items: q.items || q.products || []
           };
         }
       } catch (err) {
-        console.error("Error loading quote data:", err);
+        console.error("Error loading quote order:", err);
       }
     }
 
-    // Try to load from Firestore if ?orderId param
+    // --- Try loading CART-based order ---
     if (!order) {
       const params = new URLSearchParams(window.location.search);
       const orderId = params.get("orderId");
       if (orderId) {
         try {
-          const orderSnap = await getDoc(doc(db, "brands", "serac", "orders", orderId));
-          if (orderSnap.exists()) order = { orderId, ...orderSnap.data() };
+          const docSnap = await getDoc(doc(db, "brands", "serac", "orders", orderId));
+          if (docSnap.exists()) {
+            const o = docSnap.data();
+            order = {
+              id: orderId,
+              trackingRef: o.trackingRef,
+              type: "order",
+              name: o.name || o.customer?.name || "-",
+              email: o.email || o.customer?.email || "-",
+              phone: o.phone || o.customer?.phone || "-",
+              address: o.address || o.customer?.address || "-",
+              currency: o.currency || "USD",
+              total: o.total || "-",
+              items: o.items || []
+            };
+          }
         } catch (err) {
           console.error("Error loading order:", err);
         }
       }
     }
 
-    // Handle no order
+    // --- No order found ---
     if (!order) {
       detailsDiv.innerHTML = "<p>Unable to load your order details.</p>";
       refBox.textContent = "No order reference available.";
@@ -277,13 +298,13 @@
       return;
     }
 
-    // Display order reference
-    const ref = order.trackingRef || order.orderId || "N/A";
+    // --- Order Reference Display ---
+    const ref = order.trackingRef || order.id || "N/A";
     refBox.textContent = ref;
     refNote.textContent = "Track your order anytime using this reference number.";
     trackBtn.href = "trackorder.html?ref=" + encodeURIComponent(ref);
 
-    // Copy reference on click + animate
+    // --- Copy reference on click ---
     refBox.style.cursor = "pointer";
     refBox.title = "Click to copy order reference";
     refBox.addEventListener("click", async () => {
@@ -296,126 +317,35 @@
       }
     });
 
-    // Display order details
-    async function displayOrder() {
-  const detailsDiv = document.getElementById("orderDetails");
-  const refBox = document.getElementById("orderReferenceBox");
-  const refNote = document.getElementById("orderReferenceNote");
-  const trackBtn = document.getElementById("trackOrderBtn");
+    // --- Render Order Details ---
+    let html = `
+      <h3>Order Details</h3>
+      <ul>
+        <li><strong>Name:</strong> ${order.name}</li>
+        <li><strong>Email:</strong> ${order.email}</li>
+        <li><strong>Phone:</strong> ${order.phone}</li>
+        <li><strong>Address:</strong> ${order.address}</li>
+        <li><strong>Currency:</strong> ${order.currency}</li>
+        <li><strong>Total Paid:</strong> ${order.currency} ${order.total}</li>
+      </ul>
+      <h3>Items</h3>
+      <ul>`;
 
-  let order = JSON.parse(localStorage.getItem("lastOrder_serac"));
-  let paidQuoteInfo = JSON.parse(localStorage.getItem("paidQuoteInfo") || "null");
+    (order.items || []).forEach((item) => {
+      const itemName = item.name || item.productName || "Item";
+      const qty = item.quantity || item.qty || 1;
+      html += `<li>${itemName} (x${qty})</li>`;
+    });
 
-  // --- Try loading quote-based order ---
-  if (!order && paidQuoteInfo?.quoteId) {
-    try {
-      const quoteRef = doc(db, "brands", "serac", "quotes", paidQuoteInfo.quoteId);
-      const quoteSnap = await getDoc(quoteRef);
-      if (quoteSnap.exists()) {
-        const q = quoteSnap.data();
-        order = {
-          id: paidQuoteInfo.quoteId,
-          trackingRef: q.trackingRef || paidQuoteInfo.trackingRef,
-          type: "quote",
-          name: q.name || q.fullName || "-",
-          email: q.email || "-",
-          phone: q.phone || q.phoneNumber || "-",
-          address: q.address || q.shippingAddress || "-",
-          currency: q.currency || "USD",
-          total: q.total || q.amount || "-",
-          items: q.items || q.products || []
-        };
-      }
-    } catch (err) {
-      console.error("Error loading quote order:", err);
-    }
+    html += `</ul>`;
+    detailsDiv.innerHTML = html;
+
+    // --- Clean up storage ---
+    localStorage.removeItem("lastOrder_serac");
+    localStorage.removeItem("paidQuoteInfo");
   }
 
-  // --- Try loading cart-based order ---
-  if (!order) {
-    const params = new URLSearchParams(window.location.search);
-    const orderId = params.get("orderId");
-    if (orderId) {
-      try {
-        const docSnap = await getDoc(doc(db, "brands", "serac", "orders", orderId));
-        if (docSnap.exists()) {
-          const o = docSnap.data();
-          order = {
-            id: orderId,
-            trackingRef: o.trackingRef,
-            type: "order",
-            name: o.name || o.customer?.name || "-",
-            email: o.email || o.customer?.email || "-",
-            phone: o.phone || o.customer?.phone || "-",
-            address: o.address || o.customer?.address || "-",
-            currency: o.currency || "USD",
-            total: o.total || "-",
-            items: o.items || []
-          };
-        }
-      } catch (err) {
-        console.error("Error loading order:", err);
-      }
-    }
-  }
-
-  // --- No order found ---
-  if (!order) {
-    detailsDiv.innerHTML = "<p>Unable to load your order details.</p>";
-    refBox.textContent = "No order reference available.";
-    trackBtn.style.display = "none";
-    return;
-  }
-
-  // --- Order Reference ---
-  const ref = order.trackingRef || order.id || "N/A";
-  refBox.textContent = ref;
-  refNote.textContent = "Track your order anytime using this reference number.";
-  trackBtn.href = "trackorder.html?ref=" + encodeURIComponent(ref);
-
-  // --- Copy functionality with glow ---
-  refBox.style.cursor = "pointer";
-  refBox.title = "Click to copy order reference";
-  refBox.addEventListener("click", async () => {
-    try {
-      await navigator.clipboard.writeText(ref);
-      showCopyPopup("Copied!");
-      flashHighlight(refBox);
-    } catch (e) {
-      console.error("Clipboard copy failed:", e);
-    }
-  });
-
-  // --- Render Details ---
-  let html = `
-    <h3>Order Details</h3>
-    <ul>
-      <li><strong>Name:</strong> ${order.name}</li>
-      <li><strong>Email:</strong> ${order.email}</li>
-      <li><strong>Phone:</strong> ${order.phone}</li>
-      <li><strong>Address:</strong> ${order.address}</li>
-      <li><strong>Currency:</strong> ${order.currency}</li>
-      <li><strong>Total Paid:</strong> ${order.currency} ${order.total}</li>
-    </ul>
-    <h3>Items</h3>
-    <ul>`;
-
-  (order.items || []).forEach((item) => {
-    const itemName = item.name || item.productName || "Item";
-    const qty = item.quantity || item.qty || 1;
-    html += `<li>${itemName} (x${qty})</li>`;
-  });
-
-  html += `</ul>`;
-  detailsDiv.innerHTML = html;
-
-  // Cleanup
-  localStorage.removeItem("lastOrder_serac");
-  localStorage.removeItem("paidQuoteInfo");
-}
-
-
-  // Small popup animation
+  // ✅ Popup feedback
   function showCopyPopup(text) {
     let popup = document.createElement("div");
     popup.textContent = text;
@@ -433,7 +363,6 @@
     popup.style.opacity = "0";
     popup.style.transition = "opacity 0.3s ease";
     document.body.appendChild(popup);
-
     requestAnimationFrame(() => (popup.style.opacity = "1"));
     setTimeout(() => {
       popup.style.opacity = "0";
@@ -441,16 +370,14 @@
     }, 2000);
   }
 
-  // Flash highlight animation
+  // ✅ Highlight animation
   function flashHighlight(element) {
     const accent = getComputedStyle(document.documentElement)
       .getPropertyValue("--accent") || "#4CAF50";
-
     const originalBg = element.style.backgroundColor;
     element.style.transition = "background-color 0.4s ease";
     element.style.backgroundColor = accent.trim() || "#4CAF50";
     element.style.color = "#fff";
-
     setTimeout(() => {
       element.style.backgroundColor = originalBg || "";
       element.style.color = "";
