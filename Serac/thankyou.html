@@ -297,26 +297,123 @@
     });
 
     // Display order details
-    let html = `
-      <h3>Order Details</h3>
-      <ul>
-        <li><strong>Name:</strong> ${order.name || "-"}</li>
-        <li><strong>Email:</strong> ${order.email || "-"}</li>
-        <li><strong>Phone:</strong> ${order.phone || "-"}</li>
-        <li><strong>Address:</strong> ${order.address || "-"}</li>
-        <li><strong>Currency:</strong> ${order.currency || "-"}</li>
-        <li><strong>Total Paid:</strong> ${order.currency || ""} ${order.total || "-"}</li>
-      </ul>
-      <h3>Items</h3>
-      <ul>`;
-    (order.items || []).forEach(item => {
-      html += `<li>${item.name} (x${item.quantity || 1})</li>`;
-    });
-    html += `</ul>`;
-    detailsDiv.innerHTML = html;
+    async function displayOrder() {
+  const detailsDiv = document.getElementById("orderDetails");
+  const refBox = document.getElementById("orderReferenceBox");
+  const refNote = document.getElementById("orderReferenceNote");
+  const trackBtn = document.getElementById("trackOrderBtn");
 
-    localStorage.removeItem("lastOrder_serac");
+  let order = JSON.parse(localStorage.getItem("lastOrder_serac"));
+  let paidQuoteInfo = JSON.parse(localStorage.getItem("paidQuoteInfo") || "null");
+
+  // --- Try loading quote-based order ---
+  if (!order && paidQuoteInfo?.quoteId) {
+    try {
+      const quoteRef = doc(db, "brands", "serac", "quotes", paidQuoteInfo.quoteId);
+      const quoteSnap = await getDoc(quoteRef);
+      if (quoteSnap.exists()) {
+        const q = quoteSnap.data();
+        order = {
+          id: paidQuoteInfo.quoteId,
+          trackingRef: q.trackingRef || paidQuoteInfo.trackingRef,
+          type: "quote",
+          name: q.name || q.fullName || "-",
+          email: q.email || "-",
+          phone: q.phone || q.phoneNumber || "-",
+          address: q.address || q.shippingAddress || "-",
+          currency: q.currency || "USD",
+          total: q.total || q.amount || "-",
+          items: q.items || q.products || []
+        };
+      }
+    } catch (err) {
+      console.error("Error loading quote order:", err);
+    }
   }
+
+  // --- Try loading cart-based order ---
+  if (!order) {
+    const params = new URLSearchParams(window.location.search);
+    const orderId = params.get("orderId");
+    if (orderId) {
+      try {
+        const docSnap = await getDoc(doc(db, "brands", "serac", "orders", orderId));
+        if (docSnap.exists()) {
+          const o = docSnap.data();
+          order = {
+            id: orderId,
+            trackingRef: o.trackingRef,
+            type: "order",
+            name: o.name || o.customer?.name || "-",
+            email: o.email || o.customer?.email || "-",
+            phone: o.phone || o.customer?.phone || "-",
+            address: o.address || o.customer?.address || "-",
+            currency: o.currency || "USD",
+            total: o.total || "-",
+            items: o.items || []
+          };
+        }
+      } catch (err) {
+        console.error("Error loading order:", err);
+      }
+    }
+  }
+
+  // --- No order found ---
+  if (!order) {
+    detailsDiv.innerHTML = "<p>Unable to load your order details.</p>";
+    refBox.textContent = "No order reference available.";
+    trackBtn.style.display = "none";
+    return;
+  }
+
+  // --- Order Reference ---
+  const ref = order.trackingRef || order.id || "N/A";
+  refBox.textContent = ref;
+  refNote.textContent = "Track your order anytime using this reference number.";
+  trackBtn.href = "trackorder.html?ref=" + encodeURIComponent(ref);
+
+  // --- Copy functionality with glow ---
+  refBox.style.cursor = "pointer";
+  refBox.title = "Click to copy order reference";
+  refBox.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(ref);
+      showCopyPopup("Copied!");
+      flashHighlight(refBox);
+    } catch (e) {
+      console.error("Clipboard copy failed:", e);
+    }
+  });
+
+  // --- Render Details ---
+  let html = `
+    <h3>Order Details</h3>
+    <ul>
+      <li><strong>Name:</strong> ${order.name}</li>
+      <li><strong>Email:</strong> ${order.email}</li>
+      <li><strong>Phone:</strong> ${order.phone}</li>
+      <li><strong>Address:</strong> ${order.address}</li>
+      <li><strong>Currency:</strong> ${order.currency}</li>
+      <li><strong>Total Paid:</strong> ${order.currency} ${order.total}</li>
+    </ul>
+    <h3>Items</h3>
+    <ul>`;
+
+  (order.items || []).forEach((item) => {
+    const itemName = item.name || item.productName || "Item";
+    const qty = item.quantity || item.qty || 1;
+    html += `<li>${itemName} (x${qty})</li>`;
+  });
+
+  html += `</ul>`;
+  detailsDiv.innerHTML = html;
+
+  // Cleanup
+  localStorage.removeItem("lastOrder_serac");
+  localStorage.removeItem("paidQuoteInfo");
+}
+
 
   // Small popup animation
   function showCopyPopup(text) {
