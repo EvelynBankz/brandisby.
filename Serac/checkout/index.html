@@ -632,22 +632,41 @@ function normalizeOrderItems(items) {
 function renderPaidOrderUI(quoteData) {
   if (!quoteData) return;
 
-  // Render the quote/order items
+  // -------------------- Render Items --------------------
   renderOrderFromQuoteNormalized(quoteData, selectedCurrency, true);
 
-  // Mark hero section as paid
+  // -------------------- Hero Section --------------------
   if (hero) hero.classList.add('paid');
   if (heroH1) heroH1.textContent = "Order Summary";
   if (heroP) heroP.textContent = "Your order has been paid successfully.";
 
-  // Update pay button state
-  if (payBtn) {
-    payBtn.textContent = "Paid ✅";
-    payBtn.disabled = true;
-    payBtn.classList.add('paid-state');
+  // -------------------- Add Tracking Reference (Second Paragraph) --------------------
+  let trackingElem = document.querySelector("#trackingRefDisplay");
+  if (!trackingElem) {
+    trackingElem = document.createElement("p");
+    trackingElem.id = "trackingRefDisplay";
+    trackingElem.style.marginTop = "6px";
+    trackingElem.style.fontSize = "15px";
+    trackingElem.style.color = "var(--accent)";
+    trackingElem.style.fontWeight = "600";
+    trackingElem.style.letterSpacing = "0.3px";
+    trackingElem.style.textAlign = "center";
+
+    // insert right after heroP
+    if (heroP && heroP.parentNode) {
+      heroP.parentNode.insertBefore(trackingElem, heroP.nextSibling);
+    } else if (hero) {
+      hero.appendChild(trackingElem);
+    }
   }
 
-  // -------------------- LOCK CURRENCY SELECTOR --------------------
+  if (quoteData.trackingRef) {
+    trackingElem.textContent = `Order Reference: ${quoteData.trackingRef}`;
+  } else {
+    trackingElem.textContent = "";
+  }
+
+  // -------------------- Lock Currency --------------------
   const currencySelectorWrapper = document.querySelector("#currencySelector");
   const currencySelector = document.querySelector("#currency");
   if (currencySelectorWrapper && currencySelector) {
@@ -657,39 +676,27 @@ function renderPaidOrderUI(quoteData) {
     currencySelectorWrapper.style.pointerEvents = "none";
   }
 
-  // -------------------- LOCK BILLING DETAILS --------------------
+  // -------------------- Lock Billing Fields --------------------
   const billingFields = [nameInput, emailInput, phoneInput, addressInput];
   billingFields.forEach(field => {
     if (field) {
       field.value = quoteData[field.id] || field.value;
       field.disabled = true;
-      field.style.backgroundColor = "#202223"; // match order item background
+      field.style.backgroundColor = "#202223";
     }
   });
 
-  // -------------------- DISPLAY TRACKING REFERENCE --------------------
-  let trackingElem = document.querySelector("#trackingRefDisplay");
-  if (!trackingElem) {
-    trackingElem = document.createElement("div");
-    trackingElem.id = "trackingRefDisplay";
-    trackingElem.style.display = "block";
-    trackingElem.style.marginTop = "12px";
-    trackingElem.style.color = "var(--accent)";
-    trackingElem.style.fontWeight = "600";
-    if (heroP && heroP.parentNode) {
-      heroP.parentNode.insertBefore(trackingElem, heroP.nextSibling);
-    } else if (hero && hero.parentNode) {
-      hero.appendChild(trackingElem);
-    }
-  }
-  if (quoteData.trackingRef) {
-    trackingElem.textContent = "Your Order Reference: " + quoteData.trackingRef;
+  // -------------------- Pay Button Update --------------------
+  if (payBtn) {
+    payBtn.textContent = "Paid ✅";
+    payBtn.disabled = true;
+    payBtn.classList.add('paid-state');
   }
 
-  // -------------------- SYNC CART COUNT --------------------
+  // -------------------- Cart Sync --------------------
   updateCartCount();
 
-  // -------------------- STORE PAID QUOTE INFO FOR PAGE SYNC --------------------
+  // -------------------- Save Paid Info for Sync --------------------
   localStorage.setItem("paidQuoteInfo", JSON.stringify({
     quoteId: quoteData.id,
     currency: quoteData.currency,
@@ -699,23 +706,26 @@ function renderPaidOrderUI(quoteData) {
       phone: quoteData.phone,
       address: quoteData.address
     },
-    trackingRef: quoteData.trackingRef
+    trackingRef: quoteData.trackingRef,
+    verified: true
   }));
 }
 
-// -------------------- UPDATE CART COUNT FUNCTION --------------------
+
+// -------------------- UPDATE CART COUNT --------------------
 function updateCartCount() {
   const cartItems = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
   const cartTotal = cartItems.reduce((acc, item) => acc + (item.quantity || 1), 0);
   if (cartCountElem) cartCountElem.textContent = cartTotal;
 }
 
-// -------------------- SYNC PAID QUOTE ON PAGE LOAD OR RETURN --------------------
+
+// -------------------- SYNC PAID QUOTE ON PAGE LOAD --------------------
 async function syncPaidQuoteUI() {
   const paidQuoteInfo = JSON.parse(localStorage.getItem("paidQuoteInfo") || "null");
   if (!paidQuoteInfo) return;
 
-  // --- Immediately render from localStorage to avoid empty flash ---
+  // Render immediately from localStorage (prevents flash)
   const localQuoteData = {
     id: paidQuoteInfo.quoteId,
     trackingRef: paidQuoteInfo.trackingRef,
@@ -724,11 +734,11 @@ async function syncPaidQuoteUI() {
     email: paidQuoteInfo.billing?.email,
     phone: paidQuoteInfo.billing?.phone,
     address: paidQuoteInfo.billing?.address,
-    items: [] // optional: you can store items in localStorage if needed
+    items: []
   };
   renderPaidOrderUI(localQuoteData);
 
-  // --- Fetch fresh data from Firestore ---
+  // Then refresh from Firestore
   try {
     const docRef = doc(db, "brands", "serac", "quotes", paidQuoteInfo.quoteId);
     const docSnap = await getDoc(docRef);
@@ -736,7 +746,7 @@ async function syncPaidQuoteUI() {
 
     const quoteData = docSnap.data();
     quoteData.id = paidQuoteInfo.quoteId;
-    quoteData.trackingRef = paidQuoteInfo.trackingRef;
+    quoteData.trackingRef = quoteData.trackingRef || paidQuoteInfo.trackingRef;
     quoteData.currency = paidQuoteInfo.currency;
 
     renderPaidOrderUI(quoteData);
@@ -746,22 +756,9 @@ async function syncPaidQuoteUI() {
 }
 
 
-// -------------------- PAGE LOAD & RETURN EVENTS --------------------
+// -------------------- PAGE LOAD EVENTS --------------------
 document.addEventListener("DOMContentLoaded", () => {
   const paidQuoteInfo = JSON.parse(localStorage.getItem("paidQuoteInfo") || "null");
-
-  // ✅ Only run paid quote sync if the localStorage entry exists AND has a verified payment status
-  if (paidQuoteInfo && paidQuoteInfo.verified) {
-    syncPaidQuoteUI();
-  } else {
-    // ✅ Otherwise, load the unpaid quote normally
-    loadQuoteUI(); // This is your normal unpaid quote loader
-  }
-});
-
-window.addEventListener("pageshow", () => {
-  const paidQuoteInfo = JSON.parse(localStorage.getItem("paidQuoteInfo") || "null");
-
   if (paidQuoteInfo && paidQuoteInfo.verified) {
     syncPaidQuoteUI();
   } else {
@@ -769,8 +766,15 @@ window.addEventListener("pageshow", () => {
   }
 });
 
+window.addEventListener("pageshow", () => {
+  const paidQuoteInfo = JSON.parse(localStorage.getItem("paidQuoteInfo") || "null");
+  if (paidQuoteInfo && paidQuoteInfo.verified) {
+    syncPaidQuoteUI();
+  } else {
+    loadQuoteUI();
+  }
+});
 
-// -------------------- REALTIME CART UPDATE --------------------
 window.addEventListener("storage", () => updateCartCount());
 
 
