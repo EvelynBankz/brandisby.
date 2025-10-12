@@ -1355,34 +1355,20 @@ async function exportOrdersCSV(e) {
 }
 exportOrders.addEventListener("click", exportOrdersCSV);
 
-/* ---------------- INIT ---------------- */
+/* ---------------- QUOTE FORM (alternate quick add) ---------------- */
 function startSubscriptions() {
-  subscribeOrders();
-}
-document.addEventListener("DOMContentLoaded", startSubscriptions);
-
-/* ---------------- QUOTE FORM (alternate quick add via small inputs) ---------------- */
-/* This replicates the quote form behaviour from FleurDeVie including add-item panel and saving to Firestore which we implemented above. */
-/* keep existing add-item panel & draft flow */
-
-/* ---------------- START SUBSCRIPTIONS ---------------- */
-function startSubscriptions(){
   subscribeProducts();
   subscribeQuotes();
+  subscribeOrders();
 }
 
-/* initialize UI event wiring after DOM loaded */
 document.addEventListener("DOMContentLoaded", () => {
-  // ensure product currency select updates only price cells
   productCurrencySelect?.addEventListener("change", updateTablePrices);
-
-  // wire small add-quote-item (the small button which opens the addItemPanel is already wired above)
   renderDraftItems();
 
-  // quotes display currency change should re-render quotes and modal if opened
-  quotesDisplayCurrency.addEventListener('change', () => {
+  quotesDisplayCurrency.addEventListener("change", () => {
     renderQuotesTable();
-    if (quoteModalBackdrop.style.display === 'flex') {
+    if (quoteModalBackdrop.style.display === "flex") {
       const curId = quoteModalBackdrop.dataset.currentId;
       if (curId) {
         const q = quotesCache.find(x => x.id === curId);
@@ -1390,6 +1376,8 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
   });
+
+  startSubscriptions();
 });
 </script>
 
