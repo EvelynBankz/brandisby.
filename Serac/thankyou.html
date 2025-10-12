@@ -385,6 +385,15 @@
   }
 
   document.addEventListener("DOMContentLoaded", displayOrder);
+
+    // Hamburger toggle
+  const hamburger = document.getElementById('hamburger');
+  const navMenu = document.querySelector('.header-right');
+  hamburger.addEventListener('click', () => {
+    navMenu.classList.toggle('open');
+    hamburger.classList.toggle('open');
+  });
+   
 </script>
 </body>
 </html>
