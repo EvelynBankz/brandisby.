@@ -670,34 +670,28 @@ function renderPaidOrderUI(quoteData) {
   // -------------------- DISPLAY TRACKING REFERENCE --------------------
   let trackingElem = document.querySelector("#trackingRefDisplay");
   if (!trackingElem) {
-    trackingElem = document.createElement("p");
+    trackingElem = document.createElement("div");
     trackingElem.id = "trackingRefDisplay";
     trackingElem.style.display = "block";
-    trackingElem.style.marginTop = "10px";
-    trackingElem.style.fontSize = "1rem";
+    trackingElem.style.marginTop = "12px";
     trackingElem.style.color = "var(--accent)";
     trackingElem.style.fontWeight = "600";
-
     if (heroP && heroP.parentNode) {
       heroP.parentNode.insertBefore(trackingElem, heroP.nextSibling);
     } else if (hero && hero.parentNode) {
       hero.appendChild(trackingElem);
     }
   }
-
   if (quoteData.trackingRef) {
-    trackingElem.textContent = "Order Reference: " + quoteData.trackingRef;
-  } else {
-    trackingElem.textContent = "Fetching tracking reference...";
+    trackingElem.textContent = "Your Order Reference: " + quoteData.trackingRef;
   }
 
   // -------------------- SYNC CART COUNT --------------------
   updateCartCount();
 
-  // -------------------- STORE PAID QUOTE INFO --------------------
+  // -------------------- STORE PAID QUOTE INFO FOR PAGE SYNC --------------------
   localStorage.setItem("paidQuoteInfo", JSON.stringify({
     quoteId: quoteData.id,
-    verified: true, // ✅ ensure verified flag is stored
     currency: quoteData.currency,
     billing: {
       name: quoteData.name,
@@ -730,7 +724,7 @@ async function syncPaidQuoteUI() {
     email: paidQuoteInfo.billing?.email,
     phone: paidQuoteInfo.billing?.phone,
     address: paidQuoteInfo.billing?.address,
-    items: []
+    items: [] // optional: you can store items in localStorage if needed
   };
   renderPaidOrderUI(localQuoteData);
 
@@ -751,14 +745,17 @@ async function syncPaidQuoteUI() {
   }
 }
 
-// -------------------- FIX: USE loadCheckoutData INSTEAD OF loadQuoteUI --------------------
+
+// -------------------- PAGE LOAD & RETURN EVENTS --------------------
 document.addEventListener("DOMContentLoaded", () => {
   const paidQuoteInfo = JSON.parse(localStorage.getItem("paidQuoteInfo") || "null");
 
+  // ✅ Only run paid quote sync if the localStorage entry exists AND has a verified payment status
   if (paidQuoteInfo && paidQuoteInfo.verified) {
     syncPaidQuoteUI();
   } else {
-    loadCheckoutData(); // ✅ correct fallback
+    // ✅ Otherwise, load the unpaid quote normally
+    loadQuoteUI(); // This is your normal unpaid quote loader
   }
 });
 
@@ -768,9 +765,10 @@ window.addEventListener("pageshow", () => {
   if (paidQuoteInfo && paidQuoteInfo.verified) {
     syncPaidQuoteUI();
   } else {
-    loadCheckoutData(); // ✅ correct fallback
+    loadQuoteUI();
   }
 });
+
 
 // -------------------- REALTIME CART UPDATE --------------------
 window.addEventListener("storage", () => updateCartCount());
