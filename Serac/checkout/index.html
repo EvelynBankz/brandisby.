@@ -191,7 +191,6 @@ const db = getFirestore(app);
 /* -------------------- PREMIUM BLUR LOADER (NO-FLASH) -------------------- */
 (function installBlurLoader() {
   try {
-    // create overlay
     const overlay = document.createElement('div');
     overlay.id = 'serac-blur-overlay';
     overlay.setAttribute('aria-hidden', 'true');
@@ -206,7 +205,6 @@ const db = getFirestore(app);
     overlay.style.transition = 'opacity 0.36s ease';
     overlay.style.opacity = '1';
 
-    // spinner element
     const spinner = document.createElement('div');
     spinner.id = 'serac-blur-spinner';
     spinner.style.width = '54px';
@@ -218,7 +216,6 @@ const db = getFirestore(app);
     spinner.style.animation = 'serac-spin 1s linear infinite';
     spinner.style.backgroundClip = 'padding-box';
 
-    // label (optional)
     const label = document.createElement('div');
     label.textContent = 'Loading...';
     label.style.marginTop = '12px';
@@ -238,16 +235,13 @@ const db = getFirestore(app);
     const style = document.createElement('style');
     style.textContent = `
       @keyframes serac-spin { 0%{ transform: rotate(0deg);} 100%{ transform: rotate(360deg);} }
-      /* ensure main content initially not visible until we remove overlay */
       .serac-hidden-until-ready { opacity: 0 !important; transition: opacity 0.36s ease !important; }
       .serac-revealed { opacity: 1 !important; transition: opacity 0.36s ease !important; }
     `;
     document.head.appendChild(style);
 
-    // attach overlay to body
     document.documentElement.appendChild(overlay);
 
-    // mark main content to fade in later
     const main = document.getElementById('checkout-container') || document.getElementById('checkout') || document.querySelector('main') || document.body;
     main.classList.add('serac-hidden-until-ready');
   } catch (err) { /* non-fatal */ }
@@ -259,7 +253,6 @@ function removeBlurLoaderAndReveal() {
     const main = document.getElementById('checkout-container') || document.getElementById('checkout') || document.querySelector('main') || document.body;
     if (overlay) {
       overlay.style.opacity = '0';
-      // remove after transition
       setTimeout(() => { try { overlay.remove(); } catch(e){} }, 380);
     }
     if (main) {
@@ -358,7 +351,7 @@ async function fetchProductData(productId){
 function mergeCartItems(cartArr){
   const merged = [];
   (cartArr||[]).forEach(item=>{
-    const idx = merged.findIndex(i => i.id === item.id && (i.color||'')=== (item.color||'') && (i.size||'') === (item.size||''));
+    const idx = merged.findIndex(i => i.id === item.id && (i.color||'')=== (item.color||'') && (i.size||')') === (item.size||''));
     if(idx === -1) merged.push({...item});
     else merged[idx].quantity = Number(merged[idx].quantity||0) + Number(item.quantity||0);
   });
@@ -545,7 +538,6 @@ function renderOrderFromQuoteNormalized(quoteNormalized, currency='NGN', paid=fa
     }
   });
 
-  // wire toggles
   document.querySelectorAll('.show-variants-btn').forEach(btn=>{
     btn.removeEventListener('click', onShowVariants);
     btn.addEventListener('click', onShowVariants);
@@ -557,11 +549,10 @@ function renderOrderFromQuoteNormalized(quoteNormalized, currency='NGN', paid=fa
 
   totalsText.textContent = `Subtotal: ${formatPrice(subtotal, selectedCurrency)}`;
 
-  // update cart count depending on mode
   computeAndUpdateCartCount();
 }
 function onShowVariants(ev){ const idx = ev.currentTarget.dataset.idx; const c = document.querySelector(`.variants-container[data-for-idx="${idx}"]`); if(!c) return; const shown = c.classList.toggle('show'); c.style.display = shown ? 'flex' : 'none'; ev.currentTarget.textContent = shown ? 'Hide Choices ▴' : 'Show Choices ▾'; }
-function onShowDetails(ev){ const idx = ev.currentTarget.dataset.idx; const c = document.querySelector(`.details-container[data-for-idx="${idx}"]`); if(!c) return; const shown = c.classList.toggle('show'); c.style.display = shown ? 'flex' : 'none'; ev.currentTarget.textContent = shown ? 'Hide Details ▴' : 'Show Details ▾'; }
+function onShowDetails(ev){ const idx = ev.currentTarget.dataset.idx; const c = document.querySelector(`.details-container[data-for-idx="${idx}"]`); if(!c) return; const shown = c.classList.toggle('show'); c.style.display = shown ? 'flex' : 'none'; ev.currentTarget.textContent = shown ? 'Hide Details ▴' : 'Show Details ▴'; }
 
 /* -------------------- FILL BILLING FIELDS -------------------- */
 function fillBillingFields(data){
@@ -819,7 +810,8 @@ async function initiatePaymentFlow(ev){
       showSpinner(false);
 
       const qs = finalOrderId ? `?orderId=${encodeURIComponent(finalOrderId)}` : '';
-      window.location.href = `${window.location.origin}/thankyou.html${qs}`;
+      // FIXED: redirect to the exact path requested
+      window.location.href = `/thankyou.html${qs}`;
 
     } catch(e){
       console.error('finalizeAfterSuccess error', e);
@@ -1011,7 +1003,6 @@ if(hamburger) hamburger.addEventListener('click', ()=>{ hamburger.classList.togg
   } else {
     await loadCheckoutData();
   }
-  // loader removal handled in each path (loadCheckoutData / syncPaidQuoteUI)
 })();
 
 /* -------------------- suppress known noisy errors from FP/Flutterwave -------------------- */
