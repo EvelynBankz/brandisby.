@@ -188,6 +188,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+/* -------------------- Prevent flash: hide page until resolved -------------------- */
+(function hidePageUntilReady(){
+  try { document.documentElement.style.visibility = 'hidden'; } catch(e){}
+})();
+
 /* -------------------- HELPERS -------------------- */
 function safeParseJSON(val, fallback = null) {
   try { return JSON.parse(val || 'null') || fallback; } catch (e) { return fallback; }
@@ -204,8 +209,8 @@ const cartCountElem = document.getElementById('cartCount');
 const orderItemsEl = document.getElementById('orderItems');
 const totalsText = document.getElementById('totalsText');
 const payBtn = document.getElementById('payBtn');
-const currencySelect = document.getElementById('currency');
-const currencySelector = document.getElementById('currencySelector');
+const currencySelect = document.getElementById('currency');          // actual <select>
+const currencySelector = document.getElementById('currencySelector'); // wrapper
 const nameInput = document.getElementById('name');
 const emailInput = document.getElementById('email');
 const phoneInput = document.getElementById('phone');
@@ -225,6 +230,27 @@ let activeQuoteRaw = null;   // original quote doc
 let activeOrderRaw = null;   // original order doc
 let quote = null;            // normalized quote for UI
 let isPaidOrder = false;
+
+/* -------------------- CART COUNT SYNC -------------------- */
+function updateCartCount() {
+  try {
+    const current = safeParseJSON(localStorage.getItem(STORAGE_KEY), []) || [];
+    const count = current.reduce((s,i)=>s + Number(i.quantity||0),0);
+    if(cartCountElem) cartCountElem.textContent = String(count || 0);
+  } catch(e){ if(cartCountElem) cartCountElem.textContent = '0'; }
+}
+// react to storage changes from other tabs
+window.addEventListener('storage', (e)=>{
+  // update cart count when cart changes
+  if(e.key === STORAGE_KEY || e.key === CURRENCY_KEY || e.key === 'paidQuoteInfo'){
+    updateCartCount();
+  }
+  // if paidQuoteInfo changed (another tab completed payment), re-sync paid UI
+  if(e.key === 'paidQuoteInfo'){
+    const paid = safeParseJSON(localStorage.getItem('paidQuoteInfo'), null);
+    if(paid && paid.verified) syncPaidQuoteUI().catch(()=>{});
+  }
+});
 
 /* -------------------- PRODUCT HELPERS (used for cart->quote building) -------------------- */
 async function fetchProductData(productId){
@@ -441,6 +467,56 @@ function fillBillingFields(data){
   if(addressInput) addressInput.value = data.address || data.shippingAddress || '';
 }
 
+/* -------------------- UI CONFIGURATOR (cart / unpaid quote / paid) -------------------- */
+function configureCheckoutUI(type, opts = {}) {
+  // type: 'cart' | 'quote-unpaid' | 'quote-paid' | 'order-paid'
+  try {
+    const disableCurrency = (val) => {
+      if(currencySelect) currencySelect.disabled = val;
+      if(currencySelector) {
+        currencySelector.style.opacity = val ? '0.6' : '1';
+        currencySelector.style.pointerEvents = val ? 'none' : 'auto';
+        currencySelector.style.display = (type === 'quote-unpaid' ? 'flex' : currencySelector.style.display || (type === 'cart' ? 'none' : 'flex'));
+      }
+    };
+
+    // billing fields set
+    const billingFields = [nameInput, emailInput, phoneInput, addressInput].filter(Boolean);
+    const setBillingDisabled = (v) => billingFields.forEach(f => f.disabled = !!v);
+
+    if(type === 'cart'){
+      // cart: currency locked (cart already chose currency), billing open
+      disableCurrency(true);
+      setBillingDisabled(false);
+      if(payBtn) { payBtn.textContent = 'Proceed to Payment'; payBtn.disabled = false; payBtn.classList.remove('paid-state'); payBtn.dataset.processing = '0'; }
+      if(hero) { hero.classList.remove('paid'); if(heroH1) heroH1.textContent = 'Checkout'; if(heroP) heroP.textContent = 'Review your items and proceed to payment.'; }
+      // hide tracking display if present
+      const t = document.getElementById('trackingRefDisplay'); if(t) t.style.display = 'none';
+    }
+
+    if(type === 'quote-unpaid'){
+      // unpaid quote: allow currency selection, billing editable (prefilled name/email), enable pay
+      disableCurrency(false);
+      setBillingDisabled(false);
+      if(payBtn) { payBtn.textContent = 'Proceed to Payment'; payBtn.disabled = false; payBtn.classList.remove('paid-state'); payBtn.dataset.processing = '0'; }
+      if(hero) { hero.classList.remove('paid'); if(heroH1) heroH1.textContent = 'Quote Checkout'; if(heroP) heroP.textContent = 'Review your items and proceed to payment.'; }
+      const t = document.getElementById('trackingRefDisplay'); if(t) t.style.display = 'none';
+    }
+
+    if(type === 'quote-paid' || type === 'order-paid'){
+      // paid: lock currency & billing, show tracking ref & order summary, change pay button
+      disableCurrency(true);
+      setBillingDisabled(true);
+      if(payBtn) { payBtn.textContent = 'Paid ✅'; payBtn.disabled = true; payBtn.classList.add('paid-state'); }
+      if(hero) { hero.classList.add('paid'); if(heroH1) heroH1.textContent = 'Order Summary'; if(heroP) heroP.textContent = 'Your order has been paid successfully.'; }
+      // ensure order list visible
+      if(orderItemsEl) orderItemsEl.style.display = 'block';
+      // tracking element shown if exists
+      const t = document.getElementById('trackingRefDisplay'); if(t){ t.style.display = 'block'; if(opts.trackingRef) t.textContent = `Order Reference: ${opts.trackingRef}`; }
+    }
+  } catch(e){ console.warn('configureCheckoutUI error', e); }
+}
+
 /* -------------------- RENDER PAID UI (works for order doc or quote doc with trackingRef) -------------------- */
 function renderPaidUIFromDoc(docData){
   // normalize items if it's an order with items array, or quote-like object
@@ -450,12 +526,12 @@ function renderPaidUIFromDoc(docData){
   quote = normalized;
   renderOrderFromQuoteNormalized(normalized, selectedCurrency, true);
 
-  // hero
+  // hero text & tracking
   if(hero) hero.classList.add('paid');
   if(heroH1) heroH1.textContent = "Order Summary";
   if(heroP) heroP.textContent = "Your order has been paid successfully.";
 
-  // tracking paragraph
+  // tracking paragraph (ensure present)
   let trackingElem = document.getElementById('trackingRefDisplay');
   if(!trackingElem){
     trackingElem = document.createElement('p');
@@ -472,6 +548,9 @@ function renderPaidUIFromDoc(docData){
   fillBillingFields(docData);
   if(currencySelect && currencySelector){ currencySelect.value = docData.currency || selectedCurrency; currencySelect.disabled = true; currencySelector.style.opacity = 0.6; currencySelector.style.pointerEvents = 'none'; }
   if(payBtn){ payBtn.textContent = 'Paid ✅'; payBtn.disabled = true; payBtn.classList.add('paid-state'); }
+
+  // configure UI explicitly for paid
+  configureCheckoutUI(orderId ? 'order-paid' : 'quote-paid', { trackingRef: docData.trackingRef });
 
   // persist for cross-page sync
   localStorage.setItem('paidQuoteInfo', JSON.stringify({
@@ -498,6 +577,9 @@ async function syncPaidQuoteUI(){
     address: paidQuoteInfo.billing?.address,
     items: []
   });
+  // ensure UI configured for paid
+  configureCheckoutUI(quoteId ? 'quote-paid' : 'order-paid', { trackingRef: paidQuoteInfo.trackingRef });
+
   // then fresh fetch if quoteId present
   try {
     if(paidQuoteInfo.quoteId){
@@ -721,7 +803,7 @@ async function initiatePaymentFlow(ev){
 async function loadCheckoutData(){
   selectedCurrency = localStorage.getItem(CURRENCY_KEY) || selectedCurrency || 'NGN';
   if(currencySelect) currencySelect.value = selectedCurrency;
-  if(currencySelector) currencySelector.style.display = quoteId ? 'flex' : 'none';
+  if(currencySelector) currencySelector.style.display = quoteId ? 'flex' : (currencySelector.style.display || 'none');
 
   try {
     showSpinner(true);
@@ -771,6 +853,8 @@ async function loadCheckoutData(){
       if(activeQuoteRaw.email && emailInput) emailInput.value = activeQuoteRaw.email;
       quote = normalizeQuoteItems(activeQuoteRaw);
       renderOrderFromQuoteNormalized(quote, selectedCurrency, false);
+      // set UI for unpaid quote
+      configureCheckoutUI('quote-unpaid');
       setCheckoutUI();
       showSpinner(false);
       return;
@@ -784,11 +868,15 @@ async function loadCheckoutData(){
       renderOrderFromQuoteNormalized(quote, selectedCurrency, false);
       showSpinner(false);
       showError('Your cart is empty.');
+      // configure cart UI even for empty
+      configureCheckoutUI('cart');
       return;
     }
     // build quote from products
     quote = await buildQuoteFromCart();
     renderOrderFromQuoteNormalized(quote, selectedCurrency, false);
+    // set UI for cart checkout (currency locked)
+    configureCheckoutUI('cart');
     setCheckoutUI();
     showSpinner(false);
   } catch(e){
@@ -819,15 +907,10 @@ const hamburger = document.getElementById('hamburger');
 const headerRight = document.getElementById('headerRight');
 if(hamburger) hamburger.addEventListener('click', ()=>{ hamburger.classList.toggle('open'); if(headerRight) headerRight.classList.toggle('open'); });
 
-window.addEventListener('storage', () => {
-  // if paidQuoteInfo changed on another tab, sync
-  updateCartCount();
-});
-
 /* -------------------- INIT -------------------- */
 (async function init(){
   try { if(currencySelect) currencySelect.value = selectedCurrency; } catch(e){}
-  try { if(cartCountElem) cartCountElem.textContent = (safeParseJSON(localStorage.getItem(STORAGE_KEY),[])||[]).reduce((s,i)=>s + Number(i.quantity||0),0); } catch(e){ if(cartCountElem) cartCountElem.textContent = '0'; }
+  try { updateCartCount(); } catch(e){}
   // Priority: if there's a local paidQuoteInfo for this quoteId, show paid UI; else load normally
   const paidQuoteInfo = safeParseJSON(localStorage.getItem('paidQuoteInfo'), null);
   if(quoteId && paidQuoteInfo && paidQuoteInfo.verified && paidQuoteInfo.quoteId === quoteId){
@@ -835,8 +918,12 @@ window.addEventListener('storage', () => {
   } else {
     await loadCheckoutData();
   }
-})();
 
+  // reveal page now that we configured UI (prevent flash)
+  try { document.documentElement.style.visibility = 'visible'; } catch(e){}
+
+})();
+  
 /* -------------------- suppress known noisy errors from FP/Flutterwave -------------------- */
 window.addEventListener('error', (e)=>{
   try {
@@ -849,5 +936,6 @@ window.addEventListener('error', (e)=>{
   } catch(err){}
 });
 </script>
+
 </body>
 </html>
