@@ -191,46 +191,46 @@ const db = getFirestore(app);
 /* -------------------- PREMIUM BLUR LOADER (NO-FLASH) -------------------- */
 (function installBlurLoader() {
   try {
-    const overlay = document.createElement('div');
-    overlay.id = 'serac-blur-overlay';
-    overlay.setAttribute('aria-hidden', 'true');
-    overlay.style.position = 'fixed';
-    overlay.style.inset = '0';
-    overlay.style.zIndex = '9999';
-    overlay.style.display = 'flex';
-    overlay.style.alignItems = 'center';
-    overlay.style.justifyContent = 'center';
-    overlay.style.backdropFilter = 'blur(6px)';
-    overlay.style.background = 'rgba(255,255,255,0.65)';
-    overlay.style.transition = 'opacity 0.36s ease';
-    overlay.style.opacity = '1';
+  const overlay = document.createElement('div');
+  overlay.id = 'serac-blur-overlay';
+  overlay.setAttribute('aria-hidden', 'true');
+  overlay.style.position = 'fixed';
+  overlay.style.inset = '0';
+  overlay.style.zIndex = '9999';
+  overlay.style.display = 'flex';
+  overlay.style.alignItems = 'center';
+  overlay.style.justifyContent = 'center';
+  overlay.style.backdropFilter = 'blur(8px)';
+  overlay.style.background = 'rgba(0,0,0,0.6)'; // darker premium background
+  overlay.style.transition = 'opacity 0.36s ease';
+  overlay.style.opacity = '1';
 
-    const spinner = document.createElement('div');
-    spinner.id = 'serac-blur-spinner';
-    spinner.style.width = '54px';
-    spinner.style.height = '54px';
-    spinner.style.border = '6px solid rgba(0,0,0,0.08)';
-    spinner.style.borderTop = '6px solid rgba(0,0,0,0.46)';
-    spinner.style.borderRadius = '50%';
-    spinner.style.boxShadow = '0 6px 18px rgba(0,0,0,0.06)';
-    spinner.style.animation = 'serac-spin 1s linear infinite';
-    spinner.style.backgroundClip = 'padding-box';
+  const spinner = document.createElement('div');
+  spinner.id = 'serac-blur-spinner';
+  spinner.style.width = '54px';
+  spinner.style.height = '54px';
+  spinner.style.border = '6px solid rgba(255,255,255,0.15)'; // light spinner ring
+  spinner.style.borderTop = '6px solid rgba(255,255,255,0.9)'; // bright white top arc
+  spinner.style.borderRadius = '50%';
+  spinner.style.boxShadow = '0 6px 18px rgba(0,0,0,0.2)';
+  spinner.style.animation = 'serac-spin 1s linear infinite';
+  spinner.style.backgroundClip = 'padding-box';
 
-    const label = document.createElement('div');
-    label.textContent = 'Loading...';
-    label.style.marginTop = '12px';
-    label.style.fontSize = '13px';
-    label.style.color = 'rgba(0,0,0,0.65)';
-    label.style.fontFamily = 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial';
+  const label = document.createElement('div');
+  label.textContent = 'Loading...';
+  label.style.marginTop = '12px';
+  label.style.fontSize = '13px';
+  label.style.color = 'rgba(255,255,255,0.8)'; // white text
+  label.style.fontFamily = 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial';
 
-    const wrap = document.createElement('div');
-    wrap.style.display = 'flex';
-    wrap.style.flexDirection = 'column';
-    wrap.style.alignItems = 'center';
-    wrap.appendChild(spinner);
-    wrap.appendChild(label);
+  const wrap = document.createElement('div');
+  wrap.style.display = 'flex';
+  wrap.style.flexDirection = 'column';
+  wrap.style.alignItems = 'center';
+  wrap.appendChild(spinner);
+  wrap.appendChild(label);
 
-    overlay.appendChild(wrap);
+  overlay.appendChild(wrap);
 
     const style = document.createElement('style');
     style.textContent = `
