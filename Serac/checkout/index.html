@@ -811,7 +811,7 @@ async function initiatePaymentFlow(ev){
 
       const qs = finalOrderId ? `?orderId=${encodeURIComponent(finalOrderId)}` : '';
       // FIXED: redirect to the exact path requested
-      window.location.href = `/thankyou.html${qs}`;
+      window.location.assign('/Serac/thankyou.html');
 
     } catch(e){
       console.error('finalizeAfterSuccess error', e);
