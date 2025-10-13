@@ -188,10 +188,41 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* -------------------- Prevent flash: hide page until resolved -------------------- */
-(function hidePageUntilReady(){
-  try { document.documentElement.style.visibility = 'hidden'; } catch(e){}
+/* -------------------- SHIMMER LOADER (NO-FLASH) -------------------- */
+(function installShimmer() {
+  try {
+    const container = document.getElementById('checkout-wrapper') || document.body;
+    const shimmer = document.createElement('div');
+    shimmer.id = 'serac-shimmer';
+    shimmer.innerHTML = `
+      <div class="serac-shimmer-inner" aria-hidden="true"></div>
+      <style>
+        #serac-shimmer { position:relative; width:100%; min-height:360px; display:block; margin:0 auto 18px auto; border-radius:12px; overflow:hidden; }
+        .serac-shimmer-inner { width:100%; height:100%; background:linear-gradient(90deg,#f6f6f6 25%,#ededed 37%,#f6f6f6 63%); background-size:400% 100%; animation:serac-shimmer 1.2s linear infinite; min-height:320px; }
+        @keyframes serac-shimmer { 0%{background-position:100% 0} 100%{background-position:-100% 0} }
+        /* subtle fade-in target will be controlled by script */
+        .serac-fade-target { opacity:0; transition: opacity 0.38s ease; }
+      </style>
+    `;
+    // insert shimmer before the hero if exists, else top of body
+    const hero = document.getElementById('heroSection');
+    if (hero && hero.parentNode) hero.parentNode.insertBefore(shimmer, hero);
+    else container.prepend(shimmer);
+    // mark main content to fade in later
+    const main = document.getElementById('checkout-container') || document.getElementById('checkout') || document.querySelector('main') || document.body;
+    main.classList.add('serac-fade-target');
+  } catch (err) { /* non-fatal */ }
 })();
+function removeShimmerAndReveal() {
+  try {
+    const s = document.getElementById('serac-shimmer');
+    if (s) s.remove();
+    const main = document.getElementById('checkout-container') || document.getElementById('checkout') || document.querySelector('main') || document.body;
+    if (main) main.classList.add('serac-fade-in'); // will trigger opacity transition
+    // ensure visible
+    setTimeout(()=>{ try { main.style.opacity = '1'; } catch(e){} }, 10);
+  } catch(e){}
+}
 
 /* -------------------- HELPERS -------------------- */
 function safeParseJSON(val, fallback = null) {
@@ -231,19 +262,49 @@ let activeOrderRaw = null;   // original order doc
 let quote = null;            // normalized quote for UI
 let isPaidOrder = false;
 
-/* -------------------- CART COUNT SYNC -------------------- */
-function updateCartCount() {
-  try {
-    const current = safeParseJSON(localStorage.getItem(STORAGE_KEY), []) || [];
-    const count = current.reduce((s,i)=>s + Number(i.quantity||0),0);
-    if(cartCountElem) cartCountElem.textContent = String(count || 0);
-  } catch(e){ if(cartCountElem) cartCountElem.textContent = '0'; }
+/* -------------------- CART COUNT / MODE-AWARE SYNC -------------------- */
+/* compute total quantity in cart array */
+function totalQtyFromCartArray(arr){
+  try { return (arr||[]).reduce((s,i)=>s + Number(i.quantity||0),0); } catch(e){ return 0; }
 }
-// react to storage changes from other tabs
+/* compute total quantity from quote normalized object */
+function totalQtyFromQuoteNormalized(q){
+  try { return (q && Array.isArray(q.items)) ? q.items.reduce((s,i)=>s + Number(i.totalQuantity||0),0) : 0; } catch(e){ return 0; }
+}
+/* main updater: applies your rules
+   - unpaid quote: cartCount = quote items + cart items
+   - paid quote/order: cartCount = cart items only
+   - cart checkout: cart items only
+*/
+function computeAndUpdateCartCount(){
+  try {
+    const cartArr = safeParseJSON(localStorage.getItem(STORAGE_KEY), []) || [];
+    const cartQty = totalQtyFromCartArray(cartArr);
+    let displayCount = cartQty;
+
+    // If we are on an unpaid quote view (quote loaded and not paid)
+    const isUnpaidQuoteView = (!isPaidOrder && quote && Array.isArray(quote.items) && quote.items.length > 0 && !quote._isOrder && !quote._paidFlag);
+    // note: we will mark normalized quote with a helper _paidFlag or _isOrder when necessary.
+
+    if (isUnpaidQuoteView) {
+      const quoteQty = totalQtyFromQuoteNormalized(quote);
+      displayCount = Number(quoteQty || 0) + Number(cartQty || 0);
+    } else {
+      // if paid order or order view, display cart only (already assigned)
+      displayCount = cartQty;
+    }
+
+    if(cartCountElem) cartCountElem.textContent = String(displayCount || 0);
+  } catch(e){
+    if(cartCountElem) cartCountElem.textContent = '0';
+  }
+}
+
+/* react to storage changes from other tabs */
 window.addEventListener('storage', (e)=>{
-  // update cart count when cart changes
+  // always recompute cart count when cart storage changed or quote payment state changed
   if(e.key === STORAGE_KEY || e.key === CURRENCY_KEY || e.key === 'paidQuoteInfo'){
-    updateCartCount();
+    computeAndUpdateCartCount();
   }
   // if paidQuoteInfo changed (another tab completed payment), re-sync paid UI
   if(e.key === 'paidQuoteInfo'){
@@ -354,10 +415,14 @@ function normalizeQuoteItems(rawQuote){
       };
     }
   });
-  return { items };
+  // mark helper flags for mode detection
+  const normalized = { items };
+  normalized._isOrder = false;
+  normalized._paidFlag = (rawQuote && (rawQuote.status || '').toLowerCase() === 'paid') || false;
+  return normalized;
 }
 function normalizeOrderItems(items){
-  return (items||[]).map(it => ({
+  const normalized = (items||[]).map(it => ({
     productId: it.id || '',
     name: it.name || it.productName || '',
     image: (it.image && it.image !== '../asset/placeholder.jpg') ? it.image : null,
@@ -366,6 +431,11 @@ function normalizeOrderItems(items){
     totalPrices: it.totalPrices || it.linePrices || {},
     variants: it.variants || []
   }));
+  // when using from order, mark as order
+  const result = { items: normalized };
+  result._isOrder = true;
+  result._paidFlag = true;
+  return result;
 }
 
 /* -------------------- RENDER ORDER/QUOTE UI -------------------- */
@@ -375,6 +445,7 @@ function renderOrderFromQuoteNormalized(quoteNormalized, currency='NGN', paid=fa
   if(!quoteNormalized || !Array.isArray(quoteNormalized.items)) {
     orderItemsEl.innerHTML = '<li class="small-note">No items</li>';
     totalsText.textContent = `Subtotal: —`;
+    computeAndUpdateCartCount();
     return;
   }
   let subtotal = 0;
@@ -454,7 +525,9 @@ function renderOrderFromQuoteNormalized(quoteNormalized, currency='NGN', paid=fa
   });
 
   totalsText.textContent = `Subtotal: ${formatPrice(subtotal, selectedCurrency)}`;
-  try { if (cartCountElem) cartCountElem.textContent = quote ? (quote.items.reduce((s,a)=>s+(a.totalQuantity||0),0)) : (safeParseJSON(localStorage.getItem(STORAGE_KEY),[]).reduce((s,i)=>s + Number(i.quantity||0),0)); } catch(e){}
+
+  // update cart count depending on mode
+  computeAndUpdateCartCount();
 }
 function onShowVariants(ev){ const idx = ev.currentTarget.dataset.idx; const c = document.querySelector(`.variants-container[data-for-idx="${idx}"]`); if(!c) return; const shown = c.classList.toggle('show'); c.style.display = shown ? 'flex' : 'none'; ev.currentTarget.textContent = shown ? 'Hide Choices ▴' : 'Show Choices ▾'; }
 function onShowDetails(ev){ const idx = ev.currentTarget.dataset.idx; const c = document.querySelector(`.details-container[data-for-idx="${idx}"]`); if(!c) return; const shown = c.classList.toggle('show'); c.style.display = shown ? 'flex' : 'none'; ev.currentTarget.textContent = shown ? 'Hide Details ▴' : 'Show Details ▾'; }
@@ -520,7 +593,11 @@ function configureCheckoutUI(type, opts = {}) {
 /* -------------------- RENDER PAID UI (works for order doc or quote doc with trackingRef) -------------------- */
 function renderPaidUIFromDoc(docData){
   // normalize items if it's an order with items array, or quote-like object
-  const normalized = (docData.items && Array.isArray(docData.items)) ? { items: normalizeOrderItems(docData.items) } : normalizeQuoteItems(docData);
+  const normalized = (docData.items && Array.isArray(docData.items)) ? normalizeOrderItems(docData.items) : normalizeQuoteItems(docData);
+  // mark normalized as order / paid
+  normalized._isOrder = true;
+  normalized._paidFlag = true;
+
   // set flags and render
   isPaidOrder = true;
   quote = normalized;
@@ -560,13 +637,19 @@ function renderPaidUIFromDoc(docData){
     trackingRef: docData.trackingRef || null,
     verified: true
   }));
+
+  // ensure cart count is updated for paid-order (cart-only)
+  computeAndUpdateCartCount();
 }
 
 /* -------------------- SYNC PAID QUOTE ON LOAD -------------------- */
 async function syncPaidQuoteUI(){
   const paidQuoteInfo = safeParseJSON(localStorage.getItem('paidQuoteInfo'), null);
-  if(!paidQuoteInfo) return;
-  // render quick local state to avoid flash
+  if(!paidQuoteInfo) {
+    // no paid info -> nothing to do
+    return;
+  }
+  // render quick local state to avoid flash (items empty placeholder)
   renderPaidUIFromDoc({
     id: paidQuoteInfo.quoteId,
     trackingRef: paidQuoteInfo.trackingRef,
@@ -592,14 +675,20 @@ async function syncPaidQuoteUI(){
           if(orderSnap.exists()){
             const o = orderSnap.data(); o.id = orderSnap.id;
             renderPaidUIFromDoc(o);
+            removeShimmerAndReveal(); // reveal after render
             return;
           }
         }
         // otherwise render quote doc
         renderPaidUIFromDoc(q);
+        removeShimmerAndReveal();
+      } else {
+        removeShimmerAndReveal();
       }
+    } else {
+      removeShimmerAndReveal();
     }
-  } catch(e){ console.error('syncPaidQuoteUI failed', e); }
+  } catch(e){ console.error('syncPaidQuoteUI failed', e); removeShimmerAndReveal(); }
 }
 
 /* -------------------- ORDER REFERENCE GENERATOR & SAVE ORDER -------------------- */
@@ -709,6 +798,9 @@ async function initiatePaymentFlow(ev){
       const active = { ...baseOrder, id: finalOrderId, orderId: finalOrderId, status: 'paid', trackingRef };
       activeOrderRaw = active;
       quote = { items: active.items || [] };
+      // make sure the normalized quote reflects order/paid state
+      quote._isOrder = true;
+      quote._paidFlag = true;
       isPaidOrder = true;
 
       // render paid UI
@@ -817,6 +909,7 @@ async function loadCheckoutData(){
           fillBillingFields(data);
           renderPaidUIFromDoc(data);
           showSpinner(false);
+          removeShimmerAndReveal();
           return;
         }
       } catch(e){ console.error("Error loading order by id", e); }
@@ -825,7 +918,7 @@ async function loadCheckoutData(){
     // 2) quoteId param -> fetch quote doc
     if(quoteId){
       const qSnap = await getDoc(doc(db, "brands", "serac", "quotes", quoteId));
-      if(!qSnap.exists()){ showSpinner(false); showError('Quote not found.'); return; }
+      if(!qSnap.exists()){ showSpinner(false); removeShimmerAndReveal(); showError('Quote not found.'); return; }
       activeQuoteRaw = qSnap.data(); activeQuoteRaw.id = qSnap.id;
       const qStatus = (activeQuoteRaw.status || '').toLowerCase();
 
@@ -838,12 +931,14 @@ async function loadCheckoutData(){
           fillBillingFields(orderData);
           renderPaidUIFromDoc(orderData);
           showSpinner(false);
+          removeShimmerAndReveal();
           return;
         } else {
           // quote marked paid but order missing -> show paid-quote UI locked (disable pay)
           isPaidOrder = true;
           renderPaidUIFromDoc(activeQuoteRaw);
           showSpinner(false);
+          removeShimmerAndReveal();
           return;
         }
       }
@@ -852,11 +947,15 @@ async function loadCheckoutData(){
       if(activeQuoteRaw.customer && nameInput) nameInput.value = activeQuoteRaw.customer;
       if(activeQuoteRaw.email && emailInput) emailInput.value = activeQuoteRaw.email;
       quote = normalizeQuoteItems(activeQuoteRaw);
+      // mark helper fields
+      quote._isOrder = false;
+      quote._paidFlag = (activeQuoteRaw.status || '').toLowerCase() === 'paid';
       renderOrderFromQuoteNormalized(quote, selectedCurrency, false);
       // set UI for unpaid quote
       configureCheckoutUI('quote-unpaid');
       setCheckoutUI();
       showSpinner(false);
+      removeShimmerAndReveal();
       return;
     }
 
@@ -870,19 +969,25 @@ async function loadCheckoutData(){
       showError('Your cart is empty.');
       // configure cart UI even for empty
       configureCheckoutUI('cart');
+      removeShimmerAndReveal();
       return;
     }
     // build quote from products
     quote = await buildQuoteFromCart();
+    // mark helper flags for cart-built quote (not an admin quote)
+    quote._isOrder = false;
+    quote._paidFlag = false;
     renderOrderFromQuoteNormalized(quote, selectedCurrency, false);
     // set UI for cart checkout (currency locked)
     configureCheckoutUI('cart');
     setCheckoutUI();
     showSpinner(false);
+    removeShimmerAndReveal();
   } catch(e){
     showSpinner(false);
     console.error('loadCheckoutData failed', e);
     showError('Failed to load checkout data. Refresh and try again.');
+    removeShimmerAndReveal();
   }
 }
 
@@ -892,6 +997,8 @@ function setCheckoutUI(){
   if(heroH1) heroH1.textContent = quoteId ? 'Quote Checkout' : 'Checkout';
   if(heroP) heroP.textContent = 'Review your items and proceed to payment.';
   if(payBtn){ payBtn.textContent = 'Proceed to Payment'; payBtn.disabled = false; payBtn.classList.remove('paid-state'); payBtn.dataset.processing = '0'; }
+  // ensure cart count is correct on UI set
+  computeAndUpdateCartCount();
 }
 
 /* -------------------- BINDINGS -------------------- */
@@ -910,7 +1017,7 @@ if(hamburger) hamburger.addEventListener('click', ()=>{ hamburger.classList.togg
 /* -------------------- INIT -------------------- */
 (async function init(){
   try { if(currencySelect) currencySelect.value = selectedCurrency; } catch(e){}
-  try { updateCartCount(); } catch(e){}
+  try { computeAndUpdateCartCount(); } catch(e){}
   // Priority: if there's a local paidQuoteInfo for this quoteId, show paid UI; else load normally
   const paidQuoteInfo = safeParseJSON(localStorage.getItem('paidQuoteInfo'), null);
   if(quoteId && paidQuoteInfo && paidQuoteInfo.verified && paidQuoteInfo.quoteId === quoteId){
@@ -919,11 +1026,10 @@ if(hamburger) hamburger.addEventListener('click', ()=>{ hamburger.classList.togg
     await loadCheckoutData();
   }
 
-  // reveal page now that we configured UI (prevent flash)
-  try { document.documentElement.style.visibility = 'visible'; } catch(e){}
-
+  // reveal page (shimmer removal handled in the specific flows)
+  try { /* no-op: shimmer removal is done by called functions */ } catch(e){}
 })();
-  
+
 /* -------------------- suppress known noisy errors from FP/Flutterwave -------------------- */
 window.addEventListener('error', (e)=>{
   try {
