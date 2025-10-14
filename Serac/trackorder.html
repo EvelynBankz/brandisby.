@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -6,110 +6,166 @@
 <title>Sérac - Track Order</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 <style>
 :root{
   --bg:#141517;
-  --bg-2:#4B4E54;
   --accent:#B66E41;
   --muted:#9aa0a4;
-  --surface:#1b1c1d;
-  --radius:12px;
+  --surface:#1c1e22;
+  --radius:16px;
   --transition:200ms cubic-bezier(.2,.8,.2,1);
 }
+
 *{margin:0;padding:0;box-sizing:border-box;}
+
 body{
   font-family:"Montserrat",sans-serif;
   background:linear-gradient(180deg,var(--bg) 0%,#0f1011 100%);
   color:#E7E7E7;
-  padding-top:84px;
-  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  overflow-x:hidden;
 }
 
-/* Header reused */
-.site-header{background:linear-gradient(90deg,rgba(0,0,0,0.25),rgba(0,0,0,0.15));color:#E7E7E7;
-display:flex;justify-content:space-between;align-items:center;padding:18px 28px;position:fixed;top:0;left:0;right:0;
-z-index:1100;backdrop-filter:blur(6px);border-bottom:1px solid rgba(255,255,255,0.03);}
-.header-left{display:flex;align-items:center;gap:14px;}
+/* Header */
+.site-header{
+  position:fixed;
+  top:0;left:0;right:0;
+  display:flex;justify-content:space-between;align-items:center;
+  padding:18px 28px;
+  backdrop-filter:blur(6px);
+  transition:background 0.3s ease;
+  z-index:1000;
+}
+.site-header.transparent{background:transparent;}
+.site-header.scrolled{background:rgba(0,0,0,0.85);}
 .brand-logo{height:56px;}
 .brand-title{font-family:"Playfair Display",serif;font-size:22px;font-weight:700;color:#fff;}
-.header-right{display:flex;gap:20px;align-items:center;}
 .header-right a{color:var(--muted);font-weight:500;padding:8px 10px;border-radius:8px;transition:color var(--transition),transform var(--transition);}
 .header-right a:hover{color:var(--accent);transform:translateY(-2px);}
 .cart-count{background:var(--accent);color:#111;font-size:12px;font-weight:700;border-radius:999px;padding:4px 7px;margin-left:6px;}
 
-/* Layout */
-main{
-  max-width:500px;
-  margin:60px auto;
+/* Section */
+.track-section {
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+  min-height:100vh;
+  padding:120px 20px 60px;
+}
+
+.track-box {
   background:var(--surface);
   border-radius:var(--radius);
-  padding:36px 28px;
-  box-shadow:0 14px 36px rgba(0,0,0,0.55);
+  padding:60px;
+  max-width:960px;
+  width:100%;
+  box-shadow:0 12px 40px rgba(0,0,0,0.6);
   text-align:center;
 }
-main h1{
+
+.track-box h1 {
   font-family:"Playfair Display",serif;
-  font-size:26px;
+  font-size:30px;
   color:#fff;
-  margin-bottom:18px;
+  margin-bottom:12px;
 }
-main p{
+
+.track-box p {
   color:var(--muted);
-  font-size:15px;
-  margin-bottom:28px;
+  margin-bottom:32px;
 }
-form{
+
+/* Form */
+form {
   display:flex;
   flex-direction:column;
   gap:16px;
+  align-items:center;
 }
-input{
+
+input {
   background:#191A1B;
   border:1px solid rgba(255,255,255,0.06);
   border-radius:10px;
   padding:12px 14px;
   color:#fff;
   font-size:15px;
+  width:100%;
+  max-width:400px;
   transition:border-color var(--transition);
 }
-input:focus{
+input:focus {
   outline:none;
   border-color:var(--accent);
 }
-button{
+
+button {
   background:linear-gradient(90deg,var(--accent),#a85a35);
   color:#111;
   border:none;
   border-radius:12px;
-  padding:14px;
+  padding:14px 36px;
   font-weight:600;
   cursor:pointer;
   transition:transform var(--transition),box-shadow var(--transition);
 }
-button:hover{transform:translateY(-3px);box-shadow:0 18px 48px rgba(182,110,65,0.18);}
+button:hover {
+  transform:translateY(-3px);
+  box-shadow:0 18px 48px rgba(182,110,65,0.18);
+}
 
-/* Order Status */
-.order-status{
-  margin-top:30px;
+/* Order status box */
+.order-status {
+  display:none;
+  margin-top:40px;
   background:rgba(255,255,255,0.02);
   border:1px solid rgba(255,255,255,0.05);
-  border-radius:12px;
-  padding:20px;
-  display:none;
+  border-radius:20px;
+  padding:40px;
   text-align:left;
+  max-width:820px;
+  margin-left:auto;
+  margin-right:auto;
+  box-shadow:0 10px 30px rgba(0,0,0,0.3);
+  transition:all 0.3s ease;
 }
-.order-status h3{
+.order-status h3 {
   font-family:"Playfair Display",serif;
   color:#fff;
-  margin-bottom:10px;
+  margin-bottom:20px;
+  text-align:center;
+  font-size:24px;
 }
-.status-line{
-  margin-top:6px;
-  font-size:15px;
-  color:var(--muted);
+.order-details {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px 24px;
+  list-style:none;
+  padding:0;
 }
-.status-line span{
-  color:#fff;
+.order-details li {
+  background:rgba(255,255,255,0.03);
+  padding:14px 18px;
+  border-radius:10px;
+  color:#ddd;
+  transition:transform 0.2s ease, background 0.3s ease;
+}
+.order-details li:hover {
+  background:rgba(255,255,255,0.06);
+  transform:translateY(-3px);
+}
+.order-details strong {
+  color:var(--accent);
+  display:block;
+  font-weight:600;
+  margin-bottom:4px;
 }
 
 /* Footer */
@@ -117,14 +173,46 @@ footer{
   text-align:center;
   padding:28px 14px;
   color:var(--muted);
-  margin-top:40px;
-  border-top:1px solid rgba(255,255,255,0.03);
+  margin-top:60px;
+}
+
+/* Spinner overlay */
+#serac-overlay {
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.7);
+  backdrop-filter:blur(6px);
+  z-index:9999;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 0.3s ease;
+}
+#serac-overlay.active {opacity:1;pointer-events:all;}
+.spinner {
+  width:60px;
+  height:60px;
+  border:6px solid rgba(255,255,255,0.15);
+  border-top:6px solid var(--accent);
+  border-radius:50%;
+  animation:spin 1s linear infinite;
+}
+@keyframes spin {to{transform:rotate(360deg);}}
+.spinner-text {
+  color:var(--accent);
+  margin-top:18px;
+  font-weight:500;
+  letter-spacing:0.5px;
+  font-size:15px;
 }
 </style>
 </head>
-<body>
 
-<header class="site-header">
+<body>
+<header class="site-header transparent" id="header">
   <div class="header-left">
     <img src="serac-logo.png" alt="Sérac Logo" class="brand-logo">
     <div class="brand-title">Sérac</div>
@@ -139,30 +227,111 @@ footer{
   </nav>
 </header>
 
-<main>
-  <h1>Track Your Order</h1>
-  <p>Enter your Order Reference Number below to check the status of your order.</p>
-  <form id="trackOrderForm">
-    <input type="text" id="orderRef" placeholder="Enter your order reference" required>
-    <button type="submit">Check Status</button>
-  </form>
+<section class="track-section">
+  <div class="track-box">
+    <h1>Track Your Order</h1>
+    <p>Enter your Order Reference Number below to check the status of your order.</p>
 
-  <div class="order-status" id="orderStatus">
-    <h3>Order Details</h3>
-    <div class="status-line">Status: <span id="statusText"></span></div>
-    <div class="status-line">Date: <span id="orderDate"></span></div>
-    <div class="status-line">Email: <span id="orderEmail"></span></div>
-    <div class="status-line">Amount: <span id="orderAmount"></span></div>
+    <form id="trackOrderForm">
+      <input type="text" id="orderRef" placeholder="Enter your order reference" required>
+      <button type="submit">Check Status</button>
+    </form>
+
+    <div class="order-status" id="orderStatus">
+      <h3>Order Details</h3>
+      <ul class="order-details" id="orderDetails"></ul>
+    </div>
   </div>
-</main>
+</section>
+
+<div id="serac-overlay">
+  <div class="spinner"></div>
+  <div class="spinner-text">Fetching order...</div>
+</div>
 
 <footer>
   © <span id="year"></span> Sérac. All rights reserved.
 </footer>
 
-<script>
-document.getElementById("year").textContent = new Date().getFullYear();
-</script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+/* ---------- FIREBASE CONFIG ---------- */
+  const firebaseConfig = {
+    apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
+    authDomain: "brandisby.firebaseapp.com",
+    projectId: "brandisby",
+    storageBucket: "brandisby.firebasestorage.app",
+    messagingSenderId: "87213267039",
+    appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
+  };
+ 
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+/* ---------- ELEMENTS ---------- */
+const form = document.getElementById('trackOrderForm');
+const statusBox = document.getElementById('orderStatus');
+const detailsList = document.getElementById('orderDetails');
+const overlay = document.getElementById('serac-overlay');
+
+/* ---------- SPINNER CONTROL ---------- */
+function showSpinner(show){
+  overlay.classList.toggle('active', show);
+}
+
+/* ---------- ORDER TRACKING ---------- */
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const ref = document.getElementById('orderRef').value.trim();
+  if (!ref) return alert('Please enter an order reference.');
+
+  showSpinner(true);
+  detailsList.innerHTML = '';
+  statusBox.style.display = 'none';
+
+  try {
+    const q = query(collection(db, "orders"), where("trackingRef", "==", ref));
+    const snap = await getDocs(q);
+    showSpinner(false);
+
+    if (snap.empty) {
+      statusBox.style.display = 'block';
+      detailsList.innerHTML = '<li><strong>Notice:</strong> No order found for that reference.</li>';
+      return;
+    }
+
+    const doc = snap.docs[0].data();
+    const date = doc.date ? new Date(doc.date).toLocaleString() : '—';
+    const amount = doc.total ? `${doc.currency || '₦'}${doc.total.toLocaleString()}` : '—';
+
+    detailsList.innerHTML = `
+      <li><strong>Status</strong>${doc.status || 'Processing'}</li>
+      <li><strong>Date</strong>${date}</li>
+      <li><strong>Email</strong>${doc.email || '—'}</li>
+      <li><strong>Amount</strong>${amount}</li>
+      <li style="grid-column: span 2"><strong>Items</strong>${(doc.items || []).map(i => `${i.name} (${i.qty})`).join('<br>')}</li>
+    `;
+    statusBox.style.display = 'block';
+
+  } catch (err) {
+    console.error(err);
+    showSpinner(false);
+    statusBox.style.display = 'block';
+    detailsList.innerHTML = '<li><strong>Error:</strong> Unable to fetch order details. Try again later.</li>';
+  }
+});
+
+/* ---------- HEADER SCROLL EFFECT ---------- */
+const header = document.getElementById('header');
+window.addEventListener('scroll', () => {
+  if (window.scrollY > 40) header.classList.add('scrolled');
+  else header.classList.remove('scrolled');
+});
+
+/* ---------- FOOTER YEAR ---------- */
+document.getElementById('year').textContent = new Date().getFullYear();
+</script>
 </body>
 </html>
