@@ -239,7 +239,7 @@
     © <span id="year"></span> Sérac. All rights reserved.
   </footer>
 
- <script type="module">
+<script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -277,7 +277,7 @@
   }
 
   // -----------------------------
-  // Handle Order Search
+  // Handle Order Search (For Serac Only)
   // -----------------------------
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -289,7 +289,13 @@
     statusBox.style.display = 'none';
 
     try {
-      const q = query(collection(db, "orders"), where("trackingRef", "==", ref));
+      const brandId = "serac"; // 🔹 Only fetch from Serac's order collection
+
+      const q = query(
+        collection(db, `brands/${brandId}/orders`),
+        where("trackingRef", "==", ref)
+      );
+
       const snap = await getDocs(q);
       showSpinner(false);
 
@@ -304,12 +310,14 @@
       const amount = doc.total ? `${doc.currency || '₦'}${doc.total.toLocaleString()}` : '—';
       const items = (doc.items || []).map(i => `${i.name} (${i.qty})`).join('<br>');
 
+      // ✅ Only show non-sensitive info
       detailsList.innerHTML = `
-        <li><strong>Status</strong> ${doc.status || 'Processing'}</li>
-        <li><strong>Date</strong> ${date}</li>
-        <li><strong>Amount</strong> ${amount}</li>
-        <li><strong>Items</strong><br>${items || '—'}</li>
+        <li><strong>Status:</strong> ${doc.status || 'Processing'}</li>
+        <li><strong>Date:</strong> ${date}</li>
+        <li><strong>Total:</strong> ${amount}</li>
+        <li><strong>Items:</strong><br>${items || '—'}</li>
       `;
+
       statusBox.style.display = 'block';
     } catch (err) {
       console.error(err);
