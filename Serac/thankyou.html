@@ -84,7 +84,7 @@
     .hero h1{font-family:"Playfair Display",serif;color:#B66E41;font-size:clamp(36px,6vw,60px)}
 
     /* Main */
-    /* Center the thank-you box */
+    /* Center the box in the viewport */
     .thankyou-section {
       min-height: 100vh;
       display: flex;
@@ -92,7 +92,22 @@
       align-items: center;
       padding: 100px 20px;
     }
-    .thankyou-box{max-width:760px;background:#1c1e22;padding:48px;border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,0.6);color:#ddd}
+    
+    /* Center all content inside the box */
+    .thankyou-box {
+      max-width: 760px;
+      background: #1c1e22;
+      padding: 48px;
+      border-radius: 16px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+      color: #ddd;
+      text-align: center;           /* ✅ Centers all text & inline elements */
+      display: flex;                /* ✅ Enables internal centering */
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    
     .thankyou-box h2{font-family:"Playfair Display",serif;color:#B66E41;margin-bottom:12px}
     .thankyou-box p{color:#ccc;margin-bottom:10px}
 
