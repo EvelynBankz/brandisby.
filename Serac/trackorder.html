@@ -243,6 +243,9 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+  // -----------------------------
+  // Firebase Configuration
+  // -----------------------------
   const firebaseConfig = {
     apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
     authDomain: "brandisby.firebaseapp.com",
@@ -255,15 +258,21 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
+  // -----------------------------
+  // Elements
+  // -----------------------------
   const form = document.getElementById('trackOrderForm');
   const statusBox = document.getElementById('orderStatus');
   const detailsList = document.getElementById('orderDetails');
   const overlay = document.getElementById('serac-overlay');
 
   function showSpinner(show) {
-    overlay.style.display = show ? 'flex' : 'none';
+    if (overlay) overlay.style.display = show ? 'flex' : 'none';
   }
 
+  // -----------------------------
+  // Handle Order Search
+  // -----------------------------
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const ref = document.getElementById('orderRef').value.trim();
@@ -274,7 +283,7 @@
     statusBox.style.display = 'none';
 
     try {
-      // 🔥 Make sure to query inside brands/serac/orders
+      // Query Serac orders by trackingRef
       const q = query(collection(db, "brands", "serac", "orders"), where("trackingRef", "==", ref));
       const snap = await getDocs(q);
       showSpinner(false);
@@ -297,6 +306,7 @@
         <li><strong>Items:</strong><br>${items || '—'}</li>
       `;
       statusBox.style.display = 'block';
+
     } catch (err) {
       console.error(err);
       showSpinner(false);
@@ -305,5 +315,6 @@
     }
   });
 </script>
+
 </body>
 </html>
