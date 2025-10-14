@@ -95,18 +95,20 @@
     
     /* Center all content inside the box */
     .thankyou-box {
-      max-width: 800px;
+      max-width: 960px;             /* ✅ wider than 760px */
+      width: 100%;
       background: #1c1e22;
-      padding: 60px;
+      padding: 60px;                /* a bit more breathing room */
       border-radius: 16px;
       box-shadow: 0 12px 40px rgba(0,0,0,0.6);
       color: #ddd;
-      text-align: center;           /* ✅ Centers all text & inline elements */
-      display: flex;                /* ✅ Enables internal centering */
+      text-align: center;           /* center everything inside */
+      display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
     }
+
     
     .thankyou-box h2{font-family:"Playfair Display",serif;color:#B66E41;margin-bottom:12px}
     .thankyou-box p{color:#ccc;margin-bottom:10px}
@@ -116,9 +118,9 @@
       font-weight:600;font-size:18px;color:#fff;margin:14px 0;cursor:pointer;display:inline-block;
     }
     #orderReferenceNote{color:#999;font-size:13px;margin-bottom:12px}
-    .order-details{background:#17181b;padding:18px;border-radius:10px;text-align:left;border:1px solid rgba(255,255,255,0.04)}
+    .order-details{background:#17181b;padding:20px;border-radius:10px;text-align:center;width: 100%;max-width: 800px;border:1px solid rgba(255,255,255,0.04)}
     .order-details h3{color:#B66E41;font-family:"Playfair Display",serif;margin-bottom:8px}
-    .order-details li{color:#eee;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.02)}
+    .order-details li{color:#eee;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.02)}
 
     .btn{display:inline-block;padding:12px 26px;border-radius:8px;font-weight:600;cursor:pointer;margin-top:12px}
     .btn-primary{background:#B66E41;color:#fff;border:0}
