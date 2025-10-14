@@ -783,44 +783,67 @@ async function initiatePaymentFlow(ev){
   let paymentCallbackHandled = false;
 
   async function finalizeAfterSuccess(verifyResp){
-    try {
-      const saved = await persistPaidOrder(baseOrder, txRef);
-      const finalOrderId = saved?.orderId || null;
-      const trackingRef = saved?.trackingRef || generateOrderReference(baseOrder.email, finalOrderId||'', txRef);
+  try {
+    const saved = await persistPaidOrder(baseOrder, txRef);
+    const finalOrderId = saved?.orderId || null;
+    const trackingRef = saved?.trackingRef || generateOrderReference(baseOrder.email, finalOrderId||'', txRef);
 
-      if(!quoteId) localStorage.removeItem(STORAGE_KEY);
+    if(!quoteId) localStorage.removeItem(STORAGE_KEY);
 
-      const active = { ...baseOrder, id: finalOrderId, orderId: finalOrderId, status: 'paid', trackingRef };
-      activeOrderRaw = active;
-      quote = { items: active.items || [] };
-      quote._isOrder = true;
-      quote._paidFlag = true;
-      isPaidOrder = true;
+    const active = { ...baseOrder, id: finalOrderId, orderId: finalOrderId, status: 'paid', trackingRef };
+    activeOrderRaw = active;
+    quote = { items: active.items || [] };
+    quote._isOrder = true;
+    quote._paidFlag = true;
+    isPaidOrder = true;
 
-      renderPaidUIFromDoc(active);
+    renderPaidUIFromDoc(active);
 
-      localStorage.setItem('paidQuoteInfo', JSON.stringify({
-        quoteId: quoteId || null,
-        currency: selectedCurrency,
-        billing: { name: active.name, email: active.email, phone: active.phone, address: active.address },
-        trackingRef,
-        verified: true
-      }));
+    localStorage.setItem('paidQuoteInfo', JSON.stringify({
+      quoteId: quoteId || null,
+      currency: selectedCurrency,
+      billing: { 
+        name: active.name, 
+        email: active.email, 
+        phone: active.phone, 
+        address: active.address 
+      },
+      trackingRef,
+      verified: true
+    }));
 
-      showSpinner(false);
+    // ✅ Save complete order details for thankyou.html
+    localStorage.setItem('lastOrder_serac', JSON.stringify({
+      id: finalOrderId,
+      trackingRef,
+      name: active.name,
+      email: active.email,
+      phone: active.phone,
+      address: active.address,
+      currency: selectedCurrency,
+      total: subtotal,
+      items: quote.items,
+      status: 'paid',
+      verified: true,
+      createdAt: new Date().toISOString()
+    }));
 
-      const qs = finalOrderId ? `?orderId=${encodeURIComponent(finalOrderId)}` : '';
-      // FIXED: redirect to the exact path requested
-      window.location.assign('/Serac/thankyou.html');
+    showSpinner(false);
 
-    } catch(e){
-      console.error('finalizeAfterSuccess error', e);
-      showSpinner(false);
-      showError('Payment verified but finalisation failed. Contact support with tx_ref: ' + txRef);
-      if(payBtn){ payBtn.disabled = false; payBtn.dataset.processing = '0'; }
+    // ✅ Redirect with correct path and orderId
+    window.location.assign('/Serac/thankyou.html?orderId=' + encodeURIComponent(finalOrderId));
+
+  } catch(e){
+    console.error('finalizeAfterSuccess error', e);
+    showSpinner(false);
+    showError('Payment verified but finalisation failed. Contact support with tx_ref: ' + txRef);
+    if(payBtn){ 
+      payBtn.disabled = false; 
+      payBtn.dataset.processing = '0'; 
     }
   }
-
+}
+  
   const fwConfig = {
     public_key: FLW_PUBLIC_KEY,
     tx_ref: txRef,
