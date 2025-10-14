@@ -703,32 +703,40 @@ function generateOrderReference(email, orderId, txRef){
   const shortTx = txRef ? txRef.slice(-4).toUpperCase() : rand();
   return `${emailPrefix}-${day}${month}${year}-${shortTx}`;
 }
-async function persistPaidOrder(orderData, txRef){
+async function persistPaidOrder(orderData, txRef) {
   try {
     const trackingRef = generateOrderReference(orderData.email, orderData.id || "", txRef);
-    const docRef = await addDoc(collection(db, "brands", "serac", "orders"), {
+
+    // Save order using trackingRef as doc ID
+    const docRef = doc(db, "brands", "serac", "orders", trackingRef);
+    await setDoc(docRef, {
       ...orderData,
       createdAt: serverTimestamp(),
       verifiedAt: serverTimestamp(),
       status: "paid",
       trackingRef
     });
-    try {
-      if(orderData.source && orderData.source.startsWith('quote:')){
-        const qid = orderData.source.split('quote:')[1];
-        if(qid){
-          await updateDoc(doc(db, "brands", "serac", "quotes", qid), {
-            status: "Paid",
-            orderId: docRef.id,
-            paidAt: serverTimestamp(),
-            trackingRef
-          });
-        }
+
+    // Update related quote if exists
+    if(orderData.source?.startsWith('quote:')){
+      const qid = orderData.source.split('quote:')[1];
+      if(qid){
+        await updateDoc(doc(db, "brands", "serac", "quotes", qid), {
+          status: "Paid",
+          orderId: trackingRef,
+          paidAt: serverTimestamp(),
+          trackingRef
+        });
       }
-    } catch(e){ console.warn("Failed to update quote after saving order", e); }
-    return { orderId: docRef.id, trackingRef };
-  } catch(e){ console.error("persistPaidOrder failed", e); return null; }
+    }
+
+    return { orderId: trackingRef, trackingRef };
+  } catch(e){
+    console.error("persistPaidOrder failed", e);
+    return null;
+  }
 }
+
 
 /* -------------------- PAYMENT FLOW (FLUTTERWAVE) -------------------- */
 const FLW_PUBLIC_KEY = "FLWPUBK_TEST-07eb9d2da345c08dc4d54278c3bc86f7-X";
