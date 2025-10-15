@@ -160,11 +160,25 @@
       }
 
       const doc = data.order;
+      const currentStatus = doc.status || 'Paid';
 
-      // Convert Firestore timestamp to JS Date
-      const createdAt = doc.createdAt?.seconds
+      // Determine the timestamp for the current status
+      let statusDate = doc.createdAt?.seconds
         ? new Date(doc.createdAt.seconds * 1000)
         : new Date();
+
+      if (Array.isArray(doc.statusHistory) && doc.statusHistory.length > 0) {
+        const historyEntry = [...doc.statusHistory]
+          .reverse()
+          .find(h => h.status === currentStatus && h.changedAt);
+
+        if (historyEntry) {
+          // Firestore timestamps can be either seconds or ISO strings
+          statusDate = historyEntry.changedAt.seconds
+            ? new Date(historyEntry.changedAt.seconds * 1000)
+            : new Date(historyEntry.changedAt);
+        }
+      }
 
       const amount = doc.total ? `${doc.currency || '₦'}${doc.total.toLocaleString()}` : '—';
 
@@ -176,8 +190,8 @@
 
       // Show order details
       detailsList.innerHTML = `
-        <li><strong>Status:</strong> ${doc.status || 'Processing'}</li>
-        <li><strong>Date:</strong> ${createdAt.toLocaleString()}</li>
+        <li><strong>Status:</strong> ${currentStatus}</li>
+        <li><strong>Date:</strong> ${statusDate.toLocaleString()}</li>
         <li><strong>Amount:</strong> ${amount}</li>
         <li><strong>Items:</strong><br>${items}</li>
       `;
