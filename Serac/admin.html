@@ -1128,6 +1128,27 @@ function subscribeOrders() {
   );
 }
 
+<script>
+/* ---------------- ORDERS: subscribe + render + export ---------------- */
+
+function subscribeOrders() {
+  const ordersRef = collection(db, "brands", "serac", "orders");
+  onSnapshot(
+    ordersRef,
+    snap => {
+      allOrders = [];
+      snap.forEach(docSnap => {
+        const o = { id: docSnap.id, ...docSnap.data() };
+        // Default status fallback
+        if (!o.status) o.status = "Paid";
+        allOrders.push(o);
+      });
+      renderOrders(allOrders);
+    },
+    err => console.error("Orders snapshot error:", err)
+  );
+}
+
 /* ---------------- RENDER ORDERS ---------------- */
 function renderOrders(orders) {
   const term = (orderSearch.value || "").toLowerCase();
@@ -1144,23 +1165,25 @@ function renderOrders(orders) {
     return matchesStatus && matchesTerm;
   });
 
+  filtered.forEach(o => {
+    const orderIdDisplay = `<a href="./order-details.html?orderId=${o.id}" target="_blank">${escapeHtml(o.id)}</a>`;
     const colorMap = {
-     Paid: "#2A9D8F",
-     Pending: "#F4A261",
-     Processing: "#8A4D2B",
-     Shipped: "#C2855E",
-     Completed: "#2ECC71",
-     Cancelled: "#E74C3C"
-   };
-   
-   const statusDropdown = `
-     <select class="statusSelect" data-id="${o.id}" style="background:${colorMap[o.status] || "#999"};color:#fff;border:none;padding:4px 8px;border-radius:6px;">
-       ${["Paid","Pending","Processing","Shipped","Completed","Cancelled"]
-         .map(
-           s => `<option value="${s}" ${o.status === s ? "selected" : ""}>${s}</option>`
-         ).join("")}
-     </select>
-   `;
+      Paid: "#2A9D8F",
+      Pending: "#F4A261",
+      Processing: "#8A4D2B",
+      Shipped: "#C2855E",
+      Completed: "#2ECC71",
+      Cancelled: "#E74C3C"
+    };
+
+    const statusDropdown = `
+      <select class="statusSelect" data-id="${o.id}" style="background:${colorMap[o.status] || "#999"};color:#fff;border:none;padding:4px 8px;border-radius:6px;">
+        ${["Paid","Pending","Processing","Shipped","Completed","Cancelled"]
+          .map(
+            s => `<option value="${s}" ${o.status === s ? "selected" : ""}>${s}</option>`
+          ).join("")}
+      </select>
+    `;
 
     const row = document.createElement("tr");
     row.innerHTML = `
@@ -1206,6 +1229,7 @@ async function openOrderModal(orderId) {
   const docSnap = await getDoc(doc(db, "brands", "serac", "orders", orderId));
   if (!docSnap.exists()) return;
   const o = docSnap.data();
+  if (!o.status) o.status = "Paid";
 
   let historyHtml = "";
   if (Array.isArray(o.statusHistory)) {
@@ -1228,7 +1252,7 @@ async function openOrderModal(orderId) {
     <p><b>Email:</b> ${o.email || ""}</p>
     <p><b>Address:</b> ${o.address || "—"}</p>
     <p><b>Amount:</b> ${formatCurrency(parseFloat(o.total || 0), o.currency || "NGN")}</p>
-    <p><b>Status:</b> ${o.status || ""}</p>
+    <p><b>Status:</b> ${o.status}</p>
     ${historyHtml}
   `;
 
@@ -1260,7 +1284,7 @@ async function logStatusChange(orderRef, newStatus, changedBy = "system") {
     statusHistory: arrayUnion(entry)
   });
 }
- 
+
 /* ---------------- AUTO-COMPLETE SHIPPED AFTER 48H ---------------- */
 async function autoCompleteShippedOrders() {
   try {
@@ -1346,12 +1370,14 @@ async function exportOrdersCSV(e) {
       if (rateOrder && rateTarget)
         converted = (origTotal / rateOrder) * rateTarget;
     }
+    // Default status fallback
+    if (!o.status) o.status = "Paid";
     rows.push([
       o.id || "",
       o.trackingNumber || o.trackingRef || o.tx_ref || "",
       o.email || "",
       o.createdAt || "",
-      o.status || "",
+      o.status,
       origCurrency,
       origTotal,
       converted,
@@ -1428,6 +1454,7 @@ document.querySelectorAll(".toggleTable").forEach(btn => {
   });
 });
 </script>
+
 
 </body>
 </html>
