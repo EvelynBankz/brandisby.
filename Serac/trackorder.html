@@ -122,25 +122,7 @@
     © <span id="year"></span> Sérac. All rights reserved.
   </footer>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-  // -----------------------------
-  // Firebase Configuration
-  // -----------------------------
-  const firebaseConfig = {
-    apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
-    authDomain: "brandisby.firebaseapp.com",
-    projectId: "brandisby",
-    storageBucket: "brandisby.firebasestorage.app",
-    messagingSenderId: "87213267039",
-    appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-
+<script>
   // -----------------------------
   // Elements
   // -----------------------------
@@ -150,7 +132,7 @@
   const overlay = document.getElementById('serac-overlay');
 
   function showSpinner(show) {
-    if (overlay) overlay.style.display = show ? 'flex' : 'none';
+    overlay.style.display = show ? 'flex' : 'none';
   }
 
   // -----------------------------
@@ -166,41 +148,32 @@
     statusBox.style.display = 'none';
 
     try {
-      // Query inside brands/serac/orders, filtered by trackingRef
-      const q = query(
-        collection(db, "brands", "serac", "orders"),
-        where("trackingRef", "==", ref)
-      );
-
-      const snap = await getDocs(q);
+      // Call Vercel serverless function
+      const res = await fetch(`/api/getOrder?trackingRef=${encodeURIComponent(ref)}`);
+      const data = await res.json();
       showSpinner(false);
 
-      if (snap.empty) {
+      if (!res.ok || !data.order) {
         statusBox.style.display = 'block';
         detailsList.innerHTML = '<li><strong>Notice:</strong> No order found for that reference.</li>';
         return;
       }
 
-      const docSnap = snap.docs[0];
-      const doc = docSnap.data();
+      const doc = data.order;
+      const date = doc.createdAt ? new Date(doc.createdAt).toLocaleString() : '—';
+      const amount = doc.total ? `${doc.currency || '₦'}${doc.total.toLocaleString()}` : '—';
 
-      // Safely format the date
-      const date = doc.createdAt && doc.createdAt.toDate ? doc.createdAt.toDate().toLocaleString() : '—';
-
-      // Use USD total or fallback
-      const amount = doc.totalPrices?.USD ?? doc.total ?? '—';
-
-      // Format items with quantity
-      const items = (doc.items || []).map(i => {
-        const qty = i.quantity ?? i.qty ?? 1;
-        return `${i.name} (Qty: ${qty})`;
-      }).join('<br>');
+      // Build item list
+      const items = (doc.items || []).map(item => {
+        const qty = item.quantity || item.totalQuantity || '—';
+        return `${item.name} (${qty})`;
+      }).join('<br>') || '—';
 
       detailsList.innerHTML = `
-        <li><strong>Status:</strong> ${doc.status ?? 'Processing'}</li>
+        <li><strong>Status:</strong> ${doc.status || 'Processing'}</li>
         <li><strong>Date:</strong> ${date}</li>
         <li><strong>Amount:</strong> ${amount}</li>
-        <li><strong>Items:</strong><br>${items || '—'}</li>
+        <li><strong>Items:</strong><br>${items}</li>
       `;
       statusBox.style.display = 'block';
 
