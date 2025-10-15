@@ -14,14 +14,14 @@
   body{font-family:"Montserrat",sans-serif;background:#F5E6CC;color:#112e1f;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 
   /* --- HEADER --- */
-  .site-header{position:fixed;left:0;right:0;top:0;height:80px;display:flex;align-items:center;justify-content:space-between;padding:16px 28px;z-index:1200;background:#112e1f;color:#F5E6CC}
+  .site-header{position:fixed;left:0;right:0;top:0;height:80px;display:flex;align-items:center;justify-content:space-between;padding:16px 28px;z-index:1200;background:#112e1f;color:#FFD6BA}
   .header-left{display:flex;align-items:center;gap:12px}
   .brand-logo{height:60px}
   .brand-title{font-family:"Playfair Display",serif;font-size:24px;font-weight:700;color:#FFD6BA}
   .header-right{display:flex;gap:20px;align-items:center}
-  .header-right a{color:#F5E6CC;text-decoration:none;font-weight:500}
+  .header-right a{color:#FFD6BA;text-decoration:none;font-weight:500}
   .hamburger{display:none;background:none;border:0;cursor:pointer;width:30px;height:24px;position:relative}
-  .hamburger span{position:absolute;height:3px;background:#F5E6CC;width:100%;left:0;border-radius:2px;transition:all .3s}
+  .hamburger span{position:absolute;height:3px;background:#FFD6BA;width:100%;left:0;border-radius:2px;transition:all .3s}
   .hamburger span:nth-child(1){top:0}
   .hamburger span:nth-child(2){top:10px}
   .hamburger span:nth-child(3){top:20px}
@@ -56,13 +56,13 @@
   .order-details strong{display:block;margin-bottom:4px}
 
   /* --- Overlay / Spinner --- */
-  #fleur-overlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:linear-gradient(270deg,#f7dad9,#112e1f,#e6daf6);background-size:600% 600%;animation:gradientShift 15s ease infinite;transition:opacity .45s ease;opacity:1}
+  #fleur-overlay{position:fixed;inset:0;z-index:9999;display:none;align-items:center;justify-content:center;background:linear-gradient(270deg,#f7dad9,#112e1f,#e6daf6);background-size:600% 600%;animation:gradientShift 15s ease infinite;transition:opacity .45s ease;opacity:0}
   .fleur-spinner{width:70px;height:70px;border-radius:50%;border:7px solid rgba(255,255,255,0.18);border-top-color:#112e1f;animation:spin 1s linear infinite;box-shadow:0 8px 28px rgba(0,0,0,0.35)}
   @keyframes spin{to{transform:rotate(360deg)}}
   @keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 
   /* --- Floating Support Button --- */
-  #floatingSupportBtn{position:fixed;bottom:25px;right:25px;width:64px;height:64px;border-radius:50%;border:none;background:#112e1f;color:#FFD6BA;display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer;box-shadow: 0 8px 30px rgba(212,245,105,1);transition:all .3s ease;z-index:10001}
+  #floatingSupportBtn{position:fixed;bottom:25px;right:25px;width:64px;height:64px;border-radius:50%;border:none;background:#112e1f;color:#FFD6BA;display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer;box-shadow:0 8px 30px rgba(212,245,105,1);transition:all .3s ease;z-index:10001}
   #floatingSupportBtn:hover{transform:translateY(-2px);box-shadow:0 12px 36px rgba(17,46,31,1)}
   .support-tooltip{position:absolute;bottom:70px;left:50%;transform:translateX(-50%);background:#112e1f;color:#FFD6BA;padding:6px 12px;border-radius:8px;font-size:14px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s}
   #floatingSupportBtn:hover .support-tooltip{opacity:1;transform:translateX(-50%) translateY(-6px)}
@@ -112,19 +112,19 @@
 <footer>© <span id="year"></span> Fleur De Vie</footer>
 
 <script>
-  // --- Hamburger Toggle ---
-  const hamburger = document.getElementById('hamburger');
-  const headerRight = document.getElementById('headerRight');
+  // --- Hamburger ---
+  const hamburger=document.getElementById('hamburger');
+  const headerRight=document.getElementById('headerRight');
   hamburger.addEventListener('click',()=>{hamburger.classList.toggle('open');headerRight.classList.toggle('open')})
 
   // --- Spinner ---
   const overlay=document.getElementById('fleur-overlay')
-  function showSpinner(show){overlay.style.opacity=show?'1':'0';setTimeout(()=>{if(!show)overlay.style.display='none';else overlay.style.display='flex'},450)}
+  function showSpinner(show){overlay.style.display='flex';overlay.style.opacity=show?'1':'0'}
 
   // --- Footer Year ---
   document.getElementById('year').textContent=new Date().getFullYear()
 
-  // --- Order Tracking (GET like Serac) ---
+  // --- Order Tracking ---
   const form=document.getElementById('trackOrderForm')
   const statusBox=document.getElementById('orderStatus')
   const detailsList=document.getElementById('orderDetails')
@@ -132,7 +132,8 @@
   form.addEventListener('submit',async e=>{
     e.preventDefault()
     const ref=document.getElementById('orderRef').value.trim()
-    if(!ref)return alert('Please enter your order reference.')
+    if(!ref) return alert('Please enter your order reference.')
+
     showSpinner(true)
     detailsList.innerHTML=''
     statusBox.style.display='none'
@@ -140,21 +141,24 @@
     try{
       const res=await fetch(`/api/getOrders?trackingRef=${encodeURIComponent(ref)}&brandId=fleurdevie`)
       const data=await res.json()
-      showSpinner(false)
-      if(!res.ok||!data.found){statusBox.style.display='block';detailsList.innerHTML='<li><strong>Notice:</strong> No order found for that reference.</li>';return}
+
+      if(!res.ok||!data.found){
+        statusBox.style.display='block'
+        detailsList.innerHTML='<li><strong>Notice:</strong> No order found for that reference.</li>'
+        return
+      }
 
       const doc=data.order
       const currentStatus=doc.status||'Paid'
       let statusDate=new Date()
-      if(doc.createdAt)statusDate=new Date(doc.createdAt)
+      if(doc.createdAt) statusDate=new Date(doc.createdAt)
       if(Array.isArray(doc.statusHistory)&&doc.statusHistory.length>0){
         const historyEntry=[...doc.statusHistory].reverse().find(h=>h.status===currentStatus&&h.changedAt)
-        if(historyEntry)statusDate=new Date(historyEntry.changedAt)
+        if(historyEntry) statusDate=new Date(historyEntry.changedAt)
       }
 
       const amount=doc.total?`${doc.currency||'NGN'}${doc.total.toLocaleString()}`:'—'
       const items=(doc.items||[]).map(i=>`${i.name} (${i.quantity||1})`).join('<br>')||'—'
-
       const statusColors={Paid:"#2A9D8F",Pending:"#F4A261",Processing:"#8A4D2B",Shipped:"#C2855E",Completed:"#2ECC71",Cancelled:"#E74C3C"}
 
       detailsList.innerHTML=`
@@ -169,7 +173,14 @@
         <li><strong>Items:</strong><br>${items}</li>
       `
       statusBox.style.display='block'
-    }catch(err){console.error(err);showSpinner(false);detailsList.innerHTML='<li><strong>Error:</strong> Unable to fetch order details. Try again later.</li>';statusBox.style.display='block'}
+
+    }catch(err){
+      console.error(err)
+      detailsList.innerHTML='<li><strong>Error:</strong> Unable to fetch order details. Try again later.</li>'
+      statusBox.style.display='block'
+    }finally{
+      showSpinner(false) // ensure spinner always hides
+    }
   })
 
   // --- Support Button ---
