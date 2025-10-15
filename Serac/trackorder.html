@@ -137,49 +137,58 @@
     overlay.style.display = show ? "flex" : "none";
   }
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const ref = document.getElementById("orderRef").value.trim();
-    if (!ref) return alert("Please enter your order reference.");
+  form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const ref = document.getElementById('orderRef').value.trim();
+  if (!ref) return alert('Please enter your order reference.');
 
-    showSpinner(true);
-    detailsList.innerHTML = "";
-    statusBox.style.display = "none";
+  showSpinner(true);
+  detailsList.innerHTML = '';
+  statusBox.style.display = 'none';
 
-    try {
-      const res = await fetch("/api/getOrder", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ trackingRef: ref, brandId: BRAND_ID }),
-      });
-      const data = await res.json();
-      showSpinner(false);
+  try {
+    // Query Serac orders by trackingRef
+    const q = query(
+      collection(db, "brands", "serac", "orders"),
+      where("trackingRef", "==", ref)
+    );
 
-      if (!data.found) {
-        statusBox.style.display = "block";
-        detailsList.innerHTML = "<li><strong>Notice:</strong> No order found for that reference.</li>";
-        return;
-      }
+    const snap = await getDocs(q);
+    showSpinner(false);
 
-      const doc = data.order;
-      const date = doc.date ? new Date(doc.date).toLocaleString() : "—";
-      const amount = doc.total ? `${doc.currency || "₦"}${doc.total.toLocaleString()}` : "—";
-      const items = (doc.items || []).map(i => `${i.name} (${i.qty})`).join("<br>");
-
-      detailsList.innerHTML = `
-        <li><strong>Status:</strong> ${doc.status || "Processing"}</li>
-        <li><strong>Date:</strong> ${date}</li>
-        <li><strong>Amount:</strong> ${amount}</li>
-        <li><strong>Items:</strong><br>${items || "—"}</li>
-      `;
-      statusBox.style.display = "block";
-    } catch (err) {
-      console.error(err);
-      showSpinner(false);
-      statusBox.style.display = "block";
-      detailsList.innerHTML = "<li><strong>Error:</strong> Unable to fetch order details. Try again later.</li>";
+    if (snap.empty) {
+      statusBox.style.display = 'block';
+      detailsList.innerHTML = '<li><strong>Notice:</strong> No order found for that reference.</li>';
+      return;
     }
-  });
+
+    const doc = snap.docs[0].data();
+
+    // Format date
+    const date = doc.createdAt?.toDate ? doc.createdAt.toDate().toLocaleString() : '—';
+
+    // Total amount (using USD for simplicity, adjust as needed)
+    const amount = doc.totalPrices?.USD ? `$${doc.totalPrices.USD}` : doc.total || '—';
+
+    // Items list
+    const items = (doc.items || []).map(i => `${i.name} (Qty: ${i.quantity || i.qty || 1})`).join('<br>');
+
+    // Render details
+    detailsList.innerHTML = `
+      <li><strong>Status:</strong> ${doc.status || 'Processing'}</li>
+      <li><strong>Date:</strong> ${date}</li>
+      <li><strong>Amount:</strong> ${amount}</li>
+      <li><strong>Items:</strong><br>${items || '—'}</li>
+    `;
+    statusBox.style.display = 'block';
+
+  } catch (err) {
+    console.error(err);
+    showSpinner(false);
+    detailsList.innerHTML = '<li><strong>Error:</strong> Unable to fetch order details. Try again later.</li>';
+    statusBox.style.display = 'block';
+  }
+});
 </script>
 </body>
 </html>
