@@ -9,24 +9,12 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
   <style>
+    /* === Keep your existing CSS === */
     *{box-sizing:border-box;margin:0;padding:0}
     html,body{height:100%;scroll-behavior:smooth}
-    body{
-      font-family:"Montserrat",sans-serif;
-      background:#141517;color:#fff;
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-    }
-
-    /* Header */
-    .site-header{
-      position:fixed;left:0;right:0;top:0;height:80px;
-      display:flex;align-items:center;justify-content:space-between;
-      padding:10px 20px;z-index:1200;background:transparent;
-      transition:background .28s ease,backdrop-filter .28s ease,border-color .28s ease;
-      border-bottom:1px solid rgba(255,255,255,0.02);
-    }
-    .site-header.scrolled{ background: rgba(20,21,23,0.95); backdrop-filter: blur(6px); border-bottom-color: rgba(255,255,255,0.04); }
+    body{font-family:"Montserrat",sans-serif;background:#141517;color:#fff;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+    .site-header{position:fixed;left:0;right:0;top:0;height:80px;display:flex;align-items:center;justify-content:space-between;padding:10px 20px;z-index:1200;background:transparent;transition:background .28s ease,backdrop-filter .28s ease,border-color .28s ease;border-bottom:1px solid rgba(255,255,255,0.02);}
+    .site-header.scrolled{background: rgba(20,21,23,0.95); backdrop-filter: blur(6px); border-bottom-color: rgba(255,255,255,0.04);}
     .header-left{display:flex;align-items:center;gap:16px}
     .brand-logo{height:64px;width:auto}
     .brand-title{font-family:"Playfair Display",serif;color:#B66E41;font-weight:700;font-size:1.6rem}
@@ -40,7 +28,6 @@
     .hamburger.open span:nth-child(1){transform:rotate(45deg);top:12px}
     .hamburger.open span:nth-child(2){opacity:0}
     .hamburger.open span:nth-child(3){transform:rotate(-45deg);top:12px}
-
     @media(max-width:768px){
       .hamburger { display:block; }
       .header-right {
@@ -69,127 +56,23 @@
         background:rgba(182,110,65,0.12);
       }
     }
-
-    /* Main section */
-    .track-section {
-      min-height:100vh;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      padding:120px 20px;
-    }
-
-    .track-box {
-      max-width:960px;
-      width:100%;
-      background:#1c1e22;
-      padding:60px;
-      border-radius:16px;
-      box-shadow:0 12px 40px rgba(0,0,0,0.6);
-      color:#ddd;
-      text-align:center;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-    }
-
-    .track-box h1 {
-      font-family:"Playfair Display",serif;
-      color:#B66E41;
-      margin-bottom:12px;
-      font-size:2rem;
-    }
-
-    .track-box p {
-      color:#ccc;
-      margin-bottom:24px;
-      font-size:15px;
-    }
-
-    input {
-      background:#17181b;
-      border:1px solid rgba(255,255,255,0.06);
-      border-radius:10px;
-      padding:12px 14px;
-      color:#fff;
-      font-size:15px;
-      width:100%;
-      max-width:400px;
-      transition:border-color .25s ease;
-      margin-bottom:18px;
-    }
-
-    input:focus {
-      outline:none;
-      border-color:#B66E41;
-    }
-
-    button {
-      background:#B66E41;
-      color:#fff;
-      border:none;
-      border-radius:8px;
-      padding:12px 26px;
-      font-weight:600;
-      cursor:pointer;
-      transition:transform .25s, box-shadow .25s;
-    }
-
-    button:hover {
-      transform:translateY(-3px);
-      box-shadow:0 12px 36px rgba(182,110,65,0.25);
-    }
-
-    /* Order details */
-    .order-status {
-      margin-top:40px;
-      width:100%;
-      display:none;
-      text-align:left;
-      background:#17181b;
-      padding:30px;
-      border-radius:12px;
-      border:1px solid rgba(255,255,255,0.05);
-    }
-
-    .order-status h3 {
-      color:#B66E41;
-      font-family:"Playfair Display",serif;
-      text-align:center;
-      margin-bottom:18px;
-    }
-
-    .order-details {
-      list-style:none;
-      padding:0;
-    }
-
-    .order-details li {
-      padding:10px 0;
-      border-bottom:1px solid rgba(255,255,255,0.05);
-      color:#eee;
-    }
-
-    .order-details strong {
-      color:#B66E41;
-      display:block;
-      margin-bottom:4px;
-    }
-
-    /* Footer */
+    .track-section {min-height:100vh;display:flex;justify-content:center;align-items:center;padding:120px 20px;}
+    .track-box {max-width:960px;width:100%;background:#1c1e22;padding:60px;border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,0.6);color:#ddd;text-align:center;display:flex;flex-direction:column;align-items:center;}
+    .track-box h1 {font-family:"Playfair Display",serif;color:#B66E41;margin-bottom:12px;font-size:2rem;}
+    .track-box p {color:#ccc;margin-bottom:24px;font-size:15px;}
+    input {background:#17181b;border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:12px 14px;color:#fff;font-size:15px;width:100%;max-width:400px;transition:border-color .25s ease;margin-bottom:18px;}
+    input:focus {outline:none;border-color:#B66E41;}
+    button {background:#B66E41;color:#fff;border:none;border-radius:8px;padding:12px 26px;font-weight:600;cursor:pointer;transition:transform .25s, box-shadow .25s;}
+    button:hover {transform:translateY(-3px);box-shadow:0 12px 36px rgba(182,110,65,0.25);}
+    .order-status {margin-top:40px;width:100%;display:none;text-align:left;background:#17181b;padding:30px;border-radius:12px;border:1px solid rgba(255,255,255,0.05);}
+    .order-status h3 {color:#B66E41;font-family:"Playfair Display",serif;text-align:center;margin-bottom:18px;}
+    .order-details {list-style:none;padding:0;}
+    .order-details li {padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);color:#eee;}
+    .order-details strong {color:#B66E41;display:block;margin-bottom:4px;}
     footer{padding:28px;text-align:center;color:#777;margin-top:60px}
-
-    /* Overlay Spinner */
-    #serac-overlay{
-      position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;
-      background:rgba(0,0,0,0.95);backdrop-filter:blur(6px);transition:opacity .45s ease;opacity:0;pointer-events:none;
-    }
+    #serac-overlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.95);backdrop-filter:blur(6px);transition:opacity .45s ease;opacity:0;pointer-events:none;}
     #serac-overlay.active{opacity:1;pointer-events:auto;}
-    .gold-spinner{
-      width:64px;height:64px;border-radius:50%;
-      border:5px solid rgba(182,110,65,0.18);border-top-color:#B66E41;animation:serac-spin 1s linear infinite;
-      box-shadow:0 6px 26px rgba(0,0,0,0.6);
-    }
+    .gold-spinner{width:64px;height:64px;border-radius:50%;border:5px solid rgba(182,110,65,0.18);border-top-color:#B66E41;animation:serac-spin 1s linear infinite;box-shadow:0 6px 26px rgba(0,0,0,0.6);}
     @keyframes serac-spin{to{transform:rotate(360deg)}}
   </style>
 </head>
@@ -239,83 +122,64 @@
     © <span id="year"></span> Sérac. All rights reserved.
   </footer>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+<script>
+  // =========================
+  // CONFIG
+  // =========================
+  const BRAND_ID = "serac"; // change to "fleurdevie" on Fleurdevie page
 
-  // -----------------------------
-  // Firebase Configuration
-  // -----------------------------
-  const firebaseConfig = {
-    apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
-    authDomain: "brandisby.firebaseapp.com",
-    projectId: "brandisby",
-    storageBucket: "brandisby.firebasestorage.app",
-    messagingSenderId: "87213267039",
-    appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-
-  // -----------------------------
-  // Elements
-  // -----------------------------
-  const form = document.getElementById('trackOrderForm');
-  const statusBox = document.getElementById('orderStatus');
-  const detailsList = document.getElementById('orderDetails');
-  const overlay = document.getElementById('serac-overlay');
+  const form = document.getElementById("trackOrderForm");
+  const statusBox = document.getElementById("orderStatus");
+  const detailsList = document.getElementById("orderDetails");
+  const overlay = document.getElementById("serac-overlay");
 
   function showSpinner(show) {
-    if (overlay) overlay.style.display = show ? 'flex' : 'none';
+    overlay.style.display = show ? "flex" : "none";
   }
 
-  // -----------------------------
-  // Handle Order Tracking
-  // -----------------------------
-  form.addEventListener('submit', async (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const ref = document.getElementById('orderRef').value.trim();
-    if (!ref) return alert('Please enter your order reference.');
+    const ref = document.getElementById("orderRef").value.trim();
+    if (!ref) return alert("Please enter your order reference.");
 
     showSpinner(true);
-    detailsList.innerHTML = '';
-    statusBox.style.display = 'none';
+    detailsList.innerHTML = "";
+    statusBox.style.display = "none";
 
     try {
-      // 🔥 Query only inside brands/serac/orders, filtered by trackingRef
-      const q = query(
-        collection(db, "brands", "serac", "orders"),
-        where("trackingRef", "==", ref)
-      );
-
-      const snap = await getDocs(q);
+      const res = await fetch("/api/getOrder", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ trackingRef: ref, brandId: BRAND_ID }),
+      });
+      const data = await res.json();
       showSpinner(false);
 
-      if (snap.empty) {
-        statusBox.style.display = 'block';
-        detailsList.innerHTML = '<li><strong>Notice:</strong> No order found for that reference.</li>';
+      if (!data.found) {
+        statusBox.style.display = "block";
+        detailsList.innerHTML = "<li><strong>Notice:</strong> No order found for that reference.</li>";
         return;
       }
 
-      const doc = snap.docs[0].data();
-      const date = doc.date ? new Date(doc.date).toLocaleString() : '—';
-      const amount = doc.total ? `${doc.currency || '₦'}${doc.total.toLocaleString()}` : '—';
-      const items = (doc.items || []).map(i => `${i.name} (${i.qty})`).join('<br>');
+      const doc = data.order;
+      const date = doc.date ? new Date(doc.date).toLocaleString() : "—";
+      const amount = doc.total ? `${doc.currency || "₦"}${doc.total.toLocaleString()}` : "—";
+      const items = (doc.items || []).map(i => `${i.name} (${i.qty})`).join("<br>");
 
       detailsList.innerHTML = `
-        <li><strong>Status:</strong> ${doc.status || 'Processing'}</li>
+        <li><strong>Status:</strong> ${doc.status || "Processing"}</li>
         <li><strong>Date:</strong> ${date}</li>
         <li><strong>Amount:</strong> ${amount}</li>
-        <li><strong>Items:</strong><br>${items || '—'}</li>
+        <li><strong>Items:</strong><br>${items || "—"}</li>
       `;
-      statusBox.style.display = 'block';
-
+      statusBox.style.display = "block";
     } catch (err) {
       console.error(err);
       showSpinner(false);
-      detailsList.innerHTML = '<li><strong>Error:</strong> Unable to fetch order details. Try again later.</li>';
-      statusBox.style.display = 'block';
+      statusBox.style.display = "block";
+      detailsList.innerHTML = "<li><strong>Error:</strong> Unable to fetch order details. Try again later.</li>";
     }
   });
 </script>
+</body>
+</html>
