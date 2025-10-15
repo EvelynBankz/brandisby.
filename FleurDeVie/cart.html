@@ -187,26 +187,9 @@ function mergeCartItems(cartArray){
   cartArray.forEach(item=>{
     const idx = merged.findIndex(i => i.id === item.id && (i.color||'')=== (item.color||'') && (i.size||'')=== (item.size||''));
     if(idx===-1) merged.push({...item});
-    else merged[idx].quantity = (merged[idx].quantity||0) + (item.quantity||0);
+    else merged[idx].quantity += (item.quantity||0);
   });
   return merged;
-}
-
-function totalQuantityByProduct(productId){
-  return cart.filter(i=>i.id===productId).reduce((sum,i)=>sum+(i.quantity||0),0);
-}
-
-function groupVariants(productId){
-  return cart.filter(i=>i.id===productId);
-}
-
-async function fetchProductData(productId){
-  try{
-    const dref = doc(db,"brands","fleurdevie","products",productId);
-    const snap = await getDoc(dref);
-    if(snap.exists()) return snap.data();
-  }catch(e){ console.warn("Fetch product failed", productId, e); }
-  return null;
 }
 
 function updateCartCount(){
@@ -214,53 +197,48 @@ function updateCartCount(){
   cartCountElem.textContent = total;
 }
 
-function updateLineTotalAndQty(productId){
-  const currency = currencySelect.value || 'NGN';
-  const variants = groupVariants(productId);
-  const totalQty = totalQuantityByProduct(productId);
-  const lineTotal = variants.reduce((sum,v)=>{
-    const price = v.price || 0;
-    return sum + (price * (v.quantity || 0));
-  },0);
-
-  // Update line totals and quantity in DOM
-  cartGrid.querySelectorAll(`.cart-item[data-id="${productId}"]`).forEach(div=>{
-    const lineElem = div.querySelector('.line-total');
-    if(lineElem) lineElem.textContent = formatPrice(lineTotal, currency);
-    const qtyElem = div.querySelector('.variant-summary');
-    if(qtyElem) qtyElem.textContent = `Total Quantity: ${totalQty}`;
-  });
-
-  // Update subtotal
-  const subtotal = cart.reduce((sum,i)=>sum+(i.price||0)*(i.quantity||0),0);
-  cartSubtotalElem.textContent = `Subtotal: ${formatPrice(subtotal, currency)}`;
+async function fetchProductData(productId){
+  try{
+    const dref = doc(db,"brands","fleurdevie","products",productId);
+    const snap = await getDoc(dref);
+    if(snap.exists()) return snap.data();
+  }catch(e){ console.warn("Fetch failed", productId, e); }
+  return null;
 }
 
 async function renderCart(){
-  cartGrid.innerHTML = '';
-  if(!cart.length){ cartEmpty.style.display='block'; cartSubtotalElem.textContent=''; checkoutBtn.style.display='none'; return; }
-  cartEmpty.style.display='none'; checkoutBtn.style.display='inline-block';
+  cartGrid.innerHTML='';
+  if(!cart.length){
+    cartEmpty.style.display='block';
+    cartSubtotalElem.textContent='';
+    checkoutBtn.style.display='none';
+    return;
+  }
+  cartEmpty.style.display='none';
+  checkoutBtn.style.display='inline-block';
 
   const currency = currencySelect.value || 'NGN';
   const productIds = [...new Set(cart.map(i=>i.id))];
 
   for(const pid of productIds){
     const product = await fetchProductData(pid);
-    const variants = groupVariants(pid);
-    const totalQty = totalQuantityByProduct(pid);
-    let thumbnail = product?.images?.[0] || product?.imageUrl || 'placeholder.jpg';
-    let lineTotal = variants.reduce((sum,v)=>sum+v.quantity*((product && product[`price${currency}`])||v.price||0),0);
+    const variants = cart.filter(i=>i.id===pid);
+    const totalQty = variants.reduce((sum,v)=>sum+(v.quantity||0),0);
+    const thumbnail = product?.images?.[0] || product?.imageUrl || 'placeholder.jpg';
+    const lineTotal = variants.reduce((sum,v)=>{
+      return sum + (v.price || product?.[`price${currency}`] || 0) * (v.quantity||0);
+    },0);
 
-    const div = document.createElement('div'); 
+    const div = document.createElement('div');
     div.className='cart-item';
-    div.dataset.id = pid;
+    div.dataset.id=pid;
     div.innerHTML=`
       <div class="cart-item-header">
         <img src="${thumbnail}" alt="${product?.name||''}">
         <div class="cart-item-details">
           <h3>${product?.name||''}</h3>
           <div class="variant-summary">Total Quantity: ${totalQty}</div>
-          <div class="price line-total">${formatPrice(lineTotal, currency)}</div>
+          <div class="price line-total">${formatPrice(lineTotal,currency)}</div>
           ${variants.length>1?'<button class="show-variants-btn">Show Choices</button>':''}
           <div class="variants-container"></div>
         </div>
@@ -269,9 +247,11 @@ async function renderCart(){
 
     const variantsContainer = div.querySelector('.variants-container');
     if(variants.length>1){
+      variantsContainer.style.display='none';
+      variantsContainer.style.flexDirection='column';
       variants.forEach(v=>{
-        const vDiv = document.createElement('div'); 
-        vDiv.className='quantity-controls'; 
+        const vDiv = document.createElement('div');
+        vDiv.className='quantity-controls';
         vDiv.style.flexWrap='wrap';
         vDiv.innerHTML=`
           ${v.color?`<span>Color:${v.color}</span>`:''}
@@ -297,68 +277,53 @@ async function renderCart(){
     cartGrid.appendChild(div);
   }
 
-  // Event listeners for quantity changes
+  // Event Listeners
   cartGrid.querySelectorAll('.show-variants-btn').forEach(btn=>{
-    btn.addEventListener('click', ()=>{ 
-      btn.nextElementSibling.style.display = btn.nextElementSibling.style.display==='flex'?'none':'flex'; 
+    btn.addEventListener('click', ()=>{
+      btn.nextElementSibling.style.display = btn.nextElementSibling.style.display==='flex'?'none':'flex';
     });
   });
 
-  const animateButton = (btn) => {
-    btn.style.transform = 'scale(1.2)';
-    setTimeout(()=>btn.style.transform='scale(1)',100);
+  const updateCart = (id,color,size,qty)=>{
+    const idx = cart.findIndex(i=>i.id===id && (i.color||'')===color && (i.size||'')===size);
+    if(idx!==-1){
+      cart[idx].quantity=qty;
+      if(qty<=0) cart.splice(idx,1);
+      localStorage.setItem('cart',JSON.stringify(cart));
+      renderCart();
+      updateCartCount();
+    }
   };
 
-  // PLUS buttons
+  // Plus/Minus Buttons
   cartGrid.querySelectorAll('.plus').forEach(btn=>{
     btn.addEventListener('click', ()=>{
-      const id=btn.dataset.id, color=btn.dataset.color||'', size=btn.dataset.size||'';
-      const idx = cart.findIndex(i=>i.id===id && (i.color||'')===color && (i.size||'')===size);
-      if(idx!==-1){ 
-        cart[idx].quantity+=1; 
-        localStorage.setItem('cart', JSON.stringify(cart));
-        updateLineTotalAndQty(id);
-        updateCartCount();
-        animateButton(btn);
-      }
+      const {id,color,size} = btn.dataset;
+      const item = cart.find(i=>i.id===id && (i.color||'')===color && (i.size||'')===size);
+      if(item) updateCart(id,color,size,item.quantity+1);
     });
   });
 
-  // MINUS buttons
   cartGrid.querySelectorAll('.minus').forEach(btn=>{
     btn.addEventListener('click', ()=>{
-      const id=btn.dataset.id, color=btn.dataset.color||'', size=btn.dataset.size||'';
-      const idx = cart.findIndex(i=>i.id===id && (i.color||'')===color && (i.size||'')===size);
-      if(idx!==-1){
-        cart[idx].quantity-=1;
-        if(cart[idx].quantity<=0) cart.splice(idx,1);
-        localStorage.setItem('cart', JSON.stringify(cart));
-        updateLineTotalAndQty(id);
-        updateCartCount();
-        animateButton(btn);
-      }
+      const {id,color,size} = btn.dataset;
+      const item = cart.find(i=>i.id===id && (i.color||'')===color && (i.size||'')===size);
+      if(item) updateCart(id,color,size,item.quantity-1);
     });
   });
 
-  // Input change
+  // Input changes
   cartGrid.querySelectorAll('input[type=number]').forEach(input=>{
     input.addEventListener('input', ()=>{
       let val=parseInt(input.value,10); if(isNaN(val)||val<0) val=0;
-      const id=input.dataset.id, color=input.dataset.color||'', size=input.dataset.size||'';
-      const idx = cart.findIndex(i=>i.id===id && (i.color||'')===color && (i.size||'')===size);
-      if(idx!==-1){ 
-        cart[idx].quantity=val; 
-        if(val===0) cart.splice(idx,1);
-        localStorage.setItem('cart', JSON.stringify(cart));
-        updateLineTotalAndQty(id);
-        updateCartCount();
-      }
+      const {id,color,size} = input.dataset;
+      updateCart(id,color,size,val);
     });
   });
 
-  // Initial subtotal
+  // Update subtotal
   const subtotal = cart.reduce((sum,i)=>sum+(i.price||0)*(i.quantity||0),0);
-  cartSubtotalElem.textContent = `Subtotal: ${formatPrice(subtotal, currency)}`;
+  cartSubtotalElem.textContent = `Subtotal: ${formatPrice(subtotal,currency)}`;
 }
 
 currencySelect.addEventListener('change', ()=>{
@@ -372,16 +337,16 @@ document.getElementById('hamburger').addEventListener('click', ()=>{
 });
 
 (async function init(){
-  cart=mergeCartItems(cart); 
-  await renderCart(); 
-  updateCartCount(); 
+  cart = mergeCartItems(cart);
+  await renderCart();
+  updateCartCount();
 })();
 
 window.addEventListener('storage', ()=>{
-  cart=JSON.parse(localStorage.getItem('cart'))||[]; 
-  cart=mergeCartItems(cart); 
-  renderCart(); 
-  updateCartCount(); 
+  cart = JSON.parse(localStorage.getItem('cart')) || [];
+  cart = mergeCartItems(cart);
+  renderCart();
+  updateCartCount();
 });
 </script>
 </body>
