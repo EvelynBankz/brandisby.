@@ -139,6 +139,29 @@
       box-shadow:0 6px 26px rgba(0,0,0,0.6);
     }
     @keyframes serac-spin{to{transform:rotate(360deg)}}
+
+    #floatingSupportBtn {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    background: #4B4E54;
+    color: #fff;
+    border: none;
+    padding: 16px 20px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
+    z-index: 9999;
+  }
+
+  #floatingSupportBtn:hover {
+    background: #D48C61;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
   </style>
 </head>
 <body>
@@ -192,7 +215,9 @@
       </div>
     </section>
   </main>
-
+<!-- Floating Support Button -->
+<button id="floatingSupportBtn">Support</button>
+  
   <footer>© 2025 Sérac</footer>
 
   <script type="module">
@@ -401,6 +426,12 @@ Sérac`);
         fadeRemoveOverlay();
       });
     });
+
+     const supportBtn = document.getElementById('floatingSupportBtn');
+  supportBtn.addEventListener('click', () => {
+    // Replace with your support email
+    window.location.href = 'mailto:stonecold.serac@gmail.com?subject=Support%20Request';
+  });
   </script>
 </body>
 </html>
