@@ -20,14 +20,14 @@
     .header-right{display:flex;gap:22px;align-items:center}
     .header-right a{color:#F5F5F3;text-decoration:none;font-weight:500}
     .hamburger{display:none;background:none;border:0;cursor:pointer;width:28px;height:22px;position:relative}
-    .hamburger span{position:absolute;height:3px;background:#B66E41;width:100%;left:0;border-radius:2px;transition:all .28s}
+    .hamburger span{position:absolute;height:2px;background:#B66E41;width:100%;left:0;border-radius:2px;transition:all .28s}
     .hamburger span:nth-child(1){top:0}
-    .hamburger span:nth-child(2){top:12px}
-    .hamburger span:nth-child(3){top:24px}
+    .hamburger span:nth-child(2){top:10px}
+    .hamburger span:nth-child(3){top:20px}
     .hamburger.open span:nth-child(1){transform:rotate(45deg);top:12px}
     .hamburger.open span:nth-child(2){opacity:0}
     .hamburger.open span:nth-child(3){transform:rotate(-45deg);top:12px}
-    @media(max-width:768px){
+    @media(max-width:900px){
       .hamburger { display:block; }
       .header-right {
         position:absolute;
