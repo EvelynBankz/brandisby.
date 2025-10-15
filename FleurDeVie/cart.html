@@ -214,24 +214,25 @@ function updateCartCount(){
   cartCountElem.textContent = total;
 }
 
-function updateLineTotal(id){
+function updateLineTotalAndQty(productId){
   const currency = currencySelect.value || 'NGN';
-  const lineElems = cartGrid.querySelectorAll(`.cart-item[data-id="${id}"]`);
-  const totalQty = totalQuantityByProduct(id);
+  const variants = groupVariants(productId);
+  const totalQty = totalQuantityByProduct(productId);
+  const lineTotal = variants.reduce((sum,v)=>{
+    const price = v.price || 0;
+    return sum + (price * (v.quantity || 0));
+  },0);
 
-  lineElems.forEach(div => {
-    // Update line total
-    const lineTotal = cart.filter(v=>v.id===id).reduce((sum,v)=>sum + (v.price||0)*v.quantity,0);
+  // Update line totals and quantity in DOM
+  cartGrid.querySelectorAll(`.cart-item[data-id="${productId}"]`).forEach(div=>{
     const lineElem = div.querySelector('.line-total');
     if(lineElem) lineElem.textContent = formatPrice(lineTotal, currency);
-
-    // Update total quantity label
     const qtyElem = div.querySelector('.variant-summary');
     if(qtyElem) qtyElem.textContent = `Total Quantity: ${totalQty}`;
   });
 
   // Update subtotal
-  const subtotal = cart.reduce((sum,i)=>(i.price||0)*i.quantity + sum,0);
+  const subtotal = cart.reduce((sum,i)=>sum+(i.price||0)*(i.quantity||0),0);
   cartSubtotalElem.textContent = `Subtotal: ${formatPrice(subtotal, currency)}`;
 }
 
@@ -296,7 +297,7 @@ async function renderCart(){
     cartGrid.appendChild(div);
   }
 
-  // Attach events
+  // Event listeners for quantity changes
   cartGrid.querySelectorAll('.show-variants-btn').forEach(btn=>{
     btn.addEventListener('click', ()=>{ 
       btn.nextElementSibling.style.display = btn.nextElementSibling.style.display==='flex'?'none':'flex'; 
@@ -308,6 +309,7 @@ async function renderCart(){
     setTimeout(()=>btn.style.transform='scale(1)',100);
   };
 
+  // PLUS buttons
   cartGrid.querySelectorAll('.plus').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       const id=btn.dataset.id, color=btn.dataset.color||'', size=btn.dataset.size||'';
@@ -315,13 +317,14 @@ async function renderCart(){
       if(idx!==-1){ 
         cart[idx].quantity+=1; 
         localStorage.setItem('cart', JSON.stringify(cart));
-        updateLineTotal(id);
+        updateLineTotalAndQty(id);
         updateCartCount();
         animateButton(btn);
       }
     });
   });
 
+  // MINUS buttons
   cartGrid.querySelectorAll('.minus').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       const id=btn.dataset.id, color=btn.dataset.color||'', size=btn.dataset.size||'';
@@ -330,13 +333,14 @@ async function renderCart(){
         cart[idx].quantity-=1;
         if(cart[idx].quantity<=0) cart.splice(idx,1);
         localStorage.setItem('cart', JSON.stringify(cart));
-        updateLineTotal(id);
+        updateLineTotalAndQty(id);
         updateCartCount();
         animateButton(btn);
       }
     });
   });
 
+  // Input change
   cartGrid.querySelectorAll('input[type=number]').forEach(input=>{
     input.addEventListener('input', ()=>{
       let val=parseInt(input.value,10); if(isNaN(val)||val<0) val=0;
@@ -346,14 +350,15 @@ async function renderCart(){
         cart[idx].quantity=val; 
         if(val===0) cart.splice(idx,1);
         localStorage.setItem('cart', JSON.stringify(cart));
-        updateLineTotal(id);
+        updateLineTotalAndQty(id);
         updateCartCount();
       }
     });
   });
 
-  // Update subtotal for first render
-  cartSubtotalElem.textContent = `Subtotal: ${formatPrice(cart.reduce((sum,i)=>sum+(i.price||0)*i.quantity,0), currency)}`;
+  // Initial subtotal
+  const subtotal = cart.reduce((sum,i)=>sum+(i.price||0)*(i.quantity||0),0);
+  cartSubtotalElem.textContent = `Subtotal: ${formatPrice(subtotal, currency)}`;
 }
 
 currencySelect.addEventListener('change', ()=>{
@@ -379,6 +384,5 @@ window.addEventListener('storage', ()=>{
   updateCartCount(); 
 });
 </script>
-
 </body>
 </html>
