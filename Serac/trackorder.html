@@ -9,7 +9,6 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
   <style>
-    /* === Keep your existing CSS === */
     *{box-sizing:border-box;margin:0;padding:0}
     html,body{height:100%;scroll-behavior:smooth}
     body{font-family:"Montserrat",sans-serif;background:#141517;color:#fff;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
@@ -74,57 +73,55 @@
     #serac-overlay.active{opacity:1;pointer-events:auto;}
     .gold-spinner{width:64px;height:64px;border-radius:50%;border:5px solid rgba(182,110,65,0.18);border-top-color:#B66E41;animation:serac-spin 1s linear infinite;box-shadow:0 6px 26px rgba(0,0,0,0.6);}
     @keyframes serac-spin{to{transform:rotate(360deg)}}
-    
-      /* Chat-style floating support button */
-  #floatingSupportBtn {
-    position: fixed;
-    bottom: 25px;
-    right: 25px;
-    width: 56px;
-    height: 56px;
-    background: #1a202b; /* Sérac primary color */
-    color: #fff;
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 6px 20px rgba(182, 110, 65, 1);
-    transition: all 0.3s ease;
-    z-index: 9999;
-  }
 
-  #floatingSupportBtn:hover {
-    background: #20232b; /* Slightly lighter shade on hover */
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(75, 78, 84, 1.0);
-  }
+    /* Chat-style floating support button */
+    #floatingSupportBtn {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      width: 56px;
+      height: 56px;
+      background: #1a202b; /* Sérac primary color */
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 20px rgba(182, 110, 65, 1);
+      transition: all 0.3s ease;
+      z-index: 9999;
+    }
 
-  /* Tooltip */
-  .support-tooltip {
-    position: absolute;
-    bottom: 30px;      /* Distance above the button */
-    left: 20%;
-    transform: translateX(-50%); /* Center horizontally */
-    background: #1c1e22;
-    color: #fff;
-    padding: 6px 12px;
-    border-radius: 8px;
-    font-size: 14px;
-    white-space: nowrap;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-  }
-    
+    #floatingSupportBtn:hover {
+      background: #20232b;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(75, 78, 84, 1.0);
+    }
 
-  #floatingSupportBtn:hover .support-tooltip {
-    opacity: 1;
-    transform: translateY(-50%) translateX(0);
-  }
-    
+    /* Tooltip */
+    .support-tooltip {
+      position: absolute;
+      bottom: 50px;      /* tooltip above button */
+      left: 20%;
+      transform: translateX(-50%);
+      background: #1c1e22;
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    #floatingSupportBtn:hover .support-tooltip {
+      opacity: 1;
+      transform: translateX(-50%) translateY(-6px);
+    }
   </style>
 </head>
 
@@ -168,111 +165,120 @@
       </div>
     </div>
   </section>
-  
+
   <!-- Floating Chat-Style Support Button -->
   <button id="floatingSupportBtn" aria-label="Contact Support">
     <i class="fas fa-headset"></i>
     <span class="support-tooltip">Support</span>
   </button>
-  
+
   <footer>
     © <span id="year"></span> Sérac. All rights reserved.
   </footer>
 
-<script>
-  const form = document.getElementById('trackOrderForm');
-  const statusBox = document.getElementById('orderStatus');
-  const detailsList = document.getElementById('orderDetails');
-  const overlay = document.getElementById('serac-overlay');
+  <script>
+    // ----------------- Hamburger Toggle -----------------
+    const hamburger = document.getElementById('hamburger');
+    const headerRight = document.getElementById('headerRight');
 
-  function showSpinner(show) {
-    overlay.style.display = show ? 'flex' : 'none';
-  }
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('open');
+      headerRight.classList.toggle('open');
+    });
 
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const ref = document.getElementById('orderRef').value.trim();
-    if (!ref) return alert('Please enter your order reference.');
+    // ----------------- Order Tracking -----------------
+    const form = document.getElementById('trackOrderForm');
+    const statusBox = document.getElementById('orderStatus');
+    const detailsList = document.getElementById('orderDetails');
+    const overlay = document.getElementById('serac-overlay');
 
-    showSpinner(true);
-    detailsList.innerHTML = '';
-    statusBox.style.display = 'none';
-
-    try {
-      const res = await fetch(`/api/getOrder?trackingRef=${encodeURIComponent(ref)}`);
-      const data = await res.json();
-      showSpinner(false);
-
-      if (!res.ok || !data.order) {
-        statusBox.style.display = 'block';
-        detailsList.innerHTML = '<li><strong>Notice:</strong> No order found for that reference.</li>';
-        return;
-      }
-
-      const doc = data.order;
-      const currentStatus = doc.status || 'Paid';
-
-      // Determine the correct timestamp for the current status
-      let statusDate = new Date();
-      if (doc.createdAt) {
-        if (doc.createdAt.seconds) statusDate = new Date(doc.createdAt.seconds * 1000);
-        else statusDate = new Date(doc.createdAt);
-      }
-
-      if (Array.isArray(doc.statusHistory) && doc.statusHistory.length > 0) {
-        const historyEntry = [...doc.statusHistory].reverse().find(h => h.status === currentStatus && h.changedAt);
-        if (historyEntry) {
-          const t = historyEntry.changedAt;
-          if (t.seconds) statusDate = new Date(t.seconds * 1000); // Firestore Timestamp
-          else statusDate = new Date(t); // ISO string
-        }
-      }
-
-      const amount = doc.total ? `${doc.currency || '₦'}${doc.total.toLocaleString()}` : '—';
-
-      const items = (doc.items || []).map(item => {
-        const qty = item.quantity || item.totalQuantity || '—';
-        return `${item.name} (${qty})`;
-      }).join('<br>') || '—';
-
-      // Status colors map
-      const statusColors = {
-        Paid: "#2A9D8F",
-        Pending: "#F4A261",
-        Processing: "#8A4D2B",
-        Shipped: "#C2855E",
-        Completed: "#2ECC71",
-        Cancelled: "#E74C3C"
-      };
-
-      // Build order details with colored dot for status
-      detailsList.innerHTML = `
-        <li><strong>Status:</strong> 
-          <span style="color:#fff; font-weight:600; position:relative; padding-left:16px;">
-            <span style="width:10px; height:10px; background:${statusColors[currentStatus] || '#999'}; border-radius:50%; position:absolute; left:0; top:50%; transform:translateY(-50%); display:inline-block;"></span>
-            ${currentStatus}
-          </span>
-        </li>
-        <li><strong>Date:</strong> ${statusDate.toLocaleString()}</li>
-        <li><strong>Amount:</strong> ${amount}</li>
-        <li><strong>Items:</strong><br>${items}</li>
-      `;
-      statusBox.style.display = 'block';
-
-    } catch (err) {
-      console.error(err);
-      showSpinner(false);
-      detailsList.innerHTML = '<li><strong>Error:</strong> Unable to fetch order details. Try again later.</li>';
-      statusBox.style.display = 'block';
+    function showSpinner(show) {
+      overlay.style.display = show ? 'flex' : 'none';
     }
-  });
-  
-    const supportBtn = document.getElementById('floatingSupportBtn');
-  supportBtn.addEventListener('click', () => {
-    window.location.href = 'mailto:stonecold.serac@gmail.com?subject=Support%20Request';
-  });
-  
-</script>
 
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const ref = document.getElementById('orderRef').value.trim();
+      if (!ref) return alert('Please enter your order reference.');
+
+      showSpinner(true);
+      detailsList.innerHTML = '';
+      statusBox.style.display = 'none';
+
+      try {
+        const res = await fetch(`/api/getOrder?trackingRef=${encodeURIComponent(ref)}`);
+        const data = await res.json();
+        showSpinner(false);
+
+        if (!res.ok || !data.order) {
+          statusBox.style.display = 'block';
+          detailsList.innerHTML = '<li><strong>Notice:</strong> No order found for that reference.</li>';
+          return;
+        }
+
+        const doc = data.order;
+        const currentStatus = doc.status || 'Paid';
+
+        let statusDate = new Date();
+        if (doc.createdAt) {
+          if (doc.createdAt.seconds) statusDate = new Date(doc.createdAt.seconds * 1000);
+          else statusDate = new Date(doc.createdAt);
+        }
+
+        if (Array.isArray(doc.statusHistory) && doc.statusHistory.length > 0) {
+          const historyEntry = [...doc.statusHistory].reverse().find(h => h.status === currentStatus && h.changedAt);
+          if (historyEntry) {
+            const t = historyEntry.changedAt;
+            if (t.seconds) statusDate = new Date(t.seconds * 1000);
+            else statusDate = new Date(t);
+          }
+        }
+
+        const amount = doc.total ? `${doc.currency || '₦'}${doc.total.toLocaleString()}` : '—';
+
+        const items = (doc.items || []).map(item => {
+          const qty = item.quantity || item.totalQuantity || '—';
+          return `${item.name} (${qty})`;
+        }).join('<br>') || '—';
+
+        const statusColors = {
+          Paid: "#2A9D8F",
+          Pending: "#F4A261",
+          Processing: "#8A4D2B",
+          Shipped: "#C2855E",
+          Completed: "#2ECC71",
+          Cancelled: "#E74C3C"
+        };
+
+        detailsList.innerHTML = `
+          <li><strong>Status:</strong> 
+            <span style="color:#fff; font-weight:600; position:relative; padding-left:16px;">
+              <span style="width:10px; height:10px; background:${statusColors[currentStatus] || '#999'}; border-radius:50%; position:absolute; left:0; top:50%; transform:translateY(-50%); display:inline-block;"></span>
+              ${currentStatus}
+            </span>
+          </li>
+          <li><strong>Date:</strong> ${statusDate.toLocaleString()}</li>
+          <li><strong>Amount:</strong> ${amount}</li>
+          <li><strong>Items:</strong><br>${items}</li>
+        `;
+        statusBox.style.display = 'block';
+
+      } catch (err) {
+        console.error(err);
+        showSpinner(false);
+        detailsList.innerHTML = '<li><strong>Error:</strong> Unable to fetch order details. Try again later.</li>';
+        statusBox.style.display = 'block';
+      }
+    });
+
+    // ----------------- Support Button -----------------
+    const supportBtn = document.getElementById('floatingSupportBtn');
+    supportBtn.addEventListener('click', () => {
+      window.location.href = 'mailto:stonecold.serac@gmail.com?subject=Support%20Request';
+    });
+
+    // ----------------- Footer Year -----------------
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
