@@ -151,6 +151,8 @@ footer { text-align:center; padding:20px; background:#112e1f; color:#F5E6CC; mar
   <p>© 2025 Fleur De Vie</p>
 </footer>
 
+  
+<script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
@@ -355,7 +357,7 @@ window.addEventListener('storage', ()=>{
   cart = mergeCartItems(cart); 
   renderCart(); 
 });
-
+</script>
 
 </body>
 </html>
