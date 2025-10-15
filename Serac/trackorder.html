@@ -132,6 +132,16 @@
     overlay.style.display = show ? 'flex' : 'none';
   }
 
+  // Status-to-color mapping (matches admin dropdown)
+  const statusColors = {
+    Paid: "#2ECC71",
+    Pending: "#F39C12",
+    Processing: "#8A4D2B",
+    Shipped: "#C2855E",
+    Completed: "#2ECC71",
+    Cancelled: "#E74C3C"
+  };
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const ref = document.getElementById('orderRef').value.trim();
@@ -153,21 +163,23 @@
       }
 
       const doc = data.order;
+
+      // Default to Paid if status missing
       const currentStatus = doc.status || 'Paid';
 
-      // Default to createdAt
+      // Determine timestamp for current status
       let statusDate = new Date();
       if (doc.createdAt) {
         if (doc.createdAt.seconds) statusDate = new Date(doc.createdAt.seconds * 1000);
         else statusDate = new Date(doc.createdAt);
       }
 
-      // Check statusHistory
       if (Array.isArray(doc.statusHistory) && doc.statusHistory.length > 0) {
+        // Find the last entry matching the current status
         const historyEntry = [...doc.statusHistory].reverse().find(h => h.status === currentStatus && h.changedAt);
         if (historyEntry) {
           const t = historyEntry.changedAt;
-          if (t.seconds) statusDate = new Date(t.seconds * 1000); // Firestore Timestamp
+          if (t.seconds) statusDate = new Date(t.seconds * 1000); // Firestore timestamp
           else statusDate = new Date(t); // ISO string
         }
       }
@@ -179,8 +191,19 @@
         return `${item.name} (${qty})`;
       }).join('<br>') || '—';
 
+      // Colored badge for current status
+      const badge = `<span style="
+        display:inline-block;
+        padding:4px 12px;
+        border-radius:12px;
+        background:${statusColors[currentStatus] || '#999'};
+        color:#fff;
+        font-weight:600;
+        font-size:0.95rem;
+      ">${currentStatus}</span>`;
+
       detailsList.innerHTML = `
-        <li><strong>Status:</strong> ${currentStatus}</li>
+        <li><strong>Status:</strong> ${badge}</li>
         <li><strong>Date:</strong> ${statusDate.toLocaleString()}</li>
         <li><strong>Amount:</strong> ${amount}</li>
         <li><strong>Items:</strong><br>${items}</li>
@@ -195,6 +218,5 @@
     }
   });
 </script>
-
 </body>
 </html>
