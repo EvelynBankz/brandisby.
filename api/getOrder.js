@@ -12,6 +12,14 @@ if (!admin.apps.length) {
 
 const db = admin.firestore();
 
+// Utility to convert Firestore timestamps to ISO strings
+const convertTimestamp = (t) => {
+  if (!t) return null;
+  if (t.toDate) return t.toDate().toISOString(); // Firestore Timestamp
+  if (t.seconds) return new Date(t.seconds * 1000).toISOString();
+  return new Date(t).toISOString(); // fallback
+};
+
 export default async function handler(req, res) {
   let trackingRef, brandId;
 
@@ -41,8 +49,21 @@ export default async function handler(req, res) {
         .get();
 
       if (!snapshot.empty) {
-        order = snapshot.docs[0].data();
-        order.brandId = brand; // include which brand
+        const docData = snapshot.docs[0].data();
+
+        // Convert timestamps
+        const convertedOrder = {
+          ...docData,
+          brandId: brand,
+          createdAt: convertTimestamp(docData.createdAt),
+          verifiedAt: convertTimestamp(docData.verifiedAt),
+          statusHistory: (docData.statusHistory || []).map(h => ({
+            ...h,
+            changedAt: convertTimestamp(h.changedAt)
+          }))
+        };
+
+        order = convertedOrder;
         break;
       }
     }
