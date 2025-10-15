@@ -1,193 +1,265 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Track Order - Fleur De Vie</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Track Order - Fleur De Vie</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-<style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%;scroll-behavior:smooth}
-  body{font-family:"Montserrat",sans-serif;background:#F5E6CC;color:#112e1f;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;scroll-behavior:smooth;font-family:"Montserrat",sans-serif;background:#F5E6CC;color:#112e1f;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 
-  .site-header{position:fixed;left:0;right:0;top:0;height:80px;display:flex;align-items:center;justify-content:space-between;padding:16px 28px;z-index:1200;background:transparent;transition:background .28s ease,backdrop-filter .28s ease,border-color .28s ease;border-bottom:1px solid rgba(17,46,31,0.1);}
-  .site-header.scrolled{background: rgba(245,230,204,0.95); backdrop-filter: blur(6px); border-bottom-color: rgba(17,46,31,0.05);}
-  .header-left{display:flex;align-items:center;gap:16px}
-  .brand-logo{height:64px;width:auto}
-  .brand-title{font-family:"Playfair Display",serif;color:#112e1f;font-weight:700;font-size:1.6rem}
-  .header-right{display:flex;gap:22px;align-items:center}
-  .header-right a{color:#112e1f;text-decoration:none;font-weight:500}
-  .hamburger{display:none;background:none;border:0;cursor:pointer;width:36px;height:28px;position:relative}
-  .hamburger span{position:absolute;height:3px;background:#112e1f;width:24px;left:0;border-radius:2px;transition:all .28s}
-  .hamburger span:nth-child(1){top:0}
-  .hamburger span:nth-child(2){top:8px}
-  .hamburger span:nth-child(3){top:16px}
-  .hamburger.open span:nth-child(1){transform:rotate(45deg);top:12px}
-  .hamburger.open span:nth-child(2){opacity:0}
-  .hamburger.open span:nth-child(3){transform:rotate(-45deg);top:12px}
-
-  @media(max-width:900px){
-    .hamburger { display:block; }
-    .header-right {
-      position:absolute; top:80px; right:20px; display:none; flex-direction:column;
-      background:rgba(245,230,204,0.98); border-radius:12px; overflow:hidden;
-      box-shadow:0 6px 20px rgba(0,0,0,0.2); padding:12px 0; width:200px;
+    /* Header */
+    .site-header {
+      background: #112e1f;
+      color: #F5E6CC;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 28px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
     }
-    .header-right.open { display:flex; }
-    .header-right a {
-      padding:12px 16px; width:100%; text-align:left; transition:background .25s;
+    .header-left{display:flex;align-items:center;gap:12px}
+    .brand-logo{height:60px}
+    .brand-title{font-family:"Playfair Display",serif;font-size:24px;font-weight:700}
+    .header-right{display:flex;gap:20px;align-items:center}
+    .header-right a{color:#F5E6CC;text-decoration:none;font-weight:500;transition:color .3s}
+    .header-right a:hover{color:#FFD6BA}
+
+    /* Hamburger */
+    .hamburger{display:none;background:none;border:none;cursor:pointer;width:30px;height:24px;position:relative}
+    .hamburger span{display:block;width:100%;height:3px;background:#F5E6CC;border-radius:2px;position:absolute;left:0;transition:0.3s}
+    .hamburger span:nth-child(1){top:0}
+    .hamburger span:nth-child(2){top:10px}
+    .hamburger span:nth-child(3){top:20px}
+    .hamburger.open span:nth-child(1){transform:rotate(45deg);top:10px}
+    .hamburger.open span:nth-child(2){opacity:0}
+    .hamburger.open span:nth-child(3){transform:rotate(-45deg);top:10px}
+
+    @media(max-width:800px){
+      .hamburger { display:block; }
+      .header-right {
+        position:absolute;
+        top:80px;
+        right:0;
+        display:none;
+        flex-direction:column;
+        background:#112e1f;
+        border-radius:12px;
+        overflow:hidden;
+        box-shadow:0 6px 20px rgba(0,0,0,0.4);
+        padding:12px 0;
+        width:200px;
+      }
+      .header-right.open { display:flex; }
+      .header-right a {
+        padding:12px 16px;
+        width:100%;
+        text-align:left;
+      }
     }
-    .header-right a:hover { background:rgba(17,46,31,0.1);}
-  }
 
-  .track-section {min-height:100vh;display:flex;justify-content:center;align-items:center;padding:120px 20px;}
-  .track-box {max-width:960px;width:100%;background:#FFD6BA;padding:60px;border-radius:16px;box-shadow:0 12px 40px rgba(17,46,31,0.15);color:#112e1f;text-align:center;display:flex;flex-direction:column;align-items:center;}
-  .track-box h1 {font-family:"Playfair Display",serif;color:#112e1f;margin-bottom:12px;font-size:2rem;}
-  .track-box p {color:#112e1f;margin-bottom:24px;font-size:15px;}
-  input {background:#fff;border:1px solid rgba(17,46,31,0.2);border-radius:10px;padding:12px 14px;color:#112e1f;font-size:15px;width:100%;max-width:400px;transition:border-color .25s ease;margin-bottom:18px;}
-  input:focus {outline:none;border-color:#112e1f;}
-  button {background:#112e1f;color:#FFD6BA;border:none;border-radius:8px;padding:12px 26px;font-weight:600;cursor:pointer;transition:transform .25s, box-shadow .25s;}
-  button:hover {transform:translateY(-3px);box-shadow:0 12px 36px rgba(17,46,31,0.25);}
-  .order-status {margin-top:40px;width:100%;display:none;text-align:left;background:#fff4e6;padding:30px;border-radius:12px;border:1px solid rgba(17,46,31,0.05);}
-  .order-status h3 {color:#112e1f;font-family:"Playfair Display",serif;text-align:center;margin-bottom:18px;}
-  .order-details {list-style:none;padding:0;}
-  .order-details li {padding:10px 0;border-bottom:1px solid rgba(17,46,31,0.05);color:#112e1f;}
-  .order-details strong {color:#112e1f;display:block;margin-bottom:4px;}
-  footer{padding:28px;text-align:center;color:#112e1f;margin-top:60px}
+    /* Main section */
+    .track-section {min-height:100vh;display:flex;justify-content:center;align-items:center;padding:120px 20px;}
+    .track-box {max-width:960px;width:100%;background:#FFD6BA;padding:60px;border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,0.2);color:#112e1f;text-align:center;display:flex;flex-direction:column;align-items:center}
+    .track-box h1 {font-family:"Playfair Display",serif;color:#112e1f;margin-bottom:12px;font-size:2rem;}
+    .track-box p {color:#334d3a;margin-bottom:24px;font-size:16px;}
 
-  #fleur-overlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:linear-gradient(270deg,#f7dad9,#112e1f,#e6daf6);background-size:600% 600%;animation:gradientShift 15s ease infinite;transition:opacity .45s ease;opacity:0;pointer-events:none;}
-  .fleur-spinner{width:64px;height:64px;border-radius:50%;border:5px solid rgba(17,46,31,0.2);border-top-color:#112e1f;animation:spin 1s linear infinite;box-shadow:0 6px 26px rgba(17,46,31,0.15);}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  @keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+    input {background:#fff;border:1px solid #112e1f;border-radius:10px;padding:12px 14px;color:#112e1f;font-size:15px;width:100%;max-width:400px;margin-bottom:18px;transition:border-color .25s}
+    input:focus {outline:none;border-color:#FFD6BA;}
+    button {background:#112e1f;color:#F5E6CC;border:none;border-radius:8px;padding:12px 26px;font-weight:600;cursor:pointer;transition:transform .25s,box-shadow .25s;}
+    button:hover {transform:translateY(-3px);box-shadow:0 12px 36px rgba(17,46,31,0.25);}
 
-  #floatingSupportBtn {
-    position: fixed; bottom: 25px; right: 25px; width: 60px; height: 60px;
-    background: #112e1f; color: #FFD6BA; border: none; border-radius: 50%;
-    cursor: pointer; font-size: 28px; display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 6px 20px rgba(212,245,105,1); transition: all 0.3s ease; z-index: 9999;
-  }
-  #floatingSupportBtn:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgba(212,245,105,0.8);}
-  #floatingSupportBtn::after {content: "Support"; position: absolute; bottom: 70px; left:50%; transform:translateX(-50%) translateY(0); background:#112e1f;color:#FFD6BA;padding:6px 12px;border-radius:6px;font-size:14px;font-weight:500;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity 0.3s ease, transform 0.3s ease;}
-  #floatingSupportBtn:hover::after{opacity:1;transform:translateX(-50%) translateY(-6px);}
-</style>
+    .order-status {margin-top:40px;width:100%;display:none;text-align:left;background:#fff;padding:30px;border-radius:12px;border:1px solid #112e1f;}
+    .order-status h3 {color:#112e1f;font-family:"Playfair Display",serif;text-align:center;margin-bottom:18px;}
+    .order-details {list-style:none;padding:0;color:#112e1f;}
+    .order-details li {padding:10px 0;border-bottom:1px solid rgba(17,46,31,0.1);}
+    .order-details strong {display:block;margin-bottom:4px;}
+
+    /* Spinner overlay */
+    #fleur-overlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background: linear-gradient(-45deg,#f7dad9,#112e1f,#e6daf6,#112e1f);background-size:400% 400%;animation:gradientShift 15s ease infinite;transition:opacity .45s ease;opacity:1;}
+    .fleur-spinner{width:64px;height:64px;border-radius:50%;border:6px solid rgba(255,255,255,0.18);border-top-color:#112e1f;animation:spin 1s linear infinite;box-shadow:0 8px 28px rgba(0,0,0,0.35);}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+
+    /* Floating support button */
+    #floatingSupportBtn {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      width: 60px;
+      height: 60px;
+      background: #112e1f;
+      color: #F5E6CC;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 28px; /* larger icon */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 20px rgba(17,46,31,1);
+      transition: all 0.3s ease;
+      z-index: 10002;
+    }
+    #floatingSupportBtn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(17,46,31,1);
+    }
+    .support-tooltip {
+      position: absolute;
+      bottom: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #112e1f;
+      color: #F5E6CC;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    #floatingSupportBtn:hover .support-tooltip {
+      opacity: 1;
+      transform: translateX(-50%) translateY(-6px);
+    }
+
+    footer{padding:28px;text-align:center;color:#112e1f;margin-top:60px;}
+  </style>
 </head>
 
 <body>
-<div id="fleur-overlay" aria-hidden="true"><div class="fleur-spinner"></div></div>
-
-<header class="site-header">
-  <div class="header-left">
-    <img src="asset/logo.png" alt="Fleur De Vie" class="brand-logo" />
-    <div class="brand-title">Fleur De Vie</div>
+  <!-- Spinner overlay -->
+  <div id="fleur-overlay" aria-hidden="true">
+    <div class="fleur-spinner"></div>
   </div>
-  <nav class="header-right" id="headerRight">
-    <a href="index.html">Home</a>
-    <a href="shop.html">Shop</a>
-    <a href="about.html">About</a>
-    <a href="contact.html">Contact</a>
-    <a href="trackorder.html">Track</a>
-  </nav>
-  <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
-</header>
 
-<section class="track-section">
-  <div class="track-box">
-    <h1>Track Your Order</h1>
-    <p>Enter your Order Reference Number below to check the status of your order.</p>
-
-    <form id="trackOrderForm">
-      <input type="text" id="orderRef" placeholder="Enter your order reference" required>
-      <button type="submit">Check Status</button>
-    </form>
-
-    <div class="order-status" id="orderStatus">
-      <h3>Order Details</h3>
-      <ul class="order-details" id="orderDetails"></ul>
+  <!-- Header -->
+  <header class="site-header">
+    <div class="header-left">
+      <img src="asset/logo.png" alt="Fleur De Vie Logo" class="brand-logo" />
+      <div class="brand-title">Fleur De Vie</div>
     </div>
-  </div>
-</section>
+    <nav class="header-right" id="headerRight">
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+      <a href="trackorder.html">Track</a>
+    </nav>
+    <button class="hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
 
-<button id="floatingSupportBtn" aria-label="Support"><i class="fas fa-headset"></i></button>
-<footer>© <span id="year"></span> Fleur De Vie. All rights reserved.</footer>
+  <!-- Tracking section -->
+  <section class="track-section">
+    <div class="track-box">
+      <h1>Track Your Order</h1>
+      <p>Enter your Order Reference Number below to check the status of your order.</p>
 
-<script type="module">
-const hamburger = document.getElementById('hamburger');
-const headerRight = document.getElementById('headerRight');
-hamburger.addEventListener('click',()=>{hamburger.classList.toggle('open');headerRight.classList.toggle('open');});
+      <form id="trackOrderForm">
+        <input type="text" id="orderRef" placeholder="Enter your order reference" required>
+        <button type="submit">Check Status</button>
+      </form>
 
-// Firebase setup
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+      <div class="order-status" id="orderStatus">
+        <h3>Order Details</h3>
+        <ul class="order-details" id="orderDetails"></ul>
+      </div>
+    </div>
+  </section>
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
-  authDomain: "brandisby.firebaseapp.com",
-  projectId: "brandisby",
-  storageBucket: "brandisby.appspot.com",
-  messagingSenderId: "87213267039",
-  appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
-};
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+  <!-- Floating support button -->
+  <button id="floatingSupportBtn">
+    <i class="fas fa-headset"></i>
+    <span class="support-tooltip">Support</span>
+  </button>
 
-const overlay=document.getElementById('fleur-overlay');
-const statusBox=document.getElementById('orderStatus');
-const detailsList=document.getElementById('orderDetails');
+  <footer>© 2025 Fleur De Vie</footer>
 
-function showSpinner(show){overlay.style.display=show?'flex':'none';}
+  <script>
+    // Hamburger toggle
+    const hamburger = document.getElementById('hamburger');
+    const headerRight = document.getElementById('headerRight');
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('open');
+      headerRight.classList.toggle('open');
+    });
 
-function safeParseJSON(val){try{return JSON.parse(val||'null')}catch(e){return null}}
-function escapeHtml(s){if(s===undefined||s===null)return '';return String(s).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[ch]))}
-
-document.getElementById('trackOrderForm').addEventListener('submit', async e=>{
-  e.preventDefault();
-  const ref=document.getElementById('orderRef').value.trim();
-  if(!ref)return alert('Please enter your order reference.');
-  showSpinner(true); detailsList.innerHTML=''; statusBox.style.display='none';
-
-  let order=null;
-  try{
-    const snap=await getDoc(doc(db,"brands","fleurdevie","orders",ref));
-    if(snap.exists()) order=snap.data();
-    else {
-      const q=query(collection(db,"brands","fleurdevie","orders"),where("trackingRef","==",ref));
-      const snaps=await getDocs(q);
-      if(snaps.docs.length) order=snaps.docs[0].data();
-    }
-    showSpinner(false);
-    if(!order){
-      statusBox.style.display='block';
-      detailsList.innerHTML='<li><strong>Notice:</strong> No order found for that reference.</li>';
-      return;
+    // Spinner overlay
+    const overlay = document.getElementById('fleur-overlay');
+    function showSpinner(show) {
+      overlay.style.opacity = show ? '1' : '0';
+      overlay.style.pointerEvents = show ? 'auto' : 'none';
     }
 
-    const statusColors={Paid:"#2A9D8F",Pending:"#F4A261",Processing:"#8A4D2B",Shipped:"#C2855E",Completed:"#2ECC71",Cancelled:"#E74C3C"};
-    const currentStatus=order.status||'Paid';
-    const statusDate=order.createdAt?new Date(order.createdAt.seconds?order.createdAt.seconds*1000:order.createdAt):new Date();
-    const amount=order.total?`${order.currency||'₦'}${order.total.toLocaleString()}`:'—';
-    const items=(order.items||[]).map(i=>`${i.name} (x${i.quantity||i.totalQuantity||1})`).join('<br>')||'—';
+    // Track order
+    const form = document.getElementById('trackOrderForm');
+    const statusBox = document.getElementById('orderStatus');
+    const detailsList = document.getElementById('orderDetails');
 
-    detailsList.innerHTML=`
-      <li><strong>Status:</strong> <span style="color:#112e1f;font-weight:600;position:relative;padding-left:16px;">
-        <span style="width:10px;height:10px;background:${statusColors[currentStatus]||'#999'};border-radius:50%;position:absolute;left:0;top:50%;transform:translateY(-50%);display:inline-block;"></span>
-        ${currentStatus}
-      </span></li>
-      <li><strong>Date:</strong> ${statusDate.toLocaleString()}</li>
-      <li><strong>Amount:</strong> ${amount}</li>
-      <li><strong>Items:</strong><br>${items}</li>
-    `;
-    statusBox.style.display='block';
-  }catch(err){console.error(err); showSpinner(false); statusBox.style.display='block'; detailsList.innerHTML='<li><strong>Error:</strong> Unable to fetch order details. Try again later.</li>';}
-});
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const ref = document.getElementById('orderRef').value.trim();
+      if (!ref) return alert('Please enter your order reference.');
+      showSpinner(true);
+      detailsList.innerHTML = '';
+      statusBox.style.display = 'none';
 
-// Support button
-document.getElementById('floatingSupportBtn').addEventListener('click',()=>{window.location.href='mailto:yourstruly.fleurdevie@gmail.com?subject=Support%20Request';});
+      try {
+        const res = await fetch(`/api/getOrder?brand=fleurdevie&trackingRef=${encodeURIComponent(ref)}`);
+        const data = await res.json();
+        showSpinner(false);
 
-// Footer year
-document.getElementById('year').textContent=new Date().getFullYear();
-</script>
+        if (!res.ok || !data.order) {
+          statusBox.style.display = 'block';
+          detailsList.innerHTML = '<li><strong>Notice:</strong> No order found for that reference.</li>';
+          return;
+        }
+
+        const doc = data.order;
+        const currentStatus = doc.status || 'Paid';
+        const statusColors = { Paid:"#2A9D8F", Pending:"#F4A261", Processing:"#8A4D2B", Shipped:"#C2855E", Completed:"#2ECC71", Cancelled:"#E74C3C" };
+
+        const statusDate = doc.createdAt ? new Date(doc.createdAt) : new Date();
+        const amount = doc.total ? `${doc.currency || '₦'}${doc.total.toLocaleString()}` : '—';
+        const items = (doc.items || []).map(i => `${i.name} (${i.quantity || 1})`).join('<br>') || '—';
+
+        detailsList.innerHTML = `
+          <li><strong>Status:</strong> 
+            <span style="position:relative;padding-left:16px;color:#112e1f;font-weight:600">
+              <span style="width:10px;height:10px;background:${statusColors[currentStatus]||'#999'};border-radius:50%;position:absolute;left:0;top:50%;transform:translateY(-50%);display:inline-block;"></span>
+              ${currentStatus}
+            </span>
+          </li>
+          <li><strong>Date:</strong> ${statusDate.toLocaleString()}</li>
+          <li><strong>Amount:</strong> ${amount}</li>
+          <li><strong>Items:</strong><br>${items}</li>
+        `;
+        statusBox.style.display = 'block';
+      } catch(err) {
+        console.error(err);
+        showSpinner(false);
+        statusBox.style.display = 'block';
+        detailsList.innerHTML = '<li><strong>Error:</strong> Unable to fetch order details. Try again later.</li>';
+      }
+    });
+
+    // Support button
+    const supportBtn = document.getElementById('floatingSupportBtn');
+    supportBtn.addEventListener('click', () => {
+      window.location.href = 'mailto:yourstruly.fleurdevie@gmail.com?subject=Support%20Request';
+    });
+  </script>
 </body>
 </html>
