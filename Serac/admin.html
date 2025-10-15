@@ -361,7 +361,21 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, getDoc, query } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+import { 
+  getFirestore, 
+  collection, 
+  addDoc, 
+  doc, 
+  updateDoc, 
+  deleteDoc, 
+  onSnapshot, 
+  getDoc, 
+  query, 
+  where,       // <--- needed for query filters
+  arrayUnion,  // <--- needed for status history
+  getDocs      // <--- needed for your autoCompleteShippedOrders
+} from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
 
 /* ---------------- FIREBASE CONFIG (SERAC) ---------------- */
 const firebaseConfig = {
