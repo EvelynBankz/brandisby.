@@ -7,7 +7,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
-    /* KEEP Fleur De Vie styling exactly as provided, with minimal additions for overlay/toast/modal */
     *{margin:0;padding:0;box-sizing:border-box}
     body{font-family:"Montserrat",sans-serif;background:#F5E6CC;color:#112e1f;line-height:1.6;text-align:center}
     a{text-decoration:none;color:inherit}
@@ -49,7 +48,6 @@
 
     footer{text-align:center;padding:20px;background:#112e1f;color:#F5E6CC;margin-top:60px}
 
-    /* Responsive adjustments (preserve original behaviour) */
     @media(max-width:800px){
       .header-right{display:none;flex-direction:column;position:absolute;top:70px;right:0;background:#112e1f;width:200px;padding:20px}
       .header-right.open{display:flex}
@@ -57,78 +55,54 @@
       .thankyou-box{padding:20px}
     }
 
-    /* ---------- Animated gradient overlay (luxury) ---------- */
+    /* ---------- Overlay with animated gradient ---------- */
     #fleur-overlay{
       position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;
-      /* Three-color elegant gradient that slowly shifts */
-      background: linear-gradient(120deg, #f7dad9 0%, #112e1f 45%, #e6daf6 100%);
-      background-size: 300% 300%;
-      animation: fleurGradient 14s ease infinite;
-      transition:opacity .45s ease;
-      opacity:1;
+      background: linear-gradient(-45deg,#f7dad9,#112e1f,#e6daf6,#f7dad9);
+      background-size:400% 400%;
+      animation:gradientShift 10s ease infinite;
+      transition:opacity .45s ease;opacity:1;
     }
-    @keyframes fleurGradient{
+    @keyframes gradientShift{
       0%{background-position:0% 50%}
       50%{background-position:100% 50%}
       100%{background-position:0% 50%}
     }
-
     .fleur-spinner{
-      width:72px;height:72px;border-radius:50%;
-      border:8px solid rgba(255,255,255,0.18);
-      border-top-color:#F5E6CC;
+      width:70px;height:70px;border-radius:50%;
+      border:7px solid rgba(255,255,255,0.18);
+      border-top-color:#112e1f;
       animation:spin 1s linear infinite;
       box-shadow:0 8px 28px rgba(0,0,0,0.35);
     }
     @keyframes spin{to{transform:rotate(360deg)}}
 
-    /* ---------- Toast (Copied.) ---------- */
+    /* ---------- Toast ---------- */
     .fleur-toast{
-      position:fixed;left:50%;bottom:36px;transform:translateX(-50%);background:#112e1f;color:#F5E6CC;padding:10px 14px;border-radius:8px;font-weight:600;z-index:10001;opacity:0;pointer-events:none;transition:opacity .25s ease,transform .25s ease;
+      position:fixed;left:50%;bottom:36px;transform:translateX(-50%);
+      background:#112e1f;color:#fff;padding:10px 14px;border-radius:8px;
+      font-weight:600;z-index:10001;opacity:0;pointer-events:none;
+      transition:opacity .2s ease,transform .2s ease;
       box-shadow:0 8px 30px rgba(17,46,31,0.6)
     }
     .fleur-toast.show{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(-6px)}
-
-    /* ---------- Support modal (toggle from support button) ---------- */
-    #supportModalBackdrop{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;z-index:10005}
-    #supportModal{background:#FFD6BA;color:#112e1f;padding:18px;border-radius:12px;max-width:420px;width:92%;box-shadow:0 8px 40px rgba(0,0,0,0.4)}
-    #supportModal h4{font-family:"Playfair Display",serif;margin-bottom:8px}
-    .support-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
-    .support-actions a, .support-actions button{padding:8px 12px;border-radius:8px;border:none;background:#112e1f;color:#F5E6CC;cursor:pointer;text-decoration:none}
-    .support-close{background:transparent;border:1px solid rgba(17,46,31,0.08);color:#112e1f;padding:8px 12px;border-radius:8px;cursor:pointer}
-
-    /* support button */
-    #floatingSupportBtn{
-      position:fixed;right:22px;bottom:22px;width:56px;height:56px;border-radius:50%;border:none;background:linear-gradient(135deg,#f7dad9,#e6daf6,#112e1f);color:#112e1f;font-size:20px;display:flex;align-items:center;justify-content:center;z-index:10003;cursor:pointer;box-shadow:0 10px 30px rgba(17,46,31,0.18);transition:transform .25s ease;
-    }
-    #floatingSupportBtn:hover{transform:translateY(-6px) scale(1.04)}
-    .support-tooltip{position:absolute;bottom:70px;right:22px;background:#112e1f;color:#F5E6CC;padding:8px 12px;border-radius:8px;font-weight:600;opacity:0;pointer-events:none;transform:translateY(6px);transition:opacity .18s ease,transform .18s ease;z-index:10004}
-    #floatingSupportBtn:hover + .support-tooltip, #floatingSupportBtn:focus + .support-tooltip{opacity:1;pointer-events:auto;transform:translateY(0)}
   </style>
 </head>
-<body>
-  <!-- Overlay + spinner (initially visible until JS resolves) -->
-  <div id="fleur-overlay" aria-hidden="true">
-    <div class="fleur-spinner" role="status" aria-label="Loading"></div>
-  </div>
 
-  <!-- HEADER (unchanged) -->
+<body>
+  <!-- HEADER -->
   <header class="site-header">
     <div class="header-left">
       <img src="asset/logo.png" alt="Fleur De Vie Logo" class="brand-logo">
       <div class="brand-title">Fleur De Vie</div>
     </div>
-
     <nav class="header-right" id="headerRight">
       <a href="index.html">Home</a>
       <a href="shop.html">Shop</a>
       <a href="about.html">About</a>
       <a href="contact.html">Contact</a>
     </nav>
-
-    <button class="hamburger" id="hamburger" aria-label="Menu">
-      <span></span><span></span><span></span>
-    </button>
+    <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
   </header>
 
   <!-- HERO -->
@@ -140,11 +114,9 @@
       <h2>We’ve received your order 🎉</h2>
       <p>Thank you for shopping with <strong>Fleur De Vie</strong>. Your order is being processed and you’ll receive a confirmation email shortly.</p>
 
-      <!-- Order reference will be displayed and clickable to copy -->
       <div id="orderReferenceBox" style="display:inline-block;margin:12px 0;padding:12px 18px;border-radius:10px;background:#fff;font-weight:700;cursor:pointer">Loading reference…</div>
       <div id="orderReferenceNote" style="color:#334d3a;margin-bottom:12px"></div>
 
-      <!-- ORDER DETAILS -->
       <div class="order-details" id="orderDetails"><p>Loading order details…</p></div>
 
       <div style="margin-top:18px">
@@ -154,270 +126,134 @@
     </div>
   </section>
 
+  <!-- Overlay + Spinner -->
+  <div id="fleur-overlay"><div class="fleur-spinner"></div></div>
+
   <!-- Toast -->
-  <div id="fleur-toast" class="fleur-toast" role="status" aria-live="polite">Copied.</div>
+  <div id="fleur-toast" class="fleur-toast">Copied.</div>
 
-  <!-- Floating support button + tooltip -->
-  <button id="floatingSupportBtn" aria-label="Support">
-    <i class="fa-solid fa-headset" style="color:#fff"></i>
+  <!-- Floating Support Button -->
+  <button id="floatingSupportBtn" aria-label="Support" 
+    style="position:fixed;right:22px;bottom:22px;width:60px;height:60px;border-radius:50%;
+    border:none;background:#112e1f;color:#fff;z-index:10002;
+    box-shadow:0 8px 30px rgba(212,245,105,1);cursor:pointer;display:flex;
+    align-items:center;justify-content:center;">
+    <i class="fa-solid fa-headset" style="color:#fff;font-size:28px;"></i>
   </button>
-  <div class="support-tooltip" role="note">Contact support</div>
-
-  <!-- Support modal (toggle) -->
-  <div id="supportModalBackdrop" role="dialog" aria-modal="true">
-    <div id="supportModal" aria-labelledby="supportTitle">
-      <h4 id="supportTitle">Support</h4>
-      <p>If you need help with your order, we can assist via email.</p>
-      <p style="font-size:0.95rem;color:#334d3a">Email: <strong>yourstruly.fleurdevie@gmail.com</strong></p>
-      <div class="support-actions">
-        <a id="supportMail" href="mailto:yourstruly.fleurdevie@gmail.com?subject=Support%20Request">Email Support</a>
-        <button id="supportClose" class="support-close">Close</button>
-      </div>
-    </div>
-  </div>
 
   <footer>© 2025 Fleur De Vie</footer>
 
   <script type="module">
-    /* ---------------- FIREBASE CONFIG (brandisby) - using your provided config ---------------- */
+    // Hamburger toggle
+    const hamburger=document.getElementById('hamburger');
+    const headerRight=document.getElementById('headerRight');
+    hamburger?.addEventListener('click',()=>{hamburger.classList.toggle('open');headerRight.classList.toggle('open');});
+
+    // Floating support toggle
+    const supportBtn=document.getElementById('floatingSupportBtn');
+    supportBtn?.addEventListener('click',()=>{window.location.href='mailto:yourstruly.fleurdevie@gmail.com?subject=Support%20Request';});
+
+    // Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
     import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
-      authDomain: "brandisby.firebaseapp.com",
-      projectId: "brandisby",
-      storageBucket: "brandisby.firebasestorage.app",
-      messagingSenderId: "87213267039",
-      appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
+    const firebaseConfig={
+      apiKey:"AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
+      authDomain:"brandisby.firebaseapp.com",
+      projectId:"brandisby",
+      storageBucket:"brandisby.firebasestorage.app",
+      messagingSenderId:"87213267039",
+      appId:"1:87213267039:web:339e9fd49e3ad31f7423ea"
     };
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    const app=initializeApp(firebaseConfig);
+    const db=getFirestore(app);
 
-    /* ---------------- UI refs ---------------- */
-    const hamburger = document.getElementById('hamburger');
-    const headerRight = document.getElementById('headerRight');
-    const overlay = document.getElementById('fleur-overlay');
-    const toast = document.getElementById('fleur-toast');
-    const refBox = document.getElementById('orderReferenceBox');
-    const note = document.getElementById('orderReferenceNote');
-    const details = document.getElementById('orderDetails');
-    const trackBtn = document.getElementById('trackOrderBtn');
-    const thankyouBox = document.getElementById('thankyouBox');
+    const overlay=document.getElementById('fleur-overlay');
+    const toast=document.getElementById('fleur-toast');
 
-    // Support button + modal
-    const supportBtn = document.getElementById('floatingSupportBtn');
-    const supportModalBackdrop = document.getElementById('supportModalBackdrop');
-    const supportClose = document.getElementById('supportClose');
-    const supportMail = document.getElementById('supportMail');
-
-    // hamburger mobile toggle
-    hamburger?.addEventListener('click', () => {
-      hamburger.classList.toggle('open');
-      headerRight.classList.toggle('open');
-    });
-
-    // support button toggle (opens modal). Also provide mailto link in modal.
-    supportBtn?.addEventListener('click', () => {
-      // toggle modal visibility
-      const isShown = supportModalBackdrop.style.display === 'flex';
-      if (isShown) {
-        supportModalBackdrop.style.display = 'none';
-      } else {
-        supportModalBackdrop.style.display = 'flex';
-      }
-    });
-    supportClose?.addEventListener('click', () => supportModalBackdrop.style.display = 'none');
-    supportModalBackdrop?.addEventListener('click', (e) => {
-      if (e.target === supportModalBackdrop) supportModalBackdrop.style.display = 'none';
-    });
-
-    // toast helper
-    let toastTimer = null;
+    function fadeRemoveOverlay(){overlay.style.opacity='0';setTimeout(()=>overlay.remove(),500);}
+    let toastTimer=null;
     function showCopiedToast(){
-      if (!toast) return;
       toast.classList.add('show');
       clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => toast.classList.remove('show'), 1500);
+      toastTimer=setTimeout(()=>toast.classList.remove('show'),1400);
     }
+    function safeParseJSON(v){try{return JSON.parse(v||'null');}catch(e){return null;}}
+    function escapeHtml(s){if(s==null)return'';return String(s).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[ch]));}
 
-    // small helpers
-    function safeParseJSON(v){ try { return JSON.parse(v || 'null'); } catch(e) { return null; } }
-    function escapeHtml(s){ if (s === undefined || s === null) return ''; return String(s).replace(/[&<>"']/g,ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[ch])); }
-
-    // fade overlay
-    function fadeRemoveOverlay(){
-      if(!overlay) return;
-      overlay.style.opacity = '0';
-      setTimeout(() => { try { overlay.remove(); } catch(e) {} }, 600);
-    }
-
-    /* ---------------- Main order display logic (mirrors Serac behavior but uses fleurdevie paths) ---------------- */
     async function displayOrder(){
-      // try local saved order (checkout may set these)
-      let order = safeParseJSON(localStorage.getItem('lastOrder_fleurdevie')) || safeParseJSON(localStorage.getItem('lastOrder')) || null;
+      const refBox=document.getElementById('orderReferenceBox');
+      const note=document.getElementById('orderReferenceNote');
+      const details=document.getElementById('orderDetails');
+      const trackBtn=document.getElementById('trackOrderBtn');
+      let order=safeParseJSON(localStorage.getItem('lastOrder_fleurdevie'))||safeParseJSON(localStorage.getItem('lastOrder'))||null;
+      const params=new URLSearchParams(window.location.search);
+      const orderId=params.get('orderId');
+      const txref=params.get('txref')||params.get('ref');
+      const quoteId=params.get('quoteId');
 
-      // read URL params (support quoteId, txref/ref, orderId)
-      const params = new URLSearchParams(window.location.search);
-      const orderId = params.get('orderId');
-      const txref = params.get('txref') || params.get('ref') || null;
-      const quoteId = params.get('quoteId');
-
-      try {
-        // 1) fetch by orderId if local not present
+      try{
         if(!order && orderId){
-          try {
-            const snap = await getDoc(doc(db, "brands", "fleurdevie", "orders", orderId));
-            if (snap.exists()){
-              order = snap.data(); order.id = orderId;
-            }
-          } catch(e) { console.error('fetch order by id failed', e); }
+          const snap=await getDoc(doc(db,"brands","fleurdevie","orders",orderId));
+          if(snap.exists())order={id:orderId,...snap.data()};
         }
-
-        // 2) if txref present and no order yet, try doc id then query trackingRef
         if(!order && txref){
-          try {
-            const snapDoc = await getDoc(doc(db, "brands", "fleurdevie", "orders", txref));
-            if (snapDoc.exists()){
-              order = snapDoc.data(); order.id = snapDoc.id;
-            } else {
-              const q = query(collection(db, "brands", "fleurdevie", "orders"), where("trackingRef", "==", txref));
-              const snaps = await getDocs(q);
-              if (snaps && snaps.docs && snaps.docs.length){
-                const s = snaps.docs[0];
-                order = s.data(); order.id = s.id;
-              }
-            }
-          } catch(e){ console.error('fetch by txref failed', e); }
-        }
-
-        // 3) if still no order, try quote doc (paid quote flow)
-        if(!order && (quoteId || safeParseJSON(localStorage.getItem('paidQuoteInfo'))?.quoteId )){
-          const qid = quoteId || safeParseJSON(localStorage.getItem('paidQuoteInfo'))?.quoteId;
-          try {
-            const qsnap = await getDoc(doc(db, "brands", "fleurdevie", "quotes", qid));
-            if (qsnap.exists()){
-              const qd = qsnap.data();
-              order = {
-                id: qid,
-                type: 'quote',
-                trackingRef: qd.trackingRef || qd.orderRef || null,
-                name: qd.name || qd.customer || '',
-                email: qd.email || '',
-                phone: qd.phone || '',
-                address: qd.address || '',
-                currency: qd.currency || 'NGN',
-                total: qd.total || qd.amount || qd.subtotal || 0,
-                items: qd.items || []
-              };
-            }
-          } catch(e){ console.error('fetch quote failed', e); }
-        }
-
-        // 4) if still nothing: friendly fallback
-        if(!order){
-          refBox.textContent = 'No order reference available.';
-          note.textContent = '';
-          details.innerHTML = '<p>Unable to locate order details. If you just paid, please wait a few moments and refresh this page.</p>';
-          if (trackBtn) trackBtn.style.display = 'none';
-          // clean local copies
-          try { localStorage.removeItem('lastOrder_fleurdevie'); localStorage.removeItem('lastOrder'); localStorage.removeItem('paidQuoteInfo'); } catch(e){}
-          fadeRemoveOverlay();
-          return;
-        }
-
-        // Normalize and present
-        const ref = order.trackingRef || order.tracking || order.orderRef || order.id || 'N/A';
-        refBox.textContent = ref;
-        note.textContent = 'You can use this reference to track your order. Click to copy.';
-
-        // click-to-copy
-        refBox.onclick = async () => {
-          try {
-            await navigator.clipboard.writeText(ref);
-            showCopiedToast();
-          } catch (e) {
-            console.error('copy failed', e);
+          const snap=await getDoc(doc(db,"brands","fleurdevie","orders",txref));
+          if(snap.exists())order={id:txref,...snap.data()};
+          else{
+            const q=query(collection(db,"brands","fleurdevie","orders"),where("trackingRef","==",txref));
+            const snaps=await getDocs(q);
+            if(!snaps.empty){const s=snaps.docs[0];order={id:s.id,...s.data()};}
           }
-        };
+        }
+        if(!order && (quoteId||safeParseJSON(localStorage.getItem('paidQuoteInfo'))?.quoteId)){
+          const qid=quoteId||safeParseJSON(localStorage.getItem('paidQuoteInfo'))?.quoteId;
+          const qsnap=await getDoc(doc(db,"brands","fleurdevie","quotes",qid));
+          if(qsnap.exists()){
+            const qd=qsnap.data();
+            order={id:qid,type:'quote',trackingRef:qd.trackingRef||qd.orderRef,name:qd.name||qd.customer,email:qd.email,phone:qd.phone,address:qd.address,currency:qd.currency||'NGN',total:qd.total||qd.amount||qd.subtotal||0,items:qd.items||[]};
+          }
+        }
+      }catch(e){console.error(e);}
 
-        // build details HTML
-        const currency = order.currency || order.currencyCode || 'NGN';
-        const total = order.total ?? order.amount ?? order.subtotal ?? '-';
-        let html = `<h3>Order Details</h3><ul>`;
-        html += `<li><strong>Name:</strong> ${escapeHtml(order.name || order.customer || '-')}</li>`;
-        html += `<li><strong>Email:</strong> ${escapeHtml(order.email || '-')}</li>`;
-        html += `<li><strong>Phone:</strong> ${escapeHtml(order.phone || '-')}</li>`;
-        html += `<li><strong>Address:</strong> ${escapeHtml(order.address || '-')}</li>`;
-        html += `<li><strong>Currency:</strong> ${escapeHtml(currency)}</li>`;
-        html += `<li><strong>Total Paid:</strong> ${escapeHtml(currency)} ${escapeHtml(String(total))}</li>`;
-        html += `</ul><h3>Items</h3><ul>`;
-        (order.items || []).forEach(i=>{
-          const name = i.name || i.productName || i.title || 'Item';
-          const qty = i.quantity || i.qty || i.count || i.totalQuantity || 1;
-          html += `<li>${escapeHtml(name)} (x${escapeHtml(String(qty))})</li>`;
-        });
-        html += `</ul>`;
-        details.innerHTML = html;
-
-        // Send to email button (insert into thankyouBox if not present)
-        const prev = document.getElementById('__fleur_send_email_btn');
-        if(prev) prev.remove();
-        const sendEmailBtn = document.createElement('button');
-        sendEmailBtn.className = 'btn btn-secondary';
-        sendEmailBtn.id = '__fleur_send_email_btn';
-        sendEmailBtn.textContent = 'Send to my email';
-        sendEmailBtn.style.marginTop = '12px';
-        sendEmailBtn.onclick = () => {
-          const subject = encodeURIComponent('Your Fleur De Vie Order Confirmation');
-          const body = encodeURIComponent(`Hello ${order.name || ''},
-
-Thank you for shopping with Fleur De Vie.
-
-Order reference: ${ref}
-Total: ${currency} ${total}
-
-Track here: ${window.location.origin}/trackorder.html
-
-Regards,
-Fleur De Vie`);
-          window.location.href = `mailto:${order.email || ''}?subject=${subject}&body=${body}`;
-        };
-        // insert before order details
-        if(thankyouBox) thankyouBox.insertBefore(sendEmailBtn, details);
-
-        // track link
-        if(trackBtn) trackBtn.href = 'trackorder.html';
-
-        // cleanup saved local copies if any
-        try{ localStorage.removeItem('lastOrder_fleurdevie'); localStorage.removeItem('lastOrder'); localStorage.removeItem('paidQuoteInfo'); } catch(e){}
-
-      } catch (err) {
-        console.error('displayOrder error', err);
-        details.innerHTML = '<p>Error loading order.</p>';
-      } finally {
+      if(!order){
+        refBox.textContent='No order reference available.';
+        note.textContent='';
+        details.innerHTML='<p>Unable to locate order details. Please refresh or contact support.</p>';
+        trackBtn.style.display='none';
         fadeRemoveOverlay();
+        return;
       }
+
+      const ref=order.trackingRef||order.tracking||order.orderRef||order.id;
+      refBox.textContent=ref;
+      note.textContent='You can use this reference to track your order. Click to copy.';
+      refBox.onclick=async()=>{await navigator.clipboard.writeText(ref);showCopiedToast();};
+
+      const c=order.currency||'NGN', t=order.total??'-';
+      let html=`<h3>Order Details</h3><ul>
+        <li><strong>Name:</strong> ${escapeHtml(order.name)}</li>
+        <li><strong>Email:</strong> ${escapeHtml(order.email)}</li>
+        <li><strong>Phone:</strong> ${escapeHtml(order.phone)}</li>
+        <li><strong>Address:</strong> ${escapeHtml(order.address)}</li>
+        <li><strong>Currency:</strong> ${escapeHtml(c)}</li>
+        <li><strong>Total Paid:</strong> ${escapeHtml(c)} ${escapeHtml(t)}</li>
+      </ul><h3>Items</h3><ul>`;
+      (order.items||[]).forEach(i=>{html+=`<li>${escapeHtml(i.name||'Item')} (x${escapeHtml(i.quantity||1)})</li>`;});
+      html+='</ul>';details.innerHTML=html;
+
+      const sendEmailBtn=document.createElement('button');
+      sendEmailBtn.className='btn btn-secondary';
+      sendEmailBtn.textContent='Send to my email';
+      sendEmailBtn.style.marginTop='12px';
+      sendEmailBtn.onclick=()=>{const subject=encodeURIComponent('Your Fleur De Vie Order Confirmation');
+        const body=encodeURIComponent(`Hello ${order.name||''},\n\nThank you for shopping with Fleur De Vie.\n\nOrder reference: ${ref}\nTotal: ${c} ${t}\n\nTrack here: ${window.location.origin}/trackorder.html\n\nRegards,\nFleur De Vie`);
+        window.location.href=`mailto:${order.email}?subject=${subject}&body=${body}`;};
+      document.getElementById('thankyouBox').insertBefore(sendEmailBtn,details);
+      fadeRemoveOverlay();
     }
 
-    // show copied toast helper (text 'Copied.' preserved)
-    function showCopiedToast(){
-      const t = document.getElementById('fleur-toast');
-      if(!t) return;
-      t.classList.add('show');
-      clearTimeout(window.__fleur_toast_timer);
-      window.__fleur_toast_timer = setTimeout(()=> t.classList.remove('show'), 1400);
-    }
-
-    // Start
-    document.addEventListener('DOMContentLoaded', () => {
-      // ensure overlay visible
-      try { document.getElementById('fleur-overlay').style.opacity = '1'; } catch(e){}
-      displayOrder().catch(err => {
-        console.error('displayOrder error', err);
-        fadeRemoveOverlay();
-      });
-    });
+    document.addEventListener('DOMContentLoaded',()=>{displayOrder();});
   </script>
 </body>
 </html>
