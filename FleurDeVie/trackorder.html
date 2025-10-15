@@ -142,7 +142,7 @@
     detailsList.innerHTML=''
 
     try{
-      const res=await fetch(`/api/getOrder?trackingRef=${encodeURIComponent(ref)}&brandId=fleurdevie`)
+      const res = await fetch(`../api/fleurdevie/getOrder?trackingRef=${encodeURIComponent(ref)}`);
       const data=await res.json()
 
       if(!res.ok || !data.found){
