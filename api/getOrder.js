@@ -13,22 +13,42 @@ if (!admin.apps.length) {
 const db = admin.firestore();
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
+  let trackingRef, brandId;
 
-  const { trackingRef, brandId } = req.body;
-  if (!trackingRef || !brandId) return res.status(400).json({ error: "Missing parameters" });
+  // Handle GET and POST
+  if (req.method === "GET") {
+    trackingRef = req.query.trackingRef;
+    brandId = req.query.brandId; // optional
+  } else if (req.method === "POST") {
+    trackingRef = req.body.trackingRef;
+    brandId = req.body.brandId; // optional
+  } else {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  if (!trackingRef) return res.status(400).json({ error: "Missing trackingRef" });
 
   try {
-    const snapshot = await db
-      .collection("brands")
-      .doc(brandId)
-      .collection("orders")
-      .where("trackingRef", "==", trackingRef)
-      .get();
+    const brandsToCheck = brandId ? [brandId] : ["serac", "fleurdevie"];
+    let order = null;
 
-    if (snapshot.empty) return res.status(200).json({ found: false });
+    for (const brand of brandsToCheck) {
+      const snapshot = await db
+        .collection("brands")
+        .doc(brand)
+        .collection("orders")
+        .where("trackingRef", "==", trackingRef)
+        .get();
 
-    const order = snapshot.docs[0].data();
+      if (!snapshot.empty) {
+        order = snapshot.docs[0].data();
+        order.brandId = brand; // include which brand
+        break;
+      }
+    }
+
+    if (!order) return res.status(200).json({ found: false });
+
     res.status(200).json({ found: true, order });
   } catch (err) {
     console.error(err);
