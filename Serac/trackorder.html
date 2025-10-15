@@ -75,14 +75,14 @@
     .gold-spinner{width:64px;height:64px;border-radius:50%;border:5px solid rgba(182,110,65,0.18);border-top-color:#B66E41;animation:serac-spin 1s linear infinite;box-shadow:0 6px 26px rgba(0,0,0,0.6);}
     @keyframes serac-spin{to{transform:rotate(360deg)}}
     
-    /* Chat-style floating support button */
+      /* Chat-style floating support button */
   #floatingSupportBtn {
     position: fixed;
     bottom: 25px;
     right: 25px;
     width: 56px;
     height: 56px;
-    background: #B66E41; /* Sérac primary color */
+    background: #1a202b; /* Sérac primary color */
     color: #fff;
     border: none;
     border-radius: 50%;
@@ -91,15 +91,38 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    box-shadow: 0 6px 20px rgba(182, 110, 65, 1);
     transition: all 0.3s ease;
     z-index: 9999;
   }
 
   #floatingSupportBtn:hover {
-    background: #D48C61; /* Slightly lighter shade on hover */
+    background: #20232b; /* Slightly lighter shade on hover */
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    box-shadow: 0 8px 24px rgba(75, 78, 84, 1.0);
+  }
+
+  /* Tooltip */
+  .support-tooltip {
+    position: absolute;
+    bottom: 30px;      /* Distance above the button */
+    left: 20%;
+    transform: translateX(-50%); /* Center horizontally */
+    background: #1c1e22;
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+    
+
+  #floatingSupportBtn:hover .support-tooltip {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
   }
     
   </style>
@@ -149,6 +172,7 @@
   <!-- Floating Chat-Style Support Button -->
   <button id="floatingSupportBtn" aria-label="Contact Support">
     <i class="fas fa-headset"></i>
+    <span class="support-tooltip">Support</span>
   </button>
   
   <footer>
@@ -245,7 +269,6 @@
   
     const supportBtn = document.getElementById('floatingSupportBtn');
   supportBtn.addEventListener('click', () => {
-    // Replace with your support email
     window.location.href = 'mailto:stonecold.serac@gmail.com?subject=Support%20Request';
   });
   
