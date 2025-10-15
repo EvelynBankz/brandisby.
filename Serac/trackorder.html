@@ -123,9 +123,6 @@
   </footer>
 
 <script>
-  // -----------------------------
-  // Elements
-  // -----------------------------
   const form = document.getElementById('trackOrderForm');
   const statusBox = document.getElementById('orderStatus');
   const detailsList = document.getElementById('orderDetails');
@@ -135,9 +132,6 @@
     overlay.style.display = show ? 'flex' : 'none';
   }
 
-  // -----------------------------
-  // Handle Order Tracking
-  // -----------------------------
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const ref = document.getElementById('orderRef').value.trim();
@@ -148,7 +142,6 @@
     statusBox.style.display = 'none';
 
     try {
-      // Call Vercel serverless function
       const res = await fetch(`/api/getOrder?trackingRef=${encodeURIComponent(ref)}`);
       const data = await res.json();
       showSpinner(false);
@@ -162,33 +155,30 @@
       const doc = data.order;
       const currentStatus = doc.status || 'Paid';
 
-      // Determine the timestamp for the current status
-      let statusDate = doc.createdAt?.seconds
-        ? new Date(doc.createdAt.seconds * 1000)
-        : new Date();
+      // Default to createdAt
+      let statusDate = new Date();
+      if (doc.createdAt) {
+        if (doc.createdAt.seconds) statusDate = new Date(doc.createdAt.seconds * 1000);
+        else statusDate = new Date(doc.createdAt);
+      }
 
+      // Check statusHistory
       if (Array.isArray(doc.statusHistory) && doc.statusHistory.length > 0) {
-        const historyEntry = [...doc.statusHistory]
-          .reverse()
-          .find(h => h.status === currentStatus && h.changedAt);
-
+        const historyEntry = [...doc.statusHistory].reverse().find(h => h.status === currentStatus && h.changedAt);
         if (historyEntry) {
-          // Firestore timestamps can be either seconds or ISO strings
-          statusDate = historyEntry.changedAt.seconds
-            ? new Date(historyEntry.changedAt.seconds * 1000)
-            : new Date(historyEntry.changedAt);
+          const t = historyEntry.changedAt;
+          if (t.seconds) statusDate = new Date(t.seconds * 1000); // Firestore Timestamp
+          else statusDate = new Date(t); // ISO string
         }
       }
 
       const amount = doc.total ? `${doc.currency || '₦'}${doc.total.toLocaleString()}` : '—';
 
-      // Build item list
       const items = (doc.items || []).map(item => {
         const qty = item.quantity || item.totalQuantity || '—';
         return `${item.name} (${qty})`;
       }).join('<br>') || '—';
 
-      // Show order details
       detailsList.innerHTML = `
         <li><strong>Status:</strong> ${currentStatus}</li>
         <li><strong>Date:</strong> ${statusDate.toLocaleString()}</li>
