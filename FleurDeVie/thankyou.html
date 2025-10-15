@@ -1,162 +1,397 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Thank You - Fleur De Vie</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
   <style>
-    /* RESET */
-    *{margin:0;padding:0;box-sizing:border-box;}
-    body{font-family:"Montserrat",sans-serif;background:#F5E6CC;color:#112e1f;line-height:1.6;text-align:center;}
-    a{text-decoration:none;color:inherit;}
-
-    /* HEADER */
-    .site-header{background:#112e1f;color:#F5E6CC;display:flex;justify-content:space-between;align-items:center;padding:16px 28px;position:fixed;top:0;left:0;right:0;z-index:1000;}
-    .header-left{display:flex;align-items:center;gap:12px;}
-    .brand-logo{height:60px;}
-    .brand-title{font-family:"Playfair Display",serif;font-size:24px;font-weight:700;}
-    .header-right{display:flex;gap:20px;align-items:center;}
-    .header-right a{font-weight:500;transition:color 0.3s;}
-    .header-right a:hover{color:#FFD6BA;}
-    .cart-count{background:#FFD6BA;color:#112e1f;font-size:12px;font-weight:600;border-radius:50%;padding:2px 6px;margin-left:4px;}
-    .hamburger{display:none;background:none;border:none;cursor:pointer;width:30px;height:24px;position:relative;}
-    .hamburger span{display:block;width:100%;height:3px;background:#F5E6CC;border-radius:2px;position:absolute;left:0;transition:0.3s;}
-    .hamburger span:nth-child(1){top:0;}
-    .hamburger span:nth-child(2){top:10px;}
-    .hamburger span:nth-child(3){top:20px;}
-    .hamburger.open span:nth-child(1){transform:rotate(45deg);top:10px;}
-    .hamburger.open span:nth-child(2){opacity:0;}
-    .hamburger.open span:nth-child(3){transform:rotate(-45deg);top:10px;}
-
-    /* HERO */
-    .hero{position:relative;height:90vh;display:flex;justify-content:center;align-items:center;text-align:center;margin-top:80px;overflow:hidden;}
-    .hero::after{content:"";position:absolute;inset:0;background:url('asset/bg2.jpg') center/cover no-repeat;transform:scale(1.1);z-index:-1;border-radius:12px;box-shadow:inset 0 0 0 2000px rgba(17,46,31,0.3);}
-    .hero-text{position:relative;display:inline-block;color:#FFD6BA;}
-    .hero-text h1{font-family:"Playfair Display",serif;font-size:clamp(32px,5vw,56px);}
-
-    /* THANK YOU SECTION */
-    .thankyou-section{padding:80px 20px;}
-    .thankyou-box{background:#FFD6BA;padding:40px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.15);max-width:700px;margin:auto;}
-    .thankyou-box h2{font-family:"Playfair Display",serif;font-size:28px;margin-bottom:20px;}
-    .thankyou-box p{font-size:18px;margin-bottom:24px;}
-    .order-details{text-align:left;margin-top:20px;}
-    .order-details h3{margin-bottom:10px;font-family:"Playfair Display",serif;}
-    .order-details ul{list-style:none;padding:0;margin:0;}
-    .order-details li{margin-bottom:8px;font-size:16px;}
-    .btn{display:inline-block;padding:14px 28px;border-radius:8px;font-weight:600;transition:0.3s;}
-    .btn-primary{background:#112e1f;color:#F5E6CC;border:none;}
-    .btn-primary:hover{background:#0a1d14;}
-    .btn-secondary{background:#fff;color:#112e1f;border:2px solid #112e1f;margin-left:10px;}
-    .btn-secondary:hover{background:#112e1f;color:#FFD6BA;}
-
-    footer{text-align:center;padding:20px;background:#112e1f;color:#F5E6CC;margin-top:60px;}
-
-    @media(max-width:800px){
-      .header-right{display:none;flex-direction:column;position:absolute;top:70px;right:0;background:#112e1f;width:200px;padding:20px;}
-      .header-right.open{display:flex;}
-      .hamburger{display:block;}
-      .thankyou-box{padding:20px;}
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;scroll-behavior:smooth}
+    body{
+      font-family:"Montserrat",sans-serif;
+      background:#F5E6CC;color:#112e1f;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
     }
 
-    /* MOBILE HERO ADJUSTMENT FOR THANK YOU PAGE */
-@media(max-width:600px){
-  .hero {
-    height:40vh;               /* shorter hero on mobile */
-    margin-top:0;              /* remove extra margin from desktop */
-    padding-top:80px;          /* offset for fixed header */
-    display:flex;
-    justify-content:center;     /* horizontal centering */
-    align-items:center;         /* vertical centering */
-    text-align:center;
-    box-sizing:border-box;      /* include padding in height */
-  }
+    /* Header */
+    .site-header{
+      position:fixed;left:0;right:0;top:0;height:80px;
+      display:flex;align-items:center;justify-content:space-between;
+      padding:10px 20px;z-index:1200;background:transparent;
+      transition:background .28s ease,backdrop-filter .28s ease,border-color .28s ease;
+      border-bottom:1px solid rgba(17,46,31,0.04);
+    }
+    .site-header.scrolled{ background: rgba(17,46,31,0.95); backdrop-filter: blur(6px); border-bottom-color: rgba(255,255,255,0.04); }
+    .header-left{display:flex;align-items:center;gap:16px}
+    .brand-logo{height:56px;width:auto}
+    .brand-title{font-family:"Playfair Display",serif;color:#FFD6BA;font-weight:700;font-size:1.4rem}
+    .header-right{display:flex;gap:18px;align-items:center}
+    .header-right a{color:#112e1f;text-decoration:none;font-weight:500}
+    .hamburger{display:none;background:none;border:0;cursor:pointer;width:36px;height:28px;position:relative}
+    .hamburger span{position:absolute;height:3px;background:#F5E6CC;width:100%;left:0;border-radius:2px;transition:all .28s}
+    .hamburger span:nth-child(1){top:0}
+    .hamburger span:nth-child(2){top:12px}
+    .hamburger span:nth-child(3){top:24px}
+    .hamburger.open span:nth-child(1){transform:rotate(45deg);top:12px}
+    .hamburger.open span:nth-child(2){opacity:0}
+    .hamburger.open span:nth-child(3){transform:rotate(-45deg);top:12px}
 
-  .hero-text h1 {
-    font-size:clamp(24px,5vw,32px); /* scale text for mobile */
-    line-height:1.2;                /* tighter line height */
-    margin:0;                        /* remove default margin */
-  }
-}
+    /* Hero */
+    .hero{height:90vh;display:flex;align-items:center;justify-content:center;text-align:center;position:relative;margin-top:80px}
+    .hero::after{content:"";position:absolute;inset:0;background:url('asset/bg2.jpg') center/cover no-repeat;box-shadow:inset 0 0 0 2000px rgba(17,46,31,0.3);z-index:-1}
+    .hero h1{font-family:"Playfair Display",serif;color:#FFD6BA;font-size:clamp(32px,6vw,56px)}
+
+    /* Main */
+    .thankyou-section {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 100px 20px;
+    }
+
+    .thankyou-box {
+      max-width: 960px;
+      width: 100%;
+      background: #FFD6BA;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+      color: #112e1f;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .thankyou-box h2{font-family:"Playfair Display",serif;color:#112e1f;margin-bottom:12px}
+    .thankyou-box p{color:#334d3a;margin-bottom:10px}
+
+    #orderReferenceBox{
+      background:#fff;padding:12px 16px;border-radius:8px;border:1px solid rgba(17,46,31,0.06);
+      font-weight:600;font-size:18px;color:#112e1f;margin:14px 0;cursor:pointer;display:inline-block;
+    }
+    #orderReferenceNote{color:#334d3a;font-size:13px;margin-bottom:12px}
+    .order-details{background:#fff;padding:18px;border-radius:8px;text-align:left;border:1px solid rgba(17,46,31,0.04);width:100%;max-width:760px}
+    .order-details h3{color:#112e1f;text-align:left;font-family:"Playfair Display",serif;margin-bottom:8px}
+    .order-details li{color:#112e1f;padding:8px 0;text-align:left;list-style: none;border-bottom:1px solid rgba(17,46,31,0.03)}
+
+    .btn{display:inline-block;padding:12px 26px;border-radius:8px;font-weight:600;cursor:pointer;margin-top:12px}
+    .btn-primary{background:#112e1f;color:#F5E6EC;border:0}
+    .btn-secondary{background:transparent;color:#112e1f;border:2px solid #112e1f}
+
+    footer{padding:28px;text-align:center;color:#334d3a;margin-top:36px}
+
+    /* Overlay & spinner */
+    #fleur-overlay{
+      position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;
+      background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);transition:opacity .35s ease;
+    }
+    .fleur-spinner{
+      width:64px;height:64px;border-radius:50%;
+      border:6px solid rgba(17,46,31,0.12);border-top-color:#112e1f;animation:spin 1s linear infinite;
+      box-shadow:0 6px 26px rgba(0,0,0,0.3);
+    }
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* Floating support */
+    #floatingSupportBtn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 56px;
+      height: 56px;
+      background: #112e1f;
+      color: #FFD6BA;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+    }
+    #floatingSupportBtn:hover { transform: translateY(-4px); }
+
+    @media(max-width:800px){
+      .header-right{display:none}
+      .hamburger{display:block}
+      .thankyou-box{padding:20px}
+      .hero{height:40vh;margin-top:0;padding-top:80px}
+    }
   </style>
 </head>
 <body>
+  <!-- Loader overlay -->
+  <div id="fleur-overlay" aria-hidden="true">
+    <div class="fleur-spinner" role="status" aria-label="Loading"></div>
+  </div>
 
-  <!-- HEADER -->
-  <header class="site-header">
+  <header class="site-header" id="siteHeader">
     <div class="header-left">
-      <img src="logo.png" alt="Fleur De Vie Logo" class="brand-logo">
+      <img src="logo.png" alt="Fleur De Vie" class="brand-logo" />
       <div class="brand-title">Fleur De Vie</div>
     </div>
-    <nav class="header-right">
+
+    <nav class="header-right" id="headerRight">
       <a href="index.html">Home</a>
       <a href="shop.html">Shop</a>
       <a href="about.html">About</a>
       <a href="contact.html">Contact</a>
     </nav>
-    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+
+    <button class="hamburger" id="hamburger" aria-label="Menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
   </header>
 
-  <!-- HERO -->
-  <section class="hero">
-    <div class="hero-text">
-      <h1>Thank You</h1>
-    </div>
-  </section>
+  <main>
+    <section class="hero"><h1>Thank You</h1></section>
 
-  <!-- THANK YOU SECTION -->
-  <section class="thankyou-section">
-    <div class="thankyou-box">
-      <h2>We’ve received your order 🎉</h2>
-      <p>Thank you for shopping with <strong>Fleur De Vie</strong>.  
-      Your order is being processed and you’ll receive a confirmation email shortly.</p>
+    <section class="thankyou-section">
+      <div class="thankyou-box">
+        <h2>We’ve received your order 🎉</h2>
+        <p>Thank you for shopping with <strong>Fleur De Vie</strong>. Your order is now being processed.</p>
 
-      <!-- ORDER DETAILS -->
-      <div class="order-details" id="orderDetails"></div>
+        <div id="orderReferenceBox">Loading reference…</div>
+        <div id="orderReferenceNote"></div>
 
-      <a href="shop.html" class="btn btn-primary">Continue Shopping</a>
-      <a href="index.html" class="btn btn-secondary">Return Home</a>
-    </div>
-  </section>
+        <div style="margin:14px 0;">
+          <button id="sendEmailBtn" class="btn btn-secondary">Send to my email</button>
+        </div>
 
-  <!-- FOOTER -->
-  <footer>
-    <p>© 2025 Fleur De Vie</p>
-  </footer>
+        <div class="order-details" id="orderDetails">
+          <p>Loading order details…</p>
+        </div>
 
-  <script>
-    // Hamburger toggle
-    document.getElementById('hamburger').addEventListener('click',()=>{
-      document.querySelector('.header-right').classList.toggle('open');
-      document.getElementById('hamburger').classList.toggle('open');
+        <div style="margin-top:18px">
+          <a href="shop.html" class="btn btn-primary">Continue Shopping</a>
+          <a id="trackOrderBtn" href="trackorder.html" class="btn btn-secondary">Track Order</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <button id="floatingSupportBtn" aria-label="Contact Support" title="Contact Support">
+    <i class="fas fa-headset"></i>
+  </button>
+
+  <footer>© 2025 Fleur De Vie</footer>
+
+  <script type="module">
+    // UI wiring: header scroll, hamburger and support
+    const overlay = document.getElementById('fleur-overlay');
+    const header = document.getElementById('siteHeader');
+    const hamburger = document.getElementById('hamburger');
+    const headerRight = document.getElementById('headerRight');
+
+    window.addEventListener('scroll', () => header.classList.toggle('scrolled', window.scrollY > 30));
+    hamburger.addEventListener('click', () => {
+      const open = headerRight.classList.toggle('open');
+      hamburger.classList.toggle('open');
+      hamburger.setAttribute('aria-expanded', String(open));
     });
 
-    // Load order details from localStorage (set in checkout.html)
-    const orderData = JSON.parse(localStorage.getItem('lastOrder'));
-    if(orderData){
-      const detailsDiv = document.getElementById('orderDetails');
-      let html = `
-        <h3>Order Details</h3>
-        <ul>
-          <li><strong>Name:</strong> ${orderData.name}</li>
-          <li><strong>Email:</strong> ${orderData.email}</li>
-          <li><strong>Phone:</strong> ${orderData.phone}</li>
-          <li><strong>Address:</strong> ${orderData.address}</li>
-          <li><strong>Currency:</strong> ${orderData.currency}</li>
-          <li><strong>Total Paid:</strong> ${orderData.currency} ${orderData.total}</li>
-        </ul>
-        <h3>Items</h3>
-        <ul>`;
-      orderData.items.forEach(item=>{
-        html+=`<li>${item.name} (x${item.quantity})</li>`;
-      });
-      html+=`</ul>`;
-      detailsDiv.innerHTML = html;
+    const supportBtn = document.getElementById('floatingSupportBtn');
+    supportBtn.addEventListener('click', () => {
+      // change to your preferred support contact
+      window.location.href = 'mailto:yourstruly.fleurdevie@gmail.com?subject=Support%20Request';
+    });
 
-      // Clear after displaying
-      localStorage.removeItem('lastOrder');
+    // ---------- Firebase imports ----------
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
+      authDomain: "brandisby.firebaseapp.com",
+      projectId: "brandisby",
+      storageBucket: "brandisby.firebasestorage.app",
+      messagingSenderId: "87213267039",
+      appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // ---------- Helpers ----------
+    function safeParseJSON(v){ try{ return JSON.parse(v||'null'); } catch(e){ return null; } }
+    function escapeHtml(s){ if(s === undefined || s === null) return ''; return String(s).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[ch])); }
+
+    function showCopyPopup(text){
+      const pop = document.createElement('div');
+      pop.textContent = text;
+      Object.assign(pop.style, {
+        position:'fixed',left:'50%',bottom:'36px',transform:'translateX(-50%)',
+        background:'#112e1f',color:'#FFD6BA',padding:'10px 16px',borderRadius:'8px',zIndex:10000,opacity:'0',transition:'opacity .25s'
+      });
+      document.body.appendChild(pop);
+      requestAnimationFrame(()=> pop.style.opacity='1');
+      setTimeout(()=> { pop.style.opacity='0'; setTimeout(()=>pop.remove(),280); },1500);
     }
+
+    // ---------- Main logic (mirrors Serac behavior, but for fleurdevie paths) ----------
+    async function displayOrder(){
+      const refBox = document.getElementById('orderReferenceBox');
+      const note = document.getElementById('orderReferenceNote');
+      const details = document.getElementById('orderDetails');
+      const trackBtn = document.getElementById('trackOrderBtn');
+      const sendEmail = document.getElementById('sendEmailBtn');
+
+      // 1) look for local saved order (common keys)
+      let order = safeParseJSON(localStorage.getItem('lastOrder_fleurdevie')) ||
+                  safeParseJSON(localStorage.getItem('lastOrder')) ||
+                  safeParseJSON(localStorage.getItem('lastOrder_serac')) || null;
+
+      // 2) URL params
+      const params = new URLSearchParams(window.location.search);
+      const orderId = params.get('orderId');
+      const txref = params.get('txref') || params.get('ref') || null;
+      const quoteId = params.get('quoteId');
+
+      // 3) if no local order and orderId param -> fetch order doc (brands/fleurdevie/orders)
+      if(!order && orderId){
+        try{
+          const snap = await getDoc(doc(db, "brands", "fleurdevie", "orders", orderId));
+          if(snap.exists()){ order = snap.data(); order.id = orderId; }
+        } catch(e){ console.error('fetch order by id failed', e); }
+      }
+
+      // 4) if txref present and still no order -> try doc id then trackingRef query
+      if(!order && txref){
+        try{
+          const maybeDoc = await getDoc(doc(db, "brands", "fleurdevie", "orders", txref));
+          if(maybeDoc.exists()){
+            order = maybeDoc.data(); order.id = maybeDoc.id;
+          } else {
+            const q = query(collection(db, "brands", "fleurdevie", "orders"), where("trackingRef","==", txref));
+            const snaps = await getDocs(q);
+            if(!snaps.empty){
+              const s = snaps.docs[0];
+              order = s.data(); order.id = s.id;
+            }
+          }
+        } catch(e){ console.error('fetch by txref failed', e); }
+      }
+
+      // 5) if still no order, try paid quote info or quote doc
+      if(!order && (quoteId || safeParseJSON(localStorage.getItem('paidQuoteInfo'))?.quoteId)){
+        const qid = quoteId || safeParseJSON(localStorage.getItem('paidQuoteInfo'))?.quoteId;
+        if(qid){
+          try{
+            const qsnap = await getDoc(doc(db, "brands", "fleurdevie", "quotes", qid));
+            if(qsnap.exists()){
+              const qdata = qsnap.data();
+              order = {
+                id: qid,
+                type: 'quote',
+                trackingRef: qdata.trackingRef || qdata.orderRef || null,
+                name: qdata.name || qdata.customer || qdata.customerName || '',
+                email: qdata.email || '',
+                phone: qdata.phone || qdata.phoneNumber || '',
+                address: qdata.address || qdata.shippingAddress || '',
+                currency: qdata.currency || 'NGN',
+                total: qdata.total || qdata.amount || qdata.subtotal || 0,
+                items: qdata.items || []
+              };
+            }
+          } catch(e){ console.error('fetch quote failed', e); }
+        }
+      }
+
+      // 6) nothing -> inform user
+      if(!order){
+        refBox.textContent = 'No order reference available.';
+        note.textContent = '';
+        details.innerHTML = '<p>Unable to locate order details. If you just paid, please wait a few moments and refresh.</p>';
+        sendEmail.style.display = 'none';
+        trackBtn.style.display = 'none';
+        fadeRemoveOverlay();
+        return;
+      }
+
+      // Normalize and display
+      const ref = order.trackingRef || order.tracking || order.orderRef || order.id || 'N/A';
+      refBox.textContent = ref;
+      note.textContent = 'You can use this reference to track your order.';
+
+      refBox.onclick = async () => {
+        try {
+          await navigator.clipboard.writeText(ref);
+          showCopyPopup('Copied!');
+        } catch(e){ console.error('copy failed', e); }
+      };
+
+      const currency = order.currency || order.currencyCode || 'NGN';
+      const total = order.total ?? order.amount ?? order.subtotal ?? '-';
+
+      let html = `<h3>Order Details</h3><ul>`;
+      html += `<li><strong>Name:</strong> ${escapeHtml(order.name || order.customer || '-')}</li>`;
+      html += `<li><strong>Email:</strong> ${escapeHtml(order.email || '-')}</li>`;
+      html += `<li><strong>Phone:</strong> ${escapeHtml(order.phone || '-')}</li>`;
+      html += `<li><strong>Address:</strong> ${escapeHtml(order.address || '-')}</li>`;
+      html += `<li><strong>Currency:</strong> ${escapeHtml(currency)}</li>`;
+      html += `<li><strong>Total Paid:</strong> ${escapeHtml(currency)} ${escapeHtml(String(total))}</li>`;
+      html += `</ul><h3>Items</h3><ul>`;
+
+      (order.items || []).forEach(i=>{
+        const name = i.name || i.productName || i.title || 'Item';
+        const qty = i.quantity || i.qty || i.count || i.totalQuantity || 1;
+        html += `<li>${escapeHtml(name)} (x${escapeHtml(String(qty))})</li>`;
+      });
+      html += `</ul>`;
+      details.innerHTML = html;
+
+      // send email as mailto prefill
+      sendEmail.onclick = () => {
+        const subject = encodeURIComponent('Your Fleur De Vie Order Confirmation');
+        const body = encodeURIComponent(`Hello ${order.name || ''},
+
+Thank you for shopping with Fleur De Vie.
+
+Order reference: ${ref}
+Total: ${currency} ${total}
+
+Track here: ${window.location.origin}/trackorder.html
+
+Regards,
+Fleur De Vie`);
+        window.location.href = `mailto:${order.email || ''}?subject=${subject}&body=${body}`;
+      };
+
+      // Track button -> trackorder page
+      trackBtn.href = 'trackorder.html';
+
+      // try to clean up stored local copies
+      try{
+        localStorage.removeItem('lastOrder_fleurdevie');
+        localStorage.removeItem('lastOrder');
+        localStorage.removeItem('paidQuoteInfo');
+      } catch(e){ /* ignore */ }
+
+      // done
+      setTimeout(fadeRemoveOverlay, 450);
+    }
+
+    function fadeRemoveOverlay(){
+      if(!overlay) return;
+      overlay.style.opacity = '0';
+      setTimeout(()=> { try{ overlay.remove(); } catch(e){} }, 420);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      try{ overlay.style.opacity = '1'; } catch(e){}
+      displayOrder().catch(err => {
+        console.error('displayOrder error', err);
+        fadeRemoveOverlay();
+      });
+    });
   </script>
 </body>
 </html>
