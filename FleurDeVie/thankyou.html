@@ -1,50 +1,143 @@
-<!-- FIXED & CLEANED thankyou.html (Spinner color #f7dad9) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Thank You - Fleur De Vie</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* Spinner overlay */
-    #fleur-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #f7dad9;
-      backdrop-filter: blur(6px);
-      transition: opacity 0.45s ease;
+    /* RESET */
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:"Montserrat",sans-serif;background:#F5E6CC;color:#112e1f;line-height:1.6;text-align:center;}
+    a{text-decoration:none;color:inherit;}
+
+    /* HEADER */
+    .site-header{background:#112e1f;color:#F5E6CC;display:flex;justify-content:space-between;align-items:center;padding:16px 28px;position:fixed;top:0;left:0;right:0;z-index:1000;}
+    .header-left{display:flex;align-items:center;gap:12px;}
+    .brand-logo{height:60px;}
+    .brand-title{font-family:"Playfair Display",serif;font-size:24px;font-weight:700;}
+    .header-right{display:flex;gap:20px;align-items:center;}
+    .header-right a{font-weight:500;transition:color 0.3s;}
+    .header-right a:hover{color:#FFD6BA;}
+    .hamburger{display:none;background:none;border:none;cursor:pointer;width:30px;height:24px;position:relative;}
+    .hamburger span{display:block;width:100%;height:3px;background:#F5E6CC;border-radius:2px;position:absolute;left:0;transition:0.3s;}
+    .hamburger span:nth-child(1){top:0;}
+    .hamburger span:nth-child(2){top:10px;}
+    .hamburger span:nth-child(3){top:20px;}
+    .hamburger.open span:nth-child(1){transform:rotate(45deg);top:10px;}
+    .hamburger.open span:nth-child(2){opacity:0;}
+    .hamburger.open span:nth-child(3){transform:rotate(-45deg);top:10px;}
+
+    /* HERO */
+    .hero{position:relative;height:90vh;display:flex;justify-content:center;align-items:center;text-align:center;margin-top:80px;overflow:hidden;}
+    .hero::after{content:"";position:absolute;inset:0;background:url('asset/bg2.jpg') center/cover no-repeat;transform:scale(1.1);z-index:-1;border-radius:12px;box-shadow:inset 0 0 0 2000px rgba(17,46,31,0.3);}
+    .hero-text{position:relative;display:inline-block;color:#FFD6BA;}
+    .hero-text h1{font-family:"Playfair Display",serif;font-size:clamp(32px,5vw,56px);}
+
+    /* THANK YOU SECTION */
+    .thankyou-section{padding:80px 20px;}
+    .thankyou-box{background:#FFD6BA;padding:40px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.15);max-width:700px;margin:auto;}
+    .thankyou-box h2{font-family:"Playfair Display",serif;font-size:28px;margin-bottom:20px;}
+    .thankyou-box p{font-size:18px;margin-bottom:24px;}
+    .order-details{text-align:left;margin-top:20px;}
+    .order-details h3{margin-bottom:10px;font-family:"Playfair Display",serif;}
+    .order-details ul{list-style:none;padding:0;margin:0;}
+    .order-details li{margin-bottom:8px;font-size:16px;}
+    .btn{display:inline-block;padding:14px 28px;border-radius:8px;font-weight:600;transition:0.3s;}
+    .btn-primary{background:#112e1f;color:#F5E6CC;border:none;}
+    .btn-primary:hover{background:#0a1d14;}
+    .btn-secondary{background:#fff;color:#112e1f;border:2px solid #112e1f;margin-left:10px;}
+    .btn-secondary:hover{background:#112e1f;color:#FFD6BA;}
+    footer{text-align:center;padding:20px;background:#112e1f;color:#F5E6CC;margin-top:60px;}
+
+    @media(max-width:800px){
+      .header-right{display:none;flex-direction:column;position:absolute;top:70px;right:0;background:#112e1f;width:200px;padding:20px;}
+      .header-right.open{display:flex;}
+      .hamburger{display:block;}
+      .thankyou-box{padding:20px;}
     }
-    .spinner {
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      border: 5px solid rgba(17, 46, 31, 0.2);
-      border-top-color: #112e1f;
-      animation: spin 1s linear infinite;
+
+    /* MOBILE HERO ADJUSTMENT */
+    @media(max-width:600px){
+      .hero {height:40vh;margin-top:0;padding-top:80px;}
+      .hero-text h1 {font-size:clamp(24px,5vw,32px);}
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Overlay spinner */
+    #fleur-overlay{
+      position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;
+      background:linear-gradient(135deg,#f7dad9,#112e1f,#e6daf6);
+      transition:opacity .45s ease;
+    }
+    .fleur-spinner{
+      width:64px;height:64px;border-radius:50%;
+      border:5px solid rgba(255,255,255,0.2);border-top-color:#112e1f;
+      animation:spin 1s linear infinite;
+    }
+    @keyframes spin{to{transform:rotate(360deg);}}
   </style>
 </head>
-
 <body>
-  <div id="fleur-overlay"><div class="spinner"></div></div>
+  <div id="fleur-overlay" aria-hidden="true">
+    <div class="fleur-spinner" role="status"></div>
+  </div>
 
-  <!-- Replace with your actual logo path -->
-  <img src="logo.png" alt="Fleur De Vie Logo" style="margin:40px auto;display:block;width:120px;" />
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="header-left">
+      <img src="logo.png" alt="Fleur De Vie Logo" class="brand-logo">
+      <div class="brand-title">Fleur De Vie</div>
+    </div>
+    <nav class="header-right">
+      <a href="index.html">Home</a>
+      <a href="shop.html">Shop</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+  </header>
 
-  <h1>Thank You</h1>
-  <p>Your order is being processed...</p>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-text"><h1>Thank You</h1></div>
+  </section>
+
+  <!-- THANK YOU SECTION -->
+  <section class="thankyou-section">
+    <div class="thankyou-box">
+      <h2>We’ve received your order 🎉</h2>
+      <p>Thank you for shopping with <strong>Fleur De Vie</strong>.  
+      Your order is being processed and you’ll receive a confirmation email shortly.</p>
+
+      <div id="orderReferenceBox" style="background:#f4ede0;padding:10px 20px;border-radius:10px;margin-bottom:10px;font-weight:600;cursor:pointer;">
+        Loading reference…
+      </div>
+      <div id="orderReferenceNote" style="color:#555;font-size:13px;margin-bottom:16px;"></div>
+
+      <div class="order-details" id="orderDetails"><p>Loading order details…</p></div>
+
+      <div style="margin-top:18px;">
+        <a href="shop.html" class="btn btn-primary">Continue Shopping</a>
+        <a href="index.html" class="btn btn-secondary">Return Home</a>
+      </div>
+    </div>
+  </section>
+
+  <footer><p>© 2025 Fleur De Vie</p></footer>
 
   <script type="module">
+    // Hamburger toggle
+    const hamburger = document.getElementById('hamburger');
+    const headerRight = document.querySelector('.header-right');
+    hamburger.addEventListener('click', () => {
+      headerRight.classList.toggle('open');
+      hamburger.classList.toggle('open');
+    });
+
+    // Firebase imports
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-app.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-firestore.js";
+    import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
@@ -54,38 +147,71 @@
       messagingSenderId: "87213267039",
       appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
     };
-
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    async function loadOrder() {
-      try {
-        const params = new URLSearchParams(window.location.search);
-        const orderId = params.get("orderId");
-        if (!orderId) throw new Error("No order ID in URL");
+    const overlay = document.getElementById('fleur-overlay');
+    function fadeRemoveOverlay(){ overlay.style.opacity='0'; setTimeout(()=>overlay.remove(),600); }
 
-        const docRef = doc(db, "brands", "fleurdevie", "orders", orderId);
-        const docSnap = await getDoc(docRef);
+    function safeParseJSON(v){ try{return JSON.parse(v||'null')}catch{return null;} }
 
-        if (docSnap.exists()) {
-          console.log("Order found:", docSnap.data());
-          document.querySelector("h1").textContent = "Thank You!";
-          document.querySelector("p").textContent = "Your order has been received successfully.";
-        } else {
-          document.querySelector("p").textContent = "We could not find your order.";
-        }
-      } catch (err) {
-        console.error(err);
-        document.querySelector("p").textContent = "An error occurred loading your order.";
-      } finally {
-        // fade out the overlay
-        const overlay = document.getElementById("fleur-overlay");
-        overlay.style.opacity = "0";
-        setTimeout(() => overlay.remove(), 500);
+    async function displayOrder(){
+      const refBox=document.getElementById('orderReferenceBox');
+      const note=document.getElementById('orderReferenceNote');
+      const details=document.getElementById('orderDetails');
+      let order=safeParseJSON(localStorage.getItem('lastOrder_fleurdevie'));
+      const params=new URLSearchParams(window.location.search);
+      const orderId=params.get('orderId');const txref=params.get('txref')||params.get('ref');
+
+      if(!order && orderId){
+        try{
+          const snap=await getDoc(doc(db,"brands","fleurdevie","orders",orderId));
+          if(snap.exists()) order={...snap.data(),id:snap.id};
+        }catch(e){console.error(e);}
       }
+
+      if(!order && txref){
+        try{
+          const snap=await getDoc(doc(db,"brands","fleurdevie","orders",txref));
+          if(snap.exists()) order={...snap.data(),id:snap.id};
+          else{
+            const q=query(collection(db,"brands","fleurdevie","orders"),where("trackingRef","==",txref));
+            const snaps=await getDocs(q);
+            if(!snaps.empty){const s=snaps.docs[0];order={...s.data(),id:s.id};}
+          }
+        }catch(e){console.error(e);}
+      }
+
+      if(!order){
+        refBox.textContent='No order reference available.';
+        note.textContent='';
+        details.innerHTML='<p>Unable to locate order details. Please refresh later.</p>';
+        fadeRemoveOverlay();
+        return;
+      }
+
+      const ref=order.trackingRef||order.id;
+      refBox.textContent=ref;
+      note.textContent='You can use this reference to track your order.';
+      refBox.onclick=async()=>{await navigator.clipboard.writeText(ref);alert('Copied!');}
+
+      let html=`<h3>Order Details</h3><ul>`;
+      html+=`<li><strong>Name:</strong> ${order.name||'-'}</li>`;
+      html+=`<li><strong>Email:</strong> ${order.email||'-'}</li>`;
+      html+=`<li><strong>Phone:</strong> ${order.phone||'-'}</li>`;
+      html+=`<li><strong>Address:</strong> ${order.address||'-'}</li>`;
+      html+=`<li><strong>Currency:</strong> ${order.currency||'NGN'}</li>`;
+      html+=`<li><strong>Total Paid:</strong> ${order.currency||'NGN'} ${order.total||order.amount||'-'}</li></ul>`;
+      html+=`<h3>Items</h3><ul>`;
+      (order.items||[]).forEach(i=>{html+=`<li>${i.name||i.title||'Item'} (x${i.quantity||1})</li>`});
+      html+=`</ul>`;
+      details.innerHTML=html;
+
+      localStorage.removeItem('lastOrder_fleurdevie');
+      setTimeout(fadeRemoveOverlay,600);
     }
 
-    document.addEventListener("DOMContentLoaded", loadOrder);
+    document.addEventListener('DOMContentLoaded',()=>{displayOrder();});
   </script>
 </body>
 </html>
