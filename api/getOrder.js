@@ -15,9 +15,9 @@ const db = admin.firestore();
 // Utility to convert Firestore timestamps to ISO strings
 const convertTimestamp = (t) => {
   if (!t) return null;
-  if (t.toDate) return t.toDate().toISOString(); // Firestore Timestamp
+  if (t.toDate) return t.toDate().toISOString();
   if (t.seconds) return new Date(t.seconds * 1000).toISOString();
-  return new Date(t).toISOString(); // fallback
+  return new Date(t).toISOString();
 };
 
 export default async function handler(req, res) {
@@ -26,51 +26,47 @@ export default async function handler(req, res) {
   // Handle GET and POST
   if (req.method === "GET") {
     trackingRef = req.query.trackingRef;
-    brandId = req.query.brandId; // optional
+    brandId = req.query.brandId; // must be provided
   } else if (req.method === "POST") {
     trackingRef = req.body.trackingRef;
-    brandId = req.body.brandId; // optional
+    brandId = req.body.brandId; // must be provided
   } else {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
   if (!trackingRef) return res.status(400).json({ error: "Missing trackingRef" });
+  if (!brandId) return res.status(400).json({ error: "Missing brandId" });
+
+  // Enforce brand-specific search
+  const allowedBrands = ["fleurdevie", "serac"];
+  if (!allowedBrands.includes(brandId.toLowerCase())) {
+    return res.status(403).json({ error: "Unauthorized brand access" });
+  }
 
   try {
-    const brandsToCheck = brandId ? [brandId] : ["serac", "fleurdevie"];
-    let order = null;
+    // Only check the requested brand
+    const snapshot = await db
+      .collection("brands")
+      .doc(brandId.toLowerCase())
+      .collection("orders")
+      .where("trackingRef", "==", trackingRef)
+      .get();
 
-    for (const brand of brandsToCheck) {
-      const snapshot = await db
-        .collection("brands")
-        .doc(brand)
-        .collection("orders")
-        .where("trackingRef", "==", trackingRef)
-        .get();
+    if (snapshot.empty) return res.status(200).json({ found: false });
 
-      if (!snapshot.empty) {
-        const docData = snapshot.docs[0].data();
+    const docData = snapshot.docs[0].data();
+    const convertedOrder = {
+      ...docData,
+      brandId: brandId.toLowerCase(),
+      createdAt: convertTimestamp(docData.createdAt),
+      verifiedAt: convertTimestamp(docData.verifiedAt),
+      statusHistory: (docData.statusHistory || []).map(h => ({
+        ...h,
+        changedAt: convertTimestamp(h.changedAt)
+      }))
+    };
 
-        // Convert timestamps
-        const convertedOrder = {
-          ...docData,
-          brandId: brand,
-          createdAt: convertTimestamp(docData.createdAt),
-          verifiedAt: convertTimestamp(docData.verifiedAt),
-          statusHistory: (docData.statusHistory || []).map(h => ({
-            ...h,
-            changedAt: convertTimestamp(h.changedAt)
-          }))
-        };
-
-        order = convertedOrder;
-        break;
-      }
-    }
-
-    if (!order) return res.status(200).json({ found: false });
-
-    res.status(200).json({ found: true, order });
+    res.status(200).json({ found: true, order: convertedOrder });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
