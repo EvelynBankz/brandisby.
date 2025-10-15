@@ -74,6 +74,28 @@
     #serac-overlay.active{opacity:1;pointer-events:auto;}
     .gold-spinner{width:64px;height:64px;border-radius:50%;border:5px solid rgba(182,110,65,0.18);border-top-color:#B66E41;animation:serac-spin 1s linear infinite;box-shadow:0 6px 26px rgba(0,0,0,0.6);}
     @keyframes serac-spin{to{transform:rotate(360deg)}}
+    #contactSupportBtn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #B66E41;
+    color: #fff;
+    border: none;
+    padding: 14px 20px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
+    z-index: 9999;
+  }
+
+  #contactSupportBtn:hover {
+    background: #D48C61;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+  }
   </style>
 </head>
 
@@ -117,7 +139,10 @@
       </div>
     </div>
   </section>
-
+  
+  <!-- Contact Support Popup -->
+  <button id="contactSupportBtn">Contact Support</button>
+  
   <footer>
     © <span id="year"></span> Sérac. All rights reserved.
   </footer>
@@ -209,6 +234,13 @@
       statusBox.style.display = 'block';
     }
   });
+  
+  const supportBtn = document.getElementById('contactSupportBtn');
+  supportBtn.addEventListener('click', () => {
+    // Replace with your support email
+    window.location.href = 'mailto:support@yourbrand.com?subject=Order%20Support';
+  });
+  
 </script>
 
 </body>
