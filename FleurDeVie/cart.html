@@ -151,7 +151,6 @@ footer { text-align:center; padding:20px; background:#112e1f; color:#F5E6CC; mar
   <p>© 2025 Fleur De Vie</p>
 </footer>
 
-<script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
@@ -192,7 +191,10 @@ function mergeCartItems(cartArray){
   return merged;
 }
 
-// Fetch product data from Firebase
+function groupVariants(productId){
+  return cart.filter(i=>i.id===productId);
+}
+
 async function fetchProductData(productId){
   try{
     const dref = doc(db,"brands","fleurdevie","products",productId);
@@ -202,21 +204,45 @@ async function fetchProductData(productId){
   return null;
 }
 
-// Render the cart DOM (first time load)
+function updateCartSubtotalAndCount(){
+  const currency = currencySelect.value || 'NGN';
+  const subtotal = cart.reduce((sum,i)=>{
+    const priceField = `price${currency}`;
+    const price = i[priceField] || i.price || 0;
+    return sum + price * (i.quantity||0);
+  },0);
+
+  cartSubtotalElem.textContent = `Subtotal: ${formatPrice(subtotal, currency)}`;
+
+  const totalQty = cart.reduce((sum,i)=>sum+(i.quantity||0),0);
+  cartCountElem.textContent = totalQty;
+
+  if(!cart.length){
+    cartEmpty.style.display='block';
+    checkoutBtn.style.display='none';
+  } else {
+    cartEmpty.style.display='none';
+    checkoutBtn.style.display='inline-block';
+  }
+}
+
 async function renderCart(){
   cartGrid.innerHTML = '';
-  if(!cart.length){ cartEmpty.style.display='block'; cartSubtotalElem.textContent=''; checkoutBtn.style.display='none'; return; }
-  cartEmpty.style.display='none'; checkoutBtn.style.display='inline-block';
+  if(!cart.length){ updateCartSubtotalAndCount(); return; }
 
   const currency = currencySelect.value || 'NGN';
   const productIds = [...new Set(cart.map(i=>i.id))];
 
   for(const pid of productIds){
     const product = await fetchProductData(pid);
-    const variants = cart.filter(i=>i.id===pid);
+    const variants = groupVariants(pid);
     const totalQty = variants.reduce((sum,v)=>sum+(v.quantity||0),0);
+
     const thumbnail = product?.images?.[0] || product?.imageUrl || 'placeholder.jpg';
-    const lineTotal = variants.reduce((sum,v)=>sum+(v.price||0)*(v.quantity||0),0);
+    const lineTotal = variants.reduce((sum,v)=>{
+      const price = v[`price${currency}`] || v.price || 0;
+      return sum + price * (v.quantity||0);
+    },0);
 
     const div = document.createElement('div'); 
     div.className='cart-item';
@@ -240,6 +266,7 @@ async function renderCart(){
         const vDiv = document.createElement('div'); 
         vDiv.className='quantity-controls'; 
         vDiv.style.flexWrap='wrap';
+        const price = v[`price${currency}`] || v.price || 0;
         vDiv.innerHTML=`
           ${v.color?`<span>Color:${v.color}</span>`:''}
           ${v.size?`<span>Size:${v.size}</span>`:''}
@@ -264,110 +291,71 @@ async function renderCart(){
     cartGrid.appendChild(div);
   }
 
-  // Variant toggle
+  // Event listeners
   cartGrid.querySelectorAll('.show-variants-btn').forEach(btn=>{
     btn.addEventListener('click', ()=>{ 
-      btn.nextElementSibling.style.display = btn.nextElementSibling.style.display==='flex'?'none':'flex'; 
+      const container = btn.nextElementSibling;
+      container.style.display = container.style.display==='flex'?'none':'flex'; 
     });
   });
 
-  updateAllCartLines();
-}
+  const adjustQuantity = (id, color, size, delta) => {
+    const idx = cart.findIndex(i=>i.id===id && (i.color||'')===color && (i.size||'')===size);
+    if(idx!==-1){ 
+      cart[idx].quantity += delta;
+      if(cart[idx].quantity <= 0) cart.splice(idx,1);
+      localStorage.setItem('cart', JSON.stringify(cart));
+      renderCart();
+    }
+  };
 
-// Update a single cart line (quantity, line total)
-function updateCartLine(productId){
-  const currency = currencySelect.value || 'NGN';
-  const variants = cart.filter(i=>i.id===productId);
-  const lineTotal = variants.reduce((sum,v)=>sum+(v.price||0)*(v.quantity||0),0);
-  const totalQty = variants.reduce((sum,v)=>sum+(v.quantity||0),0);
+  // Plus/Minus buttons
+  cartGrid.querySelectorAll('.plus').forEach(btn=>{
+    btn.addEventListener('click', ()=> adjustQuantity(btn.dataset.id, btn.dataset.color||'', btn.dataset.size||'', 1));
+  });
+  cartGrid.querySelectorAll('.minus').forEach(btn=>{
+    btn.addEventListener('click', ()=> adjustQuantity(btn.dataset.id, btn.dataset.color||'', btn.dataset.size||'', -1));
+  });
 
-  const div = cartGrid.querySelector(`.cart-item[data-id="${productId}"]`);
-  if(div){
-    div.querySelector('.line-total').textContent = formatPrice(lineTotal, currency);
-    div.querySelector('.variant-summary').textContent = `Total Quantity: ${totalQty}`;
-    div.querySelectorAll('input[type=number]').forEach(input=>{
-      const v = variants.find(vv=>vv.id===input.dataset.id && (vv.color||'')===input.dataset.color && (vv.size||'')===input.dataset.size);
-      if(v) input.value = v.quantity;
+  // Input change
+  cartGrid.querySelectorAll('input[type=number]').forEach(input=>{
+    input.addEventListener('input', ()=>{
+      let val=parseInt(input.value,10); if(isNaN(val)||val<0) val=0;
+      const id=input.dataset.id, color=input.dataset.color||'', size=input.dataset.size||'';
+      const idx = cart.findIndex(i=>i.id===id && (i.color||'')===color && (i.size||'')===size);
+      if(idx!==-1){ 
+        if(val===0) cart.splice(idx,1);
+        else cart[idx].quantity = val;
+        localStorage.setItem('cart', JSON.stringify(cart));
+        renderCart();
+      }
     });
-  }
+  });
 
   updateCartSubtotalAndCount();
 }
 
-// Update subtotal and cart count
-function updateCartSubtotalAndCount(){
-  const currency = currencySelect.value || 'NGN';
-  const subtotal = cart.reduce((sum,i)=>sum+(i.price||0)*(i.quantity||0),0);
-  cartSubtotalElem.textContent = `Subtotal: ${formatPrice(subtotal, currency)}`;
-  cartCountElem.textContent = cart.reduce((sum,i)=>sum+(i.quantity||0),0);
-  if(!cart.length){
-    cartEmpty.style.display='block';
-    checkoutBtn.style.display='none';
-  } else {
-    cartEmpty.style.display='none';
-    checkoutBtn.style.display='inline-block';
-  }
-}
-
-// Update all lines (used after first render or currency change)
-function updateAllCartLines(){
-  [...new Set(cart.map(i=>i.id))].forEach(pid=>updateCartLine(pid));
-}
-
-// Event delegation for plus/minus buttons
-cartGrid.addEventListener('click', e=>{
-  if(e.target.matches('.plus, .minus')){
-    const btn = e.target;
-    const {id,color,size} = btn.dataset;
-    const idx = cart.findIndex(i=>i.id===id && (i.color||'')===color && (i.size||'')===size);
-    if(idx===-1) return;
-    cart[idx].quantity += btn.classList.contains('plus') ? 1 : -1;
-    if(cart[idx].quantity<=0) cart.splice(idx,1);
-    localStorage.setItem('cart', JSON.stringify(cart));
-    updateCartLine(id);
-  }
-});
-
-// Event delegation for input number
-cartGrid.addEventListener('input', e=>{
-  if(e.target.matches('input[type=number]')){
-    let val = parseInt(e.target.value,10); if(isNaN(val)||val<0) val=0;
-    const {id,color,size} = e.target.dataset;
-    const idx = cart.findIndex(i=>i.id===id && (i.color||'')===color && (i.size||'')===size);
-    if(idx!==-1){
-      cart[idx].quantity = val;
-      if(val===0) cart.splice(idx,1);
-      localStorage.setItem('cart', JSON.stringify(cart));
-      updateCartLine(id);
-    }
-  }
-});
-
-// Currency change
 currencySelect.addEventListener('change', ()=>{
   localStorage.setItem('currency', currencySelect.value);
-  updateAllCartLines();
+  renderCart();
 });
 
-// Hamburger menu
 document.getElementById('hamburger').addEventListener('click', ()=>{
   document.querySelector('.header-right').classList.toggle('open');
   document.getElementById('hamburger').classList.toggle('open');
 });
 
-// Initialize
 (async function init(){
-  cart = mergeCartItems(cart);
-  await renderCart();
+  cart = mergeCartItems(cart); 
+  await renderCart(); 
 })();
 
-// Listen for storage changes
 window.addEventListener('storage', ()=>{
-  cart = JSON.parse(localStorage.getItem('cart'))||[];
-  cart = mergeCartItems(cart);
-  updateAllCartLines();
+  cart = JSON.parse(localStorage.getItem('cart'))||[]; 
+  cart = mergeCartItems(cart); 
+  renderCart(); 
 });
-</script>
+
 
 </body>
 </html>
