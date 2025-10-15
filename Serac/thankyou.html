@@ -156,7 +156,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 6px 10px rgba(182, 110, 65, 1);
+    box-shadow: 3px 6px 60px rgba(182, 110, 65, 1);
     transition: all 0.3s ease;
     z-index: 9999;
   }
@@ -170,7 +170,9 @@
   /* Tooltip */
   .support-tooltip {
     position: absolute;
-    right: 70px;
+    bottom: 70px;      /* Distance above the button */
+    left: 50%;
+    transform: translateX(-50%); /* Center horizontally */
     background: #1c1e22;
     color: #fff;
     padding: 6px 12px;
@@ -180,9 +182,8 @@
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease, transform 0.3s ease;
-    transform: translateY(-50%);
-    top: 50%;
   }
+    
 
   #floatingSupportBtn:hover .support-tooltip {
     opacity: 1;
