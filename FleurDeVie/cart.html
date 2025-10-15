@@ -187,35 +187,26 @@ function mergeCartItems(cartArray){
   cartArray.forEach(item=>{
     const idx = merged.findIndex(i => i.id === item.id && (i.color||'')=== (item.color||'') && (i.size||'')=== (item.size||''));
     if(idx===-1) merged.push({...item});
-    else merged[idx].quantity += (item.quantity||0);
+    else merged[idx].quantity = (merged[idx].quantity||0) + (item.quantity||0);
   });
   return merged;
 }
 
-function updateCartCount(){
-  const total = cart.reduce((sum,i)=>sum+(i.quantity||0),0);
-  cartCountElem.textContent = total;
-}
-
+// Fetch product data from Firebase
 async function fetchProductData(productId){
   try{
     const dref = doc(db,"brands","fleurdevie","products",productId);
     const snap = await getDoc(dref);
     if(snap.exists()) return snap.data();
-  }catch(e){ console.warn("Fetch failed", productId, e); }
+  }catch(e){ console.warn("Fetch product failed", productId, e); }
   return null;
 }
 
+// Render the cart DOM (first time load)
 async function renderCart(){
-  cartGrid.innerHTML='';
-  if(!cart.length){
-    cartEmpty.style.display='block';
-    cartSubtotalElem.textContent='';
-    checkoutBtn.style.display='none';
-    return;
-  }
-  cartEmpty.style.display='none';
-  checkoutBtn.style.display='inline-block';
+  cartGrid.innerHTML = '';
+  if(!cart.length){ cartEmpty.style.display='block'; cartSubtotalElem.textContent=''; checkoutBtn.style.display='none'; return; }
+  cartEmpty.style.display='none'; checkoutBtn.style.display='inline-block';
 
   const currency = currencySelect.value || 'NGN';
   const productIds = [...new Set(cart.map(i=>i.id))];
@@ -225,20 +216,18 @@ async function renderCart(){
     const variants = cart.filter(i=>i.id===pid);
     const totalQty = variants.reduce((sum,v)=>sum+(v.quantity||0),0);
     const thumbnail = product?.images?.[0] || product?.imageUrl || 'placeholder.jpg';
-    const lineTotal = variants.reduce((sum,v)=>{
-      return sum + (v.price || product?.[`price${currency}`] || 0) * (v.quantity||0);
-    },0);
+    const lineTotal = variants.reduce((sum,v)=>sum+(v.price||0)*(v.quantity||0),0);
 
-    const div = document.createElement('div');
+    const div = document.createElement('div'); 
     div.className='cart-item';
-    div.dataset.id=pid;
+    div.dataset.id = pid;
     div.innerHTML=`
       <div class="cart-item-header">
         <img src="${thumbnail}" alt="${product?.name||''}">
         <div class="cart-item-details">
           <h3>${product?.name||''}</h3>
           <div class="variant-summary">Total Quantity: ${totalQty}</div>
-          <div class="price line-total">${formatPrice(lineTotal,currency)}</div>
+          <div class="price line-total">${formatPrice(lineTotal, currency)}</div>
           ${variants.length>1?'<button class="show-variants-btn">Show Choices</button>':''}
           <div class="variants-container"></div>
         </div>
@@ -247,11 +236,9 @@ async function renderCart(){
 
     const variantsContainer = div.querySelector('.variants-container');
     if(variants.length>1){
-      variantsContainer.style.display='none';
-      variantsContainer.style.flexDirection='column';
       variants.forEach(v=>{
-        const vDiv = document.createElement('div');
-        vDiv.className='quantity-controls';
+        const vDiv = document.createElement('div'); 
+        vDiv.className='quantity-controls'; 
         vDiv.style.flexWrap='wrap';
         vDiv.innerHTML=`
           ${v.color?`<span>Color:${v.color}</span>`:''}
@@ -277,77 +264,110 @@ async function renderCart(){
     cartGrid.appendChild(div);
   }
 
-  // Event Listeners
+  // Variant toggle
   cartGrid.querySelectorAll('.show-variants-btn').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      btn.nextElementSibling.style.display = btn.nextElementSibling.style.display==='flex'?'none':'flex';
+    btn.addEventListener('click', ()=>{ 
+      btn.nextElementSibling.style.display = btn.nextElementSibling.style.display==='flex'?'none':'flex'; 
     });
   });
 
-  const updateCart = (id,color,size,qty)=>{
-    const idx = cart.findIndex(i=>i.id===id && (i.color||'')===color && (i.size||'')===size);
-    if(idx!==-1){
-      cart[idx].quantity=qty;
-      if(qty<=0) cart.splice(idx,1);
-      localStorage.setItem('cart',JSON.stringify(cart));
-      renderCart();
-      updateCartCount();
-    }
-  };
-
-  // Plus/Minus Buttons
-  cartGrid.querySelectorAll('.plus').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const {id,color,size} = btn.dataset;
-      const item = cart.find(i=>i.id===id && (i.color||'')===color && (i.size||'')===size);
-      if(item) updateCart(id,color,size,item.quantity+1);
-    });
-  });
-
-  cartGrid.querySelectorAll('.minus').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const {id,color,size} = btn.dataset;
-      const item = cart.find(i=>i.id===id && (i.color||'')===color && (i.size||'')===size);
-      if(item) updateCart(id,color,size,item.quantity-1);
-    });
-  });
-
-  // Input changes
-  cartGrid.querySelectorAll('input[type=number]').forEach(input=>{
-    input.addEventListener('input', ()=>{
-      let val=parseInt(input.value,10); if(isNaN(val)||val<0) val=0;
-      const {id,color,size} = input.dataset;
-      updateCart(id,color,size,val);
-    });
-  });
-
-  // Update subtotal
-  const subtotal = cart.reduce((sum,i)=>sum+(i.price||0)*(i.quantity||0),0);
-  cartSubtotalElem.textContent = `Subtotal: ${formatPrice(subtotal,currency)}`;
+  updateAllCartLines();
 }
 
-currencySelect.addEventListener('change', ()=>{
-  localStorage.setItem('currency', currencySelect.value);
-  renderCart();
+// Update a single cart line (quantity, line total)
+function updateCartLine(productId){
+  const currency = currencySelect.value || 'NGN';
+  const variants = cart.filter(i=>i.id===productId);
+  const lineTotal = variants.reduce((sum,v)=>sum+(v.price||0)*(v.quantity||0),0);
+  const totalQty = variants.reduce((sum,v)=>sum+(v.quantity||0),0);
+
+  const div = cartGrid.querySelector(`.cart-item[data-id="${productId}"]`);
+  if(div){
+    div.querySelector('.line-total').textContent = formatPrice(lineTotal, currency);
+    div.querySelector('.variant-summary').textContent = `Total Quantity: ${totalQty}`;
+    div.querySelectorAll('input[type=number]').forEach(input=>{
+      const v = variants.find(vv=>vv.id===input.dataset.id && (vv.color||'')===input.dataset.color && (vv.size||'')===input.dataset.size);
+      if(v) input.value = v.quantity;
+    });
+  }
+
+  updateCartSubtotalAndCount();
+}
+
+// Update subtotal and cart count
+function updateCartSubtotalAndCount(){
+  const currency = currencySelect.value || 'NGN';
+  const subtotal = cart.reduce((sum,i)=>sum+(i.price||0)*(i.quantity||0),0);
+  cartSubtotalElem.textContent = `Subtotal: ${formatPrice(subtotal, currency)}`;
+  cartCountElem.textContent = cart.reduce((sum,i)=>sum+(i.quantity||0),0);
+  if(!cart.length){
+    cartEmpty.style.display='block';
+    checkoutBtn.style.display='none';
+  } else {
+    cartEmpty.style.display='none';
+    checkoutBtn.style.display='inline-block';
+  }
+}
+
+// Update all lines (used after first render or currency change)
+function updateAllCartLines(){
+  [...new Set(cart.map(i=>i.id))].forEach(pid=>updateCartLine(pid));
+}
+
+// Event delegation for plus/minus buttons
+cartGrid.addEventListener('click', e=>{
+  if(e.target.matches('.plus, .minus')){
+    const btn = e.target;
+    const {id,color,size} = btn.dataset;
+    const idx = cart.findIndex(i=>i.id===id && (i.color||'')===color && (i.size||'')===size);
+    if(idx===-1) return;
+    cart[idx].quantity += btn.classList.contains('plus') ? 1 : -1;
+    if(cart[idx].quantity<=0) cart.splice(idx,1);
+    localStorage.setItem('cart', JSON.stringify(cart));
+    updateCartLine(id);
+  }
 });
 
+// Event delegation for input number
+cartGrid.addEventListener('input', e=>{
+  if(e.target.matches('input[type=number]')){
+    let val = parseInt(e.target.value,10); if(isNaN(val)||val<0) val=0;
+    const {id,color,size} = e.target.dataset;
+    const idx = cart.findIndex(i=>i.id===id && (i.color||'')===color && (i.size||'')===size);
+    if(idx!==-1){
+      cart[idx].quantity = val;
+      if(val===0) cart.splice(idx,1);
+      localStorage.setItem('cart', JSON.stringify(cart));
+      updateCartLine(id);
+    }
+  }
+});
+
+// Currency change
+currencySelect.addEventListener('change', ()=>{
+  localStorage.setItem('currency', currencySelect.value);
+  updateAllCartLines();
+});
+
+// Hamburger menu
 document.getElementById('hamburger').addEventListener('click', ()=>{
   document.querySelector('.header-right').classList.toggle('open');
   document.getElementById('hamburger').classList.toggle('open');
 });
 
+// Initialize
 (async function init(){
   cart = mergeCartItems(cart);
   await renderCart();
-  updateCartCount();
 })();
 
+// Listen for storage changes
 window.addEventListener('storage', ()=>{
-  cart = JSON.parse(localStorage.getItem('cart')) || [];
+  cart = JSON.parse(localStorage.getItem('cart'))||[];
   cart = mergeCartItems(cart);
-  renderCart();
-  updateCartCount();
+  updateAllCartLines();
 });
 </script>
+
 </body>
 </html>
