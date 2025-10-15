@@ -1144,29 +1144,23 @@ function renderOrders(orders) {
     return matchesStatus && matchesTerm;
   });
 
-  filtered.forEach(o => {
-    const orderIdDisplay = `<a href="./order-details.html?orderId=${o.id}" target="_blank">${escapeHtml(o.id)}</a>`;
     const colorMap = {
-      Processing: "#8A4D2B",
-      Shipped: "#C2855E",
-      Completed: "#2ECC71",
-      Cancelled: "#E74C3C"
-    };
-
-    const statusColor = colorMap[o.status] || "#999";
-
-    const statusDropdown = `
-      <select class="statusSelect" data-id="${o.id}" style="background:${statusColor};color:#fff;border:none;padding:4px 8px;border-radius:6px;">
-        ${["Processing", "Shipped", "Completed", "Cancelled"]
-          .map(
-            s =>
-              `<option value="${s}" ${
-                o.status === s ? "selected" : ""
-              }>${s}</option>`
-          )
-          .join("")}
-      </select>
-    `;
+     Paid: "#2A9D8F",
+     Pending: "#F4A261",
+     Processing: "#8A4D2B",
+     Shipped: "#C2855E",
+     Completed: "#2ECC71",
+     Cancelled: "#E74C3C"
+   };
+   
+   const statusDropdown = `
+     <select class="statusSelect" data-id="${o.id}" style="background:${colorMap[o.status] || "#999"};color:#fff;border:none;padding:4px 8px;border-radius:6px;">
+       ${["Paid","Pending","Processing","Shipped","Completed","Cancelled"]
+         .map(
+           s => `<option value="${s}" ${o.status === s ? "selected" : ""}>${s}</option>`
+         ).join("")}
+     </select>
+   `;
 
     const row = document.createElement("tr");
     row.innerHTML = `
