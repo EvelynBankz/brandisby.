@@ -140,28 +140,55 @@
     }
     @keyframes serac-spin{to{transform:rotate(360deg)}}
 
-    #floatingSupportBtn {
+     /* Chat-style floating support button */
+  #floatingSupportBtn {
     position: fixed;
     bottom: 25px;
     right: 25px;
-    background: #4B4E54;
+    width: 56px;
+    height: 56px;
+    background: #B66E41; /* Sérac primary color */
     color: #fff;
     border: none;
-    padding: 16px 20px;
-    border-radius: 50px;
+    border-radius: 50%;
     cursor: pointer;
-    font-weight: 600;
-    font-size: 14px;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     box-shadow: 0 6px 20px rgba(0,0,0,0.3);
     transition: all 0.3s ease;
     z-index: 9999;
   }
 
   #floatingSupportBtn:hover {
-    background: #D48C61;
+    background: #D48C61; /* Slightly lighter shade on hover */
     transform: translateY(-2px);
     box-shadow: 0 8px 24px rgba(0,0,0,0.4);
   }
+
+  /* Tooltip */
+  .support-tooltip {
+    position: absolute;
+    right: 70px;
+    background: #1c1e22;
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    transform: translateY(-50%);
+    top: 50%;
+  }
+
+  #floatingSupportBtn:hover .support-tooltip {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+    
   </style>
 </head>
 <body>
@@ -215,8 +242,12 @@
       </div>
     </section>
   </main>
-<!-- Floating Support Button -->
-<button id="floatingSupportBtn">Support</button>
+  
+    <!-- Floating Chat-Style Support Button -->
+  <button id="floatingSupportBtn" aria-label="Contact Support">
+    <i class="fas fa-headset"></i>
+    <span class="support-tooltip">Contact Support</span>
+  </button>
   
   <footer>© 2025 Sérac</footer>
 
@@ -427,11 +458,11 @@ Sérac`);
       });
     });
 
-     const supportBtn = document.getElementById('floatingSupportBtn');
+    const supportBtn = document.getElementById('floatingSupportBtn');
   supportBtn.addEventListener('click', () => {
-    // Replace with your support email
     window.location.href = 'mailto:stonecold.serac@gmail.com?subject=Support%20Request';
   });
+    
   </script>
 </body>
 </html>
