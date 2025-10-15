@@ -160,7 +160,12 @@
       }
 
       const doc = data.order;
-      const date = doc.createdAt ? new Date(doc.createdAt).toLocaleString() : '—';
+
+      // Convert Firestore timestamp to JS Date
+      const createdAt = doc.createdAt?.seconds
+        ? new Date(doc.createdAt.seconds * 1000)
+        : new Date();
+
       const amount = doc.total ? `${doc.currency || '₦'}${doc.total.toLocaleString()}` : '—';
 
       // Build item list
@@ -169,9 +174,10 @@
         return `${item.name} (${qty})`;
       }).join('<br>') || '—';
 
+      // Show order details
       detailsList.innerHTML = `
         <li><strong>Status:</strong> ${doc.status || 'Processing'}</li>
-        <li><strong>Date:</strong> ${date}</li>
+        <li><strong>Date:</strong> ${createdAt.toLocaleString()}</li>
         <li><strong>Amount:</strong> ${amount}</li>
         <li><strong>Items:</strong><br>${items}</li>
       `;
@@ -185,5 +191,6 @@
     }
   });
 </script>
+
 </body>
 </html>
