@@ -19,31 +19,28 @@
     .brand-title{font-family:"Playfair Display",serif;color:#B66E41;font-weight:700;font-size:1.6rem}
     .header-right{display:flex;gap:22px;align-items:center}
     .header-right a{color:#F5F5F3;text-decoration:none;font-weight:500}
-    .hamburger{display:none;background:none;border:none;cursor:pointer;width:38px;height:32px;position:relativez-index:1200}
-    .hamburger span{display:block;position:absolute;height:3px;background:#B66E41;width:24px;left:0;border-radius:2px;transition:.3s}
-    .hamburger span:nth-child(1){top:6px}
-    .hamburger span:nth-child(2){top:14px}
-    .hamburger span:nth-child(3){top:22px}
-    .hamburger.open span:nth-child(1){transform:rotate(45deg);top:14px}
+    .hamburger{display:none;background:none;border:0;cursor:pointer;width:36px;height:28px;position:relative}
+    .hamburger span{position:absolute;height:3px;background:#B66E41;width:24px;left:0;border-radius:2px;transition:all .28s}
+    .hamburger span:nth-child(1){top:0}
+    .hamburger span:nth-child(2){top:8px}
+    .hamburger span:nth-child(3){top:16px}
+    .hamburger.open span:nth-child(1){transform:rotate(45deg);top:12px}
     .hamburger.open span:nth-child(2){opacity:0}
-    .hamburger.open span:nth-child(3){transform:rotate(-45deg);top:14px}
+    .hamburger.open span:nth-child(3){transform:rotate(-45deg);top:12px}
     @media(max-width:900px){
       .hamburger { display:block; }
       .header-right {
         position:absolute;
-        top:64px;
-        right:12px;
+        top:80px;
+        right:20px;
         display:none;
         flex-direction:column;
-        background:rgba(20,20,20,0.98);
-        border-radius:10px;
+        background:rgba(20,21,23,0.98);
+        border-radius:12px;
         overflow:hidden;
         box-shadow:0 6px 20px rgba(0,0,0,0.4);
-        padding:18px;
-        gap:10px;
-        width:220px;
-        z-index:1100;
-        border:1px solid rgba(255,255,255,0.03)}
+        padding:12px 0;
+        width:200px;
       }
       .header-right.open { display:flex; }
       .header-right a {
