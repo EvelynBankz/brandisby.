@@ -174,7 +174,6 @@ const checkoutBtn = document.getElementById('checkoutBtn');
 const currencySelect = document.getElementById('currency');
 
 let cart = JSON.parse(localStorage.getItem('cart')) || [];
-
 if(localStorage.getItem('currency')) currencySelect.value = localStorage.getItem('currency');
 
 function formatPrice(value, currency){
@@ -210,13 +209,38 @@ async function fetchProductData(productId){
   return null;
 }
 
+function updateCartCount(){
+  const total = cart.reduce((sum,i)=>sum+(i.quantity||0),0);
+  cartCountElem.textContent = total;
+}
+
+function updateLineTotal(id){
+  const currency = currencySelect.value || 'NGN';
+  const lineElems = cartGrid.querySelectorAll(`.cart-item[data-id="${id}"]`);
+  const totalQty = totalQuantityByProduct(id);
+
+  lineElems.forEach(div => {
+    // Update line total
+    const lineTotal = cart.filter(v=>v.id===id).reduce((sum,v)=>sum + (v.price||0)*v.quantity,0);
+    const lineElem = div.querySelector('.line-total');
+    if(lineElem) lineElem.textContent = formatPrice(lineTotal, currency);
+
+    // Update total quantity label
+    const qtyElem = div.querySelector('.variant-summary');
+    if(qtyElem) qtyElem.textContent = `Total Quantity: ${totalQty}`;
+  });
+
+  // Update subtotal
+  const subtotal = cart.reduce((sum,i)=>(i.price||0)*i.quantity + sum,0);
+  cartSubtotalElem.textContent = `Subtotal: ${formatPrice(subtotal, currency)}`;
+}
+
 async function renderCart(){
   cartGrid.innerHTML = '';
   if(!cart.length){ cartEmpty.style.display='block'; cartSubtotalElem.textContent=''; checkoutBtn.style.display='none'; return; }
   cartEmpty.style.display='none'; checkoutBtn.style.display='inline-block';
 
   const currency = currencySelect.value || 'NGN';
-  let subtotal = 0;
   const productIds = [...new Set(cart.map(i=>i.id))];
 
   for(const pid of productIds){
@@ -225,16 +249,17 @@ async function renderCart(){
     const totalQty = totalQuantityByProduct(pid);
     let thumbnail = product?.images?.[0] || product?.imageUrl || 'placeholder.jpg';
     let lineTotal = variants.reduce((sum,v)=>sum+v.quantity*((product && product[`price${currency}`])||v.price||0),0);
-    subtotal+=lineTotal;
 
-    const div = document.createElement('div'); div.className='cart-item';
+    const div = document.createElement('div'); 
+    div.className='cart-item';
+    div.dataset.id = pid;
     div.innerHTML=`
       <div class="cart-item-header">
         <img src="${thumbnail}" alt="${product?.name||''}">
         <div class="cart-item-details">
           <h3>${product?.name||''}</h3>
           <div class="variant-summary">Total Quantity: ${totalQty}</div>
-          <div class="price">${formatPrice(lineTotal, currency)}</div>
+          <div class="price line-total">${formatPrice(lineTotal, currency)}</div>
           ${variants.length>1?'<button class="show-variants-btn">Show Choices</button>':''}
           <div class="variants-container"></div>
         </div>
@@ -245,7 +270,7 @@ async function renderCart(){
     if(variants.length>1){
       variants.forEach(v=>{
         const vDiv = document.createElement('div'); 
-        vDiv.className='quantity-controls'; // Use same styling as main cart
+        vDiv.className='quantity-controls'; 
         vDiv.style.flexWrap='wrap';
         vDiv.innerHTML=`
           ${v.color?`<span>Color:${v.color}</span>`:''}
@@ -270,44 +295,65 @@ async function renderCart(){
 
     cartGrid.appendChild(div);
   }
-  cartSubtotalElem.textContent = `Subtotal: ${formatPrice(subtotal, currency)}`;
 
-  // attach events
+  // Attach events
   cartGrid.querySelectorAll('.show-variants-btn').forEach(btn=>{
-    btn.addEventListener('click', ()=>{ btn.nextElementSibling.style.display=btn.nextElementSibling.style.display==='flex'?'none':'flex'; });
-  });
-
-  cartGrid.querySelectorAll('.plus').forEach(btn=>{
-    btn.addEventListener('click', async ()=>{
-      const id=btn.dataset.id, color=btn.dataset.color||'', size=btn.dataset.size||'';
-      const idx = cart.findIndex(i=>i.id===id && (i.color||'')===color && (i.size||'')===size);
-      if(idx!==-1){ cart[idx].quantity+=1; localStorage.setItem('cart', JSON.stringify(cart)); renderCart(); updateCartCount(); }
+    btn.addEventListener('click', ()=>{ 
+      btn.nextElementSibling.style.display = btn.nextElementSibling.style.display==='flex'?'none':'flex'; 
     });
   });
+
+  const animateButton = (btn) => {
+    btn.style.transform = 'scale(1.2)';
+    setTimeout(()=>btn.style.transform='scale(1)',100);
+  };
+
+  cartGrid.querySelectorAll('.plus').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id=btn.dataset.id, color=btn.dataset.color||'', size=btn.dataset.size||'';
+      const idx = cart.findIndex(i=>i.id===id && (i.color||'')===color && (i.size||'')===size);
+      if(idx!==-1){ 
+        cart[idx].quantity+=1; 
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateLineTotal(id);
+        updateCartCount();
+        animateButton(btn);
+      }
+    });
+  });
+
   cartGrid.querySelectorAll('.minus').forEach(btn=>{
-    btn.addEventListener('click', async ()=>{
+    btn.addEventListener('click', ()=>{
       const id=btn.dataset.id, color=btn.dataset.color||'', size=btn.dataset.size||'';
       const idx = cart.findIndex(i=>i.id===id && (i.color||'')===color && (i.size||'')===size);
       if(idx!==-1){
         cart[idx].quantity-=1;
         if(cart[idx].quantity<=0) cart.splice(idx,1);
-        localStorage.setItem('cart', JSON.stringify(cart)); renderCart(); updateCartCount();
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateLineTotal(id);
+        updateCartCount();
+        animateButton(btn);
       }
     });
   });
+
   cartGrid.querySelectorAll('input[type=number]').forEach(input=>{
-    input.addEventListener('input', ()=>{ 
+    input.addEventListener('input', ()=>{
       let val=parseInt(input.value,10); if(isNaN(val)||val<0) val=0;
       const id=input.dataset.id, color=input.dataset.color||'', size=input.dataset.size||'';
       const idx = cart.findIndex(i=>i.id===id && (i.color||'')===color && (i.size||'')===size);
-      if(idx!==-1){ cart[idx].quantity=val; if(val===0) cart.splice(idx,1); localStorage.setItem('cart', JSON.stringify(cart)); renderCart(); updateCartCount();}
+      if(idx!==-1){ 
+        cart[idx].quantity=val; 
+        if(val===0) cart.splice(idx,1);
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateLineTotal(id);
+        updateCartCount();
+      }
     });
   });
-}
 
-function updateCartCount(){
-  const total = cart.reduce((sum,i)=>sum+(i.quantity||0),0);
-  cartCountElem.textContent=total;
+  // Update subtotal for first render
+  cartSubtotalElem.textContent = `Subtotal: ${formatPrice(cart.reduce((sum,i)=>sum+(i.price||0)*i.quantity,0), currency)}`;
 }
 
 currencySelect.addEventListener('change', ()=>{
@@ -320,10 +366,19 @@ document.getElementById('hamburger').addEventListener('click', ()=>{
   document.getElementById('hamburger').classList.toggle('open');
 });
 
-(async function init(){ cart=mergeCartItems(cart); await renderCart(); updateCartCount(); })();
+(async function init(){
+  cart=mergeCartItems(cart); 
+  await renderCart(); 
+  updateCartCount(); 
+})();
 
-window.addEventListener('storage', ()=>{ cart=JSON.parse(localStorage.getItem('cart'))||[]; cart=mergeCartItems(cart); renderCart(); updateCartCount(); });
-
+window.addEventListener('storage', ()=>{
+  cart=JSON.parse(localStorage.getItem('cart'))||[]; 
+  cart=mergeCartItems(cart); 
+  renderCart(); 
+  updateCartCount(); 
+});
 </script>
+
 </body>
 </html>
