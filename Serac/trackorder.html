@@ -206,7 +206,7 @@
       statusBox.style.display = 'none';
 
       try {
-        const res = await fetch(`/api/getOrder?trackingRef=${encodeURIComponent(ref)}`);
+        const res = await fetch(`../api/serac/getOrder?trackingRef=${encodeURIComponent(ref)}`);
         const data = await res.json();
         showSpinner(false);
 
