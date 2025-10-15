@@ -1245,19 +1245,19 @@ async function logStatusChange(orderRef, newStatus, changedBy = "system") {
   const entry = {
     status: newStatus,
     changedBy,
-    changedAt: new Date().toISOString()
+    changedAt: new Date() // Firestore will handle conversion
   };
   await updateDoc(orderRef, {
     status: newStatus,
     statusHistory: arrayUnion(entry)
   });
 }
-
+ 
 /* ---------------- AUTO-COMPLETE SHIPPED AFTER 48H ---------------- */
 async function autoCompleteShippedOrders() {
   try {
     const now = new Date();
-    const cutoff = new Date(now.getTime() - 48 * 60 * 60 * 1000);
+    const cutoff = new Date(now.getTime() - 48 * 60 * 60 * 1000); // 48h ago
     const q = query(
       collection(db, "brands", "serac", "orders"),
       where("status", "==", "Shipped")
@@ -1265,7 +1265,7 @@ async function autoCompleteShippedOrders() {
     const snap = await getDocs(q);
     for (const docSnap of snap.docs) {
       const o = docSnap.data();
-      const created = new Date(o.createdAt || 0);
+      const created = o.createdAt?.toDate?.() || new Date(0);
       if (created < cutoff) {
         await logStatusChange(docSnap.ref, "Completed", "auto-system");
       }
