@@ -12,7 +12,6 @@ if (!admin.apps.length) {
 
 const db = admin.firestore();
 
-// Utility to convert Firestore timestamps to ISO strings
 const convertTimestamp = (t) => {
   if (!t) return null;
   if (t.toDate) return t.toDate().toISOString();
@@ -23,50 +22,59 @@ const convertTimestamp = (t) => {
 export default async function handler(req, res) {
   let trackingRef, brandId;
 
-  // Handle GET and POST
   if (req.method === "GET") {
     trackingRef = req.query.trackingRef;
-    brandId = req.query.brandId; // must be provided
+    brandId = req.query.brandId; // optional
   } else if (req.method === "POST") {
     trackingRef = req.body.trackingRef;
-    brandId = req.body.brandId; // must be provided
+    brandId = req.body.brandId; // optional
   } else {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
   if (!trackingRef) return res.status(400).json({ error: "Missing trackingRef" });
-  if (!brandId) return res.status(400).json({ error: "Missing brandId" });
-
-  // Enforce brand-specific search
-  const allowedBrands = ["fleurdevie", "serac"];
-  if (!allowedBrands.includes(brandId.toLowerCase())) {
-    return res.status(403).json({ error: "Unauthorized brand access" });
-  }
 
   try {
-    // Only check the requested brand
-    const snapshot = await db
-      .collection("brands")
-      .doc(brandId.toLowerCase())
-      .collection("orders")
-      .where("trackingRef", "==", trackingRef)
-      .get();
+    const brandsToCheck = brandId ? [brandId] : ["serac", "fleurdevie"];
+    let order = null;
 
-    if (snapshot.empty) return res.status(200).json({ found: false });
+    for (const brand of brandsToCheck) {
+      const snapshot = await db
+        .collection("brands")
+        .doc(brand)
+        .collection("orders")
+        .where("trackingRef", "==", trackingRef)
+        .get();
 
-    const docData = snapshot.docs[0].data();
-    const convertedOrder = {
-      ...docData,
-      brandId: brandId.toLowerCase(),
-      createdAt: convertTimestamp(docData.createdAt),
-      verifiedAt: convertTimestamp(docData.verifiedAt),
-      statusHistory: (docData.statusHistory || []).map(h => ({
-        ...h,
-        changedAt: convertTimestamp(h.changedAt)
-      }))
-    };
+      if (!snapshot.empty) {
+        const docData = snapshot.docs[0].data();
+        const convertedOrder = {
+          ...docData,
+          brandId: brand,
+          createdAt: convertTimestamp(docData.createdAt),
+          verifiedAt: convertTimestamp(docData.verifiedAt),
+          statusHistory: (docData.statusHistory || []).map(h => ({
+            ...h,
+            changedAt: convertTimestamp(h.changedAt)
+          }))
+        };
+        order = convertedOrder;
+        break;
+      }
+    }
 
-    res.status(200).json({ found: true, order: convertedOrder });
+    if (!order) return res.status(200).json({ found: false });
+
+    // --- NEW: Check if order belongs to the requested brand ---
+    if (brandId && brandId.toLowerCase() !== order.brandId.toLowerCase()) {
+      return res.status(200).json({
+        found: false,
+        message: `Tracking reference not valid for ${brandId}`
+      });
+    }
+
+    res.status(200).json({ found: true, order });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error" });
