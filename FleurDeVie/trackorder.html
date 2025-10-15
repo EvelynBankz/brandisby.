@@ -139,7 +139,7 @@
     statusBox.style.display='none'
 
     try{
-      const res=await fetch(`/api/getOrders?trackingRef=${encodeURIComponent(ref)}&brandId=fleurdevie`)
+      const res=await fetch(`/api/getOrder?trackingRef=${encodeURIComponent(ref)}&brandId=fleurdevie`)
       const data=await res.json()
 
       if(!res.ok||!data.found){
