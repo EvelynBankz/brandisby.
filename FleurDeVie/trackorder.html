@@ -70,7 +70,7 @@
   .support-tooltip{position:absolute;bottom:70px;left:50%;transform:translateX(-50%);background:#112e1f;color:#FFD6BA;padding:6px 12px;border-radius:8px;font-size:14px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s}
   #floatingSupportBtn:hover .support-tooltip{opacity:1;transform:translateX(-50%) translateY(-6px)}
 
-  footer{padding:18px;text-align:center;color:#FFD6BA;background:#112e1f}
+  footer{padding:18px;text-align:center;color:#FFD6BA;background:#112e1f;margin-top:auto;}
 </style>
 </head>
 
@@ -125,7 +125,10 @@
 
   // --- Spinner ---
   const overlay=document.getElementById('fleur-overlay')
-  function showSpinner(show){overlay.style.display='flex';overlay.style.opacity=show?'1':'0'}
+  function showSpinner(show){
+    if(show){overlay.style.display='flex'; overlay.style.opacity='1';}
+    else{overlay.style.opacity='0'; setTimeout(()=>{overlay.style.display='none'},450);}
+  }
 
   // --- Footer Year ---
   document.getElementById('year').textContent=new Date().getFullYear()
@@ -150,16 +153,17 @@
     const ref=orderInput.value.trim()
     if(!ref) return alert('Please enter your order reference.')
 
-    showSpinner(true)
-    detailsList.innerHTML=''
+    // Reset UI before fetch
     statusBox.style.display='none'
+    detailsList.innerHTML=''
+    showSpinner(true)
 
     try{
       const res=await fetch(`/api/getOrder?trackingRef=${encodeURIComponent(ref)}&brandId=fleurdevie`)
       const data=await res.json()
       showSpinner(false)
 
-      if(!res.ok||!data.found){
+      if(!res.ok || !data.found){
         statusBox.style.display='block'
         detailsList.innerHTML='<li><strong>Notice:</strong> No order found for that reference.</li>'
         return
@@ -170,11 +174,11 @@
       let statusDate=new Date()
       if(doc.createdAt) statusDate=new Date(doc.createdAt)
       if(Array.isArray(doc.statusHistory)&&doc.statusHistory.length>0){
-        const historyEntry=[...doc.statusHistory].reverse().find(h=>h.status===currentStatus&&h.changedAt)
+        const historyEntry=[...doc.statusHistory].reverse().find(h=>h.status===currentStatus && h.changedAt)
         if(historyEntry) statusDate=new Date(historyEntry.changedAt)
       }
 
-      const amount=doc.total?`${doc.currency||'NGN'}${doc.total.toLocaleString()}`:'—'
+      const amount=doc.total ? `${doc.currency||'NGN'}${doc.total.toLocaleString()}` : '—'
       const items=(doc.items||[]).map(i=>`${i.name} (${i.quantity||1})`).join('<br>')||'—'
       const statusColors={Paid:"#2A9D8F",Pending:"#F4A261",Processing:"#2A4D2B",Shipped:"#C2855E",Completed:"#2ECC71",Cancelled:"#E74C3C"}
 
@@ -190,11 +194,12 @@
         <li><strong>Items:</strong><br>${items}</li>
       `
       statusBox.style.display='block'
+
     }catch(err){
       console.error(err)
       showSpinner(false)
-      detailsList.innerHTML='<li><strong>Error:</strong> Unable to fetch order details. Try again later.</li>'
       statusBox.style.display='block'
+      detailsList.innerHTML='<li><strong>Error:</strong> Unable to fetch order details. Try again later.</li>'
     }
   })
 
