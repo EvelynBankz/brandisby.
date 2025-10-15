@@ -175,12 +175,11 @@
       }
 
       if (Array.isArray(doc.statusHistory) && doc.statusHistory.length > 0) {
-        // Find the last entry matching the current status
         const historyEntry = [...doc.statusHistory].reverse().find(h => h.status === currentStatus && h.changedAt);
         if (historyEntry) {
           const t = historyEntry.changedAt;
-          if (t.seconds) statusDate = new Date(t.seconds * 1000); // Firestore timestamp
-          else statusDate = new Date(t); // ISO string
+          if (t.seconds) statusDate = new Date(t.seconds * 1000);
+          else statusDate = new Date(t);
         }
       }
 
@@ -191,19 +190,11 @@
         return `${item.name} (${qty})`;
       }).join('<br>') || '—';
 
-      // Colored badge for current status
-      const badge = `<span style="
-        display:inline-block;
-        padding:4px 12px;
-        border-radius:12px;
-        background:${statusColors[currentStatus] || '#999'};
-        color:#fff;
-        font-weight:600;
-        font-size:0.95rem;
-      ">${currentStatus}</span>`;
+      // Status text with color
+      const statusHtml = `<span style="color:${statusColors[currentStatus] || '#fff'};font-weight:600;">${currentStatus}</span>`;
 
       detailsList.innerHTML = `
-        <li><strong>Status:</strong> ${badge}</li>
+        <li><strong>Status:</strong> ${statusHtml}</li>
         <li><strong>Date:</strong> ${statusDate.toLocaleString()}</li>
         <li><strong>Amount:</strong> ${amount}</li>
         <li><strong>Items:</strong><br>${items}</li>
@@ -218,5 +209,6 @@
     }
   });
 </script>
+
 </body>
 </html>
