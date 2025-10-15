@@ -1109,26 +1109,7 @@ openCheckoutBtn.addEventListener('click', () => {
   if (link) window.open(link, '_blank');
 });
 
-
-/* ---------------- ORDERS: subscribe + render + export ---------------- */
-
-function subscribeOrders() {
-  const ordersRef = collection(db, "brands", "serac", "orders");
-  onSnapshot(
-    ordersRef,
-    snap => {
-      allOrders = [];
-      snap.forEach(docSnap => {
-        const o = { id: docSnap.id, ...docSnap.data() };
-        allOrders.push(o);
-      });
-      renderOrders(allOrders);
-    },
-    err => console.error("Orders snapshot error:", err)
-  );
-}
-
-<script>
+ 
 /* ---------------- ORDERS: subscribe + render + export ---------------- */
 
 function subscribeOrders() {
