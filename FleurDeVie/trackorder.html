@@ -9,102 +9,63 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;scroll-behavior:smooth}
-body{font-family:"Montserrat",sans-serif;background:#F5E6CC;color:#112e1f;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
-.site-header{position:fixed;left:0;right:0;top:0;height:80px;display:flex;align-items:center;justify-content:space-between;padding:16px 28px;z-index:1200;background:#112e1f;color:#F5E6CC}
-.header-left{display:flex;align-items:center;gap:12px}
-.brand-logo{height:60px;width:auto}
-.brand-title{font-family:"Playfair Display",serif;color:#FFD6BA;font-weight:700;font-size:1.6rem}
-.header-right{display:flex;gap:20px;align-items:center}
-.header-right a{color:#F5E6CC;text-decoration:none;font-weight:500}
-.hamburger{display:none;background:none;border:0;cursor:pointer;width:36px;height:28px;position:relative}
-.hamburger span{position:absolute;height:3px;background:#FFD6BA;width:24px;left:0;border-radius:2px;transition:all .28s}
-.hamburger span:nth-child(1){top:0}
-.hamburger span:nth-child(2){top:10px}
-.hamburger span:nth-child(3){top:20px}
-.hamburger.open span:nth-child(1){transform:rotate(45deg);top:10px}
-.hamburger.open span:nth-child(2){opacity:0}
-.hamburger.open span:nth-child(3){transform:rotate(-45deg);top:10px}
-@media(max-width:900px){
-  .hamburger { display:block; }
-  .header-right {
-    position:absolute;
-    top:80px;
-    right:28px;
-    display:none;
-    flex-direction:column;
-    background:#112e1f;
-    border-radius:12px;
-    overflow:hidden;
-    padding:12px 0;
-    width:220px;
-  }
-  .header-right.open { display:flex; }
-  .header-right a {
-    padding:12px 16px;
-    width:100%;
-    text-align:left;
-    color:#F5E6CC;
-    transition:background .25s;
-  }
-  .header-right a:hover { background:rgba(255,214,186,0.15); }
-}
-.track-section {min-height:100vh;display:flex;justify-content:center;align-items:center;padding:120px 20px;}
-.track-box {max-width:960px;width:100%;background:#FFD6BA;padding:60px;border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,0.15);color:#112e1f;text-align:center;display:flex;flex-direction:column;align-items:center;}
-.track-box h1 {font-family:"Playfair Display",serif;color:#112e1f;margin-bottom:12px;font-size:2rem;}
-.track-box p {color:#334d3a;margin-bottom:24px;font-size:15px;}
-input {background:#fff;border:1px solid rgba(17,46,31,0.15);border-radius:10px;padding:12px 14px;color:#112e1f;font-size:15px;width:100%;max-width:400px;transition:border-color .25s ease;margin-bottom:18px;}
-input:focus {outline:none;border-color:#112e1f;}
-button {background:#112e1f;color:#FFD6BA;border:none;border-radius:8px;padding:12px 26px;font-weight:600;cursor:pointer;transition:transform .25s, box-shadow .25s;}
-button:hover {transform:translateY(-3px);box-shadow:0 12px 36px rgba(17,46,31,0.25);}
-.order-status {margin-top:40px;width:100%;display:none;text-align:left;background:#fff5e6;padding:30px;border-radius:12px;border:1px solid rgba(17,46,31,0.15);}
-.order-status h3 {color:#112e1f;font-family:"Playfair Display",serif;text-align:center;margin-bottom:18px;}
-.order-details {list-style:none;padding:0;}
-.order-details li {padding:10px 0;border-bottom:1px solid rgba(17,46,31,0.1);color:#112e1f;}
-.order-details strong {color:#112e1f;display:block;margin-bottom:4px;}
-footer{padding:28px;text-align:center;color:#112e1f;margin-top:60px}
-#fleur-overlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background: linear-gradient(270deg, #f7dad9, #112e1f, #e6daf6);background-size:600% 600%;animation:fleur-gradient 20s ease infinite;transition:opacity .45s ease;opacity:0;pointer-events:none;}
-.fleur-spinner{width:64px;height:64px;border-radius:50%;border:5px solid rgba(17,46,31,0.18);border-top-color:#112e1f;animation:spin 1s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg)}}
-@keyframes fleur-gradient{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;scroll-behavior:smooth}
+  body{font-family:"Montserrat",sans-serif;background:#F5E6CC;color:#112e1f;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
 
-#floatingSupportBtn {
-  position: fixed;
-  bottom: 25px;
-  right: 25px;
-  width: 56px;
-  height: 56px;
-  background: #112e1f;
-  color: #FFD6BA;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  font-size: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 6px 20px rgba(17,46,31,1);
-  transition: all 0.3s ease;
-  z-index: 9999;
-}
-#floatingSupportBtn:hover { background:#334d3a; transform: translateY(-2px); box-shadow:0 8px 24px rgba(17,46,31,1);}
-.support-tooltip {
-  position: absolute;
-  bottom: 50px;
-  left: 50%;
-  transform: translateX(-50%);
-  background:#112e1f;
-  color:#FFD6BA;
-  padding:6px 12px;
-  border-radius:8px;
-  font-size:14px;
-  white-space:nowrap;
-  opacity:0;
-  pointer-events:none;
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-#floatingSupportBtn:hover .support-tooltip { opacity:1; transform:translateX(-50%) translateY(-6px);}
+  /* --- HEADER --- */
+  .site-header{position:fixed;left:0;right:0;top:0;height:80px;display:flex;align-items:center;justify-content:space-between;padding:16px 28px;z-index:1200;background:#112e1f;color:#F5E6CC}
+  .header-left{display:flex;align-items:center;gap:12px}
+  .brand-logo{height:60px}
+  .brand-title{font-family:"Playfair Display",serif;font-size:24px;font-weight:700;color:#FFD6BA}
+  .header-right{display:flex;gap:20px;align-items:center}
+  .header-right a{color:#F5E6CC;text-decoration:none;font-weight:500}
+  .hamburger{display:none;background:none;border:0;cursor:pointer;width:30px;height:24px;position:relative}
+  .hamburger span{position:absolute;height:3px;background:#F5E6CC;width:100%;left:0;border-radius:2px;transition:all .3s}
+  .hamburger span:nth-child(1){top:0}
+  .hamburger span:nth-child(2){top:10px}
+  .hamburger span:nth-child(3){top:20px}
+  .hamburger.open span:nth-child(1){transform:rotate(45deg);top:10px}
+  .hamburger.open span:nth-child(2){opacity:0}
+  .hamburger.open span:nth-child(3){transform:rotate(-45deg);top:10px}
+
+  @media(max-width:900px){
+    .hamburger{display:block}
+    .header-right{
+      position:absolute;top:80px;right:28px;display:none;flex-direction:column;background:#112e1f;border-radius:12px;padding:12px 0;width:200px;
+    }
+    .header-right.open{display:flex}
+    .header-right a{padding:12px 16px;width:100%;text-align:left;transition:background .25s}
+    .header-right a:hover{background:#FFD6BA;color:#112e1f}
+  }
+
+  /* --- TRACK SECTION --- */
+  .track-section{min-height:100vh;display:flex;justify-content:center;align-items:center;padding:120px 20px;}
+  .track-box{max-width:960px;width:100%;background:#FFD6BA;padding:60px;border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,0.15);color:#112e1f;text-align:center;display:flex;flex-direction:column;align-items:center}
+  .track-box h1{font-family:"Playfair Display",serif;margin-bottom:12px;font-size:2rem}
+  .track-box p{margin-bottom:24px;font-size:15px;color:#112e1f}
+  input{background:#fff;border:1px solid rgba(17,46,31,0.2);border-radius:10px;padding:12px 14px;color:#112e1f;font-size:15px;width:100%;max-width:400px;margin-bottom:18px;transition:border-color .25s ease}
+  input:focus{outline:none;border-color:#112e1f}
+  button{background:#112e1f;color:#FFD6BA;border:none;border-radius:8px;padding:12px 26px;font-weight:600;cursor:pointer;transition:transform .25s, box-shadow .25s}
+  button:hover{transform:translateY(-3px);box-shadow:0 12px 36px rgba(17,46,31,0.25)}
+
+  .order-status{margin-top:40px;width:100%;display:none;text-align:left;background:#fff;padding:30px;border-radius:12px;border:1px solid rgba(17,46,31,0.2)}
+  .order-status h3{font-family:"Playfair Display",serif;text-align:center;margin-bottom:18px;color:#112e1f}
+  .order-details{list-style:none;padding:0;color:#112e1f}
+  .order-details li{padding:10px 0;border-bottom:1px solid rgba(17,46,31,0.1)}
+  .order-details strong{display:block;margin-bottom:4px}
+
+  /* --- Overlay / Spinner --- */
+  #fleur-overlay{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:linear-gradient(270deg,#f7dad9,#112e1f,#e6daf6);background-size:600% 600%;animation:gradientShift 15s ease infinite;transition:opacity .45s ease;opacity:1}
+  .fleur-spinner{width:70px;height:70px;border-radius:50%;border:7px solid rgba(255,255,255,0.18);border-top-color:#112e1f;animation:spin 1s linear infinite;box-shadow:0 8px 28px rgba(0,0,0,0.35)}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+
+  /* --- Floating Support Button --- */
+  #floatingSupportBtn{position:fixed;bottom:25px;right:25px;width:64px;height:64px;border-radius:50%;border:none;background:#112e1f;color:#FFD6BA;display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer;box-shadow:0 8px 30px rgba(17,46,31,0.8);transition:all .3s ease;z-index:10001}
+  #floatingSupportBtn:hover{transform:translateY(-2px);box-shadow:0 12px 36px rgba(17,46,31,1)}
+  .support-tooltip{position:absolute;bottom:70px;left:50%;transform:translateX(-50%);background:#112e1f;color:#FFD6BA;padding:6px 12px;border-radius:8px;font-size:14px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s}
+  #floatingSupportBtn:hover .support-tooltip{opacity:1;transform:translateX(-50%) translateY(-6px)}
 </style>
 </head>
 
@@ -113,10 +74,9 @@ footer{padding:28px;text-align:center;color:#112e1f;margin-top:60px}
 
 <header class="site-header">
   <div class="header-left">
-    <img src="asset/logo.png" alt="Fleur De Vie" class="brand-logo" />
+    <img src="asset/logo.png" alt="Fleur De Vie Logo" class="brand-logo">
     <div class="brand-title">Fleur De Vie</div>
   </div>
-
   <nav class="header-right" id="headerRight">
     <a href="index.html">Home</a>
     <a href="shop.html">Shop</a>
@@ -124,10 +84,7 @@ footer{padding:28px;text-align:center;color:#112e1f;margin-top:60px}
     <a href="contact.html">Contact</a>
     <a href="trackorder.html">Track</a>
   </nav>
-
-  <button class="hamburger" id="hamburger" aria-label="Menu">
-    <span></span><span></span><span></span>
-  </button>
+  <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
 </header>
 
 <section class="track-section">
@@ -147,85 +104,77 @@ footer{padding:28px;text-align:center;color:#112e1f;margin-top:60px}
   </div>
 </section>
 
-<button id="floatingSupportBtn" aria-label="Contact Support">
+<button id="floatingSupportBtn">
   <i class="fas fa-headset"></i>
   <span class="support-tooltip">Support</span>
 </button>
 
-<footer>© <span id="year"></span> Fleur De Vie. All rights reserved.</footer>
+<footer>© <span id="year"></span> Fleur De Vie</footer>
 
 <script>
-const hamburger = document.getElementById('hamburger');
-const headerRight = document.getElementById('headerRight');
-hamburger.addEventListener('click', ()=>{ hamburger.classList.toggle('open'); headerRight.classList.toggle('open'); });
+  // --- Hamburger Toggle ---
+  const hamburger = document.getElementById('hamburger');
+  const headerRight = document.getElementById('headerRight');
+  hamburger.addEventListener('click',()=>{hamburger.classList.toggle('open');headerRight.classList.toggle('open')})
 
-const overlay = document.getElementById('fleur-overlay');
-const form = document.getElementById('trackOrderForm');
-const statusBox = document.getElementById('orderStatus');
-const detailsList = document.getElementById('orderDetails');
+  // --- Spinner ---
+  const overlay=document.getElementById('fleur-overlay')
+  function showSpinner(show){overlay.style.opacity=show?'1':'0';setTimeout(()=>{if(!show)overlay.style.display='none';else overlay.style.display='flex'},450)}
 
-function showSpinner(show){ overlay.style.opacity = show? '1':'0'; overlay.style.pointerEvents = show? 'auto':'none'; }
+  // --- Footer Year ---
+  document.getElementById('year').textContent=new Date().getFullYear()
 
-form.addEventListener('submit', async e=>{
-  e.preventDefault();
-  const ref = document.getElementById('orderRef').value.trim();
-  if(!ref) return alert('Please enter your order reference.');
+  // --- Order Tracking (GET like Serac) ---
+  const form=document.getElementById('trackOrderForm')
+  const statusBox=document.getElementById('orderStatus')
+  const detailsList=document.getElementById('orderDetails')
 
-  showSpinner(true);
-  detailsList.innerHTML = '';
-  statusBox.style.display = 'none';
+  form.addEventListener('submit',async e=>{
+    e.preventDefault()
+    const ref=document.getElementById('orderRef').value.trim()
+    if(!ref)return alert('Please enter your order reference.')
+    showSpinner(true)
+    detailsList.innerHTML=''
+    statusBox.style.display='none'
 
-  try{
-    const res = await fetch('/api/getOrder.js', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({brand:'fleurdevie', orderRef: ref})
-    });
-    const data = await res.json();
+    try{
+      const res=await fetch(`/api/getOrders.js?trackingRef=${encodeURIComponent(ref)}&brandId=fleurdevie`)
+      const data=await res.json()
+      showSpinner(false)
+      if(!res.ok||!data.found){statusBox.style.display='block';detailsList.innerHTML='<li><strong>Notice:</strong> No order found for that reference.</li>';return}
 
-    if(!res.ok || !data.order){
-      detailsList.innerHTML = '<li><strong>Notice:</strong> No order found for that reference.</li>';
-      statusBox.style.display = 'block';
-      return;
-    }
+      const doc=data.order
+      const currentStatus=doc.status||'Paid'
+      let statusDate=new Date()
+      if(doc.createdAt)statusDate=new Date(doc.createdAt)
+      if(Array.isArray(doc.statusHistory)&&doc.statusHistory.length>0){
+        const historyEntry=[...doc.statusHistory].reverse().find(h=>h.status===currentStatus&&h.changedAt)
+        if(historyEntry)statusDate=new Date(historyEntry.changedAt)
+      }
 
-    const doc = data.order;
-    const currentStatus = doc.status || 'Paid';
-    let statusDate = new Date();
-    if(doc.createdAt){ statusDate = doc.createdAt.seconds ? new Date(doc.createdAt.seconds*1000): new Date(doc.createdAt); }
+      const amount=doc.total?`${doc.currency||'NGN'}${doc.total.toLocaleString()}`:'—'
+      const items=(doc.items||[]).map(i=>`${i.name} (${i.quantity||1})`).join('<br>')||'—'
 
-    const amount = doc.total ? `${doc.currency||'₦'}${doc.total.toLocaleString()}`:'—';
-    const items = (doc.items||[]).map(i=>`${i.name} (${i.quantity||i.totalQuantity||1})`).join('<br>')||'—';
-    const statusColors = {Paid:"#2A9D8F",Pending:"#F4A261",Processing:"#8A4D2B",Shipped:"#C2855E",Completed:"#2ECC71",Cancelled:"#E74C3C"};
+      const statusColors={Paid:"#2A9D8F",Pending:"#F4A261",Processing:"#8A4D2B",Shipped:"#C2855E",Completed:"#2ECC71",Cancelled:"#E74C3C"}
 
-    detailsList.innerHTML=`
-      <li><strong>Status:</strong>
-        <span style="color:#112e1f;font-weight:600;position:relative;padding-left:16px;">
-          <span style="width:10px;height:10px;background:${statusColors[currentStatus]||'#999'};border-radius:50%;position:absolute;left:0;top:50%;transform:translateY(-50%);display:inline-block;"></span>
-          ${currentStatus}
-        </span>
-      </li>
-      <li><strong>Date:</strong> ${statusDate.toLocaleString()}</li>
-      <li><strong>Amount:</strong> ${amount}</li>
-      <li><strong>Items:</strong><br>${items}</li>
-    `;
-    statusBox.style.display='block';
-  } catch(err){
-    console.error(err);
-    detailsList.innerHTML='<li><strong>Error:</strong> Unable to fetch order details. Try again later.</li>';
-    statusBox.style.display='block';
-  } finally{
-    showSpinner(false);
-  }
-});
+      detailsList.innerHTML=`
+        <li><strong>Status:</strong> 
+          <span style="color:#112e1f;font-weight:600;position:relative;padding-left:16px;">
+            <span style="width:10px;height:10px;background:${statusColors[currentStatus]||'#999'};border-radius:50%;position:absolute;left:0;top:50%;transform:translateY(-50%);display:inline-block;"></span>
+            ${currentStatus}
+          </span>
+        </li>
+        <li><strong>Date:</strong> ${statusDate.toLocaleString()}</li>
+        <li><strong>Amount:</strong> ${amount}</li>
+        <li><strong>Items:</strong><br>${items}</li>
+      `
+      statusBox.style.display='block'
+    }catch(err){console.error(err);showSpinner(false);detailsList.innerHTML='<li><strong>Error:</strong> Unable to fetch order details. Try again later.</li>';statusBox.style.display='block'}
+  })
 
-// Support Button
-document.getElementById('floatingSupportBtn').addEventListener('click',()=>{
-  window.location.href='mailto:yourstruly.fleurdevie@gmail.com?subject=Support%20Request';
-});
-
-// Footer Year
-document.getElementById('year').textContent = new Date().getFullYear();
+  // --- Support Button ---
+  const supportBtn=document.getElementById('floatingSupportBtn')
+  supportBtn.addEventListener('click',()=>{window.location.href='mailto:yourstruly.fleurdevie@gmail.com?subject=Support%20Request'})
 </script>
 </body>
 </html>
