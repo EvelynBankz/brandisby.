@@ -89,6 +89,57 @@ footer{text-align:center;padding:22px;background:transparent;color:var(--muted);
 @media(max-width:680px){.order-item img{width:48px;height:48px}.brand-logo{height:48px}.hero{height:40vh}.checkout-inner{grid-template-columns:1fr;gap:20px;padding:12px}.order-item .meta{font-size:0.92rem}.order-item .price{min-width:60px;font-size:0.95rem}textarea{min-height:100px}}
 @media(max-width:900px){.hamburger{display:block}.header-right{display:none;position:absolute;top:64px;right:12px;background:rgba(20,20,20,0.98);flex-direction:column;padding:18px;gap:10px;border-radius:10px;width:220px;z-index:1100;border:1px solid rgba(255,255,255,0.03)}.header-right.open{display:flex}}
 .small-note{color:var(--muted);padding:8px;text-align:center}
+
+/* Chat-style floating support button */
+  #floatingSupportBtn {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    width: 56px;
+    height: 56px;
+    background: #1a202b; /* Sérac primary color */
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 20px rgba(182, 110, 65, 1);
+    transition: all 0.3s ease;
+    z-index: 9999;
+  }
+
+  #floatingSupportBtn:hover {
+    background: #20232b; /* Slightly lighter shade on hover */
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(75, 78, 84, 1.0);
+  }
+
+  /* Tooltip */
+  .support-tooltip {
+    position: absolute;
+    bottom: 30px;      /* Distance above the button */
+    left: 20%;
+    transform: translateX(-50%); /* Center horizontally */
+    background: #1c1e22;
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+    
+
+  #floatingSupportBtn:hover .support-tooltip {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+  
 </style>
 </head>
 <body>
@@ -158,7 +209,13 @@ footer{text-align:center;padding:22px;background:transparent;color:var(--muted);
       <button id="payBtn" class="pay-btn" type="button">Proceed to Payment</button>
     </aside>
   </div>
-</section>
+</section> 
+
+   <!-- Floating Chat-Style Support Button -->
+  <button id="floatingSupportBtn" aria-label="Contact Support">
+    <i class="fas fa-headset"></i>
+    <span class="support-tooltip">Support</span>
+  </button>
 
 <footer><p>© 2025 Sérac</p></footer>
 
@@ -1048,6 +1105,11 @@ window.addEventListener('error', (e)=>{
     }
   } catch(err){}
 });
+
+ const supportBtn = document.getElementById('floatingSupportBtn');
+  supportBtn.addEventListener('click', () => {
+    window.location.href = 'mailto:stonecold.serac@gmail.com?subject=Support%20Request';
+  });
 </script>
 
 </body>
