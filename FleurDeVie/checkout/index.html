@@ -48,6 +48,7 @@
     .brand-title { font-family:"Playfair Display", serif; font-size:22px; font-weight:700; }
     
     .header-right { display:flex; gap:20px; align-items:center; }
+    
     .header-right a {
       font-weight: 500;
       color: inherit;
@@ -117,23 +118,32 @@
     /* responsive */
     @media(max-width:900px){.container{grid-template-columns:1fr}}
 
-    @media(max-width:600px){
-      .header-right{
-        position:absolute;
-        top:70px;
-        right:0;
-        background:rgba(17,46,31,0.95);
-        flex-direction:column;
-        width:200px;
-        padding:20px;
-        display:none;
-        border-radius:0 0 0 10px;
+    @media (max-width:900px) {
+      .header-right {
+        position: absolute;
+        top: 68px;
+        right: 0;
+        background: rgba(17,46,31,0.95);
+        flex-direction: column;
+        width: 200px;
+        padding: 20px;
+        display: none;
+        border-radius: 0 0 0 10px;
+        z-index: 1100;
       }
-      .header-right.open{display:flex}
-      .hamburger{display:block}
-      section{padding:60px 20px}
-      .hero{height:40vh}
+    
+      .header-right.open {
+        display: flex !important;
+        flex-direction: column;
+        gap: 12px;
+      }
+    
+      .hamburger {
+        display: block;
+      }
     }
+
+
 
     @media(max-width:420px){
       .brand-logo{height:clamp(40px,15vw,80px)}
@@ -159,10 +169,10 @@
     </button>
     <nav class="header-right" id="nav-menu">
       <a href="../index.html">Home</a>
-      <a href="../shop.html">Shop</a>
       <a href="../about.html">About</a>
-      <a href="../contact.html">Contact</a>
+      <a href="../shop.html">Shop</a>
       <a href="../cart.html">Cart <span class="cart-count" id="cartCount">0</span></a>
+      <a href="../contact.html">Contact</a>
     </nav>
   </header>
 
@@ -1099,7 +1109,7 @@
     // (No floating support button in original Fleur markup; keep it consistent.)
   </script>
 
-  <script>
+ <script>
   document.addEventListener("DOMContentLoaded", () => {
     const hamburgerBtn = document.getElementById("hamburger-btn");
     const navMenu = document.getElementById("nav-menu");
@@ -1111,9 +1121,10 @@
       });
     }
   });
-  </script>
+</script>
 
-  <script>
+
+<script>
    /*------New header Settings-----*/
 let lastScrollY = window.scrollY;
 const header = document.querySelector('.site-header');
