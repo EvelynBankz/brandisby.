@@ -14,9 +14,29 @@ a { text-decoration:none; color:inherit; }
 button { cursor:pointer; }
 
 /* ---------------- HEADER ---------------- */
-.site-header { background: #112e1f; color: #F5E6CC; display:flex; justify-content:space-between; align-items:center; padding:16px 28px; position:fixed; top:0; left:0; right:0; z-index:1000; }
+.site-header { 
+  background: #112e1f; 
+  color: #F5E6CC; 
+  display:flex; 
+  justify-content:space-between; 
+  align-items:center; 
+  height: 60px;
+  padding: 8px 20px;
+  transition: top 0.4s ease, background 0.3s ease;
+  position:fixed; 
+  top:0; left:0; right:0; 
+  z-index:1000; }
+  
+.site-header.hidden {
+  top: -80px;
+}
+
+.site-header:hover {
+  top: 0;
+}
+  
 .header-left { display:flex; align-items:center; gap:12px; }
-.brand-logo { height:60px; }
+.brand-logo { height:60px; transition: height 0.3s ease; }
 .brand-title { font-family:"Playfair Display", serif; font-size:24px; font-weight:700; }
 .header-right { display:flex; gap:20px; align-items:center; }
 .header-right a { font-weight:500; transition: color 0.3s; }
@@ -85,7 +105,13 @@ h2 { text-align:center; font-size:24px; font-family:"Playfair Display", serif; m
 .cart-buttons .checkout-btn { background:#FFD6BA; color:#112e1f; }
 
 /* ---------------- FOOTER ---------------- */
-footer { text-align:center; padding:20px; background:#112e1f; color:#F5E6CC; margin-top:60px; }
+footer {
+  text-align: center;
+  padding: 20px;
+  background: transparent;
+  color: #112e1f;
+  margin-top: 60px;
+}
 
 /* ---------------- MOBILE ---------------- */
 @media (max-width:600px){
@@ -466,6 +492,23 @@ function escapeHtml(str) {
   if (savedCurrency) currencySelect.value = savedCurrency;
   await renderCart();
 })();
+
+
+  /* ------- Hidden, on scroll header ------*/
+let lastScrollY = window.scrollY;
+const header = document.querySelector('.site-header');
+const hero = document.querySelector('.hero');
+
+window.addEventListener('scroll', () => {
+  const heroBottom = hero.offsetTop + hero.offsetHeight;
+  if (window.scrollY > heroBottom) {
+    if (window.scrollY > lastScrollY) header.classList.add('hidden');
+    else header.classList.remove('hidden');
+  } else {
+    header.classList.remove('hidden');
+  }
+  lastScrollY = window.scrollY;
+});
 </script>
 
 </body>
