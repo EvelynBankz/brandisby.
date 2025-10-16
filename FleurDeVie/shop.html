@@ -124,6 +124,59 @@ footer { text-align:center; padding:20px; background:transparent; color:#112e1f;
   .hero-text h1 { font-size:clamp(24px,5vw,32px); line-height:1.2; margin:0; }
   .hero-text p { font-size:clamp(14px,2.5vw,18px); margin:0 auto; }
 }
+
+ /* ---------------- Floating Support Button + Tooltip ---------------- */
+  #floatingSupportBtn {
+    position: fixed;
+    right: 22px;
+    bottom: 22px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: none;
+    background: #112e1f;
+    color: #fff;
+    z-index: 10002;
+    box-shadow: 0 8px 30px rgba(212,245,105,1);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px; /* enlarged icon */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  #floatingSupportBtn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 36px rgba(212,245,105,0.8);
+    animation: glowPulse 1.5s infinite ease-in-out;
+  }
+  #floatingSupportBtn::after {
+    content: "Support";
+    position: absolute;
+    bottom: 70px;
+    left: 50%;
+    transform: translateX(-50%) translateY(0);
+    background: #112e1f;
+    color: #FFD6BA;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+  #floatingSupportBtn:hover::after {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-6px);
+  }
+  @keyframes glowPulse {
+    0%,100%{ box-shadow:0 8px 30px rgba(212,245,105,1);}
+    50%{ box-shadow:0 12px 36px rgba(212,245,105,0.6);}
+  }
+
+  
 </style>
 
 </head>
@@ -180,12 +233,11 @@ footer { text-align:center; padding:20px; background:transparent; color:#112e1f;
     <div class="product-grid" id="productGrid"></div>
   </div>
 </section>
-
- <!-- Floating Chat-Style Support Button -->
-  <button id="floatingSupportBtn" aria-label="Contact Support">
-    <i class="fas fa-headset"></i>
-    <span class="support-tooltip">Support</span>
-  </button>
+  
+  <!-- Floating support button -->
+<button id="floatingSupportBtn" aria-label="Support">
+  <i class="fas fa-headset"></i>
+</button>
 
 <!-- FOOTER -->
 <footer>
@@ -391,11 +443,11 @@ document.addEventListener('mousemove', (e) => {
   if (e.clientY < 100) header.classList.remove('hidden');
 });
 
-/*-----floating button-----*/
- const supportBtn = document.getElementById('floatingSupportBtn');
-  supportBtn.addEventListener('click', () => {
-    window.location.href = 'mailto:stonecold.serac@gmail.com?subject=Support%20Request';
-  });
+// Floating support
+const supportBtn = document.getElementById('floatingSupportBtn');
+supportBtn?.addEventListener('click', () => {
+  window.location.href = 'mailto:yourstruly.fleurdevie@gmail.com?subject=Support%20Request';
+});
  
 </script>
 </body>
