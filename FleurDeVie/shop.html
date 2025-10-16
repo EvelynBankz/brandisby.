@@ -16,7 +16,7 @@ a { text-decoration:none; color:inherit; }
 /* HEADER (Luxury Translucent Version) */
 .site-header {
   background: rgba(17,46,31,0.9); /* deep brand green, slightly see-through */
-  backdrop-filter: blur(20px);
+  backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(10px);
   color: #F5E6CC;
   display:flex;
@@ -49,8 +49,17 @@ a { text-decoration:none; color:inherit; }
 .brand-title { font-family:"Playfair Display", serif; font-size:22px; font-weight:700; }
 
 .header-right { display:flex; gap:20px; align-items:center; }
-.header-right a { font-weight:500; transition: color 0.3s; }
-.header-right a:hover { color:#FFD6BA; }
+.header-right a {
+  font-weight: 500;
+  color: inherit;
+  position: relative;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.header-right a:hover {
+  color: #c9e4ff;
+  transform: translateY(-2px);
+}
 .cart-count { background:#FFD6BA; color:#112e1f; font-size:12px; font-weight:600; border-radius:50%; padding:2px 6px; margin-left:4px; }
 
 .hamburger { display:none; background:none; border:none; cursor:pointer; width:30px; height:24px; position:relative; }
