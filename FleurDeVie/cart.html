@@ -242,14 +242,20 @@ function computeSubtotal(currency) {
   return subtotal;
 }
 
+/* ---------- Cart Count (Instant) ---------- */
+function updateCartCount() {
+  const totalItems = cart.reduce((sum, i) => sum + (i.quantity || 0), 0);
+  if (cartCountElem) cartCountElem.textContent = totalItems;
+}
+
 /* ---------- Render Cart ---------- */
 async function renderCart() {
+  updateCartCount(); // update first to avoid flicker
   cartGrid.innerHTML = '';
   if (!cart.length) {
     cartEmpty.style.display = 'block';
     cartSubtotalElem.textContent = '';
     checkoutBtn.style.display = 'none';
-    updateCartCount();
     return;
   }
 
@@ -286,9 +292,7 @@ async function renderCart() {
       <div class="cart-item-header">
         <img src="${thumbnail}" alt="${(product && product.name) ? escapeHtml(product.name) : 'Product'}">
         <div class="cart-item-details">
-          <h3 title="${(product && product.name) ? escapeHtml(product.name) : 'Product'}">
-            ${(product && product.name) ? escapeHtml(product.name) : 'Product'}
-          </h3>
+          <h3>${(product && product.name) ? escapeHtml(product.name) : 'Product'}</h3>
           <div class="variant-summary">${variantSummaryText}</div>
           <div class="price">${formatPrice(lineTotal, currency)}</div>
           <div class="quantity-controls main-quantity" ${hasVariantMeta ? 'style="display:flex;"' : ''}>
@@ -323,23 +327,15 @@ async function renderCart() {
   updateCartCount();
 }
 
-/* ---------- Cart Count ---------- */
-function updateCartCount() {
-  const totalItems = cart.reduce((sum, i) => sum + (i.quantity || 0), 0);
-  const text = totalItems;
-  if (cartCountElem) cartCountElem.textContent = text;
-  if (totalItems > 0) {
-    cartCountElem.classList.add('pulse');
-    setTimeout(() => cartCountElem.classList.remove('pulse'), 160);
-  }
-}
-
-/* ---------- Update Item ---------- */
+/* ---------- Update Row with Variant Cleanup ---------- */
 async function updateItemRow(productId) {
   const itemDiv = document.getElementById(`cart-item-${productId}`);
   const currency = currencySelect.value || 'NGN';
-  const productVariants = groupVariants(productId);
 
+  // Clean zero-quantity variants before rendering
+  cart = cart.filter(i => (i.quantity || 0) > 0);
+
+  const productVariants = groupVariants(productId);
   if (productVariants.length === 0) {
     if (itemDiv) itemDiv.remove();
     const subtotal = computeSubtotal(currency);
@@ -356,38 +352,30 @@ async function updateItemRow(productId) {
   const product = await fetchProductData(productId);
   if (!itemDiv) return renderCart();
 
-  const variants = productVariants;
   const totalQty = totalQuantityByProduct(productId);
-  const lineTotal = variants.reduce((s, v) =>
+  const lineTotal = productVariants.reduce((s, v) =>
     s + (Number((product && product[`price${currency}`]) || v.price || 0) * Number(v.quantity || 0)), 0);
-  const hasVariantMeta = variants.length > 1 || variants.some(v =>
-    (v.color && v.color.trim() !== '') || (v.size && v.size.trim() !== ''));
-  const variantSummaryText = hasVariantMeta
-    ? variants.map(v => `${v.color ? v.color + ' / ' : ''}${v.size ? v.size + ' x ' : ''}${v.quantity}`).join(', ')
+
+  const variantSummaryText = productVariants.length > 1 || productVariants.some(v => (v.color || v.size))
+    ? productVariants.map(v => `${v.color ? v.color + ' / ' : ''}${v.size ? v.size + ' x ' : ''}${v.quantity}`).join(', ')
     : `Quantity: ${totalQty}`;
 
-  const priceEl = itemDiv.querySelector('.price');
-  if (priceEl) priceEl.textContent = formatPrice(lineTotal, currency);
+  itemDiv.querySelector('.price').textContent = formatPrice(lineTotal, currency);
+  itemDiv.querySelector('.variant-summary').textContent = variantSummaryText;
 
-  const variantSummaryEl = itemDiv.querySelector('.variant-summary');
-  if (variantSummaryEl) variantSummaryEl.textContent = variantSummaryText;
-
-  const mainInput = itemDiv.querySelector('.main-quantity input');
-  if (mainInput) mainInput.value = totalQty;
-
-  const variantRows = Array.from(itemDiv.querySelectorAll('.variant-row'));
-  for (const v of variants) {
-    const match = variantRows.find(r => (r.dataset.color || '') === (v.color || '') && (r.dataset.size || '') === (v.size || ''));
-    if (match) {
-      const meta = match.querySelector('.variant-meta');
-      if (meta) meta.textContent = `${v.color ? v.color + ' / ' : ''}${v.size ? v.size + ' x ' : ''}${v.quantity}`;
-      const input = match.querySelector('input[type="number"]');
-      if (input) input.value = v.quantity;
-    }
+  // Rebuild variant rows dynamically (removing any zeros)
+  const variantsContainer = itemDiv.querySelector('.variants-container');
+  if (variantsContainer) {
+    variantsContainer.innerHTML = productVariants.map(v => `
+      <div class="variant-row" data-id="${v.id}" data-color="${(v.color || '')}" data-size="${(v.size || '')}">
+        <div class="variant-meta">${v.color ? v.color + ' / ' : ''}${v.size ? v.size + ' x ' : ''}${v.quantity}</div>
+        <div class="quantity-controls variant-controls">
+          <button class="v-minus" data-id="${v.id}" data-color="${(v.color || '')}" data-size="${(v.size || '')}">-</button>
+          <input type="number" min="0" value="${v.quantity}" data-id="${v.id}" data-color="${(v.color || '')}" data-size="${(v.size || '')}">
+          <button class="v-plus" data-id="${v.id}" data-color="${(v.color || '')}" data-size="${(v.size || '')}">+</button>
+        </div>
+      </div>`).join('');
   }
-
-  const mainQtyEl = itemDiv.querySelector('.main-quantity');
-  if (hasVariantMeta) mainQtyEl.style.display = 'none'; else mainQtyEl.style.display = 'flex';
 
   const subtotal = computeSubtotal(currency);
   cartSubtotalElem.textContent = subtotal ? 'Subtotal: ' + formatPrice(subtotal, currency) : '';
@@ -405,60 +393,46 @@ function persistAndUpdate(productId) {
 
 /* ---------- Event Delegation ---------- */
 cartGrid.addEventListener('click', e => {
-  const target = e.target;
-  const pid = target.dataset.id;
+  const t = e.target;
+  const pid = t.dataset.id;
 
-  if (target.classList.contains('qty-plus')) {
+  if (t.classList.contains('qty-plus') || t.classList.contains('qty-minus')) {
     const item = cart.find(i => i.id === pid);
-    if (item) item.quantity = (item.quantity || 0) + 1;
+    if (item) item.quantity += t.classList.contains('qty-plus') ? 1 : -1;
+    if (item && item.quantity <= 0) cart = cart.filter(i => i.id !== pid);
     persistAndUpdate(pid);
   }
 
-  if (target.classList.contains('qty-minus')) {
-    const idx = cart.findIndex(i => i.id === pid);
-    if (idx !== -1) {
-      cart[idx].quantity = (cart[idx].quantity || 0) - 1;
-      if (cart[idx].quantity <= 0) cart.splice(idx, 1);
-      persistAndUpdate(pid);
-    }
-  }
-
-  if (target.classList.contains('v-plus') || target.classList.contains('v-minus')) {
-    const id = target.dataset.id;
-    const color = target.dataset.color || '';
-    const size = target.dataset.size || '';
+  if (t.classList.contains('v-plus') || t.classList.contains('v-minus')) {
+    const { id, color = '', size = '' } = t.dataset;
     const idx = cart.findIndex(i => i.id === id && (i.color || '') === color && (i.size || '') === size);
     if (idx !== -1) {
-      cart[idx].quantity += target.classList.contains('v-plus') ? 1 : -1;
+      cart[idx].quantity += t.classList.contains('v-plus') ? 1 : -1;
       if (cart[idx].quantity <= 0) cart.splice(idx, 1);
       persistAndUpdate(id);
     }
   }
 
-  if (target.classList.contains('show-variants-btn')) {
-    const container = target.nextElementSibling;
+  if (t.classList.contains('show-variants-btn')) {
+    const container = t.nextElementSibling;
     if (!container) return;
-    const isOpen = container.style.display === 'flex';
-    container.style.display = isOpen ? 'none' : 'flex';
-    target.textContent = isOpen ? 'Show Choices' : 'Hide Choices';
+    const open = container.style.display === 'flex';
+    container.style.display = open ? 'none' : 'flex';
+    t.textContent = open ? 'Show Choices' : 'Hide Choices';
   }
 });
 
 /* ---------- Input Quantity ---------- */
 cartGrid.addEventListener('input', e => {
-  const target = e.target;
-  if (target.tagName !== 'INPUT') return;
-  const id = target.dataset.id;
-  const color = target.dataset.color || '';
-  const size = target.dataset.size || '';
-  const val = parseInt(target.value, 10);
+  const t = e.target;
+  if (t.tagName !== 'INPUT') return;
+  const { id, color = '', size = '' } = t.dataset;
+  const val = parseInt(t.value, 10);
   if (isNaN(val) || val < 0) return;
-
-  const idx = cart.findIndex(i =>
-    i.id === id && (i.color || '') === color && (i.size || '') === size);
+  const idx = cart.findIndex(i => i.id === id && (i.color || '') === color && (i.size || '') === size);
   if (idx !== -1) {
     cart[idx].quantity = val;
-    if (cart[idx].quantity <= 0) cart.splice(idx, 1);
+    if (val <= 0) cart.splice(idx, 1);
     persistAndUpdate(id);
   }
 });
@@ -485,12 +459,13 @@ function escapeHtml(str) {
 /* ---------- Init ---------- */
 (async function init() {
   cart = mergeCartItems(cart);
+  updateCartCount(); // show instantly on page load
   const savedCurrency = localStorage.getItem(CURRENCY_KEY);
   if (savedCurrency) currencySelect.value = savedCurrency;
   await renderCart();
-  updateCartCount();
 })();
 </script>
+
 
 </body>
 </html>
