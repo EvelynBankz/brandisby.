@@ -6,13 +6,13 @@
 <title>Fleur De Vie - Shop</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<style>
+
 <style>
 /* RESET */
 * { margin:0; padding:0; box-sizing:border-box; }
 body {
-  font-family: "Montserrat", sans-serif;
-  background: #F5E6CC;
+  font-family:"Montserrat", sans-serif;
+  background:#F5E6CC;
   color:#112e1f;
   line-height:1.6;
 }
@@ -30,18 +30,15 @@ a { text-decoration:none; color:inherit; }
   align-items:center;
   height:60px;
   padding:8px 20px;
-  background:rgba(17,46,31,0.7);
+  background:rgba(8,30,20,0.6); /* deep green tint */
   color:#F5E6CC;
-  backdrop-filter:blur(6px);
-  transition:top 0.4s ease, background 0.3s ease, opacity 0.4s ease;
+  backdrop-filter:blur(8px);
+  transition:opacity 0.4s ease, background 0.3s ease;
+  opacity:1;
 }
-.site-header:hover {
-  background:#112e1f;
-}
-.site-header.hidden {
-  top:-80px;
-  opacity:0;
-}
+.site-header:hover { background:#112e1f; }
+.site-header.hidden { opacity:0; pointer-events:none; }
+
 .header-left { display:flex; align-items:center; gap:10px; }
 .brand-logo { height:60px; transition:height 0.3s ease; }
 .brand-title {
@@ -89,7 +86,7 @@ a { text-decoration:none; color:inherit; }
 
 /* HERO */
 .hero {
-  position: relative;
+  position:relative;
   height:90vh;
   display:flex;
   justify-content:center;
@@ -123,7 +120,7 @@ a { text-decoration:none; color:inherit; }
   max-width:700px;
 }
 
-/* SHOP SECTION */
+/* SHOP */
 section.shop {
   padding:80px 20px;
   background:#F5E6CC;
@@ -136,11 +133,11 @@ h2 {
   margin-bottom:40px;
 }
 
-/* GRID */
+/* PRODUCT GRID */
 .product-grid {
   display:grid;
   gap:20px;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns:repeat(auto-fit, minmax(220px,1fr));
 }
 .product-card {
   background:#FFD6BA;
@@ -149,11 +146,11 @@ h2 {
   box-shadow:0 4px 10px rgba(0,0,0,0.1);
   display:flex;
   flex-direction:column;
-  transition: transform 0.2s;
+  transition:transform 0.2s;
   position:relative;
   color:inherit;
 }
-.product-card:hover { transform: translateY(-5px); }
+.product-card:hover { transform:translateY(-5px); }
 .product-card img {
   width:100%;
   height:180px;
@@ -172,10 +169,7 @@ h2 {
   color:#112e1f;
   margin-bottom:8px;
 }
-.product-card .price {
-  font-weight:600;
-  margin-bottom:12px;
-}
+.product-card .price { font-weight:600; margin-bottom:12px; }
 .product-card button {
   background:#112e1f;
   color:#F5E6CC;
@@ -198,12 +192,12 @@ footer {
 
 /* MEDIA */
 @media(max-width:900px){
-  .product-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+  .product-grid{grid-template-columns:repeat(auto-fit,minmax(180px,1fr));}
 }
 @media(max-width:600px){
-  .product-grid { grid-template-columns: repeat(2, 1fr); }
-  .product-card img { height:140px; }
-  .header-right {
+  .product-grid{grid-template-columns:repeat(2,1fr);}
+  .product-card img{height:140px;}
+  .header-right{
     display:none;
     flex-direction:column;
     background:#112e1f;
@@ -213,40 +207,38 @@ footer {
     width:200px;
     padding:20px;
   }
-  .header-right.open { display:flex; }
-  .hamburger { display:block; }
-  .mobile-cart {
+  .header-right.open{display:flex;}
+  .hamburger{display:block;}
+  .mobile-cart{
     display:flex;
     align-items:center;
     margin-right:10px;
   }
-  .mobile-cart a {
+  .mobile-cart a{
     color:#FFD6BA;
     font-size:20px;
     position:relative;
   }
-  .mobile-cart .cart-count {
+  .mobile-cart .cart-count{
     position:absolute;
     top:-8px;
     right:-8px;
   }
-  .hero {
+  .hero{
     height:40vh;
     margin-top:20px;
     padding-top:80px;
   }
-  .hero-text h1 {
+  .hero-text h1{
     font-size:clamp(24px,5vw,32px);
     line-height:1.2;
     margin:0;
   }
-  .hero-text p {
+  .hero-text p{
     font-size:clamp(14px,2.5vw,18px);
     margin:0 auto;
   }
 }
-</style>
-
 </style>
 </head>
 <body>
@@ -482,33 +474,27 @@ window.addEventListener('storage', ()=>{
 });
 
 /*-----NEW HEADER SCROLL SETTINGS----*/
+
 const header = document.querySelector('.site-header');
 const hero = document.querySelector('.hero');
-let lastScrollY = window.scrollY;
-let hideTimeout;
+let pastHero = false;
 
+// Track scroll position
 window.addEventListener('scroll', () => {
   const heroBottom = hero.offsetTop + hero.offsetHeight;
-  if (window.scrollY > heroBottom) {
-    if (window.scrollY > lastScrollY) {
-      header.classList.add('hidden');
-    } else {
-      header.classList.remove('hidden');
-    }
-  } else {
+  pastHero = window.scrollY > heroBottom;
+  if (!pastHero) {
     header.classList.remove('hidden');
+  } else {
+    header.classList.add('hidden');
   }
-  lastScrollY = window.scrollY;
 });
 
-// Show header on hover when scrolled past hero
-header.addEventListener('mouseenter', () => {
-  clearTimeout(hideTimeout);
-  header.classList.remove('hidden');
-});
-header.addEventListener('mouseleave', () => {
-  if (window.scrollY > hero.offsetTop + hero.offsetHeight) {
-    hideTimeout = setTimeout(() => header.classList.add('hidden'), 600);
+// Show header on hover when past hero
+document.addEventListener('mousemove', (e) => {
+  if (pastHero) {
+    if (e.clientY < 90) header.classList.remove('hidden');
+    else header.classList.add('hidden');
   }
 });
 
