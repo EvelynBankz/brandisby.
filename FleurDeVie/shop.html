@@ -346,7 +346,7 @@ document.getElementById('hamburger').addEventListener('click', ()=>{
   document.getElementById('hamburger').classList.toggle('open');
 });
 
-function handleMobileCart(){ document.querySelector('.mobile-cart').style.display=window.innerWidth<=600?'flex':'none'; }
+function handleMobileCart(){ document.querySelector('.mobile-cart').style.display=window.innerWidth<=900?'flex':'none'; }
 window.addEventListener('resize', handleMobileCart);
 handleMobileCart();
 
