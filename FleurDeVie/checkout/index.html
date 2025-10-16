@@ -1168,11 +1168,8 @@
     /* -------------------- small support: mailto link when clicking brand (optional) -------------------- */
     // (No floating support button in original Fleur markup; keep it consistent.)
     
-    // ----------------- Support Button -----------------
-    const supportBtn = document.getElementById('floatingSupportBtn');
-    supportBtn.addEventListener('click', () => {
-      window.location.href = 'mailto:stonecold.serac@gmail.com?subject=Support%20Request';
-    });
+    
+   
 
     // ----------------- Footer Year -----------------
     document.getElementById('year').textContent = new Date().getFullYear();
@@ -1204,6 +1201,7 @@ document.addEventListener('mousemove', (e) => {
   if (e.clientY < 100) header.classList.remove('hidden');
 });
 
+// ----------------- Support Button ----------------- 
 // Floating support
 const supportBtn = document.getElementById('floatingSupportBtn');
 supportBtn?.addEventListener('click', () => {
