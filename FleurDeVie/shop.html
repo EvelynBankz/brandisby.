@@ -480,6 +480,38 @@ window.addEventListener('storage', ()=>{
   updateCartCount();
   loadProducts();
 });
+
+/*-----NEW HEADER SCROLL SETTINGS----*/
+const header = document.querySelector('.site-header');
+const hero = document.querySelector('.hero');
+let lastScrollY = window.scrollY;
+let hideTimeout;
+
+window.addEventListener('scroll', () => {
+  const heroBottom = hero.offsetTop + hero.offsetHeight;
+  if (window.scrollY > heroBottom) {
+    if (window.scrollY > lastScrollY) {
+      header.classList.add('hidden');
+    } else {
+      header.classList.remove('hidden');
+    }
+  } else {
+    header.classList.remove('hidden');
+  }
+  lastScrollY = window.scrollY;
+});
+
+// Show header on hover when scrolled past hero
+header.addEventListener('mouseenter', () => {
+  clearTimeout(hideTimeout);
+  header.classList.remove('hidden');
+});
+header.addEventListener('mouseleave', () => {
+  if (window.scrollY > hero.offsetTop + hero.offsetHeight) {
+    hideTimeout = setTimeout(() => header.classList.add('hidden'), 600);
+  }
+});
+
 </script>
 </body>
 </html>
