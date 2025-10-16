@@ -250,7 +250,7 @@ function updateCartCount() {
 
 /* ---------- Render Cart ---------- */
 async function renderCart() {
-  updateCartCount(); // update first to avoid flicker
+  updateCartCount(); // instant display
   cartGrid.innerHTML = '';
   if (!cart.length) {
     cartEmpty.style.display = 'block';
@@ -327,15 +327,15 @@ async function renderCart() {
   updateCartCount();
 }
 
-/* ---------- Update Row with Variant Cleanup ---------- */
+/* ---------- Update Row with Instant Input Sync & Variant Cleanup ---------- */
 async function updateItemRow(productId) {
   const itemDiv = document.getElementById(`cart-item-${productId}`);
   const currency = currencySelect.value || 'NGN';
 
-  // Clean zero-quantity variants before rendering
+  // Clean zero-quantity items
   cart = cart.filter(i => (i.quantity || 0) > 0);
-
   const productVariants = groupVariants(productId);
+
   if (productVariants.length === 0) {
     if (itemDiv) itemDiv.remove();
     const subtotal = computeSubtotal(currency);
@@ -350,20 +350,22 @@ async function updateItemRow(productId) {
   }
 
   const product = await fetchProductData(productId);
-  if (!itemDiv) return renderCart();
-
   const totalQty = totalQuantityByProduct(productId);
   const lineTotal = productVariants.reduce((s, v) =>
     s + (Number((product && product[`price${currency}`]) || v.price || 0) * Number(v.quantity || 0)), 0);
 
+  if (!itemDiv) return renderCart();
+
+  // Update all visible parts
+  itemDiv.querySelector('.price').textContent = formatPrice(lineTotal, currency);
   const variantSummaryText = productVariants.length > 1 || productVariants.some(v => (v.color || v.size))
     ? productVariants.map(v => `${v.color ? v.color + ' / ' : ''}${v.size ? v.size + ' x ' : ''}${v.quantity}`).join(', ')
     : `Quantity: ${totalQty}`;
-
-  itemDiv.querySelector('.price').textContent = formatPrice(lineTotal, currency);
   itemDiv.querySelector('.variant-summary').textContent = variantSummaryText;
 
-  // Rebuild variant rows dynamically (removing any zeros)
+  const mainInput = itemDiv.querySelector('.main-quantity input');
+  if (mainInput) mainInput.value = totalQty;
+
   const variantsContainer = itemDiv.querySelector('.variants-container');
   if (variantsContainer) {
     variantsContainer.innerHTML = productVariants.map(v => `
@@ -459,13 +461,12 @@ function escapeHtml(str) {
 /* ---------- Init ---------- */
 (async function init() {
   cart = mergeCartItems(cart);
-  updateCartCount(); // show instantly on page load
+  updateCartCount(); // instant count on load
   const savedCurrency = localStorage.getItem(CURRENCY_KEY);
   if (savedCurrency) currencySelect.value = savedCurrency;
   await renderCart();
 })();
 </script>
-
 
 </body>
 </html>
