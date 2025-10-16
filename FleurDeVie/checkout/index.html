@@ -73,7 +73,7 @@
     
     /* HERO */
     .hero { position: relative; height:90vh; display:flex; justify-content:center; align-items:center; text-align:center; margin-top:0; overflow:hidden; }
-    .hero::after { content:""; position:absolute; inset:0; background:url('asset/bg21.jpg') center/cover no-repeat; transform:scale(1.1); z-index:-1; border-radius:12px; box-shadow: inset 0 0 0 2000px rgba(17,46,31,0.3); }
+    .hero::after { content:""; position:absolute; inset:0; background:url('../asset/bg21.jpg') center/cover no-repeat; transform:scale(1.1); z-index:-1; border-radius:12px; box-shadow: inset 0 0 0 2000px rgba(17,46,31,0.3); }
     .hero-text { position:relative; display:inline-block; color:#FFD6BA; margin-bottom:12px; animation: shimmer 3s infinite linear; }
     .hero-text h1 { font-family:"Playfair Display", serif; font-size:clamp(36px,5vw,64px); margin-bottom:12px; }
     .hero-text p { font-size:clamp(16px,2vw,24px); max-width:700px; }
@@ -1072,6 +1072,8 @@
     const navMenu = document.getElementById('nav-menu');
     if(hamburgerBtn) hamburgerBtn.addEventListener('click', ()=>{ hamburgerBtn.classList.toggle('open'); if(navMenu) navMenu.classList.toggle('open'); });
 
+    
+
     /* -------------------- INIT -------------------- */
     (async function init(){
       try { if(currencySelect) currencySelect.value = selectedCurrency; } catch(e){}
@@ -1107,26 +1109,16 @@
 
     /* -------------------- small support: mailto link when clicking brand (optional) -------------------- */
     // (No floating support button in original Fleur markup; keep it consistent.)
+    
+    // ----------------- Support Button -----------------
+    const supportBtn = document.getElementById('floatingSupportBtn');
+    supportBtn.addEventListener('click', () => {
+      window.location.href = 'mailto:stonecold.serac@gmail.com?subject=Support%20Request';
+    });
+
+    // ----------------- Footer Year -----------------
+    document.getElementById('year').textContent = new Date().getFullYear();
   </script>
-
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const hamburgerBtn = document.getElementById("hamburger-btn");
-  const navMenu = document.getElementById("nav-menu");
-
-  if (!hamburgerBtn || !navMenu) {
-    console.error("Missing hamburger or nav-menu element");
-    return;
-  }
-
-  hamburgerBtn.addEventListener("click", () => {
-    hamburgerBtn.classList.toggle("open");
-    navMenu.classList.toggle("open");
-  });
-});
-</script>
-
-
 
 <script>
    /*------New header Settings-----*/
