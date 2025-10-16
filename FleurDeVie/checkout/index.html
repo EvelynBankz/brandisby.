@@ -1109,19 +1109,23 @@
     // (No floating support button in original Fleur markup; keep it consistent.)
   </script>
 
- <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const hamburgerBtn = document.getElementById("hamburger-btn");
-    const navMenu = document.getElementById("nav-menu");
-  
-    if (hamburgerBtn && navMenu) {
-      hamburgerBtn.addEventListener("click", () => {
-        hamburgerBtn.classList.toggle("open");
-        navMenu.classList.toggle("open");
-      });
-    }
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const hamburgerBtn = document.getElementById("hamburger-btn");
+  const navMenu = document.getElementById("nav-menu");
+
+  if (!hamburgerBtn || !navMenu) {
+    console.error("Missing hamburger or nav-menu element");
+    return;
+  }
+
+  hamburgerBtn.addEventListener("click", () => {
+    hamburgerBtn.classList.toggle("open");
+    navMenu.classList.toggle("open");
   });
+});
 </script>
+
 
 
 <script>
