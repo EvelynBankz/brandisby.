@@ -399,10 +399,10 @@ function truncateText(text, wordLimit){ return text.split(' ').slice(0,wordLimit
 searchInput.addEventListener('input', loadProducts);
 sortSelect.addEventListener('change', loadProducts);
 
-document.getElementById('hamburger').addEventListener('click', ()=>{
-  document.querySelector('.header-right').classList.toggle('open');
-  document.getElementById('hamburger').classList.toggle('open');
-});
+// hamburger
+const hamburgerBtn = document.getElementById('hamburger-btn');
+const navMenu = document.getElementById('nav-menu');
+if(hamburgerBtn) hamburgerBtn.addEventListener('click', ()=>{ hamburgerBtn.classList.toggle('open'); if(navMenu) navMenu.classList.toggle('open'); });
 
 function handleMobileCart(){ document.querySelector('.mobile-cart').style.display=window.innerWidth<=900?'flex':'none'; }
 window.addEventListener('resize', handleMobileCart);
