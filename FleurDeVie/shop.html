@@ -181,6 +181,12 @@ footer { text-align:center; padding:20px; background:transparent; color:#112e1f;
   </div>
 </section>
 
+ <!-- Floating Chat-Style Support Button -->
+  <button id="floatingSupportBtn" aria-label="Contact Support">
+    <i class="fas fa-headset"></i>
+    <span class="support-tooltip">Support</span>
+  </button>
+
 <!-- FOOTER -->
 <footer>
   <p>© 2025 Fleur De Vie</p>
@@ -384,6 +390,13 @@ window.addEventListener('scroll', () => {
 document.addEventListener('mousemove', (e) => {
   if (e.clientY < 100) header.classList.remove('hidden');
 });
+
+/*-----floating button-----*/
+ const supportBtn = document.getElementById('floatingSupportBtn');
+  supportBtn.addEventListener('click', () => {
+    window.location.href = 'mailto:stonecold.serac@gmail.com?subject=Support%20Request';
+  });
+ 
 </script>
 </body>
 </html>
