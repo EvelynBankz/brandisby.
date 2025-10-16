@@ -175,17 +175,18 @@ const cartCountElem = document.getElementById('cartCount');
 const cartSubtotalElem = document.getElementById('cartSubtotal');
 const checkoutBtn = document.getElementById('checkoutBtn');
 const currencySelect = document.getElementById('currency');
+const currencyWrapper = document.getElementById('currencyWrapper');
 const hamburger = document.getElementById('hamburger');
 const headerRight = document.querySelector('.header-right');
 
 const STORAGE_KEY = 'fleurCart';
 const CURRENCY_KEY = 'fleurCurrency';
 
-/* state */
+/* ---------- State ---------- */
 let cart = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
 let productCache = {}; // cached product docs to avoid refetching
 
-/* Utilities */
+/* ---------- Utilities ---------- */
 function formatPrice(value, currency){
   const localeMap = { USD:'en-US', EUR:'de-DE', GBP:'en-GB', NGN:'en-NG' };
   const minFrac = currency === 'NGN' ? 0 : 2;
@@ -233,11 +234,18 @@ function computeSubtotal(currency){
   return subtotal;
 }
 
-/* RENDER ENTIRE CART */
+/* ---------- Render Entire Cart ---------- */
 async function renderCart(){
   cartGrid.innerHTML = '';
-  if(!cart.length){ cartEmpty.style.display='block'; cartSubtotalElem.textContent=''; checkoutBtn.style.display='none'; updateCartCount(); return; }
-  cartEmpty.style.display='none'; checkoutBtn.style.display='inline-block';
+  if(!cart.length){ 
+    cartEmpty.style.display='block'; 
+    cartSubtotalElem.textContent=''; 
+    checkoutBtn.style.display='none'; 
+    updateCartCount(); 
+    return; 
+  }
+  cartEmpty.style.display='none'; 
+  checkoutBtn.style.display='inline-block';
 
   const currency = currencySelect.value || 'NGN';
   let subtotal = 0;
@@ -298,13 +306,13 @@ async function renderCart(){
   updateCartCount();
 }
 
-/* Update header bubble */
+/* ---------- Update Header Cart Count ---------- */
 function updateCartCount(){
   const totalItems = cart.reduce((sum,i)=>sum+(i.quantity||0),0);
   cartCountElem.textContent = totalItems;
 }
 
-/* persist + targeted update */
+/* ---------- Persist + Targeted Update ---------- */
 function persistAndUpdate(productId){
   cart = cart.filter(i => (i.quantity||0) > 0);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
@@ -312,7 +320,7 @@ function persistAndUpdate(productId){
   else renderCart();
 }
 
-/* Event delegation */
+/* ---------- Event Delegation ---------- */
 cartGrid.addEventListener('click', e=>{
   const target = e.target;
   const pid = target.dataset.id;
@@ -365,50 +373,60 @@ cartGrid.addEventListener('click', e=>{
   }
 });
 
-/* input handling */
+/* ---------- Input Handling ---------- */
 cartGrid.addEventListener('input', e=>{
   const target = e.target;
   if(target.tagName !== 'INPUT') return;
   const id = target.dataset.id; const color = target.dataset.color||''; const size = target.dataset.size||'';
-  const val = parseInt(target.value, 10);
+  let val = parseInt(target.value, 10);
   if(isNaN(val) || val < 0) return;
 
-  const idx = cart.findIndex(i=>i.id===id && (i.color||'')===color && (i.size||'')===size);
-  if(idx!==-1){
-    cart[idx].quantity = val;
-    if(cart[idx].quantity === 0) cart.splice(idx,1);
-    persistAndUpdate(id);
+  if(color || size){
+    const idx = cart.findIndex(i=>i.id===id && (i.color||'')===color && (i.size||'')===size);
+    if(idx!==-1){
+      cart[idx].quantity = val;
+      if(cart[idx].quantity === 0) cart.splice(idx,1);
+      persistAndUpdate(id);
+    }
+  } else {
+    const productVariants = cart.filter(i=>i.id===id);
+    if(productVariants.length){
+      const idx = cart.findIndex(i=>i.id===id);
+      if(idx!==-1){
+        cart[idx].quantity = val;
+        if(cart[idx].quantity === 0) cart.splice(idx,1);
+        persistAndUpdate(id);
+      }
+    }
   }
 });
 
-/* currency change -> full render */
-currencySelect.addEventListener('change', ()=>{
+/* ---------- Currency Change ---------- */
+currencySelect.addEventListener('change', async ()=>{
   localStorage.setItem(CURRENCY_KEY, currencySelect.value);
-  renderCart();
+  await renderCart();
 });
 
-/* Hamburger */
+/* ---------- Hamburger ---------- */
 hamburger.addEventListener('click', ()=>{
   headerRight.classList.toggle('open');
   hamburger.classList.toggle('open');
 });
 
-/* storage sync */
+/* ---------- Storage Sync ---------- */
 window.addEventListener('storage', ()=>{
   cart = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
   cart = mergeCartItems(cart);
   renderCart();
 });
 
-/* escape html */
-function escapeHtml(str){ if(!str && str !== 0) return ""; return String(str).replace(/[&<>"']/g, s => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": "&#39;" }[s])); }
-
-/* init */
+/* ---------- Initialize ---------- */
 (async function init(){
   cart = mergeCartItems(cart);
   await renderCart();
   updateCartCount();
 })();
 </script>
+
 </body>
 </html>
