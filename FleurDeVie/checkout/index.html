@@ -7,32 +7,75 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:"Montserrat",sans-serif;background:#F5E6CC;color:#112e1f;line-height:1.6}
-    a{text-decoration:none;color:inherit}
-
-    /* header */
-    .site-header{background:#112e1f;color:#F5E6CC;display:flex;justify-content:space-between;align-items:center;padding:16px 28px;position:fixed;top:0;left:0;right:0;z-index:1000}
-    .brand-logo{height:60px}
-    .brand-title{font-family:"Playfair Display",serif;font-weight:700;font-size:24px}
-
-    /* nav */
-    .header-right{display:flex;gap:18px;align-items:center}
-    .header-right a{font-weight:500;transition:color .2s}
-    .header-right a:hover{color:#FFD6BA}
-    .cart-count{background:#FFD6BA;color:#112e1f;border-radius:50%;padding:2px 6px;font-weight:600;font-size:12px;margin-left:6px}
-
-    /* hamburger */
-    .hamburger{display:none;background:none;border:none;width:44px;height:40px;cursor:pointer;position:relative;z-index:1300}
-    .hamburger span{display:block;height:2.5px;width:22px;background:#F5E6CC;margin:6px auto;border-radius:2px;transition:all 0.3s ease}
-    .hamburger.open span:nth-child(1){transform:rotate(45deg) translate(5px,5px)}
-    .hamburger.open span:nth-child(2){opacity:0}
-    .hamburger.open span:nth-child(3){transform:rotate(-45deg) translate(5px,-5px)}
-
-    /* hero */
-    .hero{position:relative;height:90vh;display:flex;align-items:center;justify-content:center;margin-top:80px;text-align:center}
-    .hero::after{content:"";position:absolute;inset:0;background:url('../asset/bg17.jpg') center/cover no-repeat;transform:scale(1.08);z-index:-1;border-radius:12px;box-shadow:inset 0 0 0 2000px rgba(17,46,31,0.18)}
-    .hero-text h1{font-family:"Playfair Display",serif;color:#FFD6BA;font-size:clamp(28px,5vw,48px)}
+    /* RESET & BASE */
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: "Montserrat", sans-serif; background: #F5E6CC; color:#112e1f; line-height:1.6; }
+    a { text-decoration:none; color:inherit; }
+    
+    /* HEADER (Luxury Translucent Version) */
+    .site-header {
+      background: rgba(17,46,31,0.9); /* deep brand green, slightly see-through */
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(5px);
+      color: #F5E6CC;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:10px 24px;
+      position:fixed;
+      top:0; left:0; right:0;
+      z-index:1000;
+      height:68px;
+      transition: background 0.3s ease, top 0.4s ease, opacity 0.4s ease;
+    }
+    
+    .site-header.scrolled {
+      background: #112e1f; /* solid brand color after scroll */
+    }
+    
+    .site-header.hidden {
+      opacity: 0;
+      top: -80px;
+      pointer-events: none;
+    }
+    
+    .site-header:hover {
+      background: rgba(17,46,31,0.9);
+    }
+    
+    .header-left { display:flex; align-items:center; gap:10px; }
+    .brand-logo { height:70px; transition:height 0.3s ease; }
+    .brand-title { font-family:"Playfair Display", serif; font-size:22px; font-weight:700; }
+    
+    .header-right { display:flex; gap:20px; align-items:center; }
+    .header-right a {
+      font-weight: 500;
+      color: inherit;
+      position: relative;
+      transition: color 0.3s ease, transform 0.3s ease;
+    }
+    
+    .header-right a:hover {
+      color: #c9e4ff;
+      transform: translateY(-2px);
+    }
+    .cart-count { background:#FFD6BA; color:#112e1f; font-size:12px; font-weight:600; border-radius:50%; padding:2px 6px; margin-left:4px; }
+    
+    .hamburger { display:none; background:none; border:none; cursor:pointer; width:30px; height:24px; position:relative; }
+    .hamburger span { display:block; width:100%; height:3px; background:#F5E6CC; border-radius:2px; position:absolute; left:0; transition:0.3s; }
+    .hamburger span:nth-child(1){ top:0; }
+    .hamburger span:nth-child(2){ top:10px; }
+    .hamburger span:nth-child(3){ top:20px; }
+    .hamburger.open span:nth-child(1){ transform:rotate(45deg); top:10px; }
+    .hamburger.open span:nth-child(2){ opacity:0; }
+    .hamburger.open span:nth-child(3){ transform:rotate(-45deg); top:10px; }
+    
+    /* HERO */
+    .hero { position: relative; height:90vh; display:flex; justify-content:center; align-items:center; text-align:center; margin-top:0; overflow:hidden; }
+    .hero::after { content:""; position:absolute; inset:0; background:url('asset/bg21.jpg') center/cover no-repeat; transform:scale(1.1); z-index:-1; border-radius:12px; box-shadow: inset 0 0 0 2000px rgba(17,46,31,0.3); }
+    .hero-text { position:relative; display:inline-block; color:#FFD6BA; margin-bottom:12px; animation: shimmer 3s infinite linear; }
+    .hero-text h1 { font-family:"Playfair Display", serif; font-size:clamp(36px,5vw,64px); margin-bottom:12px; }
+    .hero-text p { font-size:clamp(16px,2vw,24px); max-width:700px; }
 
     /* checkout grid */
     section.checkout{padding:60px 20px}
@@ -1065,5 +1108,31 @@
       navMenu.classList.toggle('open');
     });
   </script>
+  <script>
+   /*------New header Settings-----*/
+let lastScrollY = window.scrollY;
+const header = document.querySelector('.site-header');
+const hero = document.querySelector('.hero');
+
+window.addEventListener('scroll', () => {
+  const heroBottom = hero.offsetTop + hero.offsetHeight;
+  if (window.scrollY > heroBottom) {
+    if (window.scrollY > lastScrollY) {
+      header.classList.add('hidden');
+    } else {
+      header.classList.remove('hidden');
+      header.classList.add('scrolled');
+    }
+  } else {
+    header.classList.remove('hidden', 'scrolled');
+  }
+  lastScrollY = window.scrollY;
+});
+
+// Show header again on hover when below hero
+document.addEventListener('mousemove', (e) => {
+  if (e.clientY < 100) header.classList.remove('hidden');
+});
+</script>
 </body>
 </html>
