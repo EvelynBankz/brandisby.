@@ -7,9 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* ================= RESET & BASE ================= */
-    <style>
-    /* RESET & BASE */
+   /* RESET & BASE */
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family: "Montserrat", sans-serif; background: #F5E6CC; color:#112e1f; line-height:1.6; }
     a { text-decoration:none; color:inherit; }
@@ -62,7 +60,6 @@
       color: #c9e4ff;
       transform: translateY(-2px);
     }
-    .cart-count { background:#FFD6BA; color:#112e1f; font-size:12px; font-weight:600; border-radius:50%; padding:2px 6px; margin-left:4px; }
     
     .hamburger { display:flex; background:none; border:none; cursor:pointer; width:30px; height:24px; position:relative; }
     .hamburger span { display:block; width:100%; height:3px; background:#F5E6CC; border-radius:2px; position:absolute; left:0; transition:0.3s; }
@@ -75,11 +72,10 @@
     
     /* HERO */
     .hero { position: relative; height:90vh; display:flex; justify-content:center; align-items:center; text-align:center; margin-top:0; overflow:hidden; }
-    .hero::after { content:""; position:absolute; inset:0; background:url("asset/bg25.jpg") center/cover no-repeat; transform:scale(1.1); z-index:-1; border-radius:12px; box-shadow: inset 0 0 0 2000px rgba(17,46,31,0.3); }
+    .hero::after { content:""; position:absolute; inset:0; background:url('../asset/bg25.jpg') center/cover no-repeat; transform:scale(1.1); z-index:-1; border-radius:12px; box-shadow: inset 0 0 0 2000px rgba(17,46,31,0.3); }
     .hero-text { position:relative; display:inline-block; color:#FFD6BA; margin-bottom:12px; animation: shimmer 3s infinite linear; }
     .hero-text h1 { font-family:"Playfair Display", serif; font-size:clamp(36px,5vw,64px); margin-bottom:12px; }
     .hero-text p { font-size:clamp(16px,2vw,24px); max-width:700px; }
-
 
     @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
 
@@ -164,14 +160,6 @@
 
 
     /* ================= RESPONSIVE ================= */
-@media(max-width:900px){ 
-  .header-right { 
-    gap:12px; 
-    flex-wrap: wrap; 
-    justify-content:center; 
-  } 
-}
-
  @media (max-width:900px) {
       .header-right {
         position: absolute;
@@ -197,13 +185,20 @@
       }
     }
 
-@media(max-width:420px){ 
-  .brand-logo { height:clamp(40px,15vw,80px); } 
-  .brand-title{ font-size: clamp(16px,7vw,22px); } 
-  .hero-about { 
-    height: 35vh; /* further reduce for very small screens */
-  }
-}
+    @media(max-width:420px){
+      .brand-logo{height:clamp(40px,15vw,80px)}
+      .brand-title{font-size:clamp(16px,7vw,22px)}
+      .hero{height:40vh}
+    }
+
+
+    @media(max-width:420px){ 
+      .brand-logo { height:clamp(40px,15vw,80px); } 
+      .brand-title{ font-size: clamp(16px,7vw,22px); } 
+      .hero-about { 
+        height: 35vh; /* further reduce for very small screens */
+      }
+    }
 
 /* ---------------- Floating Support Button + Tooltip ---------------- */
   #floatingSupportBtn {
@@ -255,7 +250,6 @@
     0%,100%{ box-shadow:0 8px 30px rgba(212,245,105,1);}
     50%{ box-shadow:0 12px 36px rgba(212,245,105,0.6);}
   }
-
   
   </style>
 </head>
@@ -267,14 +261,17 @@
       <img src="asset/logo.png" alt="Fleur De Vie Logo" class="brand-logo">
       <div class="brand-title">Fleur De Vie</div>
     </div>
-    <nav class="header-right">
-      <a href="index.html">Home</a>
-      <a href="shop.html">Shop</a>
-      <a href="#faq">FAQ</a>
-      <a href="contact.html">Contact</a>
-      <a href="customization.html">Customize</a>
+
+    <button class="hamburger" id="hamburger-btn">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="header-right" id="nav-menu">
+      <a href="../index.html">Home</a>
+      <a href="../about.html">About</a>
+      <a href="../shop.html">Shop</a>
+      <a href="../cart.html">Cart <span class="cart-count" id="cartCount">0</span></a>
+      <a href="../contact.html">Contact</a>
     </nav>
-    <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
   </header>
 
   <!-- HERO -->
@@ -390,11 +387,10 @@
     </div>
   </section>
 
-<!-- Floating support button -->
-<button id="floatingSupportBtn" aria-label="Support">
-  <i class="fas fa-headset"></i>
-</button>
-
+  <!-- Floating support button -->
+  <button id="floatingSupportBtn" aria-label="Support">
+    <i class="fas fa-headset"></i>
+  </button>
 
   <!-- FOOTER -->
   <footer class="site-footer">
@@ -403,21 +399,10 @@
 
   <!-- SCRIPTS -->
   <script>
-  // HAMBURGER TOGGLE
-  const hamburger = document.getElementById('hamburger');
-  const headerRight = document.querySelector('.header-right');
-  if (hamburger && headerRight) {
-    hamburger.addEventListener('click', () => {
-      headerRight.classList.toggle('open');
-      hamburger.classList.toggle('open');
-    });
-  }
-
-// // hamburger
-//   const hamburgerBtn = document.getElementById('hamburger-btn');
-//   const navMenu = document.getElementById('nav-menu');
-//   if(hamburgerBtn) hamburgerBtn.addEventListener('click', ()=>{ hamburgerBtn.classList.toggle('open'); if(navMenu) navMenu.classList.toggle('open'); });
-
+ // hamburger
+    const hamburgerBtn = document.getElementById('hamburger-btn');
+    const navMenu = document.getElementById('nav-menu');
+    if(hamburgerBtn) hamburgerBtn.addEventListener('click', ()=>{ hamburgerBtn.classList.toggle('open'); if(navMenu) navMenu.classList.toggle('open'); });
 
   // FAQ ACCORDION
   document.querySelectorAll('.faq-item').forEach(item => {
@@ -495,7 +480,7 @@ supportBtn?.addEventListener('click', () => {
 
     
 // ----------------- Footer Year -----------------
-    document.getElementById('year').textContent = new Date().getFullYear();
+  document.getElementById('year').textContent = new Date().getFullYear();
 
 /*------New header Settings-----*/
 let lastScrollY = window.scrollY;
@@ -521,5 +506,6 @@ window.addEventListener('scroll', () => {
 document.addEventListener('mousemove', (e) => {
   if (e.clientY < 100) header.classList.remove('hidden');
 });
+
 
 </script>
