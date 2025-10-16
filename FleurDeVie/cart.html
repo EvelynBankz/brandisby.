@@ -7,10 +7,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-/* RESET & HEADER */
+/* ---------------- RESET & BASE ---------------- */
 * { margin:0; padding:0; box-sizing:border-box; }
 body { font-family: "Montserrat", sans-serif; background: #F5E6CC; color:#112e1f; line-height:1.6; }
 a { text-decoration:none; color:inherit; }
+button { cursor:pointer; }
+
+/* ---------------- HEADER ---------------- */
 .site-header { background: #112e1f; color: #F5E6CC; display:flex; justify-content:space-between; align-items:center; padding:16px 28px; position:fixed; top:0; left:0; right:0; z-index:1000; }
 .header-left { display:flex; align-items:center; gap:12px; }
 .brand-logo { height:60px; }
@@ -28,14 +31,14 @@ a { text-decoration:none; color:inherit; }
 .hamburger.open span:nth-child(2){ opacity:0; }
 .hamburger.open span:nth-child(3){ transform:rotate(-45deg); top:10px; }
 
-/* HERO */
+/* ---------------- HERO ---------------- */
 .hero { position: relative; height:90vh; display:flex; justify-content:center; align-items:center; text-align:center; margin-top:80px; overflow:hidden; }
 .hero::after { content:""; position:absolute; inset:0; background:url('asset/bg21.jpg') center/cover no-repeat; transform:scale(1.1); z-index:-1; border-radius:12px; box-shadow: inset 0 0 0 2000px rgba(17,46,31,0.3); }
 .hero-text { position:relative; display:inline-block; color:#FFD6BA; margin-bottom:12px; animation: shimmer 3s infinite linear; }
 .hero-text h1 { font-family:"Playfair Display", serif; font-size:clamp(36px,5vw,64px); margin-bottom:12px; }
 .hero-text p { font-size:clamp(16px,2vw,24px); max-width:700px; }
 
-/* CART */
+/* ---------------- CART ---------------- */
 section.cart { padding:60px 20px; background:#F5E6CC; }
 .container { max-width:1100px; margin:auto; }
 h2 { text-align:center; font-size:24px; font-family:"Playfair Display", serif; margin-bottom:20px; }
@@ -70,7 +73,6 @@ h2 { text-align:center; font-size:24px; font-family:"Playfair Display", serif; m
   text-align: center;
   align-self: flex-start;
 }
-
 .variants-container { display:none; flex-direction:column; gap:8px; margin-top:8px; padding-left:8px; border-left:2px solid #112e1f; }
 
 /* Cart Subtotal */
@@ -82,10 +84,10 @@ h2 { text-align:center; font-size:24px; font-family:"Playfair Display", serif; m
 .cart-buttons .continue-btn { background:#112e1f; color:#F5E6CC; }
 .cart-buttons .checkout-btn { background:#FFD6BA; color:#112e1f; }
 
-/* FOOTER */
+/* ---------------- FOOTER ---------------- */
 footer { text-align:center; padding:20px; background:#112e1f; color:#F5E6CC; margin-top:60px; }
 
-/* MOBILE */
+/* ---------------- MOBILE ---------------- */
 @media (max-width:600px){
   .header-right { display:none; flex-direction:column; background:#112e1f; position:absolute; top:70px; right:0; width:200px; padding:20px; }
   .header-right.open { display:flex; }
@@ -151,6 +153,7 @@ footer { text-align:center; padding:20px; background:#112e1f; color:#F5E6CC; mar
 </footer>
 
 <script type="module">
+/* ---------- Firebase ---------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
 import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
@@ -165,16 +168,24 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+/* ---------- DOM refs ---------- */
 const cartGrid = document.getElementById('cartGrid');
 const cartEmpty = document.getElementById('cartEmpty');
 const cartCountElem = document.getElementById('cartCount');
 const cartSubtotalElem = document.getElementById('cartSubtotal');
 const checkoutBtn = document.getElementById('checkoutBtn');
 const currencySelect = document.getElementById('currency');
+const hamburger = document.getElementById('hamburger');
+const headerRight = document.querySelector('.header-right');
 
-let cart = JSON.parse(localStorage.getItem('cart')) || [];
-if(localStorage.getItem('currency')) currencySelect.value = localStorage.getItem('currency');
+const STORAGE_KEY = 'fleurCart';
+const CURRENCY_KEY = 'fleurCurrency';
 
+/* state */
+let cart = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+let productCache = {}; // cached product docs to avoid refetching
+
+/* Utilities */
 function formatPrice(value, currency){
   const localeMap = { USD:'en-US', EUR:'de-DE', GBP:'en-GB', NGN:'en-NG' };
   const minFrac = currency === 'NGN' ? 0 : 2;
@@ -183,7 +194,7 @@ function formatPrice(value, currency){
 
 function mergeCartItems(cartArray){
   const merged = [];
-  cartArray.forEach(item=>{
+  (cartArray || []).forEach(item=>{
     const idx = merged.findIndex(i => i.id === item.id && (i.color||'')=== (item.color||'') && (i.size||'')=== (item.size||''));
     if(idx===-1) merged.push({...item});
     else merged[idx].quantity = (merged[idx].quantity||0) + (item.quantity||0);
@@ -201,16 +212,31 @@ function groupVariants(productId){
 
 async function fetchProductData(productId){
   try{
+    if(productCache[productId]) return productCache[productId];
     const dref = doc(db,"brands","fleurdevie","products",productId);
     const snap = await getDoc(dref);
-    if(snap.exists()) return snap.data();
+    if(snap.exists()){
+      productCache[productId] = snap.data();
+      return productCache[productId];
+    }
   }catch(e){ console.warn("Fetch product failed", productId, e); }
   return null;
 }
 
+function computeSubtotal(currency){
+  let subtotal = 0;
+  for(const it of cart){
+    const product = productCache[it.id];
+    const price = (product && product[`price${currency}`]) || it.price || 0;
+    subtotal += Number(price || 0) * Number(it.quantity || 0);
+  }
+  return subtotal;
+}
+
+/* RENDER ENTIRE CART */
 async function renderCart(){
   cartGrid.innerHTML = '';
-  if(!cart.length){ cartEmpty.style.display='block'; cartSubtotalElem.textContent=''; checkoutBtn.style.display='none'; return; }
+  if(!cart.length){ cartEmpty.style.display='block'; cartSubtotalElem.textContent=''; checkoutBtn.style.display='none'; updateCartCount(); return; }
   cartEmpty.style.display='none'; checkoutBtn.style.display='inline-block';
 
   const currency = currencySelect.value || 'NGN';
@@ -221,116 +247,168 @@ async function renderCart(){
     const product = await fetchProductData(pid);
     const variants = groupVariants(pid);
     const totalQty = totalQuantityByProduct(pid);
-    let thumbnail = product?.images?.[0] || product?.imageUrl || 'placeholder.jpg';
-    let lineTotal = variants.reduce((sum,v)=>sum+v.quantity*((product && product[`price${currency}`])||v.price||0),0);
-    subtotal+=lineTotal;
+    let thumbnail = (product && (product.images && product.images[0])) || product?.imageUrl || 'asset/placeholder.jpg';
+    let lineTotal = variants.reduce((sum,v)=>sum + (Number((product && product[`price${currency}`]) || v.price || 0) * Number(v.quantity || 0)),0);
+    subtotal += lineTotal;
 
-    const div = document.createElement('div'); div.className='cart-item';
-    div.innerHTML=`
+    const hasVariantMeta = variants.length > 1 || variants.some(v=> (v.color && v.color.trim()!=='') || (v.size && v.size.trim()!=='' ));
+    const showButton = hasVariantMeta;
+
+    const itemDiv = document.createElement('div');
+    itemDiv.className = 'cart-item';
+    itemDiv.id = `cart-item-${pid}`;
+    itemDiv.dataset.productId = pid;
+
+    const variantSummaryText = hasVariantMeta ? variants.map(v=>`${v.color? v.color+' / ':''}${v.size? v.size+' x ':''}${v.quantity}`).join(', ') : `Quantity: ${totalQty}`;
+
+    itemDiv.innerHTML = `
       <div class="cart-item-header">
-        <img src="${thumbnail}" alt="${product?.name||''}">
+        <img src="${thumbnail}" alt="${(product && product.name) ? escapeHtml(product.name) : 'Product'}">
         <div class="cart-item-details">
-          <h3>${product?.name||''}</h3>
-          <div class="variant-summary">Total Quantity: ${totalQty}</div>
+          <h3 title="${(product && product.name) ? escapeHtml(product.name) : 'Product'}">${(product && product.name) ? escapeHtml(product.name) : 'Product'}</h3>
+          <div class="variant-summary">${variantSummaryText}</div>
           <div class="price">${formatPrice(lineTotal, currency)}</div>
-          ${variants.length>1?'<button class="show-variants-btn">Show Choices</button>':''}
-          <div class="variants-container"></div>
+          <div class="quantity-controls main-quantity" ${hasVariantMeta ? 'style="display:flex;"' : ''}>
+            <button class="qty-minus" data-id="${pid}">-</button>
+            <input type="number" min="0" value="${totalQty}" data-id="${pid}">
+            <button class="qty-plus" data-id="${pid}">+</button>
+          </div>
+          ${showButton ? '<button class="show-variants-btn">Show Choices</button>' : ''}
+          <div class="variants-container">${variants.map(v=>`<div class="variant-row" data-id="${v.id}" data-color="${(v.color||'')}" data-size="${(v.size||'')}">
+                <div class="variant-meta">${v.color? v.color+' / ':''}${v.size? v.size+' x ':''}${v.quantity}</div>
+                <div class="quantity-controls variant-controls">
+                  <button class="v-minus" data-id="${v.id}" data-color="${(v.color||'')}" data-size="${(v.size||'')}">-</button>
+                  <input type="number" min="0" value="${v.quantity}" data-id="${v.id}" data-color="${(v.color||'')}" data-size="${(v.size||'')}">
+                  <button class="v-plus" data-id="${v.id}" data-color="${(v.color||'')}" data-size="${(v.size||'')}">+</button>
+                </div>
+              </div>`).join('')}</div>
         </div>
       </div>
     `;
+    cartGrid.appendChild(itemDiv);
 
-    const variantsContainer = div.querySelector('.variants-container');
-    if(variants.length>1){
-      variants.forEach(v=>{
-        const vDiv = document.createElement('div'); 
-        vDiv.className='quantity-controls';
-        vDiv.style.flexWrap='wrap';
-        vDiv.innerHTML=`
-          ${v.color?`<span>Color:${v.color}</span>`:''}
-          ${v.size?`<span>Size:${v.size}</span>`:''}
-          <button class="minus" data-id="${v.id}" data-color="${v.color||''}" data-size="${v.size||''}">–</button>
-          <input type="number" value="${v.quantity}" data-id="${v.id}" data-color="${v.color||''}" data-size="${v.size||''}">
-          <button class="plus" data-id="${v.id}" data-color="${v.color||''}" data-size="${v.size||''}">+</button>
-        `;
-        variantsContainer.appendChild(vDiv);
-      });
-    } else if(variants.length===1){
-      const v = variants[0];
-      const qDiv = div.querySelector('.cart-item-details');
-      qDiv.innerHTML+=`
-        <div class="quantity-controls">
-          <button class="minus" data-id="${v.id}" data-color="${v.color||''}" data-size="${v.size||''}">–</button>
-          <input type="number" value="${v.quantity}" data-id="${v.id}" data-color="${v.color||''}" data-size="${v.size||''}">
-          <button class="plus" data-id="${v.id}" data-color="${v.color||''}" data-size="${v.size||''}">+</button>
-        </div>
-      `;
+    if(hasVariantMeta){
+      const mainQtyEl = itemDiv.querySelector('.main-quantity');
+      if(mainQtyEl) mainQtyEl.style.display = 'none';
     }
-
-    cartGrid.appendChild(div);
   }
-  cartSubtotalElem.textContent = `Subtotal: ${formatPrice(subtotal, currency)}`;
 
-  // Events
-  cartGrid.querySelectorAll('.show-variants-btn').forEach(btn=>{
-    btn.addEventListener('click', ()=>{ 
-      const container = btn.nextElementSibling; 
-      container.style.display = container.style.display==='flex'?'none':'flex'; 
-    });
-  });
-
-  cartGrid.querySelectorAll('.plus').forEach(btn=>{
-    btn.addEventListener('click', async ()=>{
-      const id=btn.dataset.id, color=btn.dataset.color||'', size=btn.dataset.size||'';
-      const idx = cart.findIndex(i=>i.id===id && (i.color||'')===color && (i.size||'')===size);
-      if(idx!==-1){ cart[idx].quantity+=1; localStorage.setItem('cart', JSON.stringify(cart)); renderCart(); updateCartCount(); }
-    });
-  });
-  cartGrid.querySelectorAll('.minus').forEach(btn=>{
-    btn.addEventListener('click', async ()=>{
-      const id=btn.dataset.id, color=btn.dataset.color||'', size=btn.dataset.size||'';
-      const idx = cart.findIndex(i=>i.id===id && (i.color||'')===color && (i.size||'')===size);
-      if(idx!==-1){
-        const itemDiv = btn.closest('.cart-item');
-        itemDiv.style.opacity='0';
-        itemDiv.style.transform='translateX(-50px)';
-        setTimeout(()=>{
-          cart[idx].quantity-=1;
-          if(cart[idx].quantity<=0) cart.splice(idx,1);
-          localStorage.setItem('cart', JSON.stringify(cart)); 
-          renderCart(); 
-          updateCartCount();
-        }, 300);
-      }
-    });
-  });
-  cartGrid.querySelectorAll('input[type=number]').forEach(input=>{
-    input.addEventListener('input', ()=>{ 
-      let val=parseInt(input.value,10); if(isNaN(val)||val<0) val=0;
-      const id=input.dataset.id, color=input.dataset.color||'', size=input.dataset.size||'';
-      const idx = cart.findIndex(i=>i.id===id && (i.color||'')===color && (i.size||'')===size);
-      if(idx!==-1){ cart[idx].quantity=val; if(val===0) cart.splice(idx,1); localStorage.setItem('cart', JSON.stringify(cart)); renderCart(); updateCartCount();}
-    });
-  });
+  cartSubtotalElem.textContent = 'Subtotal: ' + formatPrice(subtotal, currency);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
+  updateCartCount();
 }
 
+/* Update header bubble */
 function updateCartCount(){
-  const total = cart.reduce((sum,i)=>sum+(i.quantity||0),0);
-  cartCountElem.textContent=total;
+  const totalItems = cart.reduce((sum,i)=>sum+(i.quantity||0),0);
+  cartCountElem.textContent = totalItems;
 }
 
+/* persist + targeted update */
+function persistAndUpdate(productId){
+  cart = cart.filter(i => (i.quantity||0) > 0);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
+  if(productId) renderCart();
+  else renderCart();
+}
+
+/* Event delegation */
+cartGrid.addEventListener('click', e=>{
+  const target = e.target;
+  const pid = target.dataset.id;
+
+  if(target.classList.contains('qty-plus')){
+    const productVariants = cart.filter(i=>i.id===pid);
+    if(productVariants.length===0) return;
+    productVariants[0].quantity = (productVariants[0].quantity||0) + 1;
+    persistAndUpdate(pid);
+    return;
+  }
+
+  if(target.classList.contains('qty-minus')){
+    const productVariants = cart.filter(i=>i.id===pid);
+    if(productVariants.length===0) return;
+    const idx = cart.findIndex(i => i.id===pid && (i.quantity||0)>0);
+    if(idx!==-1){
+      cart[idx].quantity = (cart[idx].quantity||0) - 1;
+      if(cart[idx].quantity <= 0) cart.splice(idx,1);
+      persistAndUpdate(pid);
+    }
+    return;
+  }
+
+  if(target.classList.contains('v-plus')){
+    const id = target.dataset.id; const color = target.dataset.color||''; const size = target.dataset.size||'';
+    const idx = cart.findIndex(i=>i.id===id && (i.color||'')===color && (i.size||'')===size);
+    if(idx!==-1){ cart[idx].quantity = (cart[idx].quantity||0) + 1; persistAndUpdate(id); }
+    return;
+  }
+
+  if(target.classList.contains('v-minus')){
+    const id = target.dataset.id; const color = target.dataset.color||''; const size = target.dataset.size||'';
+    const idx = cart.findIndex(i=>i.id===id && (i.color||'')===color && (i.size||'')===size);
+    if(idx!==-1){
+      cart[idx].quantity = (cart[idx].quantity||0) - 1;
+      if(cart[idx].quantity <= 0) cart.splice(idx,1);
+      persistAndUpdate(id);
+    }
+    return;
+  }
+
+  if(target.classList.contains('show-variants-btn')){
+    const container = target.nextElementSibling;
+    if(!container) return;
+    const isOpen = container.style.display === 'flex';
+    container.style.display = isOpen ? 'none' : 'flex';
+    target.textContent = isOpen ? 'Show Choices' : 'Hide Choices';
+    return;
+  }
+});
+
+/* input handling */
+cartGrid.addEventListener('input', e=>{
+  const target = e.target;
+  if(target.tagName !== 'INPUT') return;
+  const id = target.dataset.id; const color = target.dataset.color||''; const size = target.dataset.size||'';
+  const val = parseInt(target.value, 10);
+  if(isNaN(val) || val < 0) return;
+
+  const idx = cart.findIndex(i=>i.id===id && (i.color||'')===color && (i.size||'')===size);
+  if(idx!==-1){
+    cart[idx].quantity = val;
+    if(cart[idx].quantity === 0) cart.splice(idx,1);
+    persistAndUpdate(id);
+  }
+});
+
+/* currency change -> full render */
 currencySelect.addEventListener('change', ()=>{
-  localStorage.setItem('currency', currencySelect.value);
+  localStorage.setItem(CURRENCY_KEY, currencySelect.value);
   renderCart();
 });
 
-document.getElementById('hamburger').addEventListener('click', ()=>{
-  document.querySelector('.header-right').classList.toggle('open');
-  document.getElementById('hamburger').classList.toggle('open');
+/* Hamburger */
+hamburger.addEventListener('click', ()=>{
+  headerRight.classList.toggle('open');
+  hamburger.classList.toggle('open');
 });
 
-(async function init(){ cart=mergeCartItems(cart); await renderCart(); updateCartCount(); })();
-window.addEventListener('storage', ()=>{ cart=JSON.parse(localStorage.getItem('cart'))||[]; cart=mergeCartItems(cart); renderCart(); updateCartCount(); });
+/* storage sync */
+window.addEventListener('storage', ()=>{
+  cart = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+  cart = mergeCartItems(cart);
+  renderCart();
+});
 
+/* escape html */
+function escapeHtml(str){ if(!str && str !== 0) return ""; return String(str).replace(/[&<>"']/g, s => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": "&#39;" }[s])); }
+
+/* init */
+(async function init(){
+  cart = mergeCartItems(cart);
+  await renderCart();
+  updateCartCount();
+})();
 </script>
 </body>
 </html>
