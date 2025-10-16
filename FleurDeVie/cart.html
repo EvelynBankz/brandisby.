@@ -7,13 +7,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-/* RESET & GLOBAL */
+/* RESET & HEADER */
 * { margin:0; padding:0; box-sizing:border-box; }
 body { font-family: "Montserrat", sans-serif; background: #F5E6CC; color:#112e1f; line-height:1.6; }
 a { text-decoration:none; color:inherit; }
-img { display:block; max-width:100%; }
-
-/* HEADER */
 .site-header { background: #112e1f; color: #F5E6CC; display:flex; justify-content:space-between; align-items:center; padding:16px 28px; position:fixed; top:0; left:0; right:0; z-index:1000; }
 .header-left { display:flex; align-items:center; gap:12px; }
 .brand-logo { height:60px; }
@@ -273,6 +270,7 @@ async function renderCart(){
   }
   cartSubtotalElem.textContent = `Subtotal: ${formatPrice(subtotal, currency)}`;
 
+  // Events
   cartGrid.querySelectorAll('.show-variants-btn').forEach(btn=>{
     btn.addEventListener('click', ()=>{ 
       const container = btn.nextElementSibling; 
