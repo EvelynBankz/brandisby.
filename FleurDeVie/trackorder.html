@@ -74,24 +74,24 @@
 /* Ensure hamburger button isn't affected by general button rules */
 .hamburger {
   all: unset; /* remove inherited button styles */
-  width: 28px;
-  height: 20px;
+  width: 30px;
+  height: 24px;
   display: none;
   flex-direction: column;
   justify-content: space-between;
   cursor: pointer;
-  z-index: 1200;
-   
+  background:none; border:none; cursor:pointer;
 }
 
 .hamburger span {
   display: block;
   height: 3px;
   width: 100%;
-  background: #c9e4ff;
+  background:#F5E6CC;
   border-radius: 2px;
   transition: all 0.3s ease;
   position: absolute;
+  left:0; 
 }
   
  .hamburger span:nth-child(1){ top:0; }
