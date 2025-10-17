@@ -137,42 +137,34 @@ footer { text-align:center; padding:20px; background:transparent; color:#112e1f;
   }
 
   /* --- Hover-reveal back button --- */
-  .mobile-actions {
-    display: flex;
-    position: fixed;
-    bottom: 18px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 92%;
-    max-width: 540px;
-    z-index: 999;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.4s ease;
-    pointer-events: none; /* prevent accidental taps when invisible */
-  }
+  /* add to your stylesheet (mobile rules) */
+.mobile-actions {
+  display:flex;
+  position:fixed;
+  bottom:18px;
+  left:50%;
+  transform:translateX(-50%);
+  width:92%;
+  max-width:540px;
+  z-index:999;
+  justify-content:center;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity 0.28s ease;
+}
 
-  /* Show only when hovered near it */
-  .mobile-actions:hover {
-    opacity: 1;
-    pointer-events: auto;
-  }
+/* visible state toggled by JS */
+.mobile-actions.visible {
+  opacity:1;
+  pointer-events:auto;
+}
 
-  .mobile-actions .back-btn {
-    background: #112e1f;
-    color: #F5E6CC;
-    border: none;
-    border-radius: 8px;
-    padding: 10px 18px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.3s ease, transform 0.3s ease;
-  }
-
-  .mobile-actions .back-btn:hover {
-    background: #0a1d14;
-    transform: translateY(-2px);
-  }
+/* smaller button sizing when visible */
+.mobile-actions .back-btn {
+  padding:8px 12px;
+  font-size:0.92rem;
+  min-width:120px;
+  border-radius:8px;
 }
 
 
@@ -551,26 +543,62 @@ supportBtn?.addEventListener('click', () => {
 </script>
 
  <script>
-document.addEventListener("DOMContentLoaded", () => {
-  const backBtn = document.querySelector(".mobile-actions");
-  if (!backBtn) return;
+(function(){
+  const mob = document.querySelector('.mobile-actions');
+  if(!mob) return;
+  let hideTimer = null;
+  const AUTO_HIDE_MS = 3000; // hide after inactivity
 
-  // Function to check scroll position
-  function handleScroll() {
-    const scrollY = window.scrollY + window.innerHeight;
-    const docHeight = document.documentElement.scrollHeight;
+  function clearHideTimer(){ if(hideTimer){ clearTimeout(hideTimer); hideTimer = null; } }
+  function scheduleHide(){ clearHideTimer(); hideTimer = setTimeout(()=> mob.classList.remove('visible'), AUTO_HIDE_MS); }
 
-    // Fade in when near bottom (last 20% of page)
-    if (scrollY >= docHeight * 0.8) {
-      backBtn.style.opacity = "1";
-    } else {
-      backBtn.style.opacity = "0";
-    }
+  function showNow(){
+    mob.classList.add('visible');
+    scheduleHide();
+  }
+  function hideNow(){
+    mob.classList.remove('visible');
+    clearHideTimer();
   }
 
-  window.addEventListener("scroll", handleScroll);
-});
+  // Desktop / pointer devices: show when pointer is near bottom edge
+  window.addEventListener('pointermove', (e) => {
+    // prefer mouse/pen; touch handled separately
+    if(e.pointerType === 'mouse' || e.pointerType === 'pen'){
+      const distFromBottom = window.innerHeight - e.clientY;
+      if(distFromBottom <= 80) showNow();
+    }
+  }, { passive: true });
+
+  // Hover over the element keeps it visible
+  mob.addEventListener('pointerenter', showNow);
+  mob.addEventListener('pointerleave', scheduleHide);
+
+  // Touch devices: show on touchstart near bottom
+  window.addEventListener('touchstart', (ev) => {
+    const t = ev.touches && ev.touches[0];
+    if(!t) return;
+    const distFromBottom = window.innerHeight - t.clientY;
+    if(distFromBottom <= 80) {
+      showNow();
+    } else {
+      // If already visible and user touches outside -> hide
+      if(mob.classList.contains('visible') && !mob.contains(ev.target)) hideNow();
+    }
+  }, { passive: true });
+
+  // If user taps anywhere outside while visible, hide
+  document.addEventListener('touchstart', (ev) => {
+    if(!mob.classList.contains('visible')) return;
+    if(!mob.contains(ev.target)) hideNow();
+  }, { passive: true });
+
+  // Also allow keyboard showing (optional): pressing "b" toggles for testing
+  document.addEventListener('keydown', (e) => { if(e.key === 'b') { mob.classList.toggle('visible'); if(mob.classList.contains('visible')) scheduleHide(); } });
+
+})();
 </script>
+
 
 </body>
 </html>
