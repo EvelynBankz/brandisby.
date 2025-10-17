@@ -196,6 +196,8 @@
     closeBtn.addEventListener('click',()=>{overlay.classList.remove('open');ham.classList.remove('is-active');});
     overlay.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{overlay.classList.remove('open');ham.classList.remove('is-active');}));
   
+    // ----------------- Footer Year -----------------
+    document.getElementById('year').textContent = new Date().getFullYear();
   
   </script>
 </body>
