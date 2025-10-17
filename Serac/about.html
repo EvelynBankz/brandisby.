@@ -160,6 +160,7 @@
       #vision .container, #affiliate .container, #partnerships .container { flex-direction:column; text-align:center; }
       #vision img, #affiliate img, #partnerships img { width:100%; max-width:100%; }
       #vision .text, #affiliate .text, #partnerships .text { flex:1 1 100%; }
+    
     }
     @media(max-width:600px){
       .header-right { 
@@ -168,6 +169,7 @@
       .header-right.open { display: flex; }
       .hamburger { display: block; }
       section{ padding:70px 20px; }
+      .hero-about {height: 40vh; }
     }
     @media(max-width:420px){
       .brand-logo { height:clamp(60px,15vw,110px); }
@@ -308,12 +310,53 @@
 
   <!-- SCRIPTS -->
   <script>
-    // HEADER SCROLL EFFECT
-    const siteHeader = document.getElementById('siteHeader');
-    window.addEventListener('scroll', () => {
-      if(window.scrollY > 50){ siteHeader.classList.add('scrolled'); }
-      else { siteHeader.classList.remove('scrolled'); }
-    });
+   // === HEADER HIDE/SHOW AFTER HERO ===
+const siteHeader = document.getElementById('siteHeader');
+let lastScrollY = window.scrollY;
+let isHidden = false;
+const heroHeight = document.querySelector('.hero-about')?.offsetHeight || 500;
+
+function handleScroll() {
+  const currentY = window.scrollY;
+
+  // Apply scrolled styling after leaving hero
+  if (currentY > 50) siteHeader.classList.add('scrolled');
+  else siteHeader.classList.remove('scrolled');
+
+  // Hide header after hero
+  if (currentY > heroHeight - 80) {
+    if (currentY > lastScrollY && !isHidden) {
+      siteHeader.style.top = "-90px";
+      siteHeader.style.opacity = "0";
+      siteHeader.style.pointerEvents = "none";
+      isHidden = true;
+    } else if (currentY < lastScrollY && isHidden) {
+      siteHeader.style.top = "0";
+      siteHeader.style.opacity = "1";
+      siteHeader.style.pointerEvents = "auto";
+      isHidden = false;
+    }
+  } else {
+    siteHeader.style.top = "0";
+    siteHeader.style.opacity = "1";
+    siteHeader.style.pointerEvents = "auto";
+    isHidden = false;
+  }
+
+  lastScrollY = currentY;
+}
+
+window.addEventListener('scroll', handleScroll, { passive: true });
+
+// Show header when hovering near top
+document.addEventListener('mousemove', e => {
+  if (e.clientY < 100 && isHidden) {
+    siteHeader.style.top = "0";
+    siteHeader.style.opacity = "1";
+    siteHeader.style.pointerEvents = "auto";
+    isHidden = false;
+  }
+});
 
     // HAMBURGER TOGGLE
     const hamburger = document.getElementById('hamburger');
