@@ -451,11 +451,13 @@ plusBtn.addEventListener('click', ()=> {
 minusBtn.addEventListener('click', ()=> { removeFromCart(productId); });
 
    
-// window.addEventListener('scroll', () => {
-// const header = document.querySelector('.site-header');
-// if(!header) return;
-// if(window.scrollY > 30) header.classList.add('scrolled'); else header.classList.remove('scrolled');
-// });
+window.addEventListener('scroll', () => {
+const header = document.querySelector('.site-header');
+if(!header) return;
+if(window.scrollY > 30) header.classList.add('scrolled'); else header.classList.remove('scrolled');
+});
+
+
 
    
 // hamburger
@@ -479,30 +481,30 @@ loadProduct();
 document.getElementById('year').textContent = new Date().getFullYear();
   
 
-/*------New header Settings-----*/
-let lastScrollY = window.scrollY;
-const header = document.querySelector('.site-header');
-const hero = document.querySelector('.hero');
+// /*------New header Settings-----*/
+// let lastScrollY = window.scrollY;
+// const header = document.querySelector('.site-header');
+// const hero = document.querySelector('.hero');
 
-window.addEventListener('scroll', () => {
-  const heroBottom = hero.offsetTop + hero.offsetHeight;
-  if (window.scrollY > heroBottom) {
-    if (window.scrollY > lastScrollY) {
-      header.classList.add('hidden');
-    } else {
-      header.classList.remove('hidden');
-      header.classList.add('scrolled');
-    }
-  } else {
-    header.classList.remove('hidden', 'scrolled');
-  }
-  lastScrollY = window.scrollY;
-});
+// window.addEventListener('scroll', () => {
+//   const heroBottom = hero.offsetTop + hero.offsetHeight;
+//   if (window.scrollY > heroBottom) {
+//     if (window.scrollY > lastScrollY) {
+//       header.classList.add('hidden');
+//     } else {
+//       header.classList.remove('hidden');
+//       header.classList.add('scrolled');
+//     }
+//   } else {
+//     header.classList.remove('hidden', 'scrolled');
+//   }
+//   lastScrollY = window.scrollY;
+// });
 
-// Show header again on hover when below hero
-document.addEventListener('mousemove', (e) => {
-  if (e.clientY < 100) header.classList.remove('hidden');
-});
+// // Show header again on hover when below hero
+// document.addEventListener('mousemove', (e) => {
+//   if (e.clientY < 100) header.classList.remove('hidden');
+// });
 
    
 // ----------------- Support Button ----------------- 
