@@ -345,9 +345,8 @@ section p { font-size: clamp(16px,1.6vw,20px); line-height:1.8; margin-bottom:18
     <p>© 2025 Serac</p>
   </footer>
 
-  <!-- SCRIPTS -->
-  <script>
-   // === HEADER HIDE/SHOW AFTER HERO ===
+<script>
+/* === HEADER HIDE/SHOW AFTER HERO === */
 const siteHeader = document.getElementById('siteHeader');
 let lastScrollY = window.scrollY;
 let isHidden = false;
@@ -356,111 +355,116 @@ const heroHeight = document.querySelector('.hero-about')?.offsetHeight || 500;
 function handleScroll() {
   const currentY = window.scrollY;
 
-  // Apply scrolled styling after leaving hero
+  // Add shadow + background when scrolling down slightly
   if (currentY > 50) siteHeader.classList.add('scrolled');
   else siteHeader.classList.remove('scrolled');
 
-  // Hide header after hero
+  // Hide header only after hero section
   if (currentY > heroHeight - 80) {
     if (currentY > lastScrollY && !isHidden) {
-      siteHeader.style.top = "-90px";
-      siteHeader.style.opacity = "0";
-      siteHeader.style.pointerEvents = "none";
-      isHidden = true;
+      hideHeader();
     } else if (currentY < lastScrollY && isHidden) {
-      siteHeader.style.top = "0";
-      siteHeader.style.opacity = "1";
-      siteHeader.style.pointerEvents = "auto";
-      isHidden = false;
+      showHeader();
     }
   } else {
-    siteHeader.style.top = "0";
-    siteHeader.style.opacity = "1";
-    siteHeader.style.pointerEvents = "auto";
-    isHidden = false;
+    showHeader(); // always visible inside hero area
   }
 
   lastScrollY = currentY;
 }
 
+function hideHeader() {
+  siteHeader.style.top = "-90px";
+  siteHeader.style.opacity = "0";
+  siteHeader.style.pointerEvents = "none";
+  isHidden = true;
+}
+
+function showHeader() {
+  siteHeader.style.top = "0";
+  siteHeader.style.opacity = "1";
+  siteHeader.style.pointerEvents = "auto";
+  isHidden = false;
+}
+
 window.addEventListener('scroll', handleScroll, { passive: true });
 
-// Show header when hovering near top
-// Show header when hovering near top, hide again when leaving
+// === Hover visibility control ===
 document.addEventListener('mousemove', e => {
+  // When mouse near top, show header
   if (e.clientY < 100) {
-    siteHeader.style.top = "0";
-    siteHeader.style.opacity = "1";
-    siteHeader.style.pointerEvents = "auto";
-  } else if (window.scrollY > heroHeight - 80) {
-    siteHeader.style.top = "-90px";
-    siteHeader.style.opacity = "0";
-    siteHeader.style.pointerEvents = "none";
+    showHeader();
+  } 
+  // When away from top and past hero, hide again
+  else if (window.scrollY > heroHeight - 80) {
+    hideHeader();
   }
 });
 
-
-    // HAMBURGER TOGGLE
-    const hamburger = document.getElementById('hamburger');
-    const headerRight = document.querySelector('.header-right');
-    if (hamburger && headerRight) {
-      hamburger.addEventListener('click', () => {
-        headerRight.classList.toggle('open');
-        hamburger.classList.toggle('open');
-      });
-    }
-
-  // FAQ ACCORDION
-  document.querySelectorAll('.faq-item').forEach(item => {
-    const question = item.querySelector('.faq-question');
-    const answer = item.querySelector('.faq-answer');
-    const icon = item.querySelector('i');
-    answer.style.display = 'none';
-    question.addEventListener('click', () => {
-      const isOpen = answer.style.display === 'block';
-      answer.style.display = isOpen ? 'none' : 'block';
-      icon.classList.toggle('fa-plus', isOpen);
-      icon.classList.toggle('fa-minus', !isOpen);
-    });
+/* === HAMBURGER TOGGLE === */
+const hamburger = document.getElementById('hamburger');
+const headerRight = document.querySelector('.header-right');
+if (hamburger && headerRight) {
+  hamburger.addEventListener('click', () => {
+    headerRight.classList.toggle('open');
+    hamburger.classList.toggle('open');
   });
+}
 
-  // FAQ SHOW MORE/LESS
-  const faqItems = [...document.querySelectorAll('.faq-item')];
-  const faqToggle = document.getElementById('faq-toggle');
-  if (faqItems.length > 2) {
-    faqItems.forEach((item, i) => i > 1 && (item.style.display='none'));
-    faqToggle.addEventListener('click', () => {
-      const isExpanded = faqToggle.textContent.trim() === 'Less';
-      faqItems.forEach((item, i) => i > 1 && (item.style.display=isExpanded ? 'none':'block'));
-      faqToggle.textContent = isExpanded ? 'More':'Less';
-    });
-  }
+/* === FAQ ACCORDION === */
+document.querySelectorAll('.faq-item').forEach(item => {
+  const question = item.querySelector('.faq-question');
+  const answer = item.querySelector('.faq-answer');
+  const icon = item.querySelector('i');
+  answer.style.display = 'none';
+  question.addEventListener('click', () => {
+    const isOpen = answer.style.display === 'block';
+    answer.style.display = isOpen ? 'none' : 'block';
+    icon.classList.toggle('fa-plus', isOpen);
+    icon.classList.toggle('fa-minus', !isOpen);
+  });
+});
 
-  // TESTIMONIAL SHOW MORE/LESS
-  const testimonialCards = [...document.querySelectorAll('.testimonial-card')];
-  const testimonialToggle = document.getElementById('testimonial-toggle');
-  if (testimonialCards.length > 2) {
-    testimonialCards.forEach((card,i)=> i>1 && (card.style.display='none'));
-    testimonialToggle.addEventListener('click', ()=>{
-      const isExpanded = testimonialToggle.textContent.trim()==='Less';
-      testimonialCards.forEach((card,i)=> i>1 && (card.style.display=isExpanded?'none':'flex'));
-      testimonialToggle.textContent = isExpanded ? 'More':'Less';
-    });
-  }
+/* === FAQ SHOW MORE/LESS === */
+const faqItems = [...document.querySelectorAll('.faq-item')];
+const faqToggle = document.getElementById('faq-toggle');
+if (faqItems.length > 2 && faqToggle) {
+  faqItems.forEach((item, i) => i > 1 && (item.style.display = 'none'));
+  faqToggle.addEventListener('click', () => {
+    const isExpanded = faqToggle.textContent.trim() === 'Less';
+    faqItems.forEach((item, i) => i > 1 && (item.style.display = isExpanded ? 'none' : 'block'));
+    faqToggle.textContent = isExpanded ? 'More' : 'Less';
+  });
+}
 
-  // SMOOTH SCROLL
-  document.querySelectorAll('.header-right a').forEach(link => {
-    link.addEventListener('click', e => {
-      const href = link.getAttribute('href');
-      if(href.startsWith('#')){
-        e.preventDefault();
-        const target = document.getElementById(href.slice(1));
-        target && window.scrollTo({ top: target.offsetTop-80, behavior:'smooth' });
-        headerRight.classList.remove('open');
-        hamburger.classList.remove('open');
+/* === TESTIMONIAL SHOW MORE/LESS === */
+const testimonialCards = [...document.querySelectorAll('.testimonial-card')];
+const testimonialToggle = document.getElementById('testimonial-toggle');
+if (testimonialCards.length > 2 && testimonialToggle) {
+  testimonialCards.forEach((card, i) => i > 1 && (card.style.display = 'none'));
+  testimonialToggle.addEventListener('click', () => {
+    const isExpanded = testimonialToggle.textContent.trim() === 'Less';
+    testimonialCards.forEach((card, i) => i > 1 && (card.style.display = isExpanded ? 'none' : 'flex'));
+    testimonialToggle.textContent = isExpanded ? 'More' : 'Less';
+  });
+}
+
+/* === SMOOTH SCROLL === */
+document.querySelectorAll('.header-right a').forEach(link => {
+  link.addEventListener('click', e => {
+    const href = link.getAttribute('href');
+    if (href && href.startsWith('#')) {
+      e.preventDefault();
+      const target = document.getElementById(href.slice(1));
+      if (target) {
+        window.scrollTo({ top: target.offsetTop - 80, behavior: 'smooth' });
       }
-    });
+      headerRight.classList.remove('open');
+      hamburger.classList.remove('open');
+    }
   });
+});
 </script>
+
 </body>
 </html>
