@@ -62,37 +62,6 @@
       color: #c9e4ff;
       transform: translateY(-2px);
     }
-
-   @media (max-width:900px) {
-      .header-right {
-        position: absolute;
-        top: 68px;
-        right: 0;
-        background: rgba(17,46,31,0.95);
-        flex-direction: column;
-        width: 200px;
-        padding: 20px;
-        display: none;
-        border-radius: 0 0 0 10px;
-        z-index: 1100;
-      }
-    
-      .header-right.open {
-        display: flex !important;
-        flex-direction: column;
-        gap: 12px;
-      }
-    
-      .hamburger {
-        display: block;
-      }
-    }
-
-  
-    .brand-logo{height:clamp(40px,15vw,80px)}
-    .brand-title{font-size:clamp(16px,7vw,22px)}
-
-    
  
   
  .hamburger { display:none; background:none; border:none; cursor:pointer; width:30px; height:24px; position:relative; }
@@ -104,7 +73,35 @@
  .hamburger.open span:nth-child(2){ opacity:0; }
  .hamburger.open span:nth-child(3){ transform:rotate(-45deg); top:10px; }
     
+@media (max-width:900px) {
+  .header-right {
+    position: absolute;
+    top: 68px;
+    right: 0;
+    background: rgba(17,46,31,0.95);
+    flex-direction: column;
+    width: 200px;
+    padding: 20px;
+    display: none;
+    border-radius: 0 0 0 10px;
+    z-index: 1100;
+  }
 
+  .header-right.open {
+    display: flex !important;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .hamburger {
+    display: block;
+  }
+}
+
+
+.brand-logo{height:clamp(40px,15vw,80px)}
+.brand-title{font-size:clamp(16px,7vw,22px)}
+  
   /* --- TRACK SECTION --- */
   .track-section{flex:1; display:flex;justify-content:center;align-items:center;padding:120px 20px;}
   .track-box{max-width:960px;width:100%;background:#FFD6BA;padding:60px;border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,0.15);color:#112e1f;text-align:center;display:flex;flex-direction:column;align-items:center}
