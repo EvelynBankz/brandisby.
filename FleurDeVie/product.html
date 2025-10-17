@@ -136,7 +136,7 @@ footer { text-align:center; padding:20px; background:transparent; color:#112e1f;
     display: block;
   }
 
-  /* --- Mobile floating actions (Back button) --- */
+  /* --- Hover-reveal back button --- */
   .mobile-actions {
     display: flex;
     position: fixed;
@@ -148,12 +148,14 @@ footer { text-align:center; padding:20px; background:transparent; color:#112e1f;
     z-index: 999;
     justify-content: center;
     opacity: 0;
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    transition: opacity 0.4s ease;
+    pointer-events: none; /* prevent accidental taps when invisible */
   }
 
-  .mobile-actions.visible {
+  /* Show only when hovered near it */
+  .mobile-actions:hover {
     opacity: 1;
-    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
   }
 
   .mobile-actions .back-btn {
@@ -164,11 +166,12 @@ footer { text-align:center; padding:20px; background:transparent; color:#112e1f;
     padding: 10px 18px;
     font-weight: 600;
     cursor: pointer;
-    transition: background 0.3s ease;
+    transition: background 0.3s ease, transform 0.3s ease;
   }
 
   .mobile-actions .back-btn:hover {
     background: #0a1d14;
+    transform: translateY(-2px);
   }
 }
 
