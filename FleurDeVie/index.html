@@ -140,7 +140,7 @@
   <!-- HEADER -->
   <header class="site-header">
     <div class="header-left">
-      <img src="logo.png" alt="Fleur De Vie Logo" class="brand-logo">
+      <img src="asset/logo.png" alt="Fleur De Vie Logo" class="brand-logo">
     </div>
     <div class="header-center">
       <div class="brand-title">Fleur De Vie</div>
@@ -184,7 +184,7 @@
   <!-- FOOTER -->
   <footer class="site-footer">
     <div class="tagline">Yours Truly</div>
-    <div class="copyright">© 2025 Fleur De Vie</div>
+    <div class="copyright"><p>© <span id="year"></span> Fleur De Vie</p></div>
   </footer>
 
   <!-- SCRIPT -->
@@ -195,6 +195,8 @@
     ham.addEventListener('click',()=>{overlay.classList.toggle('open');ham.classList.toggle('is-active');});
     closeBtn.addEventListener('click',()=>{overlay.classList.remove('open');ham.classList.remove('is-active');});
     overlay.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{overlay.classList.remove('open');ham.classList.remove('is-active');}));
+  
+  
   </script>
 </body>
 </html>
