@@ -113,41 +113,65 @@ footer { text-align:center; padding:20px; background:transparent; color:#112e1f;
 /* RESPONSIVE */
 @media(max-width:800px){ main { flex-direction:column; align-items:center; } .product-image, .product-details { max-width:90%; } }
 @media (max-width:900px) {
-   .header-right {
-     position: absolute;
-     top: 68px;
-     right: 0;
-     background: rgba(17,46,31,0.95);
-     flex-direction: column;
-     width: 200px;
-     padding: 20px;
-     display: none;
-     border-radius: 0 0 0 10px;
-     z-index: 1100;
-   }
- 
-   .header-right.open {
-     display: flex !important;
-     flex-direction: column;
-     gap: 12px;
-   }
- 
-   .hamburger {
-     display: block;
-   }
-
-  .mobile-actions {
-    display:flex;
-    position:fixed;
-    bottom:18px;
-    left:50%;
-    transform:translateX(-50%);
-    width:92%;
-    max-width:540px;
-    z-index:999;
+  .header-right {
+    position: absolute;
+    top: 68px;
+    right: 0;
+    background: rgba(17,46,31,0.95);
+    flex-direction: column;
+    width: 200px;
+    padding: 20px;
+    display: none;
+    border-radius: 0 0 0 10px;
+    z-index: 1100;
   }
-  .mobile-actions .back-btn { flex:1; text-align:center; }
+
+  .header-right.open {
+    display: flex !important;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .hamburger {
+    display: block;
+  }
+
+  /* --- Mobile floating actions (Back button) --- */
+  .mobile-actions {
+    display: flex;
+    position: fixed;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 92%;
+    max-width: 540px;
+    z-index: 999;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+
+  .mobile-actions.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .mobile-actions .back-btn {
+    background: #112e1f;
+    color: #F5E6CC;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+
+  .mobile-actions .back-btn:hover {
+    background: #0a1d14;
+  }
 }
+
 
 /* ---------------- Floating Support Button + Tooltip ---------------- */
   #floatingSupportBtn {
@@ -521,6 +545,28 @@ supportBtn?.addEventListener('click', () => {
   window.location.href = 'mailto:yourstruly.fleurdevie@gmail.com?subject=Support%20Request';
 });
 
+</script>
+
+ <script>
+document.addEventListener("DOMContentLoaded", () => {
+  const backBtn = document.querySelector(".mobile-actions");
+  if (!backBtn) return;
+
+  // Function to check scroll position
+  function handleScroll() {
+    const scrollY = window.scrollY + window.innerHeight;
+    const docHeight = document.documentElement.scrollHeight;
+
+    // Fade in when near bottom (last 20% of page)
+    if (scrollY >= docHeight * 0.8) {
+      backBtn.style.opacity = "1";
+    } else {
+      backBtn.style.opacity = "0";
+    }
+  }
+
+  window.addEventListener("scroll", handleScroll);
+});
 </script>
 
 </body>
