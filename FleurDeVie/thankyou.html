@@ -8,30 +8,75 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 <style>
   /* ---------------- Base Fleur De Vie styling ---------------- */
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:"Montserrat",sans-serif;background:#F5E6CC;color:#112e1f;line-height:1.6;text-align:center}
-  a{text-decoration:none;color:inherit}
-
-  .site-header{background:#112e1f;color:#F5E6CC;display:flex;justify-content:space-between;align-items:center;padding:16px 28px;position:fixed;top:0;left:0;right:0;z-index:1000}
-  .header-left{display:flex;align-items:center;gap:12px}
-  .brand-logo{height:60px}
-  .brand-title{font-family:"Playfair Display",serif;font-size:24px;font-weight:700}
-  .header-right{display:flex;gap:20px;align-items:center}
-  .header-right a{font-weight:500;transition:color .3s}
-  .header-right a:hover{color:#FFD6BA}
-  .hamburger{display:none;background:none;border:none;cursor:pointer;width:30px;height:24px;position:relative}
-  .hamburger span{display:block;width:100%;height:3px;background:#F5E6CC;border-radius:2px;position:absolute;left:0;transition:0.3s}
-  .hamburger span:nth-child(1){top:0}
-  .hamburger span:nth-child(2){top:10px}
-  .hamburger span:nth-child(3){top:20px}
-  .hamburger.open span:nth-child(1){transform:rotate(45deg);top:10px}
-  .hamburger.open span:nth-child(2){opacity:0}
-  .hamburger.open span:nth-child(3){transform:rotate(-45deg);top:10px}
-
-  .hero{position:relative;height:90vh;display:flex;justify-content:center;align-items:center;text-align:center;margin-top:80px;overflow:hidden}
-  .hero::after{content:"";position:absolute;inset:0;background:url('asset/bg2.jpg') center/cover no-repeat;transform:scale(1.1);z-index:-1;border-radius:12px;box-shadow:inset 0 0 0 2000px rgba(17,46,31,0.3)}
-  .hero-text{position:relative;display:inline-block;color:#FFD6BA}
-  .hero-text h1{font-family:"Playfair Display",serif;font-size:clamp(32px,5vw,56px)}
+   /* RESET & BASE */
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: "Montserrat", sans-serif; background: #F5E6CC; color:#112e1f; line-height:1.6; }
+    a { text-decoration:none; color:inherit; }
+    
+    /* HEADER (Luxury Translucent Version) */
+    .site-header {
+      background: rgba(17,46,31,0.9); /* deep brand green, slightly see-through */
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(5px);
+      color: #F5E6CC;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:10px 24px;
+      position:fixed;
+      top:0; left:0; right:0;
+      z-index:1000;
+      height:68px;
+      transition: background 0.3s ease, top 0.4s ease, opacity 0.4s ease;
+    }
+    
+    .site-header.scrolled {
+      background: #112e1f; /* solid brand color after scroll */
+    }
+    
+    .site-header.hidden {
+      opacity: 0;
+      top: -80px;
+      pointer-events: none;
+    }
+    
+    .site-header:hover {
+      background: rgba(17,46,31,0.9);
+    }
+    
+    .header-left { display:flex; align-items:center; gap:10px; }
+    .brand-logo { height:70px; transition:height 0.3s ease; }
+    .brand-title { font-family:"Playfair Display", serif; font-size:22px; font-weight:700; }
+    
+    .header-right { display:flex; gap:20px; align-items:center; }
+    
+    .header-right a {
+      font-weight: 500;
+      color: inherit;
+      position: relative;
+      transition: color 0.3s ease, transform 0.3s ease;
+    }
+    
+    .header-right a:hover {
+      color: #c9e4ff;
+      transform: translateY(-2px);
+    }
+    
+    .hamburger { display:flex; background:none; border:none; cursor:pointer; width:30px; height:24px; position:relative; }
+    .hamburger span { display:block; width:100%; height:3px; background:#F5E6CC; border-radius:2px; position:absolute; left:0; transition:0.3s; }
+    .hamburger span:nth-child(1){ top:0; }
+    .hamburger span:nth-child(2){ top:10px; }
+    .hamburger span:nth-child(3){ top:20px; }
+    .hamburger.open span:nth-child(1){ transform:rotate(45deg); top:10px; }
+    .hamburger.open span:nth-child(2){ opacity:0; }
+    .hamburger.open span:nth-child(3){ transform:rotate(-45deg); top:10px; }
+    
+    /* HERO */
+    .hero { position: relative; height:90vh; display:flex; justify-content:center; align-items:center; text-align:center; margin-top:0; overflow:hidden; }
+    .hero::after { content:""; position:absolute; inset:0; background:url('asset/bg2.jpg') center/cover no-repeat; transform:scale(1.1); z-index:-1; border-radius:12px; box-shadow: inset 0 0 0 2000px rgba(17,46,31,0.3); }
+    .hero-text { position:relative; display:inline-block; color:#FFD6BA; margin-bottom:12px; animation: shimmer 3s infinite linear; }
+    .hero-text h1 { font-family:"Playfair Display", serif; font-size:clamp(36px,5vw,64px); margin-bottom:12px; }
+    .hero-text p { font-size:clamp(16px,2vw,24px); max-width:700px; }
 
   .thankyou-section{padding:80px 20px}
   .thankyou-box{background:#FFD6BA;padding:40px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.15);max-width:700px;margin:auto}
@@ -47,15 +92,39 @@
   .btn-secondary{background:#fff;color:#112e1f;border:2px solid #112e1f;margin-left:10px}
   .btn-secondary:hover{background:#112e1f;color:#FFD6BA}
 
-  footer{text-align:center;padding:20px;background:#112e1f;color:#F5E6CC;margin-top:60px}
+  /* FOOTER */
+  footer { text-align:center; padding:20px; background:transparent; color:#112e1f; margin-top:60px; }
 
-  @media(max-width:800px){
-    .header-right{display:none;flex-direction:column;position:absolute;top:70px;right:0;background:#112e1f;width:200px;padding:20px}
-    .header-right.open{display:flex}
-    .hamburger{display:block}
-    .thankyou-box{padding:20px}
-  }
+   @media (max-width:900px) {
+      .header-right {
+        position: absolute;
+        top: 68px;
+        right: 0;
+        background: rgba(17,46,31,0.95);
+        flex-direction: column;
+        width: 200px;
+        padding: 20px;
+        display: none;
+        border-radius: 0 0 0 10px;
+        z-index: 1100;
+      }
+    
+      .header-right.open {
+        display: flex !important;
+        flex-direction: column;
+        gap: 12px;
+      }
+    
+      .hamburger {
+        display: block;
+      }
+    }
 
+    .brand-logo{height:clamp(40px,15vw,80px)}
+    .brand-title{font-size:clamp(16px,7vw,22px)}
+    .hero{height:40vh}
+
+  
   /* ---------------- Overlay + Spinner with rotating gradient ---------------- */
   #fleur-overlay{
     position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;
@@ -145,15 +214,19 @@
     <img src="asset/logo.png" alt="Fleur De Vie Logo" class="brand-logo">
     <div class="brand-title">Fleur De Vie</div>
   </div>
-  <nav class="header-right" id="headerRight">
+  
+  <!-- Hamburger -->
+  <button class="hamburger" id="hamburger-btn">
+    <span></span><span></span><span></span>
+  </button>
+  <nav class="header-right" id="nav-menu">
     <a href="index.html">Home</a>
     <a href="shop.html">Shop</a>
     <a href="about.html">About</a>
     <a href="contact.html">Contact</a>
+    <a href="trackorder.html">Track</a>
   </nav>
-  <button class="hamburger" id="hamburger" aria-label="Menu">
-    <span></span><span></span><span></span>
-  </button>
+  
 </header>
 
 <!-- HERO -->
@@ -163,7 +236,7 @@
 <section class="thankyou-section">
   <div class="thankyou-box" id="thankyouBox">
     <h2>We’ve received your order 🎉</h2>
-    <p>Thank you for shopping with <strong>Fleur De Vie</strong>. Your order is being processed and you’ll receive a confirmation email shortly.</p>
+    <p>Thank you for shopping with <strong>Fleur De Vie</strong>. Your order is now being processed</p>
     <div id="orderReferenceBox" style="display:inline-block;margin:12px 0;padding:12px 18px;border-radius:10px;background:#fff;font-weight:700;cursor:pointer">Loading reference…</div>
     <div id="orderReferenceNote" style="color:#334d3a;margin-bottom:12px"></div>
     <div class="order-details" id="orderDetails"><p>Loading order details…</p></div>
@@ -190,13 +263,17 @@
 <footer>© 2025 Fleur De Vie</footer>
 
 <script type="module">
-// Hamburger toggle
-const hamburger = document.getElementById('hamburger');
-const headerRight = document.getElementById('headerRight');
-hamburger?.addEventListener('click', () => {
-  hamburger.classList.toggle('open');
-  headerRight.classList.toggle('open');
+window.addEventListener('scroll', () => {
+const header = document.querySelector('.site-header');
+if(!header) return;
+if(window.scrollY > 50) header.classList.add('scrolled'); else header.classList.remove('scrolled');
 });
+
+// hamburger
+const hamburgerBtn = document.getElementById('hamburger-btn');
+const navMenu = document.getElementById('nav-menu');
+if(hamburgerBtn) hamburgerBtn.addEventListener('click', ()=>{ hamburgerBtn.classList.toggle('open'); if(navMenu) navMenu.classList.toggle('open'); });
+
 
 // Floating support
 const supportBtn = document.getElementById('floatingSupportBtn');
@@ -338,6 +415,35 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('fleur-overlay').style.opacity='1';
   displayOrder().catch(err=>{ console.error(err); fadeRemoveOverlay(); });
 });
+
+ // ----------------- Footer Year -----------------
+document.getElementById('year').textContent = new Date().getFullYear();
+
+/*------New header Settings-----*/
+let lastScrollY = window.scrollY;
+const header = document.querySelector('.site-header');
+const hero = document.querySelector('.hero');
+
+window.addEventListener('scroll', () => {
+  const heroBottom = hero.offsetTop + hero.offsetHeight;
+  if (window.scrollY > heroBottom) {
+    if (window.scrollY > lastScrollY) {
+      header.classList.add('hidden');
+    } else {
+      header.classList.remove('hidden');
+      header.classList.add('scrolled');
+    }
+  } else {
+    header.classList.remove('hidden', 'scrolled');
+  }
+  lastScrollY = window.scrollY;
+});
+
+// Show header again on hover when below hero
+document.addEventListener('mousemove', (e) => {
+  if (e.clientY < 100) header.classList.remove('hidden');
+});
+
 </script>
 </body>
 </html>
