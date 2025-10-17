@@ -412,33 +412,104 @@ document.addEventListener('DOMContentLoaded',()=>{
   displayOrder().catch(err=>{ console.error(err); fadeRemoveOverlay(); });
 });
 
- // ----------------- Footer Year -----------------
-document.getElementById('year').textContent = new Date().getFullYear();
 
-/*------New header Settings-----*/
-let lastScrollY = window.scrollY;
-const header = document.querySelector('.site-header');
-const hero = document.querySelector('.hero');
+/* ---------- Safe helpers ---------- */
+const $ = sel => document.querySelector(sel);
+const byId = id => document.getElementById(id);
 
-window.addEventListener('scroll', () => {
-  const heroBottom = hero.offsetTop + hero.offsetHeight;
-  if (window.scrollY > heroBottom) {
-    if (window.scrollY > lastScrollY) {
-      header.classList.add('hidden');
+/* ---------- Footer year (safe) ---------- */
+try {
+  const yearEl = byId('year');
+  if (yearEl) yearEl.textContent = String(new Date().getFullYear());
+} catch(e){
+  console.warn('year element update skipped', e);
+}
+
+/* ---------- ensure overlay removal after load ---------- */
+window.addEventListener('load', () => {
+  const overlay = $('.fleur-overlay') || byId('fleur-overlay');
+  if (overlay) {
+    overlay.style.transition = 'opacity .45s ease';
+    overlay.style.opacity = '0';
+    setTimeout(()=> overlay.remove(), 550);
+  }
+});
+
+/* ---------- Header hide/show when past hero (robust) ---------- */
+(function headerHideOnScroll(){
+  const header = $('.site-header');
+  const hero = $('.hero');
+
+  if (!header) return; // nothing to do
+  // if there's no hero (rare), fall back to simple scrolled class behavior
+  if (!hero) {
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 50) header.classList.add('scrolled');
+      else header.classList.remove('scrolled');
+    });
+    return;
+  }
+
+  let lastScrollY = window.scrollY;
+  let isHidden = false;
+
+  function onScroll(){
+    const heroBottom = hero.offsetTop + hero.offsetHeight;
+    const nowY = window.scrollY;
+
+    if (nowY > heroBottom) {
+      // we're past the hero
+      if (nowY > lastScrollY && !isHidden) {
+        // scrolling down -> hide
+        header.classList.add('hidden');
+        header.classList.remove('scrolled');
+        isHidden = true;
+      } else if (nowY <= lastScrollY && isHidden) {
+        // scrolling up -> show (with scrolled state)
+        header.classList.remove('hidden');
+        header.classList.add('scrolled');
+        isHidden = false;
+      } else {
+        // keep scrolled class if not hidden
+        if (!isHidden) header.classList.add('scrolled');
+      }
     } else {
+      // within hero -> always show normal header
+      header.classList.remove('hidden', 'scrolled');
+      isHidden = false;
+    }
+
+    lastScrollY = nowY;
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  // show header when pointer near top of viewport (helps reveal on hover)
+  document.addEventListener('mousemove', e => {
+    if (e.clientY < 100 && isHidden) {
       header.classList.remove('hidden');
       header.classList.add('scrolled');
+      isHidden = false;
     }
-  } else {
-    header.classList.remove('hidden', 'scrolled');
-  }
-  lastScrollY = window.scrollY;
-});
+  });
 
-// Show header again on hover when below hero
-document.addEventListener('mousemove', (e) => {
-  if (e.clientY < 100) header.classList.remove('hidden');
-});
+  // touch-friendly: reveal header when user swipes/scrolls up quickly
+  let lastTouchY = 0;
+  window.addEventListener('touchstart', e => { lastTouchY = e.touches?.[0]?.clientY || 0; }, {passive:true});
+  window.addEventListener('touchmove', e => {
+    const y = e.touches?.[0]?.clientY || 0;
+    if (y - lastTouchY > 10 && isHidden) { // finger moved down -> reveal
+      header.classList.remove('hidden');
+      header.classList.add('scrolled');
+      isHidden = false;
+    }
+    lastTouchY = y;
+  }, {passive:true});
+
+  // initial run
+  onScroll();
+})();
+
 
 </script>
 </body>
