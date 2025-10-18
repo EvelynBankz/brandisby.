@@ -305,10 +305,23 @@ const STORAGE_KEY = 'seracCart';
 const CURRENCY_KEY = 'seracCurrency';
 
 /* ---------- State ---------- */
-let cart = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+// load cart safely from localStorage
+function loadCartFromStorage(){
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return [];
+    const parsed = JSON.parse(raw);
+    if(Array.isArray(parsed)) return parsed;
+    return [];
+  } catch (e) {
+    console.warn('Failed to parse cart from localStorage', e);
+    return [];
+  }
+}
+let cart = loadCartFromStorage();
 let productCache = {}; // cached product docs to avoid refetching
 
-/* ---------- Utilities ---------- */
+/* ---------- Helpers ---------- */
 function formatPrice(value, currency){
   const localeMap = { USD:'en-US', EUR:'de-DE', GBP:'en-GB', NGN:'en-NG' };
   const minFrac = currency === 'NGN' ? 0 : 2;
@@ -318,6 +331,8 @@ function formatPrice(value, currency){
     return `${currency} ${Number(value||0).toFixed(minFrac)}`;
   }
 }
+
+function escapeHtml(str){ if(!str && str !== 0) return ""; return String(str).replace(/[&<>"']/g, s => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": "&#39;" }[s])); }
 
 function mergeCartItems(cartArray){
   const merged = [];
@@ -332,10 +347,7 @@ function mergeCartItems(cartArray){
 function totalQuantityByProduct(productId){
   return cart.filter(i=>i.id===productId).reduce((sum,i)=>sum+(i.quantity||0),0);
 }
-
-function groupVariants(productId){
-  return cart.filter(i=>i.id===productId);
-}
+function groupVariants(productId){ return cart.filter(i=>i.id===productId); }
 
 async function fetchProductData(productId){
   try{
@@ -360,11 +372,7 @@ function computeSubtotal(currency){
   return subtotal;
 }
 
-function escapeHtml(str){ if(!str && str !== 0) return ""; return String(str).replace(/[&<>"']/g, s => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": "&#39;" }[s])); }
-
-/* ---------- Cart UI ---------- */
-
-/* Prevent cart count flash: hide count indicators until we update them */
+/* ---------- UI: cart count (prevent flash) ---------- */
 if(cartCountElem) cartCountElem.classList.add('hidden');
 if(cartCountMobileElem) cartCountMobileElem.classList.add('hidden');
 
@@ -384,20 +392,20 @@ function updateCartCount(){
   }
 }
 
-/* Render cart */
+/* ---------- Render cart ---------- */
 async function renderCart(){
   cartGrid.innerHTML = '';
   if(!cart.length){
-    cartEmpty.style.display='block';
-    cartSubtotalElem.textContent='';
-    checkoutBtn.style.display='none';
+    cartEmpty && (cartEmpty.style.display='block');
+    cartSubtotalElem && (cartSubtotalElem.textContent='');
+    checkoutBtn && (checkoutBtn.style.display='none');
     updateCartCount();
     return;
   }
-  cartEmpty.style.display='none';
-  checkoutBtn.style.display='inline-block';
+  cartEmpty && (cartEmpty.style.display='none');
+  checkoutBtn && (checkoutBtn.style.display='inline-block');
 
-  const currency = currencySelect.value || localStorage.getItem(CURRENCY_KEY) || 'NGN';
+  const currency = currencySelect?.value || localStorage.getItem(CURRENCY_KEY) || 'NGN';
   let subtotal = 0;
   const productIds = [...new Set(cart.map(i=>i.id))];
 
@@ -405,19 +413,17 @@ async function renderCart(){
     const product = await fetchProductData(pid);
     const variants = groupVariants(pid);
     const totalQty = totalQuantityByProduct(pid);
-    let thumbnail = (product && (product.images && product.images[0])) || product?.imageUrl || 'asset/placeholder.jpg';
-    let lineTotal = variants.reduce((sum,v)=>sum + (Number((product && product[`price${currency}`]) || v.price || 0) * Number(v.quantity || 0)),0);
+    const thumbnail = (product && Array.isArray(product.images) && product.images[0]) || product?.imageUrl || 'asset/placeholder.jpg';
+    const lineTotal = variants.reduce((sum,v)=>sum + (Number((product && product[`price${currency}`]) || v.price || 0) * Number(v.quantity || 0)),0);
     subtotal += lineTotal;
 
     const hasVariantMeta = variants.length > 1 || variants.some(v=> (v.color && v.color.trim()!=='') || (v.size && v.size.trim()!=='' ));
-    const showButton = hasVariantMeta;
+    const variantSummaryText = hasVariantMeta ? variants.map(v=>`${v.color? v.color+' / ':''}${v.size? v.size+' x ':''}${v.quantity}`).join(', ') : `Quantity: ${totalQty}`;
 
     const itemDiv = document.createElement('div');
     itemDiv.className = 'cart-item';
     itemDiv.id = `cart-item-${pid}`;
     itemDiv.dataset.productId = pid;
-
-    const variantSummaryText = hasVariantMeta ? variants.map(v=>`${v.color? v.color+' / ':''}${v.size? v.size+' x ':''}${v.quantity}`).join(', ') : `Quantity: ${totalQty}`;
 
     itemDiv.innerHTML = `
       <div class="cart-item-header">
@@ -431,7 +437,7 @@ async function renderCart(){
             <input type="number" min="0" value="${totalQty}" data-id="${pid}">
             <button class="qty-plus" data-id="${pid}">+</button>
           </div>
-          ${showButton ? '<button class="show-variants-btn">Show Choices</button>' : ''}
+          ${hasVariantMeta ? '<button class="show-variants-btn">Show Choices</button>' : ''}
           <div class="variants-container">${variants.map(v=>`<div class="variant-row" data-id="${v.id}" data-color="${(v.color||'')}" data-size="${(v.size||'')}">
                 <div class="variant-meta">${v.color? v.color+' / ':''}${v.size? v.size+' x ':''}${v.quantity}</div>
                 <div class="quantity-controls variant-controls">
@@ -452,24 +458,24 @@ async function renderCart(){
     }
   }
 
-  cartSubtotalElem.textContent = 'Subtotal: ' + formatPrice(subtotal, currency);
+  cartSubtotalElem && (cartSubtotalElem.textContent = 'Subtotal: ' + formatPrice(subtotal, currency));
   localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
   updateCartCount();
 }
 
-/* Single item update (used after change) */
+/* ---------- Single-row update ---------- */
 async function updateItemRow(productId){
   const itemDiv = document.getElementById(`cart-item-${productId}`);
-  const currency = currencySelect.value || localStorage.getItem(CURRENCY_KEY) || 'NGN';
+  const currency = currencySelect?.value || localStorage.getItem(CURRENCY_KEY) || 'NGN';
   const productVariants = groupVariants(productId);
 
   if(productVariants.length === 0){
     if(itemDiv) itemDiv.remove();
     const subtotal = computeSubtotal(currency);
-    cartSubtotalElem.textContent = subtotal ? 'Subtotal: ' + formatPrice(subtotal, currency) : '';
+    cartSubtotalElem && (cartSubtotalElem.textContent = subtotal ? 'Subtotal: ' + formatPrice(subtotal, currency) : '');
     if(cart.length === 0){
-      cartEmpty.style.display='block';
-      checkoutBtn.style.display='none';
+      cartEmpty && (cartEmpty.style.display='block');
+      checkoutBtn && (checkoutBtn.style.display='none');
     }
     updateCartCount();
     localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
@@ -477,9 +483,7 @@ async function updateItemRow(productId){
   }
 
   const product = await fetchProductData(productId);
-  if(!itemDiv){
-    return renderCart();
-  }
+  if(!itemDiv) return renderCart();
 
   const variants = productVariants;
   const totalQty = totalQuantityByProduct(productId);
@@ -515,7 +519,7 @@ async function updateItemRow(productId){
   }
 
   const subtotal = computeSubtotal(currency);
-  cartSubtotalElem.textContent = subtotal ? 'Subtotal: ' + formatPrice(subtotal, currency) : '';
+  cartSubtotalElem && (cartSubtotalElem.textContent = subtotal ? 'Subtotal: ' + formatPrice(subtotal, currency) : '');
   localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
   updateCartCount();
 }
@@ -527,7 +531,7 @@ function persistAndUpdate(productId){
   else renderCart();
 }
 
-/* ---------- Event delegation for cart grid ---------- */
+/* ---------- Event delegation for cart interactions ---------- */
 cartGrid.addEventListener('click', e=>{
   const target = e.target;
   const pid = target.dataset.id;
@@ -535,6 +539,7 @@ cartGrid.addEventListener('click', e=>{
   if(target.classList.contains('qty-plus')){
     const productVariants = cart.filter(i=>i.id===pid);
     if(productVariants.length===0) return;
+    // prefer incrementing first matching variant or single item
     productVariants[0].quantity = (productVariants[0].quantity||0) + 1;
     persistAndUpdate(pid);
     return;
@@ -561,7 +566,7 @@ cartGrid.addEventListener('click', e=>{
 
   if(target.classList.contains('v-minus')){
     const id = target.dataset.id; const color = target.dataset.color||''; const size = target.dataset.size||'';
-    const idx = cart.findIndex(i=>i.id===id && (i.color||'')===color && (i.size||')===size);
+    const idx = cart.findIndex(i=>i.id===id && (i.color||'')===color && (i.size||'')===size);
     if(idx!==-1){
       cart[idx].quantity = (cart[idx].quantity||0) - 1;
       if(cart[idx].quantity <= 0) cart.splice(idx,1);
@@ -580,7 +585,7 @@ cartGrid.addEventListener('click', e=>{
   }
 });
 
-/* input handling */
+/* input handling for numeric inputs */
 cartGrid.addEventListener('input', e=>{
   const target = e.target;
   if(target.tagName !== 'INPUT') return;
@@ -596,27 +601,17 @@ cartGrid.addEventListener('input', e=>{
       persistAndUpdate(id);
     }
   } else {
-    const productVariants = cart.filter(i=>i.id===id);
-    if(productVariants.length === 1){
-      const idx = cart.findIndex(i=>i.id===id);
-      if(idx!==-1){
-        cart[idx].quantity = val;
-        if(cart[idx].quantity === 0) cart.splice(idx,1);
-        persistAndUpdate(id);
-      }
-    } else if(productVariants.length > 1){
-      // If multiple variants and user edited the main number, we sync first variant
-      const idx = cart.findIndex(i=>i.id===id);
-      if(idx!==-1){
-        cart[idx].quantity = val;
-        if(cart[idx].quantity === 0) cart.splice(idx,1);
-        persistAndUpdate(id);
-      }
+    // editing main product quantity - try to update the first matching item
+    const idx = cart.findIndex(i=>i.id===id);
+    if(idx!==-1){
+      cart[idx].quantity = val;
+      if(cart[idx].quantity === 0) cart.splice(idx,1);
+      persistAndUpdate(id);
     }
   }
 });
 
-/* currency change -> full render to ensure correct totals */
+/* currency change handling */
 currencySelect && currencySelect.addEventListener('change', async ()=>{
   currencyWrapper && currencyWrapper.classList.add('loading');
   localStorage.setItem(CURRENCY_KEY, currencySelect.value);
@@ -625,13 +620,13 @@ currencySelect && currencySelect.addEventListener('change', async ()=>{
   await renderCart();
 });
 
-/* Hamburger */
+/* hamburger */
 hamburger && hamburger.addEventListener('click', ()=>{
   headerRight && headerRight.classList.toggle('open');
   hamburger.classList.toggle('open');
 });
 
-/* Mobile cart visibility */
+/* mobile cart visibility */
 function handleMobileCart(){ 
   const el = document.querySelector('.mobile-cart');
   if(!el) return;
@@ -640,119 +635,100 @@ function handleMobileCart(){
 window.addEventListener('resize', handleMobileCart);
 handleMobileCart();
 
+/* header scrolled background (simple) */
+window.addEventListener('scroll', ()=>{
+  const header = document.querySelector('.site-header');
+  if(!header) return;
+  if(window.scrollY > 50) header.classList.add('scrolled'); else header.classList.remove('scrolled');
+});
+
 /* storage sync (other tabs) */
 window.addEventListener('storage', ()=>{
-  cart = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+  cart = loadCartFromStorage();
   cart = mergeCartItems(cart);
-  // Immediately update counts before render to avoid a zero flash
   updateCartCount();
   renderCart();
 });
 
-/* ---------- Header / Hero behavior (improved) ---------- */
-const headerEl = document.querySelector('.site-header');
-const heroEl = document.querySelector('.hero') || document.querySelector('.hero-about');
+/* ---------- Header/Hero hide/show (keeps behavior) ---------- */
+(function headerHeroBehavior(){
+  const headerEl = document.querySelector('.site-header');
+  const heroEl = document.querySelector('.hero') || document.querySelector('.hero-about');
+  if(!headerEl || !heroEl) return;
 
-let lastScrollY = window.scrollY || 0;
-let headerHidden = false;
-let heroHeight = heroEl ? Math.round(heroEl.getBoundingClientRect().height) : 0;
+  let lastY = window.scrollY || 0;
+  let hidden = false;
+  let heroHeight = Math.round(heroEl.getBoundingClientRect().height);
 
-// Recompute hero height on resize (mobile -> uses 40vh in CSS)
-function recomputeHeroHeight(){
-  heroHeight = heroEl ? Math.round(heroEl.getBoundingClientRect().height) : 0;
-}
-window.addEventListener('resize', () => {
-  recomputeHeroHeight();
-  handleScroll(); // re-evaluate immediately
-});
+  window.addEventListener('resize', () => {
+    heroHeight = Math.round(heroEl.getBoundingClientRect().height);
+    handleScroll(); // re-evaluate
+  });
 
-// throttle helper
-function throttle(fn, wait=50){
-  let t = 0;
-  return (...args) => {
-    const now = Date.now();
-    if(now - t > wait){ t = now; fn(...args); }
-  };
-}
+  function handleScroll(){
+    const y = window.scrollY || 0;
+    // scrolled class when beyond hero
+    if(y > Math.max(50, heroHeight - 80)) headerEl.classList.add('scrolled');
+    else headerEl.classList.remove('scrolled');
 
-// main scroll handler
-function handleScroll(){
-  const currentY = window.scrollY || window.pageYOffset || 0;
-
-  // add/remove scrolled class based on leaving hero
-  if(currentY > Math.max(50, heroHeight - 80)){
-    headerEl && headerEl.classList.add('scrolled');
-  } else {
-    headerEl && headerEl.classList.remove('scrolled');
+    if(y > heroHeight - 80){
+      if(y > lastY && !hidden){
+        headerEl.style.top = '-90px';
+        headerEl.style.opacity = '0';
+        headerEl.style.pointerEvents = 'none';
+        hidden = true;
+      } else if(y < lastY && hidden){
+        headerEl.style.top = '0';
+        headerEl.style.opacity = '1';
+        headerEl.style.pointerEvents = 'auto';
+        headerEl.classList.add('scrolled');
+        hidden = false;
+      }
+    } else {
+      // within hero: visible and transparent
+      headerEl.style.top = '0';
+      headerEl.style.opacity = '1';
+      headerEl.style.pointerEvents = 'auto';
+      headerEl.classList.remove('scrolled');
+      hidden = false;
+    }
+    lastY = y;
   }
 
-  // when past the hero area, hide on scroll down, show on scroll up
-  if(currentY > heroHeight - 80){
-    if(currentY > lastScrollY && !headerHidden){
-      // scrolling down -> hide
-      headerEl && (headerEl.style.top = '-90px');
-      headerEl && (headerEl.style.opacity = '0');
-      headerEl && (headerEl.style.pointerEvents = 'none');
-      headerHidden = true;
-    } else if(currentY < lastScrollY && headerHidden){
-      // scrolling up -> show and mark as scrolled
-      headerEl && (headerEl.style.top = '0');
-      headerEl && (headerEl.style.opacity = '1');
-      headerEl && (headerEl.style.pointerEvents = 'auto');
-      headerEl && headerEl.classList.add('scrolled');
-      headerHidden = false;
-    }
-  } else {
-    // within hero: always visible and transparent (remove scrolled)
-    headerEl && (headerEl.style.top = '0');
-    headerEl && (headerEl.style.opacity = '1');
-    headerEl && (headerEl.style.pointerEvents = 'auto');
-    headerHidden = false;
-    headerEl && headerEl.classList.remove('scrolled');
-  }
-
-  lastScrollY = currentY;
-}
-const throttledHandleScroll = throttle(handleScroll, 50);
-window.addEventListener('scroll', throttledHandleScroll, { passive: true });
-window.addEventListener('load', () => { recomputeHeroHeight(); handleScroll(); });
-
-/* Show header when mouse near top; hide again when leaving (but only if we're past hero) */
-let hoverVisible = false;
-document.addEventListener('mousemove', (e) => {
-  // When pointer Y is near top, show header (if it was hidden)
-  if(e.clientY < 100){
-    if(headerHidden){
-      headerEl && (headerEl.style.top = '0');
-      headerEl && (headerEl.style.opacity = '1');
-      headerEl && (headerEl.style.pointerEvents = 'auto');
-      headerEl && headerEl.classList.add('scrolled');
-      headerHidden = false;
-      hoverVisible = true;
-    }
-  } else {
-    // If pointer left top area and we're past hero, re-hide (only if not actively scrolling up)
-    if(hoverVisible){
-      // small delay to avoid flicker if user moves quickly
+  let hoverShown = false;
+  document.addEventListener('mousemove', (e) => {
+    if(e.clientY < 100){
+      if(hidden){
+        headerEl.style.top = '0';
+        headerEl.style.opacity = '1';
+        headerEl.style.pointerEvents = 'auto';
+        headerEl.classList.add('scrolled');
+        hidden = false;
+        hoverShown = true;
+      }
+    } else if(hoverShown){
       setTimeout(()=>{
         if(window.scrollY > heroHeight - 80){
-          headerEl && (headerEl.style.top = '-90px');
-          headerEl && (headerEl.style.opacity = '0');
-          headerEl && (headerEl.style.pointerEvents = 'none');
-          headerHidden = true;
+          headerEl.style.top = '-90px';
+          headerEl.style.opacity = '0';
+          headerEl.style.pointerEvents = 'none';
+          hidden = true;
         }
-        hoverVisible = false;
+        hoverShown = false;
       }, 220);
     }
-  }
-});
+  });
 
-/* ---------- Initialization ---------- */
+  window.addEventListener('scroll', () => handleScroll(), { passive: true });
+  window.addEventListener('load', () => { heroHeight = Math.round(heroEl.getBoundingClientRect().height); handleScroll(); });
+})();
+
+/* ---------- Init ---------- */
 (async function init(){
-  // normalize and merge cart immediately so counts are correct before rendering
-  cart = mergeCartItems(cart);
-  updateCartCount();          // update early to avoid showing zero then real value
-  await renderCart();         // then render full cart
+  // ensure we load saved cart safely and merge duplicates before rendering
+  cart = mergeCartItems(loadCartFromStorage());
+  updateCartCount();   // update count early (prevents transient zero flash)
+  await renderCart();
 })();
 </script>
 
