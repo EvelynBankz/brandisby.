@@ -227,7 +227,115 @@ footer{text-align:center;padding:22px;background:transparent;color:var(--muted);
 
 <script src="https://checkout.flutterwave.com/v3.js"></script>
 
+<script>
+// === HEADER BEHAVIOR ===
+document.addEventListener("DOMContentLoaded", () => {
+  const siteHeader = document.getElementById('siteHeader');
+  const heroSection = document.querySelector('.hero') || document.querySelector('.hero-about');
+  const heroHeight = heroSection ? heroSection.offsetHeight : 400;
+  let lastScrollY = window.scrollY;
+  let isHidden = false;
+
+  // Handle scroll
+  function handleScroll() {
+    const currentY = window.scrollY;
+
+    // Turn header solid after leaving hero
+    if (currentY > heroHeight - 100) {
+      siteHeader.classList.add('scrolled');
+    } else {
+      siteHeader.classList.remove('scrolled');
+    }
+
+    // Hide/show logic
+    if (currentY > heroHeight - 80) {
+      if (currentY > lastScrollY && !isHidden) {
+        siteHeader.style.top = "-90px";
+        siteHeader.style.opacity = "0";
+        siteHeader.style.pointerEvents = "none";
+        isHidden = true;
+      } else if (currentY < lastScrollY && isHidden) {
+        siteHeader.style.top = "0";
+        siteHeader.style.opacity = "1";
+        siteHeader.style.pointerEvents = "auto";
+        isHidden = false;
+      }
+    } else {
+      siteHeader.style.top = "0";
+      siteHeader.style.opacity = "1";
+      siteHeader.style.pointerEvents = "auto";
+      isHidden = false;
+    }
+
+    lastScrollY = currentY;
+  }
+
+  window.addEventListener('scroll', handleScroll, { passive: true });
+
+  // Show header when hovering near top
+  document.addEventListener('mousemove', e => {
+    if (e.clientY < 100) {
+      siteHeader.style.top = "0";
+      siteHeader.style.opacity = "1";
+      siteHeader.style.pointerEvents = "auto";
+    } else if (window.scrollY > heroHeight - 80) {
+      siteHeader.style.top = "-90px";
+      siteHeader.style.opacity = "0";
+      siteHeader.style.pointerEvents = "none";
+    }
+  });
+
+  // === MOBILE CART ICON ===
+  const cartIcon = document.querySelector('.cart-icon');
+  const cartDropdown = document.querySelector('.cart-dropdown');
+  if (cartIcon && cartDropdown) {
+    cartIcon.addEventListener('click', () => {
+      cartDropdown.classList.toggle('open');
+    });
+  }
+
+  // === HAMBURGER MENU TOGGLE ===
+  const hamburger = document.getElementById('hamburger');
+  const headerRight = document.querySelector('.header-right');
+  if (hamburger && headerRight) {
+    hamburger.addEventListener('click', () => {
+      headerRight.classList.toggle('open');
+      hamburger.classList.toggle('open');
+    });
+  }
+});
+
+/* --- Header scroll behavior + cart dropdown --- */
+header.scrolled {
+  background: rgba(20, 21, 23, 0.95);
+  backdrop-filter: blur(6px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  transition: background 0.3s ease, border-bottom 0.3s ease;
+}
+
+/* Hide by default (for mobile cart dropdowns or quick menus) */
+.cart-dropdown {
+  display: none;
+  position: absolute;
+  top: 64px;
+  right: 16px;
+  background: rgba(20,20,20,0.98);
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid rgba(255,255,255,0.05);
+  z-index: 1200;
+  min-width: 240px;
+}
+
+.cart-dropdown.open {
+  display: block;
+}
+
+</script>
+
+
 <script type="module">
+
 /* -------------------- FIREBASE IMPORTS -------------------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
 import {
