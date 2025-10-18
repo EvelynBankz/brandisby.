@@ -350,27 +350,10 @@ section p { font-size: clamp(16px,1.6vw,20px); line-height:1.8; margin-bottom:18
 const siteHeader = document.getElementById('siteHeader');
 let lastScrollY = window.scrollY;
 let isHidden = false;
-const heroHeight = document.querySelector('.hero-about')?.offsetHeight || 500;
 
-function handleScroll() {
-  const currentY = window.scrollY;
-
-  // Add shadow + background when scrolling down slightly
-  if (currentY > 50) siteHeader.classList.add('scrolled');
-  else siteHeader.classList.remove('scrolled');
-
-  // Hide header only after hero section
-  if (currentY > heroHeight - 60) {
-    if (currentY > lastScrollY && !isHidden) {
-      hideHeader();
-    } else if (currentY < lastScrollY && isHidden) {
-      showHeader();
-    }
-  } else {
-    showHeader(); // always visible inside hero area
-  }
-
-  lastScrollY = currentY;
+function getHeroHeight() {
+  const hero = document.querySelector('.hero-about');
+  return hero ? hero.offsetHeight : 400;
 }
 
 function hideHeader() {
@@ -387,16 +370,36 @@ function showHeader() {
   isHidden = false;
 }
 
+function handleScroll() {
+  const currentY = window.scrollY;
+  const heroHeight = getHeroHeight();
+  const hidePoint = window.innerWidth <= 600 ? heroHeight * 0.8 : heroHeight - 80;
+
+  // Add background and shadow when scrolling down
+  if (currentY > 50) siteHeader.classList.add('scrolled');
+  else siteHeader.classList.remove('scrolled');
+
+  // Hide/show logic
+  if (currentY > hidePoint) {
+    if (currentY > lastScrollY && !isHidden) hideHeader();
+    else if (currentY < lastScrollY && isHidden) showHeader();
+  } else {
+    showHeader(); // always visible within hero area
+  }
+
+  lastScrollY = currentY;
+}
+
 window.addEventListener('scroll', handleScroll, { passive: true });
 
-// === Hover visibility control ===
+// === Hover visibility (for both desktop & mobile) ===
 document.addEventListener('mousemove', e => {
-  // When mouse near top, show header
+  const heroHeight = getHeroHeight();
+  const hidePoint = window.innerWidth <= 600 ? heroHeight * 0.8 : heroHeight - 80;
+
   if (e.clientY < 100) {
     showHeader();
-  } 
-  // When away from top and past hero, hide again
-  else if (window.scrollY > heroHeight - 60) {
+  } else if (window.scrollY > hidePoint) {
     hideHeader();
   }
 });
