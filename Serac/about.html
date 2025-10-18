@@ -360,7 +360,7 @@ function handleScroll() {
   else siteHeader.classList.remove('scrolled');
 
   // Hide header only after hero section
-  if (currentY > heroHeight - 80) {
+  if (currentY > heroHeight - 60) {
     if (currentY > lastScrollY && !isHidden) {
       hideHeader();
     } else if (currentY < lastScrollY && isHidden) {
@@ -396,7 +396,7 @@ document.addEventListener('mousemove', e => {
     showHeader();
   } 
   // When away from top and past hero, hide again
-  else if (window.scrollY > heroHeight - 80) {
+  else if (window.scrollY > heroHeight - 60) {
     hideHeader();
   }
 });
