@@ -231,7 +231,7 @@ footer{text-align:center;padding:22px;background:transparent;color:var(--muted);
 /* -------------------- FIREBASE IMPORTS -------------------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
 import {
-  getFirestore, doc, getDoc, collection, addDoc, updateDoc, setDoc, serverTimestamp, query, where, getDocs, arrayUnion
+  getFirestore, doc, getDoc, collection, addDoc, updateDoc, serverTimestamp, query, where, getDocs, arrayUnion
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
 /* -------------------- CONFIG (your config kept) -------------------- */
@@ -249,46 +249,46 @@ const db = getFirestore(app);
 /* -------------------- PREMIUM BLUR LOADER (NO-FLASH) -------------------- */
 (function installBlurLoader() {
   try {
-    const overlay = document.createElement('div');
-    overlay.id = 'serac-blur-overlay';
-    overlay.setAttribute('aria-hidden', 'true');
-    overlay.style.position = 'fixed';
-    overlay.style.inset = '0';
-    overlay.style.zIndex = '9999';
-    overlay.style.display = 'flex';
-    overlay.style.alignItems = 'center';
-    overlay.style.justifyContent = 'center';
-    overlay.style.backdropFilter = 'blur(8px)';
-    overlay.style.background = 'rgba(0,0,0,0.6)';
-    overlay.style.transition = 'opacity 0.36s ease';
-    overlay.style.opacity = '1';
+  const overlay = document.createElement('div');
+  overlay.id = 'serac-blur-overlay';
+  overlay.setAttribute('aria-hidden', 'true');
+  overlay.style.position = 'fixed';
+  overlay.style.inset = '0';
+  overlay.style.zIndex = '9999';
+  overlay.style.display = 'flex';
+  overlay.style.alignItems = 'center';
+  overlay.style.justifyContent = 'center';
+  overlay.style.backdropFilter = 'blur(8px)';
+  overlay.style.background = 'rgba(0,0,0,0.6)'; // darker premium background
+  overlay.style.transition = 'opacity 0.36s ease';
+  overlay.style.opacity = '1';
 
-    const spinner = document.createElement('div');
-    spinner.id = 'serac-blur-spinner';
-    spinner.style.width = '54px';
-    spinner.style.height = '54px';
-    spinner.style.border = '6px solid rgba(255,255,255,0.15)';
-    spinner.style.borderTop = '6px solid rgba(255,255,255,0.9)';
-    spinner.style.borderRadius = '50%';
-    spinner.style.boxShadow = '0 6px 18px rgba(0,0,0,0.2)';
-    spinner.style.animation = 'serac-spin 1s linear infinite';
-    spinner.style.backgroundClip = 'padding-box';
+  const spinner = document.createElement('div');
+  spinner.id = 'serac-blur-spinner';
+  spinner.style.width = '54px';
+  spinner.style.height = '54px';
+  spinner.style.border = '6px solid rgba(255,255,255,0.15)'; // light spinner ring
+  spinner.style.borderTop = '6px solid rgba(255,255,255,0.9)'; // bright white top arc
+  spinner.style.borderRadius = '50%';
+  spinner.style.boxShadow = '0 6px 18px rgba(0,0,0,0.2)';
+  spinner.style.animation = 'serac-spin 1s linear infinite';
+  spinner.style.backgroundClip = 'padding-box';
 
-    const label = document.createElement('div');
-    label.textContent = 'Loading...';
-    label.style.marginTop = '12px';
-    label.style.fontSize = '13px';
-    label.style.color = 'rgba(255,255,255,0.8)';
-    label.style.fontFamily = 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial';
+  const label = document.createElement('div');
+  label.textContent = 'Loading...';
+  label.style.marginTop = '12px';
+  label.style.fontSize = '13px';
+  label.style.color = 'rgba(255,255,255,0.8)'; // white text
+  label.style.fontFamily = 'system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial';
 
-    const wrap = document.createElement('div');
-    wrap.style.display = 'flex';
-    wrap.style.flexDirection = 'column';
-    wrap.style.alignItems = 'center';
-    wrap.appendChild(spinner);
-    wrap.appendChild(label);
+  const wrap = document.createElement('div');
+  wrap.style.display = 'flex';
+  wrap.style.flexDirection = 'column';
+  wrap.style.alignItems = 'center';
+  wrap.appendChild(spinner);
+  wrap.appendChild(label);
 
-    overlay.appendChild(wrap);
+  overlay.appendChild(wrap);
 
     const style = document.createElement('style');
     style.textContent = `
@@ -326,14 +326,13 @@ function safeParseJSON(val, fallback = null) {
 }
 function escapeHtml(s){ if(s === undefined || s === null) return ''; return String(s).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[ch])); }
 function formatPrice(val, cur = 'NGN'){ try { const locale = {USD:'en-US',EUR:'de-DE',GBP:'en-GB',NGN:'en-NG'}[cur] || 'en-US'; const minimumFractionDigits = cur==='NGN'?0:2; return new Intl.NumberFormat(locale,{style:'currency',currency:cur, minimumFractionDigits}).format(Number(val||0)); } catch(e) { return `${cur} ${Number(val||0).toFixed(2)}`; } }
-function showSpinner(on = true){ const s = document.getElementById('spinnerBackdrop') || document.getElementById('spinner'); if(s) s.style.display = on ? 'flex' : 'none'; }
-function showError(msg){ const el = document.getElementById('errorBanner') || document.getElementById('errorBox'); if(!el){ if(msg) alert(msg); return; } if(!msg){ el.style.display='none'; el.textContent=''; } else { el.style.display='block'; el.textContent=msg; window.scrollTo({top:0, behavior:'smooth'}); } }
+function showSpinner(on = true){ const s = document.getElementById('spinnerBackdrop'); if(s) s.style.display = on ? 'flex' : 'none'; }
+function showError(msg){ const el = document.getElementById('errorBanner'); if(!el){ if(msg) alert(msg); return; } if(!msg){ el.style.display='none'; el.textContent=''; } else { el.style.display='block'; el.textContent=msg; window.scrollTo({top:0, behavior:'smooth'}); } }
 
 /* -------------------- DOM & STATE -------------------- */
 const STORAGE_KEY = 'seracCart';
 const CURRENCY_KEY = 'seracCurrency';
 const cartCountElem = document.getElementById('cartCount');
-const cartCountMobileElem = document.getElementById('cartCountMobile');
 const orderItemsEl = document.getElementById('orderItems');
 const totalsText = document.getElementById('totalsText');
 const payBtn = document.getElementById('payBtn');
@@ -343,9 +342,9 @@ const nameInput = document.getElementById('name');
 const emailInput = document.getElementById('email');
 const phoneInput = document.getElementById('phone');
 const addressInput = document.getElementById('address');
-const hero = document.getElementById('heroSection') || document.querySelector('.hero');
-const heroH1 = document.getElementById('heroH1') || (hero && hero.querySelector('h1'));
-const heroP = document.getElementById('heroP') || (hero && hero.querySelector('p'));
+const hero = document.getElementById('heroSection');
+const heroH1 = document.getElementById('heroH1');
+const heroP = document.getElementById('heroP');
 
 let productCache = {};
 let selectedCurrency = localStorage.getItem(CURRENCY_KEY) || 'NGN';
@@ -382,10 +381,8 @@ function computeAndUpdateCartCount(){
     }
 
     if(cartCountElem) cartCountElem.textContent = String(displayCount || 0);
-    if(cartCountMobileElem) cartCountMobileElem.textContent = String(displayCount || 0);
   } catch(e){
     if(cartCountElem) cartCountElem.textContent = '0';
-    if(cartCountMobileElem) cartCountMobileElem.textContent = '0';
   }
 }
 
@@ -797,6 +794,7 @@ async function persistPaidOrder(orderData, txRef) {
   }
 }
 
+
 /* -------------------- PAYMENT FLOW (FLUTTERWAVE) -------------------- */
 const FLW_PUBLIC_KEY = "FLWPUBK_TEST-07eb9d2da345c08dc4d54278c3bc86f7-X";
 const SERVERLESS_VERIFY = `${window.location.origin}/api/verify`;
@@ -851,66 +849,66 @@ async function initiatePaymentFlow(ev){
   let paymentCallbackHandled = false;
 
   async function finalizeAfterSuccess(verifyResp){
-    try {
-      const saved = await persistPaidOrder(baseOrder, txRef);
-      const finalOrderId = saved?.orderId || null;
-      const trackingRef = saved?.trackingRef || generateOrderReference(baseOrder.email, finalOrderId||'', txRef);
+  try {
+    const saved = await persistPaidOrder(baseOrder, txRef);
+    const finalOrderId = saved?.orderId || null;
+    const trackingRef = saved?.trackingRef || generateOrderReference(baseOrder.email, finalOrderId||'', txRef);
 
-      if(!quoteId) localStorage.removeItem(STORAGE_KEY);
+    if(!quoteId) localStorage.removeItem(STORAGE_KEY);
 
-      const active = { ...baseOrder, id: finalOrderId, orderId: finalOrderId, status: 'paid', trackingRef };
-      activeOrderRaw = active;
-      quote = { items: active.items || [] };
-      quote._isOrder = true;
-      quote._paidFlag = true;
-      isPaidOrder = true;
+    const active = { ...baseOrder, id: finalOrderId, orderId: finalOrderId, status: 'paid', trackingRef };
+    activeOrderRaw = active;
+    quote = { items: active.items || [] };
+    quote._isOrder = true;
+    quote._paidFlag = true;
+    isPaidOrder = true;
 
-      renderPaidUIFromDoc(active);
+    renderPaidUIFromDoc(active);
 
-      localStorage.setItem('paidQuoteInfo', JSON.stringify({
-        quoteId: quoteId || null,
-        currency: selectedCurrency,
-        billing: { 
-          name: active.name, 
-          email: active.email, 
-          phone: active.phone, 
-          address: active.address 
-        },
-        trackingRef,
-        verified: true
-      }));
+    localStorage.setItem('paidQuoteInfo', JSON.stringify({
+      quoteId: quoteId || null,
+      currency: selectedCurrency,
+      billing: { 
+        name: active.name, 
+        email: active.email, 
+        phone: active.phone, 
+        address: active.address 
+      },
+      trackingRef,
+      verified: true
+    }));
 
-      // ✅ Save complete order details for thankyou.html
-      localStorage.setItem('lastOrder_serac', JSON.stringify({
-        id: finalOrderId,
-        trackingRef,
-        name: active.name,
-        email: active.email,
-        phone: active.phone,
-        address: active.address,
-        currency: selectedCurrency,
-        total: subtotal,
-        items: quote.items,
-        status: 'paid',
-        verified: true,
-        createdAt: new Date().toISOString()
-      }));
+    // ✅ Save complete order details for thankyou.html
+    localStorage.setItem('lastOrder_serac', JSON.stringify({
+      id: finalOrderId,
+      trackingRef,
+      name: active.name,
+      email: active.email,
+      phone: active.phone,
+      address: active.address,
+      currency: selectedCurrency,
+      total: subtotal,
+      items: quote.items,
+      status: 'paid',
+      verified: true,
+      createdAt: new Date().toISOString()
+    }));
 
-      showSpinner(false);
+    showSpinner(false);
 
-      // ✅ Redirect with correct path and orderId
-      window.location.assign('/Serac/thankyou.html?orderId=' + encodeURIComponent(finalOrderId));
+    // ✅ Redirect with correct path and orderId
+    window.location.assign('/Serac/thankyou.html?orderId=' + encodeURIComponent(finalOrderId));
 
-    } catch(e){
-      console.error('finalizeAfterSuccess error', e);
-      showSpinner(false);
-      showError('Payment verified but finalisation failed. Contact support with tx_ref: ' + txRef);
-      if(payBtn){ 
-        payBtn.disabled = false; 
-        payBtn.dataset.processing = '0'; 
-      }
+  } catch(e){
+    console.error('finalizeAfterSuccess error', e);
+    showSpinner(false);
+    showError('Payment verified but finalisation failed. Contact support with tx_ref: ' + txRef);
+    if(payBtn){ 
+      payBtn.disabled = false; 
+      payBtn.dataset.processing = '0'; 
     }
   }
+}
   
   const fwConfig = {
     public_key: FLW_PUBLIC_KEY,
@@ -1075,96 +1073,26 @@ function setCheckoutUI(){
 if(payBtn) payBtn.addEventListener('click', initiatePaymentFlow);
 if(currencySelect) currencySelect.addEventListener('change', ()=>{ selectedCurrency = currencySelect.value; localStorage.setItem(CURRENCY_KEY, selectedCurrency); if(quote) renderOrderFromQuoteNormalized(quote, selectedCurrency, isPaidOrder); });
 
-/* -------------------- Header Hover + Scroll Behavior (identical to product/cart pages) -------------------- */
-(function headerHoverBehavior(){
-  const headerEl = document.querySelector('.site-header');
-  const heroEl = document.querySelector('.hero') || document.querySelector('.hero-about') || document.getElementById('heroSection');
-  if(!headerEl) return;
-
-  let lastY = window.scrollY || 0;
-  let hidden = false;
-  let heroHeight = heroEl ? Math.round(heroEl.getBoundingClientRect().height) : 0;
-
-  window.addEventListener('resize', () => {
-    heroHeight = heroEl ? Math.round(heroEl.getBoundingClientRect().height) : 0;
-    handleScroll();
-  });
-
-  function handleScroll(){
-    const y = window.scrollY || 0;
-    // scrolled class when beyond hero
-    if(y > Math.max(50, heroHeight - 80)) headerEl.classList.add('scrolled');
-    else headerEl.classList.remove('scrolled');
-
-    if(y > heroHeight - 80){
-      if(y > lastY && !hidden){
-        headerEl.style.top = '-90px';
-        headerEl.style.opacity = '0';
-        headerEl.style.pointerEvents = 'none';
-        hidden = true;
-      } else if(y < lastY && hidden){
-        headerEl.style.top = '0';
-        headerEl.style.opacity = '1';
-        headerEl.style.pointerEvents = 'auto';
-        headerEl.classList.add('scrolled');
-        hidden = false;
-      }
-    } else {
-      // within hero: visible and transparent
-      headerEl.style.top = '0';
-      headerEl.style.opacity = '1';
-      headerEl.style.pointerEvents = 'auto';
-      headerEl.classList.remove('scrolled');
-      hidden = false;
-    }
-    lastY = y;
-  }
-
-  let hoverShown = false;
-  document.addEventListener('mousemove', (e) => {
-    if(e.clientY < 100){
-      if(hidden){
-        headerEl.style.top = '0';
-        headerEl.style.opacity = '1';
-        headerEl.style.pointerEvents = 'auto';
-        headerEl.classList.add('scrolled');
-        hidden = false;
-        hoverShown = true;
-      }
-    } else if(hoverShown){
-      setTimeout(()=>{
-        if(window.scrollY > heroHeight - 80){
-          headerEl.style.top = '-90px';
-          headerEl.style.opacity = '0';
-          headerEl.style.pointerEvents = 'none';
-          hidden = true;
-        }
-        hoverShown = false;
-      }, 220);
-    }
-  });
-
-  window.addEventListener('scroll', () => handleScroll(), { passive: true });
-  window.addEventListener('load', () => { heroHeight = heroEl ? Math.round(heroEl.getBoundingClientRect().height) : 0; handleScroll(); });
-})();
-
-/* -------------------- Mobile Cart Icon (shows on small screen and links to /cart.html) -------------------- */
-function handleMobileCart(){ 
-  const el = document.querySelector('.mobile-cart');
-  if(!el) return;
-  el.style.display = window.innerWidth <= 600 ? 'flex' : 'none';
-  el.querySelectorAll('a').forEach(a=>{
-    a.setAttribute('href','/cart.html');
-    a.addEventListener('click', ()=>{ /* nothing else */ });
-  });
-}
-window.addEventListener('resize', handleMobileCart);
-handleMobileCart();
-
-/* -------------------- Hamburger (header menu) -------------------- */
+window.addEventListener('scroll', () => {
+  const header = document.querySelector('.site-header');
+  if(!header) return;
+  if(window.scrollY > 50) header.classList.add('scrolled'); else header.classList.remove('scrolled');
+});
 const hamburger = document.getElementById('hamburger');
-const headerRight = document.getElementById('headerRight') || document.querySelector('.header-right');
-if(hamburger) hamburger.addEventListener('click', ()=>{ hamburger.classList.toggle('open'); headerRight?.classList.toggle('open'); });
+const headerRight = document.getElementById('headerRight');
+if(hamburger) hamburger.addEventListener('click', ()=>{ hamburger.classList.toggle('open'); if(headerRight) headerRight.classList.toggle('open'); });
+
+/* -------------------- INIT -------------------- */
+(async function init(){
+  try { if(currencySelect) currencySelect.value = selectedCurrency; } catch(e){}
+  try { computeAndUpdateCartCount(); } catch(e){}
+  const paidQuoteInfo = safeParseJSON(localStorage.getItem('paidQuoteInfo'), null);
+  if(quoteId && paidQuoteInfo && paidQuoteInfo.verified && paidQuoteInfo.quoteId === quoteId){
+    await syncPaidQuoteUI();
+  } else {
+    await loadCheckoutData();
+  }
+})();
 
 /* -------------------- suppress known noisy errors from FP/Flutterwave -------------------- */
 window.addEventListener('error', (e)=>{
@@ -1179,25 +1107,10 @@ window.addEventListener('error', (e)=>{
 });
 
  const supportBtn = document.getElementById('floatingSupportBtn');
- if(supportBtn){
-   supportBtn.addEventListener('click', () => {
-     window.location.href = 'mailto:stonecold.serac@gmail.com?subject=Support%20Request';
-   });
- }
-
-/* -------------------- INIT -------------------- */
-(async function init(){
-  try { if(currencySelect) currencySelect.value = selectedCurrency; } catch(e){}
-  try { computeAndUpdateCartCount(); } catch(e){}
-  const paidQuoteInfo = safeParseJSON(localStorage.getItem('paidQuoteInfo'), null);
-  if(quoteId && paidQuoteInfo && paidQuoteInfo.verified && paidQuoteInfo.quoteId === quoteId){
-    await syncPaidQuoteUI();
-  } else {
-    await loadCheckoutData();
-  }
-})();
+  supportBtn.addEventListener('click', () => {
+    window.location.href = 'mailto:stonecold.serac@gmail.com?subject=Support%20Request';
+  });
 </script>
-
 
 </body>
 </html>
