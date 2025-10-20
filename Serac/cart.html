@@ -671,29 +671,42 @@ window.addEventListener('storage', ()=>{
   renderCart();
 });
 
-/* ---------- Header/Hero hide/show (keeps behavior) ---------- */
+/* -------------------- HEADER/HERO BEHAVIOR (with hamburger awareness) -------------------- */
 (function headerHeroBehavior(){
   const headerEl = document.querySelector('.site-header');
-  const heroEl = document.querySelector('.hero') || document.querySelector('.hero-about');
+  const heroEl = document.querySelector('.hero') || document.getElementById('heroSection') || document.querySelector('.hero-about');
+  const hamburger = document.querySelector('.hamburger');
+  const menu = document.querySelector('.header-right');
   if(!headerEl || !heroEl) return;
 
   let lastY = window.scrollY || 0;
   let hidden = false;
   let heroHeight = Math.round(heroEl.getBoundingClientRect().height);
+  let hoverShown = false;
+  let menuOpen = false;
 
-  window.addEventListener('resize', () => {
-    heroHeight = Math.round(heroEl.getBoundingClientRect().height);
-    handleScroll(); // re-evaluate immediately
-  });
+  function updateMenuState(){
+    menuOpen = hamburger && hamburger.classList.contains('open');
+  }
 
   function handleScroll(){
+    updateMenuState();
     const y = window.scrollY || 0;
 
-    // Apply scrolled class when beyond hero area (so header becomes darker)
+    // toggle dark background when past hero
     if(y > Math.max(50, heroHeight - 80)) headerEl.classList.add('scrolled');
     else headerEl.classList.remove('scrolled');
 
-    // Hide header when away from hero and scrolling down
+    if(menuOpen){
+      // if hamburger menu open, keep header fixed & visible
+      headerEl.style.top = '0';
+      headerEl.style.opacity = '1';
+      headerEl.style.pointerEvents = 'auto';
+      hidden = false;
+      return;
+    }
+
+    // normal behavior when menu not open
     if(y > heroHeight - 80){
       if(y > lastY && !hidden){
         headerEl.style.top = '-90px';
@@ -708,7 +721,7 @@ window.addEventListener('storage', ()=>{
         hidden = false;
       }
     } else {
-      // Within hero: visible and transparent
+      // within hero: visible and transparent
       headerEl.style.top = '0';
       headerEl.style.opacity = '1';
       headerEl.style.pointerEvents = 'auto';
@@ -718,8 +731,11 @@ window.addEventListener('storage', ()=>{
     lastY = y;
   }
 
-  let hoverShown = false;
+  // Hover reveal when near top of screen
   document.addEventListener('mousemove', (e) => {
+    updateMenuState();
+    if(menuOpen) return; // disable hover behavior while menu is open
+
     if(e.clientY < 100){
       if(hidden){
         headerEl.style.top = '0';
@@ -730,7 +746,6 @@ window.addEventListener('storage', ()=>{
         hoverShown = true;
       }
     } else if(hoverShown){
-      // when hover leaves after showing header, re-hide if we are away from hero
       setTimeout(()=>{
         if(window.scrollY > heroHeight - 80){
           headerEl.style.top = '-90px';
@@ -743,8 +758,34 @@ window.addEventListener('storage', ()=>{
     }
   });
 
-  window.addEventListener('scroll', () => handleScroll(), { passive: true });
-  window.addEventListener('load', () => { heroHeight = Math.round(heroEl.getBoundingClientRect().height); handleScroll(); });
+  // handle hamburger click
+  if(hamburger){
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('open');
+      if(menu) menu.classList.toggle('open');
+      updateMenuState();
+
+      if(menuOpen){
+        headerEl.style.top = '0';
+        headerEl.style.opacity = '1';
+        headerEl.style.pointerEvents = 'auto';
+        hidden = false;
+      } else {
+        handleScroll(); // resume normal behavior after menu closes
+      }
+    });
+  }
+
+  window.addEventListener('resize', () => {
+    heroHeight = Math.round(heroEl.getBoundingClientRect().height);
+    handleScroll();
+  }, { passive: true });
+
+  window.addEventListener('scroll', handleScroll, { passive: true });
+  window.addEventListener('load', () => {
+    heroHeight = Math.round(heroEl.getBoundingClientRect().height);
+    handleScroll();
+  });
 })();
 
 /* ---------- Init ---------- */
