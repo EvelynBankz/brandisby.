@@ -174,8 +174,9 @@ footer { text-align:center; padding:22px; background:transparent; color:#bdbdbd;
 @media(max-width:900px){
   .product-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
 }
-@media(max-width:600px){
-  .header-right { display:none; flex-direction:column; background:rgba(20,21,23,0.98); position:absolute; top:70px; right:0; width:220px; padding:18px; border-radius:8px; z-index:1100; }
+@media(max-width:900px){
+  .header-right { display:none; flex-direction:column; background:rgba(20,21,23,0.98); position:absolute; top:70px; right:0; width:220px; padding:18px; align-items: flex-start;
+ border-radius:8px; z-index:1100; }
   .header-right.open { display:flex; }
   .hamburger { display:block; }
   .mobile-cart { display:flex; align-items:center; margin-right:10px; }
