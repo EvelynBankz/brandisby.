@@ -281,478 +281,484 @@
   <script src="https://checkout.flutterwave.com/v3.js"></script>
 
   <!-- Main module: merged Serac functionality adapted for Fleur De Vie -->
-  <script type="module">
-    /* -------------------- FIREBASE IMPORTS -------------------- */
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-    import {
-      getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, serverTimestamp, query, where, getDocs
-    } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+<script type="module">
+  /* -------------------- FIREBASE IMPORTS -------------------- */
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+  import {
+    getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, serverTimestamp, query, where, getDocs
+  } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-    /* -------------------- CONFIG (brandisby project used by both brands) -------------------- */
-    const firebaseConfig = {
-      apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
-      authDomain: "brandisby.firebaseapp.com",
-      projectId: "brandisby",
-      storageBucket: "brandisby.firebasestorage.app",
-      messagingSenderId: "87213267039",
-      appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
-    };
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+  /* -------------------- CONFIG (brandisby project used by both brands) -------------------- */
+  const firebaseConfig = {
+    apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
+    authDomain: "brandisby.firebaseapp.com",
+    projectId: "brandisby",
+    storageBucket: "brandisby.firebasestorage.app",
+    messagingSenderId: "87213267039",
+    appId: "1:87213267039:web:339e9fd49e3ad31f7423ea"
+  };
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
-    /* -------------------- BLUR LOADER (no-flash) -------------------- */
-    (function installBlurLoader() {
-      try {
-        const overlay = document.createElement('div');
-        overlay.className = 'fdv-blur-overlay';
-        overlay.id = 'fdv-blur-overlay';
-        overlay.setAttribute('aria-hidden','true');
+  /* -------------------- BLUR LOADER (no-flash) -------------------- */
+  (function installBlurLoader() {
+    try {
+      const overlay = document.createElement('div');
+      overlay.className = 'fdv-blur-overlay';
+      overlay.id = 'fdv-blur-overlay';
+      overlay.setAttribute('aria-hidden','true');
 
-        const spinner = document.createElement('div');
-        spinner.className = 'fdv-blur-spinner';
+      const spinner = document.createElement('div');
+      spinner.className = 'fdv-blur-spinner';
 
-        const label = document.createElement('div');
-        label.textContent = 'Loading...';
-        label.style.color = '#fff';
-        label.style.marginTop = '10px';
-        label.style.fontSize = '13px';
-        label.style.fontFamily = 'system-ui, -apple-system, "Segoe UI", Roboto';
+      const label = document.createElement('div');
+      label.textContent = 'Loading...';
+      label.style.color = '#fff';
+      label.style.marginTop = '10px';
+      label.style.fontSize = '13px';
+      label.style.fontFamily = 'system-ui, -apple-system, "Segoe UI", Roboto';
 
-        const wrap = document.createElement('div');
-        wrap.style.display = 'flex';
-        wrap.style.flexDirection = 'column';
-        wrap.style.alignItems = 'center';
-        wrap.appendChild(spinner);
-        wrap.appendChild(label);
+      const wrap = document.createElement('div');
+      wrap.style.display = 'flex';
+      wrap.style.flexDirection = 'column';
+      wrap.style.alignItems = 'center';
+      wrap.appendChild(spinner);
+      wrap.appendChild(label);
 
-        overlay.appendChild(wrap);
-        document.documentElement.appendChild(overlay);
+      overlay.appendChild(wrap);
+      document.documentElement.appendChild(overlay);
 
-        const main = document.querySelector('main') || document.querySelector('body');
-        if(main) main.style.opacity = '0';
-      } catch(e){}
-    })();
+      const main = document.querySelector('main') || document.querySelector('body');
+      if(main) main.style.opacity = '0';
+    } catch(e){}
+  })();
 
-    function removeBlurLoaderAndReveal(){
-      try {
-        const overlay = document.getElementById('fdv-blur-overlay');
-        if(overlay) overlay.remove();
-        const main = document.querySelector('main') || document.querySelector('body');
-        if(main) main.style.opacity = '1';
-      } catch(e){}
-    }
+  function removeBlurLoaderAndReveal(){
+    try {
+      const overlay = document.getElementById('fdv-blur-overlay');
+      if(overlay) overlay.remove();
+      const main = document.querySelector('main') || document.querySelector('body');
+      if(main) main.style.opacity = '1';
+    } catch(e){}
+  }
 
-    /* -------------------- HELPERS -------------------- */
-    function safeParseJSON(v, fallback = null){ try { return JSON.parse(v || 'null') || fallback; } catch(e){ return fallback; } }
-    function escapeHtml(s){ if(s === undefined || s === null) return ''; return String(s).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[ch])); }
-    function formatPrice(val, cur = 'NGN'){ try { const locale = {USD:'en-US',EUR:'de-DE',GBP:'en-GB',NGN:'en-NG'}[cur] || 'en-US'; const minimumFractionDigits = cur==='NGN'?0:2; return new Intl.NumberFormat(locale,{style:'currency',currency:cur, minimumFractionDigits}).format(Number(val||0)); } catch(e) { return `${cur} ${Number(val||0).toFixed(2)}`; } }
-    function showSpinner(on = true){
-      try {
-        let el = document.getElementById('fdv-runtime-spinner');
-        if(on){
-          if(!el){
-            el = document.createElement('div');
-            el.id = 'fdv-runtime-spinner';
-            el.style.position = 'fixed';
-            el.style.top = '20px';
-            el.style.right = '20px';
-            el.style.zIndex = '99999';
-            el.style.padding = '8px';
-            el.style.borderRadius = '20px';
-            el.style.background = 'rgba(0,0,0,0.6)';
-            el.style.color = '#fff';
-            el.style.display = 'flex';
-            el.style.alignItems = 'center';
-            const inner = document.createElement('div');
-            inner.style.width = '8px';
-            inner.style.height = '8px';
-            inner.style.borderRadius = '50%';
-            inner.style.background = '#FFD6BA';
-            inner.style.marginRight = '8px';
-            el.appendChild(inner);
-            const txt = document.createElement('div'); txt.textContent = 'Processing...';
-            el.appendChild(txt);
-            document.body.appendChild(el);
-          }
+  /* -------------------- HELPERS -------------------- */
+  function safeParseJSON(v, fallback = null){ try { return JSON.parse(v || 'null') || fallback; } catch(e){ return fallback; } }
+  function escapeHtml(s){ if(s === undefined || s === null) return ''; return String(s).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[ch])); }
+  function formatPrice(val, cur = 'NGN'){ try { const locale = {USD:'en-US',EUR:'de-DE',GBP:'en-GB',NGN:'en-NG'}[cur] || 'en-US'; const minimumFractionDigits = cur==='NGN'?0:2; return new Intl.NumberFormat(locale,{style:'currency',currency:cur, minimumFractionDigits}).format(Number(val||0)); } catch(e) { return `${cur} ${Number(val||0).toFixed(2)}`; } }
+  function showSpinner(on = true){
+    try {
+      let el = document.getElementById('fdv-runtime-spinner');
+      if(on){
+        if(!el){
+          el = document.createElement('div');
+          el.id = 'fdv-runtime-spinner';
+          el.style.position = 'fixed';
+          el.style.top = '20px';
+          el.style.right = '20px';
+          el.style.zIndex = '99999';
+          el.style.padding = '8px';
+          el.style.borderRadius = '20px';
+          el.style.background = 'rgba(0,0,0,0.6)';
+          el.style.color = '#fff';
           el.style.display = 'flex';
-        } else {
-          if(el) el.style.display = 'none';
+          el.style.alignItems = 'center';
+          const inner = document.createElement('div');
+          inner.style.width = '8px';
+          inner.style.height = '8px';
+          inner.style.borderRadius = '50%';
+          inner.style.background = '#FFD6BA';
+          inner.style.marginRight = '8px';
+          el.appendChild(inner);
+          const txt = document.createElement('div'); txt.textContent = 'Processing...';
+          el.appendChild(txt);
+          document.body.appendChild(el);
         }
-      } catch(e){ console.warn(e); }
-    }
-    function showError(msg){
-      const el = document.getElementById('errorBanner');
-      if(!el) { if(msg) alert(msg); return; }
-      if(!msg){ el.style.display='none'; el.textContent=''; } else { el.style.display='block'; el.textContent = msg; window.scrollTo({top:0, behavior:'smooth'}); }
-    }
-
-    /* -------------------- DOM & STATE -------------------- */
-    const STORAGE_KEY = 'cart';
-    const CURRENCY_KEY = 'currency';
-    const cartCountElem = document.getElementById('cartCount');
-    const orderItemsEl = document.getElementById('orderItems');
-    const orderSubtotalEl = document.getElementById('orderSubtotal');
-    const payBtn = document.getElementById('payBtn');
-    const currencySelect = document.getElementById('currency');
-    const currencyWrapper = document.getElementById('currencySelectorWrapper');
-    const nameInput = document.getElementById('name');
-    const emailInput = document.getElementById('email');
-    const phoneInput = document.getElementById('phone');
-    const addressInput = document.getElementById('address');
-
-    let productCache = {};
-    let selectedCurrency = localStorage.getItem(CURRENCY_KEY) || 'NGN';
-    let rawCart = safeParseJSON(localStorage.getItem(STORAGE_KEY), []) || [];
-    rawCart = mergeCartItems(rawCart);
-    const urlParams = new URLSearchParams(window.location.search);
-    const quoteId = urlParams.get('quoteId') || null;
-    const orderId = urlParams.get('orderId') || null;
-
-    let activeQuoteRaw = null;
-    let activeOrderRaw = null;
-    let quote = null;
-    let isPaidOrder = false;
-
-    /* -------------------- UTIL: cart helpers -------------------- */
-    function mergeCartItems(cartArray){
-      const merged=[];
-      (cartArray||[]).forEach(item=>{
-        const idx = merged.findIndex(i => i.id === item.id && (i.color||'') === (item.color||'') && (i.size||'') === (item.size||''));
-        if(idx === -1) merged.push({...item});
-        else merged[idx].quantity = Number(merged[idx].quantity||0) + Number(item.quantity||0);
-      });
-      return merged;
-    }
-    function totalQtyFromCartArray(arr){ try { return (arr||[]).reduce((s,i)=>s + Number(i.quantity||0),0); } catch(e){ return 0; } }
-
-    function computeAndUpdateCartCount(){
-      try {
-        const cartArr = mergeCartItems(safeParseJSON(localStorage.getItem(STORAGE_KEY), []) || []);
-        const cartQty = totalQtyFromCartArray(cartArr);
-        let displayCount = cartQty;
-        const isUnpaidQuoteView = (!isPaidOrder && quote && Array.isArray(quote.items) && quote.items.length > 0 && !quote._isOrder && !quote._paidFlag);
-        if (isUnpaidQuoteView) {
-          const quoteQty = (quote && Array.isArray(quote.items)) ? quote.items.reduce((s,i)=>s + Number(i.totalQuantity||0),0) : 0;
-          displayCount = Number(quoteQty || 0) + Number(cartQty || 0);
-        } else {
-          displayCount = cartQty;
-        }
-        if(cartCountElem) cartCountElem.textContent = String(displayCount || 0);
-      } catch(e){ if(cartCountElem) cartCountElem.textContent = '0'; }
-    }
-
-    window.addEventListener('storage', (e)=>{
-      if(e.key === STORAGE_KEY || e.key === CURRENCY_KEY || e.key === 'paidQuoteInfo'){
-        computeAndUpdateCartCount();
+        el.style.display = 'flex';
+      } else {
+        if(el) el.style.display = 'none';
       }
-      if(e.key === 'paidQuoteInfo'){
-        const paid = safeParseJSON(localStorage.getItem('paidQuoteInfo'), null);
-        if(paid && paid.verified) syncPaidQuoteUI().catch(()=>{});
-      }
+    } catch(e){ console.warn(e); }
+  }
+  function showError(msg){
+    const el = document.getElementById('errorBanner');
+    if(!el) { if(msg) alert(msg); return; }
+    if(!msg){ el.style.display='none'; el.textContent=''; } else { el.style.display='block'; el.textContent = msg; window.scrollTo({top:0, behavior:'smooth'}); }
+  }
+
+  /* -------------------- DOM & STATE -------------------- */
+  const STORAGE_KEY = 'cart';
+  const CURRENCY_KEY = 'currency';
+  const cartCountElem = document.getElementById('cartCount');
+  const orderItemsEl = document.getElementById('orderItems');
+  const orderSubtotalEl = document.getElementById('orderSubtotal');
+  const payBtn = document.getElementById('payBtn');
+  const currencySelect = document.getElementById('currency');
+  const currencyWrapper = document.getElementById('currencySelectorWrapper');
+  const nameInput = document.getElementById('name');
+  const emailInput = document.getElementById('email');
+  const phoneInput = document.getElementById('phone');
+  const addressInput = document.getElementById('address');
+
+  let productCache = {};
+  let selectedCurrency = localStorage.getItem(CURRENCY_KEY) || 'NGN';
+  let rawCart = safeParseJSON(localStorage.getItem(STORAGE_KEY), []) || [];
+  rawCart = mergeCartItems(rawCart);
+  const urlParams = new URLSearchParams(window.location.search);
+  const quoteId = urlParams.get('quoteId') || null;
+  const orderId = urlParams.get('orderId') || null;
+
+  let activeQuoteRaw = null;
+  let activeOrderRaw = null;
+  let quote = null;
+  let isPaidOrder = false;
+
+  /* -------------------- UTIL: cart helpers -------------------- */
+  function mergeCartItems(cartArray){
+    const merged=[];
+    (cartArray||[]).forEach(item=>{
+      const idx = merged.findIndex(i => i.id === item.id && (i.color||'') === (item.color||'') && (i.size||'') === (item.size||''));
+      if(idx === -1) merged.push({...item});
+      else merged[idx].quantity = Number(merged[idx].quantity||0) + Number(item.quantity||0);
     });
+    return merged;
+  }
+  function totalQtyFromCartArray(arr){ try { return (arr||[]).reduce((s,i)=>s + Number(i.quantity||0),0); } catch(e){ return 0; } }
 
-    /* -------------------- PRODUCT HELPERS (fetch product docs for fleurdevie) -------------------- */
-    async function fetchProductData(productId){
-      try {
-        if(productCache[productId]) return productCache[productId];
-        const snap = await getDoc(doc(db, "brands", "fleurdevie", "products", productId));
-        if(snap.exists()){ productCache[productId] = snap.data(); return productCache[productId]; }
-      } catch(e){ console.warn("fetchProductData failed", e); }
-      return null;
-    }
+  function computeAndUpdateCartCount(){
+    try {
+      const cartArr = mergeCartItems(safeParseJSON(localStorage.getItem(STORAGE_KEY), []) || []);
+      const cartQty = totalQtyFromCartArray(cartArr);
 
-    async function buildQuoteFromCart(){
-      rawCart = mergeCartItems(rawCart || []);
-      const byProduct = new Map();
-      rawCart.forEach(r=> { if(!byProduct.has(r.id)) byProduct.set(r.id, []); byProduct.get(r.id).push(r); });
-      const ids = Array.from(byProduct.keys());
-      const pdPromises = ids.map(id => fetchProductData(id).then(d=>[id,d]));
-      const pd = await Promise.all(pdPromises);
-      const productsMap = Object.fromEntries(pd.map(([id,doc])=>[id,doc]));
-      const items = [];
-      for(const id of ids){
-        const rows = byProduct.get(id) || [];
-        const productDoc = productsMap[id] || null;
-        const image = productDoc?.images?.[0] || productDoc?.imageUrl || rows[0]?.imageUrl || '';
-        const name = productDoc?.name || rows[0]?.name || 'Product';
-        const variants = rows.map(r=>{
-          const qty = Number(r.quantity||1);
-          const unitPrices = {
-            NGN: Number(productDoc?.priceNGN ?? r.price ?? 0),
-            USD: Number(productDoc?.priceUSD ?? 0),
-            EUR: Number(productDoc?.priceEUR ?? 0),
-            GBP: Number(productDoc?.priceGBP ?? 0)
-          };
-          return { id: r.id||id, color:r.color||'', size:r.size||'', quantity:qty, unitPrices, linePrices:{
-            NGN: unitPrices.NGN*qty, USD: unitPrices.USD*qty, EUR: unitPrices.EUR*qty, GBP: unitPrices.GBP*qty
-          } };
-        });
-        const totalQty = variants.reduce((s,v)=>s+v.quantity,0);
-        const totalPrices = { NGN:0, USD:0, EUR:0, GBP:0 };
-        variants.forEach(v=>{ totalPrices.NGN += v.linePrices.NGN||0; totalPrices.USD += v.linePrices.USD||0; totalPrices.EUR += v.linePrices.EUR||0; totalPrices.GBP += v.linePrices.GBP||0; });
-        items.push({ productId:id, name, image, totalQuantity: totalQty, totalPrices, variants, description: productDoc?.description||'' });
+      // --- FIX: only show quote items combined with cart when user is actually viewing a quote (quoteId present)
+      const isUnpaidQuoteView = (quoteId && !isPaidOrder && quote && Array.isArray(quote.items) && quote.items.length > 0 && !quote._isOrder && !quote._paidFlag);
+      if (isUnpaidQuoteView) {
+        const quoteQty = (quote && Array.isArray(quote.items)) ? quote.items.reduce((s,i)=>s + Number(i.totalQuantity||0),0) : 0;
+        const displayCount = Number(quoteQty || 0) + Number(cartQty || 0);
+        if(cartCountElem) cartCountElem.textContent = String(displayCount || 0);
+      } else {
+        // default: just show local cart qty
+        if(cartCountElem) cartCountElem.textContent = String(cartQty || 0);
       }
-      return { items };
-    }
+    } catch(e){ if(cartCountElem) cartCountElem.textContent = '0'; }
+  }
 
-    /* -------------------- NORMALIZERS (quote/order) -------------------- */
-    function normalizeQuoteItems(rawQuote){
-      const arr = Array.isArray(rawQuote.items) ? rawQuote.items : [];
-      const items = arr.map(ci => {
-        if(Array.isArray(ci.variants) && ci.variants.length){
-          const variants = ci.variants.map(v => {
-            const qty = Number(v.qty || v.quantity || 0);
-            const unitPrices = {
-              NGN: Number(v.priceNGN ?? v.price ?? 0),
-              USD: Number(v.priceUSD ?? 0),
-              EUR: Number(v.priceEUR ?? 0),
-              GBP: Number(v.priceGBP ?? 0)
-            };
-            return {
-              id: v.id || ci.id || '',
-              color: v.color||'',
-              size: v.size||'',
-              quantity: qty,
-              unitPrices,
-              linePrices: { NGN: unitPrices.NGN*qty, USD: unitPrices.USD*qty, EUR: unitPrices.EUR*qty, GBP: unitPrices.GBP*qty }
-            };
-          });
-          return {
-            productId: ci.id || '',
-            name: ci.name || '',
-            image: (ci.image && ci.image !== '../asset/placeholder.jpg') ? ci.image : null,
-            totalQuantity: variants.reduce((s,a)=>s+(a.quantity||0),0),
-            totalPrices: {
-              NGN: variants.reduce((s,a)=>s+(a.linePrices.NGN||0),0),
-              USD: variants.reduce((s,a)=>s+(a.linePrices.USD||0),0),
-              EUR: variants.reduce((s,a)=>s+(a.linePrices.EUR||0),0),
-              GBP: variants.reduce((s,a)=>s+(a.linePrices.GBP||0),0)
-            },
-            variants,
-            description: ci.desc || ci.description || ''
-          };
-        } else {
-          const qty = Number(ci.qty || ci.quantity || 1);
-          const unitPrices = { NGN: Number(ci.priceNGN ?? ci.price ?? 0), USD: Number(ci.priceUSD ?? 0), EUR: Number(ci.priceEUR ?? 0), GBP: Number(ci.priceGBP ?? 0) };
-          return {
-            productId: ci.id || '',
-            name: ci.name || '',
-            image: (ci.image && ci.image !== '../asset/placeholder.jpg') ? ci.image : null,
-            totalQuantity: qty,
-            totalPrices: { NGN: unitPrices.NGN*qty, USD: unitPrices.USD*qty, EUR: unitPrices.EUR*qty, GBP: unitPrices.GBP*qty },
-            variants: [{ id:ci.id||'', color:'', size:'', quantity: qty, unitPrices, linePrices: { NGN: unitPrices.NGN*qty, USD: unitPrices.USD*qty, EUR: unitPrices.EUR*qty, GBP: unitPrices.GBP*qty } }],
-            description: ci.desc || ci.description || ''
-          };
-        }
-      });
-      const normalized = { items };
-      normalized._isOrder = false;
-      normalized._paidFlag = (rawQuote && (rawQuote.status || '').toLowerCase() === 'paid') || false;
-      return normalized;
-    }
-    function normalizeOrderItems(items){
-      const normalized = (items||[]).map(it => ({
-        productId: it.id || '',
-        name: it.name || it.productName || '',
-        image: (it.image && it.image !== '../asset/placeholder.jpg') ? it.image : null,
-        totalQuantity: Number(it.qty || it.quantity) || 1,
-        description: it.description || '',
-        totalPrices: it.totalPrices || it.linePrices || {},
-        variants: it.variants || []
-      }));
-      const result = { items: normalized };
-      result._isOrder = true;
-      result._paidFlag = true;
-      return result;
-    }
-
-    /* -------------------- RENDER (keeps Fleur De Vie DOM & styles) -------------------- */
-    function renderOrderFromQuoteNormalized(quoteNormalized, currency='NGN', paid=false){
-      if(!orderItemsEl || !orderSubtotalEl) return;
-      orderItemsEl.innerHTML = '';
-      if(!quoteNormalized || !Array.isArray(quoteNormalized.items)) {
-        orderItemsEl.innerHTML = '<li class="small-note">No items</li>';
-        orderSubtotalEl.textContent = `Subtotal: —`;
-        computeAndUpdateCartCount();
-        return;
-      }
-      let subtotal = 0;
-      quoteNormalized.items.forEach((item, idx) => {
-        const value = (item.totalPrices && (item.totalPrices[currency] ?? 0)) || 0;
-        subtotal += value;
-
-        const li = document.createElement('li');
-        li.className = 'order-item';
-
-        const left = document.createElement('div');
-        left.className = 'left';
-
-        const headerWrapper = document.createElement('div');
-        headerWrapper.style.display = 'flex';
-        headerWrapper.style.alignItems = 'center';
-        headerWrapper.style.gap = '10px';
-
-        if(item.image){
-          const img = document.createElement('img');
-          img.src = item.image;
-          img.alt = item.name;
-          img.style.width = '56px';
-          img.style.height = '56px';
-          img.style.objectFit = 'cover';
-          img.style.borderRadius = '6px';
-          img.style.border = '1px solid rgba(0,0,0,0.06)';
-          headerWrapper.appendChild(img);
-        }
-
-        const textWrap = document.createElement('div');
-        const titleDiv = document.createElement('div');
-        titleDiv.className = 'title';
-        titleDiv.textContent = `${item.name} (x${item.totalQuantity})`;
-        textWrap.appendChild(titleDiv);
-
-        if(Array.isArray(item.variants) && item.variants.length > 1){
-          const info = document.createElement('div');
-          info.className = 'meta';
-          info.textContent = 'Multiple options selected';
-          textWrap.appendChild(info);
-        } else {
-          const singleV = item.variants && item.variants[0];
-          if(singleV && (singleV.color || singleV.size)){
-            const info = document.createElement('div');
-            info.className = 'meta';
-            info.textContent = `${singleV.color ? 'Color: ' + singleV.color : ''}${singleV.color && singleV.size ? ' · ' : ''}${singleV.size ? 'Size: ' + singleV.size : ''}`;
-            textWrap.appendChild(info);
-          }
-        }
-        headerWrapper.appendChild(textWrap);
-        left.appendChild(headerWrapper);
-
-        // variants container (hidden by default)
-        if(Array.isArray(item.variants) && item.variants.length > 1){
-          const toggle = document.createElement('button');
-          toggle.className = 'variant-toggle';
-          toggle.type = 'button';
-          toggle.setAttribute('aria-expanded','false');
-          toggle.title = 'View variants';
-          toggle.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>`;
-          headerWrapper.appendChild(toggle);
-
-          const variantsContainer = document.createElement('div');
-          variantsContainer.className = 'variants-container';
-          item.variants.forEach(v=>{
-            const row = document.createElement('div');
-            row.className = 'variant-row';
-            const leftRow = document.createElement('div');
-            leftRow.style.display = 'flex';
-            leftRow.style.gap = '8px';
-            leftRow.style.alignItems = 'center';
-            const attrs = document.createElement('div');
-            attrs.className = 'variant-attrs';
-            attrs.innerHTML = `${v.color ? `Color: ${v.color}` : ''}${v.color && v.size ? ' · ' : ''}${v.size ? `Size: ${v.size}` : ''} <span style="color:#556b59"> · qty: ${v.quantity}</span>`;
-            leftRow.appendChild(attrs);
-            const rightPrice = document.createElement('div');
-            rightPrice.className = 'variant-price';
-            const variantLinePrice = (v.linePrices && (v.linePrices[currency] ?? 0)) || ((v.unitPrices && (v.unitPrices[currency] ?? 0)) * v.quantity);
-            rightPrice.textContent = formatPrice(variantLinePrice, currency);
-            row.appendChild(leftRow);
-            row.appendChild(rightPrice);
-            variantsContainer.appendChild(row);
-          });
-          left.appendChild(variantsContainer);
-
-          toggle.addEventListener('click', () => {
-            const isShown = variantsContainer.classList.toggle('show');
-            toggle.setAttribute('aria-expanded', isShown ? 'true' : 'false');
-          });
-        }
-
-        const right = document.createElement('div');
-        right.className = 'right';
-        right.style.minWidth = '120px';
-        right.style.textAlign = 'right';
-        right.innerHTML = `<div style="font-weight:600">${formatPrice(value, currency)}</div>`;
-
-        li.appendChild(left);
-        li.appendChild(right);
-        orderItemsEl.appendChild(li);
-      });
-
-      orderSubtotalEl.textContent = `Subtotal: ${formatPrice(subtotal, selectedCurrency)}`;
+  window.addEventListener('storage', (e)=>{
+    if(e.key === STORAGE_KEY || e.key === CURRENCY_KEY || e.key === 'paidQuoteInfo'){
       computeAndUpdateCartCount();
     }
-
-    /* -------------------- FILL BILLING -------------------- */
-    function fillBillingFields(data){
-      if(nameInput) nameInput.value = data.name || data.customer || '';
-      if(emailInput) emailInput.value = data.email || data.customerEmail || '';
-      if(phoneInput) phoneInput.value = data.phone || data.phoneNumber || '';
-      if(addressInput) addressInput.value = data.address || data.shippingAddress || '';
+    if(e.key === 'paidQuoteInfo'){
+      const paid = safeParseJSON(localStorage.getItem('paidQuoteInfo'), null);
+      if(paid && paid.verified) syncPaidQuoteUI().catch(()=>{});
     }
+  });
 
-    /* -------------------- UI CONFIG (cart / quote unpaid / paid) -------------------- */
-    function configureCheckoutUI(type, opts = {}){
-      try {
-        const disableCurrency = (val) => {
-          if(currencySelect) currencySelect.disabled = val;
-          if(currencyWrapper) {
-            currencyWrapper.style.opacity = val ? '0.6' : '1';
-            currencyWrapper.style.pointerEvents = val ? 'none' : 'auto';
-            currencyWrapper.style.display = (type === 'quote-unpaid' ? 'block' : currencyWrapper.style.display || (type === 'cart' ? 'none' : 'block'));
-          }
+  /* -------------------- PRODUCT HELPERS (fetch product docs for fleurdevie) -------------------- */
+  async function fetchProductData(productId){
+    try {
+      if(productCache[productId]) return productCache[productId];
+      const snap = await getDoc(doc(db, "brands", "fleurdevie", "products", productId));
+      if(snap.exists()){ productCache[productId] = snap.data(); return productCache[productId]; }
+    } catch(e){ console.warn("fetchProductData failed", e); }
+    return null;
+  }
+
+  async function buildQuoteFromCart(){
+    rawCart = mergeCartItems(rawCart || []);
+    const byProduct = new Map();
+    rawCart.forEach(r=> { if(!byProduct.has(r.id)) byProduct.set(r.id, []); byProduct.get(r.id).push(r); });
+    const ids = Array.from(byProduct.keys());
+    const pdPromises = ids.map(id => fetchProductData(id).then(d=>[id,d]));
+    const pd = await Promise.all(pdPromises);
+    const productsMap = Object.fromEntries(pd.map(([id,doc])=>[id,doc]));
+    const items = [];
+    for(const id of ids){
+      const rows = byProduct.get(id) || [];
+      const productDoc = productsMap[id] || null;
+      const image = productDoc?.images?.[0] || productDoc?.imageUrl || rows[0]?.imageUrl || '';
+      const name = productDoc?.name || rows[0]?.name || 'Product';
+      const variants = rows.map(r=>{
+        const qty = Number(r.quantity||1);
+        const unitPrices = {
+          NGN: Number(productDoc?.priceNGN ?? r.price ?? 0),
+          USD: Number(productDoc?.priceUSD ?? 0),
+          EUR: Number(productDoc?.priceEUR ?? 0),
+          GBP: Number(productDoc?.priceGBP ?? 0)
         };
-        const billingFields = [nameInput, emailInput, phoneInput, addressInput].filter(Boolean);
-        const setBillingDisabled = (v) => billingFields.forEach(f => f.disabled = !!v);
-
-        if(type === 'cart'){
-          disableCurrency(true);
-          setBillingDisabled(false);
-          if(payBtn) { payBtn.textContent = 'Proceed to Payment'; payBtn.disabled = false; payBtn.dataset.processing = '0'; }
-        }
-
-        if(type === 'quote-unpaid'){
-          disableCurrency(false);
-          setBillingDisabled(false);
-          if(payBtn) { payBtn.textContent = 'Proceed to Payment'; payBtn.disabled = false; payBtn.dataset.processing = '0'; }
-        }
-
-        if(type === 'quote-paid' || type === 'order-paid'){
-          disableCurrency(true);
-          setBillingDisabled(true);
-          if(payBtn) { payBtn.textContent = 'Paid ✅'; payBtn.disabled = true; payBtn.classList.add('paid-state'); }
-          // show tracking ref if provided
-          if(opts.trackingRef){
-            let trackingElem = document.getElementById('trackingRefDisplay');
-            if(!trackingElem){
-              trackingElem = document.createElement('p');
-              trackingElem.id = 'trackingRefDisplay';
-              trackingElem.style.marginTop = '12px';
-              trackingElem.style.color = '#112e1f';
-              trackingElem.style.fontWeight = '600';
-              const container = document.querySelector('.hero-text') || document.querySelector('.hero');
-              if(container) container.appendChild(trackingElem);
-            }
-            document.getElementById('trackingRefDisplay').textContent = `Order Reference: ${opts.trackingRef}`;
-          }
-        }
-      } catch(e){ console.warn('configureCheckoutUI error', e); }
+        return { id: r.id||id, color:r.color||'', size:r.size||'', quantity:qty, unitPrices, linePrices:{
+          NGN: unitPrices.NGN*qty, USD: unitPrices.USD*qty, EUR: unitPrices.EUR*qty, GBP: unitPrices.GBP*qty
+        } };
+      });
+      const totalQty = variants.reduce((s,v)=>s+v.quantity,0);
+      const totalPrices = { NGN:0, USD:0, EUR:0, GBP:0 };
+      variants.forEach(v=>{ totalPrices.NGN += v.linePrices.NGN||0; totalPrices.USD += v.linePrices.USD||0; totalPrices.EUR += v.linePrices.EUR||0; totalPrices.GBP += v.linePrices.GBP||0; });
+      items.push({ productId:id, name, image, totalQuantity: totalQty, totalPrices, variants, description: productDoc?.description||'' });
     }
+    return { items };
+  }
 
-    /* -------------------- RENDER PAID UI FROM DOC -------------------- */
-    function renderPaidUIFromDoc(docData){
-      const normalized = (docData.items && Array.isArray(docData.items)) ? normalizeOrderItems(docData.items) : normalizeQuoteItems(docData);
-      normalized._isOrder = true;
-      normalized._paidFlag = true;
+  /* -------------------- NORMALIZERS (quote/order) -------------------- */
+  function normalizeQuoteItems(rawQuote){
+    const arr = Array.isArray(rawQuote.items) ? rawQuote.items : [];
+    const items = arr.map(ci => {
+      if(Array.isArray(ci.variants) && ci.variants.length){
+        const variants = ci.variants.map(v => {
+          const qty = Number(v.qty || v.quantity || 0);
+          const unitPrices = {
+            NGN: Number(v.priceNGN ?? v.price ?? 0),
+            USD: Number(v.priceUSD ?? 0),
+            EUR: Number(v.priceEUR ?? 0),
+            GBP: Number(v.priceGBP ?? 0)
+          };
+          return {
+            id: v.id || ci.id || '',
+            color: v.color||'',
+            size: v.size||'',
+            quantity: qty,
+            unitPrices,
+            linePrices: { NGN: unitPrices.NGN*qty, USD: unitPrices.USD*qty, EUR: unitPrices.EUR*qty, GBP: unitPrices.GBP*qty }
+          };
+        });
+        return {
+          productId: ci.id || '',
+          name: ci.name || '',
+          image: (ci.image && ci.image !== '../asset/placeholder.jpg') ? ci.image : null,
+          totalQuantity: variants.reduce((s,a)=>s+(a.quantity||0),0),
+          totalPrices: {
+            NGN: variants.reduce((s,a)=>s+(a.linePrices.NGN||0),0),
+            USD: variants.reduce((s,a)=>s+(a.linePrices.USD||0),0),
+            EUR: variants.reduce((s,a)=>s+(a.linePrices.EUR||0),0),
+            GBP: variants.reduce((s,a)=>s+(a.linePrices.GBP||0),0)
+          },
+          variants,
+          description: ci.desc || ci.description || ''
+        };
+      } else {
+        const qty = Number(ci.qty || ci.quantity || 1);
+        const unitPrices = { NGN: Number(ci.priceNGN ?? ci.price ?? 0), USD: Number(ci.priceUSD ?? 0), EUR: Number(ci.priceEUR ?? 0), GBP: Number(ci.priceGBP ?? 0) };
+        return {
+          productId: ci.id || '',
+          name: ci.name || '',
+          image: (ci.image && ci.image !== '../asset/placeholder.jpg') ? ci.image : null,
+          totalQuantity: qty,
+          totalPrices: { NGN: unitPrices.NGN*qty, USD: unitPrices.USD*qty, EUR: unitPrices.EUR*qty, GBP: unitPrices.GBP*qty },
+          variants: [{ id:ci.id||'', color:'', size:'', quantity: qty, unitPrices, linePrices: { NGN: unitPrices.NGN*qty, USD: unitPrices.USD*qty, EUR: unitPrices.EUR*qty, GBP: unitPrices.GBP*qty } }],
+          description: ci.desc || ci.description || ''
+        };
+      }
+    });
+    const normalized = { items };
+    normalized._isOrder = false;
+    normalized._paidFlag = (rawQuote && (rawQuote.status || '').toLowerCase() === 'paid') || false;
+    return normalized;
+  }
+  function normalizeOrderItems(items){
+    const normalized = (items||[]).map(it => ({
+      productId: it.id || '',
+      name: it.name || it.productName || '',
+      image: (it.image && it.image !== '../asset/placeholder.jpg') ? it.image : null,
+      totalQuantity: Number(it.qty || it.quantity) || 1,
+      description: it.description || '',
+      totalPrices: it.totalPrices || it.linePrices || {},
+      variants: it.variants || []
+    }));
+    const result = { items: normalized };
+    result._isOrder = true;
+    result._paidFlag = true;
+    return result;
+  }
 
-      isPaidOrder = true;
-      quote = normalized;
-      renderOrderFromQuoteNormalized(normalized, selectedCurrency, true);
+  /* -------------------- RENDER (keeps Fleur De Vie DOM & styles) -------------------- */
+  function renderOrderFromQuoteNormalized(quoteNormalized, currency='NGN', paid=false){
+    if(!orderItemsEl || !orderSubtotalEl) return;
+    orderItemsEl.innerHTML = '';
+    if(!quoteNormalized || !Array.isArray(quoteNormalized.items)) {
+      orderItemsEl.innerHTML = '<li class="small-note">No items</li>';
+      orderSubtotalEl.textContent = `Subtotal: —`;
+      computeAndUpdateCartCount();
+      return;
+    }
+    let subtotal = 0;
+    quoteNormalized.items.forEach((item, idx) => {
+      const value = (item.totalPrices && (item.totalPrices[currency] ?? 0)) || 0;
+      subtotal += value;
 
-      fillBillingFields(docData);
-      if(currencySelect && currencyWrapper){ currencySelect.value = docData.currency || selectedCurrency; currencySelect.disabled = true; currencyWrapper.style.opacity = 0.6; currencyWrapper.style.pointerEvents = 'none'; }
-      if(payBtn){ payBtn.textContent = 'Paid ✅'; payBtn.disabled = true; payBtn.classList.add('paid-state'); }
+      const li = document.createElement('li');
+      li.className = 'order-item';
 
-      configureCheckoutUI(orderId ? 'order-paid' : 'quote-paid', { trackingRef: docData.trackingRef });
+      const left = document.createElement('div');
+      left.className = 'left';
 
+      const headerWrapper = document.createElement('div');
+      headerWrapper.style.display = 'flex';
+      headerWrapper.style.alignItems = 'center';
+      headerWrapper.style.gap = '10px';
+
+      if(item.image){
+        const img = document.createElement('img');
+        img.src = item.image;
+        img.alt = item.name;
+        img.style.width = '56px';
+        img.style.height = '56px';
+        img.style.objectFit = 'cover';
+        img.style.borderRadius = '6px';
+        img.style.border = '1px solid rgba(0,0,0,0.06)';
+        headerWrapper.appendChild(img);
+      }
+
+      const textWrap = document.createElement('div');
+      const titleDiv = document.createElement('div');
+      titleDiv.className = 'title';
+      titleDiv.textContent = `${item.name} (x${item.totalQuantity})`;
+      textWrap.appendChild(titleDiv);
+
+      if(Array.isArray(item.variants) && item.variants.length > 1){
+        const info = document.createElement('div');
+        info.className = 'meta';
+        info.textContent = 'Multiple options selected';
+        textWrap.appendChild(info);
+      } else {
+        const singleV = item.variants && item.variants[0];
+        if(singleV && (singleV.color || singleV.size)){
+          const info = document.createElement('div');
+          info.className = 'meta';
+          info.textContent = `${singleV.color ? 'Color: ' + singleV.color : ''}${singleV.color && singleV.size ? ' · ' : ''}${singleV.size ? 'Size: ' + singleV.size : ''}`;
+          textWrap.appendChild(info);
+        }
+      }
+      headerWrapper.appendChild(textWrap);
+      left.appendChild(headerWrapper);
+
+      // variants container (hidden by default)
+      if(Array.isArray(item.variants) && item.variants.length > 1){
+        const toggle = document.createElement('button');
+        toggle.className = 'variant-toggle';
+        toggle.type = 'button';
+        toggle.setAttribute('aria-expanded','false');
+        toggle.title = 'View variants';
+        toggle.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>`;
+        headerWrapper.appendChild(toggle);
+
+        const variantsContainer = document.createElement('div');
+        variantsContainer.className = 'variants-container';
+        item.variants.forEach(v=>{
+          const row = document.createElement('div');
+          row.className = 'variant-row';
+          const leftRow = document.createElement('div');
+          leftRow.style.display = 'flex';
+          leftRow.style.gap = '8px';
+          leftRow.style.alignItems = 'center';
+          const attrs = document.createElement('div');
+          attrs.className = 'variant-attrs';
+          attrs.innerHTML = `${v.color ? `Color: ${v.color}` : ''}${v.color && v.size ? ' · ' : ''}${v.size ? `Size: ${v.size}` : ''} <span style="color:#556b59"> · qty: ${v.quantity}</span>`;
+          leftRow.appendChild(attrs);
+          const rightPrice = document.createElement('div');
+          rightPrice.className = 'variant-price';
+          const variantLinePrice = (v.linePrices && (v.linePrices[currency] ?? 0)) || ((v.unitPrices && (v.unitPrices[currency] ?? 0)) * v.quantity);
+          rightPrice.textContent = formatPrice(variantLinePrice, currency);
+          row.appendChild(leftRow);
+          row.appendChild(rightPrice);
+          variantsContainer.appendChild(row);
+        });
+        left.appendChild(variantsContainer);
+
+        toggle.addEventListener('click', () => {
+          const isShown = variantsContainer.classList.toggle('show');
+          toggle.setAttribute('aria-expanded', isShown ? 'true' : 'false');
+        });
+      }
+
+      const right = document.createElement('div');
+      right.className = 'right';
+      right.style.minWidth = '120px';
+      right.style.textAlign = 'right';
+      right.innerHTML = `<div style="font-weight:600">${formatPrice(value, currency)}</div>`;
+
+      li.appendChild(left);
+      li.appendChild(right);
+      orderItemsEl.appendChild(li);
+    });
+
+    // safe write
+    try { if(orderSubtotalEl) orderSubtotalEl.textContent = `Subtotal: ${formatPrice(subtotal, selectedCurrency)}`; } catch(e){}
+
+    computeAndUpdateCartCount();
+  }
+
+  /* -------------------- FILL BILLING -------------------- */
+  function fillBillingFields(data){
+    if(nameInput) nameInput.value = data.name || data.customer || '';
+    if(emailInput) emailInput.value = data.email || data.customerEmail || '';
+    if(phoneInput) phoneInput.value = data.phone || data.phoneNumber || '';
+    if(addressInput) addressInput.value = data.address || data.shippingAddress || '';
+  }
+
+  /* -------------------- UI CONFIG (cart / quote unpaid / paid) -------------------- */
+  function configureCheckoutUI(type, opts = {}){
+    try {
+      const disableCurrency = (val) => {
+        if(currencySelect) currencySelect.disabled = val;
+        if(currencyWrapper) {
+          currencyWrapper.style.opacity = val ? '0.6' : '1';
+          currencyWrapper.style.pointerEvents = val ? 'none' : 'auto';
+          currencyWrapper.style.display = (type === 'quote-unpaid' ? 'block' : currencyWrapper.style.display || (type === 'cart' ? 'none' : 'block'));
+        }
+      };
+      const billingFields = [nameInput, emailInput, phoneInput, addressInput].filter(Boolean);
+      const setBillingDisabled = (v) => billingFields.forEach(f => f.disabled = !!v);
+
+      if(type === 'cart'){
+        disableCurrency(true);
+        setBillingDisabled(false);
+        if(payBtn) { payBtn.textContent = 'Proceed to Payment'; payBtn.disabled = false; payBtn.dataset.processing = '0'; }
+      }
+
+      if(type === 'quote-unpaid'){
+        disableCurrency(false);
+        setBillingDisabled(false);
+        if(payBtn) { payBtn.textContent = 'Proceed to Payment'; payBtn.disabled = false; payBtn.dataset.processing = '0'; }
+      }
+
+      if(type === 'quote-paid' || type === 'order-paid'){
+        disableCurrency(true);
+        setBillingDisabled(true);
+        if(payBtn) { payBtn.textContent = 'Paid ✅'; payBtn.disabled = true; payBtn.classList.add('paid-state'); }
+        // show tracking ref if provided
+        if(opts.trackingRef){
+          let trackingElem = document.getElementById('trackingRefDisplay');
+          if(!trackingElem){
+            trackingElem = document.createElement('p');
+            trackingElem.id = 'trackingRefDisplay';
+            trackingElem.style.marginTop = '12px';
+            trackingElem.style.color = '#112e1f';
+            trackingElem.style.fontWeight = '600';
+            const container = document.querySelector('.hero-text') || document.querySelector('.hero');
+            if(container) container.appendChild(trackingElem);
+          }
+          const tEl = document.getElementById('trackingRefDisplay');
+          if(tEl) tEl.textContent = `Order Reference: ${opts.trackingRef}`;
+        }
+      }
+    } catch(e){ console.warn('configureCheckoutUI error', e); }
+  }
+
+  /* -------------------- RENDER PAID UI FROM DOC -------------------- */
+  function renderPaidUIFromDoc(docData){
+    const normalized = (docData.items && Array.isArray(docData.items)) ? normalizeOrderItems(docData.items) : normalizeQuoteItems(docData);
+    normalized._isOrder = true;
+    normalized._paidFlag = true;
+
+    isPaidOrder = true;
+    quote = normalized;
+    renderOrderFromQuoteNormalized(normalized, selectedCurrency, true);
+
+    fillBillingFields(docData);
+    if(currencySelect && currencyWrapper){ currencySelect.value = docData.currency || selectedCurrency; currencySelect.disabled = true; currencyWrapper.style.opacity = 0.6; currencyWrapper.style.pointerEvents = 'none'; }
+    if(payBtn){ payBtn.textContent = 'Paid ✅'; payBtn.disabled = true; payBtn.classList.add('paid-state'); }
+
+    configureCheckoutUI(orderId ? 'order-paid' : 'quote-paid', { trackingRef: docData.trackingRef });
+
+    try {
       localStorage.setItem('paidQuoteInfo', JSON.stringify({
         quoteId: docData.id || null,
         currency: docData.currency || selectedCurrency,
@@ -760,166 +766,179 @@
         trackingRef: docData.trackingRef || null,
         verified: true
       }));
+    } catch(e){}
 
-      computeAndUpdateCartCount();
-    }
+    computeAndUpdateCartCount();
+  }
 
-    /* -------------------- SYNC PAID QUOTE ON LOAD -------------------- */
-    async function syncPaidQuoteUI(){
-      const paidQuoteInfo = safeParseJSON(localStorage.getItem('paidQuoteInfo'), null);
-      if(!paidQuoteInfo) { removeBlurLoaderAndReveal(); return; }
-      renderPaidUIFromDoc({
-        id: paidQuoteInfo.quoteId,
-        trackingRef: paidQuoteInfo.trackingRef,
-        currency: paidQuoteInfo.currency,
-        name: paidQuoteInfo.billing?.name,
-        email: paidQuoteInfo.billing?.email,
-        phone: paidQuoteInfo.billing?.phone,
-        address: paidQuoteInfo.billing?.address,
-        items: []
-      });
-      configureCheckoutUI(quoteId ? 'quote-paid' : 'order-paid', { trackingRef: paidQuoteInfo.trackingRef });
+  /* -------------------- SYNC PAID QUOTE ON LOAD -------------------- */
+  async function syncPaidQuoteUI(){
+    const paidQuoteInfo = safeParseJSON(localStorage.getItem('paidQuoteInfo'), null);
+    if(!paidQuoteInfo) { removeBlurLoaderAndReveal(); return; }
+    renderPaidUIFromDoc({
+      id: paidQuoteInfo.quoteId,
+      trackingRef: paidQuoteInfo.trackingRef,
+      currency: paidQuoteInfo.currency,
+      name: paidQuoteInfo.billing?.name,
+      email: paidQuoteInfo.billing?.email,
+      phone: paidQuoteInfo.billing?.phone,
+      address: paidQuoteInfo.billing?.address,
+      items: []
+    });
+    configureCheckoutUI(quoteId ? 'quote-paid' : 'order-paid', { trackingRef: paidQuoteInfo.trackingRef });
 
-      try {
-        if(paidQuoteInfo.quoteId){
-          const docSnap = await getDoc(doc(db, "brands", "fleurdevie", "quotes", paidQuoteInfo.quoteId));
-          if(docSnap.exists()){
-            const q = docSnap.data(); q.id = paidQuoteInfo.quoteId;
-            if((q.status || '').toLowerCase() === 'paid' && q.orderId){
+    try {
+      if(paidQuoteInfo.quoteId){
+        let docSnap = null;
+        try {
+          docSnap = await getDoc(doc(db, "brands", "fleurdevie", "quotes", paidQuoteInfo.quoteId));
+        } catch(e){
+          // Permission-related or network error: show friendly message, but don't crash
+          console.error('syncPaidQuoteUI read error', e);
+          removeBlurLoaderAndReveal();
+          showError('Unable to verify quote details due to access restrictions. Contact support.');
+          return;
+        }
+        if(docSnap && docSnap.exists()){
+          const q = docSnap.data(); q.id = paidQuoteInfo.quoteId;
+          if((q.status || '').toLowerCase() === 'paid' && q.orderId){
+            try {
               const orderSnap = await getDoc(doc(db, "brands", "fleurdevie", "orders", q.orderId));
-              if(orderSnap.exists()){
+              if(orderSnap && orderSnap.exists()){
                 const o = orderSnap.data(); o.id = orderSnap.id;
                 renderPaidUIFromDoc(o);
                 removeBlurLoaderAndReveal();
                 return;
               }
-            }
-            renderPaidUIFromDoc(q);
-            removeBlurLoaderAndReveal();
-          } else {
-            removeBlurLoaderAndReveal();
+            } catch(e){ /* ignore order fetch failure and continue to show quote info */ }
           }
+          renderPaidUIFromDoc(q);
+          removeBlurLoaderAndReveal();
         } else {
           removeBlurLoaderAndReveal();
         }
-      } catch(e){ console.error('syncPaidQuoteUI failed', e); removeBlurLoaderAndReveal(); }
-    }
-
-    /* -------------------- ORDER ID GENERATOR & SAVE ORDER (fleurdevie path) -------------------- */
-    function generateOrderReference(email, orderId, txRef){
-      const rand = () => Math.random().toString(36).substring(2,6).toUpperCase();
-      const now = new Date();
-      const day = String(now.getDate()).padStart(2,'0');
-      const month = now.toLocaleString('en',{month:'short'}).toUpperCase();
-      const year = String(now.getFullYear()).slice(-2);
-      const emailPrefix = email ? email.split('@')[0].slice(0,3).toUpperCase() : "FV";
-      const shortTx = txRef ? String(txRef).slice(-4).toUpperCase() : rand();
-      return `${emailPrefix}-${day}${month}${year}-${shortTx}`;
-    }
-
-    async function persistPaidOrder(orderData, txRef) {
-      try {
-        const trackingRef = generateOrderReference(orderData.email, orderData.id || "", txRef);
-        const docRef = doc(db, "brands", "fleurdevie", "orders", trackingRef);
-        await setDoc(docRef, {
-          ...orderData,
-          createdAt: serverTimestamp(),
-          verifiedAt: serverTimestamp(),
-          status: "paid",
-          trackingRef
-        });
-
-        // Update related quote if exists
-        if(orderData.source && String(orderData.source).startsWith('quote:')){
-          const qid = String(orderData.source).split('quote:')[1];
-          if(qid){
-            try {
-              await updateDoc(doc(db, "brands", "fleurdevie", "quotes", qid), {
-                status: "Paid",
-                orderId: trackingRef,
-                paidAt: serverTimestamp(),
-                trackingRef
-              });
-            } catch(e){}
-          }
-        }
-        return { orderId: trackingRef, trackingRef };
-      } catch(e){
-        console.error("persistPaidOrder failed", e);
-        return null;
+      } else {
+        removeBlurLoaderAndReveal();
       }
-    }
+    } catch(e){ console.error('syncPaidQuoteUI failed', e); removeBlurLoaderAndReveal(); }
+  }
 
-    /* -------------------- PAYMENT (Flutterwave) -------------------- */
-    const FLW_PUBLIC_KEY = "FLWPUBK_TEST-07eb9d2da345c08dc4d54278c3bc86f7-X"; // same account as Serac
-    const SERVERLESS_VERIFY = `${window.location.origin}/api/verify`;
+  /* -------------------- ORDER ID GENERATOR & SAVE ORDER (fleurdevie path) -------------------- */
+  function generateOrderReference(email, orderId, txRef){
+    const rand = () => Math.random().toString(36).substring(2,6).toUpperCase();
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2,'0');
+    const month = now.toLocaleString('en',{month:'short'}).toUpperCase();
+    const year = String(now.getFullYear()).slice(-2);
+    const emailPrefix = email ? email.split('@')[0].slice(0,3).toUpperCase() : "FV";
+    const shortTx = txRef ? String(txRef).slice(-4).toUpperCase() : rand();
+    return `${emailPrefix}-${day}${month}${year}-${shortTx}`;
+  }
 
-    async function fetchWithRetry(url, options={}, retries=1, backoff=500){
-      try { const r = await fetch(url, options); if(!r.ok) throw new Error('HTTP '+r.status); return r; }
-      catch(err){ if(retries>0){ await new Promise(res=>setTimeout(res, backoff)); return fetchWithRetry(url, options, retries-1, Math.round(backoff*1.5)); } throw err; }
+  async function persistPaidOrder(orderData, txRef) {
+    try {
+      const trackingRef = generateOrderReference(orderData.email, orderData.id || "", txRef);
+      const docRef = doc(db, "brands", "fleurdevie", "orders", trackingRef);
+      await setDoc(docRef, {
+        ...orderData,
+        createdAt: serverTimestamp(),
+        verifiedAt: serverTimestamp(),
+        status: "paid",
+        trackingRef
+      });
+
+      // Update related quote if exists
+      if(orderData.source && String(orderData.source).startsWith('quote:')){
+        const qid = String(orderData.source).split('quote:')[1];
+        if(qid){
+          try {
+            await updateDoc(doc(db, "brands", "fleurdevie", "quotes", qid), {
+              status: "Paid",
+              orderId: trackingRef,
+              paidAt: serverTimestamp(),
+              trackingRef
+            });
+          } catch(e){}
+        }
+      }
+      return { orderId: trackingRef, trackingRef };
+    } catch(e){
+      console.error("persistPaidOrder failed", e);
+      return null;
     }
-    async function verifyPayment(payload){
+  }
+
+  /* -------------------- PAYMENT (Flutterwave) -------------------- */
+  const FLW_PUBLIC_KEY = "FLWPUBK_TEST-07eb9d2da345c08dc4d54278c3bc86f7-X"; // same account as Serac
+  const SERVERLESS_VERIFY = `${window.location.origin}/api/verify`;
+
+  async function fetchWithRetry(url, options={}, retries=1, backoff=500){
+    try { const r = await fetch(url, options); if(!r.ok) throw new Error('HTTP '+r.status); return r; }
+    catch(err){ if(retries>0){ await new Promise(res=>setTimeout(res, backoff)); return fetchWithRetry(url, options, retries-1, Math.round(backoff*1.5)); } throw err; }
+  }
+  async function verifyPayment(payload){
+    try {
+      const opts = { method: 'POST', headers: {'Content-Type':'application/json','Connection':'close'}, body: JSON.stringify(payload), cache:'no-store', mode:'cors', credentials:'omit', keepalive:true };
+      const res = await fetchWithRetry(SERVERLESS_VERIFY, opts, 1);
+      return await res.json();
+    } catch(e){ console.error('verifyPayment error', e); throw e; }
+  }
+
+  async function initiatePaymentFlow(ev){
+    if(ev && ev.preventDefault) ev.preventDefault();
+    if(isPaidOrder) return;
+    showError('');
+
+    const name = (nameInput?.value||'').trim();
+    const email = (emailInput?.value||'').trim();
+    const phone = (phoneInput?.value||'').trim();
+    const address = (addressInput?.value||'').trim();
+    if(!name) return showError('Name is required.');
+    if(!/^\S+@\S+\.\S+$/.test(email)) return showError('Please provide a valid email.');
+    if(!phone) return showError('Phone is required.');
+    if(!address) return showError('Address is required.');
+    if(!quote || !Array.isArray(quote.items) || quote.items.length === 0) return showError('Cart is empty.');
+
+    let subtotal = 0;
+    quote.items.forEach(it => { subtotal += Number(it.totalPrices?.[selectedCurrency] ?? 0); });
+    if(subtotal <= 0) return showError('Subtotal is zero. Cannot proceed.');
+
+    if(payBtn?.dataset.processing === '1') return;
+    if(payBtn){ payBtn.dataset.processing = '1'; payBtn.disabled = true; }
+
+    showSpinner(true);
+
+    const baseOrder = {
+      name, email, phone, address,
+      currency: selectedCurrency,
+      items: quote.items,
+      total: subtotal,
+      status: 'placed',
+      source: quoteId ? `quote:${quoteId}` : 'cart',
+      createdAt: new Date().toISOString()
+    };
+
+    const txRef = 'fleurdevie_' + Date.now();
+    let paymentCallbackHandled = false;
+
+    async function finalizeAfterSuccess(verifyResp){
       try {
-        const opts = { method: 'POST', headers: {'Content-Type':'application/json','Connection':'close'}, body: JSON.stringify(payload), cache:'no-store', mode:'cors', credentials:'omit', keepalive:true };
-        const res = await fetchWithRetry(SERVERLESS_VERIFY, opts, 1);
-        return await res.json();
-      } catch(e){ console.error('verifyPayment error', e); throw e; }
-    }
+        const saved = await persistPaidOrder(baseOrder, txRef);
+        const finalOrderId = saved?.orderId || null;
+        const trackingRef = saved?.trackingRef || generateOrderReference(baseOrder.email, finalOrderId||'', txRef);
 
-    async function initiatePaymentFlow(ev){
-      if(ev && ev.preventDefault) ev.preventDefault();
-      if(isPaidOrder) return;
-      showError('');
+        if(!quoteId) localStorage.removeItem(STORAGE_KEY);
 
-      const name = (nameInput?.value||'').trim();
-      const email = (emailInput?.value||'').trim();
-      const phone = (phoneInput?.value||'').trim();
-      const address = (addressInput?.value||'').trim();
-      if(!name) return showError('Name is required.');
-      if(!/^\S+@\S+\.\S+$/.test(email)) return showError('Please provide a valid email.');
-      if(!phone) return showError('Phone is required.');
-      if(!address) return showError('Address is required.');
-      if(!quote || !Array.isArray(quote.items) || quote.items.length === 0) return showError('Cart is empty.');
+        const active = { ...baseOrder, id: finalOrderId, orderId: finalOrderId, status: 'paid', trackingRef };
+        activeOrderRaw = active;
+        quote = { items: active.items || [] };
+        quote._isOrder = true;
+        quote._paidFlag = true;
+        isPaidOrder = true;
 
-      let subtotal = 0;
-      quote.items.forEach(it => { subtotal += Number(it.totalPrices?.[selectedCurrency] ?? 0); });
-      if(subtotal <= 0) return showError('Subtotal is zero. Cannot proceed.');
+        renderPaidUIFromDoc(active);
 
-      if(payBtn?.dataset.processing === '1') return;
-      if(payBtn){ payBtn.dataset.processing = '1'; payBtn.disabled = true; }
-
-      showSpinner(true);
-
-      const baseOrder = {
-        name, email, phone, address,
-        currency: selectedCurrency,
-        items: quote.items,
-        total: subtotal,
-        status: 'placed',
-        source: quoteId ? `quote:${quoteId}` : 'cart',
-        createdAt: new Date().toISOString()
-      };
-
-      const txRef = 'fleurdevie_' + Date.now();
-      let paymentCallbackHandled = false;
-
-      async function finalizeAfterSuccess(verifyResp){
         try {
-          const saved = await persistPaidOrder(baseOrder, txRef);
-          const finalOrderId = saved?.orderId || null;
-          const trackingRef = saved?.trackingRef || generateOrderReference(baseOrder.email, finalOrderId||'', txRef);
-
-          if(!quoteId) localStorage.removeItem(STORAGE_KEY);
-
-          const active = { ...baseOrder, id: finalOrderId, orderId: finalOrderId, status: 'paid', trackingRef };
-          activeOrderRaw = active;
-          quote = { items: active.items || [] };
-          quote._isOrder = true;
-          quote._paidFlag = true;
-          isPaidOrder = true;
-
-          renderPaidUIFromDoc(active);
-
           localStorage.setItem('paidQuoteInfo', JSON.stringify({
             quoteId: quoteId || null,
             currency: selectedCurrency,
@@ -927,8 +946,10 @@
             trackingRef,
             verified: true
           }));
+        } catch(e){}
 
-          // Save last order for thank you page
+        // Save last order for thank you page
+        try {
           localStorage.setItem('lastOrder_fleurdevie', JSON.stringify({
             id: finalOrderId,
             trackingRef,
@@ -943,114 +964,131 @@
             verified: true,
             createdAt: new Date().toISOString()
           }));
+        } catch(e){}
 
-          showSpinner(false);
+        showSpinner(false);
 
-          // Redirect to fleurdevie thankyou (keep original path)
-          window.location.assign('../thankyou.html');
+        // Redirect to fleurdevie thankyou (keep original path)
+        window.location.assign('../thankyou.html');
+      } catch(e){
+        console.error('finalizeAfterSuccess error', e);
+        showSpinner(false);
+        showError('Payment verified but finalisation failed. Contact support with tx_ref: ' + txRef);
+        if(payBtn){ payBtn.disabled = false; payBtn.dataset.processing = '0'; }
+      }
+    }
+
+    const fwConfig = {
+      public_key: FLW_PUBLIC_KEY,
+      tx_ref: txRef,
+      amount: Number(subtotal),
+      currency: selectedCurrency,
+      customer: { email: baseOrder.email, phonenumber: baseOrder.phone, name: baseOrder.name },
+      customizations: { title: "Fleur De Vie", description: "Order Payment", logo: "../logo.png" },
+
+      callback: async function(data){
+        if(paymentCallbackHandled) return;
+        paymentCallbackHandled = true;
+        showSpinner(true);
+        try {
+          const flwId = data?.data?.id || data.id || data.transaction_id || null;
+          if(!flwId) throw new Error('Missing transaction ID from Flutterwave');
+          const payload = { transaction_id: flwId, tx_ref: data.tx_ref || txRef, expectedAmount: subtotal, currency: selectedCurrency, orderData: baseOrder, quoteId: quoteId || null };
+          const verifyResp = await verifyPayment(payload);
+          if(verifyResp && ((verifyResp.status === 'success') || (verifyResp.success === true) || (verifyResp.verified === true) || (verifyResp.data?.status === 'successful'))){
+            await finalizeAfterSuccess(verifyResp);
+          } else {
+            showSpinner(false);
+            showError('Payment verification failed. Contact support with tx_ref: ' + txRef);
+            if(payBtn){ payBtn.disabled = false; payBtn.dataset.processing = '0'; }
+          }
         } catch(e){
-          console.error('finalizeAfterSuccess error', e);
+          console.error('Verification error', e);
           showSpinner(false);
-          showError('Payment verified but finalisation failed. Contact support with tx_ref: ' + txRef);
+          showError('Payment succeeded but could not be verified. Contact support.');
           if(payBtn){ payBtn.disabled = false; payBtn.dataset.processing = '0'; }
+        }
+      },
+
+      onclose: function(){
+        if(paymentCallbackHandled) return;
+        paymentCallbackHandled = true;
+        showSpinner(false);
+        showError('Payment was cancelled. Please complete your checkout.');
+        if(payBtn){ payBtn.disabled = false; payBtn.dataset.processing = '0'; }
+      }
+    };
+
+    try { FlutterwaveCheckout(fwConfig); }
+    catch(err){ showSpinner(false); if(payBtn){ payBtn.disabled = false; payBtn.dataset.processing = '0'; } console.error('Flutterwave failed', err); showError('Payment gateway unavailable. Try again later.'); }
+
+    // Poll fallback verification
+    let attempts = 0; const maxAttempts = 6;
+    const poll = setInterval(async ()=>{
+      if(paymentCallbackHandled) return clearInterval(poll);
+      attempts++;
+      try {
+        const res = await verifyPayment({ tx_ref: txRef, orderData: baseOrder, expectedAmount: subtotal, currency: selectedCurrency });
+        if(res && ((res.status === 'success') || (res.success === true) || (res.verified === true) || (res.data?.status === 'successful'))){
+          clearInterval(poll); paymentCallbackHandled = true; await finalizeAfterSuccess(res);
+        }
+      } catch(e){
+        if(attempts >= maxAttempts){ clearInterval(poll); showSpinner(false); showError('Automatic verification failed. Contact support with tx_ref: ' + txRef); if(payBtn){ payBtn.disabled = false; payBtn.dataset.processing = '0'; } }
+      }
+    }, 3000);
+  }
+
+  /* -------------------- LOAD CHECKOUT DATA: order -> quote -> cart -------------------- */
+  async function loadCheckoutData(){
+    selectedCurrency = localStorage.getItem(CURRENCY_KEY) || selectedCurrency || 'NGN';
+    if(currencySelect) currencySelect.value = selectedCurrency;
+    if(currencyWrapper) currencyWrapper.style.display = quoteId ? 'block' : (currencyWrapper.style.display || 'none');
+
+    try {
+      showSpinner(true);
+
+      // 1) orderId param -> fetch order and render paid summary
+      if(orderId){
+        try {
+          const snap = await getDoc(doc(db, "brands", "fleurdevie", "orders", orderId));
+          if(snap && snap.exists()){
+            const data = snap.data(); data.id = snap.id;
+            activeOrderRaw = data;
+            fillBillingFields(data);
+            renderPaidUIFromDoc(data);
+            showSpinner(false);
+            removeBlurLoaderAndReveal();
+            return;
+          }
+        } catch(e){
+          console.error("Error loading order by id", e);
+          showError('Unable to load order. Contact support.');
+          removeBlurLoaderAndReveal();
+          return;
         }
       }
 
-      const fwConfig = {
-        public_key: FLW_PUBLIC_KEY,
-        tx_ref: txRef,
-        amount: Number(subtotal),
-        currency: selectedCurrency,
-        customer: { email: baseOrder.email, phonenumber: baseOrder.phone, name: baseOrder.name },
-        customizations: { title: "Fleur De Vie", description: "Order Payment", logo: "../logo.png" },
-
-        callback: async function(data){
-          if(paymentCallbackHandled) return;
-          paymentCallbackHandled = true;
-          showSpinner(true);
-          try {
-            const flwId = data?.data?.id || data.id || data.transaction_id || null;
-            if(!flwId) throw new Error('Missing transaction ID from Flutterwave');
-            const payload = { transaction_id: flwId, tx_ref: data.tx_ref || txRef, expectedAmount: subtotal, currency: selectedCurrency, orderData: baseOrder, quoteId: quoteId || null };
-            const verifyResp = await verifyPayment(payload);
-            if(verifyResp && ((verifyResp.status === 'success') || (verifyResp.success === true) || (verifyResp.verified === true) || (verifyResp.data?.status === 'successful'))){
-              await finalizeAfterSuccess(verifyResp);
-            } else {
-              showSpinner(false);
-              showError('Payment verification failed. Contact support with tx_ref: ' + txRef);
-              if(payBtn){ payBtn.disabled = false; payBtn.dataset.processing = '0'; }
-            }
-          } catch(e){
-            console.error('Verification error', e);
-            showSpinner(false);
-            showError('Payment succeeded but could not be verified. Contact support.');
-            if(payBtn){ payBtn.disabled = false; payBtn.dataset.processing = '0'; }
-          }
-        },
-
-        onclose: function(){
-          if(paymentCallbackHandled) return;
-          paymentCallbackHandled = true;
-          showSpinner(false);
-          showError('Payment was cancelled. Please complete your checkout.');
-          if(payBtn){ payBtn.disabled = false; payBtn.dataset.processing = '0'; }
-        }
-      };
-
-      try { FlutterwaveCheckout(fwConfig); }
-      catch(err){ showSpinner(false); if(payBtn){ payBtn.disabled = false; payBtn.dataset.processing = '0'; } console.error('Flutterwave failed', err); showError('Payment gateway unavailable. Try again later.'); }
-
-      // Poll fallback verification
-      let attempts = 0; const maxAttempts = 6;
-      const poll = setInterval(async ()=>{
-        if(paymentCallbackHandled) return clearInterval(poll);
-        attempts++;
+      // 2) quoteId param -> fetch quote doc
+      if(quoteId){
+        let qSnap = null;
         try {
-          const res = await verifyPayment({ tx_ref: txRef, orderData: baseOrder, expectedAmount: subtotal, currency: selectedCurrency });
-          if(res && ((res.status === 'success') || (res.success === true) || (res.verified === true) || (res.data?.status === 'successful'))){
-            clearInterval(poll); paymentCallbackHandled = true; await finalizeAfterSuccess(res);
-          }
+          qSnap = await getDoc(doc(db, "brands", "fleurdevie", "quotes", quoteId));
         } catch(e){
-          if(attempts >= maxAttempts){ clearInterval(poll); showSpinner(false); showError('Automatic verification failed. Contact support with tx_ref: ' + txRef); if(payBtn){ payBtn.disabled = false; payBtn.dataset.processing = '0'; } }
+          console.error("Error fetching quote", e);
+          // Permission or network issue — do not crash; show message and display local paid info if available
+          showSpinner(false);
+          removeBlurLoaderAndReveal();
+          showError('Unable to access quote details. Contact support.');
+          return;
         }
-      }, 3000);
-    }
+        if(!qSnap || !qSnap.exists()){ showSpinner(false); removeBlurLoaderAndReveal(); showError('Quote not found.'); return; }
+        activeQuoteRaw = qSnap.data(); activeQuoteRaw.id = qSnap.id;
+        const qStatus = (activeQuoteRaw.status || '').toLowerCase();
 
-    /* -------------------- LOAD CHECKOUT DATA: order -> quote -> cart -------------------- */
-    async function loadCheckoutData(){
-      selectedCurrency = localStorage.getItem(CURRENCY_KEY) || selectedCurrency || 'NGN';
-      if(currencySelect) currencySelect.value = selectedCurrency;
-      if(currencyWrapper) currencyWrapper.style.display = quoteId ? 'block' : (currencyWrapper.style.display || 'none');
-
-      try {
-        showSpinner(true);
-
-        // 1) orderId param -> fetch order and render paid summary
-        if(orderId){
+        if(qStatus === 'paid' && activeQuoteRaw.orderId){
           try {
-            const snap = await getDoc(doc(db, "brands", "fleurdevie", "orders", orderId));
-            if(snap.exists()){
-              const data = snap.data(); data.id = snap.id;
-              activeOrderRaw = data;
-              fillBillingFields(data);
-              renderPaidUIFromDoc(data);
-              showSpinner(false);
-              removeBlurLoaderAndReveal();
-              return;
-            }
-          } catch(e){ console.error("Error loading order by id", e); }
-        }
-
-        // 2) quoteId param -> fetch quote doc
-        if(quoteId){
-          const qSnap = await getDoc(doc(db, "brands", "fleurdevie", "quotes", quoteId));
-          if(!qSnap.exists()){ showSpinner(false); removeBlurLoaderAndReveal(); showError('Quote not found.'); return; }
-          activeQuoteRaw = qSnap.data(); activeQuoteRaw.id = qSnap.id;
-          const qStatus = (activeQuoteRaw.status || '').toLowerCase();
-
-          if(qStatus === 'paid' && activeQuoteRaw.orderId){
             const orderSnap = await getDoc(doc(db, "brands", "fleurdevie", "orders", activeQuoteRaw.orderId));
-            if(orderSnap.exists()){
+            if(orderSnap && orderSnap.exists()){
               const orderData = orderSnap.data(); orderData.id = orderSnap.id;
               activeOrderRaw = orderData;
               fillBillingFields(orderData);
@@ -1065,141 +1103,149 @@
               removeBlurLoaderAndReveal();
               return;
             }
+          } catch(e){
+            // fail gracefully
+            console.error('Error fetching order for paid quote', e);
+            isPaidOrder = true;
+            renderPaidUIFromDoc(activeQuoteRaw);
+            showSpinner(false);
+            removeBlurLoaderAndReveal();
+            return;
           }
-
-          if(activeQuoteRaw.customer && nameInput) nameInput.value = activeQuoteRaw.customer;
-          if(activeQuoteRaw.email && emailInput) emailInput.value = activeQuoteRaw.email;
-          quote = normalizeQuoteItems(activeQuoteRaw);
-          quote._isOrder = false;
-          quote._paidFlag = (activeQuoteRaw.status || '').toLowerCase() === 'paid';
-          renderOrderFromQuoteNormalized(quote, selectedCurrency, false);
-          configureCheckoutUI('quote-unpaid');
-          setCheckoutUI();
-          showSpinner(false);
-          removeBlurLoaderAndReveal();
-          return;
         }
 
-        // 3) Cart view (local)
-        rawCart = mergeCartItems(safeParseJSON(localStorage.getItem(STORAGE_KEY), []) || []);
-        if(!rawCart.length){
-          quote = { items: [] };
-          renderOrderFromQuoteNormalized(quote, selectedCurrency, false);
-          showSpinner(false);
-          showError('Your cart is empty.');
-          configureCheckoutUI('cart');
-          removeBlurLoaderAndReveal();
-          return;
-        }
-        quote = await buildQuoteFromCart();
+        if(activeQuoteRaw.customer && nameInput) nameInput.value = activeQuoteRaw.customer;
+        if(activeQuoteRaw.email && emailInput) emailInput.value = activeQuoteRaw.email;
+        quote = normalizeQuoteItems(activeQuoteRaw);
         quote._isOrder = false;
-        quote._paidFlag = false;
+        quote._paidFlag = (activeQuoteRaw.status || '').toLowerCase() === 'paid';
         renderOrderFromQuoteNormalized(quote, selectedCurrency, false);
-        configureCheckoutUI('cart');
+        configureCheckoutUI('quote-unpaid');
         setCheckoutUI();
         showSpinner(false);
         removeBlurLoaderAndReveal();
-      } catch(e){
+        return;
+      }
+
+      // 3) Cart view (local)
+      rawCart = mergeCartItems(safeParseJSON(localStorage.getItem(STORAGE_KEY), []) || []);
+      if(!rawCart.length){
+        quote = { items: [] };
+        renderOrderFromQuoteNormalized(quote, selectedCurrency, false);
         showSpinner(false);
-        console.error('loadCheckoutData failed', e);
-        showError('Failed to load checkout data. Refresh and try again.');
+        showError('Your cart is empty.');
+        configureCheckoutUI('cart');
         removeBlurLoaderAndReveal();
+        return;
       }
+      quote = await buildQuoteFromCart();
+      quote._isOrder = false;
+      quote._paidFlag = false;
+      renderOrderFromQuoteNormalized(quote, selectedCurrency, false);
+      configureCheckoutUI('cart');
+      setCheckoutUI();
+      showSpinner(false);
+      removeBlurLoaderAndReveal();
+    } catch(e){
+      showSpinner(false);
+      console.error('loadCheckoutData failed', e);
+      showError('Failed to load checkout data. Refresh and try again.');
+      removeBlurLoaderAndReveal();
     }
+  }
 
-    /* -------------------- SET CHECKOUT UI (unpaid) -------------------- */
-    function setCheckoutUI(){
-      // keep Fleur De Vie hero text untouched except basic wording
-      const heroTitle = document.querySelector('.hero-text h1');
-      if(heroTitle) heroTitle.textContent = quoteId ? 'Quote Checkout' : 'Checkout';
-      if(payBtn){ payBtn.textContent = 'Proceed to Payment'; payBtn.disabled = false; payBtn.classList.remove('paid-state'); payBtn.dataset.processing = '0'; }
-      computeAndUpdateCartCount();
+  /* -------------------- SET CHECKOUT UI (unpaid) -------------------- */
+  function setCheckoutUI(){
+    // keep Fleur De Vie hero text untouched except basic wording
+    const heroTitle = document.querySelector('.hero-text h1');
+    if(heroTitle) heroTitle.textContent = quoteId ? 'Quote Checkout' : 'Checkout';
+    if(payBtn){ payBtn.textContent = 'Proceed to Payment'; payBtn.disabled = false; payBtn.classList.remove('paid-state'); payBtn.dataset.processing = '0'; }
+    computeAndUpdateCartCount();
+  }
+
+  /* -------------------- BINDINGS -------------------- */
+  if(payBtn) payBtn.addEventListener('click', initiatePaymentFlow);
+  if(currencySelect) currencySelect.addEventListener('change', ()=>{ selectedCurrency = currencySelect.value; localStorage.setItem(CURRENCY_KEY, selectedCurrency); if(quote) renderOrderFromQuoteNormalized(quote, selectedCurrency, isPaidOrder); });
+
+  window.addEventListener('scroll', () => {
+    const header = document.querySelector('.site-header');
+    if(!header) return;
+    if(window.scrollY > 50) header.classList.add('scrolled'); else header.classList.remove('scrolled');
+  });
+
+  // hamburger
+  const hamburgerBtn = document.getElementById('hamburger-btn');
+  const navMenu = document.getElementById('nav-menu');
+  if(hamburgerBtn) hamburgerBtn.addEventListener('click', ()=>{ hamburgerBtn.classList.toggle('open'); if(navMenu) navMenu.classList.toggle('open'); });
+
+  /* -------------------- INIT -------------------- */
+  (async function init(){
+    try { if(currencySelect) currencySelect.value = selectedCurrency; } catch(e){}
+    try { computeAndUpdateCartCount(); } catch(e){}
+    const paidQuoteInfo = safeParseJSON(localStorage.getItem('paidQuoteInfo'), null);
+    if(quoteId && paidQuoteInfo && paidQuoteInfo.verified && paidQuoteInfo.quoteId === quoteId){
+      await syncPaidQuoteUI();
+    } else {
+      await loadCheckoutData();
     }
+  })();
 
-    /* -------------------- BINDINGS -------------------- */
-    if(payBtn) payBtn.addEventListener('click', initiatePaymentFlow);
-    if(currencySelect) currencySelect.addEventListener('change', ()=>{ selectedCurrency = currencySelect.value; localStorage.setItem(CURRENCY_KEY, selectedCurrency); if(quote) renderOrderFromQuoteNormalized(quote, selectedCurrency, isPaidOrder); });
-
-    window.addEventListener('scroll', () => {
-      const header = document.querySelector('.site-header');
-      if(!header) return;
-      if(window.scrollY > 50) header.classList.add('scrolled'); else header.classList.remove('scrolled');
-    });
-
-    // hamburger
-    const hamburgerBtn = document.getElementById('hamburger-btn');
-    const navMenu = document.getElementById('nav-menu');
-    if(hamburgerBtn) hamburgerBtn.addEventListener('click', ()=>{ hamburgerBtn.classList.toggle('open'); if(navMenu) navMenu.classList.toggle('open'); });
-
-    
-
-    /* -------------------- INIT -------------------- */
-    (async function init(){
-      try { if(currencySelect) currencySelect.value = selectedCurrency; } catch(e){}
-      try { computeAndUpdateCartCount(); } catch(e){}
-      const paidQuoteInfo = safeParseJSON(localStorage.getItem('paidQuoteInfo'), null);
-      if(quoteId && paidQuoteInfo && paidQuoteInfo.verified && paidQuoteInfo.quoteId === quoteId){
-        await syncPaidQuoteUI();
-      } else {
-        await loadCheckoutData();
+  /* -------------------- suppress known noisy errors from FP/Flutterwave -------------------- */
+  window.addEventListener('error', (e)=>{
+    try {
+      const msg = (e && e.message) ? e.message.toLowerCase() : '';
+      const file = (e && e.filename) ? e.filename.toLowerCase() : '';
+      if(msg.includes('api key not found') || file.includes('metrics.flutterwave.com') || file.includes('loader_v') || file.includes('initfingerprint') || msg.includes('fpjs')){
+        console.warn('Suppressed known noise:', e.message || e.filename);
+        e.preventDefault && e.preventDefault();
       }
-    })();
+    } catch(err){}
+  });
 
-    /* -------------------- suppress known noisy errors from FP/Flutterwave -------------------- */
-    window.addEventListener('error', (e)=>{
-      try {
-        const msg = (e && e.message) ? e.message.toLowerCase() : '';
-        const file = (e && e.filename) ? e.filename.toLowerCase() : '';
-        if(msg.includes('api key not found') || file.includes('metrics.flutterwave.com') || file.includes('loader_v') || file.includes('initfingerprint') || msg.includes('fpjs')){
-          console.warn('Suppressed known noise:', e.message || e.filename);
-          e.preventDefault && e.preventDefault();
-        }
-      } catch(err){}
-    });
+  /* -------------------- storage listeners to keep UI updated -------------------- */
+  window.addEventListener('storage', async (e)=>{
+    if(e.key === STORAGE_KEY){
+      rawCart = safeParseJSON(localStorage.getItem(STORAGE_KEY), []) || [];
+      rawCart = mergeCartItems(rawCart);
+      await loadCheckoutData();
+    }
+  });
 
-    /* -------------------- storage listeners to keep UI updated -------------------- */
-    window.addEventListener('storage', async (e)=>{
-      if(e.key === STORAGE_KEY){
-        rawCart = safeParseJSON(localStorage.getItem(STORAGE_KEY), []) || [];
-        rawCart = mergeCartItems(rawCart);
-        await loadCheckoutData();
-      }
-    });
-
-    /* -------------------- small support: mailto link when clicking brand (optional) -------------------- */
-    // (No floating support button in original Fleur markup; keep it consistent.)
-    
-    
-   
-
-    // ----------------- Footer Year -----------------
-    document.getElementById('year').textContent = new Date().getFullYear();
-  </script>
+  /* -------------------- small support: mailto link when clicking brand (optional) -------------------- */
+  // (No floating support button in original Fleur markup; keep it consistent.)
+  
+  // ----------------- Footer Year -----------------
+  try {
+    const yearEl = document.getElementById('year');
+    if(yearEl) yearEl.textContent = new Date().getFullYear();
+  } catch(e){}
+</script>
 
 <script>
-   /*------New header Settings-----*/
+ /*------New header Settings-----*/
 let lastScrollY = window.scrollY;
 const header = document.querySelector('.site-header');
 const hero = document.querySelector('.hero');
 
 window.addEventListener('scroll', () => {
-  const heroBottom = hero.offsetTop + hero.offsetHeight;
+  const heroBottom = hero ? (hero.offsetTop + hero.offsetHeight) : 0;
   if (window.scrollY > heroBottom) {
     if (window.scrollY > lastScrollY) {
-      header.classList.add('hidden');
+      header?.classList.add('hidden');
     } else {
-      header.classList.remove('hidden');
-      header.classList.add('scrolled');
+      header?.classList.remove('hidden');
+      header?.classList.add('scrolled');
     }
   } else {
-    header.classList.remove('hidden', 'scrolled');
+    header?.classList.remove('hidden');
+    header?.classList.remove('scrolled');
   }
   lastScrollY = window.scrollY;
 });
 
 // Show header again on hover when below hero
 document.addEventListener('mousemove', (e) => {
-  if (e.clientY < 100) header.classList.remove('hidden');
+  if (e.clientY < 100) header?.classList.remove('hidden');
 });
 
 // ----------------- Support Button ----------------- 
