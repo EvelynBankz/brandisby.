@@ -279,11 +279,12 @@
   <!-- Flutterwave -->
   <script src="https://checkout.flutterwave.com/v3.js"></script>
 
+<!-- FULL UPDATED Fleur De Vie checkout script -->
 <script type="module">
 /* -------------------- FIREBASE IMPORTS -------------------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
 import {
-  getFirestore, doc, getDoc, setDoc, updateDoc, serverTimestamp
+  getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, serverTimestamp, query, where, getDocs
 } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
 /* -------------------- CONFIG -------------------- */
@@ -298,7 +299,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* -------------------- BLUR LOADER -------------------- */
+/* -------------------- BLUR LOADER (no-flash) -------------------- */
 (function installBlurLoader() {
   try {
     const overlay = document.createElement('div');
@@ -401,7 +402,7 @@ const addressInput = document.getElementById('address');
 let productCache = {};
 let selectedCurrency = localStorage.getItem(CURRENCY_KEY) || 'NGN';
 let rawCart = safeParseJSON(localStorage.getItem(STORAGE_KEY), []) || [];
-rawCart = mergeCartItems(rawCart);
+// mergeCartItems is declared below; set rawCart after function defined
 const urlParams = new URLSearchParams(window.location.search);
 const quoteId = urlParams.get('quoteId') || null;
 const orderId = urlParams.get('orderId') || null;
@@ -411,8 +412,8 @@ let activeOrderRaw = null;
 let quote = null;
 let isPaidOrder = false;
 
-/* flags to prevent double renders/blink */
-let paidUIRenderedFor = null; // quoteId/orderId that we've rendered paid UI for
+/* flags to prevent duplicate renders (fix flicker) */
+let paidUIRenderedFor = null;
 let paidRenderInProgress = false;
 
 /* -------------------- UTIL: cart helpers -------------------- */
@@ -425,6 +426,7 @@ function mergeCartItems(cartArray){
   });
   return merged;
 }
+rawCart = mergeCartItems(rawCart);
 function totalQtyFromCartArray(arr){ try { return (arr||[]).reduce((s,i)=>s + Number(i.quantity||0),0); } catch(e){ return 0; } }
 
 function computeAndUpdateCartCount(){
@@ -442,7 +444,6 @@ function computeAndUpdateCartCount(){
   } catch(e){ if(cartCountElem) cartCountElem.textContent = '0'; }
 }
 
-/* storage sync */
 window.addEventListener('storage', (e)=>{
   if(e.key === STORAGE_KEY || e.key === CURRENCY_KEY || e.key === 'paidQuoteInfo'){
     computeAndUpdateCartCount();
@@ -453,7 +454,7 @@ window.addEventListener('storage', (e)=>{
   }
 });
 
-/* -------------------- PRODUCT HELPERS -------------------- */
+/* -------------------- PRODUCT HELPERS (fetch product docs for fleurdevie) -------------------- */
 async function fetchProductData(productId){
   try {
     if(productCache[productId]) return productCache[productId];
@@ -497,7 +498,7 @@ async function buildQuoteFromCart(){
   return { items };
 }
 
-/* -------------------- NORMALIZERS -------------------- */
+/* -------------------- NORMALIZERS (quote/order) -------------------- */
 function normalizeQuoteItems(rawQuote){
   const arr = Array.isArray(rawQuote.items) ? rawQuote.items : [];
   const items = arr.map(ci => {
@@ -562,46 +563,19 @@ function normalizeOrderItems(items){
     totalPrices: it.totalPrices || it.linePrices || {},
     variants: it.variants || []
   }));
-
-  // compute totals from raw items if stored in simple fields
-  normalized.forEach((nItem, idx) => {
-    const raw = (Array.isArray(items) && items[idx]) ? items[idx] : null;
-    if(raw){
-      const computedUnit = {
-        NGN: Number(raw.priceNGN ?? raw.price ?? 0),
-        USD: Number(raw.priceUSD ?? 0),
-        EUR: Number(raw.priceEUR ?? 0),
-        GBP: Number(raw.priceGBP ?? 0)
-      };
-      const qty = Number(raw.qty ?? raw.quantity ?? raw.totalQuantity ?? 0) || 0;
-      if(!nItem.totalPrices || Object.keys(nItem.totalPrices).length === 0){
-        nItem.totalPrices = {
-          NGN: computedUnit.NGN * qty,
-          USD: computedUnit.USD * qty,
-          EUR: computedUnit.EUR * qty,
-          GBP: computedUnit.GBP * qty
-        };
-      }
-      if(!nItem.variants || !nItem.variants.length){
-        nItem.variants = [{ id: raw.id||nItem.productId||'', color: raw.color||'', size: raw.size||'', quantity: qty, unitPrices: computedUnit, linePrices: { NGN: computedUnit.NGN*qty, USD: computedUnit.USD*qty, EUR: computedUnit.EUR*qty, GBP: computedUnit.GBP*qty } }];
-        nItem.totalQuantity = qty;
-      }
-    }
-  });
-
   const result = { items: normalized };
   result._isOrder = true;
   result._paidFlag = true;
   return result;
 }
 
-/* -------------------- RENDER -------------------- */
+/* -------------------- RENDER (keeps Fleur De Vie DOM & styles) -------------------- */
 function renderOrderFromQuoteNormalized(quoteNormalized, currency='NGN', paid=false){
   if(!orderItemsEl || !orderSubtotalEl) return;
   orderItemsEl.innerHTML = '';
   if(!quoteNormalized || !Array.isArray(quoteNormalized.items)) {
     orderItemsEl.innerHTML = '<li class="small-note">No items</li>';
-    try { if(orderSubtotalEl) orderSubtotalEl.textContent = `Subtotal: —`; } catch(e){}
+    orderSubtotalEl.textContent = `Subtotal: —`;
     computeAndUpdateCartCount();
     return;
   }
@@ -638,7 +612,7 @@ function renderOrderFromQuoteNormalized(quoteNormalized, currency='NGN', paid=fa
     const textWrap = document.createElement('div');
     const titleDiv = document.createElement('div');
     titleDiv.className = 'title';
-    titleDiv.textContent = `${item.name} (x${item.totalQuantity || (item.variants && item.variants.reduce((s,v)=>s+v.quantity,0)) || 0})`;
+    titleDiv.textContent = `${item.name} (x${item.totalQuantity})`;
     textWrap.appendChild(titleDiv);
 
     if(Array.isArray(item.variants) && item.variants.length > 1){
@@ -658,6 +632,7 @@ function renderOrderFromQuoteNormalized(quoteNormalized, currency='NGN', paid=fa
     headerWrapper.appendChild(textWrap);
     left.appendChild(headerWrapper);
 
+    // variants container (hidden by default)
     if(Array.isArray(item.variants) && item.variants.length > 1){
       const toggle = document.createElement('button');
       toggle.className = 'variant-toggle';
@@ -707,20 +682,19 @@ function renderOrderFromQuoteNormalized(quoteNormalized, currency='NGN', paid=fa
     orderItemsEl.appendChild(li);
   });
 
-  try { if(orderSubtotalEl) orderSubtotalEl.textContent = `Subtotal: ${formatPrice(subtotal, currency)}`; } catch(e){}
+  orderSubtotalEl.textContent = `Subtotal: ${formatPrice(subtotal, selectedCurrency)}`;
   computeAndUpdateCartCount();
 }
 
 /* -------------------- FILL BILLING -------------------- */
 function fillBillingFields(data){
-  if(!data) return;
-  if(nameInput) nameInput.value = data.name || data.customer || data.customerName || '';
+  if(nameInput) nameInput.value = data.name || data.customer || '';
   if(emailInput) emailInput.value = data.email || data.customerEmail || '';
-  if(phoneInput) phoneInput.value = data.phone || data.phoneNumber || data.customerPhone || '';
-  if(addressInput) addressInput.value = data.address || data.shippingAddress || data.shipping || data.addressLine || '';
+  if(phoneInput) phoneInput.value = data.phone || data.phoneNumber || '';
+  if(addressInput) addressInput.value = data.address || data.shippingAddress || '';
 }
 
-/* -------------------- UI CONFIG -------------------- */
+/* -------------------- UI CONFIG (cart / quote unpaid / paid) -------------------- */
 function configureCheckoutUI(type, opts = {}){
   try {
     const disableCurrency = (val) => {
@@ -749,14 +723,8 @@ function configureCheckoutUI(type, opts = {}){
     if(type === 'quote-paid' || type === 'order-paid'){
       disableCurrency(true);
       setBillingDisabled(true);
-      // make UI read-only - attempt to disable many controls but avoid disabling nav/hamburger
-      document.querySelectorAll('input, select, textarea, button').forEach(el=>{
-        try {
-          if(!el.classList.contains('allow-interaction') && el !== document.getElementById('hamburger-btn')) el.disabled = true;
-        } catch(e){}
-      });
       if(payBtn) { payBtn.textContent = 'Paid ✅'; payBtn.disabled = true; payBtn.classList.add('paid-state'); }
-
+      // show tracking ref if provided (hero h2 color)
       if(opts.trackingRef){
         let heroH2Color = null;
         try {
@@ -812,30 +780,27 @@ function buildNormalizedFromFirestoreDoc(docData){
       GBP: unitPrices.GBP * qty
     };
     return {
-      productId: raw.id || raw.productId || '',
+      productId: raw.productId || raw.id || '',
       name: raw.name || raw.productName || raw.title || '',
       image: (raw.image && raw.image !== '../asset/placeholder.jpg') ? raw.image : null,
       totalQuantity: qty,
       totalPrices: linePrices,
       variants: [{ id: raw.id || '', color: raw.color || '', size: raw.size || '', quantity: qty, unitPrices, linePrices }],
-      description: raw.desc || raw.description || ''
+      description: raw.description || raw.desc || ''
     };
   });
-  const normalized = { items: normalizedItems };
-  normalized._isOrder = true;
-  normalized._paidFlag = true;
-  return normalized;
+  return { items: normalizedItems, _isOrder: true, _paidFlag: true };
 }
 
-/* -------------------- RENDER PAID UI FROM DOC (guarded to avoid blinking) -------------------- */
+/* -------------------- RENDER PAID UI FROM DOC (guarded) -------------------- */
 function renderPaidUIFromDoc(docData){
   try {
-    // guard: avoid re-rendering paid UI many times (blinking)
     const docKey = (docData && (docData.orderId || docData.trackingRef || docData.id)) || (quoteId || orderId) || 'paid';
     if(paidUIRenderedFor && paidUIRenderedFor === docKey) return;
     if(paidRenderInProgress) return;
     paidRenderInProgress = true;
 
+    // choose currency: doc -> paidQuoteInfo -> selectedCurrency
     const paidQuoteInfoLocal = safeParseJSON(localStorage.getItem('paidQuoteInfo'), null);
     const docCurrency = (docData && docData.currency) ? String(docData.currency).toUpperCase() : (paidQuoteInfoLocal && paidQuoteInfoLocal.currency ? String(paidQuoteInfoLocal.currency).toUpperCase() : selectedCurrency);
     selectedCurrency = docCurrency || selectedCurrency;
@@ -844,18 +809,17 @@ function renderPaidUIFromDoc(docData){
       try { currencySelect.disabled = true; currencyWrapper.style.opacity = 0.6; currencyWrapper.style.pointerEvents = 'none'; } catch(e){}
     }
 
-    // Build normalized items from doc
-    const normalized = (docData.items && Array.isArray(docData.items)) ? buildNormalizedFromFirestoreDoc(docData) : { items: [] };
-    normalized._isOrder = true;
-    normalized._paidFlag = true;
-
-    isPaidOrder = true;
+    // Normalize items from doc if present
+    const normalized = buildNormalizedFromFirestoreDoc(docData);
     quote = normalized;
+    quote._isOrder = true;
+    quote._paidFlag = true;
+    isPaidOrder = true;
 
-    // render using the doc currency (ensures amounts match saved values)
+    // render items & subtotal using the doc currency
     renderOrderFromQuoteNormalized(normalized, selectedCurrency, true);
 
-    // Fill billing with keys that actually exist in your Firestore doc
+    // fill billing
     fillBillingFields({
       name: docData.name || docData.customer || docData.customerName || '',
       email: docData.email || docData.customerEmail || '',
@@ -865,10 +829,10 @@ function renderPaidUIFromDoc(docData){
 
     if(payBtn){ payBtn.textContent = 'Paid ✅'; payBtn.disabled = true; payBtn.classList.add('paid-state'); }
 
-    // show trackingRef in hero and disable UI
+    // UI read-only + hero tracking ref
     configureCheckoutUI(orderId ? 'order-paid' : 'quote-paid', { trackingRef: docData.trackingRef || docData.orderId || docData.trackingRef });
 
-    // persist paid info locally so syncPaidQuoteUI has reliable fallback
+    // persist minimal info locally
     try {
       localStorage.setItem('paidQuoteInfo', JSON.stringify({
         quoteId: docData.id || null,
@@ -879,7 +843,6 @@ function renderPaidUIFromDoc(docData){
       }));
     } catch(e){}
 
-    // mark rendered to prevent re-renders
     paidUIRenderedFor = docKey;
     paidRenderInProgress = false;
     computeAndUpdateCartCount();
@@ -889,11 +852,12 @@ function renderPaidUIFromDoc(docData){
   }
 }
 
-/* -------------------- SYNC PAID QUOTE ON LOAD -------------------- */
+/* -------------------- SYNC PAID QUOTE ON LOAD (improved: check orders by source) -------------------- */
 async function syncPaidQuoteUI(){
   const paidQuoteInfo = safeParseJSON(localStorage.getItem('paidQuoteInfo'), null);
   if(!paidQuoteInfo) { removeBlurLoaderAndReveal(); return; }
-  // initial quick render from local storage to avoid blank UI
+
+  // Quick initial render from local storage so UI isn't blank
   renderPaidUIFromDoc({
     id: paidQuoteInfo.quoteId,
     trackingRef: paidQuoteInfo.trackingRef,
@@ -908,40 +872,43 @@ async function syncPaidQuoteUI(){
 
   try {
     if(paidQuoteInfo.quoteId){
-      let docSnap = null;
+      // First try: find an order that references this quote (source == quote:<id>)
       try {
-        docSnap = await getDoc(doc(db, "brands", "fleurdevie", "quotes", paidQuoteInfo.quoteId));
+        const ordersColl = collection(db, "brands", "fleurdevie", "orders");
+        const q = query(ordersColl, where("source", "==", `quote:${paidQuoteInfo.quoteId}`), where("status", "in", ["paid", "Paid", "PAID"]));
+        const snap = await getDocs(q);
+        if(snap && !snap.empty){
+          const oDoc = snap.docs[0].data(); oDoc.id = snap.docs[0].id;
+          renderPaidUIFromDoc(oDoc);
+          removeBlurLoaderAndReveal();
+          return;
+        }
+      } catch(err){
+        // ignore and fall back to reading quote or stored info
+        console.warn('order lookup by source failed', err);
+      }
+
+      // fallback: try reading the quotes doc and show it
+      try {
+        const qSnap = await getDoc(doc(db, "brands", "fleurdevie", "quotes", paidQuoteInfo.quoteId));
+        if(qSnap && qSnap.exists()){
+          const qData = qSnap.data(); qData.id = qSnap.id;
+          renderPaidUIFromDoc(qData);
+          removeBlurLoaderAndReveal();
+          return;
+        }
       } catch(e){
-        console.error('syncPaidQuoteUI read error', e);
+        console.error('syncPaidQuoteUI quote read failed', e);
         removeBlurLoaderAndReveal();
-        showError('Unable to verify quote details due to access restrictions. Contact support.');
+        showError('Unable to verify quote details. Contact support.');
         return;
       }
-      if(docSnap && docSnap.exists()){
-        const q = docSnap.data(); q.id = paidQuoteInfo.quoteId;
-        if((q.status || '').toLowerCase() === 'paid' && q.orderId){
-          try {
-            const orderSnap = await getDoc(doc(db, "brands", "fleurdevie", "orders", q.orderId));
-            if(orderSnap && orderSnap.exists()){
-              const o = orderSnap.data(); o.id = orderSnap.id;
-              renderPaidUIFromDoc(o);
-              removeBlurLoaderAndReveal();
-              return;
-            }
-          } catch(e){ /* ignore order fetch failure and continue to show quote info */ }
-        }
-        renderPaidUIFromDoc(q);
-        removeBlurLoaderAndReveal();
-      } else {
-        removeBlurLoaderAndReveal();
-      }
-    } else {
-      removeBlurLoaderAndReveal();
     }
+    removeBlurLoaderAndReveal();
   } catch(e){ console.error('syncPaidQuoteUI failed', e); removeBlurLoaderAndReveal(); }
 }
 
-/* -------------------- ORDER GENERATION & SAVE (persist billing into order doc) -------------------- */
+/* -------------------- ORDER SAVE (persist billing into order doc) -------------------- */
 function generateOrderReference(email, orderId, txRef){
   const rand = () => Math.random().toString(36).substring(2,6).toUpperCase();
   const now = new Date();
@@ -955,11 +922,8 @@ function generateOrderReference(email, orderId, txRef){
 
 async function persistPaidOrder(orderData, txRef) {
   try {
-    // Compose trackingRef and order doc id
     const trackingRef = generateOrderReference(orderData.email, orderData.id || "", txRef);
     const docRef = doc(db, "brands", "fleurdevie", "orders", trackingRef);
-
-    // Build payload with billing & currency & totals & items
     const payload = {
       ...orderData,
       name: orderData.name || orderData.customer || '',
@@ -975,7 +939,6 @@ async function persistPaidOrder(orderData, txRef) {
       verifiedAt: serverTimestamp(),
       paidAt: serverTimestamp()
     };
-
     await setDoc(docRef, payload);
 
     // Update related quote if exists
@@ -1056,7 +1019,7 @@ async function initiatePaymentFlow(ev){
     try {
       const saved = await persistPaidOrder(baseOrder, txRef);
       const finalOrderId = saved?.orderId || null;
-      const trackingRef = saved?.trackingRef || finalOrderId || generateOrderReference(baseOrder.email, finalOrderId||'', txRef);
+      const trackingRef = saved?.trackingRef || generateOrderReference(baseOrder.email, finalOrderId||'', txRef);
 
       if(!quoteId) localStorage.removeItem(STORAGE_KEY);
 
@@ -1079,7 +1042,6 @@ async function initiatePaymentFlow(ev){
         }));
       } catch(e){}
 
-      // Save last order for thank you page
       try {
         localStorage.setItem('lastOrder_fleurdevie', JSON.stringify({
           id: finalOrderId,
@@ -1099,8 +1061,8 @@ async function initiatePaymentFlow(ev){
 
       showSpinner(false);
 
-      // Redirect to fleurdevie thankyou page with orderId
-      window.location.assign('/FleurDeVie/thankyou.html?orderId=' + encodeURIComponent(finalOrderId));
+      // redirect exactly as requested (no params)
+      window.location.assign('/FleurDeVie/thankyou.html');
     } catch(e){
       console.error('finalizeAfterSuccess error', e);
       showSpinner(false);
@@ -1200,8 +1162,31 @@ async function loadCheckoutData(){
       }
     }
 
-    // 2) quoteId param -> fetch quote doc
+    // 2) quoteId param -> try to find linked order first (prevent flicker & ensure correct data)
     if(quoteId){
+      // Try find order where source == quote:<quoteId>
+      try {
+        const ordersColl = collection(db, "brands", "fleurdevie", "orders");
+        const q = query(ordersColl, where("source", "==", `quote:${quoteId}`));
+        const snap = await getDocs(q);
+        if(snap && !snap.empty){
+          // prefer first matched order (should normally be one)
+          const orderDoc = snap.docs[0];
+          const orderData = orderDoc.data(); orderData.id = orderDoc.id;
+          activeOrderRaw = orderData;
+          if(orderData.currency) selectedCurrency = String(orderData.currency).toUpperCase();
+          fillBillingFields(orderData);
+          renderPaidUIFromDoc(orderData);
+          showSpinner(false);
+          removeBlurLoaderAndReveal();
+          return;
+        }
+      } catch(e){
+        console.warn('Order lookup by source failed', e);
+        // continue to fetch quote below as fallback
+      }
+
+      // If no order found, fetch quote and decide paid/unpaid
       let qSnap = null;
       try {
         qSnap = await getDoc(doc(db, "brands", "fleurdevie", "quotes", quoteId));
@@ -1221,15 +1206,15 @@ async function loadCheckoutData(){
           const orderSnap = await getDoc(doc(db, "brands", "fleurdevie", "orders", activeQuoteRaw.orderId));
           if(orderSnap && orderSnap.exists()){
             const orderData = orderSnap.data(); orderData.id = orderSnap.id;
-            if(orderData.currency) selectedCurrency = String(orderData.currency).toUpperCase();
             activeOrderRaw = orderData;
+            if(orderData.currency) selectedCurrency = String(orderData.currency).toUpperCase();
             fillBillingFields(orderData);
             renderPaidUIFromDoc(orderData);
             showSpinner(false);
             removeBlurLoaderAndReveal();
             return;
           } else {
-            // Quote marked paid, order doc missing — still render using quote doc (may contain price fields)
+            // Quote marked paid, but order doc missing — still render using quote doc
             isPaidOrder = true;
             if(activeQuoteRaw.currency) selectedCurrency = String(activeQuoteRaw.currency).toUpperCase();
             renderPaidUIFromDoc(activeQuoteRaw);
@@ -1248,7 +1233,7 @@ async function loadCheckoutData(){
         }
       }
 
-      // Unpaid quote: populate customer/email if present and render computed quote from cart/quote
+      // Unpaid quote case: populate customer/email if present and render computed quote
       if(activeQuoteRaw.customer && nameInput) nameInput.value = activeQuoteRaw.customer;
       if(activeQuoteRaw.email && emailInput) emailInput.value = activeQuoteRaw.email;
       quote = normalizeQuoteItems(activeQuoteRaw);
@@ -1345,7 +1330,7 @@ window.addEventListener('storage', async (e)=>{
   }
 });
 
-/* -------------------- small support: mailto link -------------------- */
+/* -------------------- small support: mailto link when clicking brand (optional) -------------------- */
 try {
   const supportBtn = document.getElementById('floatingSupportBtn');
   supportBtn?.addEventListener('click', () => {
@@ -1353,7 +1338,7 @@ try {
   });
 } catch(e){}
 
-/* -------------------- Footer Year -------------------- */
+/* ----------------- Footer Year ----------------- */
 try {
   const yearEl = document.getElementById('year');
   if(yearEl) yearEl.textContent = new Date().getFullYear();
