@@ -279,7 +279,7 @@
   <!-- Flutterwave -->
   <script src="https://checkout.flutterwave.com/v3.js"></script>
 
-  <!-- Main module: merged Serac functionality adapted for Fleur De Vie -->
+<!-- Fleur De Vie: full checkout script (replace previous script blocks) -->
 <script type="module">
   /* -------------------- FIREBASE IMPORTS -------------------- */
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
@@ -287,7 +287,7 @@
     getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, serverTimestamp, query, where, getDocs
   } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
-  /* -------------------- CONFIG (brandisby project used by both brands) -------------------- */
+  /* -------------------- CONFIG -------------------- */
   const firebaseConfig = {
     apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
     authDomain: "brandisby.firebaseapp.com",
@@ -299,7 +299,7 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  /* -------------------- BLUR LOADER (no-flash) -------------------- */
+  /* -------------------- BLUR LOADER -------------------- */
   (function installBlurLoader() {
     try {
       const overlay = document.createElement('div');
@@ -451,7 +451,7 @@
     }
   });
 
-  /* -------------------- PRODUCT HELPERS (fetch product docs for fleurdevie) -------------------- */
+  /* -------------------- PRODUCT HELPERS -------------------- */
   async function fetchProductData(productId){
     try {
       if(productCache[productId]) return productCache[productId];
@@ -495,7 +495,7 @@
     return { items };
   }
 
-  /* -------------------- NORMALIZERS (quote/order) -------------------- */
+  /* -------------------- NORMALIZERS -------------------- */
   function normalizeQuoteItems(rawQuote){
     const arr = Array.isArray(rawQuote.items) ? rawQuote.items : [];
     const items = arr.map(ci => {
@@ -555,18 +555,46 @@
       productId: it.id || '',
       name: it.name || it.productName || '',
       image: (it.image && it.image !== '../asset/placeholder.jpg') ? it.image : null,
-      totalQuantity: Number(it.qty || it.quantity) || 1,
-      description: it.description || '',
+      totalQuantity: Number(it.qty || it.quantity || it.totalQuantity) || 1,
+      description: it.desc || it.description || '',
       totalPrices: it.totalPrices || it.linePrices || {},
       variants: it.variants || []
     }));
+
+    // If the items were stored in Firestore in "flat" form (single entries with priceUSD/priceNGN + qty),
+    // attempt to compute totalPrices from those fields:
+    normalized.forEach((nItem, idx) => {
+      const raw = (Array.isArray(items) && items[idx]) ? items[idx] : null;
+      if(raw){
+        const computedUnit = {
+          NGN: Number(raw.priceNGN ?? raw.price ?? 0),
+          USD: Number(raw.priceUSD ?? 0),
+          EUR: Number(raw.priceEUR ?? 0),
+          GBP: Number(raw.priceGBP ?? 0)
+        };
+        const qty = Number(raw.qty ?? raw.quantity ?? raw.totalQuantity ?? 0) || 0;
+        if(!nItem.totalPrices || Object.keys(nItem.totalPrices).length === 0){
+          nItem.totalPrices = {
+            NGN: computedUnit.NGN * qty,
+            USD: computedUnit.USD * qty,
+            EUR: computedUnit.EUR * qty,
+            GBP: computedUnit.GBP * qty
+          };
+        }
+        if(!nItem.variants || !nItem.variants.length){
+          nItem.variants = [{ id: raw.id||nItem.productId||'', color: raw.color||'', size: raw.size||'', quantity: qty, unitPrices: computedUnit, linePrices: { NGN: computedUnit.NGN*qty, USD: computedUnit.USD*qty, EUR: computedUnit.EUR*qty, GBP: computedUnit.GBP*qty } }];
+          nItem.totalQuantity = qty;
+        }
+      }
+    });
+
     const result = { items: normalized };
     result._isOrder = true;
     result._paidFlag = true;
     return result;
   }
 
-  /* -------------------- RENDER (keeps Fleur De Vie DOM & styles) -------------------- */
+  /* -------------------- RENDER -------------------- */
   function renderOrderFromQuoteNormalized(quoteNormalized, currency='NGN', paid=false){
     if(!orderItemsEl || !orderSubtotalEl) return;
     orderItemsEl.innerHTML = '';
@@ -578,10 +606,10 @@
     }
     let subtotal = 0;
     quoteNormalized.items.forEach((item, idx) => {
-      // If item.totalPrices has the requested currency, use it; otherwise fallback to compute from variants
-      const value = Number((item.totalPrices && (item.totalPrices[currency] ?? null)) ?? 0) || 0;
-      const fallbackValue = Array.isArray(item.variants) ? item.variants.reduce((s,v)=> s + Number((v.linePrices && (v.linePrices[currency] ?? null)) ?? (Number(v.unitPrices?.[currency]||0)*Number(v.quantity||0))), 0) : 0;
-      const finalValue = value || fallbackValue || 0;
+      // use stored totalPrices if present; else compute from variants and unitPrices
+      const valueFromTotals = Number((item.totalPrices && (item.totalPrices[currency] ?? null)) ?? 0) || 0;
+      const fallbackFromVariants = Array.isArray(item.variants) ? item.variants.reduce((s,v)=> s + Number((v.linePrices && (v.linePrices[currency] ?? null)) ?? (Number(v.unitPrices?.[currency]||0)*Number(v.quantity||0))), 0) : 0;
+      const finalValue = valueFromTotals || fallbackFromVariants || 0;
       subtotal += finalValue;
 
       const li = document.createElement('li');
@@ -610,7 +638,7 @@
       const textWrap = document.createElement('div');
       const titleDiv = document.createElement('div');
       titleDiv.className = 'title';
-      titleDiv.textContent = `${item.name} (x${item.totalQuantity})`;
+      titleDiv.textContent = `${item.name} (x${item.totalQuantity || (item.variants && item.variants.reduce((s,v)=>s+v.quantity,0)) || 0})`;
       textWrap.appendChild(titleDiv);
 
       if(Array.isArray(item.variants) && item.variants.length > 1){
@@ -680,20 +708,21 @@
       orderItemsEl.appendChild(li);
     });
 
-    // safe write
+    // safe write for subtotal
     try { if(orderSubtotalEl) orderSubtotalEl.textContent = `Subtotal: ${formatPrice(subtotal, currency)}`; } catch(e){}
     computeAndUpdateCartCount();
   }
 
   /* -------------------- FILL BILLING -------------------- */
   function fillBillingFields(data){
-    if(nameInput) nameInput.value = data.name || data.customer || '';
+    // support multiple possible keys for compatibility with Firestore structure
+    if(nameInput) nameInput.value = data.name || data.customer || data.customerName || '';
     if(emailInput) emailInput.value = data.email || data.customerEmail || '';
-    if(phoneInput) phoneInput.value = data.phone || data.phoneNumber || '';
-    if(addressInput) addressInput.value = data.address || data.shippingAddress || '';
+    if(phoneInput) phoneInput.value = data.phone || data.phoneNumber || data.customerPhone || '';
+    if(addressInput) addressInput.value = data.address || data.shippingAddress || data.shipping || data.addressLine || '';
   }
 
-  /* -------------------- UI CONFIG (cart / quote unpaid / paid) -------------------- */
+  /* -------------------- UI CONFIG -------------------- */
   function configureCheckoutUI(type, opts = {}){
     try {
       const disableCurrency = (val) => {
@@ -722,17 +751,17 @@
       if(type === 'quote-paid' || type === 'order-paid'){
         disableCurrency(true);
         setBillingDisabled(true);
-        // disable any other interactive elements that may change items
-        // (safe: attempt to disable any quantity inputs, remove buttons, variant toggles)
+        // attempt to make UI read-only: disable standard form controls
         document.querySelectorAll('input, select, textarea, button').forEach(el=>{
-          if(!el.classList.contains('allow-interaction')) { // allow-interaction used if some controls must remain interactive elsewhere
+          // allow certain global interactive buttons (like nav hamburger) that may have special classes
+          if(!el.classList.contains('allow-interaction')){
             try { el.disabled = true; } catch(e){}
           }
         });
         if(payBtn) { payBtn.textContent = 'Paid ✅'; payBtn.disabled = true; payBtn.classList.add('paid-state'); }
-        // show tracking ref if provided (two-line message, both inheriting hero h2 color)
+        // show tracking ref if provided
         if(opts.trackingRef){
-          // determine hero h2 color
+          // get hero h2 color, fallback to a CSS var or default
           let heroH2Color = null;
           try {
             const heroH2 = document.querySelector('.hero h2');
@@ -740,7 +769,6 @@
           } catch(e){}
           const container = document.querySelector('.hero-text') || document.querySelector('.hero');
           if(container){
-            // ensure success message element
             let successElem = document.getElementById('paidSuccessMessage');
             if(!successElem){
               successElem = document.createElement('p');
@@ -770,47 +798,94 @@
     } catch(e){ console.warn('configureCheckoutUI error', e); }
   }
 
-  /* -------------------- RENDER PAID UI FROM DOC -------------------- */
-  function renderPaidUIFromDoc(docData){
-    // Ensure the paid UI uses the currency saved in the document
-    const docCurrency = (docData && docData.currency) ? String(docData.currency).toUpperCase() : selectedCurrency;
-    selectedCurrency = docCurrency;
-    if(currencySelect && currencyWrapper){
-      try { currencySelect.value = selectedCurrency; } catch(e){}
-      try { currencySelect.disabled = true; currencyWrapper.style.opacity = 0.6; currencyWrapper.style.pointerEvents = 'none'; } catch(e){}
-    }
+  /* -------------------- RENDER PAID UI FROM DOC (FIXED) -------------------- */
+  function buildNormalizedFromFirestoreDoc(docData){
+    // Build a normalized quote/order object from the Firestore doc structure you provided
+    const itemsRaw = Array.isArray(docData.items) ? docData.items : [];
+    const normalizedItems = itemsRaw.map(raw => {
+      const qty = Number(raw.qty ?? raw.quantity ?? raw.totalQuantity ?? 0) || 0;
+      const unitPrices = {
+        NGN: Number(raw.priceNGN ?? raw.price ?? 0),
+        USD: Number(raw.priceUSD ?? 0),
+        EUR: Number(raw.priceEUR ?? 0),
+        GBP: Number(raw.priceGBP ?? 0)
+      };
+      const linePrices = {
+        NGN: unitPrices.NGN * qty,
+        USD: unitPrices.USD * qty,
+        EUR: unitPrices.EUR * qty,
+        GBP: unitPrices.GBP * qty
+      };
+      return {
+        productId: raw.id || raw.productId || '',
+        name: raw.name || raw.productName || raw.title || '',
+        image: (raw.image && raw.image !== '../asset/placeholder.jpg') ? raw.image : null,
+        totalQuantity: qty,
+        totalPrices: linePrices,
+        variants: [{ id: raw.id || '', color: raw.color || '', size: raw.size || '', quantity: qty, unitPrices, linePrices }],
+        description: raw.desc || raw.description || ''
+      };
+    });
 
-    // Normalize using order items when possible, else quote items
-    const normalized = (docData.items && Array.isArray(docData.items)) ? normalizeOrderItems(docData.items) : normalizeQuoteItems(docData);
+    // If Firestore doc already has aggregated totals, we will rely on computed normalizedItems
+    const normalized = { items: normalizedItems };
     normalized._isOrder = true;
     normalized._paidFlag = true;
+    return normalized;
+  }
 
-    isPaidOrder = true;
-    quote = normalized;
-
-    // render using the paid currency (ensures amounts reflect what was stored)
-    renderOrderFromQuoteNormalized(normalized, selectedCurrency, true);
-
-    // fill billing from saved doc
-    fillBillingFields(docData);
-
-    if(payBtn){ payBtn.textContent = 'Paid ✅'; payBtn.disabled = true; payBtn.classList.add('paid-state'); }
-
-    // configure UI read-only and show tracking ref styled to hero h2 color
-    configureCheckoutUI(orderId ? 'order-paid' : 'quote-paid', { trackingRef: docData.trackingRef || docData.trackingRef || docData.trackingRef });
-
-    // persist local paid info (safe)
+  function renderPaidUIFromDoc(docData){
     try {
-      localStorage.setItem('paidQuoteInfo', JSON.stringify({
-        quoteId: docData.id || null,
-        currency: selectedCurrency,
-        billing: { name: docData.name || '', email: docData.email || '', phone: docData.phone || '', address: docData.address || '' },
-        trackingRef: docData.trackingRef || null,
-        verified: true
-      }));
-    } catch(e){}
+      // Prefer currency stored in the doc; fall back to local paidQuoteInfo; then to selectedCurrency
+      const paidQuoteInfo = safeParseJSON(localStorage.getItem('paidQuoteInfo'), null);
+      const docCurrency = (docData && docData.currency) ? String(docData.currency).toUpperCase() : (paidQuoteInfo && paidQuoteInfo.currency ? String(paidQuoteInfo.currency).toUpperCase() : selectedCurrency);
+      selectedCurrency = docCurrency || selectedCurrency;
+      if(currencySelect && currencyWrapper){
+        try { currencySelect.value = selectedCurrency; } catch(e){}
+        try { currencySelect.disabled = true; currencyWrapper.style.opacity = 0.6; currencyWrapper.style.pointerEvents = 'none'; } catch(e){}
+      }
 
-    computeAndUpdateCartCount();
+      // Build normalized items directly from the document items structure (handles priceUSD/priceNGN/qty)
+      const normalized = buildNormalizedFromFirestoreDoc(docData);
+      normalized._isOrder = true;
+      normalized._paidFlag = true;
+
+      isPaidOrder = true;
+      quote = normalized;
+
+      // Render using doc currency (ensures amounts match what was stored)
+      renderOrderFromQuoteNormalized(normalized, selectedCurrency, true);
+
+      // Fill billing - check many possible field names present in your Firestore doc
+      fillBillingFields({
+        name: docData.name || docData.customer || docData.customerName,
+        email: docData.email || docData.customerEmail,
+        phone: docData.phone || docData.phoneNumber || docData.customerPhone,
+        address: docData.address || docData.shippingAddress || docData.shipping || docData.addressLine
+      });
+
+      if(payBtn){ payBtn.textContent = 'Paid ✅'; payBtn.disabled = true; payBtn.classList.add('paid-state'); }
+
+      // Configure UI as read-only and show the order/tracking reference with hero h2 color
+      configureCheckoutUI(orderId ? 'order-paid' : 'quote-paid', { trackingRef: docData.trackingRef || docData.orderId || docData.trackingRef });
+
+      // persist local paid info for quick sync
+      try {
+        localStorage.setItem('paidQuoteInfo', JSON.stringify({
+          quoteId: docData.id || null,
+          currency: selectedCurrency,
+          billing: { name: docData.name || docData.customer || '', email: docData.email || '', phone: docData.phone || docData.phoneNumber || '', address: docData.address || docData.shippingAddress || '' },
+          trackingRef: docData.trackingRef || docData.orderId || null,
+          verified: true
+        }));
+      } catch(e){}
+
+      computeAndUpdateCartCount();
+    } catch(e){
+      console.error('renderPaidUIFromDoc failed', e);
+      // fallback: attempt to show minimal info without throwing
+      try { removeBlurLoaderAndReveal(); } catch(err){}
+    }
   }
 
   /* -------------------- SYNC PAID QUOTE ON LOAD -------------------- */
@@ -851,7 +926,7 @@
                 removeBlurLoaderAndReveal();
                 return;
               }
-            } catch(e){}
+            } catch(e){ /* ignore order fetch failure and continue to show quote info */ }
           }
           renderPaidUIFromDoc(q);
           removeBlurLoaderAndReveal();
@@ -864,7 +939,7 @@
     } catch(e){ console.error('syncPaidQuoteUI failed', e); removeBlurLoaderAndReveal(); }
   }
 
-  /* -------------------- ORDER ID GENERATOR & SAVE ORDER (fleurdevie path) -------------------- */
+  /* -------------------- ORDER GENERATION & SAVE -------------------- */
   function generateOrderReference(email, orderId, txRef){
     const rand = () => Math.random().toString(36).substring(2,6).toUpperCase();
     const now = new Date();
@@ -910,7 +985,7 @@
   }
 
   /* -------------------- PAYMENT (Flutterwave) -------------------- */
-  const FLW_PUBLIC_KEY = "FLWPUBK_TEST-07eb9d2da345c08dc4d54278c3bc86f7-X"; // same account as Serac
+  const FLW_PUBLIC_KEY = "FLWPUBK_TEST-07eb9d2da345c08dc4d54278c3bc86f7-X";
   const SERVERLESS_VERIFY = `${window.location.origin}/api/verify`;
 
   async function fetchWithRetry(url, options={}, retries=1, backoff=500){
@@ -1079,7 +1154,7 @@
     }, 3000);
   }
 
-  /* -------------------- LOAD CHECKOUT DATA: order -> quote -> cart -------------------- */
+  /* -------------------- LOAD CHECKOUT DATA -------------------- */
   async function loadCheckoutData(){
     selectedCurrency = localStorage.getItem(CURRENCY_KEY) || selectedCurrency || 'NGN';
     if(currencySelect) currencySelect.value = selectedCurrency;
@@ -1095,7 +1170,7 @@
           if(snap && snap.exists()){
             const data = snap.data(); data.id = snap.id;
             activeOrderRaw = data;
-            // ensure we render using the currency saved in the order doc
+            // set currency from order doc if present
             if(data.currency) selectedCurrency = String(data.currency).toUpperCase();
             fillBillingFields(data);
             renderPaidUIFromDoc(data);
@@ -1141,9 +1216,8 @@
               removeBlurLoaderAndReveal();
               return;
             } else {
-              // Quote is marked paid but order doc not found - still show paid quote content
+              // Quote marked paid, order doc missing — still render using quote doc (may contain prices)
               isPaidOrder = true;
-              // set currency from quote if present
               if(activeQuoteRaw.currency) selectedCurrency = String(activeQuoteRaw.currency).toUpperCase();
               renderPaidUIFromDoc(activeQuoteRaw);
               showSpinner(false);
@@ -1161,8 +1235,10 @@
           }
         }
 
+        // Unpaid quote case: fill with values from quote doc (customer, email)
         if(activeQuoteRaw.customer && nameInput) nameInput.value = activeQuoteRaw.customer;
         if(activeQuoteRaw.email && emailInput) emailInput.value = activeQuoteRaw.email;
+        // Build UI quote
         quote = normalizeQuoteItems(activeQuoteRaw);
         quote._isOrder = false;
         quote._paidFlag = (activeQuoteRaw.status || '').toLowerCase() === 'paid';
@@ -1201,9 +1277,8 @@
     }
   }
 
-  /* -------------------- SET CHECKOUT UI (unpaid) -------------------- */
+  /* -------------------- SET CHECKOUT UI -------------------- */
   function setCheckoutUI(){
-    // keep Fleur De Vie hero text untouched except basic wording
     const heroTitle = document.querySelector('.hero-text h1');
     if(heroTitle) heroTitle.textContent = quoteId ? 'Quote Checkout' : 'Checkout';
     if(payBtn){ payBtn.textContent = 'Proceed to Payment'; payBtn.disabled = false; payBtn.classList.remove('paid-state'); payBtn.dataset.processing = '0'; }
@@ -1237,7 +1312,7 @@
     }
   })();
 
-  /* -------------------- suppress known noisy errors from FP/Flutterwave -------------------- */
+  /* -------------------- suppress noisy errors from FP/Flutterwave -------------------- */
   window.addEventListener('error', (e)=>{
     try {
       const msg = (e && e.message) ? e.message.toLowerCase() : '';
@@ -1258,10 +1333,15 @@
     }
   });
 
-  /* -------------------- small support: mailto link when clicking brand (optional) -------------------- */
-  // (No floating support button in original Fleur markup; keep it consistent.)
-  
-  // ----------------- Footer Year -----------------
+  /* -------------------- small support: mailto link -------------------- */
+  try {
+    const supportBtn = document.getElementById('floatingSupportBtn');
+    supportBtn?.addEventListener('click', () => {
+      window.location.href = 'mailto:yourstruly.fleurdevie@gmail.com?subject=Support%20Request';
+    });
+  } catch(e){}
+
+  // Footer year
   try {
     const yearEl = document.getElementById('year');
     if(yearEl) yearEl.textContent = new Date().getFullYear();
@@ -1295,8 +1375,7 @@ document.addEventListener('mousemove', (e) => {
   if (e.clientY < 100) header?.classList.remove('hidden');
 });
 
-// ----------------- Support Button ----------------- 
-// Floating support
+// Support Button
 const supportBtn = document.getElementById('floatingSupportBtn');
 supportBtn?.addEventListener('click', () => {
   window.location.href = 'mailto:yourstruly.fleurdevie@gmail.com?subject=Support%20Request';
