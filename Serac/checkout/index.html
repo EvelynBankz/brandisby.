@@ -90,6 +90,12 @@ footer{text-align:center;padding:22px;background:transparent;color:var(--muted);
 @media(max-width:900px){.hamburger{display:block}.header-right{display:none;position:absolute;top:64px;right:12px;background:rgba(20,20,20,0.98);flex-direction:column;padding:18px;gap:10px;border-radius:10px;width:220px;z-index:1100;border:1px solid rgba(255,255,255,0.03)}.header-right.open{display:flex}}
 .small-note{color:var(--muted);padding:8px;text-align:center}
 
+  
+/* cart count bubble (shop style) */
+.cart-count { background:var(--gold); color:var(--bg-dark); font-size:12px; font-weight:700; border-radius:50%; padding:3px 7px; margin-left:6px; box-shadow:0 4px 10px rgba(182,110,65,0.12); }
+
+
+  
 /* Chat-style floating support button */
   #floatingSupportBtn {
     position: fixed;
@@ -149,6 +155,13 @@ footer{text-align:center;padding:22px;background:transparent;color:var(--muted);
     <img src="../asset/logo.png" alt="Sérac Logo" class="brand-logo">
     <div class="brand-title">Sérac</div>
   </div>
+
+<!-- mobile cart (visible only on small screens) -->
+  <div class="mobile-cart" style="display:none;">
+    <a href="../cart.html"><i class="fa-solid fa-cart-shopping"></i><span class="cart-count" id="cartCountMobile">0</span></a>
+  </div>
+
+  
   <nav class="header-right" id="headerRight">
     <a href="../index.html">Home</a>
     <a href="../shop.html">Shop</a>
@@ -1205,6 +1218,31 @@ window.addEventListener('error', (e)=>{
       window.location.href = 'mailto:stonecold.serac@gmail.com?subject=Support%20Request';
     });
   }
+
+/* ------------------- Hamburger ---------------------*/
+const hamburger = document.getElementById('hamburger');
+const headerRight = document.querySelector('.header-right'); // not #headerRight
+
+if (hamburger && headerRight) {
+  hamburger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    hamburger.classList.toggle('open');
+    headerRight.classList.toggle('open');
+  });
+
+  // close dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    if (
+      headerRight.classList.contains('open') &&
+      !headerRight.contains(e.target) &&
+      !hamburger.contains(e.target)
+    ) {
+      headerRight.classList.remove('open');
+      hamburger.classList.remove('open');
+    }
+  });
+}
+
 </script>
 
 </body>
