@@ -398,7 +398,8 @@ let activeOrderRaw = null;   // original order doc
 let quote = null;            // normalized quote for UI
 let isPaidOrder = false;
 
-/* -------------------- CART COUNT / MODE-AWARE SYNC -------------------- */
+
+/* -------------------- CART COUNT / MODE-AWARE SYNC (desktop + mobile) -------------------- */
 function totalQtyFromCartArray(arr){
   try { return (arr||[]).reduce((s,i)=>s + Number(i.quantity||0),0); } catch(e){ return 0; }
 }
@@ -418,31 +419,37 @@ function mergeCartItems(cartArr){
   return merged;
 }
 
-/* compute/update cart count for this page's various modes */
+/* compute/update cart count for desktop and mobile icons */
 function computeAndUpdateCartCount(){
   try {
-    // always read raw cart then normalize/merge
     const rawCart = safeParseJSON(localStorage.getItem(STORAGE_KEY), []) || [];
     const mergedCart = mergeCartItems(rawCart);
     const cartQty = totalQtyFromCartArray(mergedCart);
 
-    // If viewing an unpaid quote, display quote items + cart items (quote might be separate)
     const isUnpaidQuoteView = (!isPaidOrder && quote && Array.isArray(quote.items) && quote.items.length > 0 && !quote._isOrder && !quote._paidFlag);
 
     let displayCount = cartQty;
     if (isUnpaidQuoteView) {
       const quoteQty = totalQtyFromQuoteNormalized(quote);
-      // display quote + cart but avoid double counting when quote was built from cart:
-      // If quote was built from cart (no quoteId param), we should just show cartQty.
       if (quoteId) displayCount = Number(quoteQty || 0) + Number(cartQty || 0);
       else displayCount = cartQty;
     } else {
       displayCount = cartQty;
     }
 
-    if(cartCountElem) cartCountElem.textContent = String(displayCount || 0);
+    // Update desktop cart count
+    if (typeof cartCountElem !== 'undefined' && cartCountElem)
+      cartCountElem.textContent = String(displayCount || 0);
+
+    // Update mobile cart count
+    const cartCountMobile = document.getElementById('cartCountMobile');
+    if (cartCountMobile)
+      cartCountMobile.textContent = String(displayCount || 0);
+
   } catch(e){
     if(cartCountElem) cartCountElem.textContent = '0';
+    const cartCountMobile = document.getElementById('cartCountMobile');
+    if (cartCountMobile) cartCountMobile.textContent = '0';
   }
 }
 
@@ -457,6 +464,10 @@ window.addEventListener('storage', (e)=>{
   }
 });
 
+/* Initialize on load */
+document.addEventListener('DOMContentLoaded', computeAndUpdateCartCount);
+
+  
 /* -------------------- PRODUCT HELPERS (used for cart->quote building) -------------------- */
 async function fetchProductData(productId){
   try {
