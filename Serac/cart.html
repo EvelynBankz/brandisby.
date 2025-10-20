@@ -672,41 +672,43 @@ window.addEventListener('storage', ()=>{
 });
 
 /* -------------------- HEADER/HERO BEHAVIOR (with hamburger awareness) -------------------- */
+/* -------------------- HEADER/HERO BEHAVIOR (safe version – works with existing hamburger) -------------------- */
 (function headerHeroBehavior(){
   const headerEl = document.querySelector('.site-header');
-  const heroEl = document.querySelector('.hero') || document.getElementById('heroSection') || document.querySelector('.hero-about');
-  const hamburger = document.querySelector('.hamburger');
-  const menu = document.querySelector('.header-right');
+  const heroEl =
+    document.querySelector('.hero') ||
+    document.getElementById('heroSection') ||
+    document.querySelector('.hero-about');
+  const hamburger = document.getElementById('hamburger');
   if(!headerEl || !heroEl) return;
 
   let lastY = window.scrollY || 0;
   let hidden = false;
   let heroHeight = Math.round(heroEl.getBoundingClientRect().height);
   let hoverShown = false;
-  let menuOpen = false;
 
-  function updateMenuState(){
-    menuOpen = hamburger && hamburger.classList.contains('open');
+  function isMenuOpen(){
+    return hamburger && hamburger.classList.contains('open');
   }
 
   function handleScroll(){
-    updateMenuState();
     const y = window.scrollY || 0;
+    const menuOpen = isMenuOpen();
 
-    // toggle dark background when past hero
-    if(y > Math.max(50, heroHeight - 80)) headerEl.classList.add('scrolled');
-    else headerEl.classList.remove('scrolled');
+    // turn header dark after hero
+    if(y > Math.max(50, heroHeight - 80))
+      headerEl.classList.add('scrolled');
+    else
+      headerEl.classList.remove('scrolled');
 
+    // if hamburger menu open, force header visible
     if(menuOpen){
-      // if hamburger menu open, keep header fixed & visible
       headerEl.style.top = '0';
       headerEl.style.opacity = '1';
       headerEl.style.pointerEvents = 'auto';
-      hidden = false;
       return;
     }
 
-    // normal behavior when menu not open
     if(y > heroHeight - 80){
       if(y > lastY && !hidden){
         headerEl.style.top = '-90px';
@@ -721,20 +723,19 @@ window.addEventListener('storage', ()=>{
         hidden = false;
       }
     } else {
-      // within hero: visible and transparent
       headerEl.style.top = '0';
       headerEl.style.opacity = '1';
       headerEl.style.pointerEvents = 'auto';
       headerEl.classList.remove('scrolled');
       hidden = false;
     }
+
     lastY = y;
   }
 
-  // Hover reveal when near top of screen
+  // hover reveal (disabled when menu open)
   document.addEventListener('mousemove', (e) => {
-    updateMenuState();
-    if(menuOpen) return; // disable hover behavior while menu is open
+    if(isMenuOpen()) return;
 
     if(e.clientY < 100){
       if(hidden){
@@ -747,7 +748,7 @@ window.addEventListener('storage', ()=>{
       }
     } else if(hoverShown){
       setTimeout(()=>{
-        if(window.scrollY > heroHeight - 80){
+        if(window.scrollY > heroHeight - 80 && !isMenuOpen()){
           headerEl.style.top = '-90px';
           headerEl.style.opacity = '0';
           headerEl.style.pointerEvents = 'none';
@@ -758,21 +759,10 @@ window.addEventListener('storage', ()=>{
     }
   });
 
-  // handle hamburger click
+  // when hamburger opens/closes, re-evaluate visibility
   if(hamburger){
     hamburger.addEventListener('click', () => {
-      hamburger.classList.toggle('open');
-      if(menu) menu.classList.toggle('open');
-      updateMenuState();
-
-      if(menuOpen){
-        headerEl.style.top = '0';
-        headerEl.style.opacity = '1';
-        headerEl.style.pointerEvents = 'auto';
-        hidden = false;
-      } else {
-        handleScroll(); // resume normal behavior after menu closes
-      }
+      setTimeout(handleScroll, 200); // slight delay ensures proper detection
     });
   }
 
@@ -787,6 +777,7 @@ window.addEventListener('storage', ()=>{
     handleScroll();
   });
 })();
+
 
 /* ---------- Init ---------- */
 (async function init(){
