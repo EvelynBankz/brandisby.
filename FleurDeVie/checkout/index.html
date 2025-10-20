@@ -429,14 +429,13 @@
       const cartArr = mergeCartItems(safeParseJSON(localStorage.getItem(STORAGE_KEY), []) || []);
       const cartQty = totalQtyFromCartArray(cartArr);
 
-      // --- FIX: only show quote items combined with cart when user is actually viewing a quote (quoteId present)
+      // show quote items combined with cart only when viewing a quote (quoteId present)
       const isUnpaidQuoteView = (quoteId && !isPaidOrder && quote && Array.isArray(quote.items) && quote.items.length > 0 && !quote._isOrder && !quote._paidFlag);
       if (isUnpaidQuoteView) {
         const quoteQty = (quote && Array.isArray(quote.items)) ? quote.items.reduce((s,i)=>s + Number(i.totalQuantity||0),0) : 0;
         const displayCount = Number(quoteQty || 0) + Number(cartQty || 0);
         if(cartCountElem) cartCountElem.textContent = String(displayCount || 0);
       } else {
-        // default: just show local cart qty
         if(cartCountElem) cartCountElem.textContent = String(cartQty || 0);
       }
     } catch(e){ if(cartCountElem) cartCountElem.textContent = '0'; }
@@ -573,14 +572,17 @@
     orderItemsEl.innerHTML = '';
     if(!quoteNormalized || !Array.isArray(quoteNormalized.items)) {
       orderItemsEl.innerHTML = '<li class="small-note">No items</li>';
-      orderSubtotalEl.textContent = `Subtotal: —`;
+      try { if(orderSubtotalEl) orderSubtotalEl.textContent = `Subtotal: —`; } catch(e){}
       computeAndUpdateCartCount();
       return;
     }
     let subtotal = 0;
     quoteNormalized.items.forEach((item, idx) => {
-      const value = (item.totalPrices && (item.totalPrices[currency] ?? 0)) || 0;
-      subtotal += value;
+      // If item.totalPrices has the requested currency, use it; otherwise fallback to compute from variants
+      const value = Number((item.totalPrices && (item.totalPrices[currency] ?? null)) ?? 0) || 0;
+      const fallbackValue = Array.isArray(item.variants) ? item.variants.reduce((s,v)=> s + Number((v.linePrices && (v.linePrices[currency] ?? null)) ?? (Number(v.unitPrices?.[currency]||0)*Number(v.quantity||0))), 0) : 0;
+      const finalValue = value || fallbackValue || 0;
+      subtotal += finalValue;
 
       const li = document.createElement('li');
       li.className = 'order-item';
@@ -653,7 +655,7 @@
           leftRow.appendChild(attrs);
           const rightPrice = document.createElement('div');
           rightPrice.className = 'variant-price';
-          const variantLinePrice = (v.linePrices && (v.linePrices[currency] ?? 0)) || ((v.unitPrices && (v.unitPrices[currency] ?? 0)) * v.quantity);
+          const variantLinePrice = Number((v.linePrices && (v.linePrices[currency] ?? null)) ?? (Number(v.unitPrices?.[currency]||0)*Number(v.quantity||0)));
           rightPrice.textContent = formatPrice(variantLinePrice, currency);
           row.appendChild(leftRow);
           row.appendChild(rightPrice);
@@ -671,7 +673,7 @@
       right.className = 'right';
       right.style.minWidth = '120px';
       right.style.textAlign = 'right';
-      right.innerHTML = `<div style="font-weight:600">${formatPrice(value, currency)}</div>`;
+      right.innerHTML = `<div style="font-weight:600">${formatPrice(finalValue, currency)}</div>`;
 
       li.appendChild(left);
       li.appendChild(right);
@@ -679,8 +681,7 @@
     });
 
     // safe write
-    try { if(orderSubtotalEl) orderSubtotalEl.textContent = `Subtotal: ${formatPrice(subtotal, selectedCurrency)}`; } catch(e){}
-
+    try { if(orderSubtotalEl) orderSubtotalEl.textContent = `Subtotal: ${formatPrice(subtotal, currency)}`; } catch(e){}
     computeAndUpdateCartCount();
   }
 
@@ -721,21 +722,49 @@
       if(type === 'quote-paid' || type === 'order-paid'){
         disableCurrency(true);
         setBillingDisabled(true);
-        if(payBtn) { payBtn.textContent = 'Paid ✅'; payBtn.disabled = true; payBtn.classList.add('paid-state'); }
-        // show tracking ref if provided
-        if(opts.trackingRef){
-          let trackingElem = document.getElementById('trackingRefDisplay');
-          if(!trackingElem){
-            trackingElem = document.createElement('p');
-            trackingElem.id = 'trackingRefDisplay';
-            trackingElem.style.marginTop = '12px';
-            trackingElem.style.color = '#112e1f';
-            trackingElem.style.fontWeight = '600';
-            const container = document.querySelector('.hero-text') || document.querySelector('.hero');
-            if(container) container.appendChild(trackingElem);
+        // disable any other interactive elements that may change items
+        // (safe: attempt to disable any quantity inputs, remove buttons, variant toggles)
+        document.querySelectorAll('input, select, textarea, button').forEach(el=>{
+          if(!el.classList.contains('allow-interaction')) { // allow-interaction used if some controls must remain interactive elsewhere
+            try { el.disabled = true; } catch(e){}
           }
-          const tEl = document.getElementById('trackingRefDisplay');
-          if(tEl) tEl.textContent = `Order Reference: ${opts.trackingRef}`;
+        });
+        if(payBtn) { payBtn.textContent = 'Paid ✅'; payBtn.disabled = true; payBtn.classList.add('paid-state'); }
+        // show tracking ref if provided (two-line message, both inheriting hero h2 color)
+        if(opts.trackingRef){
+          // determine hero h2 color
+          let heroH2Color = null;
+          try {
+            const heroH2 = document.querySelector('.hero h2');
+            if(heroH2) heroH2Color = window.getComputedStyle(heroH2).color;
+          } catch(e){}
+          const container = document.querySelector('.hero-text') || document.querySelector('.hero');
+          if(container){
+            // ensure success message element
+            let successElem = document.getElementById('paidSuccessMessage');
+            if(!successElem){
+              successElem = document.createElement('p');
+              successElem.id = 'paidSuccessMessage';
+              successElem.style.marginTop = '12px';
+              successElem.style.fontWeight = '600';
+              successElem.style.fontSize = '18px';
+              container.appendChild(successElem);
+            }
+            successElem.textContent = 'Your order has been paid successfully.';
+            if(heroH2Color) successElem.style.color = heroH2Color;
+
+            let trackingElem = document.getElementById('trackingRefDisplay');
+            if(!trackingElem){
+              trackingElem = document.createElement('p');
+              trackingElem.id = 'trackingRefDisplay';
+              trackingElem.style.marginTop = '6px';
+              trackingElem.style.fontWeight = '600';
+              trackingElem.style.fontSize = '16px';
+              container.appendChild(trackingElem);
+            }
+            trackingElem.textContent = `Order Reference: ${opts.trackingRef}`;
+            if(heroH2Color) trackingElem.style.color = heroH2Color;
+          }
         }
       }
     } catch(e){ console.warn('configureCheckoutUI error', e); }
@@ -743,24 +772,38 @@
 
   /* -------------------- RENDER PAID UI FROM DOC -------------------- */
   function renderPaidUIFromDoc(docData){
+    // Ensure the paid UI uses the currency saved in the document
+    const docCurrency = (docData && docData.currency) ? String(docData.currency).toUpperCase() : selectedCurrency;
+    selectedCurrency = docCurrency;
+    if(currencySelect && currencyWrapper){
+      try { currencySelect.value = selectedCurrency; } catch(e){}
+      try { currencySelect.disabled = true; currencyWrapper.style.opacity = 0.6; currencyWrapper.style.pointerEvents = 'none'; } catch(e){}
+    }
+
+    // Normalize using order items when possible, else quote items
     const normalized = (docData.items && Array.isArray(docData.items)) ? normalizeOrderItems(docData.items) : normalizeQuoteItems(docData);
     normalized._isOrder = true;
     normalized._paidFlag = true;
 
     isPaidOrder = true;
     quote = normalized;
+
+    // render using the paid currency (ensures amounts reflect what was stored)
     renderOrderFromQuoteNormalized(normalized, selectedCurrency, true);
 
+    // fill billing from saved doc
     fillBillingFields(docData);
-    if(currencySelect && currencyWrapper){ currencySelect.value = docData.currency || selectedCurrency; currencySelect.disabled = true; currencyWrapper.style.opacity = 0.6; currencyWrapper.style.pointerEvents = 'none'; }
+
     if(payBtn){ payBtn.textContent = 'Paid ✅'; payBtn.disabled = true; payBtn.classList.add('paid-state'); }
 
-    configureCheckoutUI(orderId ? 'order-paid' : 'quote-paid', { trackingRef: docData.trackingRef });
+    // configure UI read-only and show tracking ref styled to hero h2 color
+    configureCheckoutUI(orderId ? 'order-paid' : 'quote-paid', { trackingRef: docData.trackingRef || docData.trackingRef || docData.trackingRef });
 
+    // persist local paid info (safe)
     try {
       localStorage.setItem('paidQuoteInfo', JSON.stringify({
         quoteId: docData.id || null,
-        currency: docData.currency || selectedCurrency,
+        currency: selectedCurrency,
         billing: { name: docData.name || '', email: docData.email || '', phone: docData.phone || '', address: docData.address || '' },
         trackingRef: docData.trackingRef || null,
         verified: true
@@ -792,7 +835,6 @@
         try {
           docSnap = await getDoc(doc(db, "brands", "fleurdevie", "quotes", paidQuoteInfo.quoteId));
         } catch(e){
-          // Permission-related or network error: show friendly message, but don't crash
           console.error('syncPaidQuoteUI read error', e);
           removeBlurLoaderAndReveal();
           showError('Unable to verify quote details due to access restrictions. Contact support.');
@@ -809,7 +851,7 @@
                 removeBlurLoaderAndReveal();
                 return;
               }
-            } catch(e){ /* ignore order fetch failure and continue to show quote info */ }
+            } catch(e){}
           }
           renderPaidUIFromDoc(q);
           removeBlurLoaderAndReveal();
@@ -1053,6 +1095,8 @@
           if(snap && snap.exists()){
             const data = snap.data(); data.id = snap.id;
             activeOrderRaw = data;
+            // ensure we render using the currency saved in the order doc
+            if(data.currency) selectedCurrency = String(data.currency).toUpperCase();
             fillBillingFields(data);
             renderPaidUIFromDoc(data);
             showSpinner(false);
@@ -1074,7 +1118,6 @@
           qSnap = await getDoc(doc(db, "brands", "fleurdevie", "quotes", quoteId));
         } catch(e){
           console.error("Error fetching quote", e);
-          // Permission or network issue — do not crash; show message and display local paid info if available
           showSpinner(false);
           removeBlurLoaderAndReveal();
           showError('Unable to access quote details. Contact support.');
@@ -1089,6 +1132,8 @@
             const orderSnap = await getDoc(doc(db, "brands", "fleurdevie", "orders", activeQuoteRaw.orderId));
             if(orderSnap && orderSnap.exists()){
               const orderData = orderSnap.data(); orderData.id = orderSnap.id;
+              // set currency from order
+              if(orderData.currency) selectedCurrency = String(orderData.currency).toUpperCase();
               activeOrderRaw = orderData;
               fillBillingFields(orderData);
               renderPaidUIFromDoc(orderData);
@@ -1096,16 +1141,19 @@
               removeBlurLoaderAndReveal();
               return;
             } else {
+              // Quote is marked paid but order doc not found - still show paid quote content
               isPaidOrder = true;
+              // set currency from quote if present
+              if(activeQuoteRaw.currency) selectedCurrency = String(activeQuoteRaw.currency).toUpperCase();
               renderPaidUIFromDoc(activeQuoteRaw);
               showSpinner(false);
               removeBlurLoaderAndReveal();
               return;
             }
           } catch(e){
-            // fail gracefully
             console.error('Error fetching order for paid quote', e);
             isPaidOrder = true;
+            if(activeQuoteRaw.currency) selectedCurrency = String(activeQuoteRaw.currency).toUpperCase();
             renderPaidUIFromDoc(activeQuoteRaw);
             showSpinner(false);
             removeBlurLoaderAndReveal();
@@ -1253,7 +1301,7 @@ const supportBtn = document.getElementById('floatingSupportBtn');
 supportBtn?.addEventListener('click', () => {
   window.location.href = 'mailto:yourstruly.fleurdevie@gmail.com?subject=Support%20Request';
 });
-
 </script>
+
 </body>
 </html>
