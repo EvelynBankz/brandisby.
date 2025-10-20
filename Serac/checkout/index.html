@@ -1141,22 +1141,42 @@ function setCheckoutUI(){
 if(payBtn) payBtn.addEventListener('click', initiatePaymentFlow);
 if(currencySelect) currencySelect.addEventListener('change', ()=>{ selectedCurrency = currencySelect.value; localStorage.setItem(CURRENCY_KEY, selectedCurrency); if(quote) renderOrderFromQuoteNormalized(quote, selectedCurrency, isPaidOrder); });
 
-/* -------------------- HEADER/HERO BEHAVIOR (added & works across pages) -------------------- */
+/* -------------------- HEADER/HERO BEHAVIOR (with hamburger awareness) -------------------- */
 (function headerHeroBehavior(){
   const headerEl = document.querySelector('.site-header');
   const heroEl = document.querySelector('.hero') || document.getElementById('heroSection') || document.querySelector('.hero-about');
+  const hamburger = document.querySelector('.hamburger');
+  const menu = document.querySelector('.header-right');
   if(!headerEl || !heroEl) return;
 
   let lastY = window.scrollY || 0;
   let hidden = false;
   let heroHeight = Math.round(heroEl.getBoundingClientRect().height);
+  let hoverShown = false;
+  let menuOpen = false;
+
+  function updateMenuState(){
+    menuOpen = hamburger && hamburger.classList.contains('open');
+  }
 
   function handleScroll(){
+    updateMenuState();
     const y = window.scrollY || 0;
-    // scrolled class when beyond hero
+
+    // toggle dark background when past hero
     if(y > Math.max(50, heroHeight - 80)) headerEl.classList.add('scrolled');
     else headerEl.classList.remove('scrolled');
 
+    if(menuOpen){
+      // if hamburger menu open, keep header fixed & visible
+      headerEl.style.top = '0';
+      headerEl.style.opacity = '1';
+      headerEl.style.pointerEvents = 'auto';
+      hidden = false;
+      return;
+    }
+
+    // normal behavior when menu not open
     if(y > heroHeight - 80){
       if(y > lastY && !hidden){
         headerEl.style.top = '-90px';
@@ -1181,8 +1201,11 @@ if(currencySelect) currencySelect.addEventListener('change', ()=>{ selectedCurre
     lastY = y;
   }
 
-  let hoverShown = false;
+  // Hover reveal when near top of screen
   document.addEventListener('mousemove', (e) => {
+    updateMenuState();
+    if(menuOpen) return; // disable hover behavior while menu is open
+
     if(e.clientY < 100){
       if(hidden){
         headerEl.style.top = '0';
@@ -1205,13 +1228,34 @@ if(currencySelect) currencySelect.addEventListener('change', ()=>{ selectedCurre
     }
   });
 
+  // handle hamburger click
+  if(hamburger){
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('open');
+      if(menu) menu.classList.toggle('open');
+      updateMenuState();
+
+      if(menuOpen){
+        headerEl.style.top = '0';
+        headerEl.style.opacity = '1';
+        headerEl.style.pointerEvents = 'auto';
+        hidden = false;
+      } else {
+        handleScroll(); // resume normal behavior after menu closes
+      }
+    });
+  }
+
   window.addEventListener('resize', () => {
     heroHeight = Math.round(heroEl.getBoundingClientRect().height);
     handleScroll();
   }, { passive: true });
 
   window.addEventListener('scroll', handleScroll, { passive: true });
-  window.addEventListener('load', () => { heroHeight = Math.round(heroEl.getBoundingClientRect().height); handleScroll(); });
+  window.addEventListener('load', () => {
+    heroHeight = Math.round(heroEl.getBoundingClientRect().height);
+    handleScroll();
+  });
 })();
 
 /* -------------------- MOBILE CART ICON (show on small screens) -------------------- */
