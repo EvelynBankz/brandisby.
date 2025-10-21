@@ -235,7 +235,7 @@
 
 <!-- SCRIPT -->
 <script>
-  /* -------------------- HEADER/HERO BEHAVIOR (Unified Version for All Pages) -------------------- */
+  //* -------------------- HEADER/HERO BEHAVIOR (Final Unified Version for All Pages) -------------------- */
 (function headerHeroBehavior(){
   const headerEl = document.querySelector('.site-header') || document.getElementById('siteHeader');
   const heroEl =
@@ -282,21 +282,27 @@
   function handleScroll(){
     const y = window.scrollY || 0;
     const menuOpen = isMenuOpen();
+    const isMobile = window.innerWidth <= 768;
 
-    // Header dark background beyond hero
-    if(y > Math.max(50, heroHeight - 80)){
-      headerEl.classList.add('scrolled');
+    // Header background rule
+    if(isMobile){
+      // On mobile → dark after minimal scroll
+      if(y > 10) headerEl.classList.add('scrolled');
+      else headerEl.classList.remove('scrolled');
     } else {
-      headerEl.classList.remove('scrolled');
+      // On desktop → dark only after hero
+      if(y > Math.max(50, heroHeight - 80)) headerEl.classList.add('scrolled');
+      else headerEl.classList.remove('scrolled');
     }
 
-    // If menu is open → always visible
+    // Keep visible when menu is open
     if(menuOpen){
       showHeader();
       return;
     }
 
-    if(y > heroHeight - 80){
+    // Hide/show behavior for desktop
+    if(!isMobile && y > heroHeight - 80){
       if(y > lastY && !hidden){
         hideHeader();
       } else if(y < lastY && hidden){
@@ -305,15 +311,16 @@
       }
     } else {
       showHeader();
-      headerEl.classList.remove('scrolled');
+      if(!isMobile) headerEl.classList.remove('scrolled');
     }
 
     lastY = y;
   }
 
-  // Hover near top (disabled if menu open)
+  // Hover near top (disabled if menu open or on mobile)
   document.addEventListener('mousemove', (e)=>{
-    if(isMenuOpen()) return;
+    const isMobile = window.innerWidth <= 768;
+    if(isMenuOpen() || isMobile) return;
 
     if(e.clientY < 100){
       if(hidden){
@@ -342,7 +349,6 @@
     handleScroll();
   });
 })();
-
 
   // Contact form submission
   const form = document.getElementById('contactForm');
