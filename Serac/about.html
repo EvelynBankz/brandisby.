@@ -379,40 +379,28 @@ section p { font-size: clamp(16px,1.6vw,20px); line-height:1.8; margin-bottom:18
     hidden = true;
   }
 
-  // Keep header dark as soon as user scrolls at all.
   function updateScrolledClassOnScroll(y) {
     if (y > 0) headerEl.classList.add('scrolled');
     else headerEl.classList.remove('scrolled');
   }
 
-  // Main scroll handler: darken immediately, but only hide after hero threshold when scrolling down.
   function handleScroll() {
     const y = window.scrollY || 0;
     const menuOpen = isMenuOpen();
     const threshold = Math.max(50, heroHeight - 80);
 
-    // darken immediately when user scrolls even a little
     updateScrolledClassOnScroll(y);
 
-    // If menu is open, force header visible
     if (menuOpen) {
       showHeader(true);
       lastY = y;
       return;
     }
 
-    // Only attempt hide/show when we've scrolled past the hero threshold
     if (y > threshold) {
-      if (y > lastY && !hidden) {
-        // scrolling down -> hide
-        hideHeader();
-      } else if (y < lastY && hidden) {
-        // scrolling up -> reveal (keep dark)
-        showHeader(true);
-      }
+      if (y > lastY && !hidden) hideHeader();
+      else if (y < lastY && hidden) showHeader(true);
     } else {
-      // We're within the hero area: header is visible and transparent (but since spec says darken immediately on any scroll,
-      // ensure scrolled class respects small scroll; when within hero and at top we remove .scrolled)
       if (y === 0) headerEl.classList.remove('scrolled');
       showHeader(false);
     }
@@ -420,64 +408,51 @@ section p { font-size: clamp(16px,1.6vw,20px); line-height:1.8; margin-bottom:18
     lastY = y;
   }
 
-  // Hover to reveal: only when menu closed. Hover should reveal header even if hidden (then hide again after mouse leaves).
+  // Hover reveal (only when menu is closed)
   document.addEventListener('mousemove', (e) => {
-    // don't interfere while menu open
     if (isMenuOpen()) return;
-
-    // Only show on a near-top hover
     if (e.clientY < 100) {
       if (hidden) {
-        showHeader(true); // reveal and keep dark
+        showHeader(true);
         hoverShown = true;
       }
     } else if (hoverShown) {
-      // small delay so user can move into menu or click
       setTimeout(() => {
-        // if we've scrolled past hero and still not interacting with menu, hide again
-        if (window.scrollY > Math.max(50, heroHeight - 80) && !isMenuOpen()) {
-          hideHeader();
-        }
+        if (window.scrollY > Math.max(50, heroHeight - 80) && !isMenuOpen()) hideHeader();
         hoverShown = false;
       }, 220);
     }
   }, { passive: true });
 
-  // When hamburger is toggled, re-evaluate so header stays visible while menu open
+  /* === FIXED HAMBURGER MENU BEHAVIOR === */
   if (hamburger && headerRight) {
     hamburger.addEventListener('click', () => {
-      // small timeout to let classToggle happen on hamburger before we check
-      setTimeout(() => {
-        if (isMenuOpen()) {
-          // open: ensure visible & dark background so dropdown can be read
-          showHeader(true);
-          headerEl.classList.add('scrolled');
-        } else {
-          // closed: re-run scroll logic to decide visibility
-          handleScroll();
-        }
-      }, 100);
+      const isNowOpen = hamburger.classList.toggle('open');
+      headerRight.classList.toggle('open', isNowOpen);
+
+      if (isNowOpen) {
+        // Show header fully and keep dark so dropdown is readable
+        showHeader(true);
+        headerEl.classList.add('scrolled');
+      } else {
+        handleScroll();
+      }
     });
   }
 
-  // Keep heroHeight updated on resize and re-run check
   window.addEventListener('resize', () => {
     heroHeight = Math.round(heroEl.getBoundingClientRect().height);
     handleScroll();
   }, { passive: true });
 
-  // Passive scroll listener
   window.addEventListener('scroll', handleScroll, { passive: true });
 
-  // Initial evaluate on load
   window.addEventListener('load', () => {
     heroHeight = Math.round(heroEl.getBoundingClientRect().height);
-    // Ensure initial scrolled class is correctly set for small non-zero scroll on page load
     updateScrolledClassOnScroll(window.scrollY || 0);
     handleScroll();
   });
 })();
-
 
 /* === FAQ ACCORDION === */
 document.querySelectorAll('.faq-item').forEach(item => {
@@ -516,6 +491,23 @@ if (testimonialCards.length > 2 && testimonialToggle) {
     testimonialToggle.textContent = isExpanded ? 'More' : 'Less';
   });
 }
+
+
+/* === SMOOTH SCROLL === */
+document.querySelectorAll('.header-right a').forEach(link => {
+  link.addEventListener('click', e => {
+    const href = link.getAttribute('href');
+    if (href && href.startsWith('#')) {
+      e.preventDefault();
+      const target = document.getElementById(href.slice(1));
+      if (target) {
+        window.scrollTo({ top: target.offsetTop - 80, behavior: 'smooth' });
+      }
+      headerRight.classList.remove('open');
+      hamburger.classList.remove('open');
+    }
+  });
+});
 
 </script>
 
