@@ -403,38 +403,66 @@ function displayProducts(products) {
   }
 
   // ---------- Pagination controls (always visible, horizontal, below grid) ----------
-  // Remove any previous pagination (avoid duplicates)
-  const existingPagination = document.querySelector('.pagination');
-  if (existingPagination) existingPagination.remove();
+ // Remove any previous pagination (avoid duplicates)
+const existingPagination = document.querySelector('.pagination');
+if (existingPagination) existingPagination.remove();
 
-  const paginationContainer = document.createElement('div');
-  paginationContainer.className = 'pagination';
+const paginationContainer = document.createElement('div');
+paginationContainer.className = 'pagination';
 
-  // Always display at least one page button
-  for (let i = 1; i <= Math.max(totalPages, 1); i++) {
-    const btn = document.createElement('button');
-    btn.textContent = i;
-    btn.className = (i === currentPage) ? 'active' : '';
-    btn.addEventListener('click', () => {
-      window.currentPage = i;
-      displayProducts(products);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-    paginationContainer.appendChild(btn);
+// Prev button
+const prevBtn = document.createElement('button');
+prevBtn.textContent = 'Prev';
+prevBtn.disabled = currentPage === 1;
+prevBtn.addEventListener('click', () => {
+  if (currentPage > 1) {
+    currentPage--;
+    window.currentPage = currentPage;
+    displayProducts(products);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
+});
+paginationContainer.appendChild(prevBtn);
 
-  // Insert pagination after the product grid so it sits under the grid (full-width)
-  if (productGrid && productGrid.parentElement) {
-    productGrid.insertAdjacentElement('afterend', paginationContainer);
-  } else {
-    // fallback
-    document.body.appendChild(paginationContainer);
-  }
-
-  // update cart count + product UIs
-  updateCartCount();
-  (paginated || []).forEach(p => updateProductUI(p.id));
+// Page number buttons
+for (let i = 1; i <= Math.max(totalPages, 1); i++) {
+  const btn = document.createElement('button');
+  btn.textContent = i;
+  btn.className = (i === currentPage) ? 'active' : '';
+  btn.addEventListener('click', () => {
+    currentPage = i;
+    window.currentPage = i;
+    displayProducts(products);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  paginationContainer.appendChild(btn);
 }
+
+// Next button
+const nextBtn = document.createElement('button');
+nextBtn.textContent = 'Next';
+nextBtn.disabled = currentPage === totalPages;
+nextBtn.addEventListener('click', () => {
+  if (currentPage < totalPages) {
+    currentPage++;
+    window.currentPage = currentPage;
+    displayProducts(products);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+});
+paginationContainer.appendChild(nextBtn);
+
+// Insert pagination after the product grid so it sits under the grid (full-width)
+if (productGrid && productGrid.parentElement) {
+  productGrid.insertAdjacentElement('afterend', paginationContainer);
+} else {
+  // fallback
+  document.body.appendChild(paginationContainer);
+}
+
+// update cart count + product UIs
+updateCartCount();
+(paginated || []).forEach(p => updateProductUI(p.id));
 
 /* ---------- small helpers ---------- */
 function truncateText(text, wordLimit) { return text.split(' ').slice(0, wordLimit).join(' '); }
