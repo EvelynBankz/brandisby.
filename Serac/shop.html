@@ -627,18 +627,23 @@ loadProducts();
 const style = document.createElement('style');
 style.textContent = `
 .pagination {
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 0.6rem;
   margin-top: 2rem;
-  flex-wrap: wrap;
+  padding: 1rem 0.5rem;
+  background: transparent; /* no background */
   width: 100%;
+  flex-wrap: wrap;
 }
 
 .pagination button {
-  background: transparent;
-  
+  background: transparent !important; /* absolutely no fill */
+  color: var(--gold);
   border: 1px solid var(--gold);
   padding: 0.5rem 1rem;
   cursor: pointer;
@@ -656,6 +661,11 @@ style.textContent = `
   background: var(--gold);
   color: #fff;
   border-color: var(--gold);
+}
+
+.pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 `;
 document.head.appendChild(style);
