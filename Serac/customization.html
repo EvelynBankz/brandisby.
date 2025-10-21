@@ -403,8 +403,8 @@ footer p { font-size:14px; }
     <p>© 2025 Sérac</p>
   </footer>
 
-  <script type="module">
-/* -------------------- HEADER/HERO BEHAVIOR (safe version – works with existing hamburger) -------------------- */
+<script type="module">
+/* -------------------- HEADER / HERO BEHAVIOR -------------------- */
 (function headerHeroBehavior(){
   const headerEl = document.querySelector('.site-header');
   const heroEl =
@@ -412,6 +412,8 @@ footer p { font-size:14px; }
     document.getElementById('heroSection') ||
     document.querySelector('.hero-about');
   const hamburger = document.getElementById('hamburger');
+  const headerRight = document.querySelector('.header-right');
+
   if(!headerEl || !heroEl) return;
 
   let lastY = window.scrollY || 0;
@@ -491,10 +493,22 @@ footer p { font-size:14px; }
     }
   });
 
-  // when hamburger opens/closes, re-evaluate visibility
-  if(hamburger){
+  // ✅ Fixed: Hamburger toggle (proper dropdown behavior)
+  if(hamburger && headerRight){
     hamburger.addEventListener('click', () => {
-      setTimeout(handleScroll, 200); // slight delay ensures proper detection
+      hamburger.classList.toggle('open');
+      headerRight.classList.toggle('open');
+      const expanded = hamburger.classList.contains('open');
+      hamburger.setAttribute('aria-expanded', expanded);
+
+      // keep header visible when menu open
+      if (expanded) {
+        headerEl.style.top = '0';
+        headerEl.style.opacity = '1';
+        headerEl.style.pointerEvents = 'auto';
+      }
+
+      setTimeout(handleScroll, 200);
     });
   }
 
@@ -511,7 +525,7 @@ footer p { font-size:14px; }
 })();
 
 
-    
+
 /* -------------------- CUSTOMIZATION FORM → WHATSAPP -------------------- */
 const customForm = document.getElementById('customForm');
 if (customForm) {
@@ -533,26 +547,22 @@ if (customForm) {
     const whatsappNumber = "08085578326"; // Sérac WhatsApp
     window.open(`https://wa.me/${whatsappNumber}?text=${message}`, "_blank");
 
-    alert("Thank you! Your request has been sent. We will contact you via WhatsApp within the next few hours.");
+    alert("Thank you! Your request has been sent. We will contact you via WhatsApp shortly.");
     customForm.reset();
   });
 }
 
 
 
-
-
-
-    
- // Firebase brand placeholder
-  const brand = "serac";
-  console.log("Contact form initialized for brand:", brand);
+// Firebase brand placeholder
+const brand = "serac";
+console.log("Customization form initialized for brand:", brand);
 
 </script>
 
-    
 
 <script>
+/* -------------------- HERO PEEK EFFECT -------------------- */
 (function() {
   const applyHeroPeek = () => {
     const heroes = document.querySelectorAll('.hero');
@@ -579,34 +589,31 @@ if (customForm) {
   window.addEventListener('load', applyHeroPeek);
   window.addEventListener('resize', applyHeroPeek);
 })();
+</script>
 
-/* === SMOOTH SCROLL === */
-document.querySelectorAll('.header-right a').forEach(link => {
-  link.addEventListener('click', e => {
-    const href = link.getAttribute('href');
-    if (href && href.startsWith('#')) {
-      e.preventDefault();
-      const target = document.getElementById(href.slice(1));
-      if (target) {
-        window.scrollTo({ top: target.offsetTop - 80, behavior: 'smooth' });
+
+<script>
+/* -------------------- SMOOTH SCROLL -------------------- */
+(function() {
+  const hamburger = document.getElementById('hamburger');
+  const headerRight = document.querySelector('.header-right');
+
+  document.querySelectorAll('.header-right a').forEach(link => {
+    link.addEventListener('click', e => {
+      const href = link.getAttribute('href');
+      if (href && href.startsWith('#')) {
+        e.preventDefault();
+        const target = document.getElementById(href.slice(1));
+        if (target) {
+          window.scrollTo({ top: target.offsetTop - 80, behavior: 'smooth' });
+        }
+        headerRight.classList.remove('open');
+        hamburger.classList.remove('open');
+        hamburger.setAttribute('aria-expanded', false);
       }
-      headerRight.classList.remove('open');
-      hamburger.classList.remove('open');
-    }
+    });
   });
-});
-
-// // ✅ Fix: Hamburger toggle logic
-// if (hamburger && headerRight) {
-//   hamburger.addEventListener('click', () => {
-//     hamburger.classList.toggle('open');
-//     headerRight.classList.toggle('open');
-//     const expanded = hamburger.classList.contains('open');
-//     hamburger.setAttribute('aria-expanded', expanded);
-//   });
-// }
-  
-  
+})();
 </script>
 
 </body>
