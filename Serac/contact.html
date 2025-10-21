@@ -6,6 +6,7 @@
 <title>Sérac - Contact Us</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 <style>
 /* ================= RESET & BASE ================= */
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -33,27 +34,38 @@ a:hover { color:#B66E41; }
 .brand-title { font-family:"Playfair Display", serif; font-size:28px; font-weight:700; color:#B66E41; }
 
 .header-right {
-  display:flex;
-  gap:28px;
-  font-weight:500;
+  display: flex;
+  gap: 28px;
+  font-weight: 500;
 }
+
 .header-right a {
   position: relative;
   color: #F5F5F3;
   padding: 6px 0;
   font-size: 1rem;
+  transition: color 0.3s ease;
 }
+
 .header-right a::after {
-  content:"";
-  position:absolute;
-  bottom:-4px;
-  left:0;
-  width:0;
-  height:2px;
-  background:#B66E41;
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #B66E41;
   transition: width 0.3s ease;
 }
-.header-right a:hover::after { width:100%; }
+
+.header-right a:hover {
+  color: #B66E41; /* text color on hover */
+}
+
+.header-right a:hover::after {
+  width: 100%; /* underline expands on hover */
+}
+
 
 /* ================= HAMBURGER ================= */
 .hamburger {
@@ -400,128 +412,114 @@ footer p { font-size:14px; }
 
 <!-- SCRIPT -->
 <script>
-  //* -------------------- HEADER/HERO BEHAVIOR (Final Unified Version for All Pages) -------------------- */
+ /* -------------------- HEADER/HERO BEHAVIOR (safe version – works with existing hamburger) -------------------- */
 (function headerHeroBehavior(){
-  const headerEl = document.querySelector('.site-header') || document.getElementById('siteHeader');
+  const headerEl = document.querySelector('.site-header');
   const heroEl =
     document.querySelector('.hero') ||
     document.getElementById('heroSection') ||
     document.querySelector('.hero-about');
   const hamburger = document.getElementById('hamburger');
-  const headerRight = document.querySelector('.header-right');
-
   if(!headerEl || !heroEl) return;
 
   let lastY = window.scrollY || 0;
   let hidden = false;
-  let hoverShown = false;
   let heroHeight = Math.round(heroEl.getBoundingClientRect().height);
-
-  // Hamburger toggle
-  if(hamburger && headerRight){
-    hamburger.addEventListener('click', ()=>{
-      headerRight.classList.toggle('open');
-      hamburger.classList.toggle('open');
-      setTimeout(handleScroll, 150);
-    });
-  }
+  let hoverShown = false;
 
   function isMenuOpen(){
     return hamburger && hamburger.classList.contains('open');
   }
 
-  function showHeader(){
-    headerEl.style.top = '0';
-    headerEl.style.opacity = '1';
-    headerEl.style.pointerEvents = 'auto';
-    hidden = false;
-  }
-
-  function hideHeader(){
-    headerEl.style.top = '-90px';
-    headerEl.style.opacity = '0';
-    headerEl.style.pointerEvents = 'none';
-    hidden = true;
-  }
-
   function handleScroll(){
     const y = window.scrollY || 0;
     const menuOpen = isMenuOpen();
-    const isMobile = window.innerWidth <= 768;
 
-    // Header background rule
-    if(isMobile){
-      // On mobile → dark after minimal scroll
-      if(y > 10) headerEl.classList.add('scrolled');
-      else headerEl.classList.remove('scrolled');
-    } else {
-      // On desktop → dark only after hero
-      if(y > Math.max(50, heroHeight - 80)) headerEl.classList.add('scrolled');
-      else headerEl.classList.remove('scrolled');
-    }
+    // turn header dark after hero
+    if(y > Math.max(50, heroHeight - 80))
+      headerEl.classList.add('scrolled');
+    else
+      headerEl.classList.remove('scrolled');
 
-    // Keep visible when menu is open
+    // if hamburger menu open, force header visible
     if(menuOpen){
-      showHeader();
+      headerEl.style.top = '0';
+      headerEl.style.opacity = '1';
+      headerEl.style.pointerEvents = 'auto';
       return;
     }
 
-    // Hide/show behavior for desktop
-    if(!isMobile && y > heroHeight - 80){
+    if(y > heroHeight - 80){
       if(y > lastY && !hidden){
-        hideHeader();
+        headerEl.style.top = '-90px';
+        headerEl.style.opacity = '0';
+        headerEl.style.pointerEvents = 'none';
+        hidden = true;
       } else if(y < lastY && hidden){
-        showHeader();
+        headerEl.style.top = '0';
+        headerEl.style.opacity = '1';
+        headerEl.style.pointerEvents = 'auto';
         headerEl.classList.add('scrolled');
+        hidden = false;
       }
     } else {
-      showHeader();
-      if(!isMobile) headerEl.classList.remove('scrolled');
+      headerEl.style.top = '0';
+      headerEl.style.opacity = '1';
+      headerEl.style.pointerEvents = 'auto';
+      headerEl.classList.remove('scrolled');
+      hidden = false;
     }
 
     lastY = y;
   }
 
-  // Hover near top (disabled if menu open or on mobile)
-  document.addEventListener('mousemove', (e)=>{
-    const isMobile = window.innerWidth <= 768;
-    if(isMenuOpen() || isMobile) return;
+  // hover reveal (disabled when menu open)
+  document.addEventListener('mousemove', (e) => {
+    if(isMenuOpen()) return;
 
     if(e.clientY < 100){
       if(hidden){
-        showHeader();
+        headerEl.style.top = '0';
+        headerEl.style.opacity = '1';
+        headerEl.style.pointerEvents = 'auto';
         headerEl.classList.add('scrolled');
+        hidden = false;
         hoverShown = true;
       }
     } else if(hoverShown){
       setTimeout(()=>{
         if(window.scrollY > heroHeight - 80 && !isMenuOpen()){
-          hideHeader();
+          headerEl.style.top = '-90px';
+          headerEl.style.opacity = '0';
+          headerEl.style.pointerEvents = 'none';
+          hidden = true;
         }
         hoverShown = false;
-      }, 250);
+      }, 220);
     }
   });
 
-  window.addEventListener('resize', ()=>{
+  // when hamburger opens/closes, re-evaluate visibility
+  if(hamburger){
+    hamburger.addEventListener('click', () => {
+      setTimeout(handleScroll, 200); // slight delay ensures proper detection
+    });
+  }
+
+  window.addEventListener('resize', () => {
     heroHeight = Math.round(heroEl.getBoundingClientRect().height);
     handleScroll();
   }, { passive: true });
 
   window.addEventListener('scroll', handleScroll, { passive: true });
-  window.addEventListener('load', ()=>{
+  window.addEventListener('load', () => {
     heroHeight = Math.round(heroEl.getBoundingClientRect().height);
     handleScroll();
   });
 })();
 
-  // Contact form submission
-  const form = document.getElementById('contactForm');
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    alert("Thank you for contacting Sérac, " + document.getElementById('name').value + "! We'll get back to you soon.");
-    form.reset();
-  });
+
+  
 
   // Firebase brand placeholder
   const brand = "serac";
@@ -556,6 +554,36 @@ footer p { font-size:14px; }
   window.addEventListener('load', applyHeroPeek);
   window.addEventListener('resize', applyHeroPeek);
 })();
+
+
+/* === SMOOTH SCROLL === */
+document.querySelectorAll('.header-right a').forEach(link => {
+  link.addEventListener('click', e => {
+    const href = link.getAttribute('href');
+    if (href && href.startsWith('#')) {
+      e.preventDefault();
+      const target = document.getElementById(href.slice(1));
+      if (target) {
+        window.scrollTo({ top: target.offsetTop - 80, behavior: 'smooth' });
+      }
+      headerRight.classList.remove('open');
+      hamburger.classList.remove('open');
+    }
+  });
+});
+
+
+// // ✅ Fix: Hamburger toggle logic
+// if (hamburger && headerRight) {
+//   hamburger.addEventListener('click', () => {
+//     hamburger.classList.toggle('open');
+//     headerRight.classList.toggle('open');
+//     const expanded = hamburger.classList.contains('open');
+//     hamburger.setAttribute('aria-expanded', expanded);
+//   });
+// }
+
+  
 </script>
 
 </body>
