@@ -85,38 +85,38 @@
     .hero h1{font-family:"Playfair Display",serif;color:#B66E41;font-size:clamp(36px,6vw,60px)}
 
 
-    :root {
-  --gold: #B66E41;
-}
-
-  /* === UNDERLINE HOVER EFFECT (replicated from About page) === */
-  .header-right a {
-    color: #F5F5F3;
-    position: relative;
-    padding: 6px 0;
-    font-size: 1rem;
-    font-weight: 500;
-    transition: color 0.3s ease;
-  }
-  
-  .header-right a::after {
-    content: "";
-    position: absolute;
-    bottom: -4px;
-    left: 0;
-    width: 0;
-    height: 2px;
-    background: var(--gold);
-    transition: width 0.3s ease;
-  }
-  
-  .header-right a:hover {
-    color: var(--gold);
-  }
-  
-  .header-right a:hover::after {
-    width: 100%;
-  }
+        :root {
+      --gold: #B66E41;
+    }
+    
+      /* === UNDERLINE HOVER EFFECT (replicated from About page) === */
+    .header-right a {
+      color: #F5F5F3;
+      position: relative;
+      padding: 6px 0;
+      font-size: 1rem;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+    
+    .header-right a::after {
+      content: "";
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--gold);
+      transition: width 0.3s ease;
+    }
+    
+    .header-right a:hover {
+      color: var(--gold);
+    }
+    
+    .header-right a:hover::after {
+      width: 100%;
+    }
 
     
     /* Main */
