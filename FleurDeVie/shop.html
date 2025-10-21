@@ -271,6 +271,7 @@ const currencySelect = document.getElementById('currencySelect');
 
 let cart = JSON.parse(localStorage.getItem('cart')) || [];
 let productsData = {};
+let currentPage = 1; // 👈 pagination tracker
 
 if(localStorage.getItem('currency')) currencySelect.value = localStorage.getItem('currency');
 currencySelect.addEventListener('change', ()=>{ localStorage.setItem('currency', currencySelect.value); loadProducts(); });
@@ -288,7 +289,6 @@ function updateCartCount(){
   cartCountMobileElem.textContent=total;
 }
 
-// Merge cart items by id + variant
 function mergeCartItems(cartArray){
   const merged = [];
   cartArray.forEach(item=>{
@@ -299,7 +299,6 @@ function mergeCartItems(cartArray){
   return merged;
 }
 
-// Calculate total quantity for product across all variants
 function getTotalQuantity(productId){
   return cart.filter(i=>i.id===productId).reduce((sum,i)=>sum+(i.quantity||0),0);
 }
@@ -321,7 +320,6 @@ function removeFromCart(productId){
   updateProductUI(productId);
 }
 
-// Update product card UI based on total quantity across all variants
 function updateProductUI(productId){
   const card = document.getElementById(`product-${productId}`);
   if(!card) return;
@@ -354,18 +352,28 @@ async function loadProducts(){
   }catch(e){ console.error(e); productGrid.innerHTML='<p style="text-align:center;color:red;">Failed to load products.</p>'; }
 }
 
+/* ---------- PAGINATION + DISPLAY ---------- */
 function displayProducts(products){
   const term = searchInput.value.toLowerCase();
   let filtered = products.filter(p=>p.name.toLowerCase().includes(term));
   const sortVal = sortSelect.value;
   const currency = currencySelect.value;
   function getPriceForCurrency(product){ return currency==='NGN'?product.priceNGN:currency==='USD'?product.priceUSD:currency==='EUR'?product.priceEUR:currency==='GBP'?product.priceGBP:product.priceNGN; }
+
   if(sortVal==='alphabet') filtered.sort((a,b)=>a.name.localeCompare(b.name));
   if(sortVal==='price-asc') filtered.sort((a,b)=>getPriceForCurrency(a)-getPriceForCurrency(b));
   if(sortVal==='price-desc') filtered.sort((a,b)=>getPriceForCurrency(b)-getPriceForCurrency(a));
 
+  // 👇 Edit number of products per page here
+  const productsPerPage = 5; // change to 50 when ready
+  const totalPages = Math.ceil(filtered.length / productsPerPage) || 1;
+  if(currentPage > totalPages) currentPage = totalPages;
+  const start = (currentPage - 1) * productsPerPage;
+  const end = start + productsPerPage;
+  const paginated = filtered.slice(start, end);
+
   productGrid.innerHTML='';
-  for(const p of filtered){
+  for(const p of paginated){
     const quantity = getTotalQuantity(p.id);
     const priceForCurrency = getPriceForCurrency(p);
 
@@ -395,6 +403,36 @@ function displayProducts(products){
 
     productGrid.appendChild(div);
   }
+
+  // PAGINATION CONTROLS
+  const paginationContainer = document.createElement('div');
+  paginationContainer.className = 'pagination';
+
+  const prevBtn = document.createElement('button');
+  prevBtn.textContent = 'Prev';
+  prevBtn.disabled = currentPage === 1;
+  prevBtn.addEventListener('click', ()=>{ if(currentPage>1){ currentPage--; displayProducts(products); window.scrollTo({top:0,behavior:'smooth'});} });
+  paginationContainer.appendChild(prevBtn);
+
+  for(let i=1; i<=Math.max(totalPages,1); i++){
+    const btn = document.createElement('button');
+    btn.textContent = i;
+    btn.className = i===currentPage?'active':'';
+    btn.addEventListener('click', ()=>{
+      currentPage = i;
+      displayProducts(products);
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+    paginationContainer.appendChild(btn);
+  }
+
+  const nextBtn = document.createElement('button');
+  nextBtn.textContent = 'Next';
+  nextBtn.disabled = currentPage === totalPages;
+  nextBtn.addEventListener('click', ()=>{ if(currentPage<totalPages){ currentPage++; displayProducts(products); window.scrollTo({top:0,behavior:'smooth'});} });
+  paginationContainer.appendChild(nextBtn);
+
+  productGrid.appendChild(paginationContainer);
 }
 
 function truncateText(text, wordLimit){ return text.split(' ').slice(0,wordLimit).join(' '); }
@@ -420,7 +458,6 @@ window.addEventListener('storage', ()=>{
   loadProducts();
 });
 
-
 /*------New header Settings-----*/
 let lastScrollY = window.scrollY;
 const header = document.querySelector('.site-header');
@@ -441,17 +478,61 @@ window.addEventListener('scroll', () => {
   lastScrollY = window.scrollY;
 });
 
-// Show header again on hover when below hero
-document.addEventListener('mousemove', (e) => {
-  if (e.clientY < 100) header.classList.remove('hidden');
-});
+document.addEventListener('mousemove', (e) => { if (e.clientY < 100) header.classList.remove('hidden'); });
 
-// Floating support
 const supportBtn = document.getElementById('floatingSupportBtn');
 supportBtn?.addEventListener('click', () => {
   window.location.href = 'mailto:yourstruly.fleurdevie@gmail.com?subject=Support%20Request';
 });
- 
+
+/* ===== STICKY PAGINATION STYLING ===== */
+const style = document.createElement('style');
+style.textContent = `
+.pagination {
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 2rem;
+  padding: 1rem 0.5rem;
+  background: transparent; /* no background */
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.pagination button {
+  background: transparent !important; /* absolutely no fill */
+  color: var(--gold);
+  border: 1px solid var(--gold);
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.pagination button:hover {
+  background: var(--gold);
+  color: #fff;
+}
+
+.pagination button.active {
+  background: var(--gold);
+  color: #fff;
+  border-color: var(--gold);
+}
+
+.pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+`;
+document.head.appendChild(style);
+
 </script>
+
 </body>
 </html>
