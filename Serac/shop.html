@@ -135,6 +135,31 @@ footer { text-align:center; padding:22px; background:transparent; color:#bdbdbd;
 }
 
 button:focus, a:focus, input:focus, select:focus { outline: 3px solid rgba(182,110,65,0.12); outline-offset:2px; }
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-top: 2rem;
+}
+.pagination button {
+  background: var(--bg-mid);
+  color: var(--muted);
+  border: none;
+  padding: 0.5rem 0.8rem;
+  cursor: pointer;
+  border-radius: var(--radius, 4px);
+  transition: background 0.3s ease, color 0.3s ease;
+}
+.pagination button:hover {
+  background: var(--gold);
+  color: #fff;
+}
+.pagination button.active {
+  background: var(--accent-strong);
+  color: #fff;
+}
+
 </style>
 </head>
 <body>
@@ -333,7 +358,7 @@ async function loadProducts() {
   }
 }
 
-/* Display with same UX as FleurDeVie (search, sort, currency) */
+/* ---------- Display products with pagination (50 per page) ---------- */
 function displayProducts(products) {
   const term = (searchInput?.value || '').toLowerCase();
   let filtered = (products || []).filter(p => (p.name || '').toLowerCase().includes(term));
@@ -342,15 +367,29 @@ function displayProducts(products) {
   const currency = currencySelect?.value || (localStorage.getItem(CURRENCY_KEY) || 'NGN');
 
   function getPriceForCurrency(product) {
-    return currency === 'NGN' ? product.priceNGN : currency === 'USD' ? product.priceUSD : currency === 'EUR' ? product.priceEUR : currency === 'GBP' ? product.priceGBP : product.priceNGN;
+    return currency === 'NGN' ? product.priceNGN :
+           currency === 'USD' ? product.priceUSD :
+           currency === 'EUR' ? product.priceEUR :
+           currency === 'GBP' ? product.priceGBP :
+           product.priceNGN;
   }
 
   if (sortVal === 'alphabet') filtered.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
   if (sortVal === 'price-asc') filtered.sort((a, b) => (getPriceForCurrency(a) || 0) - (getPriceForCurrency(b) || 0));
   if (sortVal === 'price-desc') filtered.sort((a, b) => (getPriceForCurrency(b) || 0) - (getPriceForCurrency(a) || 0));
 
+  const productsPerPage = 50;
+  let currentPage = window.currentPage || 1;
+  const totalPages = Math.ceil(filtered.length / productsPerPage);
+  if (currentPage > totalPages) currentPage = totalPages || 1;
+
+  const start = (currentPage - 1) * productsPerPage;
+  const end = start + productsPerPage;
+  const paginated = filtered.slice(start, end);
+
   if (productGrid) productGrid.innerHTML = '';
-  for (const p of filtered) {
+
+  for (const p of paginated) {
     const quantity = getTotalQuantity(p.id);
     const priceForCurrency = getPriceForCurrency(p);
 
@@ -374,21 +413,33 @@ function displayProducts(products) {
       <button class="add-cart" style="display:${quantity > 0 ? 'none' : 'block'};">Add to Cart</button>
     `;
 
-    // Wire controls
-    const plusBtn = div.querySelector('.plus');
-    const minusBtn = div.querySelector('.minus');
-    const addBtn = div.querySelector('.add-cart');
-
-    plusBtn?.addEventListener('click', e => { e.stopPropagation(); addToCart(p); });
-    minusBtn?.addEventListener('click', e => { e.stopPropagation(); removeFromCart(p.id); });
-    addBtn?.addEventListener('click', e => { e.stopPropagation(); addToCart(p); });
+    div.querySelector('.plus')?.addEventListener('click', e => { e.stopPropagation(); addToCart(p); });
+    div.querySelector('.minus')?.addEventListener('click', e => { e.stopPropagation(); removeFromCart(p.id); });
+    div.querySelector('.add-cart')?.addEventListener('click', e => { e.stopPropagation(); addToCart(p); });
 
     productGrid?.appendChild(div);
   }
 
-  // update cart count + product UIs
+  /* ---------- Pagination controls ---------- */
+  const paginationContainer = document.createElement('div');
+  paginationContainer.className = 'pagination';
+  if (totalPages > 1) {
+    for (let i = 1; i <= totalPages; i++) {
+      const btn = document.createElement('button');
+      btn.textContent = i;
+      btn.className = (i === currentPage) ? 'active' : '';
+      btn.addEventListener('click', () => {
+        window.currentPage = i;
+        displayProducts(products);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+      paginationContainer.appendChild(btn);
+    }
+  }
+  productGrid?.appendChild(paginationContainer);
+
   updateCartCount();
-  (products || []).forEach(p => updateProductUI(p.id));
+  (paginated || []).forEach(p => updateProductUI(p.id));
 }
 
 /* ---------- small helpers ---------- */
@@ -412,7 +463,6 @@ if (hamburger) {
     const menuOpen = hamburger.classList.toggle('open');
     if (headerRight) headerRight.classList.toggle('open', menuOpen);
 
-    // keep header visible while menu is open
     const headerEl = document.querySelector('.site-header');
     if (headerEl) {
       if (menuOpen) {
@@ -421,14 +471,12 @@ if (hamburger) {
         headerEl.style.pointerEvents = 'auto';
         headerEl.classList.add('scrolled');
       } else {
-        // delay so hide logic can re-evaluate smoothly
         setTimeout(() => {
           if (typeof handleScroll === 'function') handleScroll();
         }, 160);
       }
     }
 
-    // ensure dropdown contents are left-aligned (if CSS doesn't already do it)
     if (headerRight) {
       headerRight.style.alignItems = 'flex-start';
       headerRight.style.textAlign = 'left';
@@ -445,7 +493,7 @@ function handleMobileCart() {
 window.addEventListener('resize', handleMobileCart);
 handleMobileCart();
 
-/* ---------- Simple fallback header scroll (turn dark quickly after small scroll) ---------- */
+/* ---------- Simple fallback header scroll ---------- */
 window.addEventListener('scroll', () => {
   const header = document.querySelector('.site-header');
   if (!header) return;
@@ -453,8 +501,8 @@ window.addEventListener('scroll', () => {
   else header.classList.remove('scrolled');
 });
 
-/* -------------------- HEADER/HERO BEHAVIOR (safe version – works with hamburger) -------------------- */
-let handleScroll = null; // exported to outer handlers above
+/* -------------------- HEADER/HERO BEHAVIOR -------------------- */
+let handleScroll = null;
 (function headerHeroBehavior(){
   const headerEl = document.querySelector('.site-header');
   const heroEl =
@@ -463,7 +511,6 @@ let handleScroll = null; // exported to outer handlers above
     document.querySelector('.hero-about');
   const ham = document.getElementById('hamburger');
   if (!headerEl || !heroEl) {
-    // still define a no-op handleScroll so other code can call it safely
     handleScroll = () => {};
     return;
   }
@@ -480,20 +527,14 @@ let handleScroll = null; // exported to outer handlers above
   handleScroll = function(){
     const y = window.scrollY || 0;
     const menuOpen = isMenuOpen();
-
-    // USER REQUEST: header should turn dark after a small scroll ( > 50px )
     if (y > 50) headerEl.classList.add('scrolled');
     else headerEl.classList.remove('scrolled');
-
-    // if hamburger menu open, force header visible
     if (menuOpen) {
       headerEl.style.top = '0';
       headerEl.style.opacity = '1';
       headerEl.style.pointerEvents = 'auto';
       return;
     }
-
-    // hide/show logic only after hero is passed
     if (y > heroHeight - 80) {
       if (y > lastY && !hidden) {
         headerEl.style.top = '-90px';
@@ -504,22 +545,18 @@ let handleScroll = null; // exported to outer handlers above
         headerEl.style.top = '0';
         headerEl.style.opacity = '1';
         headerEl.style.pointerEvents = 'auto';
-        headerEl.classList.add('scrolled'); // ensure dark when shown after scroll up
+        headerEl.classList.add('scrolled');
         hidden = false;
       }
     } else {
-      // within hero: visible (but per user request, header becomes dark as soon as y>50)
       headerEl.style.top = '0';
       headerEl.style.opacity = '1';
       headerEl.style.pointerEvents = 'auto';
-      // keep scrolled class controlled by the small-scroll rule above
       hidden = false;
     }
-
     lastY = y;
   };
 
-  // hover reveal (disabled when menu open)
   document.addEventListener('mousemove', (e) => {
     if (isMenuOpen()) return;
     if (e.clientY < 100) {
@@ -527,7 +564,6 @@ let handleScroll = null; // exported to outer handlers above
         headerEl.style.top = '0';
         headerEl.style.opacity = '1';
         headerEl.style.pointerEvents = 'auto';
-        // ensure it's dark when revealed (per small scroll rule)
         headerEl.classList.add('scrolled');
         hidden = false;
         hoverShown = true;
@@ -557,7 +593,7 @@ let handleScroll = null; // exported to outer handlers above
   });
 })();
 
-/* ---------- Storage event synchronization (other tabs) ---------- */
+/* ---------- Storage event synchronization ---------- */
 window.addEventListener('storage', (ev) => {
   if (ev.key === CART_KEY) {
     cart = JSON.parse(localStorage.getItem(CART_KEY)) || [];
@@ -576,9 +612,6 @@ window.addEventListener('storage', (ev) => {
 /* ---------- Initial load ---------- */
 updateCartCount();
 loadProducts();
-
-</script>
-
 </script>
 
 </body>
