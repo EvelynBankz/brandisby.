@@ -198,7 +198,7 @@ button:focus, a:focus, input:focus, select:focus { outline: 3px solid rgba(182,1
   <p>© 2025 Sérac</p>
 </footer>
 
-The Serac pagination does not have the previous and next button. 
+
 
 
 <script type="module">
@@ -303,7 +303,7 @@ function updateProductUI(productId) {
   }
 }
 
-/* Price formatting (same behaviour as FleurdeVie) */
+/* Price formatting */
 function formatPrice(product, currency) {
   if (!product) return '';
   const price = currency === 'NGN' ? product.priceNGN : currency === 'USD' ? product.priceUSD : currency === 'EUR' ? product.priceEUR : currency === 'GBP' ? product.priceGBP : product.priceNGN;
@@ -337,7 +337,7 @@ async function loadProducts() {
   }
 }
 
-/* ---------- Display with same UX as FleurDeVie (search, sort, currency) ---------- */
+/* ---------- Display with pagination ---------- */
 function displayProducts(products) {
   const term = (searchInput?.value || '').toLowerCase();
   let filtered = (products || []).filter(p => (p.name || '').toLowerCase().includes(term));
@@ -354,14 +354,10 @@ function displayProducts(products) {
   if (sortVal === 'price-desc') filtered.sort((a, b) => (getPriceForCurrency(b) || 0) - (getPriceForCurrency(a) || 0));
 
   /* ---------- Pagination logic ---------- */
-
-  // 👇 EDIT THIS NUMBER to control how many products show per page
-  const productsPerPage = 5; // change to 50 later when ready
-
+  const productsPerPage = 5; 
   let currentPage = window.currentPage || 1;
   const totalPages = Math.ceil(filtered.length / productsPerPage);
 
-  // Ensure currentPage is valid
   if (currentPage > totalPages) currentPage = totalPages || 1;
 
   const start = (currentPage - 1) * productsPerPage;
@@ -393,27 +389,34 @@ function displayProducts(products) {
       <button class="add-cart" style="display:${quantity > 0 ? 'none' : 'block'};">Add to Cart</button>
     `;
 
-    // Wire controls
-    const plusBtn = div.querySelector('.plus');
-    const minusBtn = div.querySelector('.minus');
-    const addBtn = div.querySelector('.add-cart');
-
-    plusBtn?.addEventListener('click', e => { e.stopPropagation(); addToCart(p); });
-    minusBtn?.addEventListener('click', e => { e.stopPropagation(); removeFromCart(p.id); });
-    addBtn?.addEventListener('click', e => { e.stopPropagation(); addToCart(p); });
+    div.querySelector('.plus')?.addEventListener('click', e => { e.stopPropagation(); addToCart(p); });
+    div.querySelector('.minus')?.addEventListener('click', e => { e.stopPropagation(); removeFromCart(p.id); });
+    div.querySelector('.add-cart')?.addEventListener('click', e => { e.stopPropagation(); addToCart(p); });
 
     productGrid?.appendChild(div);
   }
 
-  // ---------- Pagination controls (always visible, horizontal, below grid) ----------
-  // Remove any previous pagination (avoid duplicates)
+  // ---------- Pagination controls with Previous/Next ----------
   const existingPagination = document.querySelector('.pagination');
   if (existingPagination) existingPagination.remove();
 
   const paginationContainer = document.createElement('div');
   paginationContainer.className = 'pagination';
 
-  // Always display at least one page button
+  // Previous button
+  const prevBtn = document.createElement('button');
+  prevBtn.textContent = 'Previous';
+  prevBtn.disabled = currentPage === 1 || totalPages <= 1;
+  prevBtn.addEventListener('click', () => {
+    if (currentPage > 1) {
+      window.currentPage = currentPage - 1;
+      displayProducts(products);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  });
+  paginationContainer.appendChild(prevBtn);
+
+  // Number buttons
   for (let i = 1; i <= Math.max(totalPages, 1); i++) {
     const btn = document.createElement('button');
     btn.textContent = i;
@@ -426,62 +429,47 @@ function displayProducts(products) {
     paginationContainer.appendChild(btn);
   }
 
-  // Insert pagination after the product grid so it sits under the grid (full-width)
+  // Next button
+  const nextBtn = document.createElement('button');
+  nextBtn.textContent = 'Next';
+  nextBtn.disabled = currentPage === totalPages || totalPages <= 1;
+  nextBtn.addEventListener('click', () => {
+    if (currentPage < totalPages) {
+      window.currentPage = currentPage + 1;
+      displayProducts(products);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  });
+  paginationContainer.appendChild(nextBtn);
+
   if (productGrid && productGrid.parentElement) {
     productGrid.insertAdjacentElement('afterend', paginationContainer);
   } else {
-    // fallback
     document.body.appendChild(paginationContainer);
   }
 
-  // update cart count + product UIs
   updateCartCount();
   (paginated || []).forEach(p => updateProductUI(p.id));
 }
 
-/* ---------- small helpers ---------- */
+/* ---------- Helpers ---------- */
 function truncateText(text, wordLimit) { return text.split(' ').slice(0, wordLimit).join(' '); }
 function escapeHtml(str) { if (!str && str !== 0) return ""; return String(str).replace(/[&<>"']/g, s => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": "&#39;" }[s])); }
 
 /* ---------- Event wiring ---------- */
 searchInput?.addEventListener('input', () => { window.currentPage = 1; loadProducts(); });
 sortSelect?.addEventListener('change', () => { window.currentPage = 1; loadProducts(); });
-
-/* Currency persistence: Serac key */
 currencySelect?.addEventListener('change', () => {
-  try { localStorage.setItem(CURRENCY_KEY, currencySelect.value); }
-  catch(e) { console.warn("couldn't save currency", e); }
+  try { localStorage.setItem(CURRENCY_KEY, currencySelect.value); } catch(e){}
   window.currentPage = 1;
   loadProducts();
 });
 
-/* ---------- Hamburger toggle (ensures dropdown shows) ---------- */
+/* ---------- Hamburger toggle ---------- */
 if (hamburger) {
   hamburger.addEventListener('click', () => {
     const menuOpen = hamburger.classList.toggle('open');
     if (headerRight) headerRight.classList.toggle('open', menuOpen);
-
-    // keep header visible while menu is open
-    const headerEl = document.querySelector('.site-header');
-    if (headerEl) {
-      if (menuOpen) {
-        headerEl.style.top = '0';
-        headerEl.style.opacity = '1';
-        headerEl.style.pointerEvents = 'auto';
-        headerEl.classList.add('scrolled');
-      } else {
-        // delay so hide logic can re-evaluate smoothly
-        setTimeout(() => {
-          if (typeof handleScroll === 'function') handleScroll();
-        }, 160);
-      }
-    }
-
-    // ensure dropdown contents are left-aligned (if CSS doesn't already do it)
-    if (headerRight) {
-      headerRight.style.alignItems = 'flex-start';
-      headerRight.style.textAlign = 'left';
-    }
   });
 }
 
@@ -494,158 +482,25 @@ function handleMobileCart() {
 window.addEventListener('resize', handleMobileCart);
 handleMobileCart();
 
-/* ---------- Simple fallback header scroll (turn dark quickly after small scroll) ---------- */
-window.addEventListener('scroll', () => {
-  const header = document.querySelector('.site-header');
-  if (!header) return;
-  if (window.scrollY > 50) header.classList.add('scrolled');
-  else header.classList.remove('scrolled');
-});
-
-/* -------------------- HEADER/HERO BEHAVIOR (safe version – works with hamburger) -------------------- */
-let handleScroll = null; // exported to outer handlers above
-(function headerHeroBehavior(){
-  const headerEl = document.querySelector('.site-header');
-  const heroEl =
-    document.querySelector('.hero') ||
-    document.getElementById('heroSection') ||
-    document.querySelector('.hero-about');
-  const ham = document.getElementById('hamburger');
-  if (!headerEl || !heroEl) {
-    // still define a no-op handleScroll so other code can call it safely
-    handleScroll = () => {};
-    return;
-  }
-
-  let lastY = window.scrollY || 0;
-  let hidden = false;
-  let heroHeight = Math.round(heroEl.getBoundingClientRect().height);
-  let hoverShown = false;
-
-  function isMenuOpen() {
-    return ham && ham.classList.contains('open');
-  }
-
-  handleScroll = function(){
-    const y = window.scrollY || 0;
-    const menuOpen = isMenuOpen();
-
-    // USER REQUEST: header should turn dark after a small scroll ( > 50px )
-    if (y > 50) headerEl.classList.add('scrolled');
-    else headerEl.classList.remove('scrolled');
-
-    // if hamburger menu open, force header visible
-    if (menuOpen) {
-      headerEl.style.top = '0';
-      headerEl.style.opacity = '1';
-      headerEl.style.pointerEvents = 'auto';
-      return;
-    }
-
-    // hide/show logic only after hero is passed
-    if (y > heroHeight - 80) {
-      if (y > lastY && !hidden) {
-        headerEl.style.top = '-90px';
-        headerEl.style.opacity = '0';
-        headerEl.style.pointerEvents = 'none';
-        hidden = true;
-      } else if (y < lastY && hidden) {
-        headerEl.style.top = '0';
-        headerEl.style.opacity = '1';
-        headerEl.style.pointerEvents = 'auto';
-        headerEl.classList.add('scrolled'); // ensure dark when shown after scroll up
-        hidden = false;
-      }
-    } else {
-      // within hero: visible (but per user request, header becomes dark as soon as y>50)
-      headerEl.style.top = '0';
-      headerEl.style.opacity = '1';
-      headerEl.style.pointerEvents = 'auto';
-      // keep scrolled class controlled by the small-scroll rule above
-      hidden = false;
-    }
-
-    lastY = y;
-  };
-
-  // hover reveal (disabled when menu open)
-  document.addEventListener('mousemove', (e) => {
-    if (isMenuOpen()) return;
-    if (e.clientY < 100) {
-      if (hidden) {
-        headerEl.style.top = '0';
-        headerEl.style.opacity = '1';
-        headerEl.style.pointerEvents = 'auto';
-        // ensure it's dark when revealed (per small scroll rule)
-        headerEl.classList.add('scrolled');
-        hidden = false;
-        hoverShown = true;
-      }
-    } else if (hoverShown) {
-      setTimeout(() => {
-        if (window.scrollY > heroHeight - 80 && !isMenuOpen()) {
-          headerEl.style.top = '-90px';
-          headerEl.style.opacity = '0';
-          headerEl.style.pointerEvents = 'none';
-          hidden = true;
-        }
-        hoverShown = false;
-      }, 220);
-    }
-  });
-
-  window.addEventListener('resize', () => {
-    heroHeight = Math.round(heroEl.getBoundingClientRect().height);
-    handleScroll();
-  }, { passive: true });
-
-  window.addEventListener('scroll', () => { handleScroll(); }, { passive: true });
-  window.addEventListener('load', () => {
-    heroHeight = Math.round(heroEl.getBoundingClientRect().height);
-    handleScroll();
-  });
-})();
-
-/* ---------- Storage event synchronization (other tabs) ---------- */
-window.addEventListener('storage', (ev) => {
-  if (ev.key === CART_KEY) {
-    cart = JSON.parse(localStorage.getItem(CART_KEY)) || [];
-    cart = mergeCartItems(cart);
-    updateCartCount();
-    Object.keys(productsData).forEach(pid => updateProductUI(pid));
-  } else if (ev.key === CURRENCY_KEY) {
-    const val = localStorage.getItem(CURRENCY_KEY);
-    if (val && currencySelect) {
-      try { currencySelect.value = val; } catch(e) {}
-      loadProducts();
-    }
-  }
-});
-
 /* ---------- Initial load ---------- */
 updateCartCount();
 loadProducts();
 
-/* ---------- Inject pagination styles (horizontal, full-width below grid) ---------- */
+/* ---------- Pagination styles ---------- */
 const style = document.createElement('style');
 style.textContent = `
 .pagination {
-  position: sticky;
-  bottom: 0;
-  z-index: 20;
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 0.6rem;
   margin-top: 2rem;
   padding: 1rem 0.5rem;
-  background: transparent; /* no background */
   width: 100%;
   flex-wrap: wrap;
 }
-
 .pagination button {
-  background: transparent !important; /* absolutely no fill */
+  background: transparent !important;
   color: var(--gold);
   border: 1px solid var(--gold);
   padding: 0.5rem 1rem;
@@ -654,18 +509,15 @@ style.textContent = `
   font-weight: 500;
   transition: all 0.3s ease;
 }
-
 .pagination button:hover {
   background: var(--gold);
   color: #fff;
 }
-
 .pagination button.active {
   background: var(--gold);
   color: #fff;
   border-color: var(--gold);
 }
-
 .pagination button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
@@ -673,7 +525,5 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 </script>
-
-
 </body>
 </html>
