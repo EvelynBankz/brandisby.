@@ -573,15 +573,15 @@ document.querySelectorAll('.header-right a').forEach(link => {
 });
 
 
-// // ✅ Fix: Hamburger toggle logic
-// if (hamburger && headerRight) {
-//   hamburger.addEventListener('click', () => {
-//     hamburger.classList.toggle('open');
-//     headerRight.classList.toggle('open');
-//     const expanded = hamburger.classList.contains('open');
-//     hamburger.setAttribute('aria-expanded', expanded);
-//   });
-// }
+// ✅ Fix: Hamburger toggle logic
+if (hamburger && headerRight) {
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('open');
+    headerRight.classList.toggle('open');
+    const expanded = hamburger.classList.contains('open');
+    hamburger.setAttribute('aria-expanded', expanded);
+  });
+}
 
   
 </script>
