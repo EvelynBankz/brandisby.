@@ -451,7 +451,7 @@ function displayProducts(products) {
   if (sortVal === 'price-desc') filtered.sort((a, b) => (getPriceForCurrency(b) || 0) - (getPriceForCurrency(a) || 0));
 
   /* ---------- Pagination logic ---------- */
-  const productsPerPage = 5; 
+  const productsPerPage = 24; 
   let currentPage = window.currentPage || 1;
   const totalPages = Math.ceil(filtered.length / productsPerPage);
 
