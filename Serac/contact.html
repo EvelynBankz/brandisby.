@@ -276,46 +276,29 @@ footer p { font-size:14px; }
 </style>
 
 <style>
-/* Hero peek for large screens only */
-@media (min-width: 900px) {
+@media(min-width: 900px) {
   .hero {
     position: relative;
-    overflow: visible; /* allow peek to slightly overlap next section */
+    overflow: visible;
   }
 
   .hero-peek {
     position: absolute;
-    bottom: -20px; /* subtle overlap */
+    bottom: -20px; /* slight overlap for hint */
     left: 50%;
     transform: translateX(-50%);
-    width: 100px;
-    height: 30px;
-    z-index: 5;
-    overflow: hidden;
-    pointer-events: none;
+    width: 90%;  /* matches content width for symmetry */
+    height: 20px;
+    background: linear-gradient(to top, rgba(20,21,23,0.95), transparent);
+    border-radius: 10px / 50%;
+    box-shadow: 0 -6px 15px rgba(0,0,0,0.15);
+    z-index: 2;
+    animation: peekFloat 2s ease-in-out infinite alternate;
   }
 
-  .hero-peek svg {
-    display: block;
-    width: 100%;
-    height: 100%;
-    opacity: 0.7;
-    animation: peekFade 1.5s ease-out forwards, subtleShimmer 3s ease-in-out infinite alternate;
-  }
-
-  .hero-peek svg path {
-    fill: linear-gradient(90deg, rgba(182,110,65,0.6), rgba(182,110,65,0.2));
-    fill: #B66E41; /* solid fallback color */
-  }
-
-  @keyframes peekFade {
-    0% { opacity: 0; transform: translateY(10px); }
-    100% { opacity: 1; transform: translateY(0); }
-  }
-
-  @keyframes subtleShimmer {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(10px); }
+  @keyframes peekFloat {
+    0% { transform: translateX(-50%) translateY(0); opacity: 0.85; }
+    100% { transform: translateX(-50%) translateY(-4px); opacity: 1; }
   }
 }
 </style>
@@ -543,19 +526,21 @@ footer p { font-size:14px; }
 </script>
   
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-  // Automatically add curved peek to all hero sections that don’t already have it
-  document.querySelectorAll('.hero:not(:has(.hero-peek))').forEach(hero => {
-    const peek = document.createElement('div');
-    peek.className = 'hero-peek';
-    peek.innerHTML = `
-      <svg viewBox="0 0 100 30" preserveAspectRatio="none">
-        <path d="M0,30 C50,0 50,0 100,30 L100,30 L0,30 Z"></path>
-      </svg>
-    `;
-    hero.appendChild(peek);
-  });
-});
+(function() {
+  const applyHeroPeek = () => {
+    const heroes = document.querySelectorAll('.hero');
+    heroes.forEach(hero => {
+      if (hero.querySelector('.hero-peek')) return;
+
+      const peek = document.createElement('div');
+      peek.className = 'hero-peek';
+      hero.appendChild(peek);
+    });
+  };
+
+  window.addEventListener('load', applyHeroPeek);
+  window.addEventListener('resize', applyHeroPeek);
+})();
 </script>
 
 </body>
