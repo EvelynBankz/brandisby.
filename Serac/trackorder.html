@@ -62,36 +62,34 @@
 }
 
     
-/* === HEADER LINKS (hover underline + color transition) === */
-.header-right a {
-  color: #F5F5F3;
-  position: relative;
-  padding: 6px 0;
-  font-size: 1rem;
-  font-weight: 500;
-  text-decoration: none;
-  transition: color 0.3s ease;
-}
-
-.header-right a::after {
-  content: "";
-  position: absolute;
-  bottom: -4px;
-  left: 0;
-  width: 0;
-  height: 2px;
-  background: var(--gold);
-  transition: width 0.3s ease;
-}
-
-.header-right a:hover {
-  color: var(--gold);
-}
-
-.header-right a:hover::after {
-  width: 100%;
-}
-
+    /* === UNDERLINE HOVER EFFECT (replicated from About page) === */
+    .header-right a {
+      color: #F5F5F3;
+      position: relative;
+      padding: 6px 0;
+      font-size: 1rem;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+    
+    .header-right a::after {
+      content: "";
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--gold);
+      transition: width 0.3s ease;
+    }
+    
+    .header-right a:hover {
+      color: var(--gold);
+    }
+    
+    .header-right a:hover::after {
+      width: 100%;
+    }
     
     .track-section {min-height:100vh;display:flex;justify-content:center;align-items:center;padding:120px 20px;}
     .track-box {max-width:960px;width:100%;background:#1c1e22;padding:60px;border-radius:16px;box-shadow:0 12px 40px rgba(0,0,0,0.6);color:#ddd;text-align:center;display:flex;flex-direction:column;align-items:center;}
