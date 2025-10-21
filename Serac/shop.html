@@ -386,46 +386,71 @@ function displayProducts(products) {
   (products || []).forEach(p => updateProductUI(p.id));
 }
 
-/* small helpers */
-function truncateText(text, wordLimit) { return text.split(' ').slice(0, wordLimit).join(' '); }
-function escapeHtml(str) { if (!str && str !== 0) return ""; return String(str).replace(/[&<>"']/g, s => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": "&#39;" }[s])); }
+
+/* ---------- small helpers ---------- */
+function truncateText(text, wordLimit) {
+  return text.split(' ').slice(0, wordLimit).join(' ');
+}
+function escapeHtml(str) {
+  if (!str && str !== 0) return "";
+  return String(str).replace(/[&<>"']/g, s => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": "&#39;"
+  }[s]));
+}
 
 /* ---------- Event wiring ---------- */
-
-// Search/sort -> reload/filter client-side
 searchInput.addEventListener('input', () => { loadProducts(); });
 sortSelect.addEventListener('change', () => { loadProducts(); });
 
-// Currency persistence: Serac key
+/* Currency persistence: Serac key */
 currencySelect.addEventListener('change', () => {
-  try { localStorage.setItem(CURRENCY_KEY, currencySelect.value); } catch(e) { console.warn("couldn't save currency", e); }
+  try { localStorage.setItem(CURRENCY_KEY, currencySelect.value); }
+  catch(e) { console.warn("couldn't save currency", e); }
   loadProducts();
 });
 
-/* hamburger */
-if(hamburger) hamburger.addEventListener('click', ()=>{
-  headerRight && headerRight.classList.toggle('open');
-  hamburger.classList.toggle('open');
-});
+/* ---------- Hamburger toggle ---------- */
+if (hamburger) {
+  hamburger.addEventListener('click', () => {
+    const menuOpen = hamburger.classList.toggle('open');
+    headerRight && headerRight.classList.toggle('open', menuOpen);
 
-/* mobile cart visibility */
-function handleMobileCart(){ 
+    // keep header visible while menu is open
+    const headerEl = document.querySelector('.site-header');
+    if (headerEl) {
+      if (menuOpen) {
+        headerEl.style.top = '0';
+        headerEl.style.opacity = '1';
+        headerEl.style.pointerEvents = 'auto';
+        headerEl.classList.add('scrolled');
+      } else {
+        // delay to allow smooth close
+        setTimeout(() => {
+          if (typeof handleScroll === 'function') handleScroll();
+        }, 150);
+      }
+    }
+  });
+}
+
+/* ---------- Mobile cart visibility ---------- */
+function handleMobileCart() { 
   const el = document.querySelector('.mobile-cart');
-  if(!el) return;
+  if (!el) return;
   el.style.display = window.innerWidth <= 600 ? 'flex' : 'none';
 }
 window.addEventListener('resize', handleMobileCart);
 handleMobileCart();
 
-/* header scrolled background (simple fallback) */
-window.addEventListener('scroll', ()=>{
+/* ---------- Simple fallback header scroll (before hero behavior kicks in) ---------- */
+window.addEventListener('scroll', () => {
   const header = document.querySelector('.site-header');
-  if(!header) return;
-  if(window.scrollY > 50) header.classList.add('scrolled'); else header.classList.remove('scrolled');
+  if (!header) return;
+  if (window.scrollY > 50) header.classList.add('scrolled');
+  else header.classList.remove('scrolled');
 });
 
-
-/* -------------------- HEADER/HERO BEHAVIOR (safe version – works with existing hamburger) -------------------- */
+/* -------------------- HEADER/HERO BEHAVIOR (safe version – works with hamburger) -------------------- */
 (function headerHeroBehavior(){
   const headerEl = document.querySelector('.site-header');
   const heroEl =
@@ -433,42 +458,43 @@ window.addEventListener('scroll', ()=>{
     document.getElementById('heroSection') ||
     document.querySelector('.hero-about');
   const hamburger = document.getElementById('hamburger');
-  if(!headerEl || !heroEl) return;
+  if (!headerEl || !heroEl) return;
 
   let lastY = window.scrollY || 0;
   let hidden = false;
   let heroHeight = Math.round(heroEl.getBoundingClientRect().height);
   let hoverShown = false;
 
-  function isMenuOpen(){
+  function isMenuOpen() {
     return hamburger && hamburger.classList.contains('open');
   }
 
-  function handleScroll(){
+  function handleScroll() {
     const y = window.scrollY || 0;
     const menuOpen = isMenuOpen();
 
     // turn header dark after hero
-    if(y > Math.max(50, heroHeight - 80))
+    if (y > Math.max(50, heroHeight - 80))
       headerEl.classList.add('scrolled');
     else
       headerEl.classList.remove('scrolled');
 
     // if hamburger menu open, force header visible
-    if(menuOpen){
+    if (menuOpen) {
       headerEl.style.top = '0';
       headerEl.style.opacity = '1';
       headerEl.style.pointerEvents = 'auto';
       return;
     }
 
-    if(y > heroHeight - 80){
-      if(y > lastY && !hidden){
+    // normal hide/show scroll behavior
+    if (y > heroHeight - 80) {
+      if (y > lastY && !hidden) {
         headerEl.style.top = '-90px';
         headerEl.style.opacity = '0';
         headerEl.style.pointerEvents = 'none';
         hidden = true;
-      } else if(y < lastY && hidden){
+      } else if (y < lastY && hidden) {
         headerEl.style.top = '0';
         headerEl.style.opacity = '1';
         headerEl.style.pointerEvents = 'auto';
@@ -488,10 +514,10 @@ window.addEventListener('scroll', ()=>{
 
   // hover reveal (disabled when menu open)
   document.addEventListener('mousemove', (e) => {
-    if(isMenuOpen()) return;
+    if (isMenuOpen()) return;
 
-    if(e.clientY < 100){
-      if(hidden){
+    if (e.clientY < 100) {
+      if (hidden) {
         headerEl.style.top = '0';
         headerEl.style.opacity = '1';
         headerEl.style.pointerEvents = 'auto';
@@ -499,9 +525,9 @@ window.addEventListener('scroll', ()=>{
         hidden = false;
         hoverShown = true;
       }
-    } else if(hoverShown){
-      setTimeout(()=>{
-        if(window.scrollY > heroHeight - 80 && !isMenuOpen()){
+    } else if (hoverShown) {
+      setTimeout(() => {
+        if (window.scrollY > heroHeight - 80 && !isMenuOpen()) {
           headerEl.style.top = '-90px';
           headerEl.style.opacity = '0';
           headerEl.style.pointerEvents = 'none';
@@ -511,13 +537,6 @@ window.addEventListener('scroll', ()=>{
       }, 220);
     }
   });
-
-  // when hamburger opens/closes, re-evaluate visibility
-  if(hamburger){
-    hamburger.addEventListener('click', () => {
-      setTimeout(handleScroll, 200); // slight delay ensures proper detection
-    });
-  }
 
   window.addEventListener('resize', () => {
     heroHeight = Math.round(heroEl.getBoundingClientRect().height);
@@ -530,15 +549,13 @@ window.addEventListener('scroll', ()=>{
     handleScroll();
   });
 })();
-  
 
-/* Storage event synchronization (other tabs) */
+/* ---------- Storage event synchronization (other tabs) ---------- */
 window.addEventListener('storage', (ev) => {
   if (ev.key === CART_KEY) {
     cart = JSON.parse(localStorage.getItem(CART_KEY)) || [];
     cart = mergeCartItems(cart);
     updateCartCount();
-    // re-render product UIs in case quantities changed externally
     Object.keys(productsData).forEach(pid => updateProductUI(pid));
   } else if (ev.key === CURRENCY_KEY) {
     const val = localStorage.getItem(CURRENCY_KEY);
@@ -549,7 +566,7 @@ window.addEventListener('storage', (ev) => {
   }
 });
 
-/* ---------- initial load ---------- */
+/* ---------- Initial load ---------- */
 updateCartCount();
 loadProducts();
 
