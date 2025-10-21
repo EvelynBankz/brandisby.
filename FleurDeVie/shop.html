@@ -494,28 +494,34 @@ style.textContent = `
   align-items: center;
   gap: 0.6rem;
   margin-top: 2rem;
+  padding: 1rem 0.5rem;
+  background: transparent;
   width: 100%;
   flex-wrap: wrap;
 }
+
 .pagination button {
-  background: transparent;
-  color: var(--gold);
-  border: 1px solid var(--gold);
+  background: transparent !important; /* no background */
+  color: #112e1f;
+  border: 1px solid #112e1f;
   padding: 0.5rem 1rem;
   cursor: pointer;
   border-radius: 6px;
   font-weight: 500;
   transition: all 0.3s ease;
 }
+
 .pagination button:hover {
-  background: var(--gold);
+  background: #112e1f;
   color: #fff;
 }
+
 .pagination button.active {
-  background: var(--gold);
+  background: #112e1f;
   color: #fff;
-  border-color: var(--gold);
+  border-color: #112e1f;
 }
+
 .pagination button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
