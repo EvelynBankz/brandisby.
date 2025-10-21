@@ -665,13 +665,13 @@ style.textContent = `
   gap: 0.6rem;
   margin-top: 2rem;
   padding: 1rem 0.5rem;
-  background: transparent; /* no background */
+  background: transparent;
   width: 100%;
   flex-wrap: wrap;
 }
 
 .pagination button {
-  background: transparent !important; /* absolutely no fill */
+  background: transparent !important;
   color: var(--gold);
   border: 1px solid var(--gold);
   padding: 0.5rem 1rem;
@@ -696,7 +696,10 @@ style.textContent = `
   opacity: 0.4;
   cursor: not-allowed;
 }
+`; // <-- THIS BACKTICK closes the template literal
 document.head.appendChild(style);
+</script>
+
 </script>
 
 </body>
