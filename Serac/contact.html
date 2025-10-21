@@ -411,51 +411,54 @@ footer p { font-size:14px; }
 </footer>
 
 <!-- SCRIPT -->
+<!-- SCRIPT -->
 <script>
- /* -------------------- HEADER/HERO BEHAVIOR (safe version – works with existing hamburger) -------------------- */
-(function headerHeroBehavior(){
+/* -------------------- HEADER / HERO BEHAVIOR -------------------- */
+(function headerHeroBehavior() {
   const headerEl = document.querySelector('.site-header');
   const heroEl =
     document.querySelector('.hero') ||
     document.getElementById('heroSection') ||
     document.querySelector('.hero-about');
   const hamburger = document.getElementById('hamburger');
-  if(!headerEl || !heroEl) return;
+  const headerRight = document.querySelector('.header-right');
+
+  if (!headerEl || !heroEl) return;
 
   let lastY = window.scrollY || 0;
   let hidden = false;
   let heroHeight = Math.round(heroEl.getBoundingClientRect().height);
   let hoverShown = false;
 
-  function isMenuOpen(){
+  function isMenuOpen() {
     return hamburger && hamburger.classList.contains('open');
   }
 
-  function handleScroll(){
+  function handleScroll() {
     const y = window.scrollY || 0;
     const menuOpen = isMenuOpen();
 
-    // turn header dark after hero
-    if(y > Math.max(50, heroHeight - 80))
+    // Turn header dark after hero
+    if (y > Math.max(50, heroHeight - 80))
       headerEl.classList.add('scrolled');
     else
       headerEl.classList.remove('scrolled');
 
-    // if hamburger menu open, force header visible
-    if(menuOpen){
+    // If hamburger menu open, force header visible
+    if (menuOpen) {
       headerEl.style.top = '0';
       headerEl.style.opacity = '1';
       headerEl.style.pointerEvents = 'auto';
       return;
     }
 
-    if(y > heroHeight - 80){
-      if(y > lastY && !hidden){
+    if (y > heroHeight - 80) {
+      if (y > lastY && !hidden) {
         headerEl.style.top = '-90px';
         headerEl.style.opacity = '0';
         headerEl.style.pointerEvents = 'none';
         hidden = true;
-      } else if(y < lastY && hidden){
+      } else if (y < lastY && hidden) {
         headerEl.style.top = '0';
         headerEl.style.opacity = '1';
         headerEl.style.pointerEvents = 'auto';
@@ -473,12 +476,12 @@ footer p { font-size:14px; }
     lastY = y;
   }
 
-  // hover reveal (disabled when menu open)
+  // Hover reveal (disabled when menu open)
   document.addEventListener('mousemove', (e) => {
-    if(isMenuOpen()) return;
+    if (isMenuOpen()) return;
 
-    if(e.clientY < 100){
-      if(hidden){
+    if (e.clientY < 100) {
+      if (hidden) {
         headerEl.style.top = '0';
         headerEl.style.opacity = '1';
         headerEl.style.pointerEvents = 'auto';
@@ -486,9 +489,9 @@ footer p { font-size:14px; }
         hidden = false;
         hoverShown = true;
       }
-    } else if(hoverShown){
-      setTimeout(()=>{
-        if(window.scrollY > heroHeight - 80 && !isMenuOpen()){
+    } else if (hoverShown) {
+      setTimeout(() => {
+        if (window.scrollY > heroHeight - 80 && !isMenuOpen()) {
           headerEl.style.top = '-90px';
           headerEl.style.opacity = '0';
           headerEl.style.pointerEvents = 'none';
@@ -499,10 +502,22 @@ footer p { font-size:14px; }
     }
   });
 
-  // when hamburger opens/closes, re-evaluate visibility
-  if(hamburger){
+  // ✅ Hamburger toggle (now works correctly)
+  if (hamburger && headerRight) {
     hamburger.addEventListener('click', () => {
-      setTimeout(handleScroll, 200); // slight delay ensures proper detection
+      hamburger.classList.toggle('open');
+      headerRight.classList.toggle('open');
+      const expanded = hamburger.classList.contains('open');
+      hamburger.setAttribute('aria-expanded', expanded);
+
+      // When menu is open, keep header visible
+      if (expanded) {
+        headerEl.style.top = '0';
+        headerEl.style.opacity = '1';
+        headerEl.style.pointerEvents = 'auto';
+      }
+
+      setTimeout(handleScroll, 200);
     });
   }
 
@@ -517,17 +532,11 @@ footer p { font-size:14px; }
     handleScroll();
   });
 })();
-
-
-  
-
-  // Firebase brand placeholder
-  const brand = "serac";
-  console.log("Contact form initialized for brand:", brand);
-
 </script>
-  
+
+
 <script>
+/* -------------------- HERO PEEK EFFECT -------------------- */
 (function() {
   const applyHeroPeek = () => {
     const heroes = document.querySelectorAll('.hero');
@@ -543,7 +552,7 @@ footer p { font-size:14px; }
       if (bg.startsWith('rgb')) {
         const rgb = bg.match(/\d+/g).map(Number);
         const brightness = (rgb[0]*299 + rgb[1]*587 + rgb[2]*114) / 1000;
-        darkHero = brightness < 128; // simple threshold
+        darkHero = brightness < 128;
       }
 
       peek.dataset.theme = darkHero ? 'dark' : 'light';
@@ -554,36 +563,38 @@ footer p { font-size:14px; }
   window.addEventListener('load', applyHeroPeek);
   window.addEventListener('resize', applyHeroPeek);
 })();
+</script>
 
 
-/* === SMOOTH SCROLL === */
-document.querySelectorAll('.header-right a').forEach(link => {
-  link.addEventListener('click', e => {
-    const href = link.getAttribute('href');
-    if (href && href.startsWith('#')) {
-      e.preventDefault();
-      const target = document.getElementById(href.slice(1));
-      if (target) {
-        window.scrollTo({ top: target.offsetTop - 80, behavior: 'smooth' });
+<script>
+/* -------------------- SMOOTH SCROLL -------------------- */
+(function() {
+  const hamburger = document.getElementById('hamburger');
+  const headerRight = document.querySelector('.header-right');
+
+  document.querySelectorAll('.header-right a').forEach(link => {
+    link.addEventListener('click', e => {
+      const href = link.getAttribute('href');
+      if (href && href.startsWith('#')) {
+        e.preventDefault();
+        const target = document.getElementById(href.slice(1));
+        if (target) {
+          window.scrollTo({ top: target.offsetTop - 80, behavior: 'smooth' });
+        }
+        headerRight.classList.remove('open');
+        hamburger.classList.remove('open');
+        hamburger.setAttribute('aria-expanded', false);
       }
-      headerRight.classList.remove('open');
-      hamburger.classList.remove('open');
-    }
+    });
   });
-});
+})();
+</script>
 
 
-// ✅ Fix: Hamburger toggle logic
-if (hamburger && headerRight) {
-  hamburger.addEventListener('click', () => {
-    hamburger.classList.toggle('open');
-    headerRight.classList.toggle('open');
-    const expanded = hamburger.classList.contains('open');
-    hamburger.setAttribute('aria-expanded', expanded);
-  });
-}
-
-  
+<script>
+// Firebase brand context
+const brand = "serac";
+console.log("Contact form initialized for brand:", brand);
 </script>
 
 </body>
