@@ -623,35 +623,38 @@ window.addEventListener('storage', (ev) => {
 updateCartCount();
 loadProducts();
 
-/* ---------- Inject pagination styles (horizontal, full-width below grid) ---------- */
 const style = document.createElement('style');
 style.textContent = `
 .pagination {
   display: flex;
-  flex-wrap: wrap;
   justify-content: center;
   align-items: center;
+  gap: 0.6rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
   width: 100%;
-  gap: 0.4rem;
-  margin: 2rem 0 3rem 0;
-  box-sizing: border-box;
-  padding: 0 1rem;
 }
+
 .pagination button {
-  display: inline-block;
-  background: var(--bg-mid);
-  color: var(--muted);
-  border: none;
-  padding: 0.45rem 0.8rem;
+  background: transparent;
+  color: var(--gold);
+  border: 1px solid var(--gold);
+  padding: 0.5rem 1rem;
   cursor: pointer;
-  border-radius: var(--radius, 6px);
-  transition: background 0.18s ease, color 0.18s ease, transform 0.08s ease;
-  white-space: nowrap;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.3s ease;
 }
-.pagination button:hover { transform: translateY(-2px); background: var(--gold); color: #fff; }
-.pagination button.active { background: var(--accent-strong); color: #fff; }
-@media (min-width: 1100px) {
-  .pagination { margin-bottom: 4rem; }
+
+.pagination button:hover {
+  background: var(--gold);
+  color: #fff;
+}
+
+.pagination button.active {
+  background: var(--gold);
+  color: #fff;
+  border-color: var(--gold);
 }
 `;
 document.head.appendChild(style);
