@@ -52,33 +52,39 @@ a { text-decoration:none; color:inherit; transition: color var(--transition); }
 .brand-title { font-family:"Playfair Display", serif; font-size:22px; font-weight:700; color:var(--gold); letter-spacing:0.6px; }
 
 /* HEADER LINKS + underline animation */
-.header-right { display:flex; gap:20px; align-items:center; }
+.header-right {
+  display: flex;
+  gap: 24px;
+  font-weight: 500;
+}
+
 .header-right a {
   position: relative;
-  font-weight:500;
-  color:var(--muted);
-  padding:6px 8px;
-  border-radius:8px;
-  transition: all var(--transition);
+  color: #F5F5F3;
+  padding: 6px 0;
+  font-size: 1rem;
+  transition: color 0.3s ease;
 }
+
 .header-right a::after {
   content: "";
   position: absolute;
+  bottom: -4px;
   left: 0;
-  bottom: -2px;
-  width: 0%;
+  width: 0;
   height: 2px;
-  background: var(--gold);
+  background: #B66E41;
   transition: width 0.3s ease;
 }
+
 .header-right a:hover {
-  color: #B66E41;
-  transform:translateY(-2px);
-}
-.header-right a:hover::after {
-  width: 100%;
+  color: #B66E41; /* text color on hover */
 }
 
+.header-right a:hover::after {
+  width: 100%; /* underline expands on hover */
+}
+  
 /* cart count bubble */
 .cart-count {
   background:var(--gold);
