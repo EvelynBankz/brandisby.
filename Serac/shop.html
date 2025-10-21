@@ -42,7 +42,7 @@ a { text-decoration:none; color:inherit; transition: color var(--transition); }
 .brand-logo { height:56px; width:auto; object-fit:contain; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.6)); }
 .brand-title { font-family:"Playfair Display", serif; font-size:22px; font-weight:700; color:var(--gold); letter-spacing:0.6px; }
 
-.header-right { display:flex; gap:22px; align-items:center; }
+.header-right { display:flex; gap:22px; align-items:left; }
 .header-right a { font-weight:500; color:var(--muted); padding:6px 8px; border-radius:8px; transition: all var(--transition); }
 .header-right a:hover { color:#fff; transform:translateY(-2px); text-shadow: 0 4px 18px rgba(182,110,65,0.15); }
 
@@ -116,7 +116,7 @@ h2 { text-align:center; font-size:26px; font-family:"Playfair Display", serif; m
 footer { text-align:center; padding:22px; background:transparent; color:#bdbdbd; margin-top:60px; border-top:1px solid rgba(255,255,255,0.02); }
 
 @media(max-width:900px){ .product-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); } }
-@media(max-width:600px){
+@media(max-width:900px){
   .product-grid { grid-template-columns: repeat(2, 1fr); gap:12px; }
   .product-card img { height:140px; }
   .header-right { display:none; flex-direction:column; background:rgba(20,21,23,0.98); position:absolute; top:70px; right:0; width:220px; padding:18px; border-radius:8px; z-index:1100; }
@@ -220,6 +220,8 @@ const cartCountMobileElem = document.getElementById('cartCountMobile');
 const searchInput = document.getElementById('searchInput');
 const sortSelect = document.getElementById('sortSelect');
 const currencySelect = document.getElementById('currencySelect');
+const hamburger = document.getElementById('hamburger');
+const headerRight = document.querySelector('.header-right');
 
 /* ---------- Namespaced localStorage keys for Serac ---------- */
 const CART_KEY = 'seracCart';
@@ -231,7 +233,7 @@ cart = mergeCartItems(cart);
 let productsData = {}; // map id -> product data
 
 /* ---------- Init: restore currency preference ---------- */
-if (localStorage.getItem(CURRENCY_KEY)) currencySelect.value = localStorage.getItem(CURRENCY_KEY);
+try { if (localStorage.getItem(CURRENCY_KEY) && currencySelect) currencySelect.value = localStorage.getItem(CURRENCY_KEY); } catch(e){}
 
 /* ---------- Utility: localStorage cart helpers ---------- */
 function getCart() { return JSON.parse(localStorage.getItem(CART_KEY)) || []; }
@@ -252,8 +254,8 @@ function mergeCartItems(cartArray) {
 }
 function updateCartCount() {
   const total = (cart || []).reduce((sum, i) => sum + (i.quantity || 0), 0);
-  cartCountElem.textContent = total;
-  cartCountMobileElem.textContent = total;
+  if (cartCountElem) cartCountElem.textContent = total;
+  if (cartCountMobileElem) cartCountMobileElem.textContent = total;
 }
 
 /* ---------- Cart operations ---------- */
@@ -302,20 +304,23 @@ function formatPrice(product, currency) {
   if (!product) return '';
   const price = currency === 'NGN' ? product.priceNGN : currency === 'USD' ? product.priceUSD : currency === 'EUR' ? product.priceEUR : currency === 'GBP' ? product.priceGBP : product.priceNGN;
   const localeMap = { NGN: 'en-NG', USD: 'en-US', EUR: 'de-DE', GBP: 'en-GB' };
-  return new Intl.NumberFormat(localeMap[currency] || 'en-US', { style: 'currency', currency, minimumFractionDigits: currency === 'NGN' ? 0 : 2 }).format(price);
+  try {
+    return new Intl.NumberFormat(localeMap[currency] || 'en-US', { style: 'currency', currency, minimumFractionDigits: currency === 'NGN' ? 0 : 2 }).format(price);
+  } catch (e) {
+    return `${currency} ${Number(price||0).toFixed(currency==='NGN'?0:2)}`;
+  }
 }
 
 /* ---------- Load & render products (Serac collection) ---------- */
 async function loadProducts() {
   try {
-    productGrid.innerHTML = '<p style="text-align:center; color:var(--muted);">Loading products…</p>';
+    if (productGrid) productGrid.innerHTML = '<p style="text-align:center; color:var(--muted);">Loading products…</p>';
     const q = query(collection(db, "brands", "serac", "products"), where("published", "==", true));
     const snapshot = await getDocs(q);
     const products = [];
     productsData = {};
     snapshot.forEach(docSnap => {
       const data = docSnap.data();
-      // keep same validations as FleurDeVie: require name + imageUrl (but still include product even if image absent — kept consistent)
       if (!data.name) return;
       const p = { id: docSnap.id, ...data };
       products.push(p);
@@ -324,17 +329,17 @@ async function loadProducts() {
     displayProducts(products);
   } catch (e) {
     console.error(e);
-    productGrid.innerHTML = '<p style="text-align:center;color:tomato;">Failed to load products.</p>';
+    if (productGrid) productGrid.innerHTML = '<p style="text-align:center;color:tomato;">Failed to load products.</p>';
   }
 }
 
 /* Display with same UX as FleurDeVie (search, sort, currency) */
 function displayProducts(products) {
-  const term = (searchInput.value || '').toLowerCase();
+  const term = (searchInput?.value || '').toLowerCase();
   let filtered = (products || []).filter(p => (p.name || '').toLowerCase().includes(term));
 
-  const sortVal = sortSelect.value;
-  const currency = currencySelect.value;
+  const sortVal = sortSelect?.value;
+  const currency = currencySelect?.value || (localStorage.getItem(CURRENCY_KEY) || 'NGN');
 
   function getPriceForCurrency(product) {
     return currency === 'NGN' ? product.priceNGN : currency === 'USD' ? product.priceUSD : currency === 'EUR' ? product.priceEUR : currency === 'GBP' ? product.priceGBP : product.priceNGN;
@@ -344,7 +349,7 @@ function displayProducts(products) {
   if (sortVal === 'price-asc') filtered.sort((a, b) => (getPriceForCurrency(a) || 0) - (getPriceForCurrency(b) || 0));
   if (sortVal === 'price-desc') filtered.sort((a, b) => (getPriceForCurrency(b) || 0) - (getPriceForCurrency(a) || 0));
 
-  productGrid.innerHTML = '';
+  if (productGrid) productGrid.innerHTML = '';
   for (const p of filtered) {
     const quantity = getTotalQuantity(p.id);
     const priceForCurrency = getPriceForCurrency(p);
@@ -378,7 +383,7 @@ function displayProducts(products) {
     minusBtn?.addEventListener('click', e => { e.stopPropagation(); removeFromCart(p.id); });
     addBtn?.addEventListener('click', e => { e.stopPropagation(); addToCart(p); });
 
-    productGrid.appendChild(div);
+    productGrid?.appendChild(div);
   }
 
   // update cart count + product UIs
@@ -386,34 +391,26 @@ function displayProducts(products) {
   (products || []).forEach(p => updateProductUI(p.id));
 }
 
-
 /* ---------- small helpers ---------- */
-function truncateText(text, wordLimit) {
-  return text.split(' ').slice(0, wordLimit).join(' ');
-}
-function escapeHtml(str) {
-  if (!str && str !== 0) return "";
-  return String(str).replace(/[&<>"']/g, s => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": "&#39;"
-  }[s]));
-}
+function truncateText(text, wordLimit) { return text.split(' ').slice(0, wordLimit).join(' '); }
+function escapeHtml(str) { if (!str && str !== 0) return ""; return String(str).replace(/[&<>"']/g, s => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": "&#39;" }[s])); }
 
 /* ---------- Event wiring ---------- */
-searchInput.addEventListener('input', () => { loadProducts(); });
-sortSelect.addEventListener('change', () => { loadProducts(); });
+searchInput?.addEventListener('input', () => { loadProducts(); });
+sortSelect?.addEventListener('change', () => { loadProducts(); });
 
 /* Currency persistence: Serac key */
-currencySelect.addEventListener('change', () => {
+currencySelect?.addEventListener('change', () => {
   try { localStorage.setItem(CURRENCY_KEY, currencySelect.value); }
   catch(e) { console.warn("couldn't save currency", e); }
   loadProducts();
 });
 
-/* ---------- Hamburger toggle ---------- */
+/* ---------- Hamburger toggle (ensures dropdown shows) ---------- */
 if (hamburger) {
   hamburger.addEventListener('click', () => {
     const menuOpen = hamburger.classList.toggle('open');
-    headerRight && headerRight.classList.toggle('open', menuOpen);
+    if (headerRight) headerRight.classList.toggle('open', menuOpen);
 
     // keep header visible while menu is open
     const headerEl = document.querySelector('.site-header');
@@ -424,11 +421,17 @@ if (hamburger) {
         headerEl.style.pointerEvents = 'auto';
         headerEl.classList.add('scrolled');
       } else {
-        // delay to allow smooth close
+        // delay so hide logic can re-evaluate smoothly
         setTimeout(() => {
           if (typeof handleScroll === 'function') handleScroll();
-        }, 150);
+        }, 160);
       }
+    }
+
+    // ensure dropdown contents are left-aligned (if CSS doesn't already do it)
+    if (headerRight) {
+      headerRight.style.alignItems = 'flex-start';
+      headerRight.style.textAlign = 'left';
     }
   });
 }
@@ -442,7 +445,7 @@ function handleMobileCart() {
 window.addEventListener('resize', handleMobileCart);
 handleMobileCart();
 
-/* ---------- Simple fallback header scroll (before hero behavior kicks in) ---------- */
+/* ---------- Simple fallback header scroll (turn dark quickly after small scroll) ---------- */
 window.addEventListener('scroll', () => {
   const header = document.querySelector('.site-header');
   if (!header) return;
@@ -451,14 +454,19 @@ window.addEventListener('scroll', () => {
 });
 
 /* -------------------- HEADER/HERO BEHAVIOR (safe version – works with hamburger) -------------------- */
+let handleScroll = null; // exported to outer handlers above
 (function headerHeroBehavior(){
   const headerEl = document.querySelector('.site-header');
   const heroEl =
     document.querySelector('.hero') ||
     document.getElementById('heroSection') ||
     document.querySelector('.hero-about');
-  const hamburger = document.getElementById('hamburger');
-  if (!headerEl || !heroEl) return;
+  const ham = document.getElementById('hamburger');
+  if (!headerEl || !heroEl) {
+    // still define a no-op handleScroll so other code can call it safely
+    handleScroll = () => {};
+    return;
+  }
 
   let lastY = window.scrollY || 0;
   let hidden = false;
@@ -466,18 +474,16 @@ window.addEventListener('scroll', () => {
   let hoverShown = false;
 
   function isMenuOpen() {
-    return hamburger && hamburger.classList.contains('open');
+    return ham && ham.classList.contains('open');
   }
 
-  function handleScroll() {
+  handleScroll = function(){
     const y = window.scrollY || 0;
     const menuOpen = isMenuOpen();
 
-    // turn header dark after hero
-    if (y > Math.max(50, heroHeight - 80))
-      headerEl.classList.add('scrolled');
-    else
-      headerEl.classList.remove('scrolled');
+    // USER REQUEST: header should turn dark after a small scroll ( > 50px )
+    if (y > 50) headerEl.classList.add('scrolled');
+    else headerEl.classList.remove('scrolled');
 
     // if hamburger menu open, force header visible
     if (menuOpen) {
@@ -487,7 +493,7 @@ window.addEventListener('scroll', () => {
       return;
     }
 
-    // normal hide/show scroll behavior
+    // hide/show logic only after hero is passed
     if (y > heroHeight - 80) {
       if (y > lastY && !hidden) {
         headerEl.style.top = '-90px';
@@ -498,29 +504,30 @@ window.addEventListener('scroll', () => {
         headerEl.style.top = '0';
         headerEl.style.opacity = '1';
         headerEl.style.pointerEvents = 'auto';
-        headerEl.classList.add('scrolled');
+        headerEl.classList.add('scrolled'); // ensure dark when shown after scroll up
         hidden = false;
       }
     } else {
+      // within hero: visible (but per user request, header becomes dark as soon as y>50)
       headerEl.style.top = '0';
       headerEl.style.opacity = '1';
       headerEl.style.pointerEvents = 'auto';
-      headerEl.classList.remove('scrolled');
+      // keep scrolled class controlled by the small-scroll rule above
       hidden = false;
     }
 
     lastY = y;
-  }
+  };
 
   // hover reveal (disabled when menu open)
   document.addEventListener('mousemove', (e) => {
     if (isMenuOpen()) return;
-
     if (e.clientY < 100) {
       if (hidden) {
         headerEl.style.top = '0';
         headerEl.style.opacity = '1';
         headerEl.style.pointerEvents = 'auto';
+        // ensure it's dark when revealed (per small scroll rule)
         headerEl.classList.add('scrolled');
         hidden = false;
         hoverShown = true;
@@ -543,7 +550,7 @@ window.addEventListener('scroll', () => {
     handleScroll();
   }, { passive: true });
 
-  window.addEventListener('scroll', handleScroll, { passive: true });
+  window.addEventListener('scroll', () => { handleScroll(); }, { passive: true });
   window.addEventListener('load', () => {
     heroHeight = Math.round(heroEl.getBoundingClientRect().height);
     handleScroll();
@@ -559,7 +566,7 @@ window.addEventListener('storage', (ev) => {
     Object.keys(productsData).forEach(pid => updateProductUI(pid));
   } else if (ev.key === CURRENCY_KEY) {
     const val = localStorage.getItem(CURRENCY_KEY);
-    if (val) {
+    if (val && currencySelect) {
       try { currencySelect.value = val; } catch(e) {}
       loadProducts();
     }
@@ -569,6 +576,8 @@ window.addEventListener('storage', (ev) => {
 /* ---------- Initial load ---------- */
 updateCartCount();
 loadProducts();
+
+</script>
 
 </script>
 
