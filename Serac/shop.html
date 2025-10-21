@@ -198,6 +198,9 @@ button:focus, a:focus, input:focus, select:focus { outline: 3px solid rgba(182,1
   <p>© 2025 Sérac</p>
 </footer>
 
+The Serac pagination does not have the previous and next button. 
+
+
 <script type="module">
 /* ---------- Firebase ---------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
@@ -403,67 +406,38 @@ function displayProducts(products) {
   }
 
   // ---------- Pagination controls (always visible, horizontal, below grid) ----------
-// ---------- Pagination controls ----------
-const existingPagination = document.querySelector('.pagination');
-if (existingPagination) existingPagination.remove();
+  // Remove any previous pagination (avoid duplicates)
+  const existingPagination = document.querySelector('.pagination');
+  if (existingPagination) existingPagination.remove();
 
-const paginationContainer = document.createElement('div');
-paginationContainer.className = 'pagination';
+  const paginationContainer = document.createElement('div');
+  paginationContainer.className = 'pagination';
 
-// Ensure currentPage is always valid
-window.currentPage = window.currentPage || 1;
-if (window.currentPage > totalPages) window.currentPage = totalPages || 1;
-
-// Prev button
-const prevBtn = document.createElement('button');
-prevBtn.textContent = 'Prev';
-prevBtn.disabled = window.currentPage === 1;
-prevBtn.addEventListener('click', () => {
-  if (window.currentPage > 1) {
-    window.currentPage--;
-    displayProducts(products);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  // Always display at least one page button
+  for (let i = 1; i <= Math.max(totalPages, 1); i++) {
+    const btn = document.createElement('button');
+    btn.textContent = i;
+    btn.className = (i === currentPage) ? 'active' : '';
+    btn.addEventListener('click', () => {
+      window.currentPage = i;
+      displayProducts(products);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    paginationContainer.appendChild(btn);
   }
-});
-paginationContainer.appendChild(prevBtn);
 
-// Page number buttons
-for (let i = 1; i <= Math.max(totalPages, 1); i++) {
-  const btn = document.createElement('button');
-  btn.textContent = i;
-  btn.className = (i === window.currentPage) ? 'active' : '';
-  btn.addEventListener('click', () => {
-    window.currentPage = i;
-    displayProducts(products);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-  paginationContainer.appendChild(btn);
-}
-
-// Next button
-const nextBtn = document.createElement('button');
-nextBtn.textContent = 'Next';
-nextBtn.disabled = window.currentPage === totalPages;
-nextBtn.addEventListener('click', () => {
-  if (window.currentPage < totalPages) {
-    window.currentPage++;
-    displayProducts(products);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  // Insert pagination after the product grid so it sits under the grid (full-width)
+  if (productGrid && productGrid.parentElement) {
+    productGrid.insertAdjacentElement('afterend', paginationContainer);
+  } else {
+    // fallback
+    document.body.appendChild(paginationContainer);
   }
-});
-paginationContainer.appendChild(nextBtn);
 
-// Insert pagination after product grid
-if (productGrid && productGrid.parentElement) {
-  productGrid.insertAdjacentElement('afterend', paginationContainer);
-} else {
-  document.body.appendChild(paginationContainer);
+  // update cart count + product UIs
+  updateCartCount();
+  (paginated || []).forEach(p => updateProductUI(p.id));
 }
-
-// update cart count + product UIs
-updateCartCount();
-(paginated || []).forEach(p => updateProductUI(p.id));
-
 
 /* ---------- small helpers ---------- */
 function truncateText(text, wordLimit) { return text.split(' ').slice(0, wordLimit).join(' '); }
@@ -652,6 +626,7 @@ window.addEventListener('storage', (ev) => {
 updateCartCount();
 loadProducts();
 
+/* ---------- Inject pagination styles (horizontal, full-width below grid) ---------- */
 const style = document.createElement('style');
 style.textContent = `
 .pagination {
@@ -698,6 +673,7 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 </script>
+
 
 </body>
 </html>
