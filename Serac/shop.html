@@ -563,6 +563,17 @@ currencySelect?.addEventListener('change', () => {
 });
 
 
+// ✅ Fix: Hamburger toggle logic
+if (hamburger && headerRight) {
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('open');
+    headerRight.classList.toggle('open');
+    const expanded = hamburger.classList.contains('open');
+    hamburger.setAttribute('aria-expanded', expanded);
+  });
+}
+
+  
 
 /* -------------------- HEADER/HERO BEHAVIOR (safe version – works with existing hamburger) -------------------- */
 (function headerHeroBehavior(){
