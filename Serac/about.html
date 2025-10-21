@@ -346,73 +346,113 @@ section p { font-size: clamp(16px,1.6vw,20px); line-height:1.8; margin-bottom:18
   </footer>
 
 <script>
-/* === HEADER HIDE/SHOW AFTER HERO === */
-const siteHeader = document.getElementById('siteHeader');
-let lastScrollY = window.scrollY;
-let isHidden = false;
+/* -------------------- HEADER/HERO BEHAVIOR (Unified Version for All Pages) -------------------- */
+(function headerHeroBehavior(){
+  const headerEl = document.querySelector('.site-header') || document.getElementById('siteHeader');
+  const heroEl =
+    document.querySelector('.hero') ||
+    document.getElementById('heroSection') ||
+    document.querySelector('.hero-about');
+  const hamburger = document.getElementById('hamburger');
+  const headerRight = document.querySelector('.header-right');
 
-function getHeroHeight() {
-  const hero = document.querySelector('.hero-about');
-  return hero ? hero.offsetHeight : 400;
-}
+  if(!headerEl || !heroEl) return;
 
-function hideHeader() {
-  siteHeader.style.top = "-90px";
-  siteHeader.style.opacity = "0";
-  siteHeader.style.pointerEvents = "none";
-  isHidden = true;
-}
+  let lastY = window.scrollY || 0;
+  let hidden = false;
+  let hoverShown = false;
+  let heroHeight = Math.round(heroEl.getBoundingClientRect().height);
 
-function showHeader() {
-  siteHeader.style.top = "0";
-  siteHeader.style.opacity = "1";
-  siteHeader.style.pointerEvents = "auto";
-  isHidden = false;
-}
-
-function handleScroll() {
-  const currentY = window.scrollY;
-  const heroHeight = getHeroHeight();
-  const hidePoint = window.innerWidth <= 600 ? heroHeight * 0.8 : heroHeight - 80;
-
-  // Add background and shadow when scrolling down
-  if (currentY > 50) siteHeader.classList.add('scrolled');
-  else siteHeader.classList.remove('scrolled');
-
-  // Hide/show logic
-  if (currentY > hidePoint) {
-    if (currentY > lastScrollY && !isHidden) hideHeader();
-    else if (currentY < lastScrollY && isHidden) showHeader();
-  } else {
-    showHeader(); // always visible within hero area
+  // Hamburger toggle
+  if(hamburger && headerRight){
+    hamburger.addEventListener('click', ()=>{
+      headerRight.classList.toggle('open');
+      hamburger.classList.toggle('open');
+      setTimeout(handleScroll, 150);
+    });
   }
 
-  lastScrollY = currentY;
-}
-
-window.addEventListener('scroll', handleScroll, { passive: true });
-
-// === Hover visibility (for both desktop & mobile) ===
-document.addEventListener('mousemove', e => {
-  const heroHeight = getHeroHeight();
-  const hidePoint = window.innerWidth <= 600 ? heroHeight * 0.8 : heroHeight - 80;
-
-  if (e.clientY < 100) {
-    showHeader();
-  } else if (window.scrollY > hidePoint) {
-    hideHeader();
+  function isMenuOpen(){
+    return hamburger && hamburger.classList.contains('open');
   }
-});
 
-/* === HAMBURGER TOGGLE === */
-const hamburger = document.getElementById('hamburger');
-const headerRight = document.querySelector('.header-right');
-if (hamburger && headerRight) {
-  hamburger.addEventListener('click', () => {
-    headerRight.classList.toggle('open');
-    hamburger.classList.toggle('open');
+  function showHeader(){
+    headerEl.style.top = '0';
+    headerEl.style.opacity = '1';
+    headerEl.style.pointerEvents = 'auto';
+    hidden = false;
+  }
+
+  function hideHeader(){
+    headerEl.style.top = '-90px';
+    headerEl.style.opacity = '0';
+    headerEl.style.pointerEvents = 'none';
+    hidden = true;
+  }
+
+  function handleScroll(){
+    const y = window.scrollY || 0;
+    const menuOpen = isMenuOpen();
+
+    // Header dark background beyond hero
+    if(y > Math.max(50, heroHeight - 80)){
+      headerEl.classList.add('scrolled');
+    } else {
+      headerEl.classList.remove('scrolled');
+    }
+
+    // If menu is open → always visible
+    if(menuOpen){
+      showHeader();
+      return;
+    }
+
+    if(y > heroHeight - 80){
+      if(y > lastY && !hidden){
+        hideHeader();
+      } else if(y < lastY && hidden){
+        showHeader();
+        headerEl.classList.add('scrolled');
+      }
+    } else {
+      showHeader();
+      headerEl.classList.remove('scrolled');
+    }
+
+    lastY = y;
+  }
+
+  // Hover near top (disabled if menu open)
+  document.addEventListener('mousemove', (e)=>{
+    if(isMenuOpen()) return;
+
+    if(e.clientY < 100){
+      if(hidden){
+        showHeader();
+        headerEl.classList.add('scrolled');
+        hoverShown = true;
+      }
+    } else if(hoverShown){
+      setTimeout(()=>{
+        if(window.scrollY > heroHeight - 80 && !isMenuOpen()){
+          hideHeader();
+        }
+        hoverShown = false;
+      }, 250);
+    }
   });
-}
+
+  window.addEventListener('resize', ()=>{
+    heroHeight = Math.round(heroEl.getBoundingClientRect().height);
+    handleScroll();
+  }, { passive: true });
+
+  window.addEventListener('scroll', handleScroll, { passive: true });
+  window.addEventListener('load', ()=>{
+    heroHeight = Math.round(heroEl.getBoundingClientRect().height);
+    handleScroll();
+  });
+})();
 
 /* === FAQ ACCORDION === */
 document.querySelectorAll('.faq-item').forEach(item => {
