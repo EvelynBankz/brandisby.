@@ -277,23 +277,27 @@ footer p { font-size:14px; }
 
 <style>
 @media(min-width: 900px) {
-  .hero {
-    position: relative;
-    overflow: visible;
-  }
+  .hero { position: relative; overflow: visible; }
 
   .hero-peek {
     position: absolute;
-    bottom: -20px; /* slight overlap for hint */
+    bottom: -20px;
     left: 50%;
     transform: translateX(-50%);
-    width: 90%;  /* matches content width for symmetry */
+    width: 90%;
     height: 20px;
-    background: linear-gradient(to top, rgba(20,21,23,0.95), transparent);
     border-radius: 10px / 50%;
-    box-shadow: 0 -6px 15px rgba(0,0,0,0.15);
     z-index: 2;
+    box-shadow: 0 -6px 15px rgba(0,0,0,0.15);
     animation: peekFloat 2s ease-in-out infinite alternate;
+  }
+
+  .hero-peek[data-theme="dark"] {
+    background: linear-gradient(to top, rgba(182,110,65,0.3), transparent);
+  }
+
+  .hero-peek[data-theme="light"] {
+    background: linear-gradient(to top, rgba(255,235,200,0.35), transparent);
   }
 
   @keyframes peekFloat {
@@ -534,6 +538,17 @@ footer p { font-size:14px; }
 
       const peek = document.createElement('div');
       peek.className = 'hero-peek';
+
+      // Determine hero brightness (basic)
+      const bg = window.getComputedStyle(hero).backgroundColor;
+      let darkHero = true;
+      if (bg.startsWith('rgb')) {
+        const rgb = bg.match(/\d+/g).map(Number);
+        const brightness = (rgb[0]*299 + rgb[1]*587 + rgb[2]*114) / 1000;
+        darkHero = brightness < 128; // simple threshold
+      }
+
+      peek.dataset.theme = darkHero ? 'dark' : 'light';
       hero.appendChild(peek);
     });
   };
