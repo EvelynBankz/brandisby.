@@ -33,38 +33,6 @@
     .header-right{display:flex;gap:22px;align-items:center}
     .header-right a{color:#F5F5F3;text-decoration:none;font-weight:500}
 
-
-    /* === UNDERLINE HOVER EFFECT (replicated from About page) === */
-    .header-right a {
-      color: #F5F5F3;
-      position: relative;
-      padding: 6px 0;
-      font-size: 1rem;
-      font-weight: 500;
-      transition: color 0.3s ease;
-    }
-    
-    .header-right a::after {
-      content: "";
-      position: absolute;
-      bottom: -4px;
-      left: 0;
-      width: 0;
-      height: 2px;
-      background: var(--gold);
-      transition: width 0.3s ease;
-    }
-    
-    .header-right a:hover {
-      color: var(--gold);
-    }
-    
-    .header-right a:hover::after {
-      width: 100%;
-    }
-
-    
-    
     .hamburger{display:none;background:none;border:0;cursor:pointer;width:36px;height:28px;position:relative}
     .hamburger span{position:absolute;height:3px;background:#B66E41;width:100%;left:0;border-radius:2px;transition:all .28s}
     .hamburger span:nth-child(1){top:0}
@@ -116,6 +84,38 @@
     }
     .hero h1{font-family:"Playfair Display",serif;color:#B66E41;font-size:clamp(36px,6vw,60px)}
 
+
+     /* === UNDERLINE HOVER EFFECT (replicated from About page) === */
+    .header-right a {
+      color: #F5F5F3;
+      position: relative;
+      padding: 6px 0;
+      font-size: 1rem;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+    
+    .header-right a::after {
+      content: "";
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--gold);
+      transition: width 0.3s ease;
+    }
+    
+    .header-right a:hover {
+      color: var(--gold);
+    }
+    
+    .header-right a:hover::after {
+      width: 100%;
+    }
+
+
+    
     /* Main */
     /* Center the box in the viewport */
     .thankyou-section {
