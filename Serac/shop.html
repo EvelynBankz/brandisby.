@@ -403,21 +403,24 @@ function displayProducts(products) {
   }
 
   // ---------- Pagination controls (always visible, horizontal, below grid) ----------
- // Remove any previous pagination (avoid duplicates)
+// ---------- Pagination controls ----------
 const existingPagination = document.querySelector('.pagination');
 if (existingPagination) existingPagination.remove();
 
 const paginationContainer = document.createElement('div');
 paginationContainer.className = 'pagination';
 
+// Ensure currentPage is always valid
+window.currentPage = window.currentPage || 1;
+if (window.currentPage > totalPages) window.currentPage = totalPages || 1;
+
 // Prev button
 const prevBtn = document.createElement('button');
 prevBtn.textContent = 'Prev';
-prevBtn.disabled = currentPage === 1;
+prevBtn.disabled = window.currentPage === 1;
 prevBtn.addEventListener('click', () => {
-  if (currentPage > 1) {
-    currentPage--;
-    window.currentPage = currentPage;
+  if (window.currentPage > 1) {
+    window.currentPage--;
     displayProducts(products);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -428,9 +431,8 @@ paginationContainer.appendChild(prevBtn);
 for (let i = 1; i <= Math.max(totalPages, 1); i++) {
   const btn = document.createElement('button');
   btn.textContent = i;
-  btn.className = (i === currentPage) ? 'active' : '';
+  btn.className = (i === window.currentPage) ? 'active' : '';
   btn.addEventListener('click', () => {
-    currentPage = i;
     window.currentPage = i;
     displayProducts(products);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -441,28 +443,27 @@ for (let i = 1; i <= Math.max(totalPages, 1); i++) {
 // Next button
 const nextBtn = document.createElement('button');
 nextBtn.textContent = 'Next';
-nextBtn.disabled = currentPage === totalPages;
+nextBtn.disabled = window.currentPage === totalPages;
 nextBtn.addEventListener('click', () => {
-  if (currentPage < totalPages) {
-    currentPage++;
-    window.currentPage = currentPage;
+  if (window.currentPage < totalPages) {
+    window.currentPage++;
     displayProducts(products);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 });
 paginationContainer.appendChild(nextBtn);
 
-// Insert pagination after the product grid so it sits under the grid (full-width)
+// Insert pagination after product grid
 if (productGrid && productGrid.parentElement) {
   productGrid.insertAdjacentElement('afterend', paginationContainer);
 } else {
-  // fallback
   document.body.appendChild(paginationContainer);
 }
 
 // update cart count + product UIs
 updateCartCount();
 (paginated || []).forEach(p => updateProductUI(p.id));
+
 
 /* ---------- small helpers ---------- */
 function truncateText(text, wordLimit) { return text.split(' ').slice(0, wordLimit).join(' '); }
