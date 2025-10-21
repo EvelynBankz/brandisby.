@@ -419,41 +419,58 @@ function displayProducts(products) {
     productGrid.appendChild(div);
   }
 
-  // PAGINATION CONTROLS
-  const paginationContainer = document.createElement('div');
-  paginationContainer.className = 'pagination-container';
-  const pagination = document.createElement('div');
-  pagination.className = 'pagination';
+ // PAGINATION CONTROLS
+// Remove any existing pagination to prevent duplicates
+const existingPagination = document.querySelector('.pagination-container');
+if (existingPagination) existingPagination.remove();
 
-  const prevBtn = document.createElement('button');
-  prevBtn.textContent = 'Prev';
-  prevBtn.disabled = currentPage === 1;
-  prevBtn.addEventListener('click', () => { if (currentPage > 1) { currentPage--; displayProducts(products); window.scrollTo({ top: 0, behavior: 'smooth' }); } });
-  pagination.appendChild(prevBtn);
+const paginationContainer = document.createElement('div');
+paginationContainer.className = 'pagination-container';
+const pagination = document.createElement('div');
+pagination.className = 'pagination';
 
-  for (let i = 1; i <= Math.max(totalPages, 1); i++) {
-    const btn = document.createElement('button');
-    btn.textContent = i;
-    btn.className = i === currentPage ? 'active' : '';
-    btn.addEventListener('click', () => {
-      currentPage = i;
-      displayProducts(products);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-    pagination.appendChild(btn);
+// Prev button
+const prevBtn = document.createElement('button');
+prevBtn.textContent = 'Prev';
+prevBtn.disabled = currentPage === 1;
+prevBtn.addEventListener('click', () => {
+  if (currentPage > 1) {
+    currentPage--;
+    displayProducts(products);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
+});
+pagination.appendChild(prevBtn);
 
-  const nextBtn = document.createElement('button');
-  nextBtn.textContent = 'Next';
-  nextBtn.disabled = currentPage === totalPages;
-  nextBtn.addEventListener('click', () => { if (currentPage < totalPages) { currentPage++; displayProducts(products); window.scrollTo({ top: 0, behavior: 'smooth' }); } });
-  pagination.appendChild(nextBtn);
-
-  paginationContainer.appendChild(pagination);
-  productGrid.after(paginationContainer); // 👈 ensures it sits below product grid
+// Page buttons
+for (let i = 1; i <= Math.max(totalPages, 1); i++) {
+  const btn = document.createElement('button');
+  btn.textContent = i;
+  btn.className = i === currentPage ? 'active' : '';
+  btn.addEventListener('click', () => {
+    currentPage = i;
+    displayProducts(products);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  pagination.appendChild(btn);
 }
 
-function truncateText(text, wordLimit) { return text.split(' ').slice(0, wordLimit).join(' '); }
+// Next button
+const nextBtn = document.createElement('button');
+nextBtn.textContent = 'Next';
+nextBtn.disabled = currentPage === totalPages;
+nextBtn.addEventListener('click', () => {
+  if (currentPage < totalPages) {
+    currentPage++;
+    displayProducts(products);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+});
+pagination.appendChild(nextBtn);
+
+paginationContainer.appendChild(pagination);
+productGrid.after(paginationContainer);
+
 
 searchInput.addEventListener('input', loadProducts);
 sortSelect.addEventListener('change', loadProducts);
@@ -497,7 +514,7 @@ supportBtn?.addEventListener('click', () => { window.location.href = 'mailto:you
 const style = document.createElement('style');
 style.textContent = `
 .pagination-container {
-  display: flex;
+  display: sticky;
   justify-content: center;
   width: 100%;
   margin-top: 2rem;
