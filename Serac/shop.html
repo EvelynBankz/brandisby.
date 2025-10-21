@@ -65,6 +65,38 @@ a { text-decoration:none; color:inherit; transition: color var(--transition); }
 .hero-text h1 { font-family:"Playfair Display", serif; font-size: clamp(36px,5vw,64px); margin-bottom:12px; color:#B66E41; }
 .hero-text p { font-size: clamp(16px,2vw,22px); max-width:700px; color:#F5F5F3}
 
+
+/* === UNDERLINE HOVER EFFECT (replicated from About page) === */
+.header-right a {
+  color: #F5F5F3;
+  position: relative;
+  padding: 6px 0;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.header-right a::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--gold);
+  transition: width 0.3s ease;
+}
+
+.header-right a:hover {
+  color: var(--gold);
+}
+
+.header-right a:hover::after {
+  width: 100%;
+}
+
+
+  
 /* SHOP CONTROLS */
 .shop-controls { display:flex; justify-content:space-between; flex-wrap:wrap; margin-bottom:24px; gap:12px; align-items:center; }
 .shop-controls input,
@@ -136,7 +168,59 @@ footer { text-align:center; padding:22px; background:transparent; color:#bdbdbd;
 
 button:focus, a:focus, input:focus, select:focus { outline: 3px solid rgba(182,110,65,0.12); outline-offset:2px; }
 
+ /* Chat-style floating support button */
+    #floatingSupportBtn {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      width: 56px;
+      height: 56px;
+      background: #1a202b; /* Sérac primary color */
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 20px rgba(182, 110, 65, 1);
+      transition: all 0.3s ease;
+      z-index: 9999;
+    }
+
+    #floatingSupportBtn:hover {
+      background: #20232b;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(75, 78, 84, 1.0);
+    }
+
+    /* Tooltip */
+    .support-tooltip {
+      position: absolute;
+      bottom: 50px;      /* tooltip above button */
+      left: 20%;
+      transform: translateX(-50%);
+      background: #1c1e22;
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    #floatingSupportBtn:hover .support-tooltip {
+      opacity: 1;
+      transform: translateX(-50%) translateY(-6px);
+    }
+
 </style>
+
+
+  
 </head>
 <body>
 
@@ -150,7 +234,8 @@ button:focus, a:focus, input:focus, select:focus { outline: 3px solid rgba(182,1
     <a href="cart.html"><i class="fa-solid fa-cart-shopping"></i><span class="cart-count" id="cartCountMobile">0</span></a>
   </div>
 
-  <nav class="header-right">
+  
+  <nav class="header-right" id="headerRight">
     <a href="index.html">Home</a>
     <a href="about.html">About</a>
     <a href="cart.html">Cart <span class="cart-count" id="cartCount">0</span></a>
@@ -159,7 +244,10 @@ button:focus, a:focus, input:focus, select:focus { outline: 3px solid rgba(182,1
     <a href="trackorder.html">Track</a>
   </nav>
 
-  <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+   <button class="hamburger" id="hamburger" aria-label="Menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+   </button>
+  
 </header>
 
 <section class="hero">
@@ -194,6 +282,13 @@ button:focus, a:focus, input:focus, select:focus { outline: 3px solid rgba(182,1
   </div>
 </section>
 
+<!-- Floating Chat-Style Support Button -->
+  <button id="floatingSupportBtn" aria-label="Contact Support">
+    <i class="fas fa-headset"></i>
+    <span class="support-tooltip">Support</span>
+  </button>
+
+
 <footer>
   <p>© 2025 Sérac</p>
 </footer>
@@ -201,6 +296,8 @@ button:focus, a:focus, input:focus, select:focus { outline: 3px solid rgba(182,1
 
 
 
+
+  
 <script type="module">
 /* ---------- Firebase ---------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
@@ -467,97 +564,97 @@ currencySelect?.addEventListener('change', () => {
 
 
 
-/* -------------------- HEADER/HERO BEHAVIOR (darken immediately; hide after hero) -------------------- */
+/* -------------------- HEADER/HERO BEHAVIOR (safe version – works with existing hamburger) -------------------- */
 (function headerHeroBehavior(){
-  const headerEl = document.querySelector('.site-header') || document.getElementById('siteHeader');
-  const heroEl = document.querySelector('.hero') || document.getElementById('heroSection') || document.querySelector('.hero-about');
+  const headerEl = document.querySelector('.site-header');
+  const heroEl =
+    document.querySelector('.hero') ||
+    document.getElementById('heroSection') ||
+    document.querySelector('.hero-about');
   const hamburger = document.getElementById('hamburger');
-  const headerRight = document.querySelector('.header-right');
-
-  if (!headerEl || !heroEl) return;
+  if(!headerEl || !heroEl) return;
 
   let lastY = window.scrollY || 0;
   let hidden = false;
-  let hoverShown = false;
   let heroHeight = Math.round(heroEl.getBoundingClientRect().height);
+  let hoverShown = false;
 
-  function isMenuOpen() {
+  function isMenuOpen(){
     return hamburger && hamburger.classList.contains('open');
   }
 
-  function showHeader(forceScrolledClass = false) {
-    headerEl.style.top = '0';
-    headerEl.style.opacity = '1';
-    headerEl.style.pointerEvents = 'auto';
-    hidden = false;
-    if (forceScrolledClass) headerEl.classList.add('scrolled');
-  }
-
-  function hideHeader() {
-    headerEl.style.top = '-90px';
-    headerEl.style.opacity = '0';
-    headerEl.style.pointerEvents = 'none';
-    hidden = true;
-  }
-
-  function updateScrolledClassOnScroll(y) {
-    if (y > 0) headerEl.classList.add('scrolled');
-    else headerEl.classList.remove('scrolled');
-  }
-
-  function handleScroll() {
+  function handleScroll(){
     const y = window.scrollY || 0;
     const menuOpen = isMenuOpen();
-    const threshold = Math.max(50, heroHeight - 80);
 
-    updateScrolledClassOnScroll(y);
+    // turn header dark after hero
+    if(y > Math.max(50, heroHeight - 80))
+      headerEl.classList.add('scrolled');
+    else
+      headerEl.classList.remove('scrolled');
 
-    if (menuOpen) {
-      showHeader(true);
-      lastY = y;
+    // if hamburger menu open, force header visible
+    if(menuOpen){
+      headerEl.style.top = '0';
+      headerEl.style.opacity = '1';
+      headerEl.style.pointerEvents = 'auto';
       return;
     }
 
-    if (y > threshold) {
-      if (y > lastY && !hidden) hideHeader();
-      else if (y < lastY && hidden) showHeader(true);
+    if(y > heroHeight - 80){
+      if(y > lastY && !hidden){
+        headerEl.style.top = '-90px';
+        headerEl.style.opacity = '0';
+        headerEl.style.pointerEvents = 'none';
+        hidden = true;
+      } else if(y < lastY && hidden){
+        headerEl.style.top = '0';
+        headerEl.style.opacity = '1';
+        headerEl.style.pointerEvents = 'auto';
+        headerEl.classList.add('scrolled');
+        hidden = false;
+      }
     } else {
-      if (y === 0) headerEl.classList.remove('scrolled');
-      showHeader(false);
+      headerEl.style.top = '0';
+      headerEl.style.opacity = '1';
+      headerEl.style.pointerEvents = 'auto';
+      headerEl.classList.remove('scrolled');
+      hidden = false;
     }
 
     lastY = y;
   }
 
-  // Hover reveal (only when menu is closed)
+  // hover reveal (disabled when menu open)
   document.addEventListener('mousemove', (e) => {
-    if (isMenuOpen()) return;
-    if (e.clientY < 100) {
-      if (hidden) {
-        showHeader(true);
+    if(isMenuOpen()) return;
+
+    if(e.clientY < 100){
+      if(hidden){
+        headerEl.style.top = '0';
+        headerEl.style.opacity = '1';
+        headerEl.style.pointerEvents = 'auto';
+        headerEl.classList.add('scrolled');
+        hidden = false;
         hoverShown = true;
       }
-    } else if (hoverShown) {
-      setTimeout(() => {
-        if (window.scrollY > Math.max(50, heroHeight - 80) && !isMenuOpen()) hideHeader();
+    } else if(hoverShown){
+      setTimeout(()=>{
+        if(window.scrollY > heroHeight - 80 && !isMenuOpen()){
+          headerEl.style.top = '-90px';
+          headerEl.style.opacity = '0';
+          headerEl.style.pointerEvents = 'none';
+          hidden = true;
+        }
         hoverShown = false;
       }, 220);
     }
-  }, { passive: true });
+  });
 
-  /* === FIXED HAMBURGER MENU BEHAVIOR === */
-  if (hamburger && headerRight) {
+  // when hamburger opens/closes, re-evaluate visibility
+  if(hamburger){
     hamburger.addEventListener('click', () => {
-      const isNowOpen = hamburger.classList.toggle('open');
-      headerRight.classList.toggle('open', isNowOpen);
-
-      if (isNowOpen) {
-        // Show header fully and keep dark so dropdown is readable
-        showHeader(true);
-        headerEl.classList.add('scrolled');
-      } else {
-        handleScroll();
-      }
+      setTimeout(handleScroll, 200); // slight delay ensures proper detection
     });
   }
 
@@ -567,23 +664,28 @@ currencySelect?.addEventListener('change', () => {
   }, { passive: true });
 
   window.addEventListener('scroll', handleScroll, { passive: true });
-
   window.addEventListener('load', () => {
     heroHeight = Math.round(heroEl.getBoundingClientRect().height);
-    updateScrolledClassOnScroll(window.scrollY || 0);
     handleScroll();
   });
 })();
 
-
-/* ---------- Mobile cart visibility ---------- */
-function handleMobileCart() { 
+/* -------------------- MOBILE CART ICON (show on small screens) -------------------- */
+/* mobile cart visibility */
+function handleMobileCart(){ 
   const el = document.querySelector('.mobile-cart');
-  if (!el) return;
-  el.style.display = window.innerWidth <= 600 ? 'flex' : 'none';
+  if(!el) return;
+  el.style.display = window.innerWidth <= 900 ? 'flex' : 'none';
 }
 window.addEventListener('resize', handleMobileCart);
 handleMobileCart();
+
+/* header scrolled background (simple fallback) */
+window.addEventListener('scroll', ()=>{
+  const header = document.querySelector('.site-header');
+  if(!header) return;
+  if(window.scrollY > 50) header.classList.add('scrolled'); else header.classList.remove('scrolled');
+});
 
 /* === SMOOTH SCROLL === */
 document.querySelectorAll('.header-right a').forEach(link => {
