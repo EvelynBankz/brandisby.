@@ -34,8 +34,20 @@ a:hover { color:#B66E41; }
 .header-left { display: flex; align-items: center; gap: 18px; }
 .brand-logo { height: 80px; width: auto; }
 .brand-title { font-family: "Playfair Display", serif; font-weight: 700; font-size: 1.9rem; color: #B66E41; letter-spacing: 1px; }
-.header-right { display: flex; gap: 24px; font-weight:500; }
-.header-right a { color: #F5F5F3; position: relative; padding: 6px 0; font-size: 1rem; }
+.header-right {
+  display: flex;
+  gap: 24px;
+  font-weight: 500;
+}
+
+.header-right a {
+  position: relative;
+  color: #F5F5F3;
+  padding: 6px 0;
+  font-size: 1rem;
+  transition: color 0.3s ease;
+}
+
 .header-right a::after {
   content: "";
   position: absolute;
@@ -46,8 +58,14 @@ a:hover { color:#B66E41; }
   background: #B66E41;
   transition: width 0.3s ease;
 }
-.header-right a:hover::after { width: 100%; }
 
+.header-right a:hover {
+  color: #B66E41; /* text color on hover */
+}
+
+.header-right a:hover::after {
+  width: 100%; /* underline expands on hover */
+}
 /* ================= HAMBURGER ================= */
 .hamburger { display:none; background:none; border:none; width:44px; height:40px; cursor:pointer; position: relative; z-index:1300; }
 .hamburger span { display:block; height:3px; width:26px; background:#B66E41; margin:6px auto; border-radius:2px; transition: all 0.3s ease; }
