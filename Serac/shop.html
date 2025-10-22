@@ -390,26 +390,10 @@ function getTotalQuantity(productId) {
   const c = getCart();
   let total = 0;
   c.forEach(i => {
-    // direct id match
-    if (String(i.id) === String(productId)) {
-      total += (i.quantity || 0);
-      return;
-    }
-    // parentId match (common pattern when product page stores variant as separate item)
-    if (i.parentId && String(i.parentId) === String(productId)) {
-      total += (i.quantity || 0);
-      return;
-    }
-    // productId property
-    if (i.productId && String(i.productId) === String(productId)) {
-      total += (i.quantity || 0);
-      return;
-    }
-    // id starts with productId + separator (e.g., "prod123-variant456")
-    if (typeof i.id === 'string' && String(i.id).startsWith(String(productId) + '-')) {
-      total += (i.quantity || 0);
-      return;
-    }
+    if (String(i.id) === String(productId)) { total += (i.quantity || 0); return; }
+    if (i.parentId && String(i.parentId) === String(productId)) { total += (i.quantity || 0); return; }
+    if (i.productId && String(i.productId) === String(productId)) { total += (i.quantity || 0); return; }
+    if (typeof i.id === 'string' && String(i.id).startsWith(String(productId) + '-')) { total += (i.quantity || 0); return; }
   });
   return total;
 }
@@ -425,17 +409,7 @@ function addToCart(product) {
 
 function removeFromCart(productId) {
   let currentCart = getCart();
-  // try to match 'non-variant' direct id first
-  const idxDirect = currentCart.findIndex(i => i.id === productId && !(i.parentId || i.productId || (typeof i.id === 'string' && i.id.includes('-'))));
-  if (idxDirect > -1) {
-    currentCart[idxDirect].quantity -= 1;
-    if (currentCart[idxDirect].quantity <= 0) currentCart.splice(idxDirect, 1);
-    setCart(currentCart);
-    updateProductUI(productId);
-    return;
-  }
-  // fallback: remove from any matching variant entry
-  const idx = currentCart.findIndex(i => i.id === productId || i.parentId === productId || (typeof i.id === 'string' && i.id.startsWith(productId + '-')));
+  const idx = currentCart.findIndex(i => i.id === productId);
   if (idx > -1) {
     currentCart[idx].quantity -= 1;
     if (currentCart[idx].quantity <= 0) currentCart.splice(idx, 1);
@@ -456,22 +430,17 @@ function updateProductUI(productId) {
   const isVariant = card.dataset.hasVariants === 'true';
 
   if (isVariant) {
-    // For variant products: always show the select button (so user can go change variants),
-    // but show aggregated quantity if present
     if (badge) badge.textContent = totalQty > 0 ? totalQty : '';
     if (addBtn) {
-      // keep select button visible, but change label if quantity exists
       addBtn.style.display = 'block';
       addBtn.textContent = totalQty > 0 ? 'View selection' : 'Select your choice';
-      addBtn.classList.add('gold-hover'); // ensure styling
+      addBtn.classList.add('gold-hover');
     }
-    // hide plus/minus container if any (shouldn't exist for variant type)
     const plus = card.querySelector('.plus');
     const minus = card.querySelector('.minus');
     if (plus) plus.style.display = 'none';
     if (minus) minus.style.display = 'none';
   } else {
-    // Non-variant: original behavior (plus/minus/add)
     if (totalQty > 0) {
       if (addBtn && addBtn.classList.contains('add-cart')) addBtn.style.display = 'none';
       if (badge) badge.textContent = totalQty;
@@ -492,6 +461,177 @@ function formatPrice(product, currency) {
   } catch (e) {
     return `${currency} ${Number(price||0).toFixed(currency==='NGN'?0:2)}`;
   }
+}
+
+/* ---------- --- MODAL: dynamic injection & helper --- ---------- */
+function injectModalStyles() {
+  if (document.getElementById('serac-variant-modal-styles')) return;
+  const css = `
+  /* Variant Modal Styles */
+  .serac-modal-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center;
+    z-index: 99999; padding: 20px;
+  }
+  .serac-modal {
+    width: 100%; max-width:720px; background: #0f1112; border-radius:12px; box-shadow:0 10px 40px rgba(0,0,0,0.6);
+    color:#eaeaea; overflow:hidden; font-family: "Montserrat", sans-serif;
+  }
+  .serac-modal-header {
+    display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid rgba(255,255,255,0.03);
+  }
+  .serac-modal-title { font-family:"Playfair Display", serif; color:var(--gold); font-size:18px; }
+  .serac-modal-close { background:transparent; border:0; color:#bbb; font-size:20px; cursor:pointer; }
+  .serac-modal-body { max-height:60vh; overflow:auto; padding:16px 20px; display:block; gap:12px; }
+  .serac-variant-row { display:flex; gap:12px; align-items:center; padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.02); }
+  .serac-variant-img { width:72px; height:72px; object-fit:cover; border-radius:8px; background:#111; flex:0 0 72px; }
+  .serac-variant-meta { flex:1; min-width:0; }
+  .serac-variant-meta h4 { margin:0 0 6px 0; font-size:15px; color:#fff; font-weight:600; }
+  .serac-variant-meta p { margin:0; color:#bfbfbf; font-size:13px; }
+  .serac-variant-actions { display:flex; gap:8px; align-items:center; }
+  .serac-btn { border:1px solid var(--gold); background:transparent; color:var(--gold); padding:8px 10px; border-radius:8px; cursor:pointer; font-weight:600; }
+  .serac-btn:hover { background:var(--gold); color:#000; }
+  .serac-modal-footer { display:flex; justify-content:flex-end; gap:12px; padding:12px 20px; border-top:1px solid rgba(255,255,255,0.03); }
+  `;
+  const s = document.createElement('style');
+  s.id = 'serac-variant-modal-styles';
+  s.textContent = css;
+  document.head.appendChild(s);
+}
+
+function buildVariantRowsForProduct(productId) {
+  const c = getCart();
+  // gather matching items (variants or non-variants) using same matching logic
+  const rows = c.filter(i => {
+    if (String(i.id) === String(productId)) return true;
+    if (i.parentId && String(i.parentId) === String(productId)) return true;
+    if (i.productId && String(i.productId) === String(productId)) return true;
+    if (typeof i.id === 'string' && String(i.id).startsWith(String(productId) + '-')) return true;
+    return false;
+  }).map(i => ({ ...i }));
+  return rows;
+}
+
+function showVariantModal(productId) {
+  injectModalStyles();
+  // If a modal already exists, remove it first
+  const existing = document.getElementById('serac-variant-modal-backdrop');
+  if (existing) existing.remove();
+
+  const rows = buildVariantRowsForProduct(productId);
+  // If no rows, behave as regular navigation fallback
+  if (!rows || rows.length === 0) {
+    window.location.href = `product.html?productId=${encodeURIComponent(productId)}`;
+    return;
+  }
+
+  // modal DOM
+  const backdrop = document.createElement('div');
+  backdrop.id = 'serac-variant-modal-backdrop';
+  backdrop.className = 'serac-modal-backdrop';
+
+  const modal = document.createElement('div');
+  modal.className = 'serac-modal';
+  modal.setAttribute('role','dialog');
+  modal.setAttribute('aria-modal','true');
+
+  // header
+  const header = document.createElement('div');
+  header.className = 'serac-modal-header';
+  const title = document.createElement('div');
+  title.className = 'serac-modal-title';
+  title.textContent = 'Your selection';
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'serac-modal-close';
+  closeBtn.innerHTML = '&times;';
+  header.appendChild(title);
+  header.appendChild(closeBtn);
+
+  // body
+  const body = document.createElement('div');
+  body.className = 'serac-modal-body';
+
+  // Build a row for each variant / cart entry
+  rows.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'serac-variant-row';
+
+    const img = document.createElement('img');
+    img.className = 'serac-variant-img';
+    img.src = item.imageUrl || item.image || (productsData[item.id] && productsData[item.id].imageUrl) || (productsData[item.parentId] && productsData[item.parentId].imageUrl) || '';
+    img.alt = item.name || (productsData[item.id] && productsData[item.id].name) || '';
+
+    const meta = document.createElement('div');
+    meta.className = 'serac-variant-meta';
+    const h = document.createElement('h4');
+    h.textContent = item.name || (productsData[item.id] && productsData[item.id].name) || 'Product';
+    const p = document.createElement('p');
+    const parts = [];
+    if (item.color) parts.push(`Color: ${item.color}`);
+    if (item.size) parts.push(`Size: ${item.size}`);
+    parts.push(`Qty: ${item.quantity || 0}`);
+    if (item.currency && item.price !== undefined) {
+      parts.push(`Price: ${formatPrice({ priceNGN: item.price, priceUSD: item.price, priceEUR: item.price, priceGBP: item.price }, item.currency)}`);
+    }
+    p.textContent = parts.join(' • ');
+
+    meta.appendChild(h);
+    meta.appendChild(p);
+
+    const actions = document.createElement('div');
+    actions.className = 'serac-variant-actions';
+
+    // Edit selection -> open product page (user will edit there)
+    const editBtn = document.createElement('button');
+    editBtn.className = 'serac-btn';
+    editBtn.textContent = 'Edit Selection';
+    editBtn.addEventListener('click', () => {
+      // close modal then navigate
+      backdrop.remove();
+      window.location.href = `product.html?productId=${encodeURIComponent(item.parentId || item.productId || item.id)}`;
+    });
+
+    actions.appendChild(editBtn);
+    row.appendChild(img);
+    row.appendChild(meta);
+    row.appendChild(actions);
+
+    body.appendChild(row);
+  });
+
+  // footer
+  const footer = document.createElement('div');
+  footer.className = 'serac-modal-footer';
+  const closeFooterBtn = document.createElement('button');
+  closeFooterBtn.className = 'serac-btn';
+  closeFooterBtn.textContent = 'Close';
+  closeFooterBtn.addEventListener('click', () => backdrop.remove());
+  const goToProductBtn = document.createElement('button');
+  goToProductBtn.className = 'serac-btn';
+  goToProductBtn.textContent = 'Open Product Page';
+  // If multiple rows, open first product id
+  const firstPid = rows[0] ? (rows[0].parentId || rows[0].productId || rows[0].id) : productId;
+  goToProductBtn.addEventListener('click', () => {
+    backdrop.remove();
+    window.location.href = `product.html?productId=${encodeURIComponent(firstPid)}`;
+  });
+
+  footer.appendChild(closeFooterBtn);
+  footer.appendChild(goToProductBtn);
+
+  modal.appendChild(header);
+  modal.appendChild(body);
+  modal.appendChild(footer);
+  backdrop.appendChild(modal);
+  document.body.appendChild(backdrop);
+
+  // close handlers
+  closeBtn.addEventListener('click', () => backdrop.remove());
+  backdrop.addEventListener('click', (ev) => {
+    if (ev.target === backdrop) backdrop.remove();
+  });
+
+  // focus management
+  closeBtn.focus();
 }
 
 /* ---------- Load & render products (Serac collection) ---------- */
@@ -608,17 +748,22 @@ function displayProducts(products) {
       div.querySelector('.minus')?.addEventListener('click', e => { e.stopPropagation(); removeFromCart(p.id); });
       div.querySelector('.add-cart')?.addEventListener('click', e => { e.stopPropagation(); addToCart(p); });
     } else {
-      // variant product: navigate to product page (keep price & currency query for convenience)
+      // variant product: show modal if there are selected variants, otherwise go to product page
       const selectBtn = div.querySelector('.select-variant');
       if (selectBtn) {
         selectBtn.addEventListener('click', (e) => {
           e.stopPropagation();
-          // go to product page so user can choose variants
-          const url = `product.html?productId=${encodeURIComponent(p.id)}&price=${encodeURIComponent(priceForCurrency)}&currency=${encodeURIComponent(currency)}`;
-          window.location.href = url;
+          const totalSelected = getTotalQuantity(p.id);
+          if (totalSelected > 0) {
+            // show modal with items for this product
+            showVariantModal(p.id);
+          } else {
+            // no variant selected yet -> navigate to product page to pick
+            const url = `product.html?productId=${encodeURIComponent(p.id)}&price=${encodeURIComponent(priceForCurrency)}&currency=${encodeURIComponent(currency)}`;
+            window.location.href = url;
+          }
         });
       }
-      // also clicking on image/title already navigates because the anchor wraps the image
     }
 
     productGrid?.appendChild(div);
@@ -682,7 +827,7 @@ function displayProducts(products) {
 }
 
 /* ---------- Helpers ---------- */
-function truncateText(text, wordLimit) { return text.split(' ').slice(0, wordLimit).join(' '); }
+function truncateText(text, wordLimit) { return text.split(' ').slice(0,wordLimit).join(' '); }
 function escapeHtml(str) { if (!str && str !== 0) return ""; return String(str).replace(/[&<>"']/g, s => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": "&#39;" }[s])); }
 
 /* ---------- Event wiring ---------- */
@@ -694,7 +839,7 @@ currencySelect?.addEventListener('change', () => {
   loadProducts();
 });
 
-
+  
 // ✅ Fix: Hamburger toggle logic
 if (hamburger && headerRight) {
   hamburger.addEventListener('click', () => {
@@ -705,9 +850,164 @@ if (hamburger && headerRight) {
   });
 }
 
+
+/* -------------------- HEADER/HERO BEHAVIOR (safe version – works with existing hamburger) -------------------- */
+(function headerHeroBehavior(){
+  const headerEl = document.querySelector('.site-header');
+  const heroEl =
+    document.querySelector('.hero') ||
+    document.getElementById('heroSection') ||
+    document.querySelector('.hero-about');
+  const hamburger = document.getElementById('hamburger');
+  if(!headerEl || !heroEl) return;
+
+  let lastY = window.scrollY || 0;
+  let hidden = false;
+  let heroHeight = Math.round(heroEl.getBoundingClientRect().height);
+  let hoverShown = false;
+
+  function isMenuOpen(){
+    return hamburger && hamburger.classList.contains('open');
+  }
+
+  function handleScroll(){
+    const y = window.scrollY || 0;
+    const menuOpen = isMenuOpen();
+
+    // turn header dark after hero
+    if(y > Math.max(50, heroHeight - 80))
+      headerEl.classList.add('scrolled');
+    else
+      headerEl.classList.remove('scrolled');
+
+    // if hamburger menu open, force header visible
+    if(menuOpen){
+      headerEl.style.top = '0';
+      headerEl.style.opacity = '1';
+      headerEl.style.pointerEvents = 'auto';
+      return;
+    }
+
+    if(y > heroHeight - 80){
+      if(y > lastY && !hidden){
+        headerEl.style.top = '-90px';
+        headerEl.style.opacity = '0';
+        headerEl.style.pointerEvents = 'none';
+        hidden = true;
+      } else if(y < lastY && hidden){
+        headerEl.style.top = '0';
+        headerEl.style.opacity = '1';
+        headerEl.style.pointerEvents = 'auto';
+        headerEl.classList.add('scrolled');
+        hidden = false;
+      }
+    } else {
+      headerEl.style.top = '0';
+      headerEl.style.opacity = '1';
+      headerEl.style.pointerEvents = 'auto';
+      headerEl.classList.remove('scrolled');
+      hidden = false;
+    }
+
+    lastY = y;
+  }
+
+  // hover reveal (disabled when menu open)
+  document.addEventListener('mousemove', (e) => {
+    if(isMenuOpen()) return;
+
+    if(e.clientY < 100){
+      if(hidden){
+        headerEl.style.top = '0';
+        headerEl.style.opacity = '1';
+        headerEl.style.pointerEvents = 'auto';
+        headerEl.classList.add('scrolled');
+        hidden = false;
+        hoverShown = true;
+      }
+    } else if(hoverShown){
+      setTimeout(()=>{
+        if(window.scrollY > heroHeight - 80 && !isMenuOpen()){
+          headerEl.style.top = '-90px';
+          headerEl.style.opacity = '0';
+          headerEl.style.pointerEvents = 'none';
+          hidden = true;
+        }
+        hoverShown = false;
+      }, 220);
+    }
+  });
+
+  // when hamburger opens/closes, re-evaluate visibility
+  if(hamburger){
+    hamburger.addEventListener('click', () => {
+      setTimeout(handleScroll, 200); // slight delay ensures proper detection
+    });
+  }
+
+  window.addEventListener('resize', () => {
+    heroHeight = Math.round(heroEl.getBoundingClientRect().height);
+    handleScroll();
+  }, { passive: true });
+
+  window.addEventListener('scroll', handleScroll, { passive: true });
+  window.addEventListener('load', () => {
+    heroHeight = Math.round(heroEl.getBoundingClientRect().height);
+    handleScroll();
+  });
+})();
+
+/* ---------- SMOOTH SCROLL (closes mobile menu on click) ---------- */
+document.querySelectorAll('.header-right a').forEach(link => {
+  link.addEventListener('click', e => {
+    const href = link.getAttribute('href');
+    if (href && href.startsWith('#')) {
+      e.preventDefault();
+      const target = document.getElementById(href.slice(1));
+      if (target) {
+        window.scrollTo({ top: target.offsetTop - 80, behavior: 'smooth' });
+      }
+    }
+    // close mobile menu if open
+    if (headerRight && hamburger) {
+      headerRight.classList.remove('open');
+      hamburger.classList.remove('open');
+      hamburger.setAttribute('aria-expanded', 'false');
+    }
+  });
+});
+
+
+/* -------------------- MOBILE CART ICON (show on small screens) -------------------- */
+/* mobile cart visibility */
+function handleMobileCart(){ 
+  const el = document.querySelector('.mobile-cart');
+  if(!el) return;
+  el.style.display = window.innerWidth <= 900 ? 'flex' : 'none';
+}
+window.addEventListener('resize', handleMobileCart);
+handleMobileCart();
+
+/* header scrolled background (simple fallback) */
+window.addEventListener('scroll', ()=>{
+  const header = document.querySelector('.site-header');
+  if(!header) return;
+  if(window.scrollY > 50) header.classList.add('scrolled'); else header.classList.remove('scrolled');
+});
+
+/* storage sync (other tabs) */
+window.addEventListener('storage', ()=>{
+  cart = loadCartFromStorage();
+  cart = mergeCartItems(cart);
+  updateCartCount();
+  renderCart();
+});
+
+
+
+  
 /* ---------- Sync UI when returning to page (ensures product page variant adds are reflected) ---------- */
 window.addEventListener('pageshow', () => {
-  // reload cart and update counts/labels without re-fetching products (fast)
   cart = mergeCartItems(getCart());
   updateCartCount();
   Object.keys(productsData || {}).forEach(pid => updateProductUI(pid));
@@ -717,104 +1017,24 @@ window.addEventListener('pageshow', () => {
 updateCartCount();
 loadProducts();
 
-/* ---------- Pagination styles ---------- */
+/* ---------- Pagination styles + GOLD HOVER ---------- */
 const style = document.createElement('style');
 style.textContent = `
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 0.6rem;
-  margin-top: 2rem;
-  padding: 1rem 0.5rem;
-  width: 100%;
-  flex-wrap: wrap;
-}
-.pagination button {
-  background: transparent !important;
-  color: var(--gold);
-  border: 1px solid var(--gold);
-  padding: 0.5rem 1rem;
-  cursor: pointer;
-  border-radius: 6px;
-  font-weight: 500;
-  transition: all 0.3s ease;
-}
-.pagination button:hover {
-  background: var(--gold);
-  color: #fff;
-}
-.pagination button.active {
-  background: var(--gold);
-  color: #fff;
-  border-color: var(--gold);
-}
-.pagination button:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
+.pagination { display:flex; justify-content:center; align-items:center; gap:0.6rem; margin-top:2rem; padding:1rem 0.5rem; width:100%; flex-wrap:wrap; }
+.pagination button { background: transparent !important; color: var(--gold); border: 1px solid var(--gold); padding:0.5rem 1rem; cursor:pointer; border-radius:6px; font-weight:500; transition:all 0.3s ease; }
+.pagination button:hover { background: var(--gold); color:#fff; }
+.pagination button.active { background: var(--gold); color:#fff; border-color: var(--gold); }
+.pagination button:disabled { opacity:0.4; cursor:not-allowed; }
 
 /* GOLD HOVER for select/view buttons */
-.gold-hover {
-  position: relative;
-  background: transparent;
-  color: var(--gold);
-  border: 1px solid var(--gold);
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-weight: 600;
-  overflow: hidden;
-  transition: color 0.25s ease;
-}
-.gold-hover::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 0;
-  height: 100%;
-  background: var(--gold);
-  z-index: -1;
-  transition: width 0.25s ease;
-}
-.gold-hover:hover {
-  color: #000;
-}
-.gold-hover:hover::after {
-  width: 100%;
-}
+.gold-hover { position:relative; background:transparent; color:var(--gold); border:1px solid var(--gold); padding:8px 12px; border-radius:8px; font-weight:600; overflow:hidden; transition: color 0.25s ease; }
+.gold-hover::after { content:''; position:absolute; left:0; top:0; width:0; height:100%; background:var(--gold); z-index:-1; transition: width 0.25s ease; }
+.gold-hover:hover { color:#000; }
+.gold-hover:hover::after { width:100%; }
 `;
 document.head.appendChild(style);
 </script>
 
-<script>
-(function() {
-  const applyHeroPeek = () => {
-    const heroes = document.querySelectorAll('.hero');
-    heroes.forEach(hero => {
-      if (hero.querySelector('.hero-peek')) return;
-
-      const peek = document.createElement('div');
-      peek.className = 'hero-peek';
-
-      // Determine hero brightness (basic)
-      const bg = window.getComputedStyle(hero).backgroundColor;
-      let darkHero = true;
-      if (bg.startsWith('rgb')) {
-        const rgb = bg.match(/\d+/g).map(Number);
-        const brightness = (rgb[0]*299 + rgb[1]*587 + rgb[2]*114) / 1000;
-        darkHero = brightness < 128; // simple threshold
-      }
-
-      peek.dataset.theme = darkHero ? 'dark' : 'light';
-      hero.appendChild(peek);
-    });
-  };
-
-  window.addEventListener('load', applyHeroPeek);
-  window.addEventListener('resize', applyHeroPeek);
-})();
-</script>
 
 </body>
 </html>
