@@ -379,14 +379,39 @@ function mergeCartItems(cartArray) {
   return merged;
 }
 function updateCartCount() {
-  const total = (cart || []).reduce((sum, i) => sum + (i.quantity || 0), 0);
+  const total = (getCart() || []).reduce((sum, i) => sum + (i.quantity || 0), 0);
   if (cartCountElem) cartCountElem.textContent = total;
   if (cartCountMobileElem) cartCountMobileElem.textContent = total;
 }
 
 /* ---------- Cart operations ---------- */
+/* Robust getTotalQuantity to count variants stored in multiple shapes */
 function getTotalQuantity(productId) {
-  return (cart || []).filter(i => i.id === productId).reduce((sum, i) => sum + (i.quantity || 0), 0);
+  const c = getCart();
+  let total = 0;
+  c.forEach(i => {
+    // direct id match
+    if (String(i.id) === String(productId)) {
+      total += (i.quantity || 0);
+      return;
+    }
+    // parentId match (common pattern when product page stores variant as separate item)
+    if (i.parentId && String(i.parentId) === String(productId)) {
+      total += (i.quantity || 0);
+      return;
+    }
+    // productId property
+    if (i.productId && String(i.productId) === String(productId)) {
+      total += (i.quantity || 0);
+      return;
+    }
+    // id starts with productId + separator (e.g., "prod123-variant456")
+    if (typeof i.id === 'string' && String(i.id).startsWith(String(productId) + '-')) {
+      total += (i.quantity || 0);
+      return;
+    }
+  });
+  return total;
 }
 
 function addToCart(product) {
@@ -400,7 +425,17 @@ function addToCart(product) {
 
 function removeFromCart(productId) {
   let currentCart = getCart();
-  const idx = currentCart.findIndex(i => i.id === productId);
+  // try to match 'non-variant' direct id first
+  const idxDirect = currentCart.findIndex(i => i.id === productId && !(i.parentId || i.productId || (typeof i.id === 'string' && i.id.includes('-'))));
+  if (idxDirect > -1) {
+    currentCart[idxDirect].quantity -= 1;
+    if (currentCart[idxDirect].quantity <= 0) currentCart.splice(idxDirect, 1);
+    setCart(currentCart);
+    updateProductUI(productId);
+    return;
+  }
+  // fallback: remove from any matching variant entry
+  const idx = currentCart.findIndex(i => i.id === productId || i.parentId === productId || (typeof i.id === 'string' && i.id.startsWith(productId + '-')));
   if (idx > -1) {
     currentCart[idx].quantity -= 1;
     if (currentCart[idx].quantity <= 0) currentCart.splice(idx, 1);
@@ -428,6 +463,7 @@ function updateProductUI(productId) {
       // keep select button visible, but change label if quantity exists
       addBtn.style.display = 'block';
       addBtn.textContent = totalQty > 0 ? 'View selection' : 'Select your choice';
+      addBtn.classList.add('gold-hover'); // ensure styling
     }
     // hide plus/minus container if any (shouldn't exist for variant type)
     const plus = card.querySelector('.plus');
@@ -513,7 +549,16 @@ function displayProducts(products) {
     const priceForCurrency = getPriceForCurrency(p);
 
     // determine if this product has variants
-    const hasVariants = Boolean((p.variants && p.variants.length > 0) || p.variantsAvailable === true || p.hasVariants === true);
+    const hasVariants = Boolean(
+      (p.variants && Array.isArray(p.variants) && p.variants.length > 0) ||
+      (p.options && Array.isArray(p.options) && p.options.length > 0) ||
+      (p.variantOptions && Array.isArray(p.variantOptions) && p.variantOptions.length > 0) ||
+      p.variantsAvailable === true ||
+      p.hasVariants === true ||
+      p.isVariant === true ||
+      (Array.isArray(p.colors) && p.colors.length > 0) ||
+      (Array.isArray(p.sizes) && p.sizes.length > 0)
+    );
 
     const div = document.createElement('div');
     div.className = 'product-card';
@@ -542,7 +587,7 @@ function displayProducts(products) {
 
     // Button: for variants use .select-variant, for non-variants use .add-cart
     const actionButtonHtml = hasVariants
-      ? `<button class="select-variant">${quantity > 0 ? 'View selection' : 'Select your choice'}</button>`
+      ? `<button class="select-variant gold-hover">${quantity > 0 ? 'View selection' : 'Select your choice'}</button>`
       : `<button class="add-cart" style="display:${quantity > 0 ? 'none' : 'block'};">Add to Cart</button>`;
 
     div.innerHTML = `
@@ -660,147 +705,13 @@ if (hamburger && headerRight) {
   });
 }
 
-  
-
-/* -------------------- HEADER/HERO BEHAVIOR (safe version – works with existing hamburger) -------------------- */
-(function headerHeroBehavior(){
-  const headerEl = document.querySelector('.site-header');
-  const heroEl =
-    document.querySelector('.hero') ||
-    document.getElementById('heroSection') ||
-    document.querySelector('.hero-about');
-  const hamburger = document.getElementById('hamburger');
-  if(!headerEl || !heroEl) return;
-
-  let lastY = window.scrollY || 0;
-  let hidden = false;
-  let heroHeight = Math.round(heroEl.getBoundingClientRect().height);
-  let hoverShown = false;
-
-  function isMenuOpen(){
-    return hamburger && hamburger.classList.contains('open');
-  }
-
-  function handleScroll(){
-    const y = window.scrollY || 0;
-    const menuOpen = isMenuOpen();
-
-    // turn header dark after hero
-    if(y > Math.max(50, heroHeight - 80))
-      headerEl.classList.add('scrolled');
-    else
-      headerEl.classList.remove('scrolled');
-
-    // if hamburger menu open, force header visible
-    if(menuOpen){
-      headerEl.style.top = '0';
-      headerEl.style.opacity = '1';
-      headerEl.style.pointerEvents = 'auto';
-      return;
-    }
-
-    if(y > heroHeight - 80){
-      if(y > lastY && !hidden){
-        headerEl.style.top = '-90px';
-        headerEl.style.opacity = '0';
-        headerEl.style.pointerEvents = 'none';
-        hidden = true;
-      } else if(y < lastY && hidden){
-        headerEl.style.top = '0';
-        headerEl.style.opacity = '1';
-        headerEl.style.pointerEvents = 'auto';
-        headerEl.classList.add('scrolled');
-        hidden = false;
-      }
-    } else {
-      headerEl.style.top = '0';
-      headerEl.style.opacity = '1';
-      headerEl.style.pointerEvents = 'auto';
-      headerEl.classList.remove('scrolled');
-      hidden = false;
-    }
-
-    lastY = y;
-  }
-
-  // hover reveal (disabled when menu open)
-  document.addEventListener('mousemove', (e) => {
-    if(isMenuOpen()) return;
-
-    if(e.clientY < 100){
-      if(hidden){
-        headerEl.style.top = '0';
-        headerEl.style.opacity = '1';
-        headerEl.style.pointerEvents = 'auto';
-        headerEl.classList.add('scrolled');
-        hidden = false;
-        hoverShown = true;
-      }
-    } else if(hoverShown){
-      setTimeout(()=>{
-        if(window.scrollY > heroHeight - 80 && !isMenuOpen()){
-          headerEl.style.top = '-90px';
-          headerEl.style.opacity = '0';
-          headerEl.style.pointerEvents = 'none';
-          hidden = true;
-        }
-        hoverShown = false;
-      }, 220);
-    }
-  });
-
-  // when hamburger opens/closes, re-evaluate visibility
-  if(hamburger){
-    hamburger.addEventListener('click', () => {
-      setTimeout(handleScroll, 200); // slight delay ensures proper detection
-    });
-  }
-
-  window.addEventListener('resize', () => {
-    heroHeight = Math.round(heroEl.getBoundingClientRect().height);
-    handleScroll();
-  }, { passive: true });
-
-  window.addEventListener('scroll', handleScroll, { passive: true });
-  window.addEventListener('load', () => {
-    heroHeight = Math.round(heroEl.getBoundingClientRect().height);
-    handleScroll();
-  });
-})();
-
-/* -------------------- MOBILE CART ICON (show on small screens) -------------------- */
-/* mobile cart visibility */
-function handleMobileCart(){ 
-  const el = document.querySelector('.mobile-cart');
-  if(!el) return;
-  el.style.display = window.innerWidth <= 900 ? 'flex' : 'none';
-}
-window.addEventListener('resize', handleMobileCart);
-handleMobileCart();
-
-/* header scrolled background (simple fallback) */
-window.addEventListener('scroll', ()=>{
-  const header = document.querySelector('.site-header');
-  if(!header) return;
-  if(window.scrollY > 50) header.classList.add('scrolled'); else header.classList.remove('scrolled');
+/* ---------- Sync UI when returning to page (ensures product page variant adds are reflected) ---------- */
+window.addEventListener('pageshow', () => {
+  // reload cart and update counts/labels without re-fetching products (fast)
+  cart = mergeCartItems(getCart());
+  updateCartCount();
+  Object.keys(productsData || {}).forEach(pid => updateProductUI(pid));
 });
-
-/* === SMOOTH SCROLL === */
-document.querySelectorAll('.header-right a').forEach(link => {
-  link.addEventListener('click', e => {
-    const href = link.getAttribute('href');
-    if (href && href.startsWith('#')) {
-      e.preventDefault();
-      const target = document.getElementById(href.slice(1));
-      if (target) {
-        window.scrollTo({ top: target.offsetTop - 80, behavior: 'smooth' });
-      }
-      headerRight.classList.remove('open');
-      hamburger.classList.remove('open');
-    }
-  });
-});
-
 
 /* ---------- Initial load ---------- */
 updateCartCount();
@@ -842,6 +753,36 @@ style.textContent = `
   opacity: 0.4;
   cursor: not-allowed;
 }
+
+/* GOLD HOVER for select/view buttons */
+.gold-hover {
+  position: relative;
+  background: transparent;
+  color: var(--gold);
+  border: 1px solid var(--gold);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  overflow: hidden;
+  transition: color 0.25s ease;
+}
+.gold-hover::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 100%;
+  background: var(--gold);
+  z-index: -1;
+  transition: width 0.25s ease;
+}
+.gold-hover:hover {
+  color: #000;
+}
+.gold-hover:hover::after {
+  width: 100%;
+}
 `;
 document.head.appendChild(style);
 </script>
@@ -874,6 +815,6 @@ document.head.appendChild(style);
   window.addEventListener('resize', applyHeroPeek);
 })();
 </script>
-  
+
 </body>
 </html>
