@@ -410,13 +410,10 @@ footer p { font-size:14px; }
 <!-- SCRIPT -->
 <!-- SCRIPT -->
 <script>
-/* -------------------- HEADER / HERO BEHAVIOR -------------------- */
-(function headerHeroBehavior() {
-  const headerEl = document.querySelector('.site-header');
-  const heroEl =
-    document.querySelector('.hero') ||
-    document.getElementById('heroSection') ||
-    document.querySelector('.hero-about');
+/* -------------------- HEADER/HERO BEHAVIOR (darken immediately; hide after hero) -------------------- */
+(function headerHeroBehavior(){
+  const headerEl = document.querySelector('.site-header') || document.getElementById('siteHeader');
+  const heroEl = document.querySelector('.hero') || document.getElementById('heroSection') || document.querySelector('.hero-about');
   const hamburger = document.getElementById('hamburger');
   const headerRight = document.querySelector('.header-right');
 
@@ -424,97 +421,87 @@ footer p { font-size:14px; }
 
   let lastY = window.scrollY || 0;
   let hidden = false;
-  let heroHeight = Math.round(heroEl.getBoundingClientRect().height);
   let hoverShown = false;
+  let heroHeight = Math.round(heroEl.getBoundingClientRect().height);
 
   function isMenuOpen() {
     return hamburger && hamburger.classList.contains('open');
   }
 
+  function showHeader(forceScrolledClass = false) {
+    headerEl.style.top = '0';
+    headerEl.style.opacity = '1';
+    headerEl.style.pointerEvents = 'auto';
+    hidden = false;
+    if (forceScrolledClass) headerEl.classList.add('scrolled');
+  }
+
+  function hideHeader() {
+    headerEl.style.top = '-90px';
+    headerEl.style.opacity = '0';
+    headerEl.style.pointerEvents = 'none';
+    hidden = true;
+  }
+
+  function updateScrolledClassOnScroll(y) {
+    if (y > 0) headerEl.classList.add('scrolled');
+    else headerEl.classList.remove('scrolled');
+  }
+
   function handleScroll() {
     const y = window.scrollY || 0;
     const menuOpen = isMenuOpen();
+    const threshold = Math.max(50, heroHeight - 80);
 
-    // Turn header dark after hero
-    if (y > Math.max(50, heroHeight - 80))
-      headerEl.classList.add('scrolled');
-    else
-      headerEl.classList.remove('scrolled');
+    updateScrolledClassOnScroll(y);
 
-    // If hamburger menu open, force header visible
     if (menuOpen) {
-      headerEl.style.top = '0';
-      headerEl.style.opacity = '1';
-      headerEl.style.pointerEvents = 'auto';
+      showHeader(true);
+      lastY = y;
       return;
     }
 
-    if (y > heroHeight - 80) {
-      if (y > lastY && !hidden) {
-        headerEl.style.top = '-90px';
-        headerEl.style.opacity = '0';
-        headerEl.style.pointerEvents = 'none';
-        hidden = true;
-      } else if (y < lastY && hidden) {
-        headerEl.style.top = '0';
-        headerEl.style.opacity = '1';
-        headerEl.style.pointerEvents = 'auto';
-        headerEl.classList.add('scrolled');
-        hidden = false;
-      }
+    if (y > threshold) {
+      if (y > lastY && !hidden) hideHeader();
+      else if (y < lastY && hidden) showHeader(true);
     } else {
-      headerEl.style.top = '0';
-      headerEl.style.opacity = '1';
-      headerEl.style.pointerEvents = 'auto';
-      headerEl.classList.remove('scrolled');
-      hidden = false;
+      if (y === 0) headerEl.classList.remove('scrolled');
+      showHeader(false);
     }
 
     lastY = y;
   }
 
-  // Hover reveal (disabled when menu open)
+  // Hover reveal (only when menu is closed)
   document.addEventListener('mousemove', (e) => {
     if (isMenuOpen()) return;
-
     if (e.clientY < 100) {
       if (hidden) {
-        headerEl.style.top = '0';
-        headerEl.style.opacity = '1';
-        headerEl.style.pointerEvents = 'auto';
-        headerEl.classList.add('scrolled');
-        hidden = false;
+        showHeader(true);
         hoverShown = true;
       }
     } else if (hoverShown) {
       setTimeout(() => {
-        if (window.scrollY > heroHeight - 80 && !isMenuOpen()) {
-          headerEl.style.top = '-90px';
-          headerEl.style.opacity = '0';
-          headerEl.style.pointerEvents = 'none';
-          hidden = true;
-        }
+        if (window.scrollY > Math.max(50, heroHeight - 80) && !isMenuOpen()) hideHeader();
         hoverShown = false;
       }, 220);
     }
-  });
+  }, { passive: true });
+  
 
-  // ✅ Hamburger toggle (now works correctly)
+  /* === FIXED HAMBURGER MENU BEHAVIOR === */
   if (hamburger && headerRight) {
     hamburger.addEventListener('click', () => {
-      hamburger.classList.toggle('open');
-      headerRight.classList.toggle('open');
-      const expanded = hamburger.classList.contains('open');
-      hamburger.setAttribute('aria-expanded', expanded);
+      const isNowOpen = hamburger.classList.toggle('open');
+      headerRight.classList.toggle('open', isNowOpen);
 
-      // When menu is open, keep header visible
-      if (expanded) {
-        headerEl.style.top = '0';
-        headerEl.style.opacity = '1';
-        headerEl.style.pointerEvents = 'auto';
+      if (isNowOpen) {
+        // Show header fully and keep dark so dropdown is readable
+        showHeader(true);
+        headerEl.classList.add('scrolled');
+      } else {
+        handleScroll();
       }
-
-      setTimeout(handleScroll, 200);
     });
   }
 
@@ -524,11 +511,30 @@ footer p { font-size:14px; }
   }, { passive: true });
 
   window.addEventListener('scroll', handleScroll, { passive: true });
+
   window.addEventListener('load', () => {
     heroHeight = Math.round(heroEl.getBoundingClientRect().height);
+    updateScrolledClassOnScroll(window.scrollY || 0);
     handleScroll();
   });
 })();
+
+/* === SMOOTH SCROLL === */
+document.querySelectorAll('.header-right a').forEach(link => {
+  link.addEventListener('click', e => {
+    const href = link.getAttribute('href');
+    if (href && href.startsWith('#')) {
+      e.preventDefault();
+      const target = document.getElementById(href.slice(1));
+      if (target) {
+        window.scrollTo({ top: target.offsetTop - 80, behavior: 'smooth' });
+      }
+      headerRight.classList.remove('open');
+      hamburger.classList.remove('open');
+    }
+  });
+});
+
 </script>
 
 
