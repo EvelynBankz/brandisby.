@@ -585,19 +585,21 @@ function buildVariantRowsForProduct(productId) {
  * Show the modal for variant rows.
  * Accepts optional triggerElem so we can position near the clicked button.
  */
+
 function showVariantModal(productId, triggerElem = null) {
   injectModalStyles();
   // Remove existing modal/backdrop
   document.querySelectorAll('.serac-modal-backdrop').forEach(e => e.remove());
 
   const rows = buildVariantRowsForProduct(productId);
+
+  // If no items yet → go straight to product page
   if (!rows || rows.length === 0) {
-    // fallback: navigate to product page to select
     window.location.href = `product.html?productId=${encodeURIComponent(productId)}`;
     return;
   }
 
-  // Backdrop (for outside click detection)
+  // Backdrop
   const backdrop = document.createElement("div");
   backdrop.className = "serac-modal-backdrop";
   backdrop.style.display = 'flex';
@@ -611,6 +613,7 @@ function showVariantModal(productId, triggerElem = null) {
   modal.setAttribute('role', 'dialog');
   modal.setAttribute('aria-modal', 'true');
 
+  /* ---------- Header ---------- */
   const header = document.createElement("div");
   header.className = "serac-modal-header";
   const title = document.createElement("div");
@@ -622,6 +625,7 @@ function showVariantModal(productId, triggerElem = null) {
   header.appendChild(title);
   header.appendChild(closeBtn);
 
+  /* ---------- Body (variant rows) ---------- */
   const body = document.createElement("div");
   body.className = "serac-modal-body";
 
@@ -636,8 +640,10 @@ function showVariantModal(productId, triggerElem = null) {
 
     const meta = document.createElement("div");
     meta.className = "serac-variant-meta";
+
     const h = document.createElement("h4");
     h.textContent = item.name || "Product";
+
     const p = document.createElement("p");
     const parts = [];
     if (item.color) parts.push(`Color: ${item.color}`);
@@ -648,40 +654,41 @@ function showVariantModal(productId, triggerElem = null) {
     meta.appendChild(h);
     meta.appendChild(p);
 
-    const editBtn = document.createElement("button");
-    editBtn.className = "serac-btn";
-    editBtn.textContent = "Edit";
-    editBtn.addEventListener("click", (ev) => {
-      ev.stopPropagation();
-      backdrop.remove();
-      // navigate to product page: attempt to include variant id so product page can preselect if designed to do so
-      const parentId = item.parentId || item.productId || productId;
-      const variantQuery = item.id && String(item.id).includes(String(parentId) + '-') ? `&variantId=${encodeURIComponent(item.id)}` : '';
-      window.location.href = `product.html?productId=${encodeURIComponent(parentId)}${variantQuery}`;
-    });
-
     row.appendChild(img);
     row.appendChild(meta);
-    row.appendChild(editBtn);
     body.appendChild(row);
   });
 
+  /* ---------- Footer ---------- */
   const footer = document.createElement("div");
   footer.className = "serac-modal-footer";
+
+  // Single "Edit Selections" button
+  const editAllBtn = document.createElement("button");
+  editAllBtn.className = "serac-btn";
+  editAllBtn.textContent = "Edit Selections";
+  editAllBtn.addEventListener("click", (ev) => {
+    ev.stopPropagation();
+    backdrop.remove();
+    window.location.href = `product.html?productId=${encodeURIComponent(productId)}`;
+  });
+
   const closeFooterBtn = document.createElement("button");
   closeFooterBtn.className = "serac-btn";
   closeFooterBtn.textContent = "Close";
   closeFooterBtn.addEventListener("click", () => backdrop.remove());
+
+  footer.appendChild(editAllBtn);
   footer.appendChild(closeFooterBtn);
 
+  /* ---------- Assemble modal ---------- */
   modal.appendChild(header);
   modal.appendChild(body);
   modal.appendChild(footer);
-
   backdrop.appendChild(modal);
   document.body.appendChild(backdrop);
 
-  // Positioning: if trigger provided, position the modal near it (clamped)
+  /* ---------- Positioning ---------- */
   if (triggerElem && typeof triggerElem.getBoundingClientRect === 'function') {
     const rect = triggerElem.getBoundingClientRect();
     const left = Math.min(window.innerWidth - 340, Math.max(12, rect.left));
@@ -690,18 +697,18 @@ function showVariantModal(productId, triggerElem = null) {
     modal.style.left = `${left}px`;
     modal.style.top = `${top}px`;
   } else {
-    // default anchor: top-right small offset
     modal.style.position = 'fixed';
     modal.style.right = '12px';
     modal.style.top = '12px';
   }
 
-  // Closing logic
+  /* ---------- Closing logic ---------- */
   closeBtn.addEventListener("click", () => backdrop.remove());
   backdrop.addEventListener("click", e => {
     if (e.target === backdrop) backdrop.remove();
   });
 }
+
 
 /* ---------- Load & render products (Serac collection) ---------- */
 async function loadProducts() {
