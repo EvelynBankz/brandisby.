@@ -326,7 +326,7 @@ button:focus, a:focus, input:focus, select:focus { outline: 3px solid rgba(182,1
 <script type="module">
 /* ---------- Firebase ---------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
-import { getFirestore, collection, getDocs, query, where, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
@@ -464,7 +464,6 @@ function formatPrice(product, currency) {
 }
 
 /* ---------- --- MODAL: dynamic dropdown injection & helper --- ---------- */
-/* ---------- --- MODAL (Dropdown Style) : dynamic injection & helper --- ---------- */
 function injectModalStyles() {
   if (document.getElementById('serac-variant-modal-styles')) return;
   const css = `
@@ -528,24 +527,89 @@ function injectModalStyles() {
   document.head.appendChild(s);
 }
 
-function showVariantModal(productId) {
+/**
+ * Build list of variant rows for the modal from cart based on productId.
+ * returns array of { id, parentId, productId, name, imageUrl, color, size, quantity }
+ */
+function buildVariantRowsForProduct(productId) {
+  const c = getCart();
+  const rows = [];
+  c.forEach(item => {
+    const matches =
+      String(item.id) === String(productId) ||
+      (item.parentId && String(item.parentId) === String(productId)) ||
+      (item.productId && String(item.productId) === String(productId)) ||
+      (typeof item.id === 'string' && String(item.id).startsWith(String(productId) + '-')) ||
+      false;
+    if (matches) {
+      // Compose display name and image using product master data where possible
+      const master = productsData[String(productId)] || {};
+      const name = item.name || master.name || (master && master.name) || `Product ${productId}`;
+      const imageUrl = item.image || item.imageUrl || master.imageUrl || (master.images && master.images[0]) || '';
+      rows.push({
+        id: item.id,
+        parentId: item.parentId || null,
+        productId: item.productId || null,
+        name,
+        imageUrl,
+        color: item.color || item.selectedColor || null,
+        size: item.size || item.selectedSize || null,
+        quantity: item.quantity || 0
+      });
+    }
+  });
+
+  // If there are no cart rows but product page has preselected variant info saved (rare), do a best-effort fallback:
+  if (rows.length === 0) {
+    // try to detect if product object itself contains a 'selected' or 'preselected' map in productsData
+    const master = productsData[String(productId)] || {};
+    if (master.selectedVariant) {
+      const sv = master.selectedVariant;
+      rows.push({
+        id: sv.id || `${productId}-${sv.color || sv.size || 'v'}`,
+        parentId: productId,
+        productId,
+        name: master.name + (sv.color ? ` — ${sv.color}` : '') + (sv.size ? ` / ${sv.size}` : ''),
+        imageUrl: sv.image || master.imageUrl || '',
+        color: sv.color || null,
+        size: sv.size || null,
+        quantity: sv.quantity || 0
+      });
+    }
+  }
+
+  return rows;
+}
+
+/**
+ * Show the modal for variant rows.
+ * Accepts optional triggerElem so we can position near the clicked button.
+ */
+function showVariantModal(productId, triggerElem = null) {
   injectModalStyles();
-  // Remove existing
+  // Remove existing modal/backdrop
   document.querySelectorAll('.serac-modal-backdrop').forEach(e => e.remove());
 
   const rows = buildVariantRowsForProduct(productId);
   if (!rows || rows.length === 0) {
+    // fallback: navigate to product page to select
     window.location.href = `product.html?productId=${encodeURIComponent(productId)}`;
     return;
   }
 
-  // Backdrop (used for outside click detection)
+  // Backdrop (for outside click detection)
   const backdrop = document.createElement("div");
   backdrop.className = "serac-modal-backdrop";
+  backdrop.style.display = 'flex';
+  backdrop.style.justifyContent = 'flex-end';
+  backdrop.style.alignItems = 'flex-start';
+  backdrop.style.padding = '12px';
 
-  // Dropdown container
+  // Modal container
   const modal = document.createElement("div");
   modal.className = "serac-modal";
+  modal.setAttribute('role', 'dialog');
+  modal.setAttribute('aria-modal', 'true');
 
   const header = document.createElement("div");
   header.className = "serac-modal-header";
@@ -567,7 +631,7 @@ function showVariantModal(productId) {
 
     const img = document.createElement("img");
     img.className = "serac-variant-img";
-    img.src = item.imageUrl || item.image || "";
+    img.src = item.imageUrl || '';
     img.alt = item.name || "Product";
 
     const meta = document.createElement("div");
@@ -587,9 +651,13 @@ function showVariantModal(productId) {
     const editBtn = document.createElement("button");
     editBtn.className = "serac-btn";
     editBtn.textContent = "Edit";
-    editBtn.addEventListener("click", () => {
+    editBtn.addEventListener("click", (ev) => {
+      ev.stopPropagation();
       backdrop.remove();
-      window.location.href = `product.html?productId=${encodeURIComponent(item.parentId || item.productId || item.id)}`;
+      // navigate to product page: attempt to include variant id so product page can preselect if designed to do so
+      const parentId = item.parentId || item.productId || productId;
+      const variantQuery = item.id && String(item.id).includes(String(parentId) + '-') ? `&variantId=${encodeURIComponent(item.id)}` : '';
+      window.location.href = `product.html?productId=${encodeURIComponent(parentId)}${variantQuery}`;
     });
 
     row.appendChild(img);
@@ -613,13 +681,19 @@ function showVariantModal(productId) {
   backdrop.appendChild(modal);
   document.body.appendChild(backdrop);
 
-  // Position the dropdown roughly near top right (non-fullscreen)
-  const trigger = document.activeElement;
-  const rect = trigger ? trigger.getBoundingClientRect() : null;
-  if (rect) {
-    modal.style.position = "absolute";
-    modal.style.left = rect.left + "px";
-    modal.style.top = rect.bottom + 6 + "px";
+  // Positioning: if trigger provided, position the modal near it (clamped)
+  if (triggerElem && typeof triggerElem.getBoundingClientRect === 'function') {
+    const rect = triggerElem.getBoundingClientRect();
+    const left = Math.min(window.innerWidth - 340, Math.max(12, rect.left));
+    const top = Math.min(window.innerHeight - 60, rect.bottom + 6);
+    modal.style.position = 'absolute';
+    modal.style.left = `${left}px`;
+    modal.style.top = `${top}px`;
+  } else {
+    // default anchor: top-right small offset
+    modal.style.position = 'fixed';
+    modal.style.right = '12px';
+    modal.style.top = '12px';
   }
 
   // Closing logic
@@ -628,7 +702,6 @@ function showVariantModal(productId) {
     if (e.target === backdrop) backdrop.remove();
   });
 }
-
 
 /* ---------- Load & render products (Serac collection) ---------- */
 async function loadProducts() {
@@ -749,10 +822,11 @@ function displayProducts(products) {
       if (selectBtn) {
         selectBtn.addEventListener('click', (e) => {
           e.stopPropagation();
+          // pass the clicked element to the modal so it can be positioned relative to the button
           const totalSelected = getTotalQuantity(p.id);
           if (totalSelected > 0) {
-            // show modal with items for this product
-            showVariantModal(p.id);
+            // show modal with items for this product, positioned near the button
+            showVariantModal(p.id, selectBtn);
           } else {
             // no variant selected yet -> navigate to product page to pick
             const url = `product.html?productId=${encodeURIComponent(p.id)}&price=${encodeURIComponent(priceForCurrency)}&currency=${encodeURIComponent(currency)}`;
@@ -992,6 +1066,18 @@ window.addEventListener('scroll', ()=>{
 });
 
 /* storage sync (other tabs) */
+function loadCartFromStorage() {
+  try {
+    return JSON.parse(localStorage.getItem(CART_KEY)) || [];
+  } catch (e) {
+    return [];
+  }
+}
+function renderCart() {
+  // Minimal render stub - update any cart UI you have on page.
+  // If you have a full cart sidebar, plug in its rendering logic here.
+  updateCartCount();
+}
 window.addEventListener('storage', ()=>{
   cart = loadCartFromStorage();
   cart = mergeCartItems(cart);
@@ -999,9 +1085,6 @@ window.addEventListener('storage', ()=>{
   renderCart();
 });
 
-
-
-  
 /* ---------- Sync UI when returning to page (ensures product page variant adds are reflected) ---------- */
 window.addEventListener('pageshow', () => {
   cart = mergeCartItems(getCart());
@@ -1030,7 +1113,6 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 </script>
-
 
 </body>
 </html>
