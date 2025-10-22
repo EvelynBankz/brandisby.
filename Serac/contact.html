@@ -570,31 +570,6 @@ document.querySelectorAll('.header-right a').forEach(link => {
 
 
 <script>
-/* -------------------- SMOOTH SCROLL -------------------- */
-(function() {
-  const hamburger = document.getElementById('hamburger');
-  const headerRight = document.querySelector('.header-right');
-
-  document.querySelectorAll('.header-right a').forEach(link => {
-    link.addEventListener('click', e => {
-      const href = link.getAttribute('href');
-      if (href && href.startsWith('#')) {
-        e.preventDefault();
-        const target = document.getElementById(href.slice(1));
-        if (target) {
-          window.scrollTo({ top: target.offsetTop - 80, behavior: 'smooth' });
-        }
-        headerRight.classList.remove('open');
-        hamburger.classList.remove('open');
-        hamburger.setAttribute('aria-expanded', false);
-      }
-    });
-  });
-})();
-</script>
-
-
-<script>
 // Firebase brand context
 const brand = "serac";
 console.log("Contact form initialized for brand:", brand);
