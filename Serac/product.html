@@ -7,79 +7,89 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
+<style>
+/* ================= RESET & BASE ================= */
 :root{
-  --bg:#141517;        /* primary background */
-  --bg-2:#4B4E54;      /* secondary dark */
-  --accent:#B66E41;    /* golden accent */
-  --muted:#9aa0a4;     /* muted text */
-  --surface:#1b1c1d;   /* surface panels */
-  --radius:12px;
-  --transition:200ms cubic-bezier(.2,.8,.2,1);
+  --bg-dark: #141517;
+  --bg-mid: #2A2B30;
+  --gold: #B66E41;
+  --muted: #bdbdbd;
+  --accent-strong: rgba(182,110,65,0.95);
+  --radius: 12px;
+  --transition: 0.25s cubic-bezier(.2,.9,.2,1);
 }
+  
+* { margin:0; padding:0; box-sizing:border-box; }
+html, body { font-family:"Montserrat", sans-serif; color:#F5F5F3; background:#141517; scroll-behavior:smooth; }
+a { text-decoration:none; color: inherit; transition: color 0.3s ease; }
+a:hover { color:#B66E41; }
 
-/* Reset */
-* { margin:0; padding:0; box-sizing:border-box; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
-html,body { height:100%; }
-body {
-  font-family: "Montserrat", sans-serif;
-  background: linear-gradient(180deg,var(--bg) 0%, #0f1011 100%);
-  color: #E7E7E7;
-  line-height:1.6;
-  -webkit-font-smoothing:antialiased;
-  padding-top:84px; /* keep space for fixed header */
-}
-
-/* Basic links */
-a { text-decoration:none; color:inherit; }
-img { display:block; max-width:100%; }
-
-/* HEADER */
+/* ================= HEADER ================= */
 .site-header {
-  background: linear-gradient(90deg, rgba(0,0,0,0.25), rgba(0,0,0,0.15));
-  color: #E7E7E7;
+  position: fixed;
+  top:0; left:0; right:0;
   display:flex;
   justify-content:space-between;
   align-items:center;
-  padding:18px 28px;
-  position:fixed;
-  top:0; left:0; right:0;
-  z-index:1100;
-  backdrop-filter: blur(6px);
-  border-bottom:1px solid rgba(255,255,255,0.03);
+  padding:16px 28px;
+  background: transparent;
+  border-bottom:1px solid rgba(245,245,243,0.1);
+  transition: background 0.4s ease, box-shadow 0.4s ease;
+  z-index:1200;
 }
-.header-left { display:flex; align-items:center; gap:14px; }
-.brand-logo { height:56px; width:auto; object-fit:contain; filter: none; }
-.brand-title {
-  font-family:"Playfair Display", serif;
-  font-size:22px;
-  font-weight:700;
-  letter-spacing:0.4px;
-  color:#FFFFFF;
-}
-.header-right { display:flex; gap:20px; align-items:center; }
-.header-right a {
-  font-weight:500;
-  color:var(--muted);
-  padding:8px 10px;
-  border-radius:8px;
-  transition: color var(--transition), transform var(--transition);
-}
-.header-right a:hover { color:var(--accent); transform:translateY(-2px); }
-.cart-count {
-  background:var(--accent);
-  color:#111;
-  font-size:12px;
-  font-weight:700;
-  border-radius:999px;
-  padding:4px 7px;
-  margin-left:6px;
-  display:inline-block;
-  box-shadow: 0 6px 18px rgba(182,110,65,0.12);
-}
+.site-header.scrolled { background: rgba(20,21,23,0.95); box-shadow:0 4px 20px rgba(0,0,0,0.6); }
 
-/* Hamburger */
-.hamburger { display:none; background:none; border:none; cursor:pointer; width:36px; height:24px; position:relative; }
-.hamburger span { display:block; width:100%; height:3px; background:#DADADA; border-radius:3px; position:absolute; left:0; transition: transform var(--transition), opacity var(--transition), top var(--transition); }
+.header-left { display:flex; align-items:center; gap:12px; }
+.brand-logo { height:70px; }
+.brand-title { font-family:"Playfair Display", serif; font-size:28px; font-weight:700; color:#B66E41; }
+
+.header-right {
+  display:flex;
+  gap:28px;
+  font-weight:500;
+}
+.header-right a {
+  position: relative;
+  color: #F5F5F3;
+  padding: 6px 0;
+  font-size: 1rem;
+}
+.header-right a::after {
+  content:"";
+  position:absolute;
+  bottom:-4px;
+  left:0;
+  width:0;
+  height:2px;
+  background:#B66E41;
+  transition: width 0.3s ease;
+}
+.header-right a:hover {
+  color: #B66E41;;
+}
+.header-right a:hover::after { width:100%; }
+
+/* ================= HAMBURGER ================= */
+.hamburger {
+  display:none;
+  background:none;
+  border:none;
+  width:30px;
+  height:24px;
+  position:relative;
+  cursor:pointer;
+  z-index:1300;
+}
+.hamburger span {
+  display:block;
+  width:100%;
+  height:3px;
+  background:#B66E41;
+  border-radius:2px;
+  position:absolute;
+  left:0;
+  transition:0.3s;
+}
 .hamburger span:nth-child(1){ top:0; }
 .hamburger span:nth-child(2){ top:10px; }
 .hamburger span:nth-child(3){ top:20px; }
@@ -91,7 +101,7 @@ img { display:block; max-width:100%; }
 main {
   padding:24px;
   max-width:1100px;
-  margin:0 auto 48px;
+  margin:50px auto 48px; 
   display:flex;
   gap:40px;
   flex-wrap:wrap;
@@ -284,9 +294,21 @@ footer {
   main { flex-direction:column; align-items:center; padding-bottom:92px; }
 }
 @media(max-width:600px){
-  .header-right { display:none; flex-direction:column; background:var(--bg-2); position:absolute; top:72px; right:12px; width:220px; padding:16px; border-radius:10px; box-shadow: 0 12px 36px rgba(0,0,0,0.6); }
+  .header-right {
+    display:none;
+    flex-direction:column;
+    background:#141517;
+    position:absolute;
+    top:70px;
+    right:0;
+    width:220px;
+    padding:20px;
+    border-radius:0 0 0 12px;
+  }
   .header-right.open { display:flex; }
   .hamburger { display:block; }
+  .hero { height:50vh; }
+  .hero-text h1 { font-size:28px; }
 
   .mobile-actions {
     display:flex;
@@ -567,6 +589,148 @@ thumbnailContainerEl.addEventListener('mousemove', e=>{ if(!isDown)return; e.pre
 window.addEventListener('storage', ()=>{ updateCartCount(); updateQuantityUI(productId); });
 updateCartCount();
 loadProduct();
+
+// ✅ Fix: Hamburger toggle logic
+    if (hamburger && headerRight) {
+      hamburger.addEventListener('click', () => {
+        hamburger.classList.toggle('open');
+        headerRight.classList.toggle('open');
+        const expanded = hamburger.classList.contains('open');
+        hamburger.setAttribute('aria-expanded', expanded);
+      });
+    }
+    
+//* -------------------- HEADER/HERO BEHAVIOR (Final Unified Version for All Pages) -------------------- */
+(function headerHeroBehavior(){
+  const headerEl = document.querySelector('.site-header') || document.getElementById('siteHeader');
+  const heroEl =
+    document.querySelector('.hero') ||
+    document.getElementById('heroSection') ||
+    document.querySelector('.hero-about');
+  const hamburger = document.getElementById('hamburger');
+  const headerRight = document.querySelector('.header-right');
+
+  if(!headerEl || !heroEl) return;
+
+  let lastY = window.scrollY || 0;
+  let hidden = false;
+  let hoverShown = false;
+  let heroHeight = Math.round(heroEl.getBoundingClientRect().height);
+
+  // Hamburger toggle
+  if(hamburger && headerRight){
+    hamburger.addEventListener('click', ()=>{
+      headerRight.classList.toggle('open');
+      hamburger.classList.toggle('open');
+      setTimeout(handleScroll, 150);
+    });
+  }
+
+  function isMenuOpen(){
+    return hamburger && hamburger.classList.contains('open');
+  }
+
+  function showHeader(){
+    headerEl.style.top = '0';
+    headerEl.style.opacity = '1';
+    headerEl.style.pointerEvents = 'auto';
+    hidden = false;
+  }
+
+  function hideHeader(){
+    headerEl.style.top = '-90px';
+    headerEl.style.opacity = '0';
+    headerEl.style.pointerEvents = 'none';
+    hidden = true;
+  }
+
+  function handleScroll(){
+    const y = window.scrollY || 0;
+    const menuOpen = isMenuOpen();
+    const isMobile = window.innerWidth <= 768;
+
+    // Header background rule
+    if(isMobile){
+      // On mobile → dark after minimal scroll
+      if(y > 10) headerEl.classList.add('scrolled');
+      else headerEl.classList.remove('scrolled');
+    } else {
+      // On desktop → dark only after hero
+      if(y > Math.max(50, heroHeight - 80)) headerEl.classList.add('scrolled');
+      else headerEl.classList.remove('scrolled');
+    }
+
+    // Keep visible when menu is open
+    if(menuOpen){
+      showHeader();
+      return;
+    }
+
+    // Hide/show behavior for desktop
+    if(!isMobile && y > heroHeight - 80){
+      if(y > lastY && !hidden){
+        hideHeader();
+      } else if(y < lastY && hidden){
+        showHeader();
+        headerEl.classList.add('scrolled');
+      }
+    } else {
+      showHeader();
+      if(!isMobile) headerEl.classList.remove('scrolled');
+    }
+
+    lastY = y;
+  }
+
+  // Hover near top (disabled if menu open or on mobile)
+  document.addEventListener('mousemove', (e)=>{
+    const isMobile = window.innerWidth <= 768;
+    if(isMenuOpen() || isMobile) return;
+
+    if(e.clientY < 100){
+      if(hidden){
+        showHeader();
+        headerEl.classList.add('scrolled');
+        hoverShown = true;
+      }
+    } else if(hoverShown){
+      setTimeout(()=>{
+        if(window.scrollY > heroHeight - 80 && !isMenuOpen()){
+          hideHeader();
+        }
+        hoverShown = false;
+      }, 250);
+    }
+  });
+
+  window.addEventListener('resize', ()=>{
+    heroHeight = Math.round(heroEl.getBoundingClientRect().height);
+    handleScroll();
+  }, { passive: true });
+
+  window.addEventListener('scroll', handleScroll, { passive: true });
+  window.addEventListener('load', ()=>{
+    heroHeight = Math.round(heroEl.getBoundingClientRect().height);
+    handleScroll();
+  });
+})();
+
+
+/* === SMOOTH SCROLL === */
+document.querySelectorAll('.header-right a').forEach(link => {
+  link.addEventListener('click', e => {
+    const href = link.getAttribute('href');
+    if (href && href.startsWith('#')) {
+      e.preventDefault();
+      const target = document.getElementById(href.slice(1));
+      if (target) {
+        window.scrollTo({ top: target.offsetTop - 80, behavior: 'smooth' });
+      }
+      headerRight.classList.remove('open');
+      hamburger.classList.remove('open');
+    }
+  });
+});
 </script>
 
 </body>
