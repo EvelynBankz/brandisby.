@@ -142,27 +142,25 @@ footer{text-align:center;padding:22px;background:transparent;color:var(--muted);
   .hero-text h1 { font-size:32px; }
   .small-note{color:var(--muted);padding:8px;text-align:center}
   .quantity-controls input { width:56px; }
+  .site-header {
+    opacity: 1;
+    transition: background 0.3s ease, border-bottom 0.3s ease, opacity 0.3s ease;
+  }
+  .site-header.scrolled {
+    background: var(--bg-dark);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    opacity: 1;
+  }
+  .site-header:not(.scrolled) {
+    opacity: 0.95;
+  }
 
-  
 @media(max-width:480px){
   .hero { height:40vh; margin-top:0; padding-top:80px; }
   .hero-text h1 { font-size:clamp(24px,5vw,32px); line-height:1.2; margin:0; }
   .hero-text p { font-size:clamp(14px,2.5vw,18px); margin:0 auto; }
 }
-
-.site-header {
-  opacity: 1;
-  transition: background 0.3s ease, border-bottom 0.3s ease, opacity 0.3s ease;
-}
-.site-header.scrolled {
-  background: var(--bg-dark);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-  opacity: 1;
-}
-.site-header:not(.scrolled) {
-  opacity: 0.95;
-}
-
+  
 /* Chat-style floating support button */
 #floatingSupportBtn {
   position: fixed;
