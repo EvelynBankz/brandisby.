@@ -419,8 +419,8 @@ form.addEventListener('submit', async (e) => {
       <li><strong>Items:</strong><br>${items}</li>
     `;
     statusBox.style.display = 'block';
-
-  } catch (err) {
+  // } 
+  catch (err) {
     console.error(err);
     showSpinner(false);
     detailsList.innerHTML = '<li><strong>Error:</strong> Unable to fetch order details. Try again later.</li>';
