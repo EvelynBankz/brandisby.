@@ -29,9 +29,10 @@ a:hover { color:#B66E41; }
 }
 .site-header.scrolled { background: rgba(20,21,23,0.95); box-shadow:0 4px 20px rgba(0,0,0,0.6); }
 
-.header-left { display:flex; align-items:center; gap:12px; }
-.brand-logo { height:70px; }
-.brand-title { font-family:"Playfair Display", serif; font-size:28px; font-weight:700; color:#B66E41; }
+.header-left { display:flex; align-items:center; gap:14px; }
+.brand-logo { height:56px; width:auto; object-fit:contain; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.6)); }
+.brand-title { font-family:"Playfair Display", serif; font-size:22px; font-weight:700; color:#B66E41; letter-spacing:0.6px; }
+
 
 .header-right {
   display: flex;
@@ -268,23 +269,19 @@ footer p { font-size:14px; }
   .contact-flex { flex-direction:column; }
 }
 
-@media(max-width:600px){
-  .header-right {
-    display:none;
-    flex-direction:column;
-    background:#141517;
-    position:absolute;
-    top:70px;
-    right:0;
-    width:220px;
-    padding:20px;
-    border-radius:0 0 0 12px;
-  }
+@media(max-width:900px){
+  .header-right { display:none; flex-direction:column; background:rgba(20,21,23,0.98); position:absolute; top:70px; right:0; width:220px; padding:18px; border-radius:8px; z-index:1100; }
   .header-right.open { display:flex; }
   .hamburger { display:block; }
-  .hero { height:50vh; }
-  .hero-text h1 { font-size:28px; }
+  .hero-text h1 { font-size:32px; }
 }
+
+@media(max-width:600px){
+  .hero { height:40vh; margin-top:0; padding-top:80px; }
+  .hero-text h1 { font-size:clamp(24px,5vw,32px); line-height:1.2; margin:0; }
+  .hero-text p { font-size:clamp(14px,2.5vw,18px); margin:0 auto; }
+}
+  
 </style>
 
 <style>
