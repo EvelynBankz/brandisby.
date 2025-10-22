@@ -268,23 +268,44 @@ footer p { font-size:14px; }
   .contact-flex { flex-direction:column; }
 }
 
-@media(max-width:600px){
-  .header-right {
-    display:none;
-    flex-direction:column;
-    background:#141517;
-    position:absolute;
-    top:70px;
-    right:0;
-    width:220px;
-    padding:20px;
-    border-radius:0 0 0 12px;
+@media (max-width: 900px) {
+  .header-right { 
+    position: absolute;
+    top: 80px;
+    right: 0;
+    background: rgba(20,21,23,0.95);
+    flex-direction: column;
+    width: 220px;
+    padding: 24px;
+    display: none;
+    border-radius: 0 0 0 12px;
   }
-  .header-right.open { display:flex; }
-  .hamburger { display:block; }
-  .hero { height:50vh; }
-  .hero-text h1 { font-size:28px; }
+  .header-right.open { display: flex; }
+  .hamburger { display: block; }
+  section { padding: 70px 20px; }
+
+  /* Keep hero smaller */
+  .hero-about {
+    height: 40vh;
+  }
+
+  /* Adjust hero text sizes */
+  .hero-about .hero-text h1 {
+    font-size: 1.5rem;
+    line-height: 1.3;
+  }
+
+  .hero-about .hero-text p {
+    font-size: 0.9rem;
+  }
 }
+
+
+@media(max-width:900px){
+  .brand-logo { height:clamp(60px,15vw,110px); }
+  .brand-title{ font-size: clamp(18px,7vw,26px); }
+}
+</style>
 </style>   
 
 
@@ -404,111 +425,97 @@ footer p { font-size:14px; }
   </footer>
 
 <script type="module">
-/* -------------------- HEADER / HERO BEHAVIOR -------------------- */
+/* -------------------- HEADER/HERO BEHAVIOR (darken immediately; hide after hero) -------------------- */
 (function headerHeroBehavior(){
-  const headerEl = document.querySelector('.site-header');
-  const heroEl =
-    document.querySelector('.hero') ||
-    document.getElementById('heroSection') ||
-    document.querySelector('.hero-about');
+  const headerEl = document.querySelector('.site-header') || document.getElementById('siteHeader');
+  const heroEl = document.querySelector('.hero') || document.getElementById('heroSection') || document.querySelector('.hero-about');
   const hamburger = document.getElementById('hamburger');
   const headerRight = document.querySelector('.header-right');
 
-  if(!headerEl || !heroEl) return;
+  if (!headerEl || !heroEl) return;
 
   let lastY = window.scrollY || 0;
   let hidden = false;
-  let heroHeight = Math.round(heroEl.getBoundingClientRect().height);
   let hoverShown = false;
+  let heroHeight = Math.round(heroEl.getBoundingClientRect().height);
 
-  function isMenuOpen(){
+  function isMenuOpen() {
     return hamburger && hamburger.classList.contains('open');
   }
 
-  function handleScroll(){
+  function showHeader(forceScrolledClass = false) {
+    headerEl.style.top = '0';
+    headerEl.style.opacity = '1';
+    headerEl.style.pointerEvents = 'auto';
+    hidden = false;
+    if (forceScrolledClass) headerEl.classList.add('scrolled');
+  }
+
+  function hideHeader() {
+    headerEl.style.top = '-90px';
+    headerEl.style.opacity = '0';
+    headerEl.style.pointerEvents = 'none';
+    hidden = true;
+  }
+
+  function updateScrolledClassOnScroll(y) {
+    if (y > 0) headerEl.classList.add('scrolled');
+    else headerEl.classList.remove('scrolled');
+  }
+
+  function handleScroll() {
     const y = window.scrollY || 0;
     const menuOpen = isMenuOpen();
+    const threshold = Math.max(50, heroHeight - 80);
 
-    // turn header dark after hero
-    if(y > Math.max(50, heroHeight - 80))
-      headerEl.classList.add('scrolled');
-    else
-      headerEl.classList.remove('scrolled');
+    updateScrolledClassOnScroll(y);
 
-    // if hamburger menu open, force header visible
-    if(menuOpen){
-      headerEl.style.top = '0';
-      headerEl.style.opacity = '1';
-      headerEl.style.pointerEvents = 'auto';
+    if (menuOpen) {
+      showHeader(true);
+      lastY = y;
       return;
     }
 
-    if(y > heroHeight - 80){
-      if(y > lastY && !hidden){
-        headerEl.style.top = '-90px';
-        headerEl.style.opacity = '0';
-        headerEl.style.pointerEvents = 'none';
-        hidden = true;
-      } else if(y < lastY && hidden){
-        headerEl.style.top = '0';
-        headerEl.style.opacity = '1';
-        headerEl.style.pointerEvents = 'auto';
-        headerEl.classList.add('scrolled');
-        hidden = false;
-      }
+    if (y > threshold) {
+      if (y > lastY && !hidden) hideHeader();
+      else if (y < lastY && hidden) showHeader(true);
     } else {
-      headerEl.style.top = '0';
-      headerEl.style.opacity = '1';
-      headerEl.style.pointerEvents = 'auto';
-      headerEl.classList.remove('scrolled');
-      hidden = false;
+      if (y === 0) headerEl.classList.remove('scrolled');
+      showHeader(false);
     }
 
     lastY = y;
   }
 
-  // hover reveal (disabled when menu open)
+  // Hover reveal (only when menu is closed)
   document.addEventListener('mousemove', (e) => {
-    if(isMenuOpen()) return;
-
-    if(e.clientY < 100){
-      if(hidden){
-        headerEl.style.top = '0';
-        headerEl.style.opacity = '1';
-        headerEl.style.pointerEvents = 'auto';
-        headerEl.classList.add('scrolled');
-        hidden = false;
+    if (isMenuOpen()) return;
+    if (e.clientY < 100) {
+      if (hidden) {
+        showHeader(true);
         hoverShown = true;
       }
-    } else if(hoverShown){
-      setTimeout(()=>{
-        if(window.scrollY > heroHeight - 80 && !isMenuOpen()){
-          headerEl.style.top = '-90px';
-          headerEl.style.opacity = '0';
-          headerEl.style.pointerEvents = 'none';
-          hidden = true;
-        }
+    } else if (hoverShown) {
+      setTimeout(() => {
+        if (window.scrollY > Math.max(50, heroHeight - 80) && !isMenuOpen()) hideHeader();
         hoverShown = false;
       }, 220);
     }
-  });
+  }, { passive: true });
 
-  // ✅ Fixed: Hamburger toggle (proper dropdown behavior)
-  if(hamburger && headerRight){
+  /* === FIXED HAMBURGER MENU BEHAVIOR === */
+  if (hamburger && headerRight) {
     hamburger.addEventListener('click', () => {
-      hamburger.classList.toggle('open');
-      headerRight.classList.toggle('open');
-      const expanded = hamburger.classList.contains('open');
-      hamburger.setAttribute('aria-expanded', expanded);
+      const isNowOpen = hamburger.classList.toggle('open');
+      headerRight.classList.toggle('open', isNowOpen);
 
-      // keep header visible when menu open
-      if (expanded) {
-        headerEl.style.top = '0';
-        headerEl.style.opacity = '1';
-        headerEl.style.pointerEvents = 'auto';
+      if (isNowOpen) {
+        // Show header fully and keep dark so dropdown is readable
+        showHeader(true);
+        headerEl.classList.add('scrolled');
+      } else {
+        handleScroll();
       }
-
-      setTimeout(handleScroll, 200);
     });
   }
 
@@ -518,13 +525,13 @@ footer p { font-size:14px; }
   }, { passive: true });
 
   window.addEventListener('scroll', handleScroll, { passive: true });
+
   window.addEventListener('load', () => {
     heroHeight = Math.round(heroEl.getBoundingClientRect().height);
+    updateScrolledClassOnScroll(window.scrollY || 0);
     handleScroll();
   });
 })();
-
-
 
 /* -------------------- CUSTOMIZATION FORM → WHATSAPP -------------------- */
 const customForm = document.getElementById('customForm');
@@ -551,8 +558,6 @@ if (customForm) {
     customForm.reset();
   });
 }
-
-
 
 // Firebase brand placeholder
 const brand = "serac";
