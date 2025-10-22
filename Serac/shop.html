@@ -323,11 +323,6 @@ button:focus, a:focus, input:focus, select:focus { outline: 3px solid rgba(182,1
   <p>© 2025 Sérac</p>
 </footer>
 
-
-
-
-
-  
 <script type="module">
 /* ---------- Firebase ---------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
@@ -418,15 +413,36 @@ function removeFromCart(productId) {
 function updateProductUI(productId) {
   const card = document.getElementById(`product-${productId}`);
   if (!card) return;
-  const addBtn = card.querySelector('.add-cart');
+  const addBtn = card.querySelector('.add-cart, .select-variant');
   const badge = card.querySelector('.quantity-badge');
   const totalQty = getTotalQuantity(productId);
-  if (totalQty > 0) {
-    if (addBtn) addBtn.style.display = 'none';
-    if (badge) badge.textContent = totalQty;
+
+  // Determine if product is variant-type (data attribute set at render)
+  const isVariant = card.dataset.hasVariants === 'true';
+
+  if (isVariant) {
+    // For variant products: always show the select button (so user can go change variants),
+    // but show aggregated quantity if present
+    if (badge) badge.textContent = totalQty > 0 ? totalQty : '';
+    if (addBtn) {
+      // keep select button visible, but change label if quantity exists
+      addBtn.style.display = 'block';
+      addBtn.textContent = totalQty > 0 ? 'View selection' : 'Select your choice';
+    }
+    // hide plus/minus container if any (shouldn't exist for variant type)
+    const plus = card.querySelector('.plus');
+    const minus = card.querySelector('.minus');
+    if (plus) plus.style.display = 'none';
+    if (minus) minus.style.display = 'none';
   } else {
-    if (addBtn) addBtn.style.display = 'block';
-    if (badge) badge.textContent = '';
+    // Non-variant: original behavior (plus/minus/add)
+    if (totalQty > 0) {
+      if (addBtn && addBtn.classList.contains('add-cart')) addBtn.style.display = 'none';
+      if (badge) badge.textContent = totalQty;
+    } else {
+      if (addBtn && addBtn.classList.contains('add-cart')) addBtn.style.display = 'block';
+      if (badge) badge.textContent = '';
+    }
   }
 }
 
@@ -496,9 +512,38 @@ function displayProducts(products) {
     const quantity = getTotalQuantity(p.id);
     const priceForCurrency = getPriceForCurrency(p);
 
+    // determine if this product has variants
+    const hasVariants = Boolean((p.variants && p.variants.length > 0) || p.variantsAvailable === true || p.hasVariants === true);
+
     const div = document.createElement('div');
     div.className = 'product-card';
     div.id = `product-${p.id}`;
+    // expose variant flag for updateProductUI
+    div.dataset.hasVariants = hasVariants ? 'true' : 'false';
+
+    // For variant products: show quantity badge but NO +/- controls, and show "Select your choice" button that navigates to product page.
+    // For non-variant products: show +/- controls and Add to Cart.
+    let quantityControlsHtml = '';
+    if (hasVariants) {
+      quantityControlsHtml = `
+        <div class="quantity-controls" aria-hidden="true">
+          <span class="quantity-badge">${quantity > 0 ? quantity : ''}</span>
+        </div>
+      `;
+    } else {
+      quantityControlsHtml = `
+        <div class="quantity-controls">
+          <button class="minus" aria-label="Decrease">-</button>
+          <span class="quantity-badge">${quantity > 0 ? quantity : ''}</span>
+          <button class="plus" aria-label="Increase">+</button>
+        </div>
+      `;
+    }
+
+    // Button: for variants use .select-variant, for non-variants use .add-cart
+    const actionButtonHtml = hasVariants
+      ? `<button class="select-variant">${quantity > 0 ? 'View selection' : 'Select your choice'}</button>`
+      : `<button class="add-cart" style="display:${quantity > 0 ? 'none' : 'block'};">Add to Cart</button>`;
 
     div.innerHTML = `
       ${p.customizationAvailable ? `<a href="customization.html?productId=${p.id}" class="customize-badge" onclick="event.stopPropagation()"><i class="fa-solid fa-wand-magic-sparkles"></i> Customize</a>` : ''}
@@ -508,17 +553,28 @@ function displayProducts(products) {
       <h3>${escapeHtml(p.name || '')}</h3>
       <div class="description">${escapeHtml(truncateText(p.description || '', 15))}</div>
       <div class="price">${formatPrice(p, currency)}</div>
-      <div class="quantity-controls">
-        <button class="minus" aria-label="Decrease">-</button>
-        <span class="quantity-badge">${quantity > 0 ? quantity : ''}</span>
-        <button class="plus" aria-label="Increase">+</button>
-      </div>
-      <button class="add-cart" style="display:${quantity > 0 ? 'none' : 'block'};">Add to Cart</button>
+      ${quantityControlsHtml}
+      ${actionButtonHtml}
     `;
 
-    div.querySelector('.plus')?.addEventListener('click', e => { e.stopPropagation(); addToCart(p); });
-    div.querySelector('.minus')?.addEventListener('click', e => { e.stopPropagation(); removeFromCart(p.id); });
-    div.querySelector('.add-cart')?.addEventListener('click', e => { e.stopPropagation(); addToCart(p); });
+    // Event wiring depending on variant vs non-variant
+    if (!hasVariants) {
+      div.querySelector('.plus')?.addEventListener('click', e => { e.stopPropagation(); addToCart(p); });
+      div.querySelector('.minus')?.addEventListener('click', e => { e.stopPropagation(); removeFromCart(p.id); });
+      div.querySelector('.add-cart')?.addEventListener('click', e => { e.stopPropagation(); addToCart(p); });
+    } else {
+      // variant product: navigate to product page (keep price & currency query for convenience)
+      const selectBtn = div.querySelector('.select-variant');
+      if (selectBtn) {
+        selectBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          // go to product page so user can choose variants
+          const url = `product.html?productId=${encodeURIComponent(p.id)}&price=${encodeURIComponent(priceForCurrency)}&currency=${encodeURIComponent(currency)}`;
+          window.location.href = url;
+        });
+      }
+      // also clicking on image/title already navigates because the anchor wraps the image
+    }
 
     productGrid?.appendChild(div);
   }
@@ -575,6 +631,7 @@ function displayProducts(products) {
     document.body.appendChild(paginationContainer);
   }
 
+  // After rendering, ensure UI reflects cart totals
   updateCartCount();
   (paginated || []).forEach(p => updateProductUI(p.id));
 }
