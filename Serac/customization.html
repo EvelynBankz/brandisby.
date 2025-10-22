@@ -502,6 +502,7 @@ footer p { font-size:14px; }
       }, 220);
     }
   }, { passive: true });
+  
 
   /* === FIXED HAMBURGER MENU BEHAVIOR === */
   if (hamburger && headerRight) {
@@ -533,6 +534,22 @@ footer p { font-size:14px; }
   });
 })();
 
+/* === SMOOTH SCROLL === */
+document.querySelectorAll('.header-right a').forEach(link => {
+  link.addEventListener('click', e => {
+    const href = link.getAttribute('href');
+    if (href && href.startsWith('#')) {
+      e.preventDefault();
+      const target = document.getElementById(href.slice(1));
+      if (target) {
+        window.scrollTo({ top: target.offsetTop - 80, behavior: 'smooth' });
+      }
+      headerRight.classList.remove('open');
+      hamburger.classList.remove('open');
+    }
+  });
+});
+  
 /* -------------------- CUSTOMIZATION FORM → WHATSAPP -------------------- */
 const customForm = document.getElementById('customForm');
 if (customForm) {
@@ -593,31 +610,6 @@ console.log("Customization form initialized for brand:", brand);
 
   window.addEventListener('load', applyHeroPeek);
   window.addEventListener('resize', applyHeroPeek);
-})();
-</script>
-
-
-<script>
-/* -------------------- SMOOTH SCROLL -------------------- */
-(function() {
-  const hamburger = document.getElementById('hamburger');
-  const headerRight = document.querySelector('.header-right');
-
-  document.querySelectorAll('.header-right a').forEach(link => {
-    link.addEventListener('click', e => {
-      const href = link.getAttribute('href');
-      if (href && href.startsWith('#')) {
-        e.preventDefault();
-        const target = document.getElementById(href.slice(1));
-        if (target) {
-          window.scrollTo({ top: target.offsetTop - 80, behavior: 'smooth' });
-        }
-        headerRight.classList.remove('open');
-        hamburger.classList.remove('open');
-        hamburger.setAttribute('aria-expanded', false);
-      }
-    });
-  });
 })();
 </script>
 
