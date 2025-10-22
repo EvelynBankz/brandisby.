@@ -144,7 +144,7 @@ footer{text-align:center;padding:22px;background:transparent;color:var(--muted);
   .quantity-controls input { width:56px; }
 
   
-@media(max-width:600px){
+@media(max-width:480px){
   .hero { height:40vh; margin-top:0; padding-top:80px; }
   .hero-text h1 { font-size:clamp(24px,5vw,32px); line-height:1.2; margin:0; }
   .hero-text p { font-size:clamp(14px,2.5vw,18px); margin:0 auto; }
@@ -213,6 +213,39 @@ footer{text-align:center;padding:22px;background:transparent;color:var(--muted);
 }
 </style>
 
+<style>
+@media(min-width: 200px) {
+  .hero { position: relative; overflow: visible; }
+
+  .hero-peek {
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    height: 20px;
+    border-radius: 10px / 50%;
+    z-index: 2;
+    box-shadow: 0 -6px 15px rgba(0,0,0,0.15);
+    animation: peekFloat 2s ease-in-out infinite alternate;
+  }
+
+  .hero-peek[data-theme="dark"] {
+    background: linear-gradient(to top, rgba(182,110,65,0.3), transparent);
+  }
+
+  .hero-peek[data-theme="light"] {
+    background: linear-gradient(to top, rgba(255,235,200,0.35), transparent);
+  }
+
+  @keyframes peekFloat {
+    0% { transform: translateX(-50%) translateY(0); opacity: 0.85; }
+    100% { transform: translateX(-50%) translateY(-4px); opacity: 1; }
+  }
+}
+</style>
+
+  
 </head>
 <body>
 
@@ -1370,5 +1403,34 @@ if (hamburger && headerRight) {
 
 </script>
 
+<script>
+(function() {
+  const applyHeroPeek = () => {
+    const heroes = document.querySelectorAll('.hero');
+    heroes.forEach(hero => {
+      if (hero.querySelector('.hero-peek')) return;
+
+      const peek = document.createElement('div');
+      peek.className = 'hero-peek';
+
+      // Determine hero brightness (basic)
+      const bg = window.getComputedStyle(hero).backgroundColor;
+      let darkHero = true;
+      if (bg.startsWith('rgb')) {
+        const rgb = bg.match(/\d+/g).map(Number);
+        const brightness = (rgb[0]*299 + rgb[1]*587 + rgb[2]*114) / 1000;
+        darkHero = brightness < 128; // simple threshold
+      }
+
+      peek.dataset.theme = darkHero ? 'dark' : 'light';
+      hero.appendChild(peek);
+    });
+  };
+
+  window.addEventListener('load', applyHeroPeek);
+  window.addEventListener('resize', applyHeroPeek);
+})();
+</script>
+  
 </body>
 </html>
