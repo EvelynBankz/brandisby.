@@ -586,14 +586,18 @@ function buildVariantRowsForProduct(productId) {
  * Accepts optional triggerElem so we can position near the clicked button.
  */
 
+/**
+ * Show the modal for variant rows.
+ * Always positioned in top-right corner of screen (never drops down or goes off-screen)
+ */
 function showVariantModal(productId, triggerElem = null) {
   injectModalStyles();
-  // Remove existing modal/backdrop
+  // Remove any existing modal/backdrop first
   document.querySelectorAll('.serac-modal-backdrop').forEach(e => e.remove());
 
   const rows = buildVariantRowsForProduct(productId);
 
-  // If no items yet → go straight to product page
+  // If no rows found, go to product page
   if (!rows || rows.length === 0) {
     window.location.href = `product.html?productId=${encodeURIComponent(productId)}`;
     return;
@@ -625,7 +629,7 @@ function showVariantModal(productId, triggerElem = null) {
   header.appendChild(title);
   header.appendChild(closeBtn);
 
-  /* ---------- Body (variant rows) ---------- */
+  /* ---------- Body ---------- */
   const body = document.createElement("div");
   body.className = "serac-modal-body";
 
@@ -663,7 +667,6 @@ function showVariantModal(productId, triggerElem = null) {
   const footer = document.createElement("div");
   footer.className = "serac-modal-footer";
 
-  // Single "Edit Selections" button
   const editAllBtn = document.createElement("button");
   editAllBtn.className = "serac-btn";
   editAllBtn.textContent = "Edit Selections";
@@ -688,19 +691,11 @@ function showVariantModal(productId, triggerElem = null) {
   backdrop.appendChild(modal);
   document.body.appendChild(backdrop);
 
-  /* ---------- Positioning ---------- */
-  if (triggerElem && typeof triggerElem.getBoundingClientRect === 'function') {
-    const rect = triggerElem.getBoundingClientRect();
-    const left = Math.min(window.innerWidth - 340, Math.max(12, rect.left));
-    const top = Math.min(window.innerHeight - 60, rect.bottom + 6);
-    modal.style.position = 'absolute';
-    modal.style.left = `${left}px`;
-    modal.style.top = `${top}px`;
-  } else {
-    modal.style.position = 'fixed';
-    modal.style.right = '12px';
-    modal.style.top = '12px';
-  }
+  /* ---------- Fixed Top-Right Position ---------- */
+  modal.style.position = 'fixed';
+  modal.style.top = '20px';
+  modal.style.right = '20px';
+  modal.style.zIndex = '10000';
 
   /* ---------- Closing logic ---------- */
   closeBtn.addEventListener("click", () => backdrop.remove());
@@ -708,6 +703,7 @@ function showVariantModal(productId, triggerElem = null) {
     if (e.target === backdrop) backdrop.remove();
   });
 }
+
 
 
 /* ---------- Load & render products (Serac collection) ---------- */
