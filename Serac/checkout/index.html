@@ -128,40 +128,6 @@ footer{text-align:center;padding:22px;background:transparent;color:var(--muted);
 .details-container.show{display:flex}
 .details-container div{display:flex;justify-content:space-between;font-size:0.95rem;color:#bbb;padding:6px 0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 
-
-@media(max-width:980px){
-  .header-right { display:none; flex-direction:column; background:rgba(20,21,23,0.98); position:absolute; top:70px; right:0; width:220px; padding:18px; border-radius:8px; z-index:1100; }
-  .header-right.open { display:flex; }
-  .hamburger { display:block; }
-  .mobile-cart { display:flex; align-items:center; margin-right:10px; }
-  .mobile-cart a { color:var(--gold); font-size:20px; position:relative; }
-  .mobile-cart .cart-count { position:absolute; top:-8px; right:-8px; }
-  .cart-item-header img { width:90px; height:90px; }
-  .hero{height:60vh}
-  .hero-text h1 { font-size:32px; }
-  .small-note{color:var(--muted);padding:8px;text-align:center}
-  .quantity-controls input { width:56px; }
-  .site-header {
-    opacity: 1;
-    transition: background 0.3s ease, border-bottom 0.3s ease, opacity 0.3s ease;
-  }
-  .site-header.scrolled {
-    background: var(--bg-dark);
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-    opacity: 1;
-  }
-  .site-header:not(.scrolled) {
-    opacity: 0.95;
-  }
-
-@media(max-width:680px){.order-item img{width:48px;height:48px}.brand-logo{height:48px}.hero{height:40vh}.checkout-inner{grid-template-columns:1fr;gap:20px;padding:12px}.order-item .meta{font-size:0.92rem}.order-item .price{min-width:60px;font-size:0.95rem}textarea{min-height:100px}}
-  
-@media(max-width:480px){
-  .hero { height:40vh; margin-top:0; padding-top:80px; }
-  .hero-text h1 { font-size:clamp(24px,5vw,32px); line-height:1.2; margin:0; }
-  .hero-text p { font-size:clamp(14px,2.5vw,18px); margin:0 auto; }
-}
-  
 button:focus, a:focus, input:focus, select:focus { outline: 3px solid rgba(182,110,65,0.12); outline-offset:2px; }
 
  /* Chat-style floating support button */
@@ -212,6 +178,41 @@ button:focus, a:focus, input:focus, select:focus { outline: 3px solid rgba(182,1
       opacity: 1;
       transform: translateX(-50%) translateY(-6px);
     }
+
+  
+@media(max-width:980px){
+  .header-right { display:none; flex-direction:column; background:rgba(20,21,23,0.98); position:absolute; top:70px; right:0; width:220px; padding:18px; border-radius:8px; z-index:1100; }
+  .header-right.open { display:flex; }
+  .hamburger { display:block; }
+  .mobile-cart { display:flex; align-items:center; margin-right:10px; }
+  .mobile-cart a { color:var(--gold); font-size:20px; position:relative; }
+  .mobile-cart .cart-count { position:absolute; top:-8px; right:-8px; }
+  .cart-item-header img { width:90px; height:90px; }
+  .hero{height:60vh}
+  .hero-text h1 { font-size:32px; }
+  .small-note{color:var(--muted);padding:8px;text-align:center}
+  .quantity-controls input { width:56px; }
+  .site-header {
+    opacity: 1;
+    transition: background 0.3s ease, border-bottom 0.3s ease, opacity 0.3s ease;
+  }
+  .site-header.scrolled {
+    background: var(--bg-dark);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    opacity: 1;
+  }
+  .site-header:not(.scrolled) {
+    opacity: 0.95;
+  }
+
+@media(max-width:680px){.order-item img{width:48px;height:48px}.brand-logo{height:48px}.hero{height:40vh}.checkout-inner{grid-template-columns:1fr;gap:20px;padding:12px}.order-item .meta{font-size:0.92rem}.order-item .price{min-width:60px;font-size:0.95rem}textarea{min-height:100px}}
+  
+@media(max-width:480px){
+  .hero { height:40vh; margin-top:0; padding-top:80px; }
+  .hero-text h1 { font-size:clamp(24px,5vw,32px); line-height:1.2; margin:0; }
+  .hero-text p { font-size:clamp(14px,2.5vw,18px); margin:0 auto; }
+}
+
 </style>
 
 <style>
@@ -325,11 +326,11 @@ button:focus, a:focus, input:focus, select:focus { outline: 3px solid rgba(182,1
   </div>
 </section> 
 
-   <!-- Floating Chat-Style Support Button -->
-  <button id="floatingSupportBtn" aria-label="Contact Support">
-    <i class="fas fa-headset"></i>
-    <span class="support-tooltip">Support</span>
-  </button>
+ <!-- Floating Chat-Style Support Button -->
+<button id="floatingSupportBtn" aria-label="Contact Support">
+  <i class="fas fa-headset"></i>
+  <span class="support-tooltip">Support</span>
+</button>
 
 <footer><p>© 2025 Sérac</p></footer>
 
