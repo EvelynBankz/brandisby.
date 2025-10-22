@@ -406,7 +406,7 @@ function escapeHtml(str){ if(!str && str !== 0) return ""; return String(str).re
 function mergeCartItems(cartArray){
   const merged = [];
   (cartArray || []).forEach(item=>{
-    const idx = merged.findIndex(i => i.id === item.id && (i.color||'')=== (item.color||'') && (i.size||'')=== (item.size||''));
+    const idx = merged.findIndex(i => i.id === item.id && (i.color||'')=== (item.color||'') && (i.size||'') === (item.size||''));
     if(idx===-1) merged.push({...item});
     else merged[idx].quantity = (merged[idx].quantity||0) + (item.quantity||0);
   });
@@ -463,7 +463,10 @@ function updateCartCount(){
 
 /* ---------- Render cart ---------- */
 async function renderCart(){
-  cartGrid.innerHTML = '';
+  // clear grid
+  if(productCache === undefined) productCache = {};
+  cartGrid && (cartGrid.innerHTML = '');
+
   if(!cart.length){
     cartEmpty && (cartEmpty.style.display='block');
     cartSubtotalElem && (cartSubtotalElem.textContent='');
@@ -474,7 +477,10 @@ async function renderCart(){
   cartEmpty && (cartEmpty.style.display='none');
   checkoutBtn && (checkoutBtn.style.display='inline-block');
 
+  // Ensure currency select shows the currently selected currency from localStorage
   const currency = currencySelect?.value || localStorage.getItem(CURRENCY_KEY) || 'NGN';
+  if(currencySelect && currencySelect.value !== currency) currencySelect.value = currency;
+
   let subtotal = 0;
   const productIds = [...new Set(cart.map(i=>i.id))];
 
@@ -526,7 +532,7 @@ async function renderCart(){
         </div>
       </div>
     `;
-    cartGrid.appendChild(itemDiv);
+    cartGrid && cartGrid.appendChild(itemDiv);
   }
 
   cartSubtotalElem && (cartSubtotalElem.textContent = 'Subtotal: ' + formatPrice(subtotal, currency));
@@ -620,7 +626,7 @@ function persistAndUpdate(productId){
 }
 
 /* ---------- Event delegation for cart interactions ---------- */
-cartGrid.addEventListener('click', e=>{
+cartGrid && cartGrid.addEventListener('click', e=>{
   const target = e.target;
   const pid = target.dataset.id;
 
@@ -677,7 +683,7 @@ cartGrid.addEventListener('click', e=>{
 });
 
 /* numeric inputs handling */
-cartGrid.addEventListener('input', e=>{
+cartGrid && cartGrid.addEventListener('input', e=>{
   const target = e.target;
   if(target.tagName !== 'INPUT') return;
   const id = target.dataset.id; const color = target.dataset.color||''; const size = target.dataset.size||'';
@@ -705,12 +711,14 @@ cartGrid.addEventListener('input', e=>{
 /* currency change handling */
 if(currencySelect) currencySelect.addEventListener('change', async ()=>{
   currencyWrapper && currencyWrapper.classList.add('loading');
-  localStorage.setItem(CURRENCY_KEY, currencySelect.value);
+  // write selected currency to localStorage so other pages/tabs will sync
+  try { localStorage.setItem(CURRENCY_KEY, currencySelect.value); } catch(e){ console.warn("Failed to save currency", e); }
+  // small UX delay
   await new Promise(r=>setTimeout(r,260));
   currencyWrapper && currencyWrapper.classList.remove('loading');
+  // re-render cart with new currency
   await renderCart();
 });
-
 
 /* mobile cart visibility */
 function handleMobileCart(){ 
@@ -721,13 +729,40 @@ function handleMobileCart(){
 window.addEventListener('resize', handleMobileCart);
 handleMobileCart();
 
-
 /* storage sync (other tabs) */
-window.addEventListener('storage', ()=>{
-  cart = loadCartFromStorage();
-  cart = mergeCartItems(cart);
-  updateCartCount();
-  renderCart();
+/* Replaced the generic handler with a key-aware handler to sync currency and cart properly */
+window.addEventListener('storage', (ev) => {
+  try {
+    // If cart storage changed, reload cart state and re-render
+    if (ev.key === STORAGE_KEY) {
+      cart = loadCartFromStorage();
+      cart = mergeCartItems(cart);
+      updateCartCount();
+      renderCart();
+      return;
+    }
+
+    // If currency changed in another tab/page, update the dropdown and re-render
+    if (ev.key === CURRENCY_KEY) {
+      const newCurrency = ev.newValue || localStorage.getItem(CURRENCY_KEY) || 'NGN';
+      if (currencySelect && currencySelect.value !== newCurrency) {
+        try { currencySelect.value = newCurrency; } catch(e) {}
+      }
+      renderCart();
+      return;
+    }
+
+    // Fallback: if other keys changed, just refresh cart state conservatively
+    // (this preserves previous behavior in case some other code updates localStorage)
+    if (!ev.key) {
+      cart = loadCartFromStorage();
+      cart = mergeCartItems(cart);
+      updateCartCount();
+      renderCart();
+    }
+  } catch (err) {
+    console.warn("Storage event handling error", err);
+  }
 });
 
 /* -------------------- HEADER/HERO BEHAVIOR (darken immediately; hide after hero) -------------------- */
@@ -857,6 +892,12 @@ document.querySelectorAll('.header-right a').forEach(link => {
 
 /* ---------- Init ---------- */
 (async function init(){
+  // Ensure currency select reflects saved preference at start
+  try {
+    const savedCurrency = localStorage.getItem(CURRENCY_KEY);
+    if (currencySelect && savedCurrency) currencySelect.value = savedCurrency;
+  } catch(e){ /* ignore */ }
+
   // load and merge safely, update count early (prevents transient zero flash)
   cart = mergeCartItems(loadCartFromStorage());
   updateCartCount();
@@ -877,7 +918,7 @@ document.querySelectorAll('.header-right a').forEach(link => {
       // Determine hero brightness (basic)
       const bg = window.getComputedStyle(hero).backgroundColor;
       let darkHero = true;
-      if (bg.startsWith('rgb')) {
+      if (bg && bg.startsWith && bg.startsWith('rgb')) {
         const rgb = bg.match(/\d+/g).map(Number);
         const brightness = (rgb[0]*299 + rgb[1]*587 + rgb[2]*114) / 1000;
         darkHero = brightness < 128; // simple threshold
@@ -892,6 +933,7 @@ document.querySelectorAll('.header-right a').forEach(link => {
   window.addEventListener('resize', applyHeroPeek);
 })();
 </script>
+
 
 </body>
 </html>
