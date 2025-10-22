@@ -153,7 +153,42 @@ a:hover { color:#B66E41; }
     opacity: 1;
     transform: translateX(-50%) translateY(-6px);
   }
+
+/* ================= FOOTER ================= */
+footer {
+  text-align:center;
+  padding:28px;
+  background:#141517;
+  color:#aaa;
+  margin-top:60px;
+}
+footer p { font-size:14px; }
+
+/* ================= RESPONSIVE ================= */
+@media(max-width:900px){
+  section.story .container { grid-template-columns:1fr; gap:30px; }
+  .contact-flex { flex-direction:column; }
+}
+
+@media(max-width:600px){
+  .header-right {
+    display:none;
+    flex-direction:column;
+    background:#141517;
+    position:absolute;
+    top:70px;
+    right:0;
+    width:220px;
+    padding:20px;
+    border-radius:0 0 0 12px;
+  }
+  .header-right.open { display:flex; }
+  .hamburger { display:block; }
+  .hero { height:50vh; }
+  .hero-text h1 { font-size:28px; }
+}
 </style>
+    
 </head>
 
 <body>
