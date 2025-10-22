@@ -43,25 +43,25 @@
 
   /* ================= HEADER ================= */
   .site-header {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 28px;
     background: transparent;
-    transition: background 0.4s ease, box-shadow 0.4s ease;
-    z-index: 2000; /* ensure it's above everything */
+    transition: background 0.3s ease, border-bottom 0.3s ease;
+    color:#f5f5f5;
+    display:flex; justify-content:space-between; align-items:center;
+    padding:16px 28px;
+    position:fixed; top:0; left:0; right:0;
+    z-index:1000;
+    border-bottom:1px solid rgba(255,255,255,0.04);
   }
 
-  .site-header.scrolled {
-    background: rgba(20,21,23,0.95);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.6);
-  }
+  .site-header.scrolled { background:var(--bg-dark); border-bottom:1px solid rgba(255,255,255,0.06); }
 
-  .header-left { display: flex; align-items: center; gap: 12px; }
-  .brand-logo { height: 70px; }
-  .brand-title { font-family: "Playfair Display", serif; font-size: 28px; font-weight: 700; color: var(--gold); }
+  .site-header.hide {
+    transform: translateY(-100%);
+  }  
+
+  .header-left { display: flex; align-items: center; gap: 14px; }
+  .brand-logo { height: 56px; }
+  .brand-title { font-family: "Playfair Display", serif; font-size: 22px; font-weight: 700; color: var(--gold); }
 
   .header-right {
     display: flex;
@@ -423,6 +423,26 @@
   window.addEventListener('scroll', handleScroll);
   window.addEventListener('resize', () => heroHeight = heroEl.offsetHeight);
   window.addEventListener('load', handleScroll);
+
+    
+  const header = document.querySelector('.site-header');
+  
+  let lastScrollY = window.scrollY;
+  
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > lastScrollY && window.scrollY > 100) {
+      header.classList.add('hide');
+    } else {
+      header.classList.remove('hide');
+    }
+    lastScrollY = window.scrollY;
+  });
+  
+  // Make sure it reappears on hover
+  header.addEventListener('mouseenter', () => {
+    header.classList.remove('hide');
+  });
+   
 
   /* -------------------- FORM -------------------- */
   const customForm = document.getElementById('customForm');
