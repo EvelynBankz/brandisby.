@@ -283,22 +283,9 @@ footer {
   main { flex-direction:column; align-items:center; padding-bottom:92px; }
 }
 @media (max-width: 900px) {
-  .header-right { 
-    display: none;
-    position: absolute;
-    top: 80px;
-    right: 0;
-    background: rgba(20,21,23,0.95);
-    flex-direction: column;
-    width: 220px;
-    padding: 24px;
-    border-radius: 0 0 0 12px;
-    z-index: 1300; /* make sure it’s above everything else */
-  }
-
-  .header-right.open {
-    display: flex; /* ✅ This is what shows the menu */
-  }
+  .header-right { display:none; flex-direction:column; background:rgba(20,21,23,0.98); position:absolute; top:70px; right:0; width:220px; padding:18px; border-radius:8px; z-index:1100; }
+  .header-right.open { display:flex; }
+  .hamburger { display:block; }
 
   .header-right a {
     padding: 12px 0;
@@ -308,10 +295,6 @@ footer {
 
   .header-right a:hover {
     color: #B66E41;
-  }
-
-  .hamburger { 
-    display: block;
   }
 
   .brand-logo { height: clamp(60px, 15vw, 110px); }
