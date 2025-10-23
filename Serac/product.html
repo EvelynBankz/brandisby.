@@ -258,6 +258,124 @@
   function setCart(cart){ localStorage.setItem(STORAGE_KEY, JSON.stringify(cart)); updateCartCount(); }
   function updateCartCount(){ if(cartCountElem) cartCountElem.textContent = getCart().reduce((sum,i)=>sum + Number(i.quantity||0), 0); }
 
+  // ---------- CURRENCY / PRICE RESOLUTION (SYNC) ----------
+  // Check several sources and pick the most appropriate price & currency to display.
+  // Order of precedence:
+  // 1) URL params (price & currency)
+  // 2) localStorage.selectedProduct (if shop stored product before navigation)
+  // 3) first matching cart item in localStorage seracCart
+  // 4) product document's own data.price / data.currency
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlPriceParam = urlParams.get('price');
+  const urlCurrencyParam = urlParams.get('currency');
+
+  function parseSavedProductFromLocalStorage() {
+    try {
+      const raw = localStorage.getItem('selectedProduct') || localStorage.getItem('selectedVariant') || null;
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed) return null;
+      // expect shape possibly: { id, price, currency, ... } or a variant object
+      return parsed;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function findCartPriceCurrencyForProduct(pid){
+    try {
+      const cart = getCart();
+      for (const item of cart) {
+        // match by id or parent-like fields (robust)
+        if (!item) continue;
+        if (String(item.id) === String(pid) || String(item.parentId) === String(pid) || String(item.productId) === String(pid)) {
+          if (item.currency && (typeof item.price !== 'undefined')) {
+            return { price: item.price, currency: item.currency };
+          }
+          // fallback: item may have 'price' field only
+          if (typeof item.price !== 'undefined' && item.currency) {
+            return { price: item.price, currency: item.currency };
+          }
+        }
+      }
+    } catch(e) {}
+    return null;
+  }
+
+  // Given product doc data and productId, determine displayCurrency & displayPrice
+  function resolveDisplayPriceCurrency(productId, productData){
+    // 1) URL params (these were already part of your original implementation)
+    if (urlPriceParam !== null && urlCurrencyParam !== null) {
+      // urlPriceParam may be formatted (like "$11.00") — try to parse a numeric value out
+      const parsed = parseFloat(String(urlPriceParam).replace(/[^0-9\.\-]+/g,''));
+      if (!isNaN(parsed)) {
+        return { price: parsed, currency: urlCurrencyParam };
+      } else {
+        // If url param is not numeric but e.g. formatted string, keep as fallback string
+        return { price: urlPriceParam, currency: urlCurrencyParam };
+      }
+    }
+
+    // 2) localStorage selectedProduct / selectedVariant (if shop has set it)
+    const saved = parseSavedProductFromLocalStorage();
+    if (saved && (String(saved.id) === String(productId) || String(saved.productId) === String(productId) || !saved.id)) {
+      if (saved.currency && typeof saved.price !== 'undefined') {
+        return { price: saved.price, currency: saved.currency };
+      }
+      // sometimes saved may carry priceLabel or formattedPrice
+      if (saved.formattedPrice && saved.currency) {
+        return { price: saved.formattedPrice, currency: saved.currency };
+      }
+    }
+
+    // 3) check cart: if user clicked "Edit selection" there will be cart rows for that product that include currency & price
+    const cartMatch = findCartPriceCurrencyForProduct(productId);
+    if (cartMatch) return cartMatch;
+
+    // 4) fall back to product document's own fields
+    // productData may have per-currency fields (priceNGN, priceUSD...) or default 'price' + 'currency'
+    if (productData) {
+      // prefer explicit currency-specific field if available
+      const docCurrency = productData.currency || productData.defaultCurrency || null;
+      // try to find a per-currency price field if docCurrency exists
+      if (docCurrency) {
+        const key = 'price' + String(docCurrency).toUpperCase();
+        if (typeof productData[key] !== 'undefined') {
+          return { price: productData[key], currency: docCurrency };
+        }
+      }
+      // fallback to generic price & currency
+      if (typeof productData.price !== 'undefined' && productData.currency) {
+        return { price: productData.price, currency: productData.currency };
+      }
+      // as last resort, attempt any of the common fields
+      if (typeof productData.priceNGN !== 'undefined') return { price: productData.priceNGN, currency: 'NGN' };
+      if (typeof productData.priceUSD !== 'undefined') return { price: productData.priceUSD, currency: 'USD' };
+      if (typeof productData.priceEUR !== 'undefined') return { price: productData.priceEUR, currency: 'EUR' };
+      if (typeof productData.priceGBP !== 'undefined') return { price: productData.priceGBP, currency: 'GBP' };
+    }
+
+    // If we reach here, return defaults
+    return { price: 0, currency: 'NGN' };
+  }
+
+  function formatPriceForDisplay(amount, currency) {
+    // amount might be a number or formatted string — prefer numeric formatting if numeric
+    const localeMap = { NGN:'en-NG', USD:'en-US', EUR:'de-DE', GBP:'en-GB' };
+    const minFrac = currency === 'NGN' ? 0 : 2;
+    const n = Number(amount);
+    if (!isNaN(n)) {
+      try {
+        return new Intl.NumberFormat(localeMap[currency]||'en-US', { style:'currency', currency, minimumFractionDigits:minFrac }).format(n);
+      } catch(e){
+        return `${currency} ${n.toFixed(minFrac)}`;
+      }
+    } else {
+      // amount is not a numeric value — return as-is prefixed by currency code
+      return `${currency} ${String(amount)}`;
+    }
+  }
+
   // ---------- PRODUCT TOTAL UI ----------
   let totalCountElem = document.getElementById('totalVariantCount');
   function ensureProductTotalElem(){
@@ -555,15 +673,12 @@
   window.refreshClearButtonVisibility = refreshClearButtonVisibility;
 
   // ---------- LOAD PRODUCT ----------
-  const urlParams = new URLSearchParams(window.location.search);
   const productId = urlParams.get('productId');
-  const urlPrice = parseFloat(urlParams.get('price'));
-  const urlCurrency = urlParams.get('currency');
-
   let currentProductData = null;
   let sizesList = [];
   let colorsList = [];
   let comboMap = {};
+  let resolvedDisplay = { price: null, currency: null }; // will be set after product loads
 
   async function loadProduct(){
     if(!productId){
@@ -582,7 +697,10 @@
       const data = docSnap.data();
       currentProductData = data || {};
 
-      // images
+      // Resolve display price & currency (after we have product doc)
+      resolvedDisplay = resolveDisplayPriceCurrency(productId, currentProductData);
+
+      // --- IMAGES ---
       const images = Array.isArray(data.images) && data.images.length ? data.images.filter(Boolean) : (data.imageUrl ? [data.imageUrl] : []);
       if(productImg) productImg.src = images[0] || '';
       if(thumbnailContainer) thumbnailContainer.innerHTML = '';
@@ -599,27 +717,31 @@
         thumbnailContainer.appendChild(thumb);
       });
 
+      // --- NAME & DESCRIPTION ---
       if(productName) productName.textContent = data.name || '';
       if(productDescription) productDescription.textContent = data.description || '';
 
-      const displayPrice = !isNaN(urlPrice) ? urlPrice : (data.price || 0);
-      const displayCurrency = urlCurrency || data.currency || 'NGN';
-      const localeMap = { NGN:'en-NG', USD:'en-US', EUR:'de-DE', GBP:'en-GB' };
-      const minFrac = displayCurrency === 'NGN' ? 0 : 2;
+      // --- PRICE RENDER (use resolvedDisplay) ---
+      const displayPrice = resolvedDisplay.price !== null && resolvedDisplay.price !== undefined ? resolvedDisplay.price : (data.price || 0);
+      const displayCurrency = resolvedDisplay.currency || data.currency || 'NGN';
       try{
-        if(productPrice) productPrice.textContent = new Intl.NumberFormat(localeMap[displayCurrency]||'en-US', { style:'currency', currency:displayCurrency, minimumFractionDigits:minFrac }).format(displayPrice);
+        if(productPrice) productPrice.textContent = formatPriceForDisplay(displayPrice, displayCurrency);
       } catch(e){
         if(productPrice) productPrice.textContent = `${displayCurrency} ${displayPrice}`;
       }
+      // keep currentProductData.price/currency in sync for other uses
       currentProductData.price = displayPrice;
       currentProductData.currency = displayCurrency;
 
+      // --- CUSTOMIZATION ---
       if(data.customizationAvailable){
         if(customizeBtn){ customizeBtn.style.display = 'block'; customizeBtn.href = `customization.html?productId=${productId}`; }
       } else { if(customizeBtn) customizeBtn.style.display = 'none'; }
 
-      // parse variants (store lists; use normalized keys when operating)
-      sizesList = []; colorsList = []; comboMap = {};
+      // --- VARIANTS PARSE ---
+      sizesList = [];
+      colorsList = [];
+      comboMap = {};
       if(Array.isArray(data.variants) && data.variants.length){
         data.variants.forEach(v => {
           const s = (v.size || '').toString();
@@ -635,7 +757,7 @@
         if(Array.isArray(data.colors)) colorsList = data.colors.slice();
       }
 
-      // render size buttons (set dataset.value to avoid badge text bleed)
+      // --- RENDER SIZE BUTTONS ---
       if(sizeOptions) sizeOptions.innerHTML = '';
       if(sizesList.length){
         if(sizeGroup) sizeGroup.style.display = '';
@@ -655,7 +777,7 @@
         });
       } else { if(sizeGroup) sizeGroup.style.display = 'none'; }
 
-      // render color buttons (set dataset.value)
+      // --- RENDER COLOR BUTTONS ---
       if(colorOptions) colorOptions.innerHTML = '';
       if(colorsList.length){
         if(colorGroup) colorGroup.style.display = '';
@@ -675,7 +797,7 @@
         });
       } else { if(colorGroup) colorGroup.style.display = 'none'; }
 
-      // details
+      // --- DETAILS ---
       if(data.details){
         const html = renderDetailsToHtml(data.details);
         if(html){ detailsSection.innerHTML = html; detailsSection.style.display = ''; }
@@ -786,6 +908,7 @@
     });
   });
 </script>
+
 
 
 
