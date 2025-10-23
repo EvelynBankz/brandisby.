@@ -353,6 +353,64 @@ function computeSubtotal(currency) {
 }
 
 /* ---------- Cart Count (Instant) ---------- */
+// /* update cart count display */
+// function updateCartCount(){
+//   const c = getCart();
+//   const total = (c || []).reduce((s,i) => s + (i.quantity||0), 0);
+//   if (cartCountElem) cartCountElem.textContent = total;
+//   if (cartCountMobileElem) cartCountMobileElem.textContent = total;
+//   cart = mergeCartItems(c);
+// }
+
+function getCart(){ try { return JSON.parse(localStorage.getItem('cart')) || []; } catch(e) { return []; } }
+function setCart(cartArray){
+  cart = mergeCartItems(cartArray || []);
+  try { localStorage.setItem('cart', JSON.stringify(cart)); } catch(e){ console.warn('Could not set cart', e); }
+  updateCartCount();
+}
+function mergeCartItems(cartArray){
+  const merged = [];
+  (cartArray || []).forEach(item => {
+    const idx = merged.findIndex(i => i.id === item.id && (i.color||'') === (item.color||'') && (i.size||'') === (item.size||''));
+    if (idx === -1) merged.push({ ...item });
+    else merged[idx].quantity = (merged[idx].quantity || 0) + (item.quantity || 0);
+  });
+  return merged;
+}
+
+/* robust total quantity for product (accounts for variants) */
+function getTotalQuantity(productId){
+  const c = getCart();
+  let total = 0;
+  (c || []).forEach(i => {
+    if (String(i.id) === String(productId)) { total += (i.quantity||0); return; }
+    if (i.parentId && String(i.parentId) === String(productId)) { total += (i.quantity||0); return; }
+    if (i.productId && String(i.productId) === String(productId)) { total += (i.quantity||0); return; }
+    if (typeof i.id === 'string' && String(i.id).startsWith(String(productId) + '-')) { total += (i.quantity||0); return; }
+  });
+  return total;
+}
+
+/* add/remove */
+function addToCart(product){
+  const currentCart = getCart();
+  const idx = currentCart.findIndex(i => i.id === product.id && (i.color||'') === (product.color||'') && (i.size||'') === (product.size||''));
+  if (idx > -1) currentCart[idx].quantity += 1;
+  else currentCart.push({ ...product, quantity: 1 });
+  setCart(currentCart);
+  updateProductUI(product.id);
+}
+function removeFromCart(productId){
+  const currentCart = getCart();
+  const idx = currentCart.findIndex(i => i.id === productId);
+  if (idx > -1) {
+    currentCart[idx].quantity -= 1;
+    if (currentCart[idx].quantity <= 0) currentCart.splice(idx, 1);
+  }
+  setCart(currentCart);
+  updateProductUI(productId);
+}
+
 /* update cart count display */
 function updateCartCount(){
   const c = getCart();
@@ -361,7 +419,7 @@ function updateCartCount(){
   if (cartCountMobileElem) cartCountMobileElem.textContent = total;
   cart = mergeCartItems(c);
 }
-
+  
   
 
 /* ---------- Render Cart ---------- */
