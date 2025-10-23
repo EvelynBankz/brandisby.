@@ -62,8 +62,8 @@ a { text-decoration:none; color:inherit; }
 }
 .cart-count { background:#FFD6BA; color:#112e1f; font-size:12px; font-weight:600; border-radius:50%; padding:2px 6px; margin-left:4px; }
 
-.hamburger { display:none; background:none; border:none; cursor:pointer; width:30px; height:24px; position:relative; }
-.hamburger span { display:block; width:100%; height:3px; background:#F5E6CC; border-radius:2px; position:absolute; left:0; transition:0.3s; }
+.hamburger { all: unset; display:none; background:none; border:none; cursor:pointer; width:30px !important; height:24px !important; position:relative; }
+.hamburger span { display:block; width:100%; height:3px !important; background:#F5E6CC; border-radius:2px; position:absolute; left:0; transition:0.3s; }
 .hamburger span:nth-child(1){ top:0; }
 .hamburger span:nth-child(2){ top:10px; }
 .hamburger span:nth-child(3){ top:20px; }
@@ -739,39 +739,107 @@ function displayProducts(products){
       });
     }
 
-    productGrid.appendChild(card);
-  });
+  
 
-  // pagination UI (remove old then add new)
-  const old = document.querySelector('.pagination-container');
-  if (old) old.remove();
-  const paginationContainer = document.createElement('div');
-  paginationContainer.className = 'pagination-container';
-  const pagination = document.createElement('div'); pagination.className = 'pagination';
 
-  const prevBtn = document.createElement('button'); prevBtn.textContent = 'Prev'; prevBtn.disabled = currentPage === 1;
-  prevBtn.addEventListener('click', () => { if (currentPage > 1) { currentPage--; displayProducts(products); window.scrollTo({ top:0, behavior:'smooth' }); } });
-  pagination.appendChild(prevBtn);
+updateCartCount();
+(paginated || []).forEach(p => updateProductUI(p.id));
 
-  for (let i=1; i<=Math.max(totalPages,1); i++){
-    const btn = document.createElement('button'); btn.textContent = i; btn.className = i===currentPage ? 'active' : '';
-    btn.addEventListener('click', () => { currentPage = i; displayProducts(products); window.scrollTo({ top:0, behavior:'smooth' }); });
-    pagination.appendChild(btn);
+
+ // ===== PAGINATION (Fleur de Vie centered style) =====
+const oldPagination = document.querySelector('.pagination-container');
+if (oldPagination) oldPagination.remove();
+
+const paginationContainer = document.createElement('div');
+paginationContainer.className = 'pagination-container';
+paginationContainer.style.display = 'flex';
+paginationContainer.style.justifyContent = 'center';
+paginationContainer.style.margin = '24px 0';
+
+const pagination = document.createElement('div');
+pagination.className = 'pagination';
+pagination.style.display = 'flex';
+pagination.style.gap = '8px';
+
+const deepGreen = '#112e1f';
+
+// Prev button
+const prevBtn = document.createElement('button');
+prevBtn.textContent = 'Prev';
+prevBtn.disabled = currentPage === 1;
+prevBtn.style.cssText = `
+  border: 1px solid ${deepGreen};
+  color: ${deepGreen};
+  background: transparent;
+  padding: 6px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  opacity: ${currentPage === 1 ? 0.5 : 1};
+`;
+prevBtn.addEventListener('click', () => {
+  if (currentPage > 1) {
+    currentPage--;
+    displayProducts(products);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
+});
+pagination.appendChild(prevBtn);
 
-  const nextBtn = document.createElement('button'); nextBtn.textContent = 'Next'; nextBtn.disabled = currentPage === totalPages;
-  nextBtn.addEventListener('click', () => { if (currentPage < totalPages) { currentPage++; displayProducts(products); window.scrollTo({ top:0, behavior:'smooth' }); } });
-  pagination.appendChild(nextBtn);
-
-  paginationContainer.appendChild(pagination);
-  if (productGrid && productGrid.parentElement) productGrid.insertAdjacentElement('afterend', paginationContainer);
-  else document.body.appendChild(paginationContainer);
-
-  // ensure UI reflects cart state
-  updateCartCount();
-  (paginated || []).forEach(p => updateProductUI(p.id));
+// Page number buttons
+for (let i = 1; i <= Math.max(totalPages, 1); i++) {
+  const btn = document.createElement('button');
+  btn.textContent = i;
+  btn.className = i === currentPage ? 'active' : '';
+  btn.style.cssText = `
+    border: 1px solid ${deepGreen};
+    color: ${i === currentPage ? '#fff' : deepGreen};
+    background: ${i === currentPage ? deepGreen : 'transparent'};
+    padding: 6px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.25s ease;
+  `;
+  btn.addEventListener('click', () => {
+    currentPage = i;
+    displayProducts(products);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+  pagination.appendChild(btn);
 }
 
+// Next button
+const nextBtn = document.createElement('button');
+nextBtn.textContent = 'Next';
+nextBtn.disabled = currentPage === totalPages;
+nextBtn.style.cssText = `
+  border: 1px solid ${deepGreen};
+  color: ${deepGreen};
+  background: transparent;
+  padding: 6px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  opacity: ${currentPage === totalPages ? 0.5 : 1};
+`;
+nextBtn.addEventListener('click', () => {
+  if (currentPage < totalPages) {
+    currentPage++;
+    displayProducts(products);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+});
+pagination.appendChild(nextBtn);
+
+paginationContainer.appendChild(pagination);
+productGrid.insertAdjacentElement('afterend', paginationContainer);
+
+
+
+    
+
+    
 /* update single product card UI to show badge/button states */
 function updateProductUI(productId){
   const card = document.getElementById(`product-${productId}`);
