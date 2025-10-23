@@ -206,6 +206,11 @@ footer {
     <img src="asset/logo.png" alt="Fleur De Vie Logo" class="brand-logo">
     <div class="brand-title">Fleur De Vie</div>
   </div>
+
+   <div class="mobile-cart" style="display:none;">
+    <a href="cart.html"><i class="fa-solid fa-cart-shopping"></i><span class="cart-count" id="cartCountMobile">0</span></a>
+  </div>
+  
   <nav class="header-right">
     <a href="index.html">Home</a>
     <a href="shop.html">Shop</a>
@@ -347,10 +352,16 @@ function computeSubtotal(currency) {
 }
 
 /* ---------- Cart Count (Instant) ---------- */
-function updateCartCount() {
-  const totalItems = cart.reduce((sum, i) => sum + (i.quantity || 0), 0);
-  if (cartCountElem) cartCountElem.textContent = totalItems;
+/* update cart count display */
+function updateCartCount(){
+  const c = getCart();
+  const total = (c || []).reduce((s,i) => s + (i.quantity||0), 0);
+  if (cartCountElem) cartCountElem.textContent = total;
+  if (cartCountMobileElem) cartCountMobileElem.textContent = total;
+  cart = mergeCartItems(c);
 }
+
+  
 
 /* ---------- Render Cart ---------- */
 async function renderCart() {
