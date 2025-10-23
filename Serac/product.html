@@ -223,7 +223,7 @@
   const productName = document.getElementById('productName');
   const productDescription = document.getElementById('productDescription');
   const productPrice = document.getElementById('productPrice');
-  const quantityBadge = document.getElementById('quantityBadge'); // middle control number
+  const quantityBadge = document.getElementById('quantityBadge'); // middle control
   const addCartBtn = document.getElementById('addCartBtn');
   const minusBtn = document.getElementById('minus');
   const plusBtn = document.getElementById('plus');
@@ -244,12 +244,22 @@
 
   const STORAGE_KEY = 'seracCart';
 
+  // ---------- HELPERS: normalize user-facing option text ----------
+  function normalizeOption(str){
+    if(!str && str !== '') return '';
+    return String(str).trim().toLowerCase();
+  }
+  // unified combo key (normalized) -> color|size
+  function comboKeyNorm(color = '', size = ''){
+    return `${normalizeOption(color)}|${normalizeOption(size)}`;
+  }
+
   // ---------- CART STORAGE ----------
   function getCart(){ return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
   function setCart(cart){ localStorage.setItem(STORAGE_KEY, JSON.stringify(cart)); updateCartCount(); }
   function updateCartCount(){ if(cartCountElem) cartCountElem.textContent = getCart().reduce((sum,i)=>sum + Number(i.quantity||0), 0); }
 
-  // ---------- NEW: product total display (creates if missing) ----------
+  // ---------- PRODUCT TOTAL UI ----------
   let totalCountElem = document.getElementById('totalVariantCount');
   function ensureProductTotalElem(){
     if(totalCountElem) return;
@@ -267,42 +277,37 @@
   function updateProductTotalUI(pid){
     ensureProductTotalElem();
     const total = getCart().filter(i => i.id === pid).reduce((s,i)=> s + Number(i.quantity||0), 0);
-    totalCountElem.textContent = `Total in cart: ${total}`;
-    // old behaviour: hide add button when product total > 0 — keep it
+    totalCountElem.textContent = `Total: ${total}`; // changed to "Total:"
     if(addCartBtn) addCartBtn.style.display = total > 0 ? 'none' : 'flex';
   }
 
   // ---------- COMBO QUANTITY HELPERS ----------
-  // Standardize combo key to "color|size" (both may be empty strings)
-  function comboKey(color = '', size = ''){
-    return `${color||''}|${size||''}`;
-  }
-  function getComboQty(pid, color='', size=''){
+  function getComboQty(pid, color = '', size = ''){
+    const normColor = normalizeOption(color);
+    const normSize = normalizeOption(size);
     const cart = getCart();
-    const it = cart.find(i => i.id === pid && (i.color||'') === (color||'') && (i.size||'') === (size||''));
+    const it = cart.find(i => i.id === pid && normalizeOption(i.color) === normColor && normalizeOption(i.size) === normSize);
     return Number(it?.quantity || 0);
   }
 
-  // ---------- UI: selected combo quantity (middle control) ----------
+  // ---------- SELECTED QUANTITY DISPLAY ----------
   function updateSelectedQuantityDisplay(){
     const sel = getSelectedOptions();
     const hasAnyVariant = hasVariants();
-    // If no variants on product, show full product total
     if(!hasAnyVariant){
       const total = getCart().filter(i => i.id === productId).reduce((s,i)=> s + Number(i.quantity||0), 0);
       if(quantityBadge) quantityBadge.textContent = total;
     } else {
-      // when variants exist, show combo qty only (or 0)
+      // show selected combo qty or 0 if none selected
       const qty = (sel.color || sel.size) ? getComboQty(productId, sel.color, sel.size) : 0;
       if(quantityBadge) quantityBadge.textContent = qty;
     }
-    // update product total display too
     updateProductTotalUI(productId);
   }
 
-  // ---------- UTIL / MODAL ----------
+  // ---------- MODAL ----------
   function showModal(message){
-    if(!optionModal) { alert(message); return; }
+    if(!optionModal){ alert(message); return; }
     const p = optionModal.querySelector('p');
     if(p) p.textContent = message;
     optionModal.style.display = 'flex';
@@ -314,14 +319,7 @@
     optionModal.style.display = 'none';
   }
 
-  function escapeHtml(str){
-    return String(str||'')
-      .replace(/&/g,"&amp;")
-      .replace(/</g,"&lt;")
-      .replace(/>/g,"&gt;")
-      .replace(/"/g,"&quot;")
-      .replace(/'/g,"&#039;");
-  }
+  function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
 
   function renderDetailsToHtml(raw){
     if(!raw) return '';
@@ -332,8 +330,7 @@
       const inner = lines.map(l => `<li>${escapeHtml(l.replace(/^[-*]+\s*/, ''))}</li>`).join('');
       return `<ul>${inner}</ul>`;
     } else {
-      let out = '';
-      let inList = false;
+      let out = ''; let inList = false;
       for(const line of lines){
         if(line.startsWith('-') || line.startsWith('*')){
           if(!inList){ inList = true; out += '<ul>'; }
@@ -355,9 +352,7 @@
       size: sizeOptions?.querySelector('.selected')?.textContent?.trim() || ''
     };
   }
-  function hasVariants(){
-    return (sizeOptions && sizeOptions.children.length > 0) || (colorOptions && colorOptions.children.length > 0);
-  }
+  function hasVariants(){ return (sizeOptions && sizeOptions.children.length > 0) || (colorOptions && colorOptions.children.length > 0); }
   function validateSelectionForAdd(){
     const sel = getSelectedOptions();
     const requiresSize = sizeOptions && sizeOptions.children.length;
@@ -369,25 +364,26 @@
     return true;
   }
 
-  // ---------- CORE: add/remove per combination ----------
+  // ---------- CART OPERATIONS (use normalized comparisons) ----------
   function addToCart(product){
     const cart = getCart();
-    const idx = cart.findIndex(i => i.id === product.id && (i.color||'') === (product.color||'') && (i.size||'') === (product.size||''));
+    // find by normalized color/size
+    const idx = cart.findIndex(i => i.id === product.id && normalizeOption(i.color) === normalizeOption(product.color) && normalizeOption(i.size) === normalizeOption(product.size));
     if(idx > -1){
       cart[idx].quantity = (Number(cart[idx].quantity)||0) + 1;
     } else {
+      // store raw label too (but comparisons always normalized)
       cart.push({...product, quantity:1});
     }
     setCart(cart);
-    // update displays
     updateVariantBadges();
     updateSelectedQuantityDisplay();
     refreshClearButtonVisibility();
   }
 
-  function removeFromCartSpecific(productId, color = '', size = ''){
+  function removeFromCartSpecific(pid, color = '', size = ''){
     const cart = getCart();
-    const idx = cart.findIndex(i => i.id === productId && (i.color||'') === (color||'') && (i.size||'') === (size||''));
+    const idx = cart.findIndex(i => i.id === pid && normalizeOption(i.color) === normalizeOption(color) && normalizeOption(i.size) === normalizeOption(size));
     if(idx > -1){
       cart[idx].quantity = (Number(cart[idx].quantity)||0) - 1;
       if(cart[idx].quantity <= 0) cart.splice(idx,1);
@@ -400,11 +396,10 @@
     return false;
   }
 
-  function removeFromCartFallback(productId){
-    // fallback: remove from any combo (last found)
+  function removeFromCartFallback(pid){
     const cart = getCart();
     for(let i = cart.length - 1; i >= 0; i--){
-      if(cart[i].id === productId){
+      if(cart[i].id === pid){
         cart[i].quantity = (Number(cart[i].quantity)||0) - 1;
         if(cart[i].quantity <= 0) cart.splice(i,1);
         setCart(cart);
@@ -417,40 +412,40 @@
     return false;
   }
 
-  function clearProductCombos(productId){
+  function clearProductCombos(pid){
     let cart = getCart();
-    cart = cart.filter(i => i.id !== productId);
+    cart = cart.filter(i => i.id !== pid);
     setCart(cart);
     updateVariantBadges();
     updateSelectedQuantityDisplay();
     refreshClearButtonVisibility();
   }
 
-  // ---------- VARIANT / BADGE UI ----------
+  // ---------- VARIANT BADGES (uses normalized key) ----------
   function updateVariantBadges(){
     const cart = getCart();
     document.querySelectorAll('.variant-badge').forEach(n => n.remove());
-    document.querySelectorAll('#sizeOptions > button, #colorOptions > button').forEach(b=>{
-      b.classList.remove('has-combo','combo-active');
-    });
+    document.querySelectorAll('#sizeOptions > button, #colorOptions > button').forEach(b => { b.classList.remove('has-combo','combo-active'); });
 
     const mapSizeTotals = {};
     const mapColorTotals = {};
-    const mapCombo = {};
+    const mapCombo = {}; // key: normalized color|size
 
     cart.forEach(item=>{
       if(!item || item.id !== productId) return;
-      const color = item.color || 'none';
-      const size = item.size || 'none';
+      const normColor = normalizeOption(item.color || '');
+      const normSize = normalizeOption(item.size || '');
       const qty = Number(item.quantity || 0);
-      mapSizeTotals[size] = (mapSizeTotals[size] || 0) + qty;
-      mapColorTotals[color] = (mapColorTotals[color] || 0) + qty;
-      const ck = comboKey(color === 'none' ? '' : color, size === 'none' ? '' : size); // "color|size"
+      mapSizeTotals[normSize] = (mapSizeTotals[normSize] || 0) + qty;
+      mapColorTotals[normColor] = (mapColorTotals[normColor] || 0) + qty;
+      const ck = comboKeyNorm(normColor, normSize);
       mapCombo[ck] = (mapCombo[ck] || 0) + qty;
     });
 
     const activeSize = sizeOptions?.querySelector('.selected')?.textContent?.trim() || null;
     const activeColor = colorOptions?.querySelector('.selected')?.textContent?.trim() || null;
+    const actNormSize = normalizeOption(activeSize || '');
+    const actNormColor = normalizeOption(activeColor || '');
 
     function attachBadgeToBtn(btn, count){
       if(!btn) return;
@@ -478,24 +473,25 @@
       badge.style.display = count > 0 ? 'flex' : 'none';
     }
 
+    // size badges (show totals for that size across colors)
     if(sizeOptions){
       Array.from(sizeOptions.children).forEach(btn=>{
-        const s = btn.textContent.trim();
+        const s = normalizeOption(btn.textContent.trim());
         const total = mapSizeTotals[s] || 0;
         if(total > 0){
           attachBadgeToBtn(btn, total);
           btn.classList.add('has-combo');
         } else {
-          const b = btn.querySelector('.variant-badge');
-          if(b) b.remove();
+          const b = btn.querySelector('.variant-badge'); if(b) b.remove();
         }
       });
     }
 
+    // color badges (if size active show combo counts for that size, else totals)
     if(colorOptions){
       Array.from(colorOptions.children).forEach(btn=>{
-        const c = btn.textContent.trim();
-        const key = comboKey(c, activeSize || '');
+        const c = normalizeOption(btn.textContent.trim());
+        const key = comboKeyNorm(c, actNormSize || '');
         const comboQty = mapCombo[key] || 0;
         const total = mapColorTotals[c] || 0;
 
@@ -504,8 +500,7 @@
             attachBadgeToBtn(btn, comboQty);
             btn.classList.add('has-combo');
           } else {
-            const b = btn.querySelector('.variant-badge');
-            if(b) b.remove();
+            const b = btn.querySelector('.variant-badge'); if(b) b.remove();
             btn.classList.remove('has-combo');
           }
         } else {
@@ -513,8 +508,7 @@
             attachBadgeToBtn(btn, total);
             btn.classList.add('has-combo');
           } else {
-            const b = btn.querySelector('.variant-badge');
-            if(b) b.remove();
+            const b = btn.querySelector('.variant-badge'); if(b) b.remove();
             btn.classList.remove('has-combo');
           }
         }
@@ -529,10 +523,8 @@
     }
   }
 
-  function countProductCombos(pid){
-    return getCart().filter(i => i.id === pid).length;
-  }
-
+  // ---------- CLEAR BUTTON ----------
+  function countProductCombos(pid){ return getCart().filter(i => i.id === pid).length; }
   let clearButton = null;
   function ensureClearButton(){
     if(!productContainer) return;
@@ -551,27 +543,16 @@
         fontWeight: '600'
       });
       const details = document.querySelector('.product-details');
-      if(details){
-        details.appendChild(clearButton);
-      } else {
-        productContainer.appendChild(clearButton);
-      }
-      clearButton.addEventListener('click', ()=> {
-        clearProductCombos(productId);
-      });
+      if(details) details.appendChild(clearButton); else productContainer.appendChild(clearButton);
+      clearButton.addEventListener('click', ()=> { clearProductCombos(productId); });
     }
     refreshClearButtonVisibility();
   }
-
   function refreshClearButtonVisibility(){
     const combos = countProductCombos(productId);
     if(!clearButton) return;
-    if(combos >= 2){
-      clearButton.style.display = 'inline-flex';
-      clearButton.style.opacity = '1';
-    } else {
-      clearButton.style.display = 'none';
-    }
+    if(combos >= 2){ clearButton.style.display = 'inline-flex'; clearButton.style.opacity = '1'; }
+    else clearButton.style.display = 'none';
   }
 
   window.updateVariantBadges = updateVariantBadges;
@@ -641,17 +622,15 @@
         if(customizeBtn){ customizeBtn.style.display = 'block'; customizeBtn.href = `customization.html?productId=${productId}`; }
       } else { if(customizeBtn) customizeBtn.style.display = 'none'; }
 
-      // parse variants (IMPORTANT: use color|size key)
-      sizesList = [];
-      colorsList = [];
-      comboMap = {};
+      // parse variants (store lists; use normalized keys when operating)
+      sizesList = []; colorsList = []; comboMap = {};
       if(Array.isArray(data.variants) && data.variants.length){
         data.variants.forEach(v => {
           const s = (v.size || '').toString();
           const c = (v.color || '').toString();
           if(s && !sizesList.includes(s)) sizesList.push(s);
           if(c && !colorsList.includes(c)) colorsList.push(c);
-          const key = comboKey(c, s); // color|size
+          const key = comboKeyNorm(c, s);
           comboMap[key] = comboMap[key] || {};
           if(typeof v.stock !== 'undefined') comboMap[key].stock = v.stock;
         });
@@ -710,7 +689,6 @@
       ensureClearButton();
       updateSelectedQuantityDisplay();
       productContainer.style.visibility = 'visible';
-
     } catch(err){
       console.error(err);
       productContainer.style.visibility = 'visible';
@@ -752,16 +730,12 @@
 
     if(productHasVariants){
       const removed = removeFromCartSpecific(productId, sel.color, sel.size);
-      if(!removed){
-        showModal('No items of that selection to remove.');
-      }
+      if(!removed) showModal('No items of that selection to remove.');
       return;
     }
 
     const baseRemoved = removeFromCartFallback(productId);
-    if(!baseRemoved){
-      showModal('No items to remove.');
-    }
+    if(!baseRemoved) showModal('No items to remove.');
   });
 
   closeModalBtn?.addEventListener('click', hideModalAndReset);
@@ -782,127 +756,39 @@
   updateCartCount();
   loadProduct();
 
-  /* ---------- HEADER / HAMBURGER / SCROLL BEHAVIOR (FIXED) ---------- */
+  /* ---------- HEADER / HAMBURGER (unchanged) ---------- */
   (function headerHeroBehavior(){
     const heroEl = document.querySelector('.hero') || { getBoundingClientRect: () => ({ height: 0 }) };
     if (!headerEl) return;
-
-    let lastY = window.scrollY || 0;
-    let hidden = false;
-    let hoverShown = false;
-    let heroHeight = Math.round(heroEl.getBoundingClientRect().height || 0);
-
-    function isMenuOpen(){
-      return hamburger && (hamburger.classList.contains('open') || headerRight.classList.contains('open'));
-    }
-
-    function showHeader(forceScrolled=false){
-      headerEl.style.top = '0';
-      headerEl.style.opacity = '1';
-      headerEl.style.pointerEvents = 'auto';
-      hidden = false;
-      if (forceScrolled) headerEl.classList.add('scrolled');
-    }
-
-    function hideHeader(){
-      headerEl.style.top = '-90px';
-      headerEl.style.opacity = '0';
-      headerEl.style.pointerEvents = 'none';
-      hidden = true;
-    }
-
-    function handleScroll(){
-      const y = window.scrollY || 0;
-      const menuOpen = isMenuOpen();
-      const threshold = Math.max(50, (heroHeight || 0) - 80);
-
-      // header darken rule
+    let lastY = window.scrollY || 0, hidden=false, hoverShown=false, heroHeight = Math.round(heroEl.getBoundingClientRect().height || 0);
+    function isMenuOpen(){ return hamburger && (hamburger.classList.contains('open') || headerRight.classList.contains('open')); }
+    function showHeader(forceScrolled=false){ headerEl.style.top='0'; headerEl.style.opacity='1'; headerEl.style.pointerEvents='auto'; hidden=false; if(forceScrolled) headerEl.classList.add('scrolled'); }
+    function hideHeader(){ headerEl.style.top='-90px'; headerEl.style.opacity='0'; headerEl.style.pointerEvents='none'; hidden=true; }
+    function handleScroll(){ const y = window.scrollY || 0; const menuOpen = isMenuOpen(); const threshold = Math.max(50, (heroHeight || 0) - 80);
       if (y > threshold) headerEl.classList.add('scrolled'); else headerEl.classList.remove('scrolled');
-
-      // if mobile menu open, force header visible & dark
-      if (menuOpen) {
-        showHeader(true);
-        lastY = y;
-        return;
-      }
-
-      if (y > (heroHeight - 80)) {
-        if (y > lastY && !hidden) {
-          hideHeader();
-        } else if (y < lastY && hidden) {
-          showHeader(true);
-        }
-      } else {
-        showHeader(y > 50);
-        if (y <= 50) headerEl.classList.remove('scrolled');
-      }
-
+      if (menuOpen) { showHeader(true); lastY = y; return; }
+      if (y > (heroHeight - 80)) { if (y > lastY && !hidden) hideHeader(); else if (y < lastY && hidden) showHeader(true); } else { showHeader(y > 50); if (y <= 50) headerEl.classList.remove('scrolled'); }
       lastY = y;
     }
-
-    // hover reveal
-    document.addEventListener('mousemove', (e) => {
-      if (isMenuOpen()) return;
-      if (e.clientY < 100) {
-        if (hidden) {
-          showHeader(true);
-          hoverShown = true;
-        }
-      } else if (hoverShown) {
-        setTimeout(() => {
-          if (window.scrollY > (heroHeight - 80) && !isMenuOpen()) hideHeader();
-          hoverShown = false;
-        }, 220);
-      }
-    }, { passive: true });
-
-    // Hamburger toggle
-    if (hamburger && headerRight) {
-      hamburger.addEventListener('click', () => {
-        const isNowOpen = hamburger.classList.toggle('open');
-        headerRight.classList.toggle('open', isNowOpen);
-        hamburger.setAttribute('aria-expanded', isNowOpen ? 'true' : 'false');
-
-        if (isNowOpen) {
-          showHeader(true);
-          headerEl.classList.add('scrolled');
-        } else {
-          setTimeout(handleScroll, 160);
-        }
-      });
+    document.addEventListener('mousemove', (e)=>{ if(isMenuOpen()) return; if(e.clientY < 100){ if(hidden){ showHeader(true); hoverShown = true; } } else if(hoverShown){ setTimeout(()=>{ if(window.scrollY > (heroHeight - 80) && !isMenuOpen()) hideHeader(); hoverShown=false; },220); } }, { passive:true });
+    if(hamburger && headerRight){
+      hamburger.addEventListener('click', ()=>{ const isNowOpen = hamburger.classList.toggle('open'); headerRight.classList.toggle('open', isNowOpen); hamburger.setAttribute('aria-expanded', isNowOpen ? 'true' : 'false'); if(isNowOpen){ showHeader(true); headerEl.classList.add('scrolled'); } else { setTimeout(handleScroll,160); } });
     }
-
-    window.addEventListener('resize', () => {
-      heroHeight = Math.round(heroEl.getBoundingClientRect().height || 0);
-      handleScroll();
-    }, { passive: true });
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('load', () => {
-      heroHeight = Math.round(heroEl.getBoundingClientRect().height || 0);
-      handleScroll();
-    });
+    window.addEventListener('resize', ()=>{ heroHeight = Math.round(heroEl.getBoundingClientRect().height || 0); handleScroll(); }, { passive:true });
+    window.addEventListener('scroll', handleScroll, { passive:true });
+    window.addEventListener('load', ()=>{ heroHeight = Math.round(heroEl.getBoundingClientRect().height || 0); handleScroll(); });
   })();
 
-  /* ---------- SMOOTH SCROLL (closes mobile menu on click) ---------- */
+  /* ---------- SMOOTH SCROLL (closes mobile menu) ---------- */
   document.querySelectorAll('.header-right a').forEach(link => {
     link.addEventListener('click', e => {
       const href = link.getAttribute('href');
-      if (href && href.startsWith('#')) {
-        e.preventDefault();
-        const target = document.getElementById(href.slice(1));
-        if (target) {
-          window.scrollTo({ top: target.offsetTop - 80, behavior: 'smooth' });
-        }
-      }
-      if (headerRight && hamburger) {
-        headerRight.classList.remove('open');
-        hamburger.classList.remove('open');
-        hamburger.setAttribute('aria-expanded', 'false');
-      }
+      if (href && href.startsWith('#')) { e.preventDefault(); const target = document.getElementById(href.slice(1)); if (target) window.scrollTo({ top: target.offsetTop - 80, behavior: 'smooth' }); }
+      if (headerRight && hamburger) { headerRight.classList.remove('open'); hamburger.classList.remove('open'); hamburger.setAttribute('aria-expanded', 'false'); }
     });
   });
 </script>
+
 
 
 
