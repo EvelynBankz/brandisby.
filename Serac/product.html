@@ -562,6 +562,101 @@
       });
     });
 
+// ---------- VARIANT BADGE TRACKING ----------
+(function variantBadgeSystem() {
+  const STORAGE_KEY = 'seracCart';
+  const colorOptionsEl = document.getElementById('colorOptions');
+  const sizeOptionsEl = document.getElementById('sizeOptions');
+  if (!colorOptionsEl && !sizeOptionsEl) return;
+
+  // --- Helpers ---
+  const getCart = () => JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+  const key = (p) => `${p.id || ''}-${p.color || 'none'}-${p.size || 'none'}`;
+
+  // Add a badge to a button
+  function addBadge(btn, count) {
+    if (!btn) return;
+    let badge = btn.querySelector('.variant-badge');
+    if (!badge) {
+      badge = document.createElement('span');
+      badge.className = 'variant-badge';
+      Object.assign(badge.style, {
+        position: 'absolute',
+        top: '4px',
+        right: '6px',
+        background: 'var(--gold)',
+        color: '#fff',
+        fontSize: '0.65rem',
+        borderRadius: '50%',
+        minWidth: '16px',
+        height: '16px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontWeight: '600',
+        boxShadow: '0 0 3px rgba(0,0,0,0.4)',
+        pointerEvents: 'none',
+      });
+      btn.style.position = 'relative';
+      btn.appendChild(badge);
+    }
+    badge.textContent = count;
+    badge.style.display = count > 0 ? 'flex' : 'none';
+  }
+
+  // Clear all badges
+  function clearBadges() {
+    document.querySelectorAll('.variant-badge').forEach(b => b.remove());
+  }
+
+  // Update badges from cart
+  function updateVariantBadges() {
+    const cart = getCart();
+    clearBadges();
+
+    cart.forEach(item => {
+      const { color, size, quantity } = item;
+      if (color && colorOptionsEl) {
+        const btn = [...colorOptionsEl.children].find(b => b.textContent.trim() === color);
+        if (btn) addBadge(btn, (parseInt(quantity) || 0) + (parseInt(btn.dataset.count || 0)));
+      }
+      if (size && sizeOptionsEl) {
+        const btn = [...sizeOptionsEl.children].find(b => b.textContent.trim() === size);
+        if (btn) addBadge(btn, (parseInt(quantity) || 0) + (parseInt(btn.dataset.count || 0)));
+      }
+    });
+  }
+
+  // Hook into add/remove
+  const originalAddToCart = window.addToCart;
+  window.addToCart = function(product) {
+    if (typeof originalAddToCart === 'function') originalAddToCart(product);
+    updateVariantBadges();
+  };
+
+  const originalRemoveFromCart = window.removeFromCart;
+  window.removeFromCart = function(productId) {
+    if (typeof originalRemoveFromCart === 'function') originalRemoveFromCart(productId);
+    updateVariantBadges();
+  };
+
+  // Update when variant selected
+  const observerTargets = [colorOptionsEl, sizeOptionsEl].filter(Boolean);
+  observerTargets.forEach(container => {
+    container.addEventListener('click', () => {
+      setTimeout(updateVariantBadges, 80);
+    });
+  });
+
+  // Update when storage changes (multi-tab)
+  window.addEventListener('storage', updateVariantBadges);
+
+  // Initial update on load
+  window.addEventListener('load', updateVariantBadges);
+})();
+
+
+    
   </script>
 </body>
 </html>
