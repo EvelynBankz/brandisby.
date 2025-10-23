@@ -256,7 +256,6 @@
   // ---------- CORE: add/remove per combination ----------
   // Add one to a specific combination (size + color) or base product
   function addToCart(product){
-    // product: {id, name, price, currency, imageUrl, color?, size?}
     let cart = getCart();
     const index = cart.findIndex(i => i.id === product.id && (i.color||'') === (product.color||'') && (i.size||'') === (product.size||''));
     if(index > -1){
@@ -369,6 +368,12 @@
 
   let currentProductData = null;
 
+  // Data structures derived from variant objects
+  let sizesList = [];   // array of size strings
+  let colorsList = [];  // array of color strings
+  // map combos if you need (not required for UI but kept for potential stock)
+  let comboMap = {}; // key: `${size}|${color}` -> { stock, ... }
+
   async function loadProduct(){
     if(!productId){
       productContainer.style.visibility = 'visible';
@@ -389,7 +394,7 @@
       const data = docSnap.data();
       currentProductData = data || {};
 
-      // Images
+      // Images (safe fallbacks)
       const images = Array.isArray(data.images) && data.images.length ? data.images.filter(Boolean) : (data.imageUrl ? [data.imageUrl] : []);
       if(productImg) productImg.src = images[0] || '';
       if(thumbnailContainer) thumbnailContainer.innerHTML = '';
@@ -430,17 +435,41 @@
         if(customizeBtn) customizeBtn.style.display = 'none';
       }
 
+      // --- Parse variants (array of objects) ---
+      // expected data.variants to be an array of objects like { size: "Large", color: "Blue", stock: 10 }
+      sizesList = [];
+      colorsList = [];
+      comboMap = {}; // reset
+
+      if(Array.isArray(data.variants) && data.variants.length){
+        data.variants.forEach(v => {
+          const s = (v.size || '').toString();
+          const c = (v.color || '').toString();
+          if(s && !sizesList.includes(s)) sizesList.push(s);
+          if(c && !colorsList.includes(c)) colorsList.push(c);
+          const key = `${s}|${c}`;
+          comboMap[key] = comboMap[key] || {};
+          // copy other fields like stock if present
+          if(typeof v.stock !== 'undefined') comboMap[key].stock = v.stock;
+        });
+      } else {
+        // Backwards compatibility: older schema with data.sizes / data.colors arrays
+        if(Array.isArray(data.sizes)) sizesList = data.sizes.slice();
+        if(Array.isArray(data.colors)) colorsList = data.colors.slice();
+      }
+
       // Sizes (render first - size is parent when present)
       if(sizeOptions) sizeOptions.innerHTML = '';
-      if(Array.isArray(data.sizes) && data.sizes.length){
+      if(sizesList.length){
         sizeGroup.style.display = '';
-        data.sizes.forEach(s => {
+        sizesList.forEach(s => {
           const btn = document.createElement('button');
           btn.type = 'button';
           btn.textContent = s;
           btn.addEventListener('click', ()=> {
             Array.from(sizeOptions.children).forEach(b=>b.classList.remove('selected'));
             btn.classList.add('selected');
+            // when selecting a size, update color view/badges
             updateVariantBadges();
             updateQuantityUI(productId);
             refreshClearButtonVisibility();
@@ -453,9 +482,9 @@
 
       // Colors
       if(colorOptions) colorOptions.innerHTML = '';
-      if(Array.isArray(data.colors) && data.colors.length){
+      if(colorsList.length){
         colorGroup.style.display = '';
-        data.colors.forEach(c => {
+        colorsList.forEach(c => {
           const btn = document.createElement('button');
           btn.type = 'button';
           btn.textContent = c;
@@ -558,7 +587,7 @@
         refreshClearButtonVisibility();
         return;
       } else {
-        // no combos exist — show modal? better to show modal that nothing to remove
+        // no combos exist — show modal saying nothing to remove
         if(optionModal){
           optionModal.querySelector('p')?.textContent = 'No items to remove for this product.';
           optionModal.style.display = 'flex';
@@ -571,7 +600,7 @@
     if(sel.size || sel.color){
       const removed = removeFromCartSpecific(productId, sel.color, sel.size);
       if(!removed){
-        // nothing found to remove for selected combo — maybe show modal briefly
+        // nothing found to remove for selected combo — show modal briefly
         if(optionModal){
           optionModal.querySelector('p')?.textContent = 'No items of that selection to remove.';
           optionModal.style.display = 'flex';
@@ -736,6 +765,21 @@
       if(!badge){
         badge = document.createElement('span');
         badge.className = 'variant-badge';
+        // inline styles to ensure visible without extra CSS
+        badge.style.position = 'absolute';
+        badge.style.top = '4px';
+        badge.style.right = '6px';
+        badge.style.background = 'var(--gold)';
+        badge.style.color = '#fff';
+        badge.style.fontSize = '0.65rem';
+        badge.style.borderRadius = '50%';
+        badge.style.minWidth = '16px';
+        badge.style.height = '16px';
+        badge.style.display = 'flex';
+        badge.style.alignItems = 'center';
+        badge.style.justifyContent = 'center';
+        badge.style.fontWeight = '600';
+        btn.style.position = 'relative';
         btn.appendChild(badge);
       }
       badge.textContent = String(count);
@@ -864,6 +908,7 @@
      ====================================================== */
 
 </script>
+
 
 </body>
 </html>
