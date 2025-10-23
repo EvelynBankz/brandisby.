@@ -248,6 +248,8 @@ footer { text-align:center; padding:20px; background:transparent; color:#112e1f;
 </footer>
 
 <script type="module">
+/* ===== COMPLETE FleurDeVie shop script (drop-in replacement) ===== */
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
 import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
 
@@ -262,6 +264,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+/* ---------- DOM refs (must match your page) ---------- */
 const productGrid = document.getElementById('productGrid');
 const cartCountElem = document.getElementById('cartCount');
 const cartCountMobileElem = document.getElementById('cartCountMobile');
@@ -272,65 +275,54 @@ const currencySelect = document.getElementById('currencySelect');
 let cart = JSON.parse(localStorage.getItem('cart')) || [];
 cart = mergeCartItems(cart);
 let productsData = {};
-let currentPage = 1; // pagination tracker
+let currentPage = 1;
 
-// Restore currency preference if present
-if (localStorage.getItem('currency')) {
+/* restore currency */
+if (localStorage.getItem('currency') && currencySelect) {
   try { currencySelect.value = localStorage.getItem('currency'); } catch(e){}
 }
 
-// ----------------- localStorage helpers -----------------
-function getCart() { 
-  try { return JSON.parse(localStorage.getItem('cart')) || []; } catch(e) { return []; }
-}
-function setCart(cartArray) {
-  cart = mergeCartItems(cartArray);
-  try { localStorage.setItem('cart', JSON.stringify(cart)); } catch(e){ console.warn("Could not set cart", e); }
+/* ---------- localStorage cart helpers ---------- */
+function getCart(){ try { return JSON.parse(localStorage.getItem('cart')) || []; } catch(e) { return []; } }
+function setCart(cartArray){
+  cart = mergeCartItems(cartArray || []);
+  try { localStorage.setItem('cart', JSON.stringify(cart)); } catch(e){ console.warn('Could not set cart', e); }
   updateCartCount();
 }
-function mergeCartItems(cartArray) {
+function mergeCartItems(cartArray){
   const merged = [];
   (cartArray || []).forEach(item => {
-    const idx = merged.findIndex(i => i.id === item.id && (i.color || '') === (item.color || '') && (i.size || '') === (item.size || ''));
+    const idx = merged.findIndex(i => i.id === item.id && (i.color||'') === (item.color||'') && (i.size||'') === (item.size||''));
     if (idx === -1) merged.push({ ...item });
     else merged[idx].quantity = (merged[idx].quantity || 0) + (item.quantity || 0);
   });
   return merged;
 }
-function updateCartCount() {
-  const current = getCart();
-  const total = (current || []).reduce((sum, i) => sum + (i.quantity || 0), 0);
-  if (cartCountElem) cartCountElem.textContent = total;
-  if (cartCountMobileElem) cartCountMobileElem.textContent = total;
-  // update local cart variable too
-  cart = mergeCartItems(current);
-}
 
-// Robust getTotalQuantity to consider variant shapes (id, parentId, productId, and id prefix)
-function getTotalQuantity(productId) {
+/* robust total quantity for product (accounts for variants) */
+function getTotalQuantity(productId){
   const c = getCart();
   let total = 0;
   (c || []).forEach(i => {
-    if (String(i.id) === String(productId)) { total += (i.quantity || 0); return; }
-    if (i.parentId && String(i.parentId) === String(productId)) { total += (i.quantity || 0); return; }
-    if (i.productId && String(i.productId) === String(productId)) { total += (i.quantity || 0); return; }
-    if (typeof i.id === 'string' && String(i.id).startsWith(String(productId) + '-')) { total += (i.quantity || 0); return; }
+    if (String(i.id) === String(productId)) { total += (i.quantity||0); return; }
+    if (i.parentId && String(i.parentId) === String(productId)) { total += (i.quantity||0); return; }
+    if (i.productId && String(i.productId) === String(productId)) { total += (i.quantity||0); return; }
+    if (typeof i.id === 'string' && String(i.id).startsWith(String(productId) + '-')) { total += (i.quantity||0); return; }
   });
   return total;
 }
 
-// Add/remove operations (keeps original naming)
-function addToCart(product) {
-  let currentCart = getCart();
-  const idx = currentCart.findIndex(i => i.id === product.id && (i.color || '') === (product.color || '') && (i.size || '') === (product.size || ''));
+/* add/remove */
+function addToCart(product){
+  const currentCart = getCart();
+  const idx = currentCart.findIndex(i => i.id === product.id && (i.color||'') === (product.color||'') && (i.size||'') === (product.size||''));
   if (idx > -1) currentCart[idx].quantity += 1;
   else currentCart.push({ ...product, quantity: 1 });
   setCart(currentCart);
   updateProductUI(product.id);
 }
-
-function removeFromCart(productId) {
-  let currentCart = getCart();
+function removeFromCart(productId){
+  const currentCart = getCart();
   const idx = currentCart.findIndex(i => i.id === productId);
   if (idx > -1) {
     currentCart[idx].quantity -= 1;
@@ -340,90 +332,71 @@ function removeFromCart(productId) {
   updateProductUI(productId);
 }
 
-// Update product card UI depending on whether it has variants or not
-function updateProductUI(productId) {
-  const card = document.getElementById(`product-${productId}`);
-  if (!card) return;
-  const addBtn = card.querySelector('.add-cart, .select-variant');
-  const badge = card.querySelector('.quantity-badge');
-  const totalQty = getTotalQuantity(productId);
-
-  // Determine if product is variant-type using dataset flag (set during render)
-  const isVariant = card.dataset.hasVariants === 'true';
-
-  if (isVariant) {
-    // hide plus/minus controls for variants if present
-    const plus = card.querySelector('.plus');
-    const minus = card.querySelector('.minus');
-    if (plus) plus.style.display = 'none';
-    if (minus) minus.style.display = 'none';
-
-    // update badge and button text
-    if (badge) badge.textContent = totalQty > 0 ? totalQty : '';
-    if (addBtn) {
-      addBtn.style.display = 'block';
-      addBtn.classList.add('gold-hover');
-      addBtn.textContent = totalQty > 0 ? 'View choices' : 'Select your choice';
-    }
-  } else {
-    // normal product UI
-    if (totalQty > 0) {
-      if (addBtn && addBtn.classList.contains('add-cart')) addBtn.style.display = 'none';
-      if (badge) badge.textContent = totalQty;
-    } else {
-      if (addBtn && addBtn.classList.contains('add-cart')) addBtn.style.display = 'block';
-      if (badge) badge.textContent = '';
-    }
-  }
+/* update cart count display */
+function updateCartCount(){
+  const c = getCart();
+  const total = (c || []).reduce((s,i) => s + (i.quantity||0), 0);
+  if (cartCountElem) cartCountElem.textContent = total;
+  if (cartCountMobileElem) cartCountMobileElem.textContent = total;
+  cart = mergeCartItems(c);
 }
 
-// Price formatting (keeps your original locales and behavior)
-function formatPrice(product, currency) {
+/* ---------- price formatting (keeps your locale choices) ---------- */
+function formatPrice(product, currency){
   if (!product) return '';
   const price = currency === 'NGN' ? product.priceNGN :
     currency === 'USD' ? product.priceUSD :
-      currency === 'EUR' ? product.priceEUR :
-        currency === 'GBP' ? product.priceGBP : product.priceNGN;
+    currency === 'EUR' ? product.priceEUR :
+    currency === 'GBP' ? product.priceGBP : product.priceNGN;
   const localeMap = { NGN: 'en-NG', USD: 'en-US', EUR: 'de-DE', GBP: 'en-GB' };
   try {
-    return new Intl.NumberFormat(localeMap[currency] || 'en-US', { style: 'currency', currency, minimumFractionDigits: currency === 'NGN' ? 0 : 2 }).format(price);
+    return new Intl.NumberFormat(localeMap[currency] || 'en-US', { style: 'currency', currency, minimumFractionDigits: currency==='NGN'?0:2 }).format(price);
   } catch (e) {
     return `${currency} ${Number(price||0).toFixed(currency==='NGN'?0:2)}`;
   }
 }
 
-// Inject modal styles (keeps everything self-contained)
-function ensureModalStyles() {
-  if (document.getElementById('fdv-variant-modal-styles')) return;
+/* ---------- Modal CSS injection (self-contained) ---------- */
+(function injectModalCSS(){
+  if (document.getElementById('fdv-variant-modal-css')) return;
   const css = `
-    .fdv-modal-backdrop{position:fixed;inset:0;background:transparent;z-index:9999;display:flex;justify-content:flex-end;align-items:flex-start;padding:12px;}
-    .fdv-modal{position:fixed;top:20px;right:20px;width:340px;background:#1a1a1a;border:1px solid rgba(255,255,255,0.06);border-radius:10px;color:#eaeaea;box-shadow:0 8px 30px rgba(0,0,0,0.45);overflow:hidden;font-family:"Montserrat",sans-serif;}
-    .fdv-modal-header{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,0.05);}
-    .fdv-modal-title{font-size:15px;color:#FFD6BA;font-family:"Playfair Display",serif;}
-    .fdv-modal-close{background:none;border:0;color:#bbb;font-size:18px;cursor:pointer;}
-    .fdv-modal-body{padding:10px 14px;max-height:280px;overflow-y:auto;}
-    .fdv-variant-row{display:flex;gap:8px;align-items:center;margin-bottom:10px;}
-    .fdv-variant-img{width:48px;height:48px;border-radius:6px;object-fit:cover;background:#111;}
-    .fdv-variant-meta h4{margin:0;font-size:13px;color:#fff;}
-    .fdv-variant-meta p{margin:0;font-size:12px;color:#bbb;}
-    .fdv-modal-footer{display:flex;justify-content:flex-end;gap:8px;padding:10px 14px;border-top:1px solid rgba(255,255,255,0.05);}
-    .fdv-btn{border:1px solid #FFD6BA;background:transparent;color:#FFD6BA;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:13px;}
-    .fdv-btn:hover{background:#FFD6BA;color:#112e1f;}
+  .fdv-modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.15); z-index: 9999; }
+  .fdv-modal { position: absolute; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.45); color: #fff; min-width: 220px; max-width: 360px; z-index:10000; overflow:hidden; transform-origin: top left; }
+  .fdv-modal .fdv-modal-inner { padding: 12px 14px; }
+  .fdv-modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .fdv-modal-title { font-family: "Playfair Display", serif; font-size:15px; color: #FFD6BA; }
+  .fdv-modal-close { background:none; border:0; color:#FFD6BA; font-size:20px; cursor:pointer; }
+  .fdv-modal-body { max-height:280px; overflow:auto; padding-right:6px; }
+  .fdv-variant-row { display:flex; gap:10px; align-items:center; padding:8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+  .fdv-variant-row img { width:52px; height:52px; object-fit:cover; border-radius:6px; background:#fff; }
+  .fdv-variant-meta h4{ margin:0; font-size:13px; color:#fff; }
+  .fdv-variant-meta p{ margin:0; font-size:12px; color:#E6E6E6; }
+  .fdv-modal-footer { display:flex; justify-content:flex-end; gap:8px; margin-top:10px; }
+  .fdv-btn { border:1px solid rgba(255,214,186,0.15); background:transparent; color:#FFD6BA; padding:6px 10px; border-radius:8px; cursor:pointer; font-weight:600; }
+  .fdv-btn.primary { background: #FFD6BA; color:#112e1f; border: none; }
+  /* animations */
+  .fdv-anim-enter { animation: fdv-slide-fade-in 220ms ease forwards; }
+  .fdv-anim-leave { animation: fdv-slide-fade-out 220ms ease forwards; }
+  @keyframes fdv-slide-fade-in {
+    0% { opacity: 0; transform: translateY(8px) scale(0.98); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes fdv-slide-fade-out {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(8px) scale(0.98); }
+  }
   `;
   const s = document.createElement('style');
-  s.id = 'fdv-variant-modal-styles';
+  s.id = 'fdv-variant-modal-css';
   s.textContent = css;
   document.head.appendChild(s);
-}
+})();
 
-/**
- * Build list of selected variant rows for a productId
- * returns array of { id, parentId, productId, name, imageUrl, color, size, quantity }
- */
-function buildVariantRowsForProduct(productId) {
-  const c = getCart() || [];
+/* ---------- Helper: build selected variant rows for product ---------- */
+function buildVariantRowsForProduct(productId){
+  const c = getCart();
   const rows = [];
-  c.forEach(item => {
+  (c || []).forEach(item => {
     const matches =
       String(item.id) === String(productId) ||
       (item.parentId && String(item.parentId) === String(productId)) ||
@@ -436,7 +409,7 @@ function buildVariantRowsForProduct(productId) {
       if (master.name) nameParts.push(master.name);
       if (item.color) nameParts.push(item.color);
       if (item.size) nameParts.push(item.size);
-      const displayName = (item.name || nameParts.join(' — ')) || `Product ${productId}`;
+      const displayName = item.name || nameParts.join(' — ') || `Product ${productId}`;
       const imageUrl = item.image || master.imageUrl || (master.images && master.images[0]) || '';
       rows.push({
         id: item.id,
@@ -444,8 +417,8 @@ function buildVariantRowsForProduct(productId) {
         productId: item.productId || null,
         name: displayName,
         imageUrl,
-        color: item.color || item.selectedColor || null,
-        size: item.size || item.selectedSize || null,
+        color: item.color || null,
+        size: item.size || null,
         quantity: item.quantity || 0
       });
     }
@@ -453,77 +426,78 @@ function buildVariantRowsForProduct(productId) {
   return rows;
 }
 
-// Show modal listing selected variant combinations for a product
-function showVariantModal(productId) {
-  ensureModalStyles();
-  document.querySelectorAll('.fdv-modal-backdrop').forEach(e => e.remove()); // remove existing
+/* ---------- Show modal positioned near trigger element ---------- */
+let activeModal = null;
+function showVariantModal(productId, triggerElem){
+  // remove any existing
+  closeVariantModalImmediate();
 
   const rows = buildVariantRowsForProduct(productId);
-
-  // If no rows found, fall back to product page because nothing to show
   if (!rows || rows.length === 0) {
-    window.location.href = `product.html?productId=${encodeURIComponent(productId)}&currency=${encodeURIComponent(getCurrency())}`;
+    // fallback: go to product page with current currency
+    const cur = localStorage.getItem('currency') || 'NGN';
+    window.location.href = `product.html?productId=${encodeURIComponent(productId)}&currency=${encodeURIComponent(cur)}`;
     return;
   }
 
+  // create backdrop (to dim and capture outside clicks)
   const backdrop = document.createElement('div');
   backdrop.className = 'fdv-modal-backdrop';
+  backdrop.style.zIndex = 9999;
+  document.body.appendChild(backdrop);
 
+  // create modal container
   const modal = document.createElement('div');
-  modal.className = 'fdv-modal';
-  modal.setAttribute('role', 'dialog');
-  modal.setAttribute('aria-modal', 'true');
+  modal.className = 'fdv-modal fdv-anim-enter';
+  modal.setAttribute('role','dialog');
+  modal.setAttribute('aria-modal','true');
 
-  // Header
-  const header = document.createElement('div'); header.className = 'fdv-modal-header';
-  const title = document.createElement('div'); title.className = 'fdv-modal-title'; title.textContent = 'Your selection';
-  const closeBtn = document.createElement('button'); closeBtn.className = 'fdv-modal-close'; closeBtn.innerHTML = '&times;';
-  header.appendChild(title); header.appendChild(closeBtn);
+  // inner html skeleton
+  modal.innerHTML = `
+    <div class="fdv-modal-inner">
+      <div class="fdv-modal-header">
+        <div class="fdv-modal-title">Your selection</div>
+        <button class="fdv-modal-close" aria-label="Close">&times;</button>
+      </div>
+      <div class="fdv-modal-body"></div>
+      <div class="fdv-modal-footer">
+        <button class="fdv-btn clear-selection">Clear all selection</button>
+        <button class="fdv-btn primary edit-selection">Edit selection</button>
+      </div>
+    </div>
+  `;
 
-  // Body
-  const body = document.createElement('div'); body.className = 'fdv-modal-body';
-  rows.forEach(item => {
-    const row = document.createElement('div'); row.className = 'fdv-variant-row';
+  // append to DOM (initially offscreen, will be positioned)
+  document.body.appendChild(modal);
+  activeModal = { backdrop, modal };
 
-    const img = document.createElement('img'); img.className = 'fdv-variant-img'; img.src = item.imageUrl || ''; img.alt = item.name || 'Product';
-
-    const meta = document.createElement('div'); meta.className = 'fdv-variant-meta';
-    const h = document.createElement('h4'); h.textContent = item.name || 'Product';
-    const p = document.createElement('p');
-    const parts = [];
-    if (item.color) parts.push(`Color: ${item.color}`);
-    if (item.size) parts.push(`Size: ${item.size}`);
-    parts.push(`Qty: ${item.quantity || 0}`);
-    p.textContent = parts.join(' • ');
-    meta.appendChild(h); meta.appendChild(p);
-
-    row.appendChild(img); row.appendChild(meta);
+  // fill body with rows
+  const body = modal.querySelector('.fdv-modal-body');
+  rows.forEach(r => {
+    const row = document.createElement('div');
+    row.className = 'fdv-variant-row';
+    row.innerHTML = `
+      <img src="${escapeHtml(r.imageUrl || '')}" alt="${escapeHtml(r.name || '')}">
+      <div class="fdv-variant-meta">
+        <h4>${escapeHtml(r.name || '')}</h4>
+        <p>${(r.color ? `Color: ${escapeHtml(r.color)} • ` : '') + (r.size ? `Size: ${escapeHtml(r.size)} • ` : '')}Qty: ${r.quantity}</p>
+      </div>
+    `;
     body.appendChild(row);
   });
 
-  // Footer buttons
-  const footer = document.createElement('div'); footer.className = 'fdv-modal-footer';
+  // style modal background color to match FleurDeVie button if possible
+  const fvColor = detectBrandGreen() || '#112e1f';
+  modal.style.background = fvColor;
+  // ensure text is readable (we keep white)
 
-  const clearBtn = document.createElement('button'); clearBtn.className = 'fdv-btn'; clearBtn.textContent = 'Clear all selection';
-  const editBtn = document.createElement('button'); editBtn.className = 'fdv-btn'; editBtn.textContent = 'Edit selection';
-  const closeFooterBtn = document.createElement('button'); closeFooterBtn.className = 'fdv-btn'; closeFooterBtn.textContent = 'Close';
+  // position modal near trigger
+  positionModalNearTrigger(modal, triggerElem);
 
-  footer.appendChild(clearBtn); footer.appendChild(editBtn); footer.appendChild(closeFooterBtn);
-
-  modal.appendChild(header); modal.appendChild(body); modal.appendChild(footer);
-  backdrop.appendChild(modal);
-  document.body.appendChild(backdrop);
-
-  // Position: keep in top-right (already handled by CSS)
-  // Close handlers
-  closeBtn.addEventListener('click', () => backdrop.remove());
-  closeFooterBtn.addEventListener('click', () => backdrop.remove());
-  backdrop.addEventListener('click', e => {
-    if (e.target === backdrop) backdrop.remove();
-  });
-
-  // Clear selection handler: removes all cart items that match this product
-  clearBtn.addEventListener('click', () => {
+  // handlers
+  modal.querySelector('.fdv-modal-close').addEventListener('click', closeVariantModal);
+  modal.querySelector('.clear-selection').addEventListener('click', () => {
+    // remove all cart items that belong to this product
     const current = getCart();
     const filtered = (current || []).filter(item => {
       const matches =
@@ -534,25 +508,120 @@ function showVariantModal(productId) {
       return !matches;
     });
     setCart(filtered);
-    backdrop.remove();
-    updateProductUI(productId);
+    closeVariantModal();
+    // re-render product grid so badges/buttons update
+    loadProducts();
+  });
+  modal.querySelector('.edit-selection').addEventListener('click', () => {
+    const cur = localStorage.getItem('currency') || 'NGN';
+    closeVariantModal();
+    window.location.href = `product.html?productId=${encodeURIComponent(productId)}&currency=${encodeURIComponent(cur)}`;
   });
 
-  // Edit selection: navigate to product page with currency param synced to current shop currency
-  editBtn.addEventListener('click', () => {
-    const currency = getCurrency();
-    backdrop.remove();
-    window.location.href = `product.html?productId=${encodeURIComponent(productId)}&currency=${encodeURIComponent(currency)}`;
+  // clicking outside closes (backdrop)
+  backdrop.addEventListener('click', (e) => {
+    // click on backdrop closes; clicks that bubble from modal won't reach here due to stopPropagation usage below
+    closeVariantModal();
   });
+
+  // ensure clicks inside modal don't close immediately
+  modal.addEventListener('click', (e) => e.stopPropagation());
+
+  // reposition on resize/scroll for robustness
+  function __reposition() { positionModalNearTrigger(modal, triggerElem); }
+  window.addEventListener('resize', __reposition);
+  window.addEventListener('scroll', __reposition, { passive: true });
+
+  // store cleanup function on modal for use when closing
+  modal._cleanup = () => {
+    window.removeEventListener('resize', __reposition);
+    window.removeEventListener('scroll', __reposition);
+  };
 }
 
-// Utility: get current shop currency (falls back to 'NGN')
-function getCurrency() {
-  return currencySelect?.value || (localStorage.getItem('currency') || 'NGN');
+/* immediate close without animation (used to clear before open) */
+function closeVariantModalImmediate(){
+  if (!activeModal) return;
+  const { backdrop, modal } = activeModal;
+  try { modal._cleanup && modal._cleanup(); } catch(e){}
+  backdrop.remove();
+  modal.remove();
+  activeModal = null;
 }
 
-// ----------------- Load & display products -----------------
-async function loadProducts() {
+/* graceful close with animation */
+function closeVariantModal(){
+  if (!activeModal) return;
+  const { backdrop, modal } = activeModal;
+  // animate leave
+  modal.classList.remove('fdv-anim-enter');
+  modal.classList.add('fdv-anim-leave');
+  // remove after animation
+  setTimeout(() => {
+    try { modal._cleanup && modal._cleanup(); } catch(e){}
+    backdrop.remove();
+    modal.remove();
+    activeModal = null;
+  }, 220);
+}
+
+/* compute modal position based on triggerRect and available space */
+function positionModalNearTrigger(modal, triggerElem){
+  if (!modal || !triggerElem) return;
+  const modalContent = modal; // modal itself is positioned
+  const rect = triggerElem.getBoundingClientRect();
+  const mw = Math.min(window.innerWidth - 24, 360);
+  const mh = 360; // estimate for logic; actual height may vary
+
+  // prefer below if space, else above; horizontal: try align to trigger left, but keep inside viewport
+  const spaceBelow = window.innerHeight - rect.bottom;
+  const spaceAbove = rect.top;
+  const scrollY = window.scrollY || window.pageYOffset;
+  const scrollX = window.scrollX || window.pageXOffset;
+
+  // default left: rect.left (but keep margin)
+  let left = rect.left + scrollX;
+  // adjust so modal not overflow right
+  if (left + mw + 12 > scrollX + window.innerWidth) left = (scrollX + window.innerWidth) - mw - 12;
+  if (left < scrollX + 12) left = scrollX + 12;
+
+  // default top
+  let top;
+  if (spaceBelow > 220 || spaceBelow >= spaceAbove) {
+    // place below
+    top = rect.bottom + 8 + scrollY;
+  } else {
+    // place above
+    top = rect.top - 8 - (modalContent.offsetHeight || 200) + scrollY;
+    // if overflow, fallback to below
+    if (top < scrollY + 8) top = rect.bottom + 8 + scrollY;
+  }
+
+  // for narrow mobile widths, center horizontally
+  if (window.innerWidth <= 480) {
+    left = scrollX + Math.max(12, (window.innerWidth - mw) / 2);
+  }
+
+  modalContent.style.width = mw + 'px';
+  modalContent.style.left = Math.round(left) + 'px';
+  modalContent.style.top = Math.round(top) + 'px';
+}
+
+/* try to detect FleurDeVie dark green from existing buttons, fallback to #112e1f */
+function detectBrandGreen(){
+  try {
+    // check common selectors: '.product-card button', '.add-cart', '.variant-btn'
+    const el = document.querySelector('.product-card button, .add-cart, .variant-btn, .product-card .add-cart');
+    if (!el) return '#112e1f';
+    const cs = getComputedStyle(el);
+    const bg = cs.backgroundColor || cs.color || null;
+    if (!bg) return '#112e1f';
+    return bg;
+  } catch(e){ return '#112e1f'; }
+}
+
+/* ---------- Load & render products ---------- */
+async function loadProducts(){
   try {
     if (productGrid) productGrid.innerHTML = '<p style="text-align:center; color:var(--muted);">Loading products…</p>';
     const q = query(collection(db, "brands", "fleurdevie", "products"), where("published", "==", true));
@@ -573,34 +642,36 @@ async function loadProducts() {
   }
 }
 
-function displayProducts(products) {
+function displayProducts(products){
   const term = (searchInput?.value || '').toLowerCase();
   let filtered = (products || []).filter(p => (p.name || '').toLowerCase().includes(term));
   const sortVal = sortSelect?.value;
-  const currency = getCurrency();
+  const currency = currencySelect?.value || (localStorage.getItem('currency') || 'NGN');
 
-  function getPriceForCurrency(product) {
-    return currency === 'NGN' ? product.priceNGN : currency === 'USD' ? product.priceUSD : currency === 'EUR' ? product.priceEUR : currency === 'GBP' ? product.priceGBP : product.priceNGN;
-  }
+  const getPriceForCurrency = (product) => (
+    currency === 'NGN' ? product.priceNGN :
+    currency === 'USD' ? product.priceUSD :
+    currency === 'EUR' ? product.priceEUR :
+    currency === 'GBP' ? product.priceGBP : product.priceNGN
+  );
 
-  if (sortVal === 'alphabet') filtered.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-  if (sortVal === 'price-asc') filtered.sort((a, b) => (getPriceForCurrency(a) || 0) - (getPriceForCurrency(b) || 0));
-  if (sortVal === 'price-desc') filtered.sort((a, b) => (getPriceForCurrency(b) || 0) - (getPriceForCurrency(a) || 0));
+  if (sortVal === 'alphabet') filtered.sort((a,b) => (a.name||'').localeCompare(b.name||''));
+  if (sortVal === 'price-asc') filtered.sort((a,b) => (getPriceForCurrency(a)||0) - (getPriceForCurrency(b)||0));
+  if (sortVal === 'price-desc') filtered.sort((a,b) => (getPriceForCurrency(b)||0) - (getPriceForCurrency(a)||0));
 
-  const productsPerPage = 5; 
+  const productsPerPage = 5;
   const totalPages = Math.ceil(filtered.length / productsPerPage) || 1;
   if (currentPage > totalPages) currentPage = totalPages;
 
   const start = (currentPage - 1) * productsPerPage;
-  const end = start + productsPerPage;
-  const paginated = filtered.slice(start, end);
+  const paginated = filtered.slice(start, start + productsPerPage);
 
   if (productGrid) productGrid.innerHTML = '';
-  for (const p of paginated) {
+  paginated.forEach(p => {
     const quantity = getTotalQuantity(p.id);
     const priceForCurrency = getPriceForCurrency(p);
 
-    // detect variants using similar heuristics to Serac + your schema
+    // detect variants heuristics
     const hasVariants = Boolean(
       (p.variants && Array.isArray(p.variants) && p.variants.length > 0) ||
       (p.options && Array.isArray(p.options) && p.options.length > 0) ||
@@ -612,35 +683,30 @@ function displayProducts(products) {
       (Array.isArray(p.sizes) && p.sizes.length > 0)
     );
 
-    const div = document.createElement('div');
-    div.className = 'product-card';
-    div.id = `product-${p.id}`;
-    // expose variant flag
-    div.dataset.hasVariants = hasVariants ? 'true' : 'false';
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    card.id = `product-${p.id}`;
+    card.dataset.hasVariants = hasVariants ? 'true' : 'false';
 
-    // for variant products: no +/- controls; show select-variant button
-    let quantityControlsHtml = '';
+    // quantity badge for variants only; non-variants keep +/-
+    let quantityHtml = '';
     if (hasVariants) {
-      quantityControlsHtml = `
-        <div class="quantity-controls" aria-hidden="true">
-          <span class="quantity-badge">${quantity > 0 ? quantity : ''}</span>
-        </div>
-      `;
+      quantityHtml = `<div class="quantity-controls"><span class="quantity-badge">${quantity > 0 ? quantity : ''}</span></div>`;
     } else {
-      quantityControlsHtml = `
+      quantityHtml = `
         <div class="quantity-controls">
-          <button class="minus" aria-label="Decrease">-</button>
+          <button class="minus">-</button>
           <span class="quantity-badge">${quantity > 0 ? quantity : ''}</span>
-          <button class="plus" aria-label="Increase">+</button>
+          <button class="plus">+</button>
         </div>
       `;
     }
 
-    const actionButtonHtml = hasVariants
-      ? `<button class="select-variant" style="display:block;">${quantity > 0 ? 'View choices' : 'Select your choice'}</button>`
+    const actionBtnHtml = hasVariants
+      ? `<button class="select-variant">${quantity > 0 ? 'View choices' : 'Select your choice'}</button>`
       : `<button class="add-cart" style="display:${quantity > 0 ? 'none' : 'block'};">Add to Cart</button>`;
 
-    div.innerHTML = `
+    card.innerHTML = `
       ${p.customizationAvailable ? `<a href="customization.html?productId=${p.id}" class="customize-badge" onclick="event.stopPropagation()"><i class="fa-solid fa-wand-magic-sparkles"></i> Customize</a>` : ''}
       <a href="product.html?productId=${p.id}&price=${encodeURIComponent(priceForCurrency)}&currency=${encodeURIComponent(currency)}">
         <img src="${escapeHtml(p.imageUrl || '')}" alt="${escapeHtml(p.name || '')}">
@@ -648,90 +714,88 @@ function displayProducts(products) {
       <h3>${escapeHtml(p.name || '')}</h3>
       <div class="description">${escapeHtml(truncateText(p.description || '', 15))}</div>
       <div class="price">${formatPrice(p, currency)}</div>
-      ${quantityControlsHtml}
-      ${actionButtonHtml}
+      ${quantityHtml}
+      ${actionBtnHtml}
     `;
 
-    // event wiring
+    // wire events
     if (!hasVariants) {
-      div.querySelector('.plus')?.addEventListener('click', e => { e.stopPropagation(); addToCart(p); });
-      div.querySelector('.minus')?.addEventListener('click', e => { e.stopPropagation(); removeFromCart(p.id); });
-      div.querySelector('.add-cart')?.addEventListener('click', e => { e.stopPropagation(); addToCart(p); });
+      card.querySelector('.plus')?.addEventListener('click', e => { e.stopPropagation(); addToCart(p); });
+      card.querySelector('.minus')?.addEventListener('click', e => { e.stopPropagation(); removeFromCart(p.id); });
+      card.querySelector('.add-cart')?.addEventListener('click', e => { e.stopPropagation(); addToCart(p); });
     } else {
-      const selectBtn = div.querySelector('.select-variant');
-      if (selectBtn) {
-        selectBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const totalSelected = getTotalQuantity(p.id);
-          if (totalSelected > 0) {
-            // show modal with selected variants
-            showVariantModal(p.id);
-          } else {
-            // always navigate to product page to pick variants
-            const url = `product.html?productId=${encodeURIComponent(p.id)}&price=${encodeURIComponent(priceForCurrency)}&currency=${encodeURIComponent(currency)}`;
-            window.location.href = url;
-          }
-        });
-      }
+      const sel = card.querySelector('.select-variant');
+      sel?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const totalSelected = getTotalQuantity(p.id);
+        if (totalSelected > 0) {
+          // show modal listing selected combos (position near this button)
+          showVariantModal(p.id, sel);
+        } else {
+          // navigate to product page for variant selection; include shop currency
+          const url = `product.html?productId=${encodeURIComponent(p.id)}&price=${encodeURIComponent(priceForCurrency)}&currency=${encodeURIComponent(currency)}`;
+          window.location.href = url;
+        }
+      });
     }
 
-    productGrid?.appendChild(div);
-  }
+    productGrid.appendChild(card);
+  });
 
-  // pagination
-  const existingPagination = document.querySelector('.pagination-container');
-  if (existingPagination) existingPagination.remove();
-
+  // pagination UI (remove old then add new)
+  const old = document.querySelector('.pagination-container');
+  if (old) old.remove();
   const paginationContainer = document.createElement('div');
   paginationContainer.className = 'pagination-container';
-  const pagination = document.createElement('div');
-  pagination.className = 'pagination';
+  const pagination = document.createElement('div'); pagination.className = 'pagination';
 
-  const prevBtn = document.createElement('button');
-  prevBtn.textContent = 'Prev';
-  prevBtn.disabled = currentPage === 1;
-  prevBtn.addEventListener('click', () => {
-    if (currentPage > 1) { currentPage--; displayProducts(products); window.scrollTo({ top: 0, behavior: 'smooth' }); }
-  });
+  const prevBtn = document.createElement('button'); prevBtn.textContent = 'Prev'; prevBtn.disabled = currentPage === 1;
+  prevBtn.addEventListener('click', () => { if (currentPage > 1) { currentPage--; displayProducts(products); window.scrollTo({ top:0, behavior:'smooth' }); } });
   pagination.appendChild(prevBtn);
 
-  for (let i = 1; i <= Math.max(totalPages, 1); i++) {
-    const btn = document.createElement('button');
-    btn.textContent = i;
-    btn.className = (i === currentPage) ? 'active' : '';
-    btn.addEventListener('click', () => {
-      currentPage = i;
-      displayProducts(products);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
+  for (let i=1; i<=Math.max(totalPages,1); i++){
+    const btn = document.createElement('button'); btn.textContent = i; btn.className = i===currentPage ? 'active' : '';
+    btn.addEventListener('click', () => { currentPage = i; displayProducts(products); window.scrollTo({ top:0, behavior:'smooth' }); });
     pagination.appendChild(btn);
   }
 
-  const nextBtn = document.createElement('button');
-  nextBtn.textContent = 'Next';
-  nextBtn.disabled = currentPage === totalPages;
-  nextBtn.addEventListener('click', () => {
-    if (currentPage < totalPages) { currentPage++; displayProducts(products); window.scrollTo({ top: 0, behavior: 'smooth' }); }
-  });
+  const nextBtn = document.createElement('button'); nextBtn.textContent = 'Next'; nextBtn.disabled = currentPage === totalPages;
+  nextBtn.addEventListener('click', () => { if (currentPage < totalPages) { currentPage++; displayProducts(products); window.scrollTo({ top:0, behavior:'smooth' }); } });
   pagination.appendChild(nextBtn);
 
   paginationContainer.appendChild(pagination);
-  if (productGrid && productGrid.parentElement) {
-    productGrid.insertAdjacentElement('afterend', paginationContainer);
-  } else {
-    document.body.appendChild(paginationContainer);
-  }
+  if (productGrid && productGrid.parentElement) productGrid.insertAdjacentElement('afterend', paginationContainer);
+  else document.body.appendChild(paginationContainer);
 
-  // After rendering, sync UI
+  // ensure UI reflects cart state
   updateCartCount();
   (paginated || []).forEach(p => updateProductUI(p.id));
 }
 
-// helpers
-function truncateText(text, wordLimit) { return text.split(' ').slice(0,wordLimit).join(' '); }
-function escapeHtml(str) { if (!str && str !== 0) return ""; return String(str).replace(/[&<>"']/g, s => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": "&#39;" }[s])); }
+/* update single product card UI to show badge/button states */
+function updateProductUI(productId){
+  const card = document.getElementById(`product-${productId}`);
+  if (!card) return;
+  const badge = card.querySelector('.quantity-badge');
+  const addBtn = card.querySelector('.add-cart');
+  const selBtn = card.querySelector('.select-variant');
+  const totalQty = getTotalQuantity(productId);
+  const isVariant = card.dataset.hasVariants === 'true';
+  if (isVariant) {
+    if (badge) badge.textContent = totalQty > 0 ? totalQty : '';
+    if (selBtn) selBtn.textContent = totalQty > 0 ? 'View choices' : 'Select your choice';
+    if (addBtn) { addBtn.style.display = 'none'; }
+  } else {
+    if (badge) badge.textContent = totalQty > 0 ? totalQty : '';
+    if (addBtn) addBtn.style.display = totalQty > 0 ? 'none' : 'block';
+  }
+}
 
-// events
+/* ---------- helpers ---------- */
+function truncateText(text, wordLimit){ return (text||'').split(' ').slice(0,wordLimit).join(' '); }
+function escapeHtml(str){ if (!str && str !== 0) return ""; return String(str).replace(/[&<>"']/g, s => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[s])); }
+
+/* ---------- event wiring ---------- */
 searchInput?.addEventListener('input', () => { currentPage = 1; loadProducts(); });
 sortSelect?.addEventListener('change', () => { currentPage = 1; loadProducts(); });
 currencySelect?.addEventListener('change', () => {
@@ -740,88 +804,32 @@ currencySelect?.addEventListener('change', () => {
   loadProducts();
 });
 
-// hamburger (keeps your existing ids)
+/* hamburger & mobile cart handlers (kept as-is) */
 const hamburgerBtn = document.getElementById('hamburger-btn');
 const navMenu = document.getElementById('nav-menu');
 if (hamburgerBtn) hamburgerBtn.addEventListener('click', () => { hamburgerBtn.classList.toggle('open'); if (navMenu) navMenu.classList.toggle('open'); });
+function handleMobileCart(){ const el = document.querySelector('.mobile-cart'); if(!el) return; el.style.display = window.innerWidth <= 900 ? 'flex' : 'none'; }
+window.addEventListener('resize', handleMobileCart); handleMobileCart();
 
-// mobile cart
-function handleMobileCart() { const el = document.querySelector('.mobile-cart'); if(!el) return; el.style.display = window.innerWidth <= 900 ? 'flex' : 'none'; }
-window.addEventListener('resize', handleMobileCart);
-handleMobileCart();
-
-updateCartCount();
-loadProducts();
-
-// storage sync across tabs
+/* storage sync and pageshow to reflect product page changes */
 window.addEventListener('storage', () => {
   cart = getCart();
   cart = mergeCartItems(cart);
   updateCartCount();
-  // update UI for any known products (product cards may not be in DOM if not paginated)
   Object.keys(productsData || {}).forEach(pid => updateProductUI(pid));
 });
-
-// pageshow: ensure product page changes reflect when user returns
 window.addEventListener('pageshow', () => {
   cart = mergeCartItems(getCart());
   updateCartCount();
   Object.keys(productsData || {}).forEach(pid => updateProductUI(pid));
 });
 
-// minimal header/hero behaviour (preserve original behavior)
-let lastScrollY = window.scrollY;
-const header = document.querySelector('.site-header');
-const hero = document.querySelector('.hero');
-window.addEventListener('scroll', () => {
-  if (!hero || !header) return;
-  const heroBottom = hero.offsetTop + hero.offsetHeight;
-  if (window.scrollY > heroBottom) {
-    if (window.scrollY > lastScrollY) header.classList.add('hidden');
-    else { header.classList.remove('hidden'); header.classList.add('scrolled'); }
-  } else header.classList.remove('hidden', 'scrolled');
-  lastScrollY = window.scrollY;
-});
-document.addEventListener('mousemove', e => { if (e.clientY < 100 && header) header.classList.remove('hidden'); });
+/* init */
+updateCartCount();
+loadProducts();
 
-const supportBtn = document.getElementById('floatingSupportBtn');
-supportBtn?.addEventListener('click', () => { window.location.href = 'mailto:yourstruly.fleurdevie@gmail.com?subject=Support%20Request'; });
-
-// Pagination styles (keeps your original style insertion)
-const style = document.createElement('style');
-style.textContent = `
-.pagination-container {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  margin-top: 2rem;
-}
-.pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 0.6rem;
-  flex-wrap: wrap;
-}
-.pagination button {
-  background: transparent !important;
-  color: #112e1f;
-  border: 1px solid #112e1f;
-  padding: 0.5rem 1rem;
-  cursor: pointer;
-  border-radius: 6px;
-  font-weight: 500;
-  transition: all 0.3s ease;
-}
-.pagination button:hover { background: #112e1f; color: #fff; }
-.pagination button.active { background: #112e1f; color: #fff; border-color: #112e1f; }
-.pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
-
-/* small gold-hover class for consistency on variant buttons */
-.gold-hover { position:relative; background:transparent; color:#FFD6BA; border:1px solid #FFD6BA; padding:8px 12px; border-radius:8px; font-weight:600; overflow:hidden; transition: color 0.25s ease; }
-`;
-document.head.appendChild(style);
 </script>
+
 
 </body>
 </html>
