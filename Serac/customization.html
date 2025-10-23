@@ -210,7 +210,24 @@
   .hamburger { display:block; }
   .hero-text h1 { font-size:32px; }
 }
-  
+
+@media (max-width: 800px) {
+  section.story-block {
+    flex-direction: column;
+    text-align: center;
+    padding: 60px 20px;
+  }
+
+  section.story-block:nth-child(even) {
+    flex-direction: column; /* override row-reverse on mobile */
+  }
+
+  .story-image {
+    margin-top: 30px;
+  }
+}
+
+    
 @media(max-width:600px){
   .hero { height:40vh; margin-top:0; padding-top:80px; }
   .hero-text h1 { font-size:clamp(24px,5vw,32px); line-height:1.2; margin:0; }
@@ -220,7 +237,7 @@
   </style>
 
   <style>
-  @media(min-width: 900px) {
+  @media(min-width: 200px) {
     .hero { position: relative; overflow: visible; }
   
     .hero-peek {
