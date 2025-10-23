@@ -368,15 +368,7 @@ function setCart(cartArray){
   try { localStorage.setItem('cart', JSON.stringify(cart)); } catch(e){ console.warn('Could not set cart', e); }
   updateCartCount();
 }
-function mergeCartItems(cartArray){
-  const merged = [];
-  (cartArray || []).forEach(item => {
-    const idx = merged.findIndex(i => i.id === item.id && (i.color||'') === (item.color||'') && (i.size||'') === (item.size||''));
-    if (idx === -1) merged.push({ ...item });
-    else merged[idx].quantity = (merged[idx].quantity || 0) + (item.quantity || 0);
-  });
-  return merged;
-}
+
 
 /* robust total quantity for product (accounts for variants) */
 function getTotalQuantity(productId){
