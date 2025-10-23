@@ -63,7 +63,7 @@
     .option-group{ margin-top:10px; }
     .option-group h4{ font-size:14px; color:var(--gold); margin-bottom:6px; font-weight:600; letter-spacing:0.3px; }
     .options-container{ display:flex; gap:8px; flex-wrap:wrap; }
-    .options-container button{ padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.06); background:transparent; color:var(--muted); cursor:pointer; font-weight:500; transition:all var(--transition); text-align:center; }
+    .options-container button{ padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.06); background:transparent; color:var(--muted); cursor:pointer; font-weight:500; transition:all var(--transition); text-align:center; position:relative; }
     .options-container button:hover{ color:#fff; border-color:var(--gold); }
     .options-container button.selected{ background:rgba(182,110,65,0.12); color:#fff; border-color:var(--accent-strong); }
 
@@ -95,6 +95,12 @@
     .product-extra-details{ margin-top:18px; color:var(--muted); font-size:15px; line-height:1.7; white-space:pre-line; }
     .product-extra-details ul{ margin-left:20px; list-style:disc; }
     .product-extra-details li{ margin-bottom:6px; }
+
+    /* variant badge styles */
+    .variant-badge{ position:absolute; top:4px; right:6px; background:var(--gold); color:#fff; font-size:0.65rem; border-radius:50%; min-width:16px; height:16px; display:flex; align-items:center; justify-content:center; font-weight:600; box-shadow:0 0 3px rgba(0,0,0,0.4); pointer-events:none; }
+    /* when a size is active and some colors exist for it */
+    .options-container button.has-combo{ box-shadow:0 8px 20px rgba(182,110,65,0.12); }
+    .options-container button.combo-active{ background:rgba(182,110,65,0.14); border-color:var(--gold); color:#fff; }
 
     /* MODAL */
     #optionModal{ display:none; position:fixed; inset:0; background: rgba(20,21,23,0.95); justify-content:center; align-items:center; z-index:2000; }
@@ -154,14 +160,15 @@
       <div class="price" id="productPrice"></div>
 
       <!-- Variant groups (separated) -->
-      <div class="option-group" id="colorGroup" style="display:none;">
-        <h4>Colors</h4>
-        <div class="options-container" id="colorOptions"></div>
-      </div>
-
+      <!-- size first is recommended; if you keep color first visually it will still treat size as parent when present -->
       <div class="option-group" id="sizeGroup" style="display:none;">
         <h4>Sizes</h4>
         <div class="options-container" id="sizeOptions"></div>
+      </div>
+
+      <div class="option-group" id="colorGroup" style="display:none;">
+        <h4>Colors</h4>
+        <div class="options-container" id="colorOptions"></div>
       </div>
 
       <div class="quantity-controls" style="margin-top:8px;">
@@ -245,6 +252,8 @@
       if(quantityBadge) quantityBadge.textContent = total;
       if(addCartBtn) addCartBtn.style.display = total > 0 ? 'none' : 'flex';
     }
+
+    // modify addToCart/removeFromCart to operate on combination-level (they already do)
     function addToCart(product){
       let cart = getCart();
       const index = cart.findIndex(i => i.id === product.id && (i.color||'') === (product.color||'') && (i.size||'') === (product.size||''));
@@ -274,7 +283,8 @@
     }
     function validateSelection(){
       const sel = getSelectedOptions();
-      if((colorOptions?.children.length && !sel.color) || (sizeOptions?.children.length && !sel.size)){
+      // when size exists, require size; when color exists, require color
+      if((sizeOptions?.children.length && !sel.size) || (colorOptions?.children.length && !sel.color)){
         if(optionModal) optionModal.style.display = 'flex';
         return false;
       }
@@ -390,6 +400,27 @@
           if(customizeBtn) customizeBtn.style.display = 'none';
         }
 
+        // Sizes (render first - size is parent when present)
+        if(sizeOptions) sizeOptions.innerHTML = '';
+        if(Array.isArray(data.sizes) && data.sizes.length){
+          sizeGroup.style.display = '';
+          data.sizes.forEach(s => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.textContent = s;
+            btn.addEventListener('click', ()=> {
+              Array.from(sizeOptions.children).forEach(b=>b.classList.remove('selected'));
+              btn.classList.add('selected');
+              // when size selected, update colors' highlight/badges
+              updateVariantBadges();
+              updateQuantityUI(productId);
+            });
+            sizeOptions.appendChild(btn);
+          });
+        } else {
+          sizeGroup.style.display = 'none';
+        }
+
         // Colors
         if(colorOptions) colorOptions.innerHTML = '';
         if(Array.isArray(data.colors) && data.colors.length){
@@ -401,31 +432,14 @@
             btn.addEventListener('click', ()=> {
               Array.from(colorOptions.children).forEach(b=>b.classList.remove('selected'));
               btn.classList.add('selected');
+              // when color selected, update sizes highlight/badges
+              updateVariantBadges();
               updateQuantityUI(productId);
             });
             colorOptions.appendChild(btn);
           });
         } else {
           colorGroup.style.display = 'none';
-        }
-
-        // Sizes
-        if(sizeOptions) sizeOptions.innerHTML = '';
-        if(Array.isArray(data.sizes) && data.sizes.length){
-          sizeGroup.style.display = '';
-          data.sizes.forEach(s => {
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.textContent = s;
-            btn.addEventListener('click', ()=> {
-              Array.from(sizeOptions.children).forEach(b=>b.classList.remove('selected'));
-              btn.classList.add('selected');
-              updateQuantityUI(productId);
-            });
-            sizeOptions.appendChild(btn);
-          });
-        } else {
-          sizeGroup.style.display = 'none';
         }
 
         // Details (supports line breaks and bullet lists)
@@ -460,14 +474,23 @@
       if(!validateSelection()) return;
       const sel = getSelectedOptions();
       addToCart({ id: productId, name: currentProductData.name, price: currentProductData.price, currency: currentProductData.currency, imageUrl: productImg?.src, color: sel.color, size: sel.size });
+      // immediate badge update
+      updateVariantBadges();
     });
     plusBtn?.addEventListener('click', () => {
       if(!currentProductData) return;
       if(!validateSelection()) return;
       const sel = getSelectedOptions();
       addToCart({ id: productId, name: currentProductData.name, price: currentProductData.price, currency: currentProductData.currency, imageUrl: productImg?.src, color: sel.color, size: sel.size });
+      // immediate badge update
+      updateVariantBadges();
     });
-    minusBtn?.addEventListener('click', () => { removeFromCart(productId); });
+    minusBtn?.addEventListener('click', () => { 
+      // On minus, require selection (validateSelection ensures it)
+      if(!validateSelection()) return;
+      removeFromCart(productId);
+      updateVariantBadges();
+    });
     closeModalBtn?.addEventListener('click', () => { if(optionModal) optionModal.style.display = 'none'; });
 
     // ---------- THUMBNAIL SWIPE (mouse) ----------
@@ -480,7 +503,7 @@
     }
 
     // ---------- STORAGE SYNC ----------
-    window.addEventListener('storage', () => { updateCartCount(); updateQuantityUI(productId); });
+    window.addEventListener('storage', () => { updateCartCount(); updateQuantityUI(productId); updateVariantBadges(); });
 
     // ---------- INIT ----------
     updateCartCount();
@@ -562,101 +585,191 @@
       });
     });
 
-// ---------- VARIANT BADGE TRACKING ----------
-(function variantBadgeSystem() {
-  const STORAGE_KEY = 'seracCart';
-  const colorOptionsEl = document.getElementById('colorOptions');
-  const sizeOptionsEl = document.getElementById('sizeOptions');
-  if (!colorOptionsEl && !sizeOptionsEl) return;
+    /* ======================================================
+       VARIANT COMBO SYSTEM — START
+       - size is treated as parent when present
+       - per-combination counts are shown immediately
+       - plus/minus affect currently active size+color combo
+       - works without changing HTML; integrated to your cart
+       ====================================================== */
 
-  // --- Helpers ---
-  const getCart = () => JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-  const key = (p) => `${p.id || ''}-${p.color || 'none'}-${p.size || 'none'}`;
-
-  // Add a badge to a button
-  function addBadge(btn, count) {
-    if (!btn) return;
-    let badge = btn.querySelector('.variant-badge');
-    if (!badge) {
-      badge = document.createElement('span');
-      badge.className = 'variant-badge';
-      Object.assign(badge.style, {
-        position: 'absolute',
-        top: '4px',
-        right: '6px',
-        background: 'var(--gold)',
-        color: '#fff',
-        fontSize: '0.65rem',
-        borderRadius: '50%',
-        minWidth: '16px',
-        height: '16px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontWeight: '600',
-        boxShadow: '0 0 3px rgba(0,0,0,0.4)',
-        pointerEvents: 'none',
+    function updateVariantBadges(){
+      // clears and redraws badges based on current cart and selection
+      const cart = getCart();
+      // Remove existing badges and helper states
+      document.querySelectorAll('.variant-badge').forEach(n => n.remove());
+      document.querySelectorAll('#sizeOptions > button, #colorOptions > button').forEach(b=>{
+        b.classList.remove('has-combo','combo-active');
       });
-      btn.style.position = 'relative';
-      btn.appendChild(badge);
+
+      // Build helper maps:
+      // mapSizeTotals[size] = total quantity for that size (sum across colors)
+      // mapColorTotals[color] = total quantity for that color (sum across sizes)
+      // mapCombo[color+'|'+size] = quantity for that exact combination
+      const mapSizeTotals = {};
+      const mapColorTotals = {};
+      const mapCombo = {}; // key: color|size
+
+      cart.forEach(item=>{
+        if(!item || item.id !== productId) return;
+        const color = item.color || 'none';
+        const size = item.size || 'none';
+        const qty = Number(item.quantity || 0);
+        mapSizeTotals[size] = (mapSizeTotals[size] || 0) + qty;
+        mapColorTotals[color] = (mapColorTotals[color] || 0) + qty;
+        const ck = `${color}|${size}`;
+        mapCombo[ck] = (mapCombo[ck] || 0) + qty;
+      });
+
+      // helper to add badge element to button
+      function attachBadgeToBtn(btn, count){
+        if(!btn) return;
+        let badge = btn.querySelector('.variant-badge');
+        if(!badge){
+          badge = document.createElement('span');
+          badge.className = 'variant-badge';
+          btn.appendChild(badge);
+        }
+        badge.textContent = String(count);
+        badge.style.display = count > 0 ? 'flex' : 'none';
+      }
+
+      // Determine active selections
+      const activeSize = sizeOptions?.querySelector('.selected')?.textContent?.trim() || null;
+      const activeColor = colorOptions?.querySelector('.selected')?.textContent?.trim() || null;
+
+      // Update size buttons: show total per size
+      if(sizeOptions){
+        Array.from(sizeOptions.children).forEach(btn=>{
+          const s = btn.textContent.trim();
+          const total = mapSizeTotals[s] || 0;
+          if(total > 0){
+            attachBadgeToBtn(btn, total);
+            btn.classList.add('has-combo');
+          } else {
+            // remove badge if present
+            const b = btn.querySelector('.variant-badge');
+            if(b) b.remove();
+          }
+        });
+      }
+
+      // Update color buttons:
+      // If a size is active, show count for that color limited to that size (combo)
+      // Otherwise show total across sizes
+      if(colorOptions){
+        Array.from(colorOptions.children).forEach(btn=>{
+          const c = btn.textContent.trim();
+          const key = `${c}|${activeSize || 'none'}`;
+          const comboQty = mapCombo[key] || 0;
+          const total = mapColorTotals[c] || 0;
+
+          if(activeSize){
+            if(comboQty > 0){
+              attachBadgeToBtn(btn, comboQty);
+              btn.classList.add('has-combo');
+            } else {
+              // show zero? hide badge
+              const b = btn.querySelector('.variant-badge');
+              if(b) b.remove();
+              btn.classList.remove('has-combo');
+            }
+          } else {
+            if(total > 0){
+              attachBadgeToBtn(btn, total);
+              btn.classList.add('has-combo');
+            } else {
+              const b = btn.querySelector('.variant-badge');
+              if(b) b.remove();
+              btn.classList.remove('has-combo');
+            }
+          }
+        });
+      }
+
+      // Make combo-active styling: if both size and color selected, mark the exact buttons as active combo
+      if(activeSize && activeColor){
+        const sBtn = sizeOptions?.querySelector('.selected');
+        const cBtn = colorOptions?.querySelector('.selected');
+        if(sBtn) sBtn.classList.add('combo-active');
+        if(cBtn) cBtn.classList.add('combo-active');
+      }
+
+      // Ensure badges are visible immediately (no delay)
     }
-    badge.textContent = count;
-    badge.style.display = count > 0 ? 'flex' : 'none';
-  }
 
-  // Clear all badges
-  function clearBadges() {
-    document.querySelectorAll('.variant-badge').forEach(b => b.remove());
-  }
+    // Utility: return quantity for exact combination
+    function getComboQuantity(size, color){
+      const cart = getCart();
+      const idx = cart.find(i => i.id === productId && (i.size||'') === (size||'') && (i.color||'') === (color||''));
+      return idx ? Number(idx.quantity || 0) : 0;
+    }
 
-  // Update badges from cart
-  function updateVariantBadges() {
-    const cart = getCart();
-    clearBadges();
+    // Modified helpers to ensure immediate sync
+    const originalAddToCart = addToCart;
+    const originalRemoveFromCart = removeFromCart;
 
-    cart.forEach(item => {
-      const { color, size, quantity } = item;
-      if (color && colorOptionsEl) {
-        const btn = [...colorOptionsEl.children].find(b => b.textContent.trim() === color);
-        if (btn) addBadge(btn, (parseInt(quantity) || 0) + (parseInt(btn.dataset.count || 0)));
+    // Wrap addToCart/removeFromCart to update badges immediately (they already update localStorage)
+    function wrappedAddToCart(product){
+      originalAddToCart(product);
+      // immediate visual update
+      updateVariantBadges();
+      updateCartCount();
+      updateQuantityUI(product.id);
+    }
+    function wrappedRemoveFromCart(productIdArg){
+      originalRemoveFromCart(productIdArg);
+      updateVariantBadges();
+      updateCartCount();
+      updateQuantityUI(productIdArg);
+    }
+
+    // Replace functions used by page (local names)
+    addToCart = wrappedAddToCart;
+    removeFromCart = wrappedRemoveFromCart;
+
+    // On clicking size or color buttons we already update badges in their listeners.
+    // Ensure plus/minus operate on the currently active combination:
+    // plus/minus listeners already call addToCart/removeFromCart with selection; ensure the modal shows if selection missing.
+
+    // If user clicks plus/minus keyboard or other, we also handle programmatically:
+    function ensureSelectionBeforeAction(){
+      const sel = getSelectedOptions();
+      // if size exists and none selected => show modal
+      if(sizeOptions?.children.length && !sel.size){
+        if(optionModal) optionModal.style.display = 'flex';
+        return false;
       }
-      if (size && sizeOptionsEl) {
-        const btn = [...sizeOptionsEl.children].find(b => b.textContent.trim() === size);
-        if (btn) addBadge(btn, (parseInt(quantity) || 0) + (parseInt(btn.dataset.count || 0)));
+      if(colorOptions?.children.length && !sel.color){
+        if(optionModal) optionModal.style.display = 'flex';
+        return false;
+      }
+      return true;
+    }
+
+    // Guarantee immediate badge update when user clicks plus/minus or Add to Cart
+    // (listeners above already call updateVariantBadges after add/remove; this is extra safety)
+    // Also bind keyboard (Enter) if needed
+    document.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter'){
+        // do nothing automatic — leave unchanged
       }
     });
-  }
 
-  // Hook into add/remove
-  const originalAddToCart = window.addToCart;
-  window.addToCart = function(product) {
-    if (typeof originalAddToCart === 'function') originalAddToCart(product);
-    updateVariantBadges();
-  };
-
-  const originalRemoveFromCart = window.removeFromCart;
-  window.removeFromCart = function(productId) {
-    if (typeof originalRemoveFromCart === 'function') originalRemoveFromCart(productId);
-    updateVariantBadges();
-  };
-
-  // Update when variant selected
-  const observerTargets = [colorOptionsEl, sizeOptionsEl].filter(Boolean);
-  observerTargets.forEach(container => {
-    container.addEventListener('click', () => {
-      setTimeout(updateVariantBadges, 80);
+    // Make sure badges reflect initial cart on load
+    window.addEventListener('load', ()=> {
+      setTimeout(updateVariantBadges, 60);
     });
-  });
 
-  // Update when storage changes (multi-tab)
-  window.addEventListener('storage', updateVariantBadges);
+    // Also update badges after product load completes
+    // We already call updateVariantBadges in selection listeners; call it here too
+    // Expose updateVariantBadges in outer scope
+    window.updateVariantBadges = updateVariantBadges;
 
-  // Initial update on load
-  window.addEventListener('load', updateVariantBadges);
-})();
+    /* ======================================================
+       VARIANT COMBO SYSTEM — END
+       ====================================================== */
 
-
-    
   </script>
 </body>
 </html>
