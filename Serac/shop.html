@@ -885,10 +885,23 @@ function escapeHtml(str) { if (!str && str !== 0) return ""; return String(str).
 /* ---------- Event wiring ---------- */
 searchInput?.addEventListener('input', () => { window.currentPage = 1; loadProducts(); });
 sortSelect?.addEventListener('change', () => { window.currentPage = 1; loadProducts(); });
+// currencySelect?.addEventListener('change', () => {
+//   try { localStorage.setItem(CURRENCY_KEY, currencySelect.value); } catch(e){}
+//   window.currentPage = 1;
+//   loadProducts();
+// });
 currencySelect?.addEventListener('change', () => {
-  try { localStorage.setItem(CURRENCY_KEY, currencySelect.value); } catch(e){}
-  window.currentPage = 1;
-  loadProducts();
+  const newCurrency = currencySelect.value;
+  try { localStorage.setItem(CURRENCY_KEY, newCurrency); } catch(e){}
+
+  // 🔹 Update prices only
+  Object.values(productsData).forEach(product => {
+    const card = document.getElementById(`product-${product.id}`);
+    if (!card) return;
+    const priceElem = card.querySelector('.price');
+    if (!priceElem) return;
+    priceElem.textContent = formatPrice(product, newCurrency);
+  });
 });
 
   
