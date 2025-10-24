@@ -303,45 +303,45 @@ function resolveDisplayPriceCurrency(productId, productData){
   return { price: 0, currency: shopCurrency || 'NGN' };
 }
 
-// ---------- ENSURE SYNC WHEN LOADING PRODUCT ----------
-async function loadProduct(){
-  if(!productId){
-    productContainer.style.visibility = 'visible';
-    productContainer.innerHTML = '<p style="text-align:center;color:#d9534f;">Product ID missing.</p>';
-    return;
-  }
+// // ---------- ENSURE SYNC WHEN LOADING PRODUCT ----------
+// async function loadProduct(){
+//   if(!productId){
+//     productContainer.style.visibility = 'visible';
+//     productContainer.innerHTML = '<p style="text-align:center;color:#d9534f;">Product ID missing.</p>';
+//     return;
+//   }
 
-  try {
-    const docRef = doc(db, "brands","serac","products",productId);
-    const docSnap = await getDoc(docRef);
-    if(!docSnap.exists()){
-      productContainer.style.visibility = 'visible';
-      productContainer.innerHTML = '<p style="text-align:center;color:#d9534f;">Product not found.</p>';
-      return;
-    }
+//   try {
+//     const docRef = doc(db, "brands","serac","products",productId);
+//     const docSnap = await getDoc(docRef);
+//     if(!docSnap.exists()){
+//       productContainer.style.visibility = 'visible';
+//       productContainer.innerHTML = '<p style="text-align:center;color:#d9534f;">Product not found.</p>';
+//       return;
+//     }
 
-    const data = docSnap.data() || {};
-    currentProductData = data;
+//     const data = docSnap.data() || {};
+//     currentProductData = data;
 
-    // <-- FIXED: always resolve price & currency using shop's active currency -->
-    resolvedDisplay = resolveDisplayPriceCurrency(productId, currentProductData);
+//     // <-- FIXED: always resolve price & currency using shop's active currency -->
+//     resolvedDisplay = resolveDisplayPriceCurrency(productId, currentProductData);
 
-    const displayPrice = resolvedDisplay.price;
-    const displayCurrency = resolvedDisplay.currency;
+//     const displayPrice = resolvedDisplay.price;
+//     const displayCurrency = resolvedDisplay.currency;
 
-    if(productPrice) productPrice.textContent = formatPriceForDisplay(displayPrice, displayCurrency);
-    currentProductData.price = displayPrice;
-    currentProductData.currency = displayCurrency;
+//     if(productPrice) productPrice.textContent = formatPriceForDisplay(displayPrice, displayCurrency);
+//     currentProductData.price = displayPrice;
+//     currentProductData.currency = displayCurrency;
 
-    // ... rest of product render code unchanged
-    // images, description, variants, thumbnails, etc.
+//     // ... rest of product render code unchanged
+//     // images, description, variants, thumbnails, etc.
 
-  } catch(err){
-    console.error(err);
-    productContainer.style.visibility = 'visible';
-    productContainer.innerHTML = '<p style="text-align:center;color:#d9534f;">Failed to load product.</p>';
-  }
-}
+//   } catch(err){
+//     console.error(err);
+//     productContainer.style.visibility = 'visible';
+//     productContainer.innerHTML = '<p style="text-align:center;color:#d9534f;">Failed to load product.</p>';
+//   }
+// }
 
   // ---------- PRODUCT TOTAL UI ----------
   let totalCountElem = document.getElementById('totalVariantCount');
