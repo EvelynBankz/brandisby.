@@ -74,54 +74,74 @@
     .quantity-controls button:hover{ background:rgba(255,255,255,0.05); transform:translateY(-2px); }
     .quantity-badge{ font-weight:700; min-width:36px; text-align:center; color:var(--muted); }
 
-    /* /* BUTTONS - smaller padding & centered text (applies to all sizes) */
-    /* .add-cart, .customize-btn, .back-btn{
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      text-align:center;
-      padding:6px 10px;
-      font-size:0.95rem;
-      border-radius:10px;
-      /* border: 2px dashed rgba(182,110,65,0.5);  */
-    /* } */ 
-    /* .add-cart{ background:linear-gradient(90deg, var(--accent-strong), #a85a35); color:#111; border:none; cursor:pointer; font-weight:600; transition:transform var(--transition), box-shadow var(--transition); box-shadow:0 8px 26px rgba(182,110,65,0.12); }
-    .add-cart:hover{ transform:translateY(-3px); }
-    .customize-btn{ background:transparent;  color:var(--gold); border:1px dashed rgba(182,110,65,0.22); font-weight:700; transition: background var(--transition), color var(--transition); }
-    .customize-btn:hover{ background: rgba(182,110,65,0.06); color:var(--accent-strong); }
-    .back-btn{ background:transparent; color:var(--gold); border:1px solid rgba(255,255,255,0.04); font-weight:600; transition:all var(--transition); }
-    .back-btn:hover{ background: rgba(182,110,65,0.06); color:var(--accent-strong); } */
+    
 
-   /* .add-cart, .customize-btn, .back-btn {
-    background: linear-gradient(90deg, var(--accent-strong), #a85a35);
-    color: var(--gold);
-    border: none;
+  /* .add-cart,
+  .customize-btn,
+  .back-btn {
+    background: transparent;
+    color: var(--accent-strong);
+    border: 2px dashed rgba(182,110,65,0.5);
+    border-radius: 8px;
     cursor: pointer;
-    font-weight: 600;
-    transition: transform var(--transition), box-shadow var(--transition);
-    box-shadow: 0 8px 26px rgba(182,110,65,0.12);
-    border:1px dashed rgba(182,110,65,0.22);
+    font-weight: 700;
+    font-size: 15px;
+    padding: 6px 14px;
+    transition: background var(--transition), color var(--transition), border var(--transition);
   }
-
+  
   .add-cart:hover,
   .customize-btn:hover,
   .back-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 32px rgba(182,110,65,0.2);
-  } */ 
+    background: rgba(182,110,65,0.08);
+    color: var(--accent-strong);
+    border-color: rgba(182,110,65,0.8);
+  }
+  
 
-  .add-cart,
+
+    
+    --- NEW: unified compact action buttons row --- */
+    /* .buttons-row{ display:flex; gap:12px; margin-top:10px; justify-content:center; align-items:center; flex-wrap:wrap; }
+    .action-btn{ min-width:130px; padding:10px 14px; border-radius:8px; text-align:center; cursor:pointer; font-weight:700; background:#111; color:#fff; border:1px solid rgba(255,255,255,0.06); display:inline-flex; align-items:center; justify-content:center; }
+    .action-btn.add-cart{ background:transparent; color:var(--gold); border:1px dashed rgba(182,110,65,0.22); font-weight:700; transition: background var(--transition), color var(--transition); }
+    .action-btn:hover{ transform:translateY(-2px); opacity:0.95; color:var(--accent-strong); } */
+
+
+    /* --- UNIFIED BUTTON STYLE (matches Clear Selections + animated border) --- */
+.add-cart,
 .customize-btn,
 .back-btn {
-  background: transparent;
-  color: var(--accent-strong);
-  border: 2px dashed rgba(182,110,65,0.5);
+  position: relative;
+  background: transparent !important;
+  color: var(--accent-strong) !important;
+  border: 2px dashed rgba(182,110,65,0.5) !important;
   border-radius: 8px;
   cursor: pointer;
   font-weight: 700;
   font-size: 15px;
   padding: 6px 14px;
   transition: background var(--transition), color var(--transition), border var(--transition);
+  overflow: hidden;
+}
+
+/* Animated dashed border effect */
+.add-cart::before,
+.customize-btn::before,
+.back-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 2px dashed rgba(182,110,65,0.5);
+  border-radius: 8px;
+  animation: dashmove 3s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes dashmove {
+  to {
+    stroke-dashoffset: 20;
+  }
 }
 
 .add-cart:hover,
@@ -132,15 +152,36 @@
   border-color: rgba(182,110,65,0.8);
 }
 
+/* --- BUTTON ROW --- */
+.buttons-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 10px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  min-width: 130px;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform var(--transition), opacity var(--transition);
+}
+
+.action-btn:hover {
+  transform: translateY(-2px);
+  opacity: 0.95;
+}
+
 
 
     
-    /* --- NEW: unified compact action buttons row --- */
-    .buttons-row{ display:flex; gap:12px; margin-top:10px; justify-content:center; align-items:center; flex-wrap:wrap; }
-    .action-btn{ min-width:130px; padding:10px 14px; border-radius:8px; text-align:center; cursor:pointer; font-weight:700; background:#111; color:#fff; border:1px solid rgba(255,255,255,0.06); display:inline-flex; align-items:center; justify-content:center; }
-    .action-btn.add-cart{ background:transparent; color:var(--gold); border:1px dashed rgba(182,110,65,0.22); font-weight:700; transition: background var(--transition), color var(--transition); }
-    .action-btn:hover{ transform:translateY(-2px); opacity:0.95; color:var(--accent-strong); }
-
     /* DETAILS (from Firestore) */
     .product-extra-details{ margin-top:18px; color:var(--muted); font-size:15px; line-height:1.7; white-space:pre-line; }
     .product-extra-details ul{ margin-left:20px; list-style:disc; }
