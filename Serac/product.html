@@ -65,7 +65,8 @@
     .options-container{ display:flex; gap:8px; flex-wrap:wrap; }
     .options-container button{ padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.06); background:transparent; color:var(--muted); cursor:pointer; font-weight:500; transition:all var(--transition); text-align:center; position:relative; }
     .options-container button:hover{ color:#fff; border-color:var(--gold); }
-    .options-container button.selected{ background:rgba(182,110,65,0.12); color:#fff; border-color:var(--accent-strong); }
+    /* replaced glow selection with a clear double-border selection style */
+    .options-container button.selected{ box-shadow:none; border:2px double var(--gold); color:var(--gold); font-weight:700; background:transparent; }
 
     /* QUANTITY */
     .quantity-controls{ display:flex; align-items:center; gap:10px; }
@@ -89,7 +90,12 @@
     .customize-btn:hover{ background: rgba(182,110,65,0.06); color:#fff; }
     .back-btn{ background:transparent; color:var(--muted); border:1px solid rgba(255,255,255,0.04); font-weight:600; transition:all var(--transition); }
     .back-btn:hover{ color:#fff; }
-    .buttons-row{ display:flex; gap:12px; margin-top:10px; }
+
+    /* --- NEW: unified compact action buttons row --- */
+    .buttons-row{ display:flex; gap:12px; margin-top:10px; justify-content:center; align-items:center; flex-wrap:wrap; }
+    .action-btn{ min-width:130px; padding:10px 14px; border-radius:8px; text-align:center; cursor:pointer; font-weight:700; background:#111; color:#fff; border:1px solid rgba(255,255,255,0.06); display:inline-flex; align-items:center; justify-content:center; }
+    .action-btn.add-cart{ background: linear-gradient(90deg, var(--accent-strong), #a85a35); color:#111; border:none; box-shadow:0 8px 26px rgba(182,110,65,0.12); }
+    .action-btn:hover{ transform:translateY(-2px); opacity:0.95; }
 
     /* DETAILS (from Firestore) */
     .product-extra-details{ margin-top:18px; color:var(--muted); font-size:15px; line-height:1.7; white-space:pre-line; }
@@ -98,7 +104,6 @@
 
     /* variant badge styles */
     .variant-badge{ position:absolute; top:4px; right:6px; background:var(--gold); color:#fff; font-size:0.65rem; border-radius:50%; min-width:16px; height:16px; display:flex; align-items:center; justify-content:center; font-weight:600; box-shadow:0 0 3px rgba(0,0,0,0.4); pointer-events:none; }
-    /* when a size is active and some colors exist for it */
     .options-container button.has-combo{ box-shadow:0 8px 20px rgba(182,110,65,0.12); }
     .options-container button.combo-active{ background:rgba(182,110,65,0.14); border-color:var(--gold); color:#fff; }
 
@@ -115,73 +120,19 @@
       .product-image, .product-details{ max-width:100%; width:100%; }
       .product-image img{ max-height:420px; object-fit:contain; }
       .product-details{ text-align:left; padding:0 10px; }
-      .buttons-row{ flex-direction:column; width:100%; }
-      .add-cart, .customize-btn, .back-btn{ width:100%; }
+      .buttons-row{ flex-direction:row; width:100%; justify-content:space-between; gap:8px; }
+      .action-btn{ min-width:110px; flex:1 1 auto; }
+      .add-cart, .customize-btn, .back-btn{ width:auto; }
       .header-right{ display:none; flex-direction:column; background:rgba(20,21,23,0.98); position:absolute; top:70px; right:0; width:220px; padding:18px; border-radius:8px; z-index:1100; }
       .header-right.open{ display:flex; }
       .hamburger{ display:block; }
     }
 
-  /* ensure any prior mobile sticky leftover hidden */
-  .mobile-actions{ display:none !important; }
+    /* ensure any prior mobile sticky leftover hidden */
+    .mobile-actions{ display:none !important; }
 
-    /* 🔸 BUTTON LAYOUT */
-.buttons-row {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
-  margin: 12px 0;
-}
-
-.action-btn {
-  flex: 0 1 auto;
-  min-width: 120px;
-  padding: 10px 16px;
-  border: 1px solid #000;
-  border-radius: 6px;
-  background: #fff;
-  color: #000;
-  font-weight: 600;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-decoration: none;
-}
-
-.action-btn:hover {
-  background: #000;
-  color: #fff;
-}
-
-/* 🔸 SHORTER WIDTH for add-to-cart & customize */
-.add-cart,
-.customize-btn,
-.back-btn {
-  width: auto !important;
-}
-
-/* 🔸 VARIANT HIGHLIGHT (no glow, double border) */
-.options-container button.selected {
-  box-shadow: none !important;
-  border: 2px double #000 !important;
-  color: #000 !important;
-  font-weight: 700;
-}
-
-/* 🔸 TOTAL SECTION */
-.total-container {
-  font-weight: 600;
-  text-align: center;
-  margin-top: 10px;
-}
-
-/* 🔸 PRODUCT DETAILS */
-.product-extra-details {
-  margin-top: 20px;
-}
-
-    
+    /* small helper for the Total placeholder */
+    .total-container { font-weight:600; color:var(--muted); margin-top:8px; text-align:center; }
   </style>
 </head>
 <body>
@@ -218,7 +169,6 @@
       <div class="price" id="productPrice"></div>
 
       <!-- Variant groups (separated) -->
-      <!-- size first is recommended; if you keep color first visually it will still treat size as parent when present -->
       <div class="option-group" id="sizeGroup" style="display:none;">
         <h4>Sizes</h4>
         <div class="options-container" id="sizeOptions"></div>
@@ -229,24 +179,21 @@
         <div class="options-container" id="colorOptions"></div>
       </div>
 
-      <!-- 🔹 TOTAL (JS will update this automatically) -->
-      <div id="totalContainer" class="total-container" style="display:none;">
-        Total: <span id="totalPrice">0</span>
-      </div>
-      
-      <!-- 🔹 QUANTITY CONTROLS -->
-      <div class="quantity-controls">
+      <!-- TOTAL placeholder (JS updates this - moved before quantity) -->
+      <div id="totalVariantCount" class="total-container" style="display:none;"></div>
+
+      <div class="quantity-controls" style="margin-top:8px;">
         <button id="minus">-</button>
         <span class="quantity-badge" id="quantityBadge">0</span>
         <button id="plus">+</button>
       </div>
-      
-      <!-- 🔹 ACTION BUTTONS (all side-by-side) -->
-      <div class="buttons-row">
-        <button class="action-btn" id="addCartBtn">Add to Cart</button>
-        <a href="customization.html" id="customizeBtn" class="action-btn" style="display:none;">Customize</a>
-        <button class="action-btn" id="clearSelectionBtn" style="display:none;">Clear</button>
-        <a href="shop.html" class="action-btn" id="backBtnDesktop">Back</a>
+
+      <!-- Buttons row: unified styling -->
+      <div class="buttons-row" style="margin-bottom:12px;">
+        <button class="action-btn add-cart" id="addCartBtn">Add to Cart</button>
+        <a href="customization.html" id="customizeBtn" class="action-btn customize-btn" style="display:none;">Customize Product</a>
+        <!-- Clear selections button will be created by JS via ensureClearButton() and appended into this row -->
+        <a href="shop.html" class="action-btn back-btn" id="backBtnDesktop">Back to Shop</a>
       </div>
 
       <!-- Firestore details: rendered only when present; supports basic formatting -->
@@ -327,91 +274,66 @@
 
 
 // ---------- CURRENCY DETECTION (SYNC WITH SHOP) ----------
-// ---------- CURRENCY DETECTION (SYNC WITH SHOP) ----------
   function detectShopActiveCurrency() {
-  // 1) Check global (modal → product page case)
-  if (window.shopActiveCurrency) return window.shopActiveCurrency;
+    if (window.shopActiveCurrency) return window.shopActiveCurrency;
+    const stored = localStorage.getItem('seracCurrency');
+    if (stored) return stored;
+    return 'NGN';
+  }
 
-  // 2) Check localStorage (normal page load)
-  const stored = localStorage.getItem('seracCurrency');
-  if (stored) return stored;
-
-  // 3) fallback
-  return 'NGN';
-}
-
-
-// Before opening product page from Edit Selection modal in shop:
-function openProductFromModal(productId) {
-  const curr = detectShopActiveCurrency(); // get current shop currency
-  window.shopActiveCurrency = curr;        // store globally
-  window.open(`product.html?productId=${productId}&currency=${curr}`, '_blank');
-}
-
+  function openProductFromModal(productId) {
+    const curr = detectShopActiveCurrency();
+    window.shopActiveCurrency = curr;
+    window.open(`product.html?productId=${productId}&currency=${curr}`, '_blank');
+  }
 
   // ---------- CURRENCY SYMBOL FORMAT ----------
-function formatPriceForDisplay(amount, currency){
-  const symbols = { USD:'$', EUR:'€', NGN:'₦', GBP:'£' };
-  const sym = symbols[currency] || currency;
-  return `${sym}${Number(amount).toLocaleString()}`;
-}
+  function formatPriceForDisplay(amount, currency){
+    const symbols = { USD:'$', EUR:'€', NGN:'₦', GBP:'£' };
+    const sym = symbols[currency] || currency;
+    return `${sym}${Number(amount).toLocaleString()}`;
+  }
 
+  // ---------- CURRENCY / PRICE RESOLUTION (SYNC) ----------
+  function resolveDisplayPriceCurrency(productId, productData){
+    const shopCurrency = detectShopActiveCurrency();
+    const currencySymbols = { NGN: '₦', USD: '$', EUR: '€', GBP: '£' };
+    const symbol = currencySymbols[shopCurrency] || shopCurrency;
 
-  
- // ---------- CURRENCY / PRICE RESOLUTION (SYNC) ----------
-function resolveDisplayPriceCurrency(productId, productData){
-  const shopCurrency = detectShopActiveCurrency(); // always get current shop currency
-
-  // Map currency codes → symbols
-  const currencySymbols = {
-    NGN: '₦',
-    USD: '$',
-    EUR: '€',
-    GBP: '£'
-  };
-  const symbol = currencySymbols[shopCurrency] || shopCurrency; // fallback
-
-  // 1) Check per-currency field in productData
-  if(productData){
-    const perKey = 'price' + shopCurrency.toUpperCase();
-    if(typeof productData[perKey] !== 'undefined' && productData[perKey] !== null){
-      return { price: productData[perKey], currency: shopCurrency, symbol };
+    if(productData){
+      const perKey = 'price' + shopCurrency.toUpperCase();
+      if(typeof productData[perKey] !== 'undefined' && productData[perKey] !== null){
+        return { price: productData[perKey], currency: shopCurrency, symbol };
+      }
     }
-  }
 
-  // 2) Saved product in localStorage (for modal edit selection)
-  const saved = parseSavedProductFromLocalStorage?.();
-  if(saved && (String(saved.id) === String(productId) || String(saved.productId) === String(productId))){
-    if(typeof saved.price !== 'undefined'){
-      return { price: saved.price, currency: shopCurrency, symbol };
+    const saved = parseSavedProductFromLocalStorage?.();
+    if(saved && (String(saved.id) === String(productId) || String(saved.productId) === String(productId))){
+      if(typeof saved.price !== 'undefined'){
+        return { price: saved.price, currency: shopCurrency, symbol };
+      }
     }
+
+    const urlCurrencyParam = new URLSearchParams(window.location.search).get('currency');
+    const urlPriceParam = new URLSearchParams(window.location.search).get('price');
+    if(urlPriceParam){
+      const p = parseFloat(String(urlPriceParam).replace(/[^0-9\.\-]+/g,''));
+      if(!isNaN(p)) return { price: p, currency: shopCurrency, symbol };
+    }
+
+    const cartMatch = findCartPriceCurrencyForProduct?.(productId);
+    if(cartMatch){
+      return { price: cartMatch.price, currency: shopCurrency, symbol };
+    }
+
+    if(productData){
+      if(typeof productData.price !== 'undefined') return { price: productData.price, currency: shopCurrency, symbol };
+      const fallback = ['priceNGN','priceUSD','priceEUR','priceGBP'].find(k => typeof productData[k] !== 'undefined');
+      if(fallback) return { price: productData[fallback], currency: shopCurrency, symbol };
+    }
+
+    return { price: 0, currency: shopCurrency, symbol };
   }
-
-  // 3) URL param fallback
-  const urlCurrencyParam = new URLSearchParams(window.location.search).get('currency');
-  const urlPriceParam = new URLSearchParams(window.location.search).get('price');
-  if(urlPriceParam){
-    const p = parseFloat(String(urlPriceParam).replace(/[^0-9\.\-]+/g,''));
-    if(!isNaN(p)) return { price: p, currency: shopCurrency, symbol };
-  }
-
-  // 4) Cart match fallback
-  const cartMatch = findCartPriceCurrencyForProduct?.(productId);
-  if(cartMatch){
-    return { price: cartMatch.price, currency: shopCurrency, symbol };
-  }
-
-  // 5) Generic productData.price fallback
-  if(productData){
-    if(typeof productData.price !== 'undefined') return { price: productData.price, currency: shopCurrency, symbol };
-    const fallback = ['priceNGN','priceUSD','priceEUR','priceGBP'].find(k => typeof productData[k] !== 'undefined');
-    if(fallback) return { price: productData[fallback], currency: shopCurrency, symbol };
-  }
-
-  // default
-  return { price: 0, currency: shopCurrency, symbol };
-}
-
 
   // ---------- PRODUCT TOTAL UI ----------
   let totalCountElem = document.getElementById('totalVariantCount');
@@ -433,6 +355,8 @@ function resolveDisplayPriceCurrency(productId, productData){
     const total = getCart().filter(i => i.id === pid).reduce((s,i)=> s + Number(i.quantity||0), 0);
     totalCountElem.textContent = `Total: ${total}`;
     if(addCartBtn) addCartBtn.style.display = total > 0 ? 'none' : 'flex';
+    // ensure the total placeholder is visible only when meaningful
+    if(totalCountElem) totalCountElem.style.display = total > 0 ? '' : 'none';
   }
 
   // ---------- COMBO QUANTITY HELPERS ----------
@@ -676,19 +600,36 @@ function resolveDisplayPriceCurrency(productId, productData){
 
   // ---------- CLEAR BUTTON ----------
   function countProductCombos(pid){ return getCart().filter(i => i.id === pid).length; }
- let clearButton = document.getElementById('clearSelectionBtn');
+  let clearButton = null;
   function ensureClearButton(){
+    if(!productContainer) return;
     if(!clearButton){
       clearButton = document.createElement('button');
+      clearButton.type = 'button';
       clearButton.id = 'clearSelectionBtn';
       clearButton.className = 'action-btn';
-      clearButton.textContent = 'Clear';
-      productContainer.appendChild(clearButton);
+      clearButton.textContent = 'Clear selections';
+      Object.assign(clearButton.style, {
+        marginTop: '0px',
+        padding: '6px 10px',
+        background: 'transparent',
+        color: 'var(--muted)',
+        border: '1px solid rgba(255,255,255,0.06)',
+        borderRadius: '8px',
+        cursor: 'pointer',
+        fontWeight: '600'
+      });
+      // Append into the buttons-row if present (so it sits inline with other action buttons)
+      const buttonsRow = document.querySelector('.buttons-row');
+      if(buttonsRow) buttonsRow.insertBefore(clearButton, buttonsRow.querySelector('#backBtnDesktop') || null);
+      else {
+        const details = document.querySelector('.product-details');
+        if(details) details.appendChild(clearButton); else productContainer.appendChild(clearButton);
+      }
+      clearButton.addEventListener('click', ()=> { clearProductCombos(productId); });
     }
-    clearButton.addEventListener('click', ()=> { clearProductCombos(productId); });
     refreshClearButtonVisibility();
   }
-
   function refreshClearButtonVisibility(){
     const combos = countProductCombos(productId);
     if(!clearButton) return;
@@ -749,15 +690,6 @@ function resolveDisplayPriceCurrency(productId, productData){
       if(productName) productName.textContent = data.name || '';
       if(productDescription) productDescription.textContent = data.description || '';
 
-      
-      // // --- PRICE RENDER (use resolvedDisplay) ---
-      // const displayPrice = resolvedDisplay.price ?? (data.price || 0);
-      // const displayCurrency = resolvedDisplay.currency || 'NGN';
-      // const displaySymbol = resolvedDisplay.symbol || '';
-      // if(productPrice) productPrice.textContent = `${displaySymbol}${displayPrice}`;
-      // currentProductData.price = displayPrice;
-      // currentProductData.currency = displayCurrency;
-
       // --- PRICE RENDER ---
       const displayPrice = resolvedDisplay.price ?? (data.price || 0);
       const displayCurrency = resolvedDisplay.currency || 'USD';
@@ -766,12 +698,6 @@ function resolveDisplayPriceCurrency(productId, productData){
       currentProductData.price = displayPrice;
       currentProductData.currency = displayCurrency;
 
-    
-      // keep currentProductData.price/currency in sync for other uses
-      currentProductData.price = displayPrice;
-      currentProductData.currency = displayCurrency;
-
-      
       // --- CUSTOMIZATION ---
       if(data.customizationAvailable){
         if(customizeBtn){ customizeBtn.style.display = 'block'; customizeBtn.href = `customization.html?productId=${productId}`; }
@@ -947,11 +873,5 @@ function resolveDisplayPriceCurrency(productId, productData){
     });
   });
 </script>
-
-
-
-
-
-
 </body>
 </html>
