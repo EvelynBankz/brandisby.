@@ -110,36 +110,26 @@
     box-shadow: 0 10px 32px rgba(182,110,65,0.2);
   } */ 
 
-    .add-cart {
-  background: linear-gradient(90deg, var(--accent-strong), #a85a35);
-  color: #111;
-  border: none;
-  cursor: pointer;
-  font-weight: 600;
-  transition: transform var(--transition), box-shadow var(--transition);
-  box-shadow: 0 8px 26px rgba(182,110,65,0.12);
-}
-.add-cart:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 32px rgba(182,110,65,0.2);
-}
-
-/* Customize & Back buttons */
+  .add-cart,
 .customize-btn,
 .back-btn {
   background: transparent;
-  color: var(--gold);
-  border: 1.5px dashed rgba(182,110,65,0.45);
-  font-weight: 600;
+  color: var(--accent-strong);
+  border: 2px dashed rgba(182,110,65,0.5);
+  border-radius: 8px;
   cursor: pointer;
-  transition: background var(--transition), color var(--transition), transform var(--transition);
-  box-shadow: 0 8px 26px rgba(182,110,65,0.05);
+  font-weight: 700;
+  font-size: 15px;
+  padding: 6px 14px;
+  transition: background var(--transition), color var(--transition), border var(--transition);
 }
+
+.add-cart:hover,
 .customize-btn:hover,
 .back-btn:hover {
   background: rgba(182,110,65,0.08);
   color: var(--accent-strong);
-  transform: translateY(-3px);
+  border-color: rgba(182,110,65,0.8);
 }
 
 
