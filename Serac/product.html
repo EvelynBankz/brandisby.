@@ -94,7 +94,8 @@
     /* --- NEW: unified compact action buttons row --- */
     .buttons-row{ display:flex; gap:12px; margin-top:10px; justify-content:center; align-items:center; flex-wrap:wrap; }
     .action-btn{ min-width:130px; padding:10px 14px; border-radius:8px; text-align:center; cursor:pointer; font-weight:700; background:#111; color:#fff; border:1px solid rgba(255,255,255,0.06); display:inline-flex; align-items:center; justify-content:center; }
-    .action-btn.add-cart{ background: linear-gradient(90deg, var(--accent-strong), #a85a35); color:#111; border:none; box-shadow:0 8px 26px rgba(182,110,65,0.12); }
+    .action-btn.add-cart{ background:transparent; color:var(--accent-strong); border:1px dashed rgba(182,110,65,0.22); font-weight:700; transition: background var(--transition), color var(--transition); }
+    /* .action-btn.add-cart{ background: linear-gradient(90deg, var(--accent-strong), #a85a35); color:#111; border:none; box-shadow:0 8px 26px rgba(182,110,65,0.12); } */
     .action-btn:hover{ transform:translateY(-2px); opacity:0.95; }
 
     /* DETAILS (from Firestore) */
@@ -132,7 +133,7 @@
     .mobile-actions{ display:none !important; }
 
     /* small helper for the Total placeholder */
-    .total-container { font-weight:600; color:var(--muted); margin-top:8px; text-align:center; }
+    .total-container { font-weight:600; color:var(--muted); margin-top:8px; text-align:left; }
   </style>
 </head>
 <body>
@@ -613,11 +614,13 @@
         marginTop: '0px',
         padding: '6px 10px',
         background: 'transparent',
-        color: 'var(--muted)',
-        border: '1px solid rgba(255,255,255,0.06)',
+        color:var(--accent-strong),
+        border: '1px dashed rgba(182,110,65,0.22)',
         borderRadius: '8px',
         cursor: 'pointer',
-        fontWeight: '600'
+        fontWeight: '700',
+        transition: 'background var(--transition)', 
+        color: var(--transition)'
       });
       // Append into the buttons-row if present (so it sits inline with other action buttons)
       const buttonsRow = document.querySelector('.buttons-row');
