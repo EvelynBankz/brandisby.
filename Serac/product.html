@@ -122,8 +122,66 @@
       .hamburger{ display:block; }
     }
 
-    /* ensure any prior mobile sticky leftover hidden */
-    .mobile-actions{ display:none !important; }
+  /* ensure any prior mobile sticky leftover hidden */
+  .mobile-actions{ display:none !important; }
+
+    /* 🔸 BUTTON LAYOUT */
+.buttons-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.action-btn {
+  flex: 0 1 auto;
+  min-width: 120px;
+  padding: 10px 16px;
+  border: 1px solid #000;
+  border-radius: 6px;
+  background: #fff;
+  color: #000;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.action-btn:hover {
+  background: #000;
+  color: #fff;
+}
+
+/* 🔸 SHORTER WIDTH for add-to-cart & customize */
+.add-cart,
+.customize-btn,
+.back-btn {
+  width: auto !important;
+}
+
+/* 🔸 VARIANT HIGHLIGHT (no glow, double border) */
+.options-container button.selected {
+  box-shadow: none !important;
+  border: 2px double #000 !important;
+  color: #000 !important;
+  font-weight: 700;
+}
+
+/* 🔸 TOTAL SECTION */
+.total-container {
+  font-weight: 600;
+  text-align: center;
+  margin-top: 10px;
+}
+
+/* 🔸 PRODUCT DETAILS */
+.product-extra-details {
+  margin-top: 20px;
+}
+
+    
   </style>
 </head>
 <body>
@@ -171,17 +229,24 @@
         <div class="options-container" id="colorOptions"></div>
       </div>
 
-      <div class="quantity-controls" style="margin-top:8px;">
+      <!-- 🔹 TOTAL (JS will update this automatically) -->
+      <div id="totalContainer" class="total-container" style="display:none;">
+        Total: <span id="totalPrice">0</span>
+      </div>
+      
+      <!-- 🔹 QUANTITY CONTROLS -->
+      <div class="quantity-controls">
         <button id="minus">-</button>
         <span class="quantity-badge" id="quantityBadge">0</span>
         <button id="plus">+</button>
       </div>
-
-      <button class="add-cart" id="addCartBtn">Add to Cart</button>
-      <a href="customization.html" id="customizeBtn" class="customize-btn" style="display:none; margin-top:8px;">Customize Product</a>
-
-      <div class="buttons-row" style="margin-bottom:12px;">
-        <a href="shop.html" class="back-btn" id="backBtnDesktop">Back to Shop</a>
+      
+      <!-- 🔹 ACTION BUTTONS (all side-by-side) -->
+      <div class="buttons-row">
+        <button class="action-btn" id="addCartBtn">Add to Cart</button>
+        <a href="customization.html" id="customizeBtn" class="action-btn" style="display:none;">Customize</a>
+        <button class="action-btn" id="clearSelectionBtn" style="display:none;">Clear</button>
+        <a href="shop.html" class="action-btn" id="backBtnDesktop">Back</a>
       </div>
 
       <!-- Firestore details: rendered only when present; supports basic formatting -->
@@ -611,29 +676,19 @@ function resolveDisplayPriceCurrency(productId, productData){
 
   // ---------- CLEAR BUTTON ----------
   function countProductCombos(pid){ return getCart().filter(i => i.id === pid).length; }
-  let clearButton = null;
+ let clearButton = document.getElementById('clearSelectionBtn');
   function ensureClearButton(){
-    if(!productContainer) return;
     if(!clearButton){
       clearButton = document.createElement('button');
-      clearButton.type = 'button';
-      clearButton.textContent = 'Clear selections';
-      Object.assign(clearButton.style, {
-        marginTop: '8px',
-        padding: '6px 10px',
-        background: 'transparent',
-        color: 'var(--muted)',
-        border: '1px solid rgba(255,255,255,0.06)',
-        borderRadius: '8px',
-        cursor: 'pointer',
-        fontWeight: '600'
-      });
-      const details = document.querySelector('.product-details');
-      if(details) details.appendChild(clearButton); else productContainer.appendChild(clearButton);
-      clearButton.addEventListener('click', ()=> { clearProductCombos(productId); });
+      clearButton.id = 'clearSelectionBtn';
+      clearButton.className = 'action-btn';
+      clearButton.textContent = 'Clear';
+      productContainer.appendChild(clearButton);
     }
+    clearButton.addEventListener('click', ()=> { clearProductCombos(productId); });
     refreshClearButtonVisibility();
   }
+
   function refreshClearButtonVisibility(){
     const combos = countProductCombos(productId);
     if(!clearButton) return;
