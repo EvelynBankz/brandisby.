@@ -260,8 +260,28 @@
   function setCart(cart){ localStorage.setItem(STORAGE_KEY, JSON.stringify(cart)); updateCartCount(); }
   function updateCartCount(){ if(cartCountElem) cartCountElem.textContent = getCart().reduce((sum,i)=>sum + Number(i.quantity||0), 0); }
 
+
+// ---------- CURRENCY DETECTION (SYNC WITH SHOP) ----------
+function detectShopActiveCurrency() {
+  // 1) Try to get from global if opened via modal
+  if (window.shopActiveCurrency) return window.shopActiveCurrency;
+
+  // 2) Otherwise, try localStorage or default
+  const stored = localStorage.getItem('seracShopCurrency');
+  if (stored) return stored;
+
+  // 3) fallback
+  return 'NGN';
+}
+
+// Before opening product page from Edit Selection modal in shop:
+function openProductFromModal(productId) {
+  window.shopActiveCurrency = detectShopActiveCurrency(); // store globally
+  window.open(`product.html?productId=${productId}`, '_blank');
+}
+
+  
   // ---------- CURRENCY / PRICE RESOLUTION (SYNC) ----------
-  // ---------- CURRENCY / PRICE SYNC FIX ----------
 function resolveDisplayPriceCurrency(productId, productData){
   const shopCurrency = detectShopActiveCurrency(); // always get current shop currency
 
@@ -274,7 +294,7 @@ function resolveDisplayPriceCurrency(productId, productData){
   }
 
   // 2) If localStorage has saved product/variant, use numeric price but override currency to shopCurrency
-  const saved = parseSavedProductFromLocalStorage();
+  const saved = parseSavedProductFromLocalStorage?.();
   if(saved && (String(saved.id) === String(productId) || String(saved.productId) === String(productId))){
     if(typeof saved.price !== 'undefined'){
       return { price: saved.price, currency: shopCurrency };
@@ -282,13 +302,13 @@ function resolveDisplayPriceCurrency(productId, productData){
   }
 
   // 3) If URL has price param, still override currency to shopCurrency
-  if(urlPriceParam !== null){
+  if(typeof urlPriceParam !== 'undefined' && urlPriceParam !== null){
     const p = parseFloat(String(urlPriceParam).replace(/[^0-9\.\-]+/g,''));
     if(!isNaN(p)) return { price: p, currency: shopCurrency };
   }
 
   // 4) Cart match (Edit Selection), use numeric price but override currency to shopCurrency
-  const cartMatch = findCartPriceCurrencyForProduct(productId);
+  const cartMatch = findCartPriceCurrencyForProduct?.(productId);
   if(cartMatch){
     return { price: cartMatch.price, currency: shopCurrency };
   }
@@ -296,7 +316,6 @@ function resolveDisplayPriceCurrency(productId, productData){
   // 5) Fall back to productData.price (generic) but force shopCurrency
   if(productData){
     if(typeof productData.price !== 'undefined') return { price: productData.price, currency: shopCurrency };
-    // older fields fallback
     const fallback = ['priceNGN','priceUSD','priceEUR','priceGBP'].find(k => typeof productData[k] !== 'undefined');
     if(fallback) return { price: productData[fallback], currency: shopCurrency };
   }
@@ -304,6 +323,51 @@ function resolveDisplayPriceCurrency(productId, productData){
   // default
   return { price: 0, currency: shopCurrency || 'NGN' };
 }
+
+  
+//   // ---------- CURRENCY / PRICE SYNC FIX ----------
+// function resolveDisplayPriceCurrency(productId, productData){
+//   const shopCurrency = detectShopActiveCurrency(); // always get current shop currency
+
+//   // 1) If productData has per-currency field
+//   if(productData){
+//     const perKey = 'price' + shopCurrency.toUpperCase();
+//     if(typeof productData[perKey] !== 'undefined' && productData[perKey] !== null){
+//       return { price: productData[perKey], currency: shopCurrency };
+//     }
+//   }
+
+//   // 2) If localStorage has saved product/variant, use numeric price but override currency to shopCurrency
+//   const saved = parseSavedProductFromLocalStorage();
+//   if(saved && (String(saved.id) === String(productId) || String(saved.productId) === String(productId))){
+//     if(typeof saved.price !== 'undefined'){
+//       return { price: saved.price, currency: shopCurrency };
+//     }
+//   }
+
+//   // 3) If URL has price param, still override currency to shopCurrency
+//   if(urlPriceParam !== null){
+//     const p = parseFloat(String(urlPriceParam).replace(/[^0-9\.\-]+/g,''));
+//     if(!isNaN(p)) return { price: p, currency: shopCurrency };
+//   }
+
+//   // 4) Cart match (Edit Selection), use numeric price but override currency to shopCurrency
+//   const cartMatch = findCartPriceCurrencyForProduct(productId);
+//   if(cartMatch){
+//     return { price: cartMatch.price, currency: shopCurrency };
+//   }
+
+//   // 5) Fall back to productData.price (generic) but force shopCurrency
+//   if(productData){
+//     if(typeof productData.price !== 'undefined') return { price: productData.price, currency: shopCurrency };
+//     // older fields fallback
+//     const fallback = ['priceNGN','priceUSD','priceEUR','priceGBP'].find(k => typeof productData[k] !== 'undefined');
+//     if(fallback) return { price: productData[fallback], currency: shopCurrency };
+//   }
+
+//   // default
+//   return { price: 0, currency: shopCurrency || 'NGN' };
+// }
 
 // // ---------- ENSURE SYNC WHEN LOADING PRODUCT ----------
 // async function loadProduct(){
