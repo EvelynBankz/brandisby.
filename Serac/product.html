@@ -263,45 +263,37 @@
 
 // ---------- CURRENCY DETECTION (SYNC WITH SHOP) ----------
 // ---------- CURRENCY DETECTION (SYNC WITH SHOP) ----------
-function detectShopActiveCurrency() {
+  function detectShopActiveCurrency() {
   // 1) Check global (modal → product page case)
   if (window.shopActiveCurrency) return window.shopActiveCurrency;
 
   // 2) Check localStorage (normal page load)
-  const stored = localStorage.getItem('seracShopCurrency');
+  const stored = localStorage.getItem('seracCurrency');
   if (stored) return stored;
 
   // 3) fallback
   return 'NGN';
 }
 
+
 // Before opening product page from Edit Selection modal in shop:
 function openProductFromModal(productId) {
-  window.shopActiveCurrency = detectShopActiveCurrency(); // store globally
-  window.open(`product.html?productId=${productId}`, '_blank');
+  const curr = detectShopActiveCurrency(); // get current shop currency
+  window.shopActiveCurrency = curr;        // store globally
+  window.open(`product.html?productId=${productId}&currency=${curr}`, '_blank');
 }
 
-  
-// function detectShopActiveCurrency() {
-//   // 1) Try to get from global if opened via modal
-//   if (window.shopActiveCurrency) return window.shopActiveCurrency;
 
-//   // 2) Otherwise, try localStorage or default
-//   const stored = localStorage.getItem('seracShopCurrency');
-//   if (stored) return stored;
+  // ---------- CURRENCY SYMBOL FORMAT ----------
+function formatPriceForDisplay(amount, currency){
+  const symbols = { USD:'$', EUR:'€', NGN:'₦', GBP:'£' };
+  const sym = symbols[currency] || currency;
+  return `${sym}${Number(amount).toLocaleString()}`;
+}
 
-//   // 3) fallback
-//   return 'NGN';
-// }
-
-// // Before opening product page from Edit Selection modal in shop:
-// function openProductFromModal(productId) {
-//   window.shopActiveCurrency = detectShopActiveCurrency(); // store globally
-//   window.open(`product.html?productId=${productId}`, '_blank');
-// }
 
   
-  // ---------- CURRENCY / PRICE RESOLUTION (SYNC) ----------
+ // ---------- CURRENCY / PRICE RESOLUTION (SYNC) ----------
 function resolveDisplayPriceCurrency(productId, productData){
   const shopCurrency = detectShopActiveCurrency(); // always get current shop currency
 
@@ -331,7 +323,9 @@ function resolveDisplayPriceCurrency(productId, productData){
   }
 
   // 3) URL param fallback
-  if(typeof urlPriceParam !== 'undefined' && urlPriceParam !== null){
+  const urlCurrencyParam = new URLSearchParams(window.location.search).get('currency');
+  const urlPriceParam = new URLSearchParams(window.location.search).get('price');
+  if(urlPriceParam){
     const p = parseFloat(String(urlPriceParam).replace(/[^0-9\.\-]+/g,''));
     if(!isNaN(p)) return { price: p, currency: shopCurrency, symbol };
   }
@@ -353,134 +347,6 @@ function resolveDisplayPriceCurrency(productId, productData){
   return { price: 0, currency: shopCurrency, symbol };
 }
 
-
-  
-// function resolveDisplayPriceCurrency(productId, productData){
-//   const shopCurrency = detectShopActiveCurrency(); // always get current shop currency
-
-//   // 1) If productData has per-currency field
-//   if(productData){
-//     const perKey = 'price' + shopCurrency.toUpperCase();
-//     if(typeof productData[perKey] !== 'undefined' && productData[perKey] !== null){
-//       return { price: productData[perKey], currency: shopCurrency };
-//     }
-//   }
-
-//   // 2) If localStorage has saved product/variant, use numeric price but override currency to shopCurrency
-//   const saved = parseSavedProductFromLocalStorage?.();
-//   if(saved && (String(saved.id) === String(productId) || String(saved.productId) === String(productId))){
-//     if(typeof saved.price !== 'undefined'){
-//       return { price: saved.price, currency: shopCurrency };
-//     }
-//   }
-
-//   // 3) If URL has price param, still override currency to shopCurrency
-//   if(typeof urlPriceParam !== 'undefined' && urlPriceParam !== null){
-//     const p = parseFloat(String(urlPriceParam).replace(/[^0-9\.\-]+/g,''));
-//     if(!isNaN(p)) return { price: p, currency: shopCurrency };
-//   }
-
-//   // 4) Cart match (Edit Selection), use numeric price but override currency to shopCurrency
-//   const cartMatch = findCartPriceCurrencyForProduct?.(productId);
-//   if(cartMatch){
-//     return { price: cartMatch.price, currency: shopCurrency };
-//   }
-
-//   // 5) Fall back to productData.price (generic) but force shopCurrency
-//   if(productData){
-//     if(typeof productData.price !== 'undefined') return { price: productData.price, currency: shopCurrency };
-//     const fallback = ['priceNGN','priceUSD','priceEUR','priceGBP'].find(k => typeof productData[k] !== 'undefined');
-//     if(fallback) return { price: productData[fallback], currency: shopCurrency };
-//   }
-
-//   // default
-//   return { price: 0, currency: shopCurrency || 'NGN' };
-// }
-
-  
-//   // ---------- CURRENCY / PRICE SYNC FIX ----------
-// function resolveDisplayPriceCurrency(productId, productData){
-//   const shopCurrency = detectShopActiveCurrency(); // always get current shop currency
-
-//   // 1) If productData has per-currency field
-//   if(productData){
-//     const perKey = 'price' + shopCurrency.toUpperCase();
-//     if(typeof productData[perKey] !== 'undefined' && productData[perKey] !== null){
-//       return { price: productData[perKey], currency: shopCurrency };
-//     }
-//   }
-
-//   // 2) If localStorage has saved product/variant, use numeric price but override currency to shopCurrency
-//   const saved = parseSavedProductFromLocalStorage();
-//   if(saved && (String(saved.id) === String(productId) || String(saved.productId) === String(productId))){
-//     if(typeof saved.price !== 'undefined'){
-//       return { price: saved.price, currency: shopCurrency };
-//     }
-//   }
-
-//   // 3) If URL has price param, still override currency to shopCurrency
-//   if(urlPriceParam !== null){
-//     const p = parseFloat(String(urlPriceParam).replace(/[^0-9\.\-]+/g,''));
-//     if(!isNaN(p)) return { price: p, currency: shopCurrency };
-//   }
-
-//   // 4) Cart match (Edit Selection), use numeric price but override currency to shopCurrency
-//   const cartMatch = findCartPriceCurrencyForProduct(productId);
-//   if(cartMatch){
-//     return { price: cartMatch.price, currency: shopCurrency };
-//   }
-
-//   // 5) Fall back to productData.price (generic) but force shopCurrency
-//   if(productData){
-//     if(typeof productData.price !== 'undefined') return { price: productData.price, currency: shopCurrency };
-//     // older fields fallback
-//     const fallback = ['priceNGN','priceUSD','priceEUR','priceGBP'].find(k => typeof productData[k] !== 'undefined');
-//     if(fallback) return { price: productData[fallback], currency: shopCurrency };
-//   }
-
-//   // default
-//   return { price: 0, currency: shopCurrency || 'NGN' };
-// }
-
-// // ---------- ENSURE SYNC WHEN LOADING PRODUCT ----------
-// async function loadProduct(){
-//   if(!productId){
-//     productContainer.style.visibility = 'visible';
-//     productContainer.innerHTML = '<p style="text-align:center;color:#d9534f;">Product ID missing.</p>';
-//     return;
-//   }
-
-//   try {
-//     const docRef = doc(db, "brands","serac","products",productId);
-//     const docSnap = await getDoc(docRef);
-//     if(!docSnap.exists()){
-//       productContainer.style.visibility = 'visible';
-//       productContainer.innerHTML = '<p style="text-align:center;color:#d9534f;">Product not found.</p>';
-//       return;
-//     }
-
-//     const data = docSnap.data() || {};
-//     currentProductData = data;
-
-//     // <-- FIXED: always resolve price & currency using shop's active currency -->
-//     resolvedDisplay = resolveDisplayPriceCurrency(productId, currentProductData);
-
-//     const displayPrice = resolvedDisplay.price;
-//     const displayCurrency = resolvedDisplay.currency;
-
-//     if(productPrice) productPrice.textContent = formatPriceForDisplay(displayPrice, displayCurrency);
-//     currentProductData.price = displayPrice;
-//     currentProductData.currency = displayCurrency;
-
-//     // ... rest of product render code unchanged
-//     // images, description, variants, thumbnails, etc.
-
-//   } catch(err){
-//     console.error(err);
-//     productContainer.style.visibility = 'visible';
-//     productContainer.innerHTML = '<p style="text-align:center;color:#d9534f;">Failed to load product.</p>';
-//   }
-// }
 
   // ---------- PRODUCT TOTAL UI ----------
   let totalCountElem = document.getElementById('totalVariantCount');
@@ -787,24 +653,25 @@ function resolveDisplayPriceCurrency(productId, productData){
   let resolvedDisplay = { price: null, currency: null }; // will be set after product loads
 
   async function loadProduct(){
-    if(!productId){
+  if(!productId){
+    productContainer.style.visibility = 'visible';
+    productContainer.innerHTML = '<p style="text-align:center;color:#d9534f;">Product ID missing.</p>';
+    return;
+  }
+  try{
+    const docRef = doc(db, "brands", "serac", "products", productId);
+    const docSnap = await getDoc(docRef);
+    if(!docSnap.exists()){
       productContainer.style.visibility = 'visible';
-      productContainer.innerHTML = '<p style="text-align:center;color:#d9534f;">Product ID missing.</p>';
+      productContainer.innerHTML = '<p style="text-align:center;color:#d9534f;">Product not found.</p>';
       return;
     }
-    try{
-      const docRef = doc(db, "brands", "serac", "products", productId);
-      const docSnap = await getDoc(docRef);
-      if(!docSnap.exists()){
-        productContainer.style.visibility = 'visible';
-        productContainer.innerHTML = '<p style="text-align:center;color:#d9534f;">Product not found.</p>';
-        return;
-      }
-      const data = docSnap.data();
-      currentProductData = data || {};
+    const data = docSnap.data();
+    currentProductData = data || {};
 
-      // Resolve display price & currency (after we have product doc)
-      resolvedDisplay = resolveDisplayPriceCurrency(productId, currentProductData);
+    // Resolve display price & currency (after we have product doc)
+    resolvedDisplay = resolveDisplayPriceCurrency(productId, currentProductData);
+    
 
       // --- IMAGES ---
       const images = Array.isArray(data.images) && data.images.length ? data.images.filter(Boolean) : (data.imageUrl ? [data.imageUrl] : []);
@@ -828,23 +695,23 @@ function resolveDisplayPriceCurrency(productId, productData){
       if(productDescription) productDescription.textContent = data.description || '';
 
       
-      // --- PRICE RENDER (use resolvedDisplay) ---
-      const displayPrice = resolvedDisplay.price ?? (data.price || 0);
-      const displayCurrency = resolvedDisplay.currency || 'NGN';
-      const displaySymbol = resolvedDisplay.symbol || '';
-      if(productPrice) productPrice.textContent = `${displaySymbol}${displayPrice}`;
-      currentProductData.price = displayPrice;
-      currentProductData.currency = displayCurrency;
-
-
-      
+      // // --- PRICE RENDER (use resolvedDisplay) ---
       // const displayPrice = resolvedDisplay.price ?? (data.price || 0);
+      // const displayCurrency = resolvedDisplay.currency || 'NGN';
       // const displaySymbol = resolvedDisplay.symbol || '';
       // if(productPrice) productPrice.textContent = `${displaySymbol}${displayPrice}`;
       // currentProductData.price = displayPrice;
-      // currentProductData.currency = resolvedDisplay.currency;
+      // currentProductData.currency = displayCurrency;
 
-      
+      // --- PRICE RENDER ---
+      const displayPrice = resolvedDisplay.price ?? (data.price || 0);
+      const displayCurrency = resolvedDisplay.currency || 'USD';
+      const displaySymbol = resolvedDisplay.symbol || '';
+      if(productPrice) productPrice.textContent = formatPriceForDisplay(displayPrice, displayCurrency);
+      currentProductData.price = displayPrice;
+      currentProductData.currency = displayCurrency;
+
+    
       // keep currentProductData.price/currency in sync for other uses
       currentProductData.price = displayPrice;
       currentProductData.currency = displayCurrency;
