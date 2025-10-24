@@ -830,10 +830,19 @@ function resolveDisplayPriceCurrency(productId, productData){
       
       // --- PRICE RENDER (use resolvedDisplay) ---
       const displayPrice = resolvedDisplay.price ?? (data.price || 0);
+      const displayCurrency = resolvedDisplay.currency || 'NGN';
       const displaySymbol = resolvedDisplay.symbol || '';
       if(productPrice) productPrice.textContent = `${displaySymbol}${displayPrice}`;
       currentProductData.price = displayPrice;
-      currentProductData.currency = resolvedDisplay.currency;
+      currentProductData.currency = displayCurrency;
+
+
+      
+      // const displayPrice = resolvedDisplay.price ?? (data.price || 0);
+      // const displaySymbol = resolvedDisplay.symbol || '';
+      // if(productPrice) productPrice.textContent = `${displaySymbol}${displayPrice}`;
+      // currentProductData.price = displayPrice;
+      // currentProductData.currency = resolvedDisplay.currency;
 
       
       // keep currentProductData.price/currency in sync for other uses
