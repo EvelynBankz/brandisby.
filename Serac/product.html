@@ -83,20 +83,21 @@
       padding:6px 10px;
       font-size:0.95rem;
       border-radius:10px;
+      border: '2px dashed rgba(182,110,65,0.5); 
     }
     .add-cart{ background:linear-gradient(90deg, var(--accent-strong), #a85a35); color:#111; border:none; cursor:pointer; font-weight:600; transition:transform var(--transition), box-shadow var(--transition); box-shadow:0 8px 26px rgba(182,110,65,0.12); }
     .add-cart:hover{ transform:translateY(-3px); }
-    .customize-btn{ background:transparent; color:var(--accent-strong); border:1px dashed rgba(182,110,65,0.22); font-weight:700; transition: background var(--transition), color var(--transition); }
-    .customize-btn:hover{ background: rgba(182,110,65,0.06); color:#fff; }
-    .back-btn{ background:transparent; color:var(--muted); border:1px solid rgba(255,255,255,0.04); font-weight:600; transition:all var(--transition); }
-    .back-btn:hover{ color:#fff; }
+    .customize-btn{ background:transparent;  color:var(--gold); border:1px dashed rgba(182,110,65,0.22); font-weight:700; transition: background var(--transition), color var(--transition); }
+    .customize-btn:hover{ background: rgba(182,110,65,0.06); color:var(--accent-strong); }
+    .back-btn{ background:transparent; color:var(--gold); border:1px solid rgba(255,255,255,0.04); font-weight:600; transition:all var(--transition); }
+    .back-btn:hover{ background: rgba(182,110,65,0.06); color:var(--accent-strong); }
 
     /* --- NEW: unified compact action buttons row --- */
     .buttons-row{ display:flex; gap:12px; margin-top:10px; justify-content:center; align-items:center; flex-wrap:wrap; }
     .action-btn{ min-width:130px; padding:10px 14px; border-radius:8px; text-align:center; cursor:pointer; font-weight:700; background:#111; color:#fff; border:1px solid rgba(255,255,255,0.06); display:inline-flex; align-items:center; justify-content:center; }
-    .action-btn.add-cart{ background:transparent; color:var(--accent-strong); border:1px dashed rgba(182,110,65,0.22); font-weight:700; transition: background var(--transition), color var(--transition); }
+    .action-btn.add-cart{ background:transparent; color:var(--gold); border:1px dashed rgba(182,110,65,0.22); font-weight:700; transition: background var(--transition), color var(--transition); }
     /* .action-btn.add-cart{ background: linear-gradient(90deg, var(--accent-strong), #a85a35); color:#111; border:none; box-shadow:0 8px 26px rgba(182,110,65,0.12); } */
-    .action-btn:hover{ transform:translateY(-2px); opacity:0.95; }
+    .action-btn:hover{ transform:translateY(-2px); opacity:0.95; color:var(--accent-strong); }
 
     /* DETAILS (from Firestore) */
     .product-extra-details{ margin-top:18px; color:var(--muted); font-size:15px; line-height:1.7; white-space:pre-line; }
@@ -612,15 +613,25 @@
       clearButton.textContent = 'Clear selections';
       Object.assign(clearButton.style, {
         marginTop: '0px',
-        padding: '6px 10px',
+        padding: '6px 14px',
         background: 'transparent',
-        color:'var(--accent-strong)',
-        border: '1px dashed rgba(182,110,65,0.22)',
+        color: 'var(--accent-strong)',        // font color
+        border: '2px dashed rgba(182,110,65,0.5)', // increased border size (1px → 2px)
         borderRadius: '8px',
         cursor: 'pointer',
         fontWeight: '700',
-        transition: 'background var(--transition)', 
-        color: 'var(--transition)'
+        fontSize: '15px',                     // increased font size
+        transition: 'background var(--transition), color var(--transition), border var(--transition)'
+        // marginTop: '0px',
+        // padding: '6px 10px',
+        // background: 'transparent',
+        // color:'var(--accent-strong)',
+        // border: '1px dashed rgba(182,110,65,0.22)',
+        // borderRadius: '10px',
+        // cursor: 'pointer',
+        // fontWeight: '700',
+        // transition: 'background var(--transition)', 
+        // color: 'var(--transition)'
       });
       // Append into the buttons-row if present (so it sits inline with other action buttons)
       const buttonsRow = document.querySelector('.buttons-row');
