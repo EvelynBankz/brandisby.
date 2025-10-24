@@ -259,195 +259,89 @@
   function updateCartCount(){ if(cartCountElem) cartCountElem.textContent = getCart().reduce((sum,i)=>sum + Number(i.quantity||0), 0); }
 
   // ---------- CURRENCY / PRICE RESOLUTION (SYNC) ----------
-  // Check several sources and pick the most appropriate price & currency to display.
-  // Order of precedence (modified to always prefer shop's active currency for display):
-  // - Determine shopActiveCurrency (from URL, localStorage, cookies, window.Shopify, DOM hints)
-  // - If product doc has per-currency price for shopActiveCurrency -> use it (no conversion)
-  // - Else prefer numeric price from URL/localStorage/cart/product doc, but always show with shopActiveCurrency symbol (no conversion).
-  const urlParams = new URLSearchParams(window.location.search);
-  const urlPriceParam = urlParams.get('price');
-  const urlCurrencyParam = urlParams.get('currency');
+  // ---------- CURRENCY / PRICE SYNC FIX ----------
+function resolveDisplayPriceCurrency(productId, productData){
+  const shopCurrency = detectShopActiveCurrency(); // always get current shop currency
 
-  function parseSavedProductFromLocalStorage() {
-    try {
-      const raw = localStorage.getItem('selectedProduct') || localStorage.getItem('selectedVariant') || null;
-      if (!raw) return null;
-      const parsed = JSON.parse(raw);
-      if (!parsed) return null;
-      // expect shape possibly: { id, price, currency, ... } or a variant object
-      return parsed;
-    } catch (e) {
-      return null;
+  // 1) If productData has per-currency field
+  if(productData){
+    const perKey = 'price' + shopCurrency.toUpperCase();
+    if(typeof productData[perKey] !== 'undefined' && productData[perKey] !== null){
+      return { price: productData[perKey], currency: shopCurrency };
     }
   }
 
-  function findCartPriceCurrencyForProduct(pid){
-    try {
-      const cart = getCart();
-      for (const item of cart) {
-        // match by id or parent-like fields (robust)
-        if (!item) continue;
-        if (String(item.id) === String(pid) || String(item.parentId) === String(pid) || String(item.productId) === String(pid)) {
-          if (item.currency && (typeof item.price !== 'undefined')) {
-            return { price: item.price, currency: item.currency };
-          }
-          // fallback: item may have 'price' field only
-          if (typeof item.price !== 'undefined' && item.currency) {
-            return { price: item.price, currency: item.currency };
-          }
-        }
-      }
-    } catch(e) {}
-    return null;
-  }
-
-  // Helper: read cookie by name
-  function getCookie(name){
-    try {
-      const pairs = document.cookie.split(';').map(p => p.trim());
-      for(const p of pairs){
-        if(!p) continue;
-        const [k,v] = p.split('=');
-        if(k && k.trim() === name) return decodeURIComponent(v || '');
-      }
-    } catch(e){}
-    return null;
-  }
-
-  // Robust detection of the shop's currently active currency
-  function detectShopActiveCurrency(){
-    // 1) URL param explicit currency (highest signal that user set currency)
-    if(urlCurrencyParam) return String(urlCurrencyParam).toUpperCase();
-
-    // 2) common localStorage keys used by stores
-    const keys = ['activeCurrency','currency','shopCurrency','selectedCurrency','store_currency','customerCurrency','currentCurrency'];
-    for(const k of keys){
-      try {
-        const v = localStorage.getItem(k);
-        if(v) return String(v).replace(/[^A-Za-z]/g,'').toUpperCase();
-      } catch(e){}
-    }
-
-    // 3) cookie checks
-    const cookieKeys = ['storeCurrency','currency','shop_currency','cart_currency'];
-    for(const k of cookieKeys){
-      const v = getCookie(k);
-      if(v) return String(v).replace(/[^A-Za-z]/g,'').toUpperCase();
-    }
-
-    // 4) Shopify global (common on Shopify themes)
-    try {
-      if(window.Shopify && window.Shopify.currency && window.Shopify.currency.active){
-        return String(window.Shopify.currency.active).toUpperCase();
-      }
-      // some themes expose Shop Currency as Shopify.currency.current or Shopify.currency.active
-      if(window.Shopify && window.Shopify.currency && window.Shopify.currency.current){
-        return String(window.Shopify.currency.current).toUpperCase();
-      }
-    } catch(e){}
-
-    // 5) meta tags or DOM hints
-    try {
-      const meta = document.querySelector('meta[name="shop-currency"], meta[name="currency"]');
-      if(meta && meta.getAttribute('content')) return String(meta.getAttribute('content')).toUpperCase();
-      const el = document.querySelector('[data-active-currency], [data-currency]');
-      if(el){
-        const v = el.getAttribute('data-active-currency') || el.getAttribute('data-currency') || el.textContent;
-        if(v) return String(v).replace(/[^A-Za-z]/g,'').toUpperCase();
-      }
-    } catch(e){}
-
-    // 6) fall back to cart first item's currency if available
-    try {
-      const cart = getCart();
-      if(cart && cart.length){
-        const c = cart[0].currency;
-        if(c) return String(c).toUpperCase();
-      }
-    } catch(e){}
-
-    // default fallback
-    return 'NGN';
-  }
-
-  // Given product doc data and productId, determine displayCurrency & displayPrice
-  function resolveDisplayPriceCurrency(productId, productData){
-    // Always try to use the shop's active currency for display
-    const shopCurrency = detectShopActiveCurrency();
-
-    // 1) If productData contains dedicated per-currency price for the active currency (e.g. priceUSD, priceNGN),
-    //    prefer that numeric value (no conversion).
-    if(productData){
-      const perKey = 'price' + String(shopCurrency).toUpperCase();
-      if(typeof productData[perKey] !== 'undefined' && productData[perKey] !== null){
-        return { price: productData[perKey], currency: shopCurrency };
-      }
-    }
-
-    // 2) If URL provided a price, use that numeric value but show with shopCurrency (no conversion)
-    if (urlPriceParam !== null) {
-      const parsed = parseFloat(String(urlPriceParam).replace(/[^0-9\.\-]+/g,''));
-      if (!isNaN(parsed)) {
-        return { price: parsed, currency: shopCurrency };
-      } else {
-        // non-numeric formatted string — keep as-is but pair with shop currency code
-        return { price: urlPriceParam, currency: shopCurrency };
-      }
-    }
-
-    // 3) localStorage selectedProduct / selectedVariant (if shop has set it) -> use numeric price if present, but display with shopCurrency
-    const saved = parseSavedProductFromLocalStorage();
-    if (saved && (String(saved.id) === String(productId) || String(saved.productId) === String(productId) || !saved.id)) {
-      if (typeof saved.price !== 'undefined' && saved.price !== null) {
-        return { price: saved.price, currency: shopCurrency };
-      }
-      if (saved.formattedPrice) {
-        const p = parseFloat(String(saved.formattedPrice).replace(/[^0-9\.\-]+/g,''));
-        if(!isNaN(p)) return { price: p, currency: shopCurrency };
-        return { price: saved.formattedPrice, currency: shopCurrency };
-      }
-    }
-
-    // 4) check cart: if user clicked "Edit selection" there will be cart rows for that product that include currency & price
-    //    Use the numeric price found (if any) but display with shopCurrency unless the cart price is explicitly tied to another currency and productData lacks per-currency.
-    const cartMatch = findCartPriceCurrencyForProduct(productId);
-    if (cartMatch) {
-      // if cartMatch.currency equals shopCurrency, keep it; otherwise use cartMatch.price number but show with shopCurrency (no conversion).
-      return { price: cartMatch.price, currency: shopCurrency };
-    }
-
-    // 5) fall back to product document's generic price & currency (but override currency to shopCurrency if necessary and no per-currency price existed)
-    if (productData) {
-      if (typeof productData.price !== 'undefined' && productData.price !== null) {
-        return { price: productData.price, currency: shopCurrency };
-      }
-      // older fields fallback
-      if (typeof productData.priceNGN !== 'undefined') return { price: productData.priceNGN, currency: shopCurrency };
-      if (typeof productData.priceUSD !== 'undefined') return { price: productData.priceUSD, currency: shopCurrency };
-      if (typeof productData.priceEUR !== 'undefined') return { price: productData.priceEUR, currency: shopCurrency };
-      if (typeof productData.priceGBP !== 'undefined') return { price: productData.priceGBP, currency: shopCurrency };
-    }
-
-    // If we reach here, return defaults with shop currency
-    return { price: 0, currency: shopCurrency || 'NGN' };
-  }
-
-  function formatPriceForDisplay(amount, currency) {
-    // amount might be a number or formatted string — prefer numeric formatting if numeric
-    const localeMap = { NGN:'en-NG', USD:'en-US', EUR:'de-DE', GBP:'en-GB' };
-    const minFrac = currency === 'NGN' ? 0 : 2;
-    const n = Number(amount);
-    if (!isNaN(n)) {
-      try {
-        return new Intl.NumberFormat(localeMap[currency]||'en-US', { style:'currency', currency, minimumFractionDigits:minFrac }).format(n);
-      } catch(e){
-        return `${currency} ${n.toFixed(minFrac)}`;
-      }
-    } else {
-      // amount is not a numeric value — return as-is prefixed by currency code
-      return `${currency} ${String(amount)}`;
+  // 2) If localStorage has saved product/variant, use numeric price but override currency to shopCurrency
+  const saved = parseSavedProductFromLocalStorage();
+  if(saved && (String(saved.id) === String(productId) || String(saved.productId) === String(productId))){
+    if(typeof saved.price !== 'undefined'){
+      return { price: saved.price, currency: shopCurrency };
     }
   }
+
+  // 3) If URL has price param, still override currency to shopCurrency
+  if(urlPriceParam !== null){
+    const p = parseFloat(String(urlPriceParam).replace(/[^0-9\.\-]+/g,''));
+    if(!isNaN(p)) return { price: p, currency: shopCurrency };
+  }
+
+  // 4) Cart match (Edit Selection), use numeric price but override currency to shopCurrency
+  const cartMatch = findCartPriceCurrencyForProduct(productId);
+  if(cartMatch){
+    return { price: cartMatch.price, currency: shopCurrency };
+  }
+
+  // 5) Fall back to productData.price (generic) but force shopCurrency
+  if(productData){
+    if(typeof productData.price !== 'undefined') return { price: productData.price, currency: shopCurrency };
+    // older fields fallback
+    const fallback = ['priceNGN','priceUSD','priceEUR','priceGBP'].find(k => typeof productData[k] !== 'undefined');
+    if(fallback) return { price: productData[fallback], currency: shopCurrency };
+  }
+
+  // default
+  return { price: 0, currency: shopCurrency || 'NGN' };
+}
+
+// ---------- ENSURE SYNC WHEN LOADING PRODUCT ----------
+async function loadProduct(){
+  if(!productId){
+    productContainer.style.visibility = 'visible';
+    productContainer.innerHTML = '<p style="text-align:center;color:#d9534f;">Product ID missing.</p>';
+    return;
+  }
+
+  try {
+    const docRef = doc(db, "brands","serac","products",productId);
+    const docSnap = await getDoc(docRef);
+    if(!docSnap.exists()){
+      productContainer.style.visibility = 'visible';
+      productContainer.innerHTML = '<p style="text-align:center;color:#d9534f;">Product not found.</p>';
+      return;
+    }
+
+    const data = docSnap.data() || {};
+    currentProductData = data;
+
+    // <-- FIXED: always resolve price & currency using shop's active currency -->
+    resolvedDisplay = resolveDisplayPriceCurrency(productId, currentProductData);
+
+    const displayPrice = resolvedDisplay.price;
+    const displayCurrency = resolvedDisplay.currency;
+
+    if(productPrice) productPrice.textContent = formatPriceForDisplay(displayPrice, displayCurrency);
+    currentProductData.price = displayPrice;
+    currentProductData.currency = displayCurrency;
+
+    // ... rest of product render code unchanged
+    // images, description, variants, thumbnails, etc.
+
+  } catch(err){
+    console.error(err);
+    productContainer.style.visibility = 'visible';
+    productContainer.innerHTML = '<p style="text-align:center;color:#d9534f;">Failed to load product.</p>';
+  }
+}
 
   // ---------- PRODUCT TOTAL UI ----------
   let totalCountElem = document.getElementById('totalVariantCount');
