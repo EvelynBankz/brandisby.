@@ -484,18 +484,17 @@ function injectModalStyles() {
     font-family: "Montserrat", sans-serif;
     overflow: hidden;
     animation: fadeIn 0.15s ease-out;
-    max-width: calc(100vw - 40px);
   }
   @keyframes fadeIn {
-    from {opacity: 0; transform: scale(0.98);}
-    to {opacity: 1; transform: scale(1);}
+    from {opacity: 0; transform: translateY(-10px);}
+    to {opacity: 1; transform: translateY(0);}
   }
   .serac-modal-header {
     display: flex; justify-content: space-between; align-items: center;
     padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.05);
   }
   .serac-modal-title { font-size: 15px; color: var(--gold); font-family: "Playfair Display", serif; }
-  .serac-modal-close { background: none; border: 0; color: var(--gold); font-size: 13px; cursor: pointer; }
+  .serac-modal-close { background: none; border: 0; color: #bbb; font-size: 14px; cursor: pointer; }
   .serac-modal-body { padding: 10px 14px; max-height: 250px; overflow-y: auto; }
   .serac-variant-row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
   .serac-variant-img { width: 48px; height: 48px; border-radius: 6px; object-fit: cover; background: #111; }
@@ -519,283 +518,172 @@ function injectModalStyles() {
     border-top: 1px solid rgba(255,255,255,0.05);
   }
   `;
-
   const s = document.createElement("style");
   s.id = "serac-variant-modal-styles";
   s.textContent = css;
   document.head.appendChild(s);
 }
 
-/* ---------- BUILD VARIANT ROWS FROM CART ---------- */
 function buildVariantRowsForProduct(productId) {
-  try {
-    const c = getCart() || [];
-    const rows = [];
-    c.forEach(item => {
-      const matches =
-        String(item.id) === String(productId) ||
-        (item.parentId && String(item.parentId) === String(productId)) ||
-        (item.productId && String(item.productId) === String(productId)) ||
-        (typeof item.id === 'string' && String(item.id).startsWith(String(productId) + '-')) ||
-        false;
-      if (matches) {
-        const master = (productsData && productsData[String(productId)]) || {};
-        const name = item.name || master.name || `Product ${productId}`;
-        const imageUrl = item.image || item.imageUrl || master.imageUrl || (master.images && master.images[0]) || '';
-        rows.push({
-          id: item.id,
-          parentId: item.parentId || null,
-          productId: item.productId || null,
-          name,
-          imageUrl,
-          color: item.color || item.selectedColor || null,
-          size: item.size || item.selectedSize || null,
-          quantity: item.quantity || 0
-        });
-      }
-    });
-
-    // fallback if cart empty but productsData contains a preselected variant (rare)
-    if (rows.length === 0) {
-      const master = (productsData && productsData[String(productId)]) || {};
-      if (master && master.selectedVariant) {
-        const sv = master.selectedVariant;
-        rows.push({
-          id: sv.id || `${productId}-${sv.color || sv.size || 'v'}`,
-          parentId: productId,
-          productId,
-          name: master.name + (sv.color ? ` — ${sv.color}` : '') + (sv.size ? ` / ${sv.size}` : ''),
-          imageUrl: sv.image || master.imageUrl || '',
-          color: sv.color || null,
-          size: sv.size || null,
-          quantity: sv.quantity || 0
-        });
-      }
+  const c = getCart();
+  const rows = [];
+  c.forEach(item => {
+    const matches =
+      String(item.id) === String(productId) ||
+      (item.parentId && String(item.parentId) === String(productId)) ||
+      (item.productId && String(item.productId) === String(productId)) ||
+      (typeof item.id === 'string' && String(item.id).startsWith(String(productId) + '-'));
+    if (matches) {
+      const master = productsData[String(productId)] || {};
+      const name = item.name || master.name || `Product ${productId}`;
+      const imageUrl = item.image || master.imageUrl || (master.images && master.images[0]) || '';
+      rows.push({
+        id: item.id,
+        name,
+        imageUrl,
+        color: item.color || item.selectedColor || null,
+        size: item.size || item.selectedSize || null,
+        quantity: item.quantity || 0
+      });
     }
-
-    return rows;
-  } catch (err) {
-    console.error("buildVariantRowsForProduct error:", err);
-    return [];
-  }
+  });
+  return rows;
 }
 
-/* ---------- CLEAR ALL VARIANT SELECTIONS FOR PRODUCT ---------- */
-function clearSelectionsForProduct(productId) {
-  try {
-    let c = getCart() || [];
-    const filtered = c.filter(item => {
-      return !(
-        String(item.id) === String(productId) ||
-        String(item.parentId) === String(productId) ||
-        String(item.productId) === String(productId) ||
-        (typeof item.id === 'string' && String(item.id).startsWith(String(productId) + '-'))
-      );
-    });
-    saveCart(filtered);
-    // call your UI/cart updater if it exists
-    if (typeof updateCartDisplay === 'function') updateCartDisplay();
-  } catch (err) {
-    console.error("clearSelectionsForProduct error:", err);
-  }
-}
-
-/* ---------- SHOW VARIANT MODAL (smartly positioned) ---------- */
-/*
-  showVariantModal(productId, triggerElem)
-  triggerElem may be:
-   - a DOM element (button)
-   - an Event (like click event)
-   - a selector string (e.g. '#btn-1') or null
-*/
+/* ---------- SHOW VARIANT MODAL ---------- */
 function showVariantModal(productId, triggerElem = null) {
-  try {
-    injectModalStyles();
+  injectModalStyles();
+  document.querySelectorAll('.serac-modal-backdrop').forEach(e => e.remove());
 
-    // Resolve triggerElem to a DOM element if possible
-    if (triggerElem instanceof Event) {
-      triggerElem = triggerElem.currentTarget || triggerElem.target || null;
-    } else if (typeof triggerElem === 'string') {
-      try { triggerElem = document.querySelector(triggerElem); } catch (e) { triggerElem = null; }
-    }
-
-    // remove existing modal/backdrop
-    document.querySelectorAll('.serac-modal-backdrop').forEach(e => e.remove());
-
-    const rows = buildVariantRowsForProduct(productId);
-    if (!rows || rows.length === 0) {
-      // fallback to product page
-      window.location.href = `product.html?productId=${encodeURIComponent(productId)}`;
-      return;
-    }
-
-    // Backdrop container
-    const backdrop = document.createElement("div");
-    backdrop.className = "serac-modal-backdrop";
-    backdrop.setAttribute('role', 'presentation');
-    backdrop.style.zIndex = 9999;
-
-    // Modal container
-    const modal = document.createElement("div");
-    modal.className = "serac-modal";
-    modal.setAttribute('role', 'dialog');
-    modal.setAttribute('aria-modal', 'true');
-
-    /* Header */
-    const header = document.createElement("div");
-    header.className = "serac-modal-header";
-    const title = document.createElement("div");
-    title.className = "serac-modal-title";
-    title.textContent = "Your selection";
-
-    // Clear button (replaces the old close x behavior you wanted)
-    const clearBtn = document.createElement("button");
-    clearBtn.className = "serac-modal-close";
-    clearBtn.type = "button";
-    clearBtn.textContent = "Clear All"; // clear all selections
-    clearBtn.title = "Clear all selections for this product";
-
-    header.appendChild(title);
-    header.appendChild(clearBtn);
-
-    /* Body */
-    const body = document.createElement("div");
-    body.className = "serac-modal-body";
-
-    rows.forEach(item => {
-      const row = document.createElement("div");
-      row.className = "serac-variant-row";
-
-      const img = document.createElement("img");
-      img.className = "serac-variant-img";
-      img.src = item.imageUrl || '';
-      img.alt = item.name || 'Product';
-
-      const meta = document.createElement("div");
-      meta.className = "serac-variant-meta";
-
-      const h = document.createElement("h4");
-      h.textContent = item.name || 'Product';
-
-      const p = document.createElement("p");
-      const parts = [];
-      if (item.color) parts.push(`Color: ${item.color}`);
-      if (item.size) parts.push(`Size: ${item.size}`);
-      parts.push(`Qty: ${item.quantity || 0}`);
-      p.textContent = parts.join(" • ");
-
-      meta.appendChild(h);
-      meta.appendChild(p);
-
-      row.appendChild(img);
-      row.appendChild(meta);
-      body.appendChild(row);
-    });
-
-    /* Footer */
-    const footer = document.createElement("div");
-    footer.className = "serac-modal-footer";
-
-    const editAllBtn = document.createElement("button");
-    editAllBtn.className = "serac-btn";
-    editAllBtn.type = "button";
-    editAllBtn.textContent = "Edit Selections";
-    editAllBtn.addEventListener("click", (ev) => {
-      ev.stopPropagation();
-      backdrop.remove();
-      window.location.href = `product.html?productId=${encodeURIComponent(productId)}`;
-    });
-
-    const closeFooterBtn = document.createElement("button");
-    closeFooterBtn.className = "serac-btn";
-    closeFooterBtn.type = "button";
-    closeFooterBtn.textContent = "Close";
-    closeFooterBtn.addEventListener("click", () => backdrop.remove());
-
-    footer.appendChild(editAllBtn);
-    footer.appendChild(closeFooterBtn);
-
-    modal.appendChild(header);
-    modal.appendChild(body);
-    modal.appendChild(footer);
-    backdrop.appendChild(modal);
-    document.body.appendChild(backdrop);
-
-    // Give the browser a tick to render (ensures measurements are accurate)
-    // Use requestAnimationFrame instead of setTimeout for reliability
-    requestAnimationFrame(() => {
-      try {
-        // Use offsetWidth/offsetHeight to avoid transform/animation measurement issues
-        const modalW = modal.offsetWidth || 320;
-        const modalH = modal.offsetHeight || 200;
-
-        // Default fallback position (top-right)
-        let finalTop = 20 + window.scrollY;
-        let finalLeft = window.innerWidth - modalW - 20 + window.scrollX;
-
-        if (triggerElem && triggerElem.getBoundingClientRect) {
-          const rect = triggerElem.getBoundingClientRect();
-          const spaceRight = window.innerWidth - rect.right;
-          const spaceLeft = rect.left;
-          const spaceBelow = window.innerHeight - rect.bottom;
-          const spaceAbove = rect.top;
-
-          // Prefer to place near trigger: try bottom, then top, then right, then left
-          if (spaceBelow >= modalH + 16) {
-            finalTop = rect.bottom + 10 + window.scrollY;
-            // align left to trigger by default
-            finalLeft = Math.min(Math.max(rect.left + window.scrollX, 12 + window.scrollX), window.innerWidth - modalW - 12 + window.scrollX);
-          } else if (spaceAbove >= modalH + 16) {
-            finalTop = rect.top - modalH - 10 + window.scrollY;
-            finalLeft = Math.min(Math.max(rect.left + window.scrollX, 12 + window.scrollX), window.innerWidth - modalW - 12 + window.scrollX);
-          } else if (spaceRight >= modalW + 16) {
-            finalLeft = rect.right + 10 + window.scrollX;
-            finalTop = Math.min(Math.max(rect.top + window.scrollY, 12 + window.scrollY), window.innerHeight - modalH - 12 + window.scrollY);
-          } else if (spaceLeft >= modalW + 16) {
-            finalLeft = rect.left - modalW - 10 + window.scrollX;
-            finalTop = Math.min(Math.max(rect.top + window.scrollY, 12 + window.scrollY), window.innerHeight - modalH - 12 + window.scrollY);
-          } else {
-            // center near trigger but keep within viewport
-            finalTop = Math.min(Math.max(rect.top + window.scrollY - modalH / 2, 12 + window.scrollY), window.innerHeight - modalH - 12 + window.scrollY);
-            finalLeft = Math.min(Math.max(rect.left + window.scrollX - modalW / 2, 12 + window.scrollX), window.innerWidth - modalW - 12 + window.scrollX);
-          }
-        }
-
-        // Apply final clamped position (prevent off-screen)
-        const clampLeft = Math.min(Math.max(finalLeft, 12 + window.scrollX), window.innerWidth - modalW - 12 + window.scrollX);
-        const clampTop = Math.min(Math.max(finalTop, 12 + window.scrollY), window.innerHeight - modalH - 12 + window.scrollY);
-
-        modal.style.left = `${clampLeft}px`;
-        modal.style.top = `${clampTop}px`;
-        modal.style.zIndex = 10000;
-      } catch (mErr) {
-        // fallback to top-right on measurement error
-        console.warn("modal positioning fallback:", mErr);
-        modal.style.top = `${20 + window.scrollY}px`;
-        modal.style.right = `20px`;
-        modal.style.left = 'auto';
-        modal.style.zIndex = 10000;
-      }
-    });
-
-    // closing logic: clicking backdrop removes it
-    backdrop.addEventListener("click", e => {
-      if (e.target === backdrop) backdrop.remove();
-    });
-
-    // Clear all handler (header button)
-    clearBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      clearSelectionsForProduct(productId);
-      backdrop.remove();
-    });
-
-  } catch (err) {
-    console.error("showVariantModal error:", err);
-    // if anything fails, ensure no leftover modals
-    document.querySelectorAll('.serac-modal-backdrop').forEach(e => e.remove());
+  const rows = buildVariantRowsForProduct(productId);
+  if (!rows || rows.length === 0) {
+    window.location.href = `product.html?productId=${encodeURIComponent(productId)}`;
+    return;
   }
+
+  const backdrop = document.createElement("div");
+  backdrop.className = "serac-modal-backdrop";
+
+  const modal = document.createElement("div");
+  modal.className = "serac-modal";
+  modal.setAttribute('role', 'dialog');
+  modal.setAttribute('aria-modal', 'true');
+
+  /* ---------- Header ---------- */
+  const header = document.createElement("div");
+  header.className = "serac-modal-header";
+  const title = document.createElement("div");
+  title.className = "serac-modal-title";
+  title.textContent = "Your selection";
+  const closeBtn = document.createElement("button");
+  closeBtn.className = "serac-modal-close";
+  closeBtn.textContent = "Clear all";
+  header.appendChild(title);
+  header.appendChild(closeBtn);
+
+  /* ---------- Body ---------- */
+  const body = document.createElement("div");
+  body.className = "serac-modal-body";
+
+  rows.forEach(item => {
+    const row = document.createElement("div");
+    row.className = "serac-variant-row";
+
+    const img = document.createElement("img");
+    img.className = "serac-variant-img";
+    img.src = item.imageUrl || '';
+    img.alt = item.name || "Product";
+
+    const meta = document.createElement("div");
+    meta.className = "serac-variant-meta";
+
+    const h = document.createElement("h4");
+    h.textContent = item.name || "Product";
+
+    const p = document.createElement("p");
+    const parts = [];
+    if (item.color) parts.push(`Color: ${item.color}`);
+    if (item.size) parts.push(`Size: ${item.size}`);
+    parts.push(`Qty: ${item.quantity || 0}`);
+    p.textContent = parts.join(" • ");
+
+    meta.appendChild(h);
+    meta.appendChild(p);
+    row.appendChild(img);
+    row.appendChild(meta);
+    body.appendChild(row);
+  });
+
+  /* ---------- Footer ---------- */
+  const footer = document.createElement("div");
+  footer.className = "serac-modal-footer";
+
+  const editAllBtn = document.createElement("button");
+  editAllBtn.className = "serac-btn";
+  editAllBtn.textContent = "Edit Selections";
+  editAllBtn.addEventListener("click", (ev) => {
+    ev.stopPropagation();
+    backdrop.remove();
+    window.location.href = `product.html?productId=${encodeURIComponent(productId)}`;
+  });
+
+  const closeFooterBtn = document.createElement("button");
+  closeFooterBtn.className = "serac-btn";
+  closeFooterBtn.textContent = "Close";
+  closeFooterBtn.addEventListener("click", () => backdrop.remove());
+
+  footer.appendChild(editAllBtn);
+  footer.appendChild(closeFooterBtn);
+
+  modal.appendChild(header);
+  modal.appendChild(body);
+  modal.appendChild(footer);
+  backdrop.appendChild(modal);
+  document.body.appendChild(backdrop);
+
+  // 🔹 Dynamic positioning near clicked element
+  if (triggerElem) {
+    const rect = triggerElem.getBoundingClientRect();
+    const modalRect = modal.getBoundingClientRect();
+    const spaceRight = window.innerWidth - rect.right;
+    const spaceLeft = rect.left;
+    const spaceBottom = window.innerHeight - rect.bottom;
+    const spaceTop = rect.top;
+
+    let top = rect.bottom + 8;
+    let left = rect.left;
+
+    if (spaceRight < modalRect.width && spaceLeft > modalRect.width)
+      left = rect.right - modalRect.width;
+    if (spaceBottom < modalRect.height && spaceTop > modalRect.height)
+      top = rect.top - modalRect.height - 8;
+
+    modal.style.position = 'fixed';
+    modal.style.top = `${Math.max(10, top)}px`;
+    modal.style.left = `${Math.max(10, left)}px`;
+    modal.style.zIndex = '10000';
+  }
+
+  // 🔹 Close logic
+  closeBtn.addEventListener("click", () => {
+    localStorage.removeItem('cart'); // clears all selections
+    backdrop.remove();
+  });
+  backdrop.addEventListener("click", e => {
+    if (e.target === backdrop) backdrop.remove();
+  });
 }
+
+/* ---------- EVENT: View Selection / Select Your Choice ---------- */
+// This ensures the modal opens correctly when any "Select your choice" or "View selection" button is clicked.
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.select-variant');
+  if (!btn) return;
+  const productId = btn.dataset.id || btn.getAttribute('data-id');
+  if (!productId) return;
+  showVariantModal(productId, btn);
+});
+
 
 /* ---------- Load & render products (Serac collection) ---------- */
 async function loadProducts() {
@@ -1207,15 +1095,6 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-/* ---------- EVENT: View Selection / Select Your Choice ---------- */
-// This ensures the variant modal opens correctly when any "Select your choice" or "View selection" button is clicked.
-document.addEventListener('click', (e) => {
-  const btn = e.target.closest('.select-variant');
-  if (!btn) return;
-  const productId = btn.dataset.id || btn.getAttribute('data-id');
-  if (!productId) return;
-  showVariantModal(productId, btn);
-});
 
 </script>
 
