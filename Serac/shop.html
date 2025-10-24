@@ -1206,6 +1206,17 @@ style.textContent = `
 .gold-hover:hover::after { width:100%; }
 `;
 document.head.appendChild(style);
+
+/* ---------- EVENT: View Selection / Select Your Choice ---------- */
+// This ensures the variant modal opens correctly when any "Select your choice" or "View selection" button is clicked.
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.select-variant');
+  if (!btn) return;
+  const productId = btn.dataset.id || btn.getAttribute('data-id');
+  if (!productId) return;
+  showVariantModal(productId, btn);
+});
+
 </script>
 
 </body>
