@@ -473,6 +473,527 @@ function removeFromCartSpecific(pid, color = '', size = ''){
   return false;
 }
 
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Fleur De Vie — Product</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+/* ---------- Fleur De Vie visual style (preserved + adjustments) ---------- */
+:root{
+  --fdv-bg: #F5E6CC;
+  --fdv-green: #112e1f;
+  --fdv-gold: #FFD6BA;
+  --muted: rgba(17,46,31,0.7);
+  --accent-1: #f7dad9;
+  --accent-2: #ffd6ba;
+  --accent-3: #c9e4ff;
+  --accent-4: #e6daf6;
+  --accent-5: #d4f5e9;
+  --accent-6: #f5e6cc;
+  --btn-radius: 10px;
+  --btn-padding-vertical: 12px;
+  --btn-padding-horizontal: 16px;
+}
+
+/* reset */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:"Montserrat",sans-serif;background:var(--fdv-bg);color:var(--fdv-green);line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+
+/* header */
+.site-header{background:rgba(17,46,31,0.9);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(5px);color:var(--fdv-gold);display:flex;justify-content:space-between;align-items:center;padding:10px 22px;position:fixed;top:0;left:0;right:0;z-index:1000;height:68px;transition:background .28s ease,top .36s ease,opacity .36s ease}
+.site-header.scrolled{background:var(--fdv-green)}
+.site-header.hidden{opacity:0;top:-80px;pointer-events:none}
+.header-left{display:flex;gap:12px;align-items:center}
+.brand-logo{height:70px;transition:height .3s}
+.brand-title{font-family:"Playfair Display",serif;font-size:22px;font-weight:700}
+.header-right{display:flex;gap:18px;align-items:center}
+.header-right a{ font-weight:500; position:relative; transition:color .25s,transform .25s}
+.header-right a:hover{ color:#c9e4ff; transform:translateY(-2px) }
+.cart-count{background:var(--fdv-gold);color:var(--fdv-green);font-size:12px;font-weight:600;border-radius:50%;padding:2px 6px;margin-left:6px}
+.hamburger{display:none;background:none;border:none;cursor:pointer;width:34px;height:26px;position:relative}
+.hamburger span{display:block;width:100%;height:3px;background:var(--fdv-gold);border-radius:2px;position:absolute;left:0;transition:.28s}
+.hamburger span:nth-child(1){top:0}
+.hamburger span:nth-child(2){top:11px}
+.hamburger span:nth-child(3){top:22px}
+.hamburger.open span:nth-child(1){transform:rotate(45deg);top:11px}
+.hamburger.open span:nth-child(2){opacity:0}
+.hamburger.open span:nth-child(3){transform:rotate(-45deg);top:11px}
+
+/* layout - reduced gap between gallery and details */
+main{padding:120px 20px 48px;max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 420px;gap:18px;align-items:start}
+@media(max-width:980px){ main{grid-template-columns:1fr;padding-top:110px} .header-right{position:absolute;top:68px;right:0;background:rgba(17,46,31,0.95);flex-direction:column;width:260px;padding:20px;display:none;border-radius:0 0 0 10px} .header-right.open{display:flex} .hamburger{display:block} }
+
+/* gallery */
+.product-gallery{display:flex;flex-direction:column;gap:12px}
+.product-main-img{width:fit-content;margin:0 auto;border-radius:12px;background:var(--fdv-green);padding:4px;display:flex;align-items:center;justify-content:center}
+.product-main-img img{width:100%;height:auto;max-height:500px;object-fit:contain;border-radius:11px}
+.thumbnail-container{display:flex;gap:8px;overflow-x:auto;scroll-behavior:smooth;padding-bottom:6px}
+.thumbnail-container img{width:64px;height:64px;object-fit:contain;border:1px solid #d9d0c0;border-radius:8px;cursor:pointer;flex-shrink:0}
+.thumbnail-container img:hover,.thumbnail-container img.selected{border-color:var(--fdv-green)}
+
+/* details */
+.product-details{padding:8px 4px;display:flex;flex-direction:column;gap:8px}
+.product-details h1{font-family:"Playfair Display",serif;font-size:2.1rem;margin-bottom:4px}
+.product-details .description{font-size:1rem;color:var(--fdv-green)}
+.product-price{font-weight:600;font-size:1.4rem;margin-top:6px}
+#totalVariantCount{margin:8px 0 6px;color:var(--muted);font-size:.95rem;text-align:left}
+
+/* options + badges */
+.options-group{display:flex;flex-direction:column;gap:8px;position:relative}
+.options-row{display:flex;gap:10px;flex-wrap:wrap}
+.options-row button{padding:10px 12px;border-radius:8px;border:1px solid var(--fdv-green);background:var(--fdv-gold);cursor:pointer;transition:transform .18s,box-shadow .18s,font-weight .1s;font-weight:600;min-width:72px;position:relative}
+.options-row button:hover{transform:translateY(-3px);box-shadow:0 6px 18px rgba(17,46,31,0.12)}
+.options-row button.selected{background:var(--fdv-green);color:var(--fdv-gold)}
+/* variant badge base style (clean & reliable) */
+.variant-badge{position:absolute;top:4px;right:6px;background:var(--fdv-green);color:var(--fdv-gold);font-size:.65rem;font-weight:700;border-radius:50%;min-width:18px;height:18px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(17,46,31,0.22);border:2px solid rgba(255,255,255,0.08);z-index:3}
+
+/* actions: inline buttons and responsive behavior */
+.action-row{display:flex;gap:10px;flex-wrap:nowrap;align-items:center;margin-top:8px;overflow-x:auto;padding-bottom:4px}
+.action-row .action{flex:0 0 auto;min-width:140px;padding:var(--btn-padding-vertical) var(--btn-padding-horizontal);border-radius:var(--btn-radius);text-align:center;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;}
+
+/* UNIFIED: make add-cart, customize-btn, clear-btn same as back-btn visually */
+.add-cart.action,
+.customize-btn.action,
+.clear-btn.action,
+.back-btn.action {
+  background:var(--fdv-green);
+  color:var(--fdv-gold);
+  border:none;
+  transition:transform .18s,box-shadow .18s,opacity .12s,background .18s;
+  cursor:pointer;
+  text-decoration:none;
+  white-space:nowrap;
+  border-radius:var(--btn-radius);
+  box-shadow:0 8px 24px rgba(17,46,31,0.12);
+}
+
+/* Hover effects for major buttons */
+.add-cart.action:hover,
+.customize-btn.action:hover,
+.clear-btn.action:hover,
+.back-btn.action:hover {
+  transform:translateY(-4px);
+  box-shadow:0 14px 36px rgba(17,46,31,0.18);
+  filter:brightness(.98);
+}
+
+/* focus styles for accessibility */
+.add-cart.action:focus,
+.customize-btn.action:focus,
+.clear-btn.action:focus,
+.back-btn.action:focus { outline:3px solid rgba(201,228,255,0.18); outline-offset:3px; }
+
+/* smaller text variants */
+.customize-btn.action { font-weight:600; }
+
+/* Remove mobile two-per-row layout — keep same single-row/inline layout on mobile as desktop */
+@media(max-width:540px){
+  .action-row{gap:10px;flex-wrap:nowrap;}
+  .action-row .action{flex:0 0 auto;min-width:120px;}
+  .action-row::-webkit-scrollbar{height:6px}
+  .action-row::-webkit-scrollbar-thumb{background:rgba(17,46,31,0.12);border-radius:99px}
+}
+
+/* quantity controls area */
+.qty-and-actions{display:flex;flex-direction:column;gap:10px}
+.quantity-controls{display:flex;align-items:center;gap:10px;margin-top:6px}
+.quantity-controls button{background:var(--fdv-green);color:var(--fdv-gold);border:none;border-radius:8px;padding:10px 14px;cursor:pointer}
+.quantity-badge{font-weight:700;min-width:36px;text-align:center;display:inline-block}
+
+/* floating support */
+#floatingSupportBtn{position:fixed;right:22px;bottom:22px;width:60px;height:60px;border-radius:50%;border:none;background:var(--fdv-green);color:#fff;z-index:10002;box-shadow:0 8px 30px rgba(212,245,105,1);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:22px;transition:transform .3s,box-shadow .3s}
+#floatingSupportBtn:hover{transform:translateY(-3px);box-shadow:0 12px 36px rgba(212,245,105,.8)}
+#floatingSupportBtn::after{content:"Support";position:absolute;bottom:70px;left:50%;transform:translateX(-50%);background:var(--fdv-green);color:var(--fdv-gold);padding:6px 12px;border-radius:6px;font-size:14px;font-weight:500;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .28s,transform .28s}
+#floatingSupportBtn:hover::after{opacity:1;transform:translateX(-50%) translateY(-6px)}
+footer{text-align:center;padding:20px;background:transparent;color:var(--fdv-green);margin-top:44px}
+.small-muted{font-size:.92rem;color:var(--muted)}
+
+/* small utility */
+.hidden { display: none !important; }
+
+/* ensure options-group hidden by default until JS evaluates product (avoid flash) */
+.options-group{visibility:hidden}
+</style>
+</head>
+<body>
+
+<header class="site-header" id="siteHeader">
+  <div class="header-left">
+    <img src="asset/logo.png" alt="Fleur De Vie Logo" class="brand-logo">
+    <div class="brand-title">Fleur De Vie</div>
+  </div>
+
+  <button class="hamburger" id="hamburger" aria-label="Menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+
+  <nav class="header-right" id="headerRight" aria-label="Main navigation">
+    <a href="index.html">Home</a>
+    <a href="shop.html">Shop</a>
+    <a href="about.html">About</a>
+    <a href="cart.html">Cart <span class="cart-count" id="cartCount">0</span></a>
+    <a href="customization.html">Customize</a>
+    <a href="contact.html">Contact</a>
+    <a href="trackorder.html">Track</a>
+  </nav>
+</header>
+
+<main id="productContainer" style="visibility:hidden;">
+  <section class="product-gallery" aria-label="Product gallery">
+    <div class="product-main-img" id="productMainWrap">
+      <img id="productImg" src="" alt="Product image">
+    </div>
+    <div class="thumbnail-container" id="thumbnailContainer" aria-hidden="false"></div>
+  </section>
+
+  <aside class="product-details" id="productDetailsSection" aria-labelledby="productName">
+    <div>
+      <h1 id="productName">Product Name</h1>
+
+      <!-- DESCRIPTION moved to directly after Product Name as requested -->
+      <div id="productDescription" class="description" style="margin-top:6px;"></div>
+
+      <!-- Price comes after Description -->
+      <div class="product-price" id="productPrice">₦0.00</div>
+
+      <!-- subtitle retained (unchanged) -->
+      <div class="small-muted" id="productSubtitle"></div>
+    </div>
+
+    <div class="options-group" id="optionsGroup">
+      <!-- SIZE placed before COLOR as requested -->
+      <div class="small-muted" style="margin-top:8px">Size</div>
+      <div id="sizeGroup"><div class="options-row" id="sizeOptions"></div></div>
+
+      <div class="small-muted">Color</div>
+      <div id="colorGroup"><div class="options-row" id="colorOptions"></div></div>
+    </div>
+
+    <!-- Total placed BEFORE quantity controls (will be populated by JS) -->
+    <div id="totalVariantCount" style="margin-top:6px;"></div>
+
+    <div class="qty-and-actions">
+      <div class="quantity-controls" style="margin-top:6px;">
+        <button id="minus" aria-label="Decrease">-</button>
+        <span class="quantity-badge" id="quantityBadge">0</span>
+        <button id="plus" aria-label="Increase">+</button>
+      </div>
+
+      <div class="action-row" id="actionRow" role="group" aria-label="Product actions">
+        <!-- Add to Cart -->
+        <button class="add-cart action" id="addCartBtn" type="button">Add to Cart</button>
+
+        <!-- Customize remains a link but styled identically (uses same class) -->
+        <a id="customizeBtn" class="customize-btn action" href="#" style="display:none;">Customize</a>
+
+        <!-- Clear selections -->
+        <button class="clear-btn action" id="clearButton" type="button">Clear selections</button>
+
+        <!-- SINGLE Back to Shop (duplicate removed) -->
+        <a href="shop.html" class="back-btn action" id="backToShop">← Back to Shop</a>
+      </div>
+    </div>
+
+    <!-- Removed the duplicate mobile actions back-to-shop to avoid double back link -->
+    <!-- (mobile-actions element removed so JS which references mobileActions will safely see null) -->
+
+  </aside>
+</main>
+
+<!-- small accessible modal for messages (hidden by default) -->
+<div id="optionModal" class="hidden" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:12000;pointer-events:none;">
+  <div style="background:#fff;padding:14px 18px;border-radius:8px;color:#000;pointer-events:auto;max-width:90%;width:420px;box-shadow:0 6px 30px rgba(0,0,0,.2);">
+    <p style="margin:0 0 12px;color:#111;">Please select relevant options before adding to cart.</p>
+    <div style="text-align:right;">
+      <button id="optionModalClose" style="background:var(--fdv-green);color:var(--fdv-gold);border:none;padding:8px 12px;border-radius:8px;cursor:pointer;">OK</button>
+    </div>
+  </div>
+</div>
+
+<button id="floatingSupportBtn" aria-label="Support"><i class="fas fa-headset"></i></button>
+<footer><p>© <span id="year"></span> Fleur De Vie</p></footer>
+
+<!-- --------------- SCRIPT --------------- -->
+<script type="module">
+/* ---------- FIREBASE + CONSTANTS ---------- */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey:"AIzaSyCuiZXHFYl1fVKnGwojavRvbekSBpkipJg",
+  authDomain:"brandisby.firebaseapp.com",
+  projectId:"brandisby",
+  storageBucket:"brandisby.firebasestorage.app",
+  messagingSenderId:"87213267039",
+  appId:"1:87213267039:web:339e9fd49e3ad31f7423ea"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const BRAND_ID = 'fleurdevie';
+const CART_KEY = 'cart';
+const CURRENCY_KEY = 'currency';
+
+/* ---------- DOM Refs ---------- */
+const productContainer = document.getElementById('productContainer');
+const productImg = document.getElementById('productImg');
+const productName = document.getElementById('productName');
+const productSubtitle = document.getElementById('productSubtitle');
+const productDescription = document.getElementById('productDescription');
+const productPrice = document.getElementById('productPrice');
+const quantityBadge = document.getElementById('quantityBadge');
+const addCartBtn = document.getElementById('addCartBtn');
+const minusBtn = document.getElementById('minus');
+const plusBtn = document.getElementById('plus');
+const cartCountElem = document.getElementById('cartCount');
+const customizeBtn = document.getElementById('customizeBtn');
+const thumbnailContainer = document.getElementById('thumbnailContainer');
+const colorOptions = document.getElementById('colorOptions');
+const sizeOptions = document.getElementById('sizeOptions');
+const colorGroup = document.getElementById('colorGroup');
+const sizeGroup = document.getElementById('sizeGroup');
+const optionModal = document.getElementById('optionModal');
+const optionModalClose = document.getElementById('optionModalClose');
+const headerEl = document.querySelector('.site-header');
+const hamburger = document.getElementById('hamburger');
+const headerRight = document.querySelector('.header-right');
+const floatingSupportBtn = document.getElementById('floatingSupportBtn');
+const yearElem = document.getElementById('year');
+const clearButton = document.getElementById('clearButton');
+let totalVariantCountElem = document.getElementById('totalVariantCount');
+const optionsGroup = document.getElementById('optionsGroup'); // for hide/show when no variants
+
+/* ---------- Utilities ---------- */
+const urlParams = new URLSearchParams(window.location.search);
+const urlPriceParam = urlParams.get('price');
+const urlCurrencyParam = urlParams.get('currency');
+
+function normalizeOption(str){
+  if (str === null || typeof str === 'undefined') return '';
+  return String(str).trim().toLowerCase();
+}
+function comboKeyNorm(color = '', size = ''){ return `${normalizeOption(color)}|${normalizeOption(size)}`; }
+
+function getCart(){ try { return JSON.parse(localStorage.getItem(CART_KEY)) || []; } catch(e) { return []; } }
+function setCart(cartArray){ try { localStorage.setItem(CART_KEY, JSON.stringify(cartArray)); } catch(e){} updateCartCount(); }
+function mergeCartItems(cartArray){
+  const merged = [];
+  (cartArray || []).forEach(item => {
+    const idx = merged.findIndex(i => i.id === item.id && normalizeOption(i.color) === normalizeOption(item.color) && normalizeOption(i.size) === normalizeOption(item.size));
+    if (idx === -1) merged.push({ ...item });
+    else merged[idx].quantity = (merged[idx].quantity || 0) + (item.quantity || 0);
+  });
+  return merged;
+}
+
+/* update cart count in header */
+function updateCartCount(){
+  const total = (getCart() || []).reduce((sum, i) => sum + (Number(i.quantity)||0), 0);
+  if(cartCountElem) cartCountElem.textContent = total;
+}
+
+/* price formatting */
+function formatPriceForDisplay(amount, currency) {
+  const localeMap = { NGN:'en-NG', USD:'en-US', EUR:'de-DE', GBP:'en-GB' };
+  const minFrac = currency === 'NGN' ? 0 : 2;
+  const n = Number(amount);
+  if (!isNaN(n)) {
+    try {
+      return new Intl.NumberFormat(localeMap[currency]||'en-US', { style:'currency', currency, minimumFractionDigits:minFrac }).format(n);
+    } catch(e){
+      return `${currency} ${n.toFixed(minFrac)}`;
+    }
+  } else {
+    return `${currency} ${String(amount)}`;
+  }
+}
+
+/* ---------- Currency detection & resolution (Serac parity) ---------- */
+function getCookie(name){
+  try {
+    const pairs = document.cookie.split(';').map(p => p.trim());
+    for(const p of pairs){
+      if(!p) continue;
+      const [k,v] = p.split('=');
+      if(k && k.trim() === name) return decodeURIComponent(v || '');
+    }
+  } catch(e){}
+  return null;
+}
+
+function detectShopActiveCurrency(){
+  if(urlCurrencyParam) return String(urlCurrencyParam).toUpperCase();
+  const keys = ['activeCurrency','currency','shopCurrency','selectedCurrency','store_currency','customerCurrency','currentCurrency'];
+  for(const k of keys){
+    try { const v = localStorage.getItem(k); if(v) return String(v).replace(/[^A-Za-z]/g,'').toUpperCase(); } catch(e){}
+  }
+  const cookieKeys = ['storeCurrency','currency','shop_currency','cart_currency'];
+  for(const k of cookieKeys){ const v = getCookie(k); if(v) return String(v).replace(/[^A-Za-z]/g,'').toUpperCase(); }
+  try {
+    if(window.Shopify && window.Shopify.currency && (window.Shopify.currency.active || window.Shopify.currency.current)) return String(window.Shopify.currency.active || window.Shopify.currency.current).toUpperCase();
+  } catch(e){}
+  try {
+    const meta = document.querySelector('meta[name="shop-currency"], meta[name="currency"]');
+    if(meta && meta.getAttribute('content')) return String(meta.getAttribute('content')).toUpperCase();
+    const el = document.querySelector('[data-active-currency], [data-currency]');
+    if(el){ const v = el.getAttribute('data-active-currency') || el.getAttribute('data-currency') || el.textContent; if(v) return String(v).replace(/[^A-Za-z]/g,'').toUpperCase(); }
+  } catch(e){}
+  try { const cart = getCart(); if(cart && cart.length){ const c = cart[0].currency; if(c) return String(c).toUpperCase(); } } catch(e){}
+  try { const lc = localStorage.getItem(CURRENCY_KEY); if(lc) return String(lc).toUpperCase(); } catch(e){}
+  return 'NGN';
+}
+
+function parseSavedProductFromLocalStorage() {
+  try {
+    const raw = localStorage.getItem('selectedProduct') || localStorage.getItem('selectedVariant') || null;
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed || null;
+  } catch (e) { return null; }
+}
+
+function findCartPriceCurrencyForProduct(pid){
+  try {
+    const cart = getCart();
+    for (const item of cart) {
+      if (!item) continue;
+      if (String(item.id) === String(pid) || String(item.parentId) === String(pid) || String(item.productId) === String(pid)) {
+        if (item.currency && (typeof item.price !== 'undefined')) return { price: item.price, currency: item.currency };
+        if (typeof item.price !== 'undefined' && item.currency) return { price: item.price, currency: item.currency };
+      }
+    }
+  } catch(e) {}
+  return null;
+}
+
+function resolveDisplayPriceCurrency(productId, productData){
+  const shopCurrency = detectShopActiveCurrency();
+  if(productData){
+    const perKey = 'price' + String(shopCurrency).toUpperCase();
+    if(typeof productData[perKey] !== 'undefined' && productData[perKey] !== null) return { price: productData[perKey], currency: shopCurrency };
+  }
+  if (urlPriceParam !== null) {
+    const parsed = parseFloat(String(urlPriceParam).replace(/[^0-9\.\-]+/g,''));
+    if (!isNaN(parsed)) return { price: parsed, currency: shopCurrency };
+    return { price: urlPriceParam, currency: shopCurrency };
+  }
+  const saved = parseSavedProductFromLocalStorage();
+  if (saved && (String(saved.id) === String(productId) || String(saved.productId) === String(productId) || !saved.id)) {
+    if (typeof saved.price !== 'undefined' && saved.price !== null) return { price: saved.price, currency: shopCurrency };
+    if (saved.formattedPrice) {
+      const p = parseFloat(String(saved.formattedPrice).replace(/[^0-9\.\-]+/g,''));
+      if(!isNaN(p)) return { price: p, currency: shopCurrency };
+      return { price: saved.formattedPrice, currency: shopCurrency };
+    }
+  }
+  const cartMatch = findCartPriceCurrencyForProduct(productId);
+  if (cartMatch) return { price: cartMatch.price, currency: shopCurrency };
+  if (productData) {
+    if (typeof productData.price !== 'undefined' && productData.price !== null) return { price: productData.price, currency: shopCurrency };
+    if (typeof productData.priceNGN !== 'undefined') return { price: productData.priceNGN, currency: shopCurrency };
+    if (typeof productData.priceUSD !== 'undefined') return { price: productData.priceUSD, currency: shopCurrency };
+    if (typeof productData.priceEUR !== 'undefined') return { price: productData.priceEUR, currency: shopCurrency };
+    if (typeof productData.priceGBP !== 'undefined') return { price: productData.priceGBP, currency: shopCurrency };
+  }
+  return { price: 0, currency: shopCurrency || 'NGN' };
+}
+
+/* ---------- Variant UI helpers ---------- */
+function ensureProductTotalElem(){
+  if(totalVariantCountElem) return;
+  // fallback if missing
+  const el = document.getElementById('totalVariantCount');
+  if(el) totalVariantCountElem = el;
+}
+function updateProductTotalUI(pid){
+  ensureProductTotalElem();
+  const total = getCart().filter(i => String(i.id) === String(pid)).reduce((s,i)=> s + Number(i.quantity||0), 0);
+  if(totalVariantCountElem) totalVariantCountElem.textContent = `Total: ${total}`;
+  if(addCartBtn) addCartBtn.style.display = total > 0 ? 'none' : 'inline-flex';
+}
+
+/* get selected options */
+function getSelectedOptions(){
+  return {
+    color: colorOptions?.querySelector('.selected')?.dataset?.value || '',
+    size: sizeOptions?.querySelector('.selected')?.dataset?.value || ''
+  };
+}
+function hasVariants(){ return (sizeOptions && sizeOptions.children.length > 0) || (colorOptions && colorOptions.children.length > 0); }
+
+/* modal show/hide */
+function showModal(message){
+  if(!optionModal){ alert(message); return; }
+  const p = optionModal.querySelector('p');
+  if(p) p.textContent = message;
+  optionModal.classList.remove('hidden');
+  optionModal.style.pointerEvents = 'auto';
+}
+function hideModalAndReset(){
+  if(!optionModal) return;
+  optionModal.classList.add('hidden');
+  optionModal.style.pointerEvents = 'none';
+}
+
+/* combo qty helpers */
+function getComboQty(pid, color = '', size = ''){
+  const normColor = normalizeOption(color);
+  const normSize = normalizeOption(size);
+  const cart = getCart();
+  const it = cart.find(i => String(i.id) === String(pid) && normalizeOption(i.color) === normColor && normalizeOption(i.size) === normSize);
+  return Number(it?.quantity || 0);
+}
+
+/* selected quantity display */
+function updateSelectedQuantityDisplay(){
+  const sel = getSelectedOptions();
+  const hasAnyVariant = hasVariants();
+  if(!hasAnyVariant){
+    const total = getCart().filter(i => String(i.id) === String(productId)).reduce((s,i)=> s + Number(i.quantity||0), 0);
+    if(quantityBadge) quantityBadge.textContent = total;
+  } else {
+    const qty = (sel.color || sel.size) ? getComboQty(productId, sel.color, sel.size) : 0;
+    if(quantityBadge) quantityBadge.textContent = qty;
+  }
+  updateProductTotalUI(productId);
+}
+
+/* ---------- Cart operations (Serac parity) ---------- */
+function addToCartNormalized(product){
+  const cart = getCart();
+  const idx = cart.findIndex(i => String(i.id) === String(product.id) && normalizeOption(i.color) === normalizeOption(product.color) && normalizeOption(i.size) === normalizeOption(product.size));
+  if(idx > -1){
+    cart[idx].quantity = (Number(cart[idx].quantity)||0) + 1;
+  } else {
+    cart.push({...product, quantity:1});
+  }
+  setCart(cart);
+  updateVariantBadges();
+  updateSelectedQuantityDisplay();
+  refreshClearButtonVisibility();
+}
+
+function removeFromCartSpecific(pid, color = '', size = ''){
+  const cart = getCart();
+  const idx = cart.findIndex(i => String(i.id) === String(pid) && normalizeOption(i.color) === normalizeOption(color) && normalizeOption(i.size) === normalizeOption(size));
+  if(idx > -1){
+    cart[idx].quantity = (Number(cart[idx].quantity)||0) - 1;
+    if(cart[idx].quantity <= 0) cart.splice(idx,1);
+    setCart(cart);
+    updateVariantBadges();
+    updateSelectedQuantityDisplay();
+    refreshClearButtonVisibility();
+    return true;
+  }
+  return false;
+}
+
 function removeFromCartFallback(pid){
   const cart = getCart();
   for(let i = cart.length - 1; i >= 0; i--){
@@ -530,19 +1051,6 @@ function updateVariantBadges(){
     if(!badge){
       badge = document.createElement('span');
       badge.className = 'variant-badge';
-      badge.style.position = 'absolute';
-      badge.style.top = '4px';
-      badge.style.right = '6px';
-      badge.style.background = 'var(--fdv-green)';
-      badge.style.color = 'var(--fdv-gold)' ;
-      badge.style.fontSize = '0.65rem';
-      badge.style.borderRadius = '50%';
-      badge.style.minWidth = '16px';
-      badge.style.height = '16px';
-      badge.style.display = 'flex';
-      badge.style.alignItems = 'center';
-      badge.style.justifyContent = 'center';
-      badge.style.fontWeight = '600';
       btn.style.position = 'relative';
       btn.appendChild(badge);
     }
@@ -733,6 +1241,18 @@ async function loadProduct(){
       });
     } else if(colorGroup) colorGroup.style.display = 'none';
 
+    // Hide the whole options-group when no variants exist (requirement #1)
+    if(optionsGroup){
+      if(!sizesList.length && !colorsList.length){
+        optionsGroup.style.display = 'none';
+      } else {
+        optionsGroup.style.display = '';
+      }
+      // remove the JS-hide flash
+      optionsGroup.style.visibility = '';
+    }
+
+    // Ensure clear button initial visibility after load
     updateCartCount(); updateVariantBadges(); refreshClearButtonVisibility(); updateSelectedQuantityDisplay();
     productContainer.style.visibility = 'visible';
   }catch(err){
