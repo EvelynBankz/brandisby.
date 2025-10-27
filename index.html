@@ -1,4 +1,82 @@
+
 <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brandisby – Coming Soon</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background: radial-gradient(circle at 20% 20%, #111, #000);
+      color: #f4f4f4;
+      font-family: "Montserrat", sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      letter-spacing: 1px;
+      overflow: hidden;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, #ff8a00, #e52e71);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 20px;
+      animation: fadeIn 2s ease;
+    }
+
+    p {
+      font-size: 1.1rem;
+      color: #ccc;
+      animation: fadeIn 3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .dots::after {
+      content: " ";
+      animation: dots 1.5s steps(4, end) infinite;
+    }
+
+    @keyframes dots {
+      0%, 20% { content: ""; }
+      40% { content: "."; }
+      60% { content: ".."; }
+      80%, 100% { content: "..."; }
+    }
+  </style>
+</head>
+<body>
+  <h1>HOLD ON TIGHT!</h1>
+  <p>We’re crafting something extraordinary <span class="dots"></span></p>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!--<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -15,8 +93,8 @@
     <img src="assets/brandisby-logo.png" alt="Brandisby" class="logo">
   </div>
 
-  <!-- Hamburger toggle for mobile -->
-  <button class="menu-toggle"><i class="fas fa-bars"></i></button>
+   Hamburger toggle for mobile -->
+ <!-- <button class="menu-toggle"><i class="fas fa-bars"></i></button>
 
   <nav class="top-actions">
     <a href="index.html" class="nav-link">Home</a>
@@ -54,6 +132,6 @@
     topActions.classList.toggle('active');
   });
 </script>
-
 </body>
 </html>
+-->
