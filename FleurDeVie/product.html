@@ -848,10 +848,15 @@ async function loadProduct(){
     }
 
     /* ---------- HIDE OR SHOW OPTIONS ---------- */
-    if(optionsGroup){
-      optionsGroup.style.display = hasVariants ? '' : 'none';
-      optionsGroup.style.visibility = '';
-    }
+   if (optionsGroup) {
+  if (hasVariants) {
+    optionsGroup.style.display = '';
+    optionsGroup.style.visibility = 'visible'; // 👈 THIS is the missing part
+  } else {
+    optionsGroup.style.display = 'none';
+  }
+}
+
 
     /* ---------- FINALIZE ---------- */
     updateCartCount();
