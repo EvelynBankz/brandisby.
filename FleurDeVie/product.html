@@ -144,6 +144,33 @@ footer{text-align:center;padding:20px;background:transparent;color:var(--fdv-gre
 
 /* ensure options-group hidden by default until JS evaluates product (avoid flash) */
 .options-group{visibility:hidden}
+
+.variant-group {
+  margin-top: 0.75rem;
+}
+.variant-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+.variant-options button {
+  background: #d4f5e9; /* brand accent */
+  border: 2px solid var(--fdv-green, #1a5632);
+  color: var(--fdv-green, #1a5632);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.variant-options button:hover,
+.variant-options button.selected {
+  background: var(--fdv-green, #1a5632);
+  color: #fff;
+  transform: scale(1.05);
+}
+  
 </style>
 </head>
 <body>
@@ -191,14 +218,20 @@ footer{text-align:center;padding:20px;background:transparent;color:var(--fdv-gre
       <div class="small-muted" id="productSubtitle"></div>
     </div>
 
-    <div class="options-group" id="optionsGroup">
-      <!-- SIZE placed before COLOR as requested -->
+     <div class="options-group" id="optionsGroup">
+    <!-- Size group -->
+    <div id="sizeGroup" class="variant-group">
       <div class="small-muted" style="margin-top:8px">Size</div>
-      <div id="sizeGroup"><div class="options-row" id="sizeOptions"></div></div>
-
-      <div class="small-muted">Color</div>
-      <div id="colorGroup"><div class="options-row" id="colorOptions"></div></div>
+      <div class="options-row variant-options" id="sizeOptions"></div>
     </div>
+  
+    <!-- Color group -->
+    <div id="colorGroup" class="variant-group">
+      <div class="small-muted">Color</div>
+      <div class="options-row variant-options" id="colorOptions"></div>
+    </div>
+  </div>
+
 
     <!-- Total placed BEFORE quantity controls (will be populated by JS) -->
     <div id="totalVariantCount" style="margin-top:6px;"></div>
