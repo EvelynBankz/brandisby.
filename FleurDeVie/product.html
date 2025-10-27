@@ -736,46 +736,64 @@ async function loadProduct(){
       if(Array.isArray(data.colors)) colorsList = data.colors.slice();
     }
 
-    // render sizes
-    if(sizeOptions) sizeOptions.innerHTML = '';
-    if(sizesList.length){
-      if(sizeGroup) sizeGroup.style.display = '';
-      sizesList.forEach(s=>{
-        const btn = document.createElement('button'); btn.type='button'; btn.textContent = s; btn.dataset.value = s;
-        btn.addEventListener('click', ()=> {
-          Array.from(sizeOptions.children).forEach(b=>b.classList.remove('selected'));
-          btn.classList.add('selected');
-          updateVariantBadges(); updateSelectedQuantityDisplay(); refreshClearButtonVisibility();
-        });
-        sizeOptions.appendChild(btn);
-      });
-    } else if(sizeGroup) sizeGroup.style.display = 'none';
+   // ✅ Determine if product has any variants (sizes, colors, or variant list)
+const hasVariants = (Array.isArray(data.variants) && data.variants.length > 0) ||
+                    (Array.isArray(data.sizes) && data.sizes.length > 0) ||
+                    (Array.isArray(data.colors) && data.colors.length > 0);
 
-    // render colors
-    if(colorOptions) colorOptions.innerHTML = '';
-    if(colorsList.length){
-      if(colorGroup) colorGroup.style.display = '';
-      colorsList.forEach(c=>{
-        const btn = document.createElement('button'); btn.type='button'; btn.textContent = c; btn.dataset.value = c;
-        btn.addEventListener('click', ()=> {
-          Array.from(colorOptions.children).forEach(b=>b.classList.remove('selected'));
-          btn.classList.add('selected');
-          updateVariantBadges(); updateSelectedQuantityDisplay(); refreshClearButtonVisibility();
-        });
-        colorOptions.appendChild(btn);
-      });
-    } else if(colorGroup) colorGroup.style.display = 'none';
+// render sizes
+if (sizeOptions) sizeOptions.innerHTML = '';
+if (hasVariants && sizesList.length) {
+  if (sizeGroup) sizeGroup.style.display = '';
+  sizesList.forEach(s => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = s;
+    btn.dataset.value = s;
+    btn.addEventListener('click', () => {
+      Array.from(sizeOptions.children).forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      updateVariantBadges();
+      updateSelectedQuantityDisplay();
+      refreshClearButtonVisibility();
+    });
+    sizeOptions.appendChild(btn);
+  });
+} else if (sizeGroup) {
+  sizeGroup.style.display = 'none';
+}
 
-    // Hide the whole options-group when no variants exist (requirement #1)
-    if(optionsGroup){
-      if(!sizesList.length && !colorsList.length){
-        optionsGroup.style.display = 'none';
-      } else {
-        optionsGroup.style.display = '';
-      }
-      // remove the JS-hide flash
-      optionsGroup.style.visibility = '';
-    }
+// render colors
+if (colorOptions) colorOptions.innerHTML = '';
+if (hasVariants && colorsList.length) {
+  if (colorGroup) colorGroup.style.display = '';
+  colorsList.forEach(c => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = c;
+    btn.dataset.value = c;
+    btn.addEventListener('click', () => {
+      Array.from(colorOptions.children).forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      updateVariantBadges();
+      updateSelectedQuantityDisplay();
+      refreshClearButtonVisibility();
+    });
+    colorOptions.appendChild(btn);
+  });
+} else if (colorGroup) {
+  colorGroup.style.display = 'none';
+}
+
+// ✅ Hide or show the entire options section based on whether variants exist
+if (optionsGroup) {
+  if (!hasVariants) {
+    optionsGroup.style.display = 'none';
+  } else {
+    optionsGroup.style.display = '';
+  }
+  optionsGroup.style.visibility = '';
+}
 
     // Ensure clear button initial visibility after load
     updateCartCount(); updateVariantBadges(); refreshClearButtonVisibility(); updateSelectedQuantityDisplay();
