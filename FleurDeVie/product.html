@@ -740,6 +740,9 @@ async function loadProduct(){
 const hasVariants = (Array.isArray(data.variants) && data.variants.length > 0) ||
                     (Array.isArray(data.sizes) && data.sizes.length > 0) ||
                     (Array.isArray(data.colors) && data.colors.length > 0);
+console.log('Product data check:', data);
+
+    
 
 // render sizes
 if (sizeOptions) sizeOptions.innerHTML = '';
