@@ -737,10 +737,11 @@ async function loadProduct(){
     }
 
    // ✅ Determine if product has any variants (sizes, colors, or variant list)
-const hasVariants = (Array.isArray(data.variants) && data.variants.length > 0) ||
-                    (Array.isArray(data.sizes) && data.sizes.length > 0) ||
-                    (Array.isArray(data.colors) && data.colors.length > 0);
-console.log('Product data check:', data);
+const hasVariants = 
+  (Array.isArray(data.sizes) && data.sizes.length > 0) ||
+  (Array.isArray(data.colors) && data.colors.length > 0);
+
+// console.log('Product data check:', data);
 
     
 
