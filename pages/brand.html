@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Brand Store — Brandisby</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/brand.css">
+  <script src="../js/subdomain-router.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+</head>
+<body class="brand-page">
+
+  <!-- BRAND NAV -->
+  <nav class="brand-nav" id="brand-nav">
+    <a href="../index.html" class="brand-nav-back">← Brandisby</a>
+    <div class="brand-nav-logo" id="brand-nav-logo">Loading…</div>
+    <div class="brand-nav-right">
+      <a href="#" class="brand-search-btn" id="open-search">🔍</a>
+      <button class="brand-cart-btn" id="cart-toggle">
+        🛒 <span class="cart-count" id="cart-count">0</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- BRAND HERO / BANNER -->
+  <header class="brand-header" id="brand-header">
+    <div class="brand-header-bg" id="brand-header-bg"></div>
+    <div class="brand-header-overlay"></div>
+    <div class="brand-header-content">
+      <div class="brand-logo-wrap" id="brand-logo-wrap">
+        <span id="brand-logo-initials">B</span>
+      </div>
+      <h1 class="brand-name" id="brand-name">Loading…</h1>
+      <p class="brand-tagline" id="brand-tagline"></p>
+      <div class="brand-link-badge" id="brand-link-badge"></div>
+    </div>
+  </header>
+
+  <!-- FILTER & SEARCH BAR -->
+  <section class="shop-controls" id="shop-controls">
+    <div class="shop-controls-inner">
+      <div class="search-wrap" id="search-wrap">
+        <input type="text" placeholder="Search products…" id="search-input" class="search-input"/>
+        <span class="search-icon">🔍</span>
+      </div>
+      <div class="filter-wrap">
+        <select id="category-filter" class="filter-select">
+          <option value="">All Categories</option>
+          <option value="clothing">Clothing</option>
+          <option value="accessories">Accessories</option>
+          <option value="digital">Digital</option>
+          <option value="prints">Prints</option>
+          <option value="custom">Custom</option>
+          <option value="other">Other</option>
+        </select>
+        <select id="sort-filter" class="filter-select">
+          <option value="newest">Newest</option>
+          <option value="price-asc">Price: Low to High</option>
+          <option value="price-desc">Price: High to Low</option>
+        </select>
+        <div class="view-toggle">
+          <button class="view-btn active" data-view="grid" id="view-grid">⊞</button>
+          <button class="view-btn" data-view="list" id="view-list">☰</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRODUCT GRID -->
+  <section class="products-section">
+    <div class="products-inner">
+      <div class="products-grid" id="products-grid">
+        <!-- skeleton -->
+        <div class="product-skeleton"></div>
+        <div class="product-skeleton"></div>
+        <div class="product-skeleton"></div>
+        <div class="product-skeleton"></div>
+      </div>
+      <div class="products-empty hidden" id="products-empty">
+        <div class="empty-icon">📦</div>
+        <h3>No products yet</h3>
+        <p>This brand hasn't added products yet. Check back soon!</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CART SIDEBAR -->
+  <div class="cart-overlay" id="cart-overlay"></div>
+  <aside class="cart-sidebar" id="cart-sidebar">
+    <div class="cart-header">
+      <h2>Your Cart</h2>
+      <button class="cart-close" id="cart-close">✕</button>
+    </div>
+    <div class="cart-items" id="cart-items"></div>
+    <div class="cart-footer" id="cart-footer">
+      <div class="cart-total">
+        <span>Total</span>
+        <span id="cart-total-price">₦0</span>
+      </div>
+      <a href="#" class="btn-primary-lg" id="checkout-btn" style="text-align:center;justify-content:center;">Proceed to Checkout</a>
+      <button class="btn-ghost-lg" id="continue-shopping" style="width:100%;justify-content:center;margin-top:0.5rem;">Continue Shopping</button>
+    </div>
+  </aside>
+
+  <!-- FOOTER (minimal brand footer) -->
+  <footer class="brand-footer">
+    <p>Powered by <a href="../index.html">Brandisby</a></p>
+  </footer>
+
+  <script src="../js/firebase-config.js"></script>
+  <script src="../js/brand.js"></script>
+</body>
+</html>
