@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Product — Brandisby</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/product.css">
+  <script src="../js/subdomain-router.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+</head>
+<body class="product-page">
+
+  <!-- NAV -->
+  <nav class="brand-nav" id="brand-nav">
+    <a href="#" class="brand-nav-back" id="back-to-store">← Back to Store</a>
+    <div class="brand-nav-logo" id="brand-nav-logo"></div>
+    <div class="brand-nav-right">
+      <button class="brand-cart-btn" id="cart-badge">🛒 <span class="cart-count" id="cart-count">0</span></button>
+    </div>
+  </nav>
+
+  <!-- PRODUCT DETAIL -->
+  <main class="product-detail">
+    <div class="product-detail-inner">
+
+      <!-- GALLERY -->
+      <div class="product-gallery" id="product-gallery">
+        <div class="gallery-main" id="gallery-main">
+          <div class="gallery-placeholder">🛍️</div>
+        </div>
+        <div class="gallery-thumbs" id="gallery-thumbs"></div>
+      </div>
+
+      <!-- INFO PANEL -->
+      <div class="product-info-panel">
+        <div class="product-breadcrumb" id="product-breadcrumb"></div>
+
+        <h1 class="product-title" id="product-title">Loading…</h1>
+        <div class="product-meta-row">
+          <span class="product-price" id="product-price">₦0</span>
+          <span class="product-stock" id="product-stock"></span>
+        </div>
+        <div class="product-category-tag" id="product-category"></div>
+        <div class="product-description" id="product-description"></div>
+
+        <!-- CUSTOMIZATION SECTION -->
+        <div class="custom-section" id="custom-section" style="display:none;">
+          <h3 class="custom-section-title">✏️ Customize Your Order</h3>
+
+          <div class="custom-field" id="custom-text-wrap" style="display:none;">
+            <label class="custom-label">Custom Text (name, message, etc.)</label>
+            <input type="text" id="custom-text" class="custom-input" placeholder="e.g. John, Happy Birthday, etc." maxlength="60"/>
+            <span class="custom-hint">Max 60 characters</span>
+          </div>
+
+          <div class="custom-field" id="custom-font-wrap" style="display:none;">
+            <label class="custom-label">Font Style</label>
+            <div class="font-options" id="font-options">
+              <button class="font-btn active" data-font="Classic">Classic</button>
+              <button class="font-btn" data-font="Script">Script</button>
+              <button class="font-btn" data-font="Bold">Bold</button>
+              <button class="font-btn" data-font="Modern">Modern</button>
+            </div>
+          </div>
+
+          <div class="custom-field" id="custom-upload-wrap" style="display:none;">
+            <label class="custom-label">Upload Your Image</label>
+            <div class="upload-area" id="upload-area">
+              <input type="file" id="custom-image-upload" accept="image/*" hidden/>
+              <div class="upload-placeholder" id="upload-placeholder">
+                <span class="upload-icon">📁</span>
+                <p>Click to upload or drag & drop</p>
+                <span class="upload-hint">PNG, JPG, SVG up to 5MB</span>
+              </div>
+              <img id="upload-preview" style="display:none;max-width:100%;border-radius:8px;" />
+            </div>
+          </div>
+        </div>
+
+        <!-- QTY & ADD TO CART -->
+        <div class="product-actions">
+          <div class="qty-selector">
+            <button class="qty-btn" id="qty-minus">−</button>
+            <input type="number" id="qty-input" value="1" min="1" class="qty-num"/>
+            <button class="qty-btn" id="qty-plus">+</button>
+          </div>
+          <button class="btn-add-cart" id="add-to-cart">Add to Cart</button>
+        </div>
+
+        <div class="product-extra-info">
+          <div class="extra-info-item">
+            <span>🔒</span> Secure checkout via Paystack
+          </div>
+          <div class="extra-info-item">
+            <span>📦</span> <span id="shipping-info">Shipping details available at checkout</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- MINI CART DRAWER (reused) -->
+  <div class="cart-overlay" id="cart-overlay"></div>
+  <aside class="cart-sidebar" id="cart-sidebar">
+    <div class="cart-header">
+      <h2>Item Added! 🎉</h2>
+      <button class="cart-close" id="cart-close">✕</button>
+    </div>
+    <div class="cart-items" id="cart-items"></div>
+    <div class="cart-footer" id="cart-footer">
+      <div class="cart-total">
+        <span>Total</span>
+        <span id="cart-total-price">₦0</span>
+      </div>
+      <a href="#" class="btn-primary-lg" id="checkout-btn" style="text-align:center;justify-content:center;">Proceed to Checkout →</a>
+      <button class="btn-ghost-lg" id="continue-shopping" style="width:100%;justify-content:center;margin-top:0.5rem;">Continue Shopping</button>
+    </div>
+  </aside>
+
+  <script src="../js/firebase-config.js"></script>
+  <script src="../js/product.js"></script>
+  <!-- Re-use brand.css cart styles -->
+  <link rel="stylesheet" href="../css/brand.css">
+</body>
+</html>
