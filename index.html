@@ -1,137 +1,155 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Brandisby – Coming Soon</title>
-  <style>
-    body {
-      margin: 0;
-      height: 100vh;
-      background: radial-gradient(circle at 20% 20%, #111, #000);
-      color: #f4f4f4;
-      font-family: "Montserrat", sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      letter-spacing: 1px;
-      overflow: hidden;
-    }
-
-    h1 {
-      font-size: 2.5rem;
-      font-weight: 700;
-      background: linear-gradient(90deg, #ff8a00, #e52e71);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 20px;
-      animation: fadeIn 2s ease;
-    }
-
-    p {
-      font-size: 1.1rem;
-      color: #ccc;
-      animation: fadeIn 3s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .dots::after {
-      content: " ";
-      animation: dots 1.5s steps(4, end) infinite;
-    }
-
-    @keyframes dots {
-      0%, 20% { content: ""; }
-      40% { content: "."; }
-      60% { content: ".."; }
-      80%, 100% { content: "..."; }
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Brandisby — Where Brands Come Alive</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <script src="js/subdomain-router.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
 </head>
-<body>
-  <h1>HOLD ON TIGHT!</h1>
-  <p>We’re crafting something extraordinary <span class="dots"></span></p>
-</body>
-</html>
+<body class="home-page">
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<!--<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Brandisby — Create your store</title>
-
-  <link rel="stylesheet" href="styles/style.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body class="brandisby">
-
- <header class="brand-header">
-  <div class="logo-wrap">
-    <img src="assets/brandisby-logo.png" alt="Brandisby" class="logo">
-  </div>
-
-   Hamburger toggle for mobile -->
- <!-- <button class="menu-toggle"><i class="fas fa-bars"></i></button>
-
-  <nav class="top-actions">
-    <a href="index.html" class="nav-link">Home</a>
-    <a href="#about" class="nav-link">About Us</a>
-    <a href="#" class="cta-link">Create Your Store</a>
-    <a href="#" class="cta-link">Learn More</a>
-    <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
-    <a href="#" class="social-link"><i class="fab fa-tiktok"></i></a>
-    <a href="mailto:your@email.com" class="social-link"><i class="fas fa-envelope"></i></a>
-    <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
-    <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+  <!-- NAV -->
+  <nav class="main-nav">
+    <a href="index.html" class="nav-logo">BRANDISBY</a>
+    <div class="nav-links">
+      <a href="#how-it-works">How It Works</a>
+      <a href="#brands">Explore Brands</a>
+      <a href="pages/creator-signup.html" class="btn-outline">Start Your Brand</a>
+      <a href="pages/login.html" class="btn-fill" id="nav-login-btn">Sign In</a>
+    </div>
+    <button class="hamburger" id="hamburger">&#9776;</button>
   </nav>
-</header>
 
-
-  <main class="hero hero--brandisby" role="main">
-    <div class="hero-inner">
-      <h1 class="hero-title">Welcome to Brandisby</h1>
-      <p class="hero-sub">Create your store. Build your brand identity. Get your own unique page and share your creativity with the world.</p>
-
-      <div class="cta-row">
-        <a class="btn btn-primary" href="#">Create Your Store</a>
-        <a class="btn btn-outline" href="#">Learn More</a>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-grain"></div>
+    <div class="hero-content">
+      <span class="hero-eyebrow">Your brand. Your link. Your store.</span>
+      <h1 class="hero-title">Every Brand<br/><em>Deserves</em><br/>Its Own World</h1>
+      <p class="hero-sub">Brandisby gives creators and businesses a beautiful storefront, a unique link, and powerful tools to sell — all in one place.</p>
+      <div class="hero-actions">
+        <a href="pages/creator-signup.html" class="btn-primary-lg">Create Your Brand <span>→</span></a>
+        <a href="#brands" class="btn-ghost-lg">Explore Stores</a>
+      </div>
+      <div class="hero-link-demo">
+        <span class="link-prefix">brandisby.com/</span><span class="link-typed" id="typed-demo">FleurDeVie</span>
       </div>
     </div>
-  </main>
+    <div class="hero-mockup">
+      <div class="mockup-card mockup-card-1">
+        <div class="mockup-img-ph"></div>
+        <div class="mockup-text-ph short"></div>
+        <div class="mockup-text-ph"></div>
+      </div>
+      <div class="mockup-card mockup-card-2">
+        <div class="mockup-img-ph"></div>
+        <div class="mockup-text-ph short"></div>
+        <div class="mockup-text-ph"></div>
+      </div>
+      <div class="mockup-card mockup-card-3">
+        <div class="mockup-img-ph"></div>
+        <div class="mockup-text-ph short"></div>
+        <div class="mockup-text-ph"></div>
+      </div>
+    </div>
+  </section>
 
-  <footer class="site-footer">
-    <small>Brandisby • Minimalist e-commerce demo • Colors: #5a3c30 / #1b1513 / #ffffff</small>
+  <!-- HOW IT WORKS -->
+  <section class="how-it-works" id="how-it-works">
+    <div class="section-inner">
+      <h2 class="section-title">From idea to <em>storefront</em> in minutes</h2>
+      <div class="steps-grid">
+        <div class="step-card">
+          <span class="step-num">01</span>
+          <h3>Create Your Brand</h3>
+          <p>Sign up, name your brand, and get your unique Brandisby link instantly. Upload a logo and set your brand colors.</p>
+        </div>
+        <div class="step-card">
+          <span class="step-num">02</span>
+          <h3>Add Your Products</h3>
+          <p>List physical, digital, or custom products. Connect to Printify, Sellfy, Shopify and more to power your catalog.</p>
+        </div>
+        <div class="step-card">
+          <span class="step-num">03</span>
+          <h3>Share Your Link</h3>
+          <p>Share brandisby.com/YourBrand everywhere. Customers get a full branded shopping experience with checkout.</p>
+        </div>
+        <div class="step-card">
+          <span class="step-num">04</span>
+          <h3>Get Paid</h3>
+          <p>Payments via Paystack flow directly to you. Track orders, manage inventory, and grow your brand.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXPLORE BRANDS -->
+  <section class="explore-brands" id="brands">
+    <div class="section-inner">
+      <h2 class="section-title">Discover <em>Independent</em> Brands</h2>
+      <div class="brands-grid" id="brands-grid">
+        <!-- Populated by JS -->
+        <div class="brand-card-skeleton"></div>
+        <div class="brand-card-skeleton"></div>
+        <div class="brand-card-skeleton"></div>
+        <div class="brand-card-skeleton"></div>
+        <div class="brand-card-skeleton"></div>
+        <div class="brand-card-skeleton"></div>
+      </div>
+      <div class="brands-empty hidden" id="brands-empty">
+        <p>No brands yet — be the first to create one!</p>
+        <a href="pages/creator-signup.html" class="btn-primary-lg">Start Your Brand</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- INTEGRATIONS -->
+  <section class="integrations">
+    <div class="section-inner">
+      <p class="integrations-label">Seamlessly connects with</p>
+      <div class="integrations-list">
+        <span>Sellfy</span>
+        <span>Beacons</span>
+        <span>Printify</span>
+        <span>Shopify</span>
+        <span>BigCartel</span>
+        <span>Paystack</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="final-cta">
+    <div class="section-inner">
+      <h2>Ready to build<br/><em>your brand?</em></h2>
+      <a href="pages/creator-signup.html" class="btn-primary-lg">Get Started Free →</a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="main-footer">
+    <div class="footer-inner">
+      <span class="footer-logo">BRANDISBY</span>
+      <div class="footer-links">
+        <a href="#">About</a>
+        <a href="#">Pricing</a>
+        <a href="#">Blog</a>
+        <a href="#">Contact</a>
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+      </div>
+      <p class="footer-copy">© 2025 Brandisby. All rights reserved.</p>
+    </div>
   </footer>
-<script>
-  const menuToggle = document.querySelector('.menu-toggle');
-  const topActions = document.querySelector('.top-actions');
-  menuToggle.addEventListener('click', () => {
-    topActions.classList.toggle('active');
-  });
-</script>
+
+  <script src="js/firebase-config.js"></script>
+  <script src="js/home.js"></script>
 </body>
 </html>
--->
