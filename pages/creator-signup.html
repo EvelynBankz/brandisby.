@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Start Your Brand — Brandisby</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/auth.css">
+  <script src="../js/subdomain-router.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+</head>
+<body class="auth-page">
+
+  <a href="../index.html" class="auth-back">← Brandisby</a>
+
+  <div class="auth-split">
+    <!-- LEFT PANEL -->
+    <div class="auth-left">
+      <div class="auth-left-content">
+        <h1 class="auth-left-title">Your brand,<br/><em>your world.</em></h1>
+        <p class="auth-left-sub">Join thousands of creators selling on Brandisby with their own unique link and beautiful storefront.</p>
+        <div class="auth-left-features">
+          <div class="feature-item">✦ Unique brandisby.com/YourBrand link</div>
+          <div class="feature-item">✦ Custom storefront with your colors & logo</div>
+          <div class="feature-item">✦ Secure Paystack payments</div>
+          <div class="feature-item">✦ Custom order forms for personalized products</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: FORM -->
+    <div class="auth-right">
+      <div class="auth-form-wrap">
+        <!-- STEP 1: ACCOUNT -->
+        <div class="auth-step active" id="auth-step-1">
+          <h2 class="auth-heading">Create your account</h2>
+          <p class="auth-sub">Already have an account? <a href="login.html">Sign in</a></p>
+
+          <div class="form-group">
+            <label>Full Name *</label>
+            <input type="text" id="signup-name" class="form-input" placeholder="John Doe" />
+          </div>
+          <div class="form-group">
+            <label>Email *</label>
+            <input type="email" id="signup-email" class="form-input" placeholder="you@example.com" />
+          </div>
+          <div class="form-group">
+            <label>Password *</label>
+            <input type="password" id="signup-password" class="form-input" placeholder="Min. 8 characters" />
+          </div>
+          <button class="btn-primary-lg auth-submit-btn" id="create-account-btn" style="width:100%;justify-content:center;">
+            Continue →
+          </button>
+        </div>
+
+        <!-- STEP 2: BRAND SETUP -->
+        <div class="auth-step" id="auth-step-2">
+          <h2 class="auth-heading">Set up your brand</h2>
+          <p class="auth-sub">Tell us about your brand.</p>
+
+          <div class="form-group">
+            <label>Brand Name *</label>
+            <input type="text" id="brand-name-input" class="form-input" placeholder="e.g. FleurDeVie" />
+          </div>
+
+          <div class="form-group">
+            <label>Your Brandisby Link *</label>
+            <div class="handle-input-wrap">
+              <span class="handle-prefix">brandisby.com/</span>
+              <input type="text" id="brand-handle" class="form-input handle-input" placeholder="yourbrand" />
+            </div>
+            <div class="handle-status" id="handle-status"></div>
+          </div>
+
+          <div class="form-group">
+            <label>Brand Description</label>
+            <textarea id="brand-desc" class="form-input" rows="3" placeholder="What does your brand sell? Who is it for?"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Brand Tagline</label>
+            <input type="text" id="brand-tagline" class="form-input" placeholder="e.g. Handcrafted with love" />
+          </div>
+
+          <div class="form-group">
+            <label>Brand Color</label>
+            <div class="color-pick-row">
+              <input type="color" id="brand-color" value="#5a3c30" class="color-picker" />
+              <span class="color-label" id="color-label">#5a3c30</span>
+              <div class="color-swatches">
+                <div class="swatch" style="background:#5a3c30" data-color="#5a3c30"></div>
+                <div class="swatch" style="background:#2c3e50" data-color="#2c3e50"></div>
+                <div class="swatch" style="background:#8e44ad" data-color="#8e44ad"></div>
+                <div class="swatch" style="background:#16a085" data-color="#16a085"></div>
+                <div class="swatch" style="background:#c0392b" data-color="#c0392b"></div>
+                <div class="swatch" style="background:#1b1513" data-color="#1b1513"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Upload Logo (optional)</label>
+            <div class="logo-upload-area" id="logo-upload-area">
+              <input type="file" id="logo-file" accept="image/*" hidden />
+              <div id="logo-placeholder">
+                <span style="font-size:2rem">🖼️</span>
+                <p style="font-size:0.85rem;color:var(--brand-muted);">Click to upload logo</p>
+              </div>
+              <img id="logo-preview" style="display:none;max-width:120px;max-height:120px;border-radius:12px;" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Paystack Public Key <span style="color:var(--brand-muted);font-weight:400;font-size:0.78rem;">(for receiving payments)</span></label>
+            <input type="text" id="paystack-key" class="form-input" placeholder="pk_live_..." />
+          </div>
+
+          <div class="form-actions">
+            <button class="btn-ghost-lg" id="back-to-account-btn">← Back</button>
+            <button class="btn-primary-lg" id="create-brand-btn">Launch My Brand 🚀</button>
+          </div>
+        </div>
+
+        <!-- STEP 3: SUCCESS -->
+        <div class="auth-step" id="auth-step-3" style="text-align:center;">
+          <div style="font-size:4rem;margin-bottom:1rem;animation:pop 0.5s cubic-bezier(0.18,1.5,0.5,1)">🎉</div>
+          <h2 class="auth-heading">Your brand is live!</h2>
+          <p class="auth-sub" id="success-msg">Your Brandisby store is ready.</p>
+          <div class="brand-link-reveal" id="brand-link-reveal"></div>
+          <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-top:2rem;">
+            <a href="#" class="btn-primary-lg" id="visit-store-btn">Visit My Store →</a>
+            <a href="dashboard.html" class="btn-ghost-lg">Go to Dashboard</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <style>
+    @keyframes pop { from{transform:scale(0)} to{transform:scale(1)} }
+    .brand-link-reveal {
+      background: var(--brand-dark); color: var(--brand-light-brown);
+      padding: 1rem 1.5rem; border-radius: 10px; font-family: monospace;
+      font-size: 1rem; display: inline-block; margin: 1rem 0;
+    }
+  </style>
+
+  <script src="../js/firebase-config.js"></script>
+  <script src="../js/creator-signup.js"></script>
+</body>
+</html>
