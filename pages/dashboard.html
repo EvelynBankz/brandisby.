@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard — Brandisby</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/dashboard.css">
+  <script src="../js/subdomain-router.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+</head>
+<body class="dashboard-page">
+
+  <!-- SIDEBAR -->
+  <aside class="dash-sidebar" id="dash-sidebar">
+    <div class="dash-logo">BRANDISBY</div>
+    <nav class="dash-nav">
+      <a href="#" class="dash-nav-item active" data-tab="overview">
+        <span class="dash-nav-icon">📊</span> Overview
+      </a>
+      <a href="#" class="dash-nav-item" data-tab="products">
+        <span class="dash-nav-icon">🛍️</span> Products
+      </a>
+      <a href="#" class="dash-nav-item" data-tab="orders">
+        <span class="dash-nav-icon">📦</span> Orders
+      </a>
+      <a href="#" class="dash-nav-item" data-tab="settings">
+        <span class="dash-nav-icon">⚙️</span> Brand Settings
+      </a>
+    </nav>
+    <div class="dash-sidebar-footer">
+      <div class="dash-user" id="dash-user">
+        <div class="dash-user-avatar" id="dash-avatar">?</div>
+        <div class="dash-user-info">
+          <div class="dash-user-name" id="dash-user-name">Loading…</div>
+          <div class="dash-user-email" id="dash-user-email"></div>
+        </div>
+      </div>
+      <button class="dash-signout" id="dash-signout">Sign out</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="dash-main">
+    <!-- TOP BAR -->
+    <header class="dash-topbar">
+      <div class="dash-topbar-left">
+        <button class="dash-menu-btn" id="dash-menu-btn">☰</button>
+        <div class="dash-topbar-title" id="dash-topbar-title">Overview</div>
+      </div>
+      <div class="dash-topbar-right">
+        <a href="#" class="dash-view-store-btn" id="dash-view-store-btn" target="_blank">
+          👁 View My Store
+        </a>
+        <div class="dash-store-link" id="dash-store-link"></div>
+      </div>
+    </header>
+
+    <!-- CONTENT AREA -->
+    <div class="dash-content">
+
+      <!-- TAB: OVERVIEW -->
+      <section class="dash-tab active" id="tab-overview">
+        <div class="dash-welcome" id="dash-welcome">
+          <h1 class="dash-welcome-title">Welcome back <span id="welcome-name">—</span></h1>
+          <p class="dash-welcome-sub">Here's how your brand is performing.</p>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">💰</div>
+            <div class="stat-value" id="stat-revenue">₦0</div>
+            <div class="stat-label">Total Revenue</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">📦</div>
+            <div class="stat-value" id="stat-orders">0</div>
+            <div class="stat-label">Total Orders</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🛍️</div>
+            <div class="stat-value" id="stat-products">0</div>
+            <div class="stat-label">Products Listed</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🔗</div>
+            <div class="stat-value stat-link" id="stat-link">—</div>
+            <div class="stat-label">Your Brand Link</div>
+          </div>
+        </div>
+
+        <div class="dash-section-heading">Recent Orders</div>
+        <div class="orders-table-wrap">
+          <table class="orders-table" id="overview-orders-table">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Items</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="overview-orders-body">
+              <tr><td colspan="6" class="table-loading">Loading orders…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- TAB: PRODUCTS -->
+      <section class="dash-tab" id="tab-products">
+        <div class="dash-tab-header">
+          <h2 class="dash-tab-title">Products</h2>
+          <button class="btn-primary-lg" id="add-product-btn">+ Add Product</button>
+        </div>
+
+        <div class="products-table-wrap">
+          <table class="orders-table" id="products-table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th>Custom Orders</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="products-table-body">
+              <tr><td colspan="6" class="table-loading">Loading products…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- TAB: ORDERS -->
+      <section class="dash-tab" id="tab-orders">
+        <div class="dash-tab-header">
+          <h2 class="dash-tab-title">Orders</h2>
+          <select id="order-status-filter" class="filter-select" style="border-radius:8px;padding:0.5rem 1rem;">
+            <option value="">All Statuses</option>
+            <option value="pending">Pending</option>
+            <option value="paid">Paid</option>
+            <option value="processing">Processing</option>
+            <option value="shipped">Shipped</option>
+            <option value="delivered">Delivered</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+        <div class="orders-table-wrap">
+          <table class="orders-table">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Items</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="all-orders-body">
+              <tr><td colspan="7" class="table-loading">Loading orders…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- TAB: SETTINGS -->
+      <section class="dash-tab" id="tab-settings">
+        <div class="dash-tab-header">
+          <h2 class="dash-tab-title">Brand Settings</h2>
+        </div>
+        <div class="settings-grid">
+          <div class="settings-card">
+            <h3 class="settings-card-title">Brand Profile</h3>
+            <div class="form-group">
+              <label>Brand Name</label>
+              <input type="text" id="set-brand-name" class="form-input" />
+            </div>
+            <div class="form-group">
+              <label>Tagline</label>
+              <input type="text" id="set-tagline" class="form-input" />
+            </div>
+            <div class="form-group">
+              <label>Description</label>
+              <textarea id="set-desc" class="form-input" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+              <label>Brand Color</label>
+              <div style="display:flex;align-items:center;gap:0.75rem;">
+                <input type="color" id="set-color" class="color-picker" style="width:44px;height:44px;border:none;border-radius:8px;cursor:pointer;padding:2px;" />
+                <span id="set-color-label" style="font-family:monospace;font-size:0.85rem;"></span>
+              </div>
+            </div>
+            <button class="btn-primary-lg" id="save-brand-btn">Save Changes</button>
+          </div>
+
+          <div class="settings-card">
+            <h3 class="settings-card-title">Logo & Banner</h3>
+            <div class="form-group">
+              <label>Logo</label>
+              <div class="logo-upload-area" id="settings-logo-area">
+                <input type="file" id="settings-logo-file" accept="image/*" hidden />
+                <div id="settings-logo-placeholder" style="text-align:center;">
+                  <span style="font-size:2rem">🖼️</span>
+                  <p style="font-size:0.8rem;color:var(--brand-muted);">Click to upload</p>
+                </div>
+                <img id="settings-logo-preview" style="display:none;max-width:100px;max-height:100px;border-radius:10px;" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Banner Image</label>
+              <div class="logo-upload-area" id="settings-banner-area" style="aspect-ratio:3/1;min-height:80px;">
+                <input type="file" id="settings-banner-file" accept="image/*" hidden />
+                <div id="settings-banner-placeholder" style="text-align:center;">
+                  <span style="font-size:1.5rem">🌄</span>
+                  <p style="font-size:0.8rem;color:var(--brand-muted);">Click to upload banner</p>
+                </div>
+                <img id="settings-banner-preview" style="display:none;width:100%;object-fit:cover;border-radius:8px;" />
+              </div>
+            </div>
+            <button class="btn-primary-lg" id="save-media-btn">Upload Media</button>
+          </div>
+
+          <div class="settings-card">
+            <h3 class="settings-card-title">Payment Settings</h3>
+            <div class="form-group">
+              <label>Paystack Public Key</label>
+              <input type="text" id="set-paystack-key" class="form-input" placeholder="pk_live_…" />
+            </div>
+            <p style="font-size:0.78rem;color:var(--brand-muted);margin-bottom:1rem;line-height:1.6;">
+              Your Paystack public key is needed to accept payments on your store. Get it from your <a href="https://dashboard.paystack.com" target="_blank" style="color:var(--brand-brown);">Paystack dashboard</a>.
+            </p>
+            <button class="btn-primary-lg" id="save-payment-btn">Save Payment Settings</button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ADD/EDIT PRODUCT MODAL -->
+  <div class="modal-overlay" id="product-modal-overlay">
+    <div class="modal" id="product-modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-title">Add Product</h3>
+        <button class="modal-close" id="modal-close">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="edit-product-id" />
+        <div class="form-row">
+          <div class="form-group">
+            <label>Product Name *</label>
+            <input type="text" id="p-name" class="form-input" placeholder="e.g. Custom Mug" />
+          </div>
+          <div class="form-group">
+            <label>Price (₦) *</label>
+            <input type="number" id="p-price" class="form-input" placeholder="5000" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Category</label>
+            <select id="p-category" class="form-input">
+              <option value="clothing">Clothing</option>
+              <option value="accessories">Accessories</option>
+              <option value="digital">Digital</option>
+              <option value="prints">Prints</option>
+              <option value="custom">Custom</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Stock Quantity</label>
+            <input type="number" id="p-stock" class="form-input" placeholder="Leave blank for unlimited" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea id="p-desc" class="form-input" rows="3" placeholder="Describe your product…"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Product Images</label>
+          <div class="product-images-upload" id="product-images-area">
+            <input type="file" id="p-images-file" accept="image/*" multiple hidden />
+            <div class="product-images-placeholder" id="p-images-placeholder">
+              <span style="font-size:1.5rem">📷</span>
+              <p style="font-size:0.82rem;color:var(--brand-muted);">Click to upload images</p>
+            </div>
+            <div class="product-images-preview" id="p-images-preview"></div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="toggle-label">
+            <input type="checkbox" id="p-allow-custom" class="toggle-check" />
+            <span class="toggle-switch"></span>
+            Allow Custom Orders
+          </label>
+        </div>
+        <div class="custom-options-panel" id="custom-options-panel" style="display:none;">
+          <p style="font-size:0.82rem;font-weight:500;margin-bottom:0.75rem;">Customization Options:</p>
+          <div style="display:flex;flex-direction:column;gap:0.5rem;">
+            <label class="toggle-label">
+              <input type="checkbox" id="p-custom-text" class="toggle-check" />
+              <span class="toggle-switch"></span> Text input (name, message, etc.)
+            </label>
+            <label class="toggle-label">
+              <input type="checkbox" id="p-custom-font" class="toggle-check" />
+              <span class="toggle-switch"></span> Font/style picker
+            </label>
+            <label class="toggle-label">
+              <input type="checkbox" id="p-custom-upload" class="toggle-check" />
+              <span class="toggle-switch"></span> Image upload
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost-lg" id="modal-cancel">Cancel</button>
+        <button class="btn-primary-lg" id="modal-save">Save Product</button>
+      </div>
+    </div>
+  </div>
+
+  <link rel="stylesheet" href="../css/checkout.css">
+  <script src="../js/firebase-config.js"></script>
+  <script src="../js/dashboard.js"></script>
+</body>
+</html>
