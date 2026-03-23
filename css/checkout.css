@@ -172,7 +172,6 @@ textarea.form-input { resize: vertical; min-height: 80px; }
   font-size: 0.78rem; text-align: center; color: var(--brand-muted);
 }
 
-
 @media (max-width: 900px) {
   .checkout-inner { grid-template-columns: 1fr; }
   .order-summary { position: static; }
