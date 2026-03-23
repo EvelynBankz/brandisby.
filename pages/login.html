@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign In — Brandisby</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/main.css">
+  <link rel="stylesheet" href="../css/auth.css">
+  <link rel="stylesheet" href="../css/checkout.css">
+  <script src="../js/subdomain-router.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+</head>
+<body class="auth-page">
+
+  <a href="../index.html" class="auth-back">← Brandisby</a>
+
+  <div class="auth-split">
+    <div class="auth-left">
+      <div class="auth-left-content">
+        <h1 class="auth-left-title">Welcome<br/><em>back.</em></h1>
+        <p class="auth-left-sub">Sign in to manage your brand, view orders, and keep growing your Brandisby store.</p>
+      </div>
+    </div>
+
+    <div class="auth-right">
+      <div class="login-form-wrap">
+        <h2 class="auth-heading">Sign in</h2>
+        <p class="auth-sub">Don't have an account? <a href="creator-signup.html">Create one free →</a></p>
+
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="login-email" class="form-input" placeholder="you@example.com" />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="login-password" class="form-input" placeholder="Your password" />
+        </div>
+        <div style="text-align:right;margin-top:-0.75rem;margin-bottom:1.5rem;">
+          <a href="#" style="font-size:0.82rem;color:var(--brand-brown);text-decoration:none;" id="forgot-pw">Forgot password?</a>
+        </div>
+        <button class="btn-primary-lg" id="login-btn" style="width:100%;justify-content:center;">Sign In →</button>
+
+        <div class="divider">or</div>
+        <a href="creator-signup.html" class="btn-ghost-lg" style="width:100%;justify-content:center;text-decoration:none;">Create a New Brand</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="../js/firebase-config.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Auto-redirect if already logged in
+      Auth.onAuthChange(user => {
+        if (user) window.location.href = 'dashboard.html';
+      });
+
+      document.getElementById('login-btn').addEventListener('click', async () => {
+        const email = document.getElementById('login-email').value.trim();
+        const pass = document.getElementById('login-password').value;
+        if (!email || !pass) { Toast.show('Please enter email and password', 'error'); return; }
+        const btn = document.getElementById('login-btn');
+        btn.disabled = true; btn.textContent = 'Signing in…';
+        try {
+          await Auth.signIn(email, pass);
+          window.location.href = 'dashboard.html';
+        } catch(e) {
+          Toast.show('Invalid email or password', 'error');
+          btn.disabled = false; btn.textContent = 'Sign In →';
+        }
+      });
+
+      // Enter key
+      document.getElementById('login-password').addEventListener('keypress', e => {
+        if (e.key === 'Enter') document.getElementById('login-btn').click();
+      });
+
+      document.getElementById('forgot-pw').addEventListener('click', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('login-email').value.trim();
+        if (!email) { Toast.show('Enter your email first', 'error'); return; }
+        try {
+          await auth.sendPasswordResetEmail(email);
+          Toast.show('Password reset email sent!', 'success');
+        } catch(e) {
+          Toast.show('Could not send reset email', 'error');
+        }
+      });
+    });
+  </script>
+</body>
+</html>
