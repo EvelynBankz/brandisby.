@@ -66,7 +66,7 @@
   display: flex;
 }
 
-/* Handle input */
+/* Handle input — yourbrand.brandisby.com */
 .handle-input-wrap {
   display: flex; align-items: center;
   border: 1.5px solid rgba(90,60,48,0.2); border-radius: 8px;
@@ -74,14 +74,15 @@
   transition: border-color var(--transition);
 }
 .handle-input-wrap:focus-within { border-color: var(--brand-brown); }
-.handle-prefix {
-  padding: 0.7rem 0.75rem; background: var(--brand-cream);
-  font-size: 0.8rem; color: var(--brand-muted); white-space: nowrap;
-  border-right: 1px solid rgba(90,60,48,0.15);
+.handle-suffix {
+  padding: 0.7rem 0.85rem; background: var(--brand-cream);
+  font-size: 0.82rem; color: var(--brand-brown); white-space: nowrap;
+  border-left: 1px solid rgba(90,60,48,0.15); font-weight: 500;
+  letter-spacing: 0.01em;
 }
 .handle-input {
   border: none !important; border-radius: 0 !important; background: transparent !important;
-  flex: 1;
+  flex: 1; font-weight: 500;
 }
 .handle-status { font-size: 0.78rem; margin-top: 0.3rem; min-height: 18px; }
 .handle-status.available { color: #27ae60; }
