@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Order Confirmed — Brandisby</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/main.css">
+  <style>
+    body { background: var(--brand-cream); }
+    .confirm-page {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      padding: 2rem 5%;
+    }
+    .confirm-card {
+      background: var(--brand-white); border-radius: 24px; padding: 3rem;
+      max-width: 580px; width: 100%; box-shadow: var(--shadow-lg);
+      text-align: center;
+    }
+    .confirm-icon { font-size: 4rem; margin-bottom: 1.5rem; animation: pop 0.5s cubic-bezier(0.18,1.5,0.5,1); }
+    @keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
+    .confirm-title {
+      font-family: var(--font-display); font-size: 2.4rem; font-weight: 300;
+      margin-bottom: 0.5rem; color: var(--brand-dark);
+    }
+    .confirm-subtitle { color: #6b5a52; margin-bottom: 2rem; line-height: 1.6; }
+    .order-details-box {
+      background: var(--brand-cream); border-radius: 12px; padding: 1.5rem;
+      text-align: left; margin-bottom: 2rem;
+    }
+    .order-detail-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.5rem 0; font-size: 0.875rem;
+      border-bottom: 1px solid rgba(90,60,48,0.08);
+    }
+    .order-detail-row:last-child { border-bottom: none; }
+    .order-detail-label { color: var(--brand-muted); }
+    .order-detail-value { font-weight: 500; color: var(--brand-dark); }
+    .order-id { font-family: 'Courier New', monospace; font-size: 0.82rem; color: var(--brand-brown); }
+    .confirm-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.3rem 0.9rem; border-radius: 100px; font-size: 0.78rem; font-weight: 500;
+      background: rgba(39,174,96,0.1); color: #27ae60; margin-bottom: 1.5rem;
+    }
+    .items-list { margin-bottom: 2rem; text-align: left; }
+    .confirm-item {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.75rem 0; border-bottom: 1px solid rgba(90,60,48,0.08);
+    }
+    .confirm-item-img {
+      width: 44px; height: 44px; border-radius: 8px;
+      background: linear-gradient(135deg, var(--brand-light-brown), var(--brand-brown));
+      overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+    }
+    .confirm-item-img img { width: 100%; height: 100%; object-fit: cover; }
+    .confirm-item-name { flex: 1; font-size: 0.875rem; font-weight: 500; }
+    .confirm-item-price { font-size: 0.875rem; color: var(--brand-brown); font-weight: 500; }
+    .powered-footer { margin-top: 2rem; font-size: 0.75rem; color: var(--brand-muted); }
+    .powered-footer a { color: var(--brand-brown); text-decoration: none; }
+  </style>
+  <script src="../js/subdomain-router.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+</head>
+<body>
+  <div class="confirm-page">
+    <div class="confirm-card" id="confirm-card">
+      <div class="confirm-icon">🎉</div>
+      <h1 class="confirm-title">Order Confirmed!</h1>
+      <p class="confirm-subtitle">Thank you for your purchase. Your order has been received and is being processed. You'll receive an email confirmation shortly.</p>
+      <div class="status-badge">✓ Payment Successful</div>
+      <div class="order-details-box" id="order-details-box">
+        <div class="order-detail-row">
+          <span class="order-detail-label">Order ID</span>
+          <span class="order-detail-value order-id" id="conf-order-id">—</span>
+        </div>
+        <div class="order-detail-row">
+          <span class="order-detail-label">Customer</span>
+          <span class="order-detail-value" id="conf-customer">—</span>
+        </div>
+        <div class="order-detail-row">
+          <span class="order-detail-label">Email</span>
+          <span class="order-detail-value" id="conf-email">—</span>
+        </div>
+        <div class="order-detail-row">
+          <span class="order-detail-label">Delivery To</span>
+          <span class="order-detail-value" id="conf-address">—</span>
+        </div>
+        <div class="order-detail-row">
+          <span class="order-detail-label">Total Paid</span>
+          <span class="order-detail-value" id="conf-total">—</span>
+        </div>
+        <div class="order-detail-row">
+          <span class="order-detail-label">Estimated Delivery</span>
+          <span class="order-detail-value" id="conf-delivery">3–7 business days</span>
+        </div>
+      </div>
+      <div class="items-list" id="conf-items"></div>
+      <div class="confirm-actions">
+        <a href="#" id="back-to-shop-btn" class="btn-primary-lg">← Back to Shop</a>
+        <a href="../index.html" class="btn-ghost-lg">Explore More Brands</a>
+      </div>
+      <p class="powered-footer">Powered by <a href="../index.html">Brandisby</a></p>
+    </div>
+  </div>
+
+  <script src="../js/firebase-config.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const orderId = URLUtils.getParam('orderId');
+      const slug = URLUtils.getParam('slug');
+
+      document.getElementById('back-to-shop-btn').href = `brand.html?slug=${slug}`;
+
+      if (!orderId) return;
+
+      try {
+        const order = await Orders.getById(orderId);
+        if (!order) return;
+
+        document.getElementById('conf-order-id').textContent = orderId.slice(0,12).toUpperCase();
+        document.getElementById('conf-customer').textContent = `${order.customer?.firstName || ''} ${order.customer?.lastName || ''}`;
+        document.getElementById('conf-email').textContent = order.customer?.email || '';
+        document.getElementById('conf-address').textContent = `${order.customer?.address || ''}, ${order.customer?.city || ''}, ${order.customer?.state || ''}`;
+        document.getElementById('conf-total').textContent = `₦${Number(order.total || 0).toLocaleString()}`;
+
+        const itemsEl = document.getElementById('conf-items');
+        if (order.items && order.items.length) {
+          itemsEl.innerHTML = order.items.map(item => `
+            <div class="confirm-item">
+              <div class="confirm-item-img">${item.image ? `<img src="${item.image}" />` : '🛍️'}</div>
+              <div class="confirm-item-name">${item.name} × ${item.qty}</div>
+              <div class="confirm-item-price">₦${(item.price * item.qty).toLocaleString()}</div>
+            </div>
+          `).join('');
+        }
+      } catch(e) {
+        console.error(e);
+      }
+    });
+  </script>
+</body>
+</html>
