@@ -1,93 +1,110 @@
-// subdomain-router.js
-// Place this script in ALL pages (index.html, brand.html, product.html, etc.)
-// It detects subdomains like fleurdevie.brandisby.com and routes correctly.
+// =====================================================
+// subdomain-router.js — Brandisby Subdomain Engine
+// Pattern:  goodies.brandisby.com
+// Hosting:  Vercel (wildcard subdomain) + GitHub source
+// Dev:      localhost fallback via ?slug=goodies
+// =====================================================
 
 (function () {
-  const hostname = window.location.hostname; // e.g. fleurdevie.brandisby.com
+  const hostname = window.location.hostname;
   const parts = hostname.split('.');
+  const path = window.location.pathname;
+  const params = new URLSearchParams(window.location.search);
 
-  // Detect if we're on a brand subdomain
-  // Matches: fleurdevie.brandisby.com  (parts = ['fleurdevie', 'brandisby', 'com'])
-  // Does NOT match: brandisby.com or www.brandisby.com
+  // Reserved subdomains that are NOT brand stores
+  const RESERVED = ['www', 'app', 'dashboard', 'api', 'admin', 'mail', 'help'];
+
+  // Is this brandisby.com or a subdomain of it?
+  const isOnBrandisby =
+    (parts[parts.length - 2] === 'brandisby' && parts[parts.length - 1] === 'com');
+
+  // Is it specifically a BRAND subdomain? e.g. goodies.brandisby.com
   const isSubdomain =
+    isOnBrandisby &&
     parts.length >= 3 &&
-    parts[parts.length - 2] === 'brandisby' &&
-    parts[0] !== 'www' &&
-    parts[0] !== 'app' &&
-    parts[0] !== 'dashboard';
+    !RESERVED.includes(parts[0]);
 
+  // Active brand slug — from subdomain OR ?slug= param (dev fallback)
+  const slugFromSubdomain = isSubdomain ? parts[0].toLowerCase() : null;
+  const slugFromParam = params.get('slug');
+  const activeBrandSlug = slugFromSubdomain || slugFromParam || null;
+
+  // Expose slug globally for all JS files to use
+  window.getCurrentBrandSlug = function () {
+    return activeBrandSlug;
+  };
+
+  // Auto-route when on a brand subdomain
   if (isSubdomain) {
-    const brandSlug = parts[0].toLowerCase();
-    const path = window.location.pathname; // e.g. /  or /product?id=xxx
+    const slug = slugFromSubdomain;
+    const currentSlugInParam = params.get('slug');
 
-    // Already on the brand page with the correct slug — do nothing
-    const currentSlug = new URLSearchParams(window.location.search).get('slug');
-    if (currentSlug === brandSlug) return;
+    // Already hydrated correctly — do nothing
+    if (currentSlugInParam === slug) return;
 
-    // Determine which page we're on and inject slug if missing
-    if (path === '/' || path === '/index.html' || path === '') {
-      // Root of subdomain → go to brand storefront
-      window.location.replace(`/pages/brand.html?slug=${brandSlug}`);
+    // goodies.brandisby.com/ → brand storefront
+    if (path === '/' || path === '' || path === '/index.html') {
+      window.location.replace('/pages/brand.html?slug=' + slug);
       return;
     }
 
-    if (path.includes('product.html')) {
-      const productId = new URLSearchParams(window.location.search).get('id');
-      if (!currentSlug && productId) {
-        window.location.replace(`/pages/product.html?slug=${brandSlug}&id=${productId}`);
-      }
+    if (path.includes('product.html') && !currentSlugInParam) {
+      const id = params.get('id') || '';
+      window.location.replace('/pages/product.html?slug=' + slug + (id ? '&id=' + id : ''));
       return;
     }
 
-    if (path.includes('checkout.html')) {
-      if (!currentSlug) {
-        window.location.replace(`/pages/checkout.html?slug=${brandSlug}`);
-      }
+    if (path.includes('checkout.html') && !currentSlugInParam) {
+      window.location.replace('/pages/checkout.html?slug=' + slug);
       return;
     }
 
-    if (path.includes('order-confirmation.html')) {
-      const orderId = new URLSearchParams(window.location.search).get('orderId');
-      if (!currentSlug && orderId) {
-        window.location.replace(`/pages/order-confirmation.html?slug=${brandSlug}&orderId=${orderId}`);
-      }
+    if (path.includes('order-confirmation.html') && !currentSlugInParam) {
+      const orderId = params.get('orderId') || '';
+      window.location.replace('/pages/order-confirmation.html?slug=' + slug + (orderId ? '&orderId=' + orderId : ''));
       return;
     }
   }
 
-  // Helper: generate a brand URL respecting subdomain or slug style
-  // Usage: BrandURL.store('fleurdevie') → https://fleurdevie.brandisby.com  OR  /pages/brand.html?slug=fleurdevie
-  window.BrandURL = {
-    store(slug) {
-      if (hostname.includes('brandisby.com')) {
-        return `https://${slug}.brandisby.com`;
-      }
-      return `/pages/brand.html?slug=${slug}`;
-    },
-    product(slug, productId) {
-      if (hostname.includes('brandisby.com')) {
-        return `https://${slug}.brandisby.com/pages/product.html?id=${productId}`;
-      }
-      return `/pages/product.html?slug=${slug}&id=${productId}`;
-    },
-    checkout(slug) {
-      if (hostname.includes('brandisby.com')) {
-        return `https://${slug}.brandisby.com/pages/checkout.html`;
-      }
-      return `/pages/checkout.html?slug=${slug}`;
-    },
-    confirmation(slug, orderId) {
-      if (hostname.includes('brandisby.com')) {
-        return `https://${slug}.brandisby.com/pages/order-confirmation.html?orderId=${orderId}`;
-      }
-      return `/pages/order-confirmation.html?slug=${slug}&orderId=${orderId}`;
-    }
-  };
+  // BrandURL — generates the correct link for each environment
+  //
+  // Vercel production (brandisby.com):
+  //   BrandURL.store('goodies')       → https://goodies.brandisby.com
+  //   BrandURL.product('goodies', id) → https://goodies.brandisby.com/pages/product.html?id=xxx
+  //   BrandURL.checkout('goodies')    → https://goodies.brandisby.com/pages/checkout.html
+  //
+  // Localhost / dev:
+  //   BrandURL.store('goodies')       → /pages/brand.html?slug=goodies
+  //   BrandURL.product('goodies', id) → /pages/product.html?slug=goodies&id=xxx
+  //   BrandURL.checkout('goodies')    → /pages/checkout.html?slug=goodies
 
-  // Also expose current brand slug globally (works for both subdomain and ?slug= param)
-  window.getCurrentBrandSlug = function () {
-    if (isSubdomain) return parts[0].toLowerCase();
-    return new URLSearchParams(window.location.search).get('slug');
+  window.BrandURL = {
+
+    store(slug) {
+      if (isOnBrandisby) return 'https://' + slug + '.brandisby.com';
+      return '/pages/brand.html?slug=' + slug;
+    },
+
+    product(slug, productId) {
+      if (isOnBrandisby) return 'https://' + slug + '.brandisby.com/pages/product.html?id=' + productId;
+      return '/pages/product.html?slug=' + slug + '&id=' + productId;
+    },
+
+    checkout(slug) {
+      if (isOnBrandisby) return 'https://' + slug + '.brandisby.com/pages/checkout.html';
+      return '/pages/checkout.html?slug=' + slug;
+    },
+
+    confirmation(slug, orderId) {
+      if (isOnBrandisby) return 'https://' + slug + '.brandisby.com/pages/order-confirmation.html?orderId=' + orderId;
+      return '/pages/order-confirmation.html?slug=' + slug + '&orderId=' + orderId;
+    },
+
+    // For displaying the brand link in the UI — always subdomain style
+    display(slug) {
+      return slug + '.brandisby.com';
+    }
+
   };
 
 })();
