@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('brand-nav-logo').textContent = brand.name || '';
     document.getElementById('brand-name').textContent = brand.name || '';
     document.getElementById('brand-tagline').textContent = brand.tagline || brand.description || '';
-    document.getElementById('brand-link-badge').textContent = `${brand.slug}.brandisby.com`;
+    document.getElementById('brand-link-badge').textContent = (typeof BrandURL !== 'undefined') ? BrandURL.display(brand.slug) : `${brand.slug}.brandisby.com`;
 
     const bg = document.getElementById('brand-header-bg');
     if (brand.bannerUrl) {
