@@ -1,157 +1,238 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Brandisby — Every brand deserves its own world. Create your storefront and sell with your unique link."/>
   <title>Brandisby — Where Brands Come Alive</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/main.css">
+  <link rel="icon" href="assets/logo-transparent.png" type="image/png"/>
+  <link rel="stylesheet" href="css/global.css"/>
+  <link rel="stylesheet" href="css/home.css"/>
   <script src="js/subdomain-router.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
 </head>
-<body class="home-page">
+<body>
 
-  <!-- NAV -->
-  <nav class="main-nav">
-    <a href="index.html" class="nav-logo">
-      <img src="logo-light.png" alt="Brandisby" class="nav-logo-img" />
+<!-- ── NAV ─────────────────────────────────────────────────── -->
+<nav class="main-nav" id="main-nav">
+  <div class="nav-inner">
+    <a href="index.html" class="logo logo-nav">
+      <img src="assets/logo-light.png" alt="Brandisby"/>
     </a>
     <div class="nav-links">
       <a href="#how-it-works">How It Works</a>
       <a href="#brands">Explore Brands</a>
-      <a href="pages/creator-signup.html" class="btn-outline">Start Your Brand</a>
-      <a href="pages/login.html" class="btn-fill" id="nav-login-btn">Sign In</a>
+      <a href="#integrations">Integrations</a>
     </div>
-    <button class="hamburger" id="hamburger">&#9776;</button>
-  </nav>
+    <div class="nav-actions">
+      <a href="pages/login.html" class="btn btn-ghost btn-sm" id="nav-signin">Sign In</a>
+      <a href="pages/creator-signup.html" class="btn btn-primary btn-sm">Start Your Brand</a>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
 
-  <!-- HERO -->
-  <section class="hero">
-    <div class="hero-grain"></div>
+<!-- Mobile Nav -->
+<div class="mobile-nav" id="mobile-nav">
+  <a href="#how-it-works" onclick="closeMobileNav()">How It Works</a>
+  <a href="#brands" onclick="closeMobileNav()">Explore Brands</a>
+  <a href="#integrations" onclick="closeMobileNav()">Integrations</a>
+  <div class="mobile-nav-actions">
+    <a href="pages/login.html" class="btn btn-ghost btn-full" id="mobile-signin">Sign In</a>
+    <a href="pages/creator-signup.html" class="btn btn-primary btn-full">Start Your Brand →</a>
+  </div>
+</div>
+
+<!-- ── HERO ─────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-inner">
     <div class="hero-content">
-      <span class="hero-eyebrow">Your brand. Your link. Your store.</span>
-      <h1 class="hero-title">Every Brand<br/><em>Deserves</em><br/>Its Own World</h1>
-      <p class="hero-sub">Brandisby gives creators and businesses a beautiful storefront, a unique link, and powerful tools to sell — all in one place.</p>
+      <span class="hero-eyebrow">✦ Multi-brand storefront platform</span>
+      <h1 class="hero-title">
+        Every Brand<br/>
+        <em>Deserves Its</em><br/>
+        Own World.
+      </h1>
+      <p class="hero-desc">
+        Brandisby gives every creator and business a beautiful, isolated storefront — 
+        with a unique link, custom products, and secure checkout. No distractions. Just your brand.
+      </p>
       <div class="hero-actions">
-        <a href="pages/creator-signup.html" class="btn-primary-lg">Create Your Brand <span>→</span></a>
-        <a href="#brands" class="btn-ghost-lg">Explore Stores</a>
+        <a href="pages/creator-signup.html" class="btn btn-primary btn-lg">
+          Create Your Brand <span>→</span>
+        </a>
+        <a href="#brands" class="btn btn-ghost btn-lg">Explore Stores</a>
       </div>
       <div class="hero-link-demo">
-        <span class="link-typed" id="typed-demo">FleurDeVie</span><span class="link-prefix">.brandisby.com</span>
+        <span class="link-slug" id="typed-slug">goodies</span>
+        <span class="link-domain">.brandisby.com</span>
       </div>
     </div>
-    <div class="hero-mockup">
-      <div class="mockup-card mockup-card-1">
-        <div class="mockup-img-ph"></div>
-        <div class="mockup-text-ph short"></div>
-        <div class="mockup-text-ph"></div>
-      </div>
-      <div class="mockup-card mockup-card-2">
-        <div class="mockup-img-ph"></div>
-        <div class="mockup-text-ph short"></div>
-        <div class="mockup-text-ph"></div>
-      </div>
-      <div class="mockup-card mockup-card-3">
-        <div class="mockup-img-ph"></div>
-        <div class="mockup-text-ph short"></div>
-        <div class="mockup-text-ph"></div>
-      </div>
-    </div>
-  </section>
 
-  <!-- HOW IT WORKS -->
-  <section class="how-it-works" id="how-it-works">
-    <div class="section-inner">
-      <h2 class="section-title">From idea to <em>storefront</em> in minutes</h2>
-      <div class="steps-grid">
-        <div class="step-card">
-          <span class="step-num">01</span>
-          <h3>Create Your Brand</h3>
-          <p>Sign up, name your brand, and get your unique Brandisby link instantly. Upload a logo and set your brand colors.</p>
-        </div>
-        <div class="step-card">
-          <span class="step-num">02</span>
-          <h3>Add Your Products</h3>
-          <p>List physical, digital, or custom products. Connect to Printify, Sellfy, Shopify and more to power your catalog.</p>
-        </div>
-        <div class="step-card">
-          <span class="step-num">03</span>
-          <h3>Share Your Link</h3>
-          <p>Share brandisby.com/YourBrand everywhere. Customers get a full branded shopping experience with checkout.</p>
-        </div>
-        <div class="step-card">
-          <span class="step-num">04</span>
-          <h3>Get Paid</h3>
-          <p>Payments via Paystack flow directly to you. Track orders, manage inventory, and grow your brand.</p>
-        </div>
+    <div class="hero-visual">
+      <div class="mock-card mock-card-1">
+        <div class="mock-banner" style="height:110px;"></div>
+        <div class="mock-line short"></div>
+        <div class="mock-line"></div>
+        <div class="mock-line price"></div>
+      </div>
+      <div class="mock-card mock-card-2">
+        <div class="mock-banner" style="height:80px;"></div>
+        <div class="mock-line short"></div>
+        <div class="mock-line price"></div>
+      </div>
+      <div class="mock-card mock-card-3">
+        <div class="mock-banner" style="height:80px;"></div>
+        <div class="mock-line short"></div>
+        <div class="mock-line price"></div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- EXPLORE BRANDS -->
-  <section class="explore-brands" id="brands">
-    <div class="section-inner">
-      <h2 class="section-title">Discover <em>Independent</em> Brands</h2>
-      <div class="brands-grid" id="brands-grid">
-        <!-- Populated by JS -->
-        <div class="brand-card-skeleton"></div>
-        <div class="brand-card-skeleton"></div>
-        <div class="brand-card-skeleton"></div>
-        <div class="brand-card-skeleton"></div>
-        <div class="brand-card-skeleton"></div>
-        <div class="brand-card-skeleton"></div>
+<!-- ── HOW IT WORKS ─────────────────────────────────────────── -->
+<section class="how-section" id="how-it-works">
+  <div class="section-inner">
+    <p class="section-label section-label-light text-center">Simple by design</p>
+    <h2 class="section-heading section-heading-light text-center">From idea to <em>storefront</em> in minutes</h2>
+    <p class="section-sub">No technical skills needed. Just bring your products and your brand — we handle the rest.</p>
+    <div class="steps-grid">
+      <div class="step-card">
+        <span class="step-num">01</span>
+        <h3>Create Your Brand</h3>
+        <p>Sign up, choose your brand name, and instantly get your unique <em>yourbrand.brandisby.com</em> link.</p>
       </div>
-      <div class="brands-empty hidden" id="brands-empty">
-        <p>No brands yet — be the first to create one!</p>
-        <a href="pages/creator-signup.html" class="btn-primary-lg">Start Your Brand</a>
+      <div class="step-card">
+        <span class="step-num">02</span>
+        <h3>Add Your Products</h3>
+        <p>List physical, digital, or custom products. Add images, descriptions, pricing and stock levels.</p>
       </div>
-    </div>
-  </section>
-
-  <!-- INTEGRATIONS -->
-  <section class="integrations">
-    <div class="section-inner">
-      <p class="integrations-label">Seamlessly connects with</p>
-      <div class="integrations-list">
-        <span>Sellfy</span>
-        <span>Beacons</span>
-        <span>Printify</span>
-        <span>Shopify</span>
-        <span>BigCartel</span>
-        <span>Paystack</span>
+      <div class="step-card">
+        <span class="step-num">03</span>
+        <h3>Share Your Link</h3>
+        <p>Drop your Brandisby link anywhere — Instagram bio, WhatsApp, TikTok, email newsletters.</p>
+      </div>
+      <div class="step-card">
+        <span class="step-num">04</span>
+        <h3>Get Paid</h3>
+        <p>Secure payments via Paystack flow directly to you. Manage orders from your dashboard.</p>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- CTA -->
-  <section class="final-cta">
-    <div class="section-inner">
-      <h2>Ready to build<br/><em>your brand?</em></h2>
-      <a href="pages/creator-signup.html" class="btn-primary-lg">Get Started Free →</a>
+<!-- ── EXPLORE BRANDS ───────────────────────────────────────── -->
+<section class="brands-section" id="brands">
+  <div class="brands-header">
+    <div class="brands-header-left">
+      <p class="section-label section-label-dark">Live on Brandisby</p>
+      <h2 class="h2" style="color:var(--dark);">Discover <em style="font-style:italic;color:var(--brown);">Independent</em> Brands</h2>
     </div>
-  </section>
+    <a href="pages/creator-signup.html" class="btn btn-outline">Start Your Brand →</a>
+  </div>
 
-  <!-- FOOTER -->
-  <footer class="main-footer">
-    <div class="footer-inner">
-      <span class="footer-logo"><img src="logo-transparent.png" alt="Brandisby" class="footer-logo-img" /></span>
-      <div class="footer-links">
-        <a href="#">About</a>
-        <a href="#">Pricing</a>
-        <a href="#">Blog</a>
-        <a href="#">Contact</a>
-        <a href="#">Privacy</a>
-        <a href="#">Terms</a>
+  <div class="brands-grid" id="brands-grid">
+    <div class="brand-card-skeleton skeleton"></div>
+    <div class="brand-card-skeleton skeleton"></div>
+    <div class="brand-card-skeleton skeleton"></div>
+    <div class="brand-card-skeleton skeleton"></div>
+    <div class="brand-card-skeleton skeleton"></div>
+    <div class="brand-card-skeleton skeleton"></div>
+  </div>
+  <div class="hidden text-center" id="brands-empty" style="padding:4rem 0;">
+    <p style="color:var(--muted);margin-bottom:1.5rem;">No brands yet — be the first!</p>
+    <a href="pages/creator-signup.html" class="btn btn-primary">Create the First Brand →</a>
+  </div>
+</section>
+
+<!-- ── INTEGRATIONS ─────────────────────────────────────────── -->
+<section class="integrations-section" id="integrations">
+  <div class="integrations-inner">
+    <p class="integrations-label">Designed to connect with your existing tools</p>
+    <div class="integrations-logos">
+      <span class="integration-chip">Sellfy</span>
+      <span class="integration-chip">Beacons</span>
+      <span class="integration-chip">Printify</span>
+      <span class="integration-chip">Shopify</span>
+      <span class="integration-chip">BigCartel</span>
+      <span class="integration-chip">Paystack</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ──────────────────────────────────────────────────── -->
+<section class="cta-section">
+  <h2 class="h2">Ready to build<br/><em>your brand?</em></h2>
+  <a href="pages/creator-signup.html" class="btn btn-primary btn-lg">Get Started Free →</a>
+</section>
+
+<!-- ── FOOTER ────────────────────────────────────────────────── -->
+<footer class="main-footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a href="index.html" class="logo logo-sm">
+          <img src="assets/logo-transparent.png" alt="Brandisby"/>
+        </a>
+        <p>Every brand deserves its own world. Build yours on Brandisby.</p>
       </div>
+      <div class="footer-links-group">
+        <h4>Platform</h4>
+        <a href="#how-it-works">How It Works</a>
+        <a href="#brands">Explore Brands</a>
+        <a href="pages/creator-signup.html">Start a Brand</a>
+      </div>
+      <div class="footer-links-group">
+        <h4>Account</h4>
+        <a href="pages/login.html">Sign In</a>
+        <a href="pages/creator-signup.html">Register</a>
+        <a href="pages/dashboard.html">Dashboard</a>
+      </div>
+      <div class="footer-links-group">
+        <h4>Legal</h4>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Cookie Policy</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
       <p class="footer-copy">© 2025 Brandisby. All rights reserved.</p>
+      <div class="footer-social">
+        <a href="#">Instagram</a>
+        <a href="#">Twitter/X</a>
+        <a href="#">TikTok</a>
+      </div>
     </div>
-  </footer>
+  </div>
+</footer>
 
-  <script src="js/firebase-config.js"></script>
-  <script src="js/home.js"></script>
+<div id="toast-container"></div>
+
+<script src="js/firebase-config.js"></script>
+<script src="js/home.js"></script>
+<script>
+  // Nav scroll effect
+  window.addEventListener('scroll', () => {
+    document.getElementById('main-nav').classList.toggle('scrolled', window.scrollY > 20);
+  });
+  // Hamburger
+  const hamburger = document.getElementById('hamburger');
+  const mobileNav = document.getElementById('mobile-nav');
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('open');
+    mobileNav.classList.toggle('open');
+    document.body.style.overflow = mobileNav.classList.contains('open') ? 'hidden' : '';
+  });
+  function closeMobileNav() {
+    hamburger.classList.remove('open');
+    mobileNav.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+</script>
 </body>
 </html>
