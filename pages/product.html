@@ -4,10 +4,10 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Product — Brandisby</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/main.css">
-  <link rel="stylesheet" href="../css/product.css">
+  <link rel="icon" href="../assets/logo-transparent.png" type="image/png"/>
+  <link rel="stylesheet" href="../css/global.css"/>
+  <link rel="stylesheet" href="../css/store.css"/>
+  <link rel="stylesheet" href="../css/pages.css"/>
   <script src="../js/subdomain-router.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -16,118 +16,126 @@
 </head>
 <body class="product-page">
 
-  <!-- NAV -->
-  <nav class="brand-nav" id="brand-nav">
-    <a href="#" class="brand-nav-back" id="back-to-store">
-      <img src="../logo-light.png" alt="Brandisby" class="brand-nav-back-logo" />
+<!-- ── NAV ───────────────────────────────────────────────────── -->
+<nav class="brand-nav">
+  <div class="brand-nav-inner">
+    <a href="#" class="brand-nav-back" id="back-link">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M10 12L6 8l4-4"/></svg>
+      Back to Store
     </a>
-    <div class="brand-nav-logo" id="brand-nav-logo"></div>
+    <div class="brand-nav-title" id="brand-nav-title"></div>
     <div class="brand-nav-right">
-      <button class="brand-cart-btn" id="cart-badge">🛒 <span class="cart-count" id="cart-count">0</span></button>
+      <button class="cart-btn" id="cart-open-btn">🛒 <span class="cart-count" id="cart-count">0</span></button>
     </div>
-  </nav>
+  </div>
+</nav>
 
-  <!-- PRODUCT DETAIL -->
-  <main class="product-detail">
-    <div class="product-detail-inner">
+<!-- ── PRODUCT LAYOUT ─────────────────────────────────────────── -->
+<main class="product-layout">
+  <div class="product-layout-inner">
 
-      <!-- GALLERY -->
-      <div class="product-gallery" id="product-gallery">
-        <div class="gallery-main" id="gallery-main">
-          <div class="gallery-placeholder">🛍️</div>
-        </div>
-        <div class="gallery-thumbs" id="gallery-thumbs"></div>
+    <!-- Gallery -->
+    <div class="product-gallery">
+      <div class="gallery-main" id="gallery-main">
+        <span id="gallery-placeholder">🛍️</span>
+      </div>
+      <div class="gallery-thumbs" id="gallery-thumbs"></div>
+    </div>
+
+    <!-- Info -->
+    <div class="product-info">
+      <div class="product-breadcrumb" id="breadcrumb">
+        <a href="#" id="breadcrumb-brand">Store</a> <span>/</span> Product
       </div>
 
-      <!-- INFO PANEL -->
-      <div class="product-info-panel">
-        <div class="product-breadcrumb" id="product-breadcrumb"></div>
+      <h1 class="product-title" id="product-title">Loading…</h1>
 
-        <h1 class="product-title" id="product-title">Loading…</h1>
-        <div class="product-meta-row">
-          <span class="product-price" id="product-price">₦0</span>
-          <span class="product-stock" id="product-stock"></span>
+      <div class="product-price-row">
+        <span class="product-price" id="product-price">₦0</span>
+        <span class="badge stock-badge" id="stock-badge"></span>
+      </div>
+
+      <div class="product-category" id="product-category"></div>
+
+      <p class="product-desc" id="product-desc"></p>
+
+      <!-- Customization -->
+      <div class="customize-section hidden" id="customize-section">
+        <div class="customize-title">✏️ Customize Your Order</div>
+
+        <div class="custom-field hidden" id="custom-text-field">
+          <label class="label">Custom Text</label>
+          <input type="text" class="input" id="custom-text" placeholder="Your name, message, etc." maxlength="80"/>
+          <span class="custom-hint">Max 80 characters</span>
         </div>
-        <div class="product-category-tag" id="product-category"></div>
-        <div class="product-description" id="product-description"></div>
 
-        <!-- CUSTOMIZATION SECTION -->
-        <div class="custom-section" id="custom-section" style="display:none;">
-          <h3 class="custom-section-title">✏️ Customize Your Order</h3>
-
-          <div class="custom-field" id="custom-text-wrap" style="display:none;">
-            <label class="custom-label">Custom Text (name, message, etc.)</label>
-            <input type="text" id="custom-text" class="custom-input" placeholder="e.g. John, Happy Birthday, etc." maxlength="60"/>
-            <span class="custom-hint">Max 60 characters</span>
+        <div class="custom-field hidden" id="custom-font-field">
+          <label class="label">Font Style</label>
+          <div class="font-picker">
+            <button class="font-opt active" data-font="Classic">Classic</button>
+            <button class="font-opt" data-font="Script">Script</button>
+            <button class="font-opt" data-font="Bold">Bold</button>
+            <button class="font-opt" data-font="Modern">Modern</button>
           </div>
+        </div>
 
-          <div class="custom-field" id="custom-font-wrap" style="display:none;">
-            <label class="custom-label">Font Style</label>
-            <div class="font-options" id="font-options">
-              <button class="font-btn active" data-font="Classic">Classic</button>
-              <button class="font-btn" data-font="Script">Script</button>
-              <button class="font-btn" data-font="Bold">Bold</button>
-              <button class="font-btn" data-font="Modern">Modern</button>
+        <div class="custom-field hidden" id="custom-upload-field">
+          <label class="label">Upload Your Image</label>
+          <div class="upload-zone" id="upload-zone">
+            <input type="file" id="custom-upload-input" accept="image/*" hidden/>
+            <div id="upload-zone-content">
+              <div class="upload-zone-icon">📁</div>
+              <p>Click to upload or drag & drop</p>
+              <span>PNG, JPG, SVG — max 5MB</span>
             </div>
-          </div>
-
-          <div class="custom-field" id="custom-upload-wrap" style="display:none;">
-            <label class="custom-label">Upload Your Image</label>
-            <div class="upload-area" id="upload-area">
-              <input type="file" id="custom-image-upload" accept="image/*" hidden/>
-              <div class="upload-placeholder" id="upload-placeholder">
-                <span class="upload-icon">📁</span>
-                <p>Click to upload or drag & drop</p>
-                <span class="upload-hint">PNG, JPG, SVG up to 5MB</span>
-              </div>
-              <img id="upload-preview" style="display:none;max-width:100%;border-radius:8px;" />
-            </div>
-          </div>
-        </div>
-
-        <!-- QTY & ADD TO CART -->
-        <div class="product-actions">
-          <div class="qty-selector">
-            <button class="qty-btn" id="qty-minus">−</button>
-            <input type="number" id="qty-input" value="1" min="1" class="qty-num"/>
-            <button class="qty-btn" id="qty-plus">+</button>
-          </div>
-          <button class="btn-add-cart" id="add-to-cart">Add to Cart</button>
-        </div>
-
-        <div class="product-extra-info">
-          <div class="extra-info-item">
-            <span>🔒</span> Secure checkout via Paystack
-          </div>
-          <div class="extra-info-item">
-            <span>📦</span> <span id="shipping-info">Shipping details available at checkout</span>
+            <img id="upload-preview" class="upload-zone-preview" alt="Preview"/>
           </div>
         </div>
       </div>
-    </div>
-  </main>
 
-  <!-- MINI CART DRAWER (reused) -->
-  <div class="cart-overlay" id="cart-overlay"></div>
-  <aside class="cart-sidebar" id="cart-sidebar">
-    <div class="cart-header">
-      <h2>Item Added! 🎉</h2>
-      <button class="cart-close" id="cart-close">✕</button>
-    </div>
-    <div class="cart-items" id="cart-items"></div>
-    <div class="cart-footer" id="cart-footer">
-      <div class="cart-total">
-        <span>Total</span>
-        <span id="cart-total-price">₦0</span>
+      <!-- Buy Row -->
+      <div class="product-buy-row">
+        <div class="qty-wrap">
+          <button class="qty-wrap-btn" id="qty-minus" aria-label="Decrease">−</button>
+          <input type="number" class="qty-wrap-num" id="qty-input" value="1" min="1" aria-label="Quantity"/>
+          <button class="qty-wrap-btn" id="qty-plus" aria-label="Increase">+</button>
+        </div>
+        <button class="add-to-cart-btn" id="add-to-cart">Add to Cart</button>
       </div>
-      <a href="#" class="btn-primary-lg" id="checkout-btn" style="text-align:center;justify-content:center;">Proceed to Checkout →</a>
-      <button class="btn-ghost-lg" id="continue-shopping" style="width:100%;justify-content:center;margin-top:0.5rem;">Continue Shopping</button>
-    </div>
-  </aside>
 
-  <script src="../js/firebase-config.js"></script>
-  <script src="../js/product.js"></script>
-  <!-- Re-use brand.css cart styles -->
-  <link rel="stylesheet" href="../css/brand.css">
+      <!-- Trust signals -->
+      <div class="product-trust">
+        <div class="product-trust-item">🔒 Secure checkout via Paystack</div>
+        <div class="product-trust-item">📦 <span id="shipping-note">Shipping details at checkout</span></div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- ── CART DRAWER (reused) ───────────────────────────────────── -->
+<div class="cart-overlay" id="cart-overlay"></div>
+<aside class="cart-drawer" id="cart-drawer">
+  <div class="cart-drawer-header">
+    <h2 class="cart-drawer-title">Cart Updated 🎉</h2>
+    <button class="cart-drawer-close" id="cart-close-btn">✕</button>
+  </div>
+  <div class="cart-drawer-body" id="cart-body"></div>
+  <div class="cart-drawer-footer" id="cart-footer" style="display:none;">
+    <div class="cart-total-row">
+      <span class="cart-total-label">Total</span>
+      <span class="cart-total-value" id="cart-total">₦0</span>
+    </div>
+    <div class="cart-drawer-btns">
+      <a href="#" class="btn btn-primary btn-full btn-lg" id="checkout-link">Proceed to Checkout →</a>
+      <button class="btn btn-ghost btn-full" id="cart-continue-btn">Continue Shopping</button>
+    </div>
+  </div>
+</aside>
+
+<div id="toast-container"></div>
+
+<script src="../js/firebase-config.js"></script>
+<script src="../js/product.js"></script>
 </body>
 </html>
