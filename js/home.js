@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     brands.forEach(brand => {
       const initials = brand.name ? brand.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2) : 'B';
       const storeUrl = (typeof BrandURL !== 'undefined') ? BrandURL.store(brand.slug) : `pages/brand.html?slug=${brand.slug}`;
-      const displayLink = `${brand.slug}.brandisby.com`;
+      const displayLink = (typeof BrandURL !== 'undefined') ? BrandURL.display(brand.slug) : `${brand.slug}.brandisby.com`;
       const card = document.createElement('a');
       card.href = storeUrl;
       card.className = 'brand-card';
