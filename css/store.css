@@ -1,0 +1,366 @@
+/* ============================================================
+   BRANDISBY — BRAND STOREFRONT STYLES
+   ============================================================ */
+
+/* ── BRAND NAV ────────────────────────────────────────────── */
+.brand-nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 900;
+  height: var(--nav-h);
+  display: flex; align-items: center;
+  padding: 0 var(--pad-x);
+  background: rgba(247,243,239,0.96);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(90,60,48,0.08);
+}
+.brand-nav-inner {
+  width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+}
+.brand-nav-back {
+  display: flex; align-items: center; gap: 0.4rem;
+  font-size: 0.78rem; color: var(--muted); text-decoration: none;
+  transition: color var(--t-fast);
+  white-space: nowrap; flex-shrink: 0;
+}
+.brand-nav-back:hover { color: var(--brown); }
+.brand-nav-back svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+.brand-nav-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.2rem; font-weight: 400;
+  color: var(--dark); letter-spacing: 0.04em;
+  text-align: center; flex: 1;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.brand-nav-right { display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; }
+
+.cart-btn {
+  display: flex; align-items: center; gap: 0.4rem;
+  padding: 0.45rem 0.85rem; border-radius: var(--r-pill);
+  background: none; border: 1.5px solid rgba(90,60,48,0.18);
+  font-size: 0.875rem; font-weight: 500; color: var(--dark);
+  cursor: pointer; transition: all var(--t-fast);
+}
+.cart-btn:hover { background: var(--brown); color: var(--white); border-color: var(--brown); }
+
+.cart-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 20px; height: 20px; border-radius: var(--r-pill);
+  background: var(--brown); color: var(--white);
+  font-size: 0.7rem; font-weight: 700; padding: 0 4px;
+}
+.cart-btn:hover .cart-count { background: var(--white); color: var(--brown); }
+
+/* ── BRAND HEADER ─────────────────────────────────────────── */
+.brand-header {
+  margin-top: var(--nav-h);
+  height: 340px; position: relative;
+  overflow: hidden; display: flex; align-items: flex-end;
+}
+
+@media (max-width: 600px) { .brand-header { height: 260px; } }
+
+.brand-header-bg {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, var(--brown) 0%, var(--dark) 100%);
+  background-size: cover; background-position: center;
+}
+.brand-header-bg img {
+  width: 100%; height: 100%; object-fit: cover;
+  position: absolute; inset: 0;
+}
+.brand-header-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(27,21,19,0.85) 0%, rgba(27,21,19,0.15) 55%, transparent 100%);
+}
+
+.brand-header-content {
+  position: relative; z-index: 1;
+  padding: 0 var(--pad-x) 2rem;
+  width: 100%;
+  display: flex; align-items: flex-end; gap: 1.25rem;
+}
+
+@media (max-width: 480px) { .brand-header-content { gap: 0.9rem; padding-bottom: 1.5rem; } }
+
+.brand-logo-wrap {
+  width: 72px; height: 72px; flex-shrink: 0;
+  border-radius: var(--r-lg);
+  background: var(--white); border: 3px solid rgba(255,255,255,0.9);
+  box-shadow: var(--shadow-lg);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.brand-logo-wrap img { width: 100%; height: 100%; object-fit: cover; }
+.brand-logo-initials {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.8rem; font-weight: 600; color: var(--brown);
+}
+
+@media (max-width: 480px) { .brand-logo-wrap { width: 56px; height: 56px; } }
+
+.brand-header-text { flex: 1; min-width: 0; }
+.brand-header-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  font-weight: 300; color: var(--white); line-height: 1.1;
+  margin-bottom: 0.3rem;
+}
+.brand-header-tagline {
+  font-size: 0.9rem; color: rgba(255,255,255,0.65); font-weight: 300;
+  margin-bottom: 0.4rem;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.brand-header-url {
+  font-family: 'Courier New', monospace;
+  font-size: 0.72rem; color: rgba(255,255,255,0.35);
+}
+
+/* ── SHOP CONTROLS ────────────────────────────────────────── */
+.shop-controls {
+  background: var(--white);
+  border-bottom: 1px solid var(--cream-2);
+  position: sticky; top: var(--nav-h); z-index: 100;
+  padding: 0.75rem var(--pad-x);
+}
+.shop-controls-inner {
+  display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;
+}
+
+.search-field {
+  position: relative; flex: 1; min-width: 180px;
+}
+.search-field input {
+  width: 100%; padding: 0.6rem 2.5rem 0.6rem 1rem;
+  border: 1.5px solid var(--cream-3); border-radius: var(--r-pill);
+  font-size: 0.875rem; outline: none;
+  background: var(--cream); color: var(--text);
+  transition: border-color var(--t-base);
+}
+.search-field input:focus { border-color: var(--brown); background: var(--white); }
+.search-field input::placeholder { color: var(--muted-2); }
+.search-icon {
+  position: absolute; right: 0.85rem; top: 50%; transform: translateY(-50%);
+  color: var(--muted); font-size: 0.85rem; pointer-events: none;
+}
+
+.filter-controls { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+
+.filter-select {
+  padding: 0.55rem 1rem; border: 1.5px solid var(--cream-3);
+  border-radius: var(--r-pill); font-size: 0.82rem;
+  background: var(--cream); color: var(--text);
+  outline: none; cursor: pointer;
+  transition: border-color var(--t-base);
+  -webkit-appearance: none; appearance: none;
+}
+.filter-select:focus { border-color: var(--brown); }
+
+.view-toggle { display: flex; gap: 0.25rem; margin-left: auto; }
+.view-btn {
+  width: 34px; height: 34px; border-radius: var(--r-md);
+  border: 1.5px solid var(--cream-3); background: none;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; color: var(--muted);
+  transition: all var(--t-fast);
+}
+.view-btn.active { background: var(--brown); color: var(--white); border-color: var(--brown); }
+.view-btn:not(.active):hover { border-color: var(--brown); color: var(--brown); }
+
+/* ── PRODUCTS GRID ────────────────────────────────────────── */
+.products-section { padding: 2.5rem var(--pad-x) 4rem; }
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 1.25rem;
+}
+.products-grid.list-view { grid-template-columns: 1fr; }
+
+/* Product card */
+.product-card {
+  display: block; text-decoration: none; color: inherit;
+  background: var(--white); border-radius: var(--r-lg);
+  overflow: hidden; box-shadow: var(--shadow-sm);
+  transition: transform var(--t-base), box-shadow var(--t-base);
+}
+.product-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
+
+.product-card-img {
+  aspect-ratio: 1; overflow: hidden; position: relative;
+  background: linear-gradient(135deg, rgba(90,60,48,0.1) 0%, rgba(90,60,48,0.2) 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.5rem;
+}
+.product-card-img img { width: 100%; height: 100%; object-fit: cover; }
+
+.product-card-badges {
+  position: absolute; top: 0.6rem; left: 0.6rem;
+  display: flex; gap: 0.35rem; flex-wrap: wrap;
+}
+
+.product-card-body { padding: 1rem; }
+.product-card-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem; font-weight: 400;
+  margin-bottom: 0.3rem; line-height: 1.3;
+  display: -webkit-box; -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical; overflow: hidden;
+}
+.product-card-price {
+  font-size: 1rem; font-weight: 600; color: var(--brown);
+  margin-bottom: 0.5rem;
+}
+.product-card-meta {
+  display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
+}
+
+/* List view card */
+.products-grid.list-view .product-card {
+  display: grid; grid-template-columns: 120px 1fr;
+}
+.products-grid.list-view .product-card-img { aspect-ratio: auto; height: 120px; }
+
+/* Empty state */
+.products-empty {
+  grid-column: 1 / -1;
+  padding: 5rem 2rem; text-align: center;
+}
+.products-empty-icon { font-size: 3.5rem; margin-bottom: 1rem; }
+.products-empty h3 {
+  font-size: 1.5rem; font-weight: 300; margin-bottom: 0.5rem;
+}
+.products-empty p { color: var(--text-soft); font-size: 0.9rem; }
+
+/* Skeletons */
+.product-skeleton { height: 300px; border-radius: var(--r-lg); }
+
+/* ── CART DRAWER ──────────────────────────────────────────── */
+.cart-overlay {
+  position: fixed; inset: 0; background: rgba(27,21,19,0.55);
+  z-index: 1400; opacity: 0; pointer-events: none;
+  transition: opacity var(--t-base);
+}
+.cart-overlay.open { opacity: 1; pointer-events: all; }
+
+.cart-drawer {
+  position: fixed; top: 0; right: -100%; width: 400px; max-width: 100vw;
+  height: 100dvh; background: var(--white); z-index: 1500;
+  display: flex; flex-direction: column;
+  box-shadow: var(--shadow-xl);
+  transition: right var(--t-slow);
+}
+.cart-drawer.open { right: 0; }
+
+.cart-drawer-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--cream-2); flex-shrink: 0;
+}
+.cart-drawer-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.4rem; font-weight: 400;
+}
+.cart-drawer-close {
+  width: 32px; height: 32px; border-radius: 50%; border: none;
+  background: var(--cream-2); cursor: pointer; font-size: 1rem;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-soft); transition: background var(--t-fast);
+}
+.cart-drawer-close:hover { background: var(--cream-3); }
+
+.cart-drawer-body { flex: 1; overflow-y: auto; padding: 1rem 1.5rem; }
+
+.cart-empty {
+  height: 100%; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 0.75rem;
+  text-align: center; padding: 2rem;
+}
+.cart-empty-icon { font-size: 3rem; }
+.cart-empty p { color: var(--text-soft); font-size: 0.9rem; }
+
+.cart-item {
+  display: flex; gap: 0.9rem; padding: 1rem 0;
+  border-bottom: 1px solid var(--cream-2);
+}
+.cart-item:last-child { border-bottom: none; }
+
+.cart-item-img {
+  width: 64px; height: 64px; border-radius: var(--r-md); flex-shrink: 0;
+  overflow: hidden; background: var(--cream-2);
+  display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+}
+.cart-item-img img { width: 100%; height: 100%; object-fit: cover; }
+
+.cart-item-info { flex: 1; min-width: 0; }
+.cart-item-name { font-size: 0.9rem; font-weight: 500; margin-bottom: 0.2rem; }
+.cart-item-custom {
+  font-size: 0.75rem; color: var(--muted); margin-bottom: 0.4rem;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.cart-item-price { font-size: 0.9rem; font-weight: 600; color: var(--brown); }
+
+.cart-item-actions { display: flex; align-items: center; gap: 0.4rem; margin-top: 0.5rem; }
+.qty-ctrl {
+  display: flex; align-items: center; gap: 0.35rem;
+  border: 1.5px solid var(--cream-3); border-radius: var(--r-pill);
+  padding: 0.15rem;
+}
+.qty-ctrl-btn {
+  width: 24px; height: 24px; border-radius: 50%; border: none;
+  background: none; cursor: pointer; font-size: 1rem;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-soft); transition: background var(--t-fast);
+}
+.qty-ctrl-btn:hover { background: var(--cream-2); }
+.qty-ctrl-num { font-size: 0.85rem; font-weight: 500; min-width: 20px; text-align: center; }
+.cart-item-remove {
+  margin-left: auto; border: none; background: none; cursor: pointer;
+  font-size: 0.75rem; color: var(--muted); padding: 0.2rem 0.4rem;
+  transition: color var(--t-fast); border-radius: var(--r-sm);
+}
+.cart-item-remove:hover { color: var(--red); background: rgba(192,57,43,0.06); }
+
+.cart-drawer-footer {
+  padding: 1.25rem 1.5rem; border-top: 1px solid var(--cream-2); flex-shrink: 0;
+  background: var(--white);
+}
+.cart-total-row {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 1rem;
+}
+.cart-total-label { font-size: 0.9rem; font-weight: 500; }
+.cart-total-value {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.5rem; font-weight: 400; color: var(--brown);
+}
+.cart-drawer-btns { display: flex; flex-direction: column; gap: 0.6rem; }
+
+/* ── BRAND FOOTER ─────────────────────────────────────────── */
+.brand-footer {
+  text-align: center; padding: 2rem var(--pad-x);
+  border-top: 1px solid var(--cream-2);
+  font-size: 0.78rem; color: var(--muted);
+}
+.brand-footer a { color: var(--brown); text-decoration: none; }
+.brand-footer a:hover { text-decoration: underline; }
+.brand-footer-logo { height: 16px; width: auto; display: inline-block; vertical-align: middle; }
+
+/* ── RESPONSIVE ───────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .products-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+  .products-grid.list-view { grid-template-columns: 1fr; }
+  .shop-controls-inner { gap: 0.5rem; }
+  .filter-controls { display: none; } /* collapsed on mobile */
+  .filter-controls.show { display: flex; width: 100%; }
+  .filter-toggle-btn {
+    display: flex; align-items: center; gap: 0.4rem;
+    padding: 0.55rem 1rem; border: 1.5px solid var(--cream-3);
+    border-radius: var(--r-pill); font-size: 0.82rem; background: var(--cream);
+    cursor: pointer; transition: border-color var(--t-fast);
+  }
+}
+@media (max-width: 400px) {
+  .products-grid { grid-template-columns: 1fr; }
+  .product-card-img { aspect-ratio: 4/3; }
+}
