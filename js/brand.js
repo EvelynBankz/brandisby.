@@ -1,207 +1,177 @@
-// brand.js — Brand Storefront Logic
+// brand.js
 document.addEventListener('DOMContentLoaded', async () => {
-  const slug = URLUtils.getParam('slug');
+  const slug = window.getCurrentBrandSlug ? window.getCurrentBrandSlug() : URLUtils.getParam('slug');
   if (!slug) { window.location.href = '../index.html'; return; }
 
-  let allProducts = [];
-  let currentBrand = null;
+  let allProducts = [], currentBrand = null;
 
-  // ===== LOAD BRAND =====
+  // Checkout and back links
+  document.getElementById('checkout-link').href = (typeof BrandURL!=='undefined') ? BrandURL.checkout(slug) : `checkout.html?slug=${slug}`;
+
+  // Load brand
   try {
     currentBrand = await Brands.getBySlug(slug);
-    if (!currentBrand) { showError('Brand not found'); return; }
-    renderBrandHeader(currentBrand);
+    if (!currentBrand) { showBrandError(); return; }
+    renderBrand(currentBrand);
     document.title = `${currentBrand.name} — Brandisby`;
-  } catch (e) {
-    showError('Failed to load brand');
-    return;
-  }
+  } catch(e) { showBrandError(); return; }
 
-  // ===== LOAD PRODUCTS =====
+  // Load products
   try {
     allProducts = await Products.getByBrand(slug);
     renderProducts(allProducts);
-  } catch (e) {
-    renderProducts([]);
-  }
+  } catch(e) { renderProducts([]); }
 
-  // ===== RENDER BRAND HEADER =====
-  function renderBrandHeader(brand) {
-    document.getElementById('brand-nav-logo').textContent = brand.name || '';
-    document.getElementById('brand-name').textContent = brand.name || '';
-    document.getElementById('brand-tagline').textContent = brand.tagline || brand.description || '';
-    document.getElementById('brand-link-badge').textContent = (typeof BrandURL !== 'undefined') ? BrandURL.display(brand.slug) : `${brand.slug}.brandisby.com`;
+  function renderBrand(b) {
+    document.getElementById('brand-nav-title').textContent = b.name || '';
+    document.getElementById('brand-header-name').textContent = b.name || '';
+    document.getElementById('brand-header-tagline').textContent = b.tagline || b.description || '';
+    document.getElementById('brand-header-url').textContent = (typeof BrandURL!=='undefined') ? BrandURL.display(b.slug) : `${b.slug}.brandisby.com`;
 
     const bg = document.getElementById('brand-header-bg');
-    if (brand.bannerUrl) {
-      bg.style.backgroundImage = `url(${brand.bannerUrl})`;
-      bg.style.backgroundSize = 'cover';
-      bg.style.backgroundPosition = 'center';
-    } else if (brand.brandColor) {
-      bg.style.background = `linear-gradient(135deg, ${brand.brandColor} 0%, #1b1513 100%)`;
+    if (b.bannerUrl) {
+      const img = document.createElement('img');
+      img.src = b.bannerUrl; img.alt = b.name;
+      bg.appendChild(img);
+    } else if (b.brandColor) {
+      bg.style.background = `linear-gradient(135deg, ${b.brandColor} 0%, #1b1513 100%)`;
     }
 
     const logoWrap = document.getElementById('brand-logo-wrap');
-    if (brand.logoUrl) {
-      logoWrap.innerHTML = `<img src="${brand.logoUrl}" alt="${brand.name} logo" />`;
+    if (b.logoUrl) {
+      logoWrap.innerHTML = `<img src="${b.logoUrl}" alt="${b.name}"/>`;
     } else {
-      const initials = brand.name ? brand.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2) : 'B';
+      const initials = b.name ? b.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2) : 'B';
       document.getElementById('brand-logo-initials').textContent = initials;
     }
-
-    // Apply brand color to nav and accents
-    if (brand.brandColor) {
-      document.documentElement.style.setProperty('--brand-brown', brand.brandColor);
-    }
+    if (b.brandColor) document.documentElement.style.setProperty('--brown', b.brandColor);
   }
 
-  // ===== RENDER PRODUCTS =====
   function renderProducts(products) {
     const grid = document.getElementById('products-grid');
     const empty = document.getElementById('products-empty');
     grid.innerHTML = '';
-
-    if (!products.length) {
-      empty.classList.remove('hidden');
-      return;
-    }
+    if (!products.length) { empty.classList.remove('hidden'); return; }
     empty.classList.add('hidden');
 
-    products.forEach(product => {
+    products.forEach(p => {
+      const url = (typeof BrandURL!=='undefined') ? BrandURL.product(slug, p.id) : `product.html?slug=${slug}&id=${p.id}`;
       const card = document.createElement('a');
-      card.href = (typeof BrandURL !== 'undefined') ? BrandURL.product(slug, product.id) : `product.html?slug=${slug}&id=${product.id}`;
-      card.className = 'product-card';
+      card.href = url; card.className = 'product-card';
       card.innerHTML = `
         <div class="product-card-img">
-          ${product.images && product.images[0]
-            ? `<img src="${product.images[0]}" alt="${product.name}" />`
-            : '🛍️'}
+          ${p.images?.[0] ? `<img src="${p.images[0]}" alt="${p.name}" loading="lazy"/>` : '🛍️'}
+          <div class="product-card-badges">
+            ${p.allowCustom ? '<span class="badge badge-brown">Custom</span>' : ''}
+            ${p.stock === 0 ? '<span class="badge badge-red">Sold Out</span>' : ''}
+          </div>
         </div>
-        <div class="product-card-info">
-          <div class="product-card-name">${product.name || 'Untitled Product'}</div>
-          <div class="product-card-price">₦${Number(product.price || 0).toLocaleString()}</div>
-          <span class="product-card-category">${product.category || 'General'}</span>
-          ${product.allowCustom ? '<span class="product-card-custom-badge">Custom</span>' : ''}
-        </div>
-      `;
+        <div class="product-card-body">
+          <div class="product-card-name">${p.name || 'Product'}</div>
+          <div class="product-card-price">₦${Number(p.price||0).toLocaleString()}</div>
+          <div class="product-card-meta">
+            <span class="badge badge-brown">${p.category || 'General'}</span>
+          </div>
+        </div>`;
       grid.appendChild(card);
     });
   }
 
-  // ===== FILTERS =====
-  let searchTerm = '', categoryFilter = '', sortMode = 'newest';
-
+  // Filters
+  let searchTerm = '', catFilter = '', sortMode = 'newest';
   function applyFilters() {
-    let filtered = [...allProducts];
-    if (searchTerm) filtered = filtered.filter(p => p.name?.toLowerCase().includes(searchTerm.toLowerCase()) || p.description?.toLowerCase().includes(searchTerm.toLowerCase()));
-    if (categoryFilter) filtered = filtered.filter(p => p.category === categoryFilter);
-    if (sortMode === 'price-asc') filtered.sort((a,b) => (a.price||0) - (b.price||0));
-    else if (sortMode === 'price-desc') filtered.sort((a,b) => (b.price||0) - (a.price||0));
-    renderProducts(filtered);
+    let f = [...allProducts];
+    if (searchTerm) f = f.filter(p => (p.name||'').toLowerCase().includes(searchTerm.toLowerCase()) || (p.description||'').toLowerCase().includes(searchTerm.toLowerCase()));
+    if (catFilter) f = f.filter(p => p.category === catFilter);
+    if (sortMode === 'price-asc') f.sort((a,b) => (a.price||0)-(b.price||0));
+    else if (sortMode === 'price-desc') f.sort((a,b) => (b.price||0)-(a.price||0));
+    renderProducts(f);
   }
 
   document.getElementById('search-input').addEventListener('input', e => { searchTerm = e.target.value; applyFilters(); });
-  document.getElementById('category-filter').addEventListener('change', e => { categoryFilter = e.target.value; applyFilters(); });
+  document.getElementById('category-filter').addEventListener('change', e => { catFilter = e.target.value; applyFilters(); });
   document.getElementById('sort-filter').addEventListener('change', e => { sortMode = e.target.value; applyFilters(); });
 
   // View toggle
-  document.getElementById('view-grid').addEventListener('click', () => {
-    document.getElementById('products-grid').classList.remove('list-view');
-    document.getElementById('view-grid').classList.add('active');
-    document.getElementById('view-list').classList.remove('active');
+  const grid = document.getElementById('products-grid');
+  document.getElementById('view-grid-btn').addEventListener('click', () => {
+    grid.classList.remove('list-view');
+    document.getElementById('view-grid-btn').classList.add('active');
+    document.getElementById('view-list-btn').classList.remove('active');
   });
-  document.getElementById('view-list').addEventListener('click', () => {
-    document.getElementById('products-grid').classList.add('list-view');
-    document.getElementById('view-list').classList.add('active');
-    document.getElementById('view-grid').classList.remove('active');
+  document.getElementById('view-list-btn').addEventListener('click', () => {
+    grid.classList.add('list-view');
+    document.getElementById('view-list-btn').classList.add('active');
+    document.getElementById('view-grid-btn').classList.remove('active');
   });
 
-  // ===== CART =====
+  // Mobile filter toggle
+  const filterToggle = document.getElementById('filter-toggle-btn');
+  if (filterToggle) {
+    filterToggle.classList.remove('hidden');
+    filterToggle.addEventListener('click', () => {
+      document.getElementById('filter-controls').classList.toggle('show');
+    });
+  }
+
+  // Cart
   function refreshCart() {
     const items = Cart.get(slug);
     const count = Cart.count(slug);
-    document.getElementById('cart-count').textContent = count;
     const total = Cart.total(slug);
-    document.getElementById('cart-total-price').textContent = `₦${total.toLocaleString()}`;
+    document.getElementById('cart-count').textContent = count;
+    document.getElementById('cart-total').textContent = `₦${total.toLocaleString()}`;
 
-    const cartItemsEl = document.getElementById('cart-items');
+    const body = document.getElementById('cart-body');
+    const footer = document.getElementById('cart-footer');
+
     if (!items.length) {
-      cartItemsEl.innerHTML = `<div class="cart-empty-msg"><div class="empty-icon">🛒</div><p>Your cart is empty</p></div>`;
-      document.getElementById('cart-footer').style.display = 'none';
-      return;
+      body.innerHTML = `<div class="cart-empty"><div class="cart-empty-icon">🛒</div><p>Your cart is empty</p></div>`;
+      footer.style.display = 'none'; return;
     }
-    document.getElementById('cart-footer').style.display = 'block';
-
-    cartItemsEl.innerHTML = items.map((item, i) => `
+    footer.style.display = 'block';
+    body.innerHTML = items.map((item, i) => `
       <div class="cart-item">
-        <div class="cart-item-img">
-          ${item.image ? `<img src="${item.image}" />` : '🛍️'}
-        </div>
-        <div class="cart-item-details">
+        <div class="cart-item-img">${item.image?`<img src="${item.image}" alt="${item.name}"/>`:'🛍️'}</div>
+        <div class="cart-item-info">
           <div class="cart-item-name">${item.name}</div>
-          ${item.customization ? `<div class="cart-item-custom">Custom: ${Object.entries(item.customization).filter(([,v])=>v).map(([k,v])=>`${k}: ${v}`).join(', ')}</div>` : ''}
+          ${item.customization ? `<div class="cart-item-custom">${Object.entries(item.customization).filter(([,v])=>v).map(([k,v])=>`${k}: ${v}`).join(' · ')}</div>` : ''}
           <div class="cart-item-price">₦${Number(item.price).toLocaleString()}</div>
           <div class="cart-item-actions">
-            <button class="cart-qty-btn" onclick="changeQty(${i}, -1)">−</button>
-            <span class="cart-qty-num">${item.qty}</span>
-            <button class="cart-qty-btn" onclick="changeQty(${i}, 1)">+</button>
-            <button class="cart-remove" onclick="removeItem(${i})">✕ Remove</button>
+            <div class="qty-ctrl">
+              <button class="qty-ctrl-btn" onclick="cartChangeQty(${i},-1)">−</button>
+              <span class="qty-ctrl-num">${item.qty}</span>
+              <button class="qty-ctrl-btn" onclick="cartChangeQty(${i},1)">+</button>
+            </div>
+            <button class="cart-item-remove" onclick="cartRemove(${i})">✕ Remove</button>
           </div>
         </div>
-      </div>
-    `).join('');
+      </div>`).join('');
   }
 
-  window.changeQty = (idx, delta) => {
-    const items = Cart.get(slug);
-    items[idx].qty = Math.max(1, items[idx].qty + delta);
-    Cart.set(slug, items);
-    refreshCart();
-  };
-
-  window.removeItem = (idx) => {
-    Cart.remove(slug, idx);
-    refreshCart();
-  };
-
-  // Cart open/close
-  const cartSidebar = document.getElementById('cart-sidebar');
-  const cartOverlay = document.getElementById('cart-overlay');
+  window.cartChangeQty = (i, d) => { const items = Cart.get(slug); items[i].qty = Math.max(1, items[i].qty + d); Cart.set(slug, items); refreshCart(); };
+  window.cartRemove = (i) => { Cart.remove(slug, i); refreshCart(); };
 
   function openCart() {
-    cartSidebar.classList.add('open');
-    cartOverlay.classList.add('open');
+    document.getElementById('cart-drawer').classList.add('open');
+    document.getElementById('cart-overlay').classList.add('open');
     document.body.style.overflow = 'hidden';
     refreshCart();
   }
   function closeCart() {
-    cartSidebar.classList.remove('open');
-    cartOverlay.classList.remove('open');
+    document.getElementById('cart-drawer').classList.remove('open');
+    document.getElementById('cart-overlay').classList.remove('open');
     document.body.style.overflow = '';
   }
 
-  document.getElementById('cart-toggle').addEventListener('click', openCart);
-  document.getElementById('cart-close').addEventListener('click', closeCart);
+  document.getElementById('cart-open-btn').addEventListener('click', openCart);
+  document.getElementById('cart-close-btn').addEventListener('click', closeCart);
   document.getElementById('cart-overlay').addEventListener('click', closeCart);
-  document.getElementById('continue-shopping').addEventListener('click', closeCart);
-
-  document.getElementById('checkout-btn').addEventListener('click', (e) => {
-    e.preventDefault();
-    window.location.href = (typeof BrandURL !== 'undefined') ? BrandURL.checkout(slug) : `checkout.html?slug=${slug}`;
-  });
+  document.getElementById('cart-continue-btn').addEventListener('click', closeCart);
 
   refreshCart();
 
-  // ===== ERROR =====
-  function showError(msg) {
-    document.body.innerHTML = `
-      <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;text-align:center;padding:2rem;">
-        <div>
-          <div style="font-size:4rem;margin-bottom:1rem;">🔍</div>
-          <h2 style="font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;margin-bottom:0.5rem;">${msg}</h2>
-          <p style="color:#6b5a52;margin-bottom:2rem;">The brand you're looking for doesn't exist or has been removed.</p>
-          <a href="../index.html" style="background:#5a3c30;color:#fff;padding:0.85rem 2rem;border-radius:100px;text-decoration:none;font-size:0.95rem;">Back to Brandisby</a>
-        </div>
-      </div>`;
+  function showBrandError() {
+    document.body.innerHTML = `<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:DM Sans,sans-serif;text-align:center;padding:2rem;background:#f7f3ef;"><div><div style="font-size:4rem;margin-bottom:1rem">🔍</div><h2 style="font-family:Cormorant Garamond,serif;font-size:2rem;font-weight:300;margin-bottom:0.5rem;">Brand not found</h2><p style="color:#9c8880;margin-bottom:2rem">This brand link doesn't exist or has been removed.</p><a href="../index.html" style="background:#5a3c30;color:#fff;padding:0.85rem 2rem;border-radius:100px;text-decoration:none;font-size:0.95rem;">Back to Brandisby</a></div></div>`;
   }
 });
