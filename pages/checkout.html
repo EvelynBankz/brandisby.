@@ -4,10 +4,9 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Checkout — Brandisby</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/main.css">
-  <link rel="stylesheet" href="../css/checkout.css">
+  <link rel="icon" href="../assets/logo-transparent.png" type="image/png"/>
+  <link rel="stylesheet" href="../css/global.css"/>
+  <link rel="stylesheet" href="../css/pages.css"/>
   <script src="../js/subdomain-router.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -17,142 +16,146 @@
 </head>
 <body class="checkout-page">
 
-  <nav class="checkout-nav">
-    <a href="#" id="back-to-store" class="brand-nav-back">
-      <img src="../logo-light.png" alt="Brandisby" class="brand-nav-back-logo" />
+<!-- ── NAV ───────────────────────────────────────────────────── -->
+<nav class="checkout-nav">
+  <div class="checkout-nav-inner">
+    <a href="#" id="back-to-store" class="brand-nav-back" style="text-decoration:none;display:flex;align-items:center;gap:0.4rem;font-size:0.78rem;color:var(--muted);">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;"><path d="M10 12L6 8l4-4"/></svg>
+      <img src="../assets/logo-light.png" alt="Brandisby" style="height:22px;width:auto;"/>
     </a>
-    <span class="checkout-nav-brand" id="checkout-brand-name">Checkout</span>
+    <span class="brand-nav-title" id="checkout-brand-name" style="font-family:'Cormorant Garamond',serif;font-size:1.1rem;">Checkout</span>
     <div class="checkout-steps">
-      <span class="step active" data-step="cart">Cart</span>
-      <span class="step-divider">›</span>
-      <span class="step" data-step="details" id="step-details">Details</span>
-      <span class="step-divider">›</span>
-      <span class="step" data-step="payment" id="step-payment">Payment</span>
+      <span class="checkout-step-label active" id="step-lbl-cart">Cart</span>
+      <span class="checkout-step-sep">›</span>
+      <span class="checkout-step-label" id="step-lbl-details">Details</span>
+      <span class="checkout-step-sep">›</span>
+      <span class="checkout-step-label" id="step-lbl-payment">Payment</span>
     </div>
-  </nav>
+  </div>
+</nav>
 
-  <main class="checkout-main">
-    <div class="checkout-inner">
+<!-- ── LAYOUT ─────────────────────────────────────────────────── -->
+<div class="checkout-layout">
+  <div class="checkout-layout-inner">
 
-      <!-- LEFT: FORM AREA -->
-      <div class="checkout-form-area">
+    <!-- LEFT: Steps -->
+    <div>
 
-        <!-- STEP 1: CART REVIEW -->
-        <section class="checkout-step active" id="step-cart">
-          <h2 class="step-heading">Review Your Cart</h2>
-          <div id="cart-review-list"></div>
-          <button class="btn-primary-lg" id="to-details-btn" style="width:100%;justify-content:center;margin-top:2rem;">Continue to Details →</button>
-        </section>
-
-        <!-- STEP 2: CUSTOMER DETAILS -->
-        <section class="checkout-step" id="step-details-form">
-          <h2 class="step-heading">Shipping Details</h2>
-          <div class="form-row">
-            <div class="form-group">
-              <label>First Name *</label>
-              <input type="text" id="fname" class="form-input" placeholder="John" required/>
-            </div>
-            <div class="form-group">
-              <label>Last Name *</label>
-              <input type="text" id="lname" class="form-input" placeholder="Doe" required/>
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Email Address *</label>
-            <input type="email" id="email" class="form-input" placeholder="john@example.com" required/>
-          </div>
-          <div class="form-group">
-            <label>Phone Number *</label>
-            <input type="tel" id="phone" class="form-input" placeholder="+234 800 000 0000" required/>
-          </div>
-          <div class="form-group">
-            <label>Delivery Address *</label>
-            <input type="text" id="address" class="form-input" placeholder="123 Main Street, Apartment 4B" required/>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>City *</label>
-              <input type="text" id="city" class="form-input" placeholder="Lagos" required/>
-            </div>
-            <div class="form-group">
-              <label>State *</label>
-              <input type="text" id="state" class="form-input" placeholder="Lagos State" required/>
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Country *</label>
-            <select id="country" class="form-input">
-              <option value="NG">Nigeria</option>
-              <option value="GH">Ghana</option>
-              <option value="KE">Kenya</option>
-              <option value="ZA">South Africa</option>
-              <option value="OTHER">Other</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Order Notes (optional)</label>
-            <textarea id="order-notes" class="form-input" rows="3" placeholder="Any special instructions?"></textarea>
-          </div>
-          <div class="form-actions">
-            <button class="btn-ghost-lg" id="back-to-cart-btn">← Back to Cart</button>
-            <button class="btn-primary-lg" id="to-payment-btn">Continue to Payment →</button>
-          </div>
-        </section>
-
-        <!-- STEP 3: PAYMENT -->
-        <section class="checkout-step" id="step-payment-form">
-          <h2 class="step-heading">Payment</h2>
-          <div class="payment-summary">
-            <div class="payment-customer" id="payment-customer-info"></div>
-          </div>
-          <div class="payment-methods">
-            <div class="payment-method active" id="pay-paystack">
-              <div class="payment-method-radio"></div>
-              <div class="payment-method-info">
-                <div class="payment-method-name">Pay with Paystack</div>
-                <div class="payment-method-desc">Card, Bank Transfer, USSD, Mobile Money</div>
-              </div>
-              <div class="paystack-logo">🔒 Paystack</div>
-            </div>
-          </div>
-          <div class="payment-note">
-            🔒 Your payment is secured by Paystack. All transactions are encrypted.
-          </div>
-          <div class="form-actions">
-            <button class="btn-ghost-lg" id="back-to-details-btn">← Back to Details</button>
-            <button class="btn-primary-lg" id="pay-now-btn">
-              <span id="pay-now-text">Pay ₦0 Now</span>
-            </button>
-          </div>
-        </section>
-
+      <!-- STEP 1: Cart Review -->
+      <div class="checkout-card checkout-step-panel active" id="panel-cart">
+        <h2 class="checkout-step-title">Review Your Cart</h2>
+        <div id="cart-review-list"></div>
+        <div id="cart-empty-msg" class="hidden" style="text-align:center;padding:3rem 0;">
+          <p style="color:var(--muted);margin-bottom:1rem;">Your cart is empty.</p>
+          <a href="#" id="empty-back-link" class="btn btn-primary">Browse Products</a>
+        </div>
+        <div style="margin-top:2rem;" id="step1-actions">
+          <button class="btn btn-primary btn-full btn-lg" id="to-details-btn">Continue to Details →</button>
+        </div>
       </div>
 
-      <!-- RIGHT: ORDER SUMMARY -->
-      <aside class="order-summary">
-        <h3 class="summary-heading">Order Summary</h3>
-        <div id="order-items-list"></div>
-        <div class="summary-totals">
-          <div class="summary-row">
-            <span>Subtotal</span>
-            <span id="summary-subtotal">₦0</span>
+      <!-- STEP 2: Shipping Details -->
+      <div class="checkout-card checkout-step-panel" id="panel-details">
+        <h2 class="checkout-step-title">Shipping Details</h2>
+        <div class="input-row">
+          <div class="form-group">
+            <label class="label">First Name *</label>
+            <input type="text" class="input" id="fname" placeholder="John" autocomplete="given-name"/>
           </div>
-          <div class="summary-row">
-            <span>Shipping</span>
-            <span id="summary-shipping">Calculated at checkout</span>
-          </div>
-          <div class="summary-row total-row">
-            <span>Total</span>
-            <span id="summary-total">₦0</span>
+          <div class="form-group">
+            <label class="label">Last Name *</label>
+            <input type="text" class="input" id="lname" placeholder="Doe" autocomplete="family-name"/>
           </div>
         </div>
-        <div class="summary-brand-badge" id="summary-brand"></div>
-      </aside>
+        <div class="form-group">
+          <label class="label">Email Address *</label>
+          <input type="email" class="input" id="email" placeholder="john@example.com" autocomplete="email"/>
+        </div>
+        <div class="form-group">
+          <label class="label">Phone Number *</label>
+          <input type="tel" class="input" id="phone" placeholder="+234 800 000 0000" autocomplete="tel"/>
+        </div>
+        <div class="form-group">
+          <label class="label">Delivery Address *</label>
+          <input type="text" class="input" id="address" placeholder="123 Main Street, Flat 4B" autocomplete="street-address"/>
+        </div>
+        <div class="input-row">
+          <div class="form-group">
+            <label class="label">City *</label>
+            <input type="text" class="input" id="city" placeholder="Lagos" autocomplete="address-level2"/>
+          </div>
+          <div class="form-group">
+            <label class="label">State *</label>
+            <input type="text" class="input" id="state" placeholder="Lagos State" autocomplete="address-level1"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="label">Country</label>
+          <select class="input" id="country" autocomplete="country">
+            <option value="NG">Nigeria 🇳🇬</option>
+            <option value="GH">Ghana 🇬🇭</option>
+            <option value="KE">Kenya 🇰🇪</option>
+            <option value="ZA">South Africa 🇿🇦</option>
+            <option value="OTHER">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="label">Order Notes (optional)</label>
+          <textarea class="input" id="order-notes" rows="3" placeholder="Any special instructions for this order?"></textarea>
+        </div>
+        <div class="checkout-form-actions">
+          <button class="btn btn-ghost" id="back-to-cart-btn">← Back to Cart</button>
+          <button class="btn btn-primary btn-lg" id="to-payment-btn">Continue to Payment →</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: Payment -->
+      <div class="checkout-card checkout-step-panel" id="panel-payment">
+        <h2 class="checkout-step-title">Payment</h2>
+
+        <div class="payment-secure-note">
+          🔒 Your payment is protected by Paystack — Nigeria's most trusted payment gateway.
+        </div>
+
+        <div id="payment-customer-summary" style="background:var(--cream);border-radius:var(--r-md);padding:1rem;margin-bottom:1.5rem;font-size:0.875rem;line-height:1.8;"></div>
+
+        <div class="payment-option selected" id="pay-paystack-opt">
+          <div class="payment-radio"></div>
+          <div class="payment-label">
+            <div class="payment-label-name">Pay with Paystack</div>
+            <div class="payment-label-desc">Card, Bank Transfer, USSD, Mobile Money</div>
+          </div>
+          <span style="font-size:0.8rem;font-weight:700;color:var(--brown);">🔒 Paystack</span>
+        </div>
+
+        <div class="checkout-form-actions">
+          <button class="btn btn-ghost" id="back-to-details-btn">← Back to Details</button>
+          <button class="btn btn-primary btn-lg" id="pay-now-btn">
+            Pay <span id="pay-amount">₦0</span> Now
+          </button>
+        </div>
+      </div>
 
     </div>
-  </main>
 
-  <script src="../js/firebase-config.js"></script>
-  <script src="../js/checkout.js"></script>
+    <!-- RIGHT: Order Summary -->
+    <aside class="order-summary-card">
+      <h3 class="order-summary-title">Order Summary</h3>
+      <div id="summary-items"></div>
+      <div class="summary-totals">
+        <div class="summary-row"><span>Subtotal</span><span id="s-subtotal">₦0</span></div>
+        <div class="summary-row"><span>Shipping</span><span id="s-shipping" style="color:var(--muted);">Calculated at checkout</span></div>
+        <div class="summary-row total"><span>Total</span><span id="s-total">₦0</span></div>
+      </div>
+      <div class="summary-brand-note" id="summary-brand-note">Sold via Brandisby</div>
+    </aside>
+
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="../js/firebase-config.js"></script>
+<script src="../js/checkout.js"></script>
 </body>
 </html>
