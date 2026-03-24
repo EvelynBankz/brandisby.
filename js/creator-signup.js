@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
         paystackKey
       });
 
-      document.getElementById('brand-link-reveal').textContent = `${slug}.brandisby.com`;
+      document.getElementById('brand-link-reveal').textContent = (typeof BrandURL !== 'undefined') ? BrandURL.display(slug) : `${slug}.brandisby.com`;
       document.getElementById('visit-store-btn').href = (typeof BrandURL !== 'undefined') ? BrandURL.store(slug) : `brand.html?slug=${slug}`;
       document.getElementById('success-msg').textContent = `${brandName} is live on Brandisby!`;
       showStep(3);
