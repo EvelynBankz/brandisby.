@@ -42,9 +42,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!brandData) return;
 
     const storeUrl = (typeof BrandURL !== 'undefined') ? BrandURL.store(brandSlug) : `brand.html?slug=${brandSlug}`;
+    const displayLink = (typeof BrandURL !== 'undefined') ? BrandURL.display(brandSlug) : `${brandSlug}.brandisby.com`;
     document.getElementById('dash-view-store-btn').href = storeUrl;
-    document.getElementById('dash-store-link').textContent = `${brandSlug}.brandisby.com`;
-    document.getElementById('stat-link').textContent = `${brandSlug}.brandisby.com`;
+    document.getElementById('dash-store-link').textContent = displayLink;
+    document.getElementById('stat-link').textContent = displayLink;
 
     // Settings tab
     document.getElementById('set-brand-name').value = brandData.name || '';
