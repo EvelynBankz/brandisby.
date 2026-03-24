@@ -28,6 +28,64 @@ body {
   overflow-x: hidden;
 }
 
+/* ===== LOGO IMAGE ===== */
+/* logo-light.png     → tight-cropped, white bg  → use on cream/white navs  */
+/* logo-transparent.png → tight-cropped, no bg   → use on dark backgrounds  */
+
+.nav-logo {
+  display: flex; align-items: center;
+  text-decoration: none; flex-shrink: 0;
+}
+.nav-logo-img {
+  height: 32px;
+  width: auto;
+  display: block;
+  /* White bg logo on cream nav — blends perfectly */
+}
+
+.footer-logo { display: flex; align-items: center; }
+.footer-logo-img {
+  height: 26px;
+  width: auto;
+  display: block;
+  /* Transparent logo on dark footer */
+}
+
+.footer-inline-logo {
+  height: 16px;
+  width: auto;
+  vertical-align: middle;
+  display: inline-block;
+}
+
+.auth-back {
+  display: flex; align-items: center;
+  text-decoration: none; gap: 0.4rem;
+  position: fixed; top: 1.5rem; left: 2rem; z-index: 100;
+}
+.auth-back-logo {
+  height: 26px; width: auto; display: block;
+}
+
+.brand-nav-back {
+  display: flex; align-items: center;
+  text-decoration: none;
+  transition: opacity var(--transition);
+}
+.brand-nav-back:hover { opacity: 0.7; }
+.brand-nav-back-logo {
+  height: 26px; width: auto; display: block;
+}
+
+.dash-logo {
+  padding: 1.5rem 1.5rem 1.25rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.dash-logo-img {
+  height: 28px; width: auto; display: block;
+  /* Transparent logo on dark sidebar */
+}
+
 /* ===== NAV ===== */
 .main-nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
@@ -40,14 +98,7 @@ body {
   transition: var(--transition);
 }
 
-.nav-logo {
-  font-family: var(--font-display);
-  font-size: 1.6rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  color: var(--brand-brown);
-  text-decoration: none;
-}
+.nav-logo:hover { opacity: 0.85; }
 
 .nav-links {
   display: flex; align-items: center; gap: 2rem;
