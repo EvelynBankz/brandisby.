@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -10,6 +10,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="css/global.css"/>
   <link rel="stylesheet" href="css/home.css"/>
+  <!-- Apply saved theme before paint to prevent flash -->
+  <script>
+    (function(){
+      const t = localStorage.getItem('brandisby-theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
   <script src="js/subdomain-router.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -22,7 +29,7 @@
 <nav class="site-nav" id="site-nav">
   <div class="nav-inner">
     <a href="index.html" class="logo logo-nav">
-      <img src="assets/logo-light.png" alt="Brandisby"/>
+      <img src="assets/logo-transparent.png" alt="Brandisby" id="nav-logo"/>
     </a>
     <div class="nav-links">
       <a href="#features">Features</a>
@@ -30,6 +37,8 @@
       <a href="#brands">Explore Brands</a>
     </div>
     <div class="nav-right">
+      <!-- Theme toggle -->
+      <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark/light mode" title="Toggle theme"></button>
       <a href="pages/login.html" class="btn btn-ghost btn-sm" id="nav-login">Sign In</a>
       <a href="pages/creator-signup.html" class="btn btn-gold btn-sm">Start for Free</a>
     </div>
@@ -49,23 +58,24 @@
   <div class="mobile-menu-actions">
     <a href="pages/login.html" class="btn btn-ghost-light btn-full btn-lg" id="mobile-login">Sign In</a>
     <a href="pages/creator-signup.html" class="btn btn-gold btn-full btn-lg">Start for Free →</a>
+    <!-- Theme toggle in mobile too -->
+    <button class="btn btn-ghost-light btn-full" id="mobile-theme-toggle" onclick="toggleTheme()">
+      <span id="mobile-theme-icon">☀️</span> Switch to Light Mode
+    </button>
   </div>
 </div>
 
 <!-- ── HERO ─────────────────────────────────────────────────── -->
 <section class="hero">
   <div class="hero-ambient"></div>
+  <div class="hero-ambient-mid"></div>
   <div class="hero-inner">
 
-    <!-- Left -->
     <div class="hero-content">
-      <div class="hero-label">
-        <span class="hero-label-dot"></span>
-        Multi-brand storefront platform
-      </div>
+      <div class="hero-label">✦ Multi-brand storefront platform</div>
       <h1 class="hero-title">
         <span class="hero-title-line">Every Brand</span>
-        <span class="hero-title-em">Deserves Its</span>
+        <span class="hero-title-em"><span>Deserves Its</span></span>
         <span class="hero-title-line">Own World.</span>
       </h1>
       <p class="hero-desc">
@@ -73,9 +83,7 @@
         experience that's entirely yours. No distractions. No compromises.
       </p>
       <div class="hero-actions">
-        <a href="pages/creator-signup.html" class="btn btn-gold btn-lg">
-          Create Your Brand <span style="margin-left:0.25rem;">→</span>
-        </a>
+        <a href="pages/creator-signup.html" class="btn btn-gold btn-lg">Create Your Brand →</a>
         <a href="#brands" class="btn btn-ghost-light btn-lg">See Live Stores</a>
       </div>
       <div class="hero-link-pill">
@@ -83,28 +91,24 @@
         <span class="link-cursor"></span>
         <span class="link-domain">.brandisby.com</span>
       </div>
-      <div style="margin-top:var(--s8);">
-        <div class="hero-proof">
-          <div class="hero-proof-avatars">
-            <span>EV</span><span>NK</span><span>SR</span><span>+</span>
-          </div>
-          <div class="hero-proof-text">
-            <strong>Join creators</strong> already selling on Brandisby
-          </div>
+      <div class="hero-proof">
+        <div class="hero-proof-avatars">
+          <span>EV</span><span>NK</span><span>SR</span><span>+</span>
+        </div>
+        <div class="hero-proof-text">
+          <strong>Join creators</strong> already selling on Brandisby
         </div>
       </div>
     </div>
 
-    <!-- Right — brand showcase mockup -->
+    <!-- Brand showcase visual -->
     <div class="hero-showcase">
       <div style="position:relative;">
         <div class="showcase-card" style="animation:floatCard 5s ease-in-out infinite;">
-          <div class="showcase-card-banner">
-            <div class="showcase-card-banner-inner"></div>
-          </div>
-          <div class="showcase-card-body">
-            <div class="showcase-card-row">
-              <div class="showcase-avatar" style="margin-top:-22px;">E</div>
+          <div class="showcase-banner"></div>
+          <div class="showcase-body">
+            <div class="showcase-row">
+              <div class="showcase-av">E</div>
               <div>
                 <div class="showcase-name">The Evelyn Bankz</div>
                 <div class="showcase-url">theevelynbankz.brandisby.com</div>
@@ -117,47 +121,50 @@
             </div>
           </div>
         </div>
-        <div class="showcase-badge" style="top:var(--s5);right:calc(-1 * var(--s6));">
+        <div class="showcase-badge">
           <span class="showcase-badge-val">₦48,500</span>
-          <span style="font-size:0.68rem;color:var(--text-muted);">Today's revenue</span>
+          <span class="showcase-badge-label">Today's revenue</span>
         </div>
       </div>
-      <div class="showcase-card showcase-card-sm" style="animation:floatCard 5s ease-in-out infinite 0.8s;">
+      <div class="showcase-card showcase-card-sm" style="animation:floatCard 5s ease-in-out infinite 0.9s;">
         <div class="showcase-sm-img"></div>
-        <div class="showcase-sm-info">
+        <div style="flex:1;">
           <div class="showcase-sm-name">Custom Name Necklace</div>
           <div class="showcase-sm-price">₦12,000</div>
         </div>
-        <button class="showcase-sm-btn">+</button>
+        <button class="showcase-sm-add">+</button>
       </div>
     </div>
+
   </div>
 </section>
 
 <!-- ── MARQUEE ───────────────────────────────────────────────── -->
-<div class="marquee-section">
+<div class="marquee-wrap">
   <div class="marquee-track">
-    <span class="marquee-item">Custom Products <span class="marquee-dot"></span></span>
-    <span class="marquee-item">Unique Storefronts <span class="marquee-dot"></span></span>
-    <span class="marquee-item">Paystack Payments <span class="marquee-dot"></span></span>
-    <span class="marquee-item">Brand Analytics <span class="marquee-dot"></span></span>
-    <span class="marquee-item">Order Management <span class="marquee-dot"></span></span>
-    <span class="marquee-item">Your Own Link <span class="marquee-dot"></span></span>
-    <span class="marquee-item">No Distractions <span class="marquee-dot"></span></span>
-    <span class="marquee-item">Custom Products <span class="marquee-dot"></span></span>
-    <span class="marquee-item">Unique Storefronts <span class="marquee-dot"></span></span>
-    <span class="marquee-item">Paystack Payments <span class="marquee-dot"></span></span>
-    <span class="marquee-item">Brand Analytics <span class="marquee-dot"></span></span>
-    <span class="marquee-item">Order Management <span class="marquee-dot"></span></span>
-    <span class="marquee-item">Your Own Link <span class="marquee-dot"></span></span>
-    <span class="marquee-item">No Distractions <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Custom Products<span class="marquee-dot"></span></span>
+    <span class="marquee-item">Unique Storefronts<span class="marquee-dot"></span></span>
+    <span class="marquee-item">Paystack Payments<span class="marquee-dot"></span></span>
+    <span class="marquee-item">Brand Dashboard<span class="marquee-dot"></span></span>
+    <span class="marquee-item">Order Management<span class="marquee-dot"></span></span>
+    <span class="marquee-item">Your Own Link<span class="marquee-dot"></span></span>
+    <span class="marquee-item">No Distractions<span class="marquee-dot"></span></span>
+    <span class="marquee-item">Mobile-First Shopping<span class="marquee-dot"></span></span>
+    <span class="marquee-item">Custom Products<span class="marquee-dot"></span></span>
+    <span class="marquee-item">Unique Storefronts<span class="marquee-dot"></span></span>
+    <span class="marquee-item">Paystack Payments<span class="marquee-dot"></span></span>
+    <span class="marquee-item">Brand Dashboard<span class="marquee-dot"></span></span>
+    <span class="marquee-item">Order Management<span class="marquee-dot"></span></span>
+    <span class="marquee-item">Your Own Link<span class="marquee-dot"></span></span>
+    <span class="marquee-item">No Distractions<span class="marquee-dot"></span></span>
+    <span class="marquee-item">Mobile-First Shopping<span class="marquee-dot"></span></span>
   </div>
 </div>
 
 <!-- ── FEATURES ─────────────────────────────────────────────── -->
 <section class="features-section" id="features">
   <div class="section-inner">
-    <div class="section-label">Why Brandisby</div>
+    <div class="section-eyebrow">Why Brandisby</div>
     <h2 class="section-title">Built for brands that<br/><em>mean business</em></h2>
     <p class="section-desc">Everything you need to sell online — without the complexity, the marketplace noise, or the compromise.</p>
     <div class="features-grid">
@@ -169,12 +176,12 @@
       <div class="feature-card">
         <div class="feature-icon">🎨</div>
         <div class="feature-title">Fully Custom Storefront</div>
-        <p class="feature-desc">Upload your logo, set your banner, choose your colors. Your store looks like your brand — not like everyone else's.</p>
+        <p class="feature-desc">Upload your logo, set your banner, choose your colors. Your store looks and feels like your brand — not like everyone else's.</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">✏️</div>
         <div class="feature-title">Custom Order System</div>
-        <p class="feature-desc">Let customers personalise products with text, font choices, and image uploads before they buy. Perfect for personalized gifts.</p>
+        <p class="feature-desc">Let customers personalise products with text, font choices, and image uploads before checkout. Built for personalized gifting.</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">💳</div>
@@ -184,12 +191,12 @@
       <div class="feature-card">
         <div class="feature-icon">📦</div>
         <div class="feature-title">Order Management</div>
-        <p class="feature-desc">Track every order from your dashboard. Update statuses, view customer details, and manage your business in one place.</p>
+        <p class="feature-desc">Track every order from your dashboard. Update statuses, view customer details, manage your business — one place.</p>
       </div>
       <div class="feature-card">
         <div class="feature-icon">📱</div>
         <div class="feature-title">Mobile-First Shopping</div>
-        <p class="feature-desc">Your store looks and feels native on every device — designed for the way your customers actually shop.</p>
+        <p class="feature-desc">Your store feels native on every device. Designed for the way your customers actually browse and shop.</p>
       </div>
     </div>
   </div>
@@ -200,33 +207,33 @@
   <div class="section-inner">
     <div class="steps-header">
       <div>
-        <div class="section-label">Simple by design</div>
-        <h2 class="section-title" style="margin-bottom:0;">From idea to<br/><em>storefront</em> in minutes</h2>
+        <div class="section-eyebrow">Simple by design</div>
+        <h2 class="section-title" style="margin-bottom:0;">From idea to<br/><em>storefront</em><br/>in minutes</h2>
       </div>
-      <p style="font-size:0.9rem;color:var(--text-muted);line-height:1.8;max-width:340px;">
-        No developers, no complex setup, no monthly fees that eat your profit. Just your brand, live and selling.
+      <p style="font-size:0.9rem;color:var(--text-2);line-height:1.85;max-width:340px;align-self:flex-end;">
+        No developers, no complex setup. Just your brand, live and selling.
       </p>
     </div>
     <div class="steps-grid">
       <div class="step-item">
         <span class="step-num">01</span>
         <div class="step-title">Create Your Brand</div>
-        <p class="step-desc">Sign up, name your brand, and get your unique link instantly. Upload your logo and set your brand colors.</p>
+        <p class="step-desc">Sign up, name your brand, get your unique link. Upload your logo, set your colors — done.</p>
       </div>
       <div class="step-item">
         <span class="step-num">02</span>
         <div class="step-title">Add Your Products</div>
-        <p class="step-desc">List physical, digital, or custom products. Add images, pricing, categories, and stock levels.</p>
+        <p class="step-desc">List physical, digital, or custom products with images, pricing, categories, and stock levels.</p>
       </div>
       <div class="step-item">
         <span class="step-num">03</span>
         <div class="step-title">Share Your Link</div>
-        <p class="step-desc">Drop your Brandisby link anywhere — Instagram bio, WhatsApp, TikTok, email, anywhere your audience is.</p>
+        <p class="step-desc">Drop your Brandisby link anywhere — Instagram bio, WhatsApp, TikTok, email — everywhere your audience is.</p>
       </div>
       <div class="step-item">
         <span class="step-num">04</span>
         <div class="step-title">Get Paid</div>
-        <p class="step-desc">Payments via Paystack flow directly to you. Manage orders from your dashboard. Watch your brand grow.</p>
+        <p class="step-desc">Payments via Paystack go straight to you. Watch orders come in, manage from your dashboard.</p>
       </div>
     </div>
   </div>
@@ -237,7 +244,7 @@
   <div class="section-inner">
     <div class="brands-header">
       <div>
-        <div class="section-label">Live on Brandisby</div>
+        <div class="section-eyebrow">Live on Brandisby</div>
         <h2 class="section-title" style="margin-bottom:0;">Discover <em>independent</em> brands</h2>
       </div>
       <a href="pages/creator-signup.html" class="btn btn-ghost">Start Your Brand →</a>
@@ -249,7 +256,7 @@
       <div class="brand-card-skeleton skeleton"></div>
     </div>
     <div class="hidden text-center" id="brands-empty" style="padding:var(--s16) 0;">
-      <p style="color:var(--text-muted);margin-bottom:var(--s6);font-size:0.9rem;">No brands yet — be the first!</p>
+      <p style="color:var(--text-3);margin-bottom:var(--s6);">No brands yet — be the first!</p>
       <a href="pages/creator-signup.html" class="btn btn-gold btn-lg">Create the First Brand →</a>
     </div>
   </div>
@@ -272,12 +279,14 @@
 
 <!-- ── CTA ───────────────────────────────────────────────────── -->
 <section class="cta-section">
-  <div class="section-label" style="justify-content:center;margin-bottom:var(--s5);">Start today</div>
-  <h2 class="cta-title">Your brand.<br/><em>Your world.</em></h2>
-  <p class="cta-desc">Join the brands building their independent stores on Brandisby.</p>
-  <div class="cta-actions">
-    <a href="pages/creator-signup.html" class="btn btn-gold btn-lg">Create Your Brand Free →</a>
-    <a href="pages/login.html" class="btn btn-ghost-light btn-lg">Sign In</a>
+  <div class="cta-inner">
+    <div class="section-eyebrow" style="justify-content:center;margin-bottom:var(--s5);">Start today</div>
+    <h2 class="cta-title">Your brand.<br/><em>Your world.</em></h2>
+    <p class="cta-desc">Join the creators building independent stores on Brandisby.</p>
+    <div class="cta-actions">
+      <a href="pages/creator-signup.html" class="btn btn-gold btn-lg">Create Your Brand Free →</a>
+      <a href="pages/login.html" class="btn btn-ghost-light btn-lg">Sign In</a>
+    </div>
   </div>
 </section>
 
@@ -308,7 +317,7 @@
         <div class="footer-col-title">Legal</div>
         <a href="#">Privacy Policy</a>
         <a href="#">Terms of Service</a>
-        <a href="#">Cookie Policy</a>
+        <a href="#">Contact</a>
       </div>
     </div>
     <div class="footer-bottom">
@@ -326,12 +335,44 @@
 
 <script src="js/firebase-config.js"></script>
 <script>
-// Nav scroll
+/* ── THEME TOGGLE ─────────────────────────────────────────── */
+function toggleTheme() {
+  const html = document.documentElement;
+  const current = html.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('brandisby-theme', next);
+  updateThemeUI(next);
+}
+
+function updateThemeUI(theme) {
+  const isLight = theme === 'light';
+  // Nav logo — use light (white bg) logo in light mode, transparent in dark
+  const navLogo = document.getElementById('nav-logo');
+  if (navLogo) navLogo.src = isLight ? 'assets/logo-light.png' : 'assets/logo-transparent.png';
+  // Mobile theme button text
+  const mobileBtn = document.getElementById('mobile-theme-toggle');
+  const mobileIcon = document.getElementById('mobile-theme-icon');
+  if (mobileBtn) mobileBtn.querySelector('span:last-child') && (mobileBtn.textContent = '');
+  if (mobileIcon) mobileIcon.textContent = isLight ? '🌙' : '☀️';
+  if (mobileBtn) {
+    mobileBtn.innerHTML = `<span>${isLight ? '🌙' : '☀️'}</span> Switch to ${isLight ? 'Dark' : 'Light'} Mode`;
+  }
+  // Toggle aria-label
+  const toggle = document.getElementById('theme-toggle');
+  if (toggle) toggle.setAttribute('aria-label', `Switch to ${isLight ? 'dark' : 'light'} mode`);
+}
+
+// Init
+document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+updateThemeUI(document.documentElement.getAttribute('data-theme'));
+
+/* ── NAV SCROLL ───────────────────────────────────────────── */
 window.addEventListener('scroll', () => {
   document.getElementById('site-nav').classList.toggle('solid', window.scrollY > 10);
 }, { passive: true });
 
-// Hamburger
+/* ── HAMBURGER ────────────────────────────────────────────── */
 const hamburger = document.getElementById('hamburger');
 const mobileMenu = document.getElementById('mobile-menu');
 hamburger.addEventListener('click', () => {
@@ -345,24 +386,24 @@ function closeMobileMenu() {
   document.body.style.overflow = '';
 }
 
-// Typing animation
-const slugWords = ['goodies', 'fleurdevie', 'novacraft', 'zenthreads', 'luxestudio'];
+/* ── TYPING ANIMATION ─────────────────────────────────────── */
+const slugWords = ['goodies', 'fleurdevie', 'novacraft', 'zenthreads', 'theevelynbankz'];
 let sIdx = 0, cIdx = 0, del = false;
 const slugEl = document.getElementById('typed-slug');
 function typeLoop() {
   const w = slugWords[sIdx];
   if (!del) { slugEl.textContent = w.slice(0, ++cIdx); if (cIdx === w.length) { del = true; setTimeout(typeLoop, 2200); return; } }
   else { slugEl.textContent = w.slice(0, --cIdx); if (cIdx === 0) { del = false; sIdx = (sIdx + 1) % slugWords.length; } }
-  setTimeout(typeLoop, del ? 50 : 95);
+  setTimeout(typeLoop, del ? 50 : 100);
 }
 typeLoop();
 
-// Float animation
-const style = document.createElement('style');
-style.textContent = '@keyframes floatCard{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}';
-document.head.appendChild(style);
+/* ── FLOAT ANIMATION ──────────────────────────────────────── */
+const s = document.createElement('style');
+s.textContent = '@keyframes floatCard{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}';
+document.head.appendChild(s);
 
-// Auth state
+/* ── AUTH STATE ───────────────────────────────────────────── */
 Auth.onAuthChange(user => {
   if (user) {
     const l = document.getElementById('nav-login');
@@ -372,7 +413,7 @@ Auth.onAuthChange(user => {
   }
 });
 
-// Load brands
+/* ── LOAD BRANDS ──────────────────────────────────────────── */
 (async () => {
   const grid = document.getElementById('brands-grid');
   const empty = document.getElementById('brands-empty');
@@ -382,13 +423,13 @@ Auth.onAuthChange(user => {
     if (!brands.length) { empty.classList.remove('hidden'); return; }
     brands.forEach(b => {
       const initials = (b.name || 'B').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-      const url = (typeof BrandURL !== 'undefined') ? BrandURL.store(b.slug) : `pages/brand.html?slug=${b.slug}`;
-      const display = (typeof BrandURL !== 'undefined') ? BrandURL.display(b.slug) : `${b.slug}.brandisby.com`;
-      const card = document.createElement('a');
-      card.href = url; card.className = 'brand-card';
-      card.innerHTML = `
-        <div class="brand-card-banner" style="background:linear-gradient(135deg,${b.brandColor||'#5a3c30'},${b.brandColor?'#1b1513':'#0d0b0a'});">
-          ${b.bannerUrl ? `<img src="${b.bannerUrl}" alt="${b.name}"/><div class="brand-card-banner-overlay"></div>` : ''}
+      const url = (typeof BrandURL!=='undefined') ? BrandURL.store(b.slug) : `pages/brand.html?slug=${b.slug}`;
+      const display = (typeof BrandURL!=='undefined') ? BrandURL.display(b.slug) : `${b.slug}.brandisby.com`;
+      const c = document.createElement('a');
+      c.href = url; c.className = 'brand-card';
+      c.innerHTML = `
+        <div class="brand-card-banner" style="background:linear-gradient(135deg,${b.brandColor||'#5a3c30'},#0d0b0a);">
+          ${b.bannerUrl?`<img src="${b.bannerUrl}" alt="${b.name}"/><div class="brand-card-banner-overlay"></div>`:''}
           <div class="brand-card-logo">${b.logoUrl?`<img src="${b.logoUrl}"/>`:`<span style="font-family:var(--font-display);font-size:1rem;color:var(--gold)">${initials}</span>`}</div>
         </div>
         <div class="brand-card-body">
@@ -400,7 +441,7 @@ Auth.onAuthChange(user => {
             <span class="brand-card-arrow">→</span>
           </div>
         </div>`;
-      grid.appendChild(card);
+      grid.appendChild(c);
     });
   } catch(e) { grid.innerHTML=''; empty.classList.remove('hidden'); }
 })();
