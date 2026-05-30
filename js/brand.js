@@ -123,7 +123,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('cart-total').textContent = `₦${total.toLocaleString()}`;
 
     const body = document.getElementById('cart-body');
-    const footer = document.getElementById('cart-footer');
+    const footer = document.getElementById('cart-foot');
 
     if (!items.length) {
       body.innerHTML = `<div class="cart-empty"><div class="cart-empty-icon">🛒</div><p>Your cart is empty</p></div>`;
@@ -153,21 +153,21 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.cartRemove = (i) => { Cart.remove(slug, i); refreshCart(); };
 
   function openCart() {
-    document.getElementById('cart-drawer').classList.add('open');
-    document.getElementById('cart-overlay').classList.add('open');
+    document.getElementById('cart-panel').classList.add('open');
+    document.getElementById('cart-veil').classList.add('open');
     document.body.style.overflow = 'hidden';
     refreshCart();
   }
   function closeCart() {
-    document.getElementById('cart-drawer').classList.remove('open');
-    document.getElementById('cart-overlay').classList.remove('open');
+    document.getElementById('cart-panel').classList.remove('open');
+    document.getElementById('cart-veil').classList.remove('open');
     document.body.style.overflow = '';
   }
 
-  document.getElementById('cart-open-btn').addEventListener('click', openCart);
+  document.getElementById('cart-open').addEventListener('click', openCart);
   document.getElementById('cart-close-btn').addEventListener('click', closeCart);
-  document.getElementById('cart-overlay').addEventListener('click', closeCart);
-  document.getElementById('cart-continue-btn').addEventListener('click', closeCart);
+  document.getElementById('cart-veil').addEventListener('click', closeCart);
+  document.getElementById('cart-continue').addEventListener('click', closeCart);
 
   refreshCart();
 
