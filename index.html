@@ -4,8 +4,10 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta name="description" content="Brandisby — Every brand deserves its own world. Create your storefront and sell with your unique link."/>
-  <title>Brandisby — Where Brands Come Alive</title>
-  <link rel="icon" href="assets/logo-transparent.png" type="image/png"/>
+  <title>Brandisby — Every Brand Deserves Its Own World</title>
+  <link rel="icon" href="assets/logo-transparent.png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="css/global.css"/>
   <link rel="stylesheet" href="css/home.css"/>
   <script src="js/subdomain-router.js"></script>
@@ -17,184 +19,293 @@
 <body>
 
 <!-- ── NAV ─────────────────────────────────────────────────── -->
-<nav class="main-nav" id="main-nav">
+<nav class="site-nav" id="site-nav">
   <div class="nav-inner">
     <a href="index.html" class="logo logo-nav">
       <img src="assets/logo-light.png" alt="Brandisby"/>
     </a>
     <div class="nav-links">
+      <a href="#features">Features</a>
       <a href="#how-it-works">How It Works</a>
       <a href="#brands">Explore Brands</a>
-      <a href="#integrations">Integrations</a>
     </div>
-    <div class="nav-actions">
-      <a href="pages/login.html" class="btn btn-ghost btn-sm" id="nav-signin">Sign In</a>
-      <a href="pages/creator-signup.html" class="btn btn-primary btn-sm">Start Your Brand</a>
+    <div class="nav-right">
+      <a href="pages/login.html" class="btn btn-ghost btn-sm" id="nav-login">Sign In</a>
+      <a href="pages/creator-signup.html" class="btn btn-gold btn-sm">Start for Free</a>
     </div>
-    <button class="hamburger" id="hamburger" aria-label="Menu">
+    <button class="hamburger" id="hamburger" aria-label="Open menu">
       <span></span><span></span><span></span>
     </button>
   </div>
 </nav>
 
-<!-- Mobile Nav -->
-<div class="mobile-nav" id="mobile-nav">
-  <a href="#how-it-works" onclick="closeMobileNav()">How It Works</a>
-  <a href="#brands" onclick="closeMobileNav()">Explore Brands</a>
-  <a href="#integrations" onclick="closeMobileNav()">Integrations</a>
-  <div class="mobile-nav-actions">
-    <a href="pages/login.html" class="btn btn-ghost btn-full" id="mobile-signin">Sign In</a>
-    <a href="pages/creator-signup.html" class="btn btn-primary btn-full">Start Your Brand →</a>
+<!-- Mobile menu -->
+<div class="mobile-menu" id="mobile-menu">
+  <div class="mobile-menu-links">
+    <a href="#features" onclick="closeMobileMenu()">Features</a>
+    <a href="#how-it-works" onclick="closeMobileMenu()">How It Works</a>
+    <a href="#brands" onclick="closeMobileMenu()">Explore Brands</a>
+  </div>
+  <div class="mobile-menu-actions">
+    <a href="pages/login.html" class="btn btn-ghost-light btn-full btn-lg" id="mobile-login">Sign In</a>
+    <a href="pages/creator-signup.html" class="btn btn-gold btn-full btn-lg">Start for Free →</a>
   </div>
 </div>
 
 <!-- ── HERO ─────────────────────────────────────────────────── -->
 <section class="hero">
+  <div class="hero-ambient"></div>
   <div class="hero-inner">
+
+    <!-- Left -->
     <div class="hero-content">
-      <span class="hero-eyebrow">✦ Multi-brand storefront platform</span>
+      <div class="hero-label">
+        <span class="hero-label-dot"></span>
+        Multi-brand storefront platform
+      </div>
       <h1 class="hero-title">
-        Every Brand<br/>
-        <em>Deserves Its</em><br/>
-        Own World.
+        <span class="hero-title-line">Every Brand</span>
+        <span class="hero-title-em">Deserves Its</span>
+        <span class="hero-title-line">Own World.</span>
       </h1>
       <p class="hero-desc">
-        Brandisby gives every creator and business a beautiful, isolated storefront — 
-        with a unique link, custom products, and secure checkout. No distractions. Just your brand.
+        Give your brand a dedicated storefront, a unique link, and a shopping
+        experience that's entirely yours. No distractions. No compromises.
       </p>
       <div class="hero-actions">
-        <a href="pages/creator-signup.html" class="btn btn-primary btn-lg">
-          Create Your Brand <span>→</span>
+        <a href="pages/creator-signup.html" class="btn btn-gold btn-lg">
+          Create Your Brand <span style="margin-left:0.25rem;">→</span>
         </a>
-        <a href="#brands" class="btn btn-ghost btn-lg">Explore Stores</a>
+        <a href="#brands" class="btn btn-ghost-light btn-lg">See Live Stores</a>
       </div>
-      <div class="hero-link-demo">
+      <div class="hero-link-pill">
         <span class="link-slug" id="typed-slug">goodies</span>
+        <span class="link-cursor"></span>
         <span class="link-domain">.brandisby.com</span>
       </div>
+      <div style="margin-top:var(--s8);">
+        <div class="hero-proof">
+          <div class="hero-proof-avatars">
+            <span>EV</span><span>NK</span><span>SR</span><span>+</span>
+          </div>
+          <div class="hero-proof-text">
+            <strong>Join creators</strong> already selling on Brandisby
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="hero-visual">
-      <div class="mock-card mock-card-1">
-        <div class="mock-banner" style="height:110px;"></div>
-        <div class="mock-line short"></div>
-        <div class="mock-line"></div>
-        <div class="mock-line price"></div>
+    <!-- Right — brand showcase mockup -->
+    <div class="hero-showcase">
+      <div style="position:relative;">
+        <div class="showcase-card" style="animation:floatCard 5s ease-in-out infinite;">
+          <div class="showcase-card-banner">
+            <div class="showcase-card-banner-inner"></div>
+          </div>
+          <div class="showcase-card-body">
+            <div class="showcase-card-row">
+              <div class="showcase-avatar" style="margin-top:-22px;">E</div>
+              <div>
+                <div class="showcase-name">The Evelyn Bankz</div>
+                <div class="showcase-url">theevelynbankz.brandisby.com</div>
+              </div>
+            </div>
+            <div class="showcase-products">
+              <div class="showcase-product"></div>
+              <div class="showcase-product"></div>
+              <div class="showcase-product"></div>
+            </div>
+          </div>
+        </div>
+        <div class="showcase-badge" style="top:var(--s5);right:calc(-1 * var(--s6));">
+          <span class="showcase-badge-val">₦48,500</span>
+          <span style="font-size:0.68rem;color:var(--text-muted);">Today's revenue</span>
+        </div>
       </div>
-      <div class="mock-card mock-card-2">
-        <div class="mock-banner" style="height:80px;"></div>
-        <div class="mock-line short"></div>
-        <div class="mock-line price"></div>
-      </div>
-      <div class="mock-card mock-card-3">
-        <div class="mock-banner" style="height:80px;"></div>
-        <div class="mock-line short"></div>
-        <div class="mock-line price"></div>
+      <div class="showcase-card showcase-card-sm" style="animation:floatCard 5s ease-in-out infinite 0.8s;">
+        <div class="showcase-sm-img"></div>
+        <div class="showcase-sm-info">
+          <div class="showcase-sm-name">Custom Name Necklace</div>
+          <div class="showcase-sm-price">₦12,000</div>
+        </div>
+        <button class="showcase-sm-btn">+</button>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ── HOW IT WORKS ─────────────────────────────────────────── -->
-<section class="how-section" id="how-it-works">
+<!-- ── MARQUEE ───────────────────────────────────────────────── -->
+<div class="marquee-section">
+  <div class="marquee-track">
+    <span class="marquee-item">Custom Products <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Unique Storefronts <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Paystack Payments <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Brand Analytics <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Order Management <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Your Own Link <span class="marquee-dot"></span></span>
+    <span class="marquee-item">No Distractions <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Custom Products <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Unique Storefronts <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Paystack Payments <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Brand Analytics <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Order Management <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Your Own Link <span class="marquee-dot"></span></span>
+    <span class="marquee-item">No Distractions <span class="marquee-dot"></span></span>
+  </div>
+</div>
+
+<!-- ── FEATURES ─────────────────────────────────────────────── -->
+<section class="features-section" id="features">
   <div class="section-inner">
-    <p class="section-label section-label-light text-center">Simple by design</p>
-    <h2 class="section-heading section-heading-light text-center">From idea to <em>storefront</em> in minutes</h2>
-    <p class="section-sub">No technical skills needed. Just bring your products and your brand — we handle the rest.</p>
+    <div class="section-label">Why Brandisby</div>
+    <h2 class="section-title">Built for brands that<br/><em>mean business</em></h2>
+    <p class="section-desc">Everything you need to sell online — without the complexity, the marketplace noise, or the compromise.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🔗</div>
+        <div class="feature-title">Your Unique Link</div>
+        <p class="feature-desc">Every brand gets its own subdomain — <em style="color:var(--gold-dim);">yourbrand.brandisby.com</em>. Share it anywhere. It's yours forever.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🎨</div>
+        <div class="feature-title">Fully Custom Storefront</div>
+        <p class="feature-desc">Upload your logo, set your banner, choose your colors. Your store looks like your brand — not like everyone else's.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">✏️</div>
+        <div class="feature-title">Custom Order System</div>
+        <p class="feature-desc">Let customers personalise products with text, font choices, and image uploads before they buy. Perfect for personalized gifts.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💳</div>
+        <div class="feature-title">Paystack Payments</div>
+        <p class="feature-desc">Secure payments flow directly to your Paystack account. Cards, bank transfer, USSD, mobile money — all covered.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📦</div>
+        <div class="feature-title">Order Management</div>
+        <p class="feature-desc">Track every order from your dashboard. Update statuses, view customer details, and manage your business in one place.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📱</div>
+        <div class="feature-title">Mobile-First Shopping</div>
+        <p class="feature-desc">Your store looks and feels native on every device — designed for the way your customers actually shop.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ──────────────────────────────────────────── -->
+<section class="steps-section" id="how-it-works">
+  <div class="section-inner">
+    <div class="steps-header">
+      <div>
+        <div class="section-label">Simple by design</div>
+        <h2 class="section-title" style="margin-bottom:0;">From idea to<br/><em>storefront</em> in minutes</h2>
+      </div>
+      <p style="font-size:0.9rem;color:var(--text-muted);line-height:1.8;max-width:340px;">
+        No developers, no complex setup, no monthly fees that eat your profit. Just your brand, live and selling.
+      </p>
+    </div>
     <div class="steps-grid">
-      <div class="step-card">
+      <div class="step-item">
         <span class="step-num">01</span>
-        <h3>Create Your Brand</h3>
-        <p>Sign up, choose your brand name, and instantly get your unique <em>yourbrand.brandisby.com</em> link.</p>
+        <div class="step-title">Create Your Brand</div>
+        <p class="step-desc">Sign up, name your brand, and get your unique link instantly. Upload your logo and set your brand colors.</p>
       </div>
-      <div class="step-card">
+      <div class="step-item">
         <span class="step-num">02</span>
-        <h3>Add Your Products</h3>
-        <p>List physical, digital, or custom products. Add images, descriptions, pricing and stock levels.</p>
+        <div class="step-title">Add Your Products</div>
+        <p class="step-desc">List physical, digital, or custom products. Add images, pricing, categories, and stock levels.</p>
       </div>
-      <div class="step-card">
+      <div class="step-item">
         <span class="step-num">03</span>
-        <h3>Share Your Link</h3>
-        <p>Drop your Brandisby link anywhere — Instagram bio, WhatsApp, TikTok, email newsletters.</p>
+        <div class="step-title">Share Your Link</div>
+        <p class="step-desc">Drop your Brandisby link anywhere — Instagram bio, WhatsApp, TikTok, email, anywhere your audience is.</p>
       </div>
-      <div class="step-card">
+      <div class="step-item">
         <span class="step-num">04</span>
-        <h3>Get Paid</h3>
-        <p>Secure payments via Paystack flow directly to you. Manage orders from your dashboard.</p>
+        <div class="step-title">Get Paid</div>
+        <p class="step-desc">Payments via Paystack flow directly to you. Manage orders from your dashboard. Watch your brand grow.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ── EXPLORE BRANDS ───────────────────────────────────────── -->
+<!-- ── BRANDS ────────────────────────────────────────────────── -->
 <section class="brands-section" id="brands">
-  <div class="brands-header">
-    <div class="brands-header-left">
-      <p class="section-label section-label-dark">Live on Brandisby</p>
-      <h2 class="h2" style="color:var(--dark);">Discover <em style="font-style:italic;color:var(--brown);">Independent</em> Brands</h2>
+  <div class="section-inner">
+    <div class="brands-header">
+      <div>
+        <div class="section-label">Live on Brandisby</div>
+        <h2 class="section-title" style="margin-bottom:0;">Discover <em>independent</em> brands</h2>
+      </div>
+      <a href="pages/creator-signup.html" class="btn btn-ghost">Start Your Brand →</a>
     </div>
-    <a href="pages/creator-signup.html" class="btn btn-outline">Start Your Brand →</a>
-  </div>
-
-  <div class="brands-grid" id="brands-grid">
-    <div class="brand-card-skeleton skeleton"></div>
-    <div class="brand-card-skeleton skeleton"></div>
-    <div class="brand-card-skeleton skeleton"></div>
-    <div class="brand-card-skeleton skeleton"></div>
-    <div class="brand-card-skeleton skeleton"></div>
-    <div class="brand-card-skeleton skeleton"></div>
-  </div>
-  <div class="hidden text-center" id="brands-empty" style="padding:4rem 0;">
-    <p style="color:var(--muted);margin-bottom:1.5rem;">No brands yet — be the first!</p>
-    <a href="pages/creator-signup.html" class="btn btn-primary">Create the First Brand →</a>
+    <div class="brands-grid" id="brands-grid">
+      <div class="brand-card-skeleton skeleton"></div>
+      <div class="brand-card-skeleton skeleton"></div>
+      <div class="brand-card-skeleton skeleton"></div>
+      <div class="brand-card-skeleton skeleton"></div>
+    </div>
+    <div class="hidden text-center" id="brands-empty" style="padding:var(--s16) 0;">
+      <p style="color:var(--text-muted);margin-bottom:var(--s6);font-size:0.9rem;">No brands yet — be the first!</p>
+      <a href="pages/creator-signup.html" class="btn btn-gold btn-lg">Create the First Brand →</a>
+    </div>
   </div>
 </section>
 
-<!-- ── INTEGRATIONS ─────────────────────────────────────────── -->
-<section class="integrations-section" id="integrations">
+<!-- ── INTEGRATIONS ──────────────────────────────────────────── -->
+<section class="integrations-section">
   <div class="integrations-inner">
-    <p class="integrations-label">Designed to connect with your existing tools</p>
-    <div class="integrations-logos">
-      <span class="integration-chip">Sellfy</span>
-      <span class="integration-chip">Beacons</span>
-      <span class="integration-chip">Printify</span>
-      <span class="integration-chip">Shopify</span>
-      <span class="integration-chip">BigCartel</span>
-      <span class="integration-chip">Paystack</span>
+    <p class="integrations-label">Connects with the tools you already use</p>
+    <div class="integrations-list">
+      <span class="integration-name">Sellfy</span>
+      <span class="integration-name">Beacons</span>
+      <span class="integration-name">Printify</span>
+      <span class="integration-name">Shopify</span>
+      <span class="integration-name">BigCartel</span>
+      <span class="integration-name">Paystack</span>
     </div>
   </div>
 </section>
 
-<!-- ── CTA ──────────────────────────────────────────────────── -->
+<!-- ── CTA ───────────────────────────────────────────────────── -->
 <section class="cta-section">
-  <h2 class="h2">Ready to build<br/><em>your brand?</em></h2>
-  <a href="pages/creator-signup.html" class="btn btn-primary btn-lg">Get Started Free →</a>
+  <div class="section-label" style="justify-content:center;margin-bottom:var(--s5);">Start today</div>
+  <h2 class="cta-title">Your brand.<br/><em>Your world.</em></h2>
+  <p class="cta-desc">Join the brands building their independent stores on Brandisby.</p>
+  <div class="cta-actions">
+    <a href="pages/creator-signup.html" class="btn btn-gold btn-lg">Create Your Brand Free →</a>
+    <a href="pages/login.html" class="btn btn-ghost-light btn-lg">Sign In</a>
+  </div>
 </section>
 
 <!-- ── FOOTER ────────────────────────────────────────────────── -->
-<footer class="main-footer">
+<footer class="site-footer">
   <div class="footer-inner">
     <div class="footer-top">
-      <div class="footer-brand">
-        <a href="index.html" class="logo logo-sm">
+      <div>
+        <a href="index.html" class="logo logo-sm" style="margin-bottom:var(--s4);">
           <img src="assets/logo-transparent.png" alt="Brandisby"/>
         </a>
-        <p>Every brand deserves its own world. Build yours on Brandisby.</p>
+        <p class="footer-brand-desc">Every brand deserves its own world. Build yours on Brandisby — the premium multi-brand storefront platform.</p>
       </div>
-      <div class="footer-links-group">
-        <h4>Platform</h4>
+      <div class="footer-col">
+        <div class="footer-col-title">Platform</div>
+        <a href="#features">Features</a>
         <a href="#how-it-works">How It Works</a>
         <a href="#brands">Explore Brands</a>
         <a href="pages/creator-signup.html">Start a Brand</a>
       </div>
-      <div class="footer-links-group">
-        <h4>Account</h4>
+      <div class="footer-col">
+        <div class="footer-col-title">Account</div>
         <a href="pages/login.html">Sign In</a>
         <a href="pages/creator-signup.html">Register</a>
         <a href="pages/dashboard.html">Dashboard</a>
       </div>
-      <div class="footer-links-group">
-        <h4>Legal</h4>
+      <div class="footer-col">
+        <div class="footer-col-title">Legal</div>
         <a href="#">Privacy Policy</a>
         <a href="#">Terms of Service</a>
         <a href="#">Cookie Policy</a>
@@ -202,9 +313,9 @@
     </div>
     <div class="footer-bottom">
       <p class="footer-copy">© 2025 Brandisby. All rights reserved.</p>
-      <div class="footer-social">
+      <div class="footer-socials">
         <a href="#">Instagram</a>
-        <a href="#">Twitter/X</a>
+        <a href="#">Twitter / X</a>
         <a href="#">TikTok</a>
       </div>
     </div>
@@ -214,25 +325,85 @@
 <div id="toast-container"></div>
 
 <script src="js/firebase-config.js"></script>
-<script src="js/home.js"></script>
 <script>
-  // Nav scroll effect
-  window.addEventListener('scroll', () => {
-    document.getElementById('main-nav').classList.toggle('scrolled', window.scrollY > 20);
-  });
-  // Hamburger
-  const hamburger = document.getElementById('hamburger');
-  const mobileNav = document.getElementById('mobile-nav');
-  hamburger.addEventListener('click', () => {
-    hamburger.classList.toggle('open');
-    mobileNav.classList.toggle('open');
-    document.body.style.overflow = mobileNav.classList.contains('open') ? 'hidden' : '';
-  });
-  function closeMobileNav() {
-    hamburger.classList.remove('open');
-    mobileNav.classList.remove('open');
-    document.body.style.overflow = '';
+// Nav scroll
+window.addEventListener('scroll', () => {
+  document.getElementById('site-nav').classList.toggle('solid', window.scrollY > 10);
+}, { passive: true });
+
+// Hamburger
+const hamburger = document.getElementById('hamburger');
+const mobileMenu = document.getElementById('mobile-menu');
+hamburger.addEventListener('click', () => {
+  const open = mobileMenu.classList.toggle('open');
+  hamburger.classList.toggle('open', open);
+  document.body.style.overflow = open ? 'hidden' : '';
+});
+function closeMobileMenu() {
+  mobileMenu.classList.remove('open');
+  hamburger.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// Typing animation
+const slugWords = ['goodies', 'fleurdevie', 'novacraft', 'zenthreads', 'luxestudio'];
+let sIdx = 0, cIdx = 0, del = false;
+const slugEl = document.getElementById('typed-slug');
+function typeLoop() {
+  const w = slugWords[sIdx];
+  if (!del) { slugEl.textContent = w.slice(0, ++cIdx); if (cIdx === w.length) { del = true; setTimeout(typeLoop, 2200); return; } }
+  else { slugEl.textContent = w.slice(0, --cIdx); if (cIdx === 0) { del = false; sIdx = (sIdx + 1) % slugWords.length; } }
+  setTimeout(typeLoop, del ? 50 : 95);
+}
+typeLoop();
+
+// Float animation
+const style = document.createElement('style');
+style.textContent = '@keyframes floatCard{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}';
+document.head.appendChild(style);
+
+// Auth state
+Auth.onAuthChange(user => {
+  if (user) {
+    const l = document.getElementById('nav-login');
+    const m = document.getElementById('mobile-login');
+    if (l) { l.textContent = 'Dashboard'; l.href = 'pages/dashboard.html'; }
+    if (m) { m.textContent = 'Dashboard'; m.href = 'pages/dashboard.html'; }
   }
+});
+
+// Load brands
+(async () => {
+  const grid = document.getElementById('brands-grid');
+  const empty = document.getElementById('brands-empty');
+  try {
+    const brands = await Brands.getAll(8);
+    grid.innerHTML = '';
+    if (!brands.length) { empty.classList.remove('hidden'); return; }
+    brands.forEach(b => {
+      const initials = (b.name || 'B').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+      const url = (typeof BrandURL !== 'undefined') ? BrandURL.store(b.slug) : `pages/brand.html?slug=${b.slug}`;
+      const display = (typeof BrandURL !== 'undefined') ? BrandURL.display(b.slug) : `${b.slug}.brandisby.com`;
+      const card = document.createElement('a');
+      card.href = url; card.className = 'brand-card';
+      card.innerHTML = `
+        <div class="brand-card-banner" style="background:linear-gradient(135deg,${b.brandColor||'#5a3c30'},${b.brandColor?'#1b1513':'#0d0b0a'});">
+          ${b.bannerUrl ? `<img src="${b.bannerUrl}" alt="${b.name}"/><div class="brand-card-banner-overlay"></div>` : ''}
+          <div class="brand-card-logo">${b.logoUrl?`<img src="${b.logoUrl}"/>`:`<span style="font-family:var(--font-display);font-size:1rem;color:var(--gold)">${initials}</span>`}</div>
+        </div>
+        <div class="brand-card-body">
+          <div class="brand-card-name">${b.name||'Brand'}</div>
+          <div class="brand-card-url">${display}</div>
+          <div class="brand-card-desc">${b.description||'An independent brand on Brandisby.'}</div>
+          <div class="brand-card-footer">
+            <span class="brand-card-count">🛍 ${b.productCount||0} products</span>
+            <span class="brand-card-arrow">→</span>
+          </div>
+        </div>`;
+      grid.appendChild(card);
+    });
+  } catch(e) { grid.innerHTML=''; empty.classList.remove('hidden'); }
+})();
 </script>
 </body>
 </html>
