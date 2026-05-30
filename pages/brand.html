@@ -4,7 +4,9 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Brand Store — Brandisby</title>
-  <link rel="icon" href="../assets/logo-transparent.png" type="image/png"/>
+  <link rel="icon" href="../assets/logo-transparent.png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="../css/global.css"/>
   <link rel="stylesheet" href="../css/store.css"/>
   <script src="../js/subdomain-router.js"></script>
@@ -15,50 +17,46 @@
 </head>
 <body>
 
-<!-- ── BRAND NAV ─────────────────────────────────────────────── -->
 <nav class="brand-nav">
   <div class="brand-nav-inner">
-    <a href="../index.html" class="brand-nav-back">
-      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 12L6 8l4-4"/></svg>
-      <img src="../assets/logo-light.png" alt="Brandisby" style="height:22px;width:auto;"/>
+    <a href="../index.html" class="brand-nav-back" aria-label="Back to Brandisby">
+      <span class="brand-nav-back-icon">←</span>
+      <img src="../assets/logo-light.png" alt="Brandisby"/>
     </a>
-    <div class="brand-nav-title" id="brand-nav-title">Loading…</div>
+    <div class="brand-nav-name" id="brand-nav-name">—</div>
     <div class="brand-nav-right">
-      <button class="cart-btn" id="cart-open-btn" aria-label="Open cart">
-        🛒 <span class="cart-count" id="cart-count">0</span>
+      <button class="cart-trigger" id="cart-open" aria-label="Open cart">
+        <span>🛒</span>
+        <span class="cart-badge" id="cart-count">0</span>
       </button>
     </div>
   </div>
 </nav>
 
-<!-- ── BRAND HEADER ───────────────────────────────────────────── -->
-<header class="brand-header">
-  <div class="brand-header-bg" id="brand-header-bg"></div>
-  <div class="brand-header-overlay"></div>
-  <div class="brand-header-content">
-    <div class="brand-logo-wrap" id="brand-logo-wrap">
-      <span class="brand-logo-initials" id="brand-logo-initials">B</span>
+<header class="brand-hero">
+  <div class="brand-hero-bg" id="brand-hero-bg"></div>
+  <div class="brand-hero-overlay"></div>
+  <div class="brand-hero-content">
+    <div class="brand-hero-logo" id="brand-hero-logo">
+      <span class="brand-hero-logo-text" id="brand-logo-initials">B</span>
     </div>
-    <div class="brand-header-text">
-      <h1 class="brand-header-name" id="brand-header-name">Loading…</h1>
-      <p class="brand-header-tagline" id="brand-header-tagline"></p>
-      <p class="brand-header-url" id="brand-header-url"></p>
+    <div class="brand-hero-info">
+      <h1 class="brand-hero-name" id="brand-hero-name">Loading…</h1>
+      <p class="brand-hero-tagline" id="brand-hero-tagline"></p>
+      <p class="brand-hero-url" id="brand-hero-url"></p>
     </div>
   </div>
 </header>
 
-<!-- ── SHOP CONTROLS ─────────────────────────────────────────── -->
-<div class="shop-controls">
-  <div class="shop-controls-inner">
-    <div class="search-field">
-      <input type="search" id="search-input" placeholder="Search products…" autocomplete="off"/>
-      <span class="search-icon">🔍</span>
+<div class="shop-bar">
+  <div class="shop-bar-inner">
+    <div class="shop-search">
+      <input type="search" id="search-input" placeholder="Search products…" autocomplete="off" aria-label="Search"/>
+      <span class="shop-search-icon">🔍</span>
     </div>
-    <button class="filter-toggle-btn hidden" id="filter-toggle-btn">
-      ⚙️ Filters
-    </button>
-    <div class="filter-controls" id="filter-controls">
-      <select id="category-filter" class="filter-select" aria-label="Category">
+    <button class="filter-toggle hidden" id="filter-toggle-btn">⚙️ Filters</button>
+    <div class="shop-filters" id="shop-filters">
+      <select id="cat-filter" class="filter-pill" aria-label="Category">
         <option value="">All Categories</option>
         <option value="clothing">Clothing</option>
         <option value="accessories">Accessories</option>
@@ -67,22 +65,23 @@
         <option value="custom">Custom</option>
         <option value="other">Other</option>
       </select>
-      <select id="sort-filter" class="filter-select" aria-label="Sort">
+      <select id="sort-filter" class="filter-pill" aria-label="Sort">
         <option value="newest">Newest</option>
         <option value="price-asc">Price: Low → High</option>
         <option value="price-desc">Price: High → Low</option>
       </select>
     </div>
-    <div class="view-toggle">
+    <div class="view-btns">
       <button class="view-btn active" id="view-grid-btn" aria-label="Grid view">⊞</button>
       <button class="view-btn" id="view-list-btn" aria-label="List view">☰</button>
     </div>
   </div>
 </div>
 
-<!-- ── PRODUCTS ───────────────────────────────────────────────── -->
-<section class="products-section">
+<section class="products-area">
   <div class="products-grid" id="products-grid">
+    <div class="product-skeleton skeleton"></div>
+    <div class="product-skeleton skeleton"></div>
     <div class="product-skeleton skeleton"></div>
     <div class="product-skeleton skeleton"></div>
     <div class="product-skeleton skeleton"></div>
@@ -91,44 +90,43 @@
   <div class="products-empty hidden" id="products-empty">
     <div class="products-empty-icon">📦</div>
     <h3>No products yet</h3>
-    <p>This brand is still setting up their store. Check back soon!</p>
+    <p>This brand is setting up their store. Check back soon.</p>
   </div>
 </section>
 
-<!-- ── CART OVERLAY + DRAWER ─────────────────────────────────── -->
-<div class="cart-overlay" id="cart-overlay"></div>
-<aside class="cart-drawer" id="cart-drawer" aria-label="Shopping cart">
-  <div class="cart-drawer-header">
-    <h2 class="cart-drawer-title">Your Cart</h2>
-    <button class="cart-drawer-close" id="cart-close-btn" aria-label="Close cart">✕</button>
+<!-- Cart veil + panel -->
+<div class="cart-veil" id="cart-veil"></div>
+<aside class="cart-panel" id="cart-panel" aria-label="Cart">
+  <div class="cart-panel-head">
+    <h2 class="cart-panel-title">Your Cart</h2>
+    <button class="cart-close-btn" id="cart-close" aria-label="Close cart">✕</button>
   </div>
-  <div class="cart-drawer-body" id="cart-body">
-    <div class="cart-empty">
+  <div class="cart-panel-body" id="cart-body">
+    <div class="cart-empty-state">
       <div class="cart-empty-icon">🛒</div>
       <p>Your cart is empty</p>
     </div>
   </div>
-  <div class="cart-drawer-footer" id="cart-footer" style="display:none;">
+  <div class="cart-panel-foot hidden" id="cart-foot">
     <div class="cart-total-row">
       <span class="cart-total-label">Total</span>
-      <span class="cart-total-value" id="cart-total">₦0</span>
+      <span class="cart-total-val" id="cart-total">₦0</span>
     </div>
-    <div class="cart-drawer-btns">
-      <a href="#" class="btn btn-primary btn-full btn-lg" id="checkout-link">Proceed to Checkout →</a>
-      <button class="btn btn-ghost btn-full" id="cart-continue-btn">Continue Shopping</button>
+    <div class="cart-panel-btns">
+      <a href="#" class="btn btn-brown btn-full btn-lg" id="checkout-link">Checkout →</a>
+      <button class="btn btn-ghost btn-full" id="cart-continue">Continue Shopping</button>
     </div>
   </div>
 </aside>
 
-<!-- ── FOOTER ─────────────────────────────────────────────────── -->
 <footer class="brand-footer">
-  Powered by <a href="../index.html">
-    <img src="../assets/logo-light.png" alt="Brandisby" class="brand-footer-logo"/>
+  Powered by
+  <a href="../index.html">
+    <img src="../assets/logo-light.png" alt="Brandisby" style="height:13px;display:inline;vertical-align:middle;margin-left:4px;opacity:0.5;"/>
   </a>
 </footer>
 
 <div id="toast-container"></div>
-
 <script src="../js/firebase-config.js"></script>
 <script src="../js/brand.js"></script>
 </body>
