@@ -154,8 +154,8 @@ document.addEventListener('DOMContentLoaded', () => {
         <td>${p.stock !== null && p.stock !== undefined ? p.stock : '∞'}</td>
         <td>${p.allowCustom ? '<span class="badge badge-green">Yes</span>' : '<span style="color:var(--muted)">—</span>'}</td>
         <td>
-          <button class="table-action" onclick="editProduct('${p.id}')">Edit</button>
-          <button class="table-action danger" onclick="deleteProduct('${p.id}')">Delete</button>
+          <button class="t-action" onclick="editProduct('${p.id}')">Edit</button>
+          <button class="t-action danger" onclick="deleteProduct('${p.id}')">Delete</button>
         </td>
       </tr>`).join('');
   }
@@ -164,11 +164,11 @@ document.addEventListener('DOMContentLoaded', () => {
   let pendingImages = [];
 
   function openModal() {
-    document.getElementById('product-modal-backdrop').classList.add('open');
+    document.getElementById('product-modal-veil').classList.add('open');
     document.body.style.overflow = 'hidden';
   }
   function closeModal() {
-    document.getElementById('product-modal-backdrop').classList.remove('open');
+    document.getElementById('product-modal-veil').classList.remove('open');
     document.body.style.overflow = '';
     resetModal();
   }
@@ -190,9 +190,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   document.getElementById('add-product-btn').addEventListener('click', () => { resetModal(); openModal(); });
-  document.getElementById('modal-close').addEventListener('click', closeModal);
+  document.getElementById('modal-x').addEventListener('click', closeModal);
   document.getElementById('modal-cancel').addEventListener('click', closeModal);
-  document.getElementById('product-modal-backdrop').addEventListener('click', e => {
+  document.getElementById('product-modal-veil').addEventListener('click', e => {
     if (e.target === e.currentTarget) closeModal();
   });
 
@@ -376,10 +376,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Tab navigation ───────────────────────────────────────────
   const TAB_TITLES = { overview:'Overview', products:'Products', orders:'Orders', settings:'Brand Settings' };
 
-  document.querySelectorAll('.dash-nav-item').forEach(item => {
+  document.querySelectorAll('.dash-nav-btn').forEach(item => {
     item.addEventListener('click', () => {
       const tab = item.dataset.tab;
-      document.querySelectorAll('.dash-nav-item').forEach(i => i.classList.remove('active'));
+      document.querySelectorAll('.dash-nav-btn').forEach(i => i.classList.remove('active'));
       document.querySelectorAll('.dash-tab').forEach(t => t.classList.remove('active'));
       item.classList.add('active');
       document.getElementById(`tab-${tab}`).classList.add('active');
