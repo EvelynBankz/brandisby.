@@ -8,14 +8,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.getElementById('back-link').href = (typeof BrandURL!=='undefined') ? BrandURL.store(slug) : `brand.html?slug=${slug}`;
   document.getElementById('checkout-link').href = (typeof BrandURL!=='undefined') ? BrandURL.checkout(slug) : `checkout.html?slug=${slug}`;
-  document.getElementById('breadcrumb-brand').href = (typeof BrandURL!=='undefined') ? BrandURL.store(slug) : `brand.html?slug=${slug}`;
+  document.getElementById('bc-brand').href = (typeof BrandURL!=='undefined') ? BrandURL.store(slug) : `brand.html?slug=${slug}`;
 
   // Load brand
   try {
     const brand = await Brands.getBySlug(slug);
     if (brand) {
-      document.getElementById('brand-nav-title').textContent = brand.name || '';
-      document.getElementById('breadcrumb-brand').textContent = brand.name || 'Store';
+      document.getElementById('brand-nav-name').textContent = brand.name || '';
+      document.getElementById('bc-brand').textContent = brand.name || 'Store';
       if (brand.brandColor) document.documentElement.style.setProperty('--brown', brand.brandColor);
     }
   } catch(e) {}
@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const thumbsEl = document.getElementById('gallery-thumbs');
     const images = p.images?.length ? p.images : [];
     if (images.length) {
-      document.getElementById('gallery-placeholder').remove();
+      document.getElementById('gallery-ph').remove();
       mainEl.innerHTML = `<img src="${images[0]}" alt="${p.name}"/>`;
       images.forEach((src, i) => {
         const t = document.createElement('div');
@@ -62,24 +62,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Customization
     if (p.allowCustom) {
-      document.getElementById('customize-section').classList.remove('hidden');
-      if (p.customOptions?.text) document.getElementById('custom-text-field').classList.remove('hidden');
-      if (p.customOptions?.font) document.getElementById('custom-font-field').classList.remove('hidden');
-      if (p.customOptions?.upload) document.getElementById('custom-upload-field').classList.remove('hidden');
+      document.getElementById('customize-box').classList.remove('hidden');
+      if (p.customOptions?.text) document.getElementById('custom-text-row').classList.remove('hidden');
+      if (p.customOptions?.font) document.getElementById('custom-font-row').classList.remove('hidden');
+      if (p.customOptions?.upload) document.getElementById('custom-upload-row').classList.remove('hidden');
     }
   }
 
   // Font picker
-  document.querySelectorAll('.font-opt').forEach(btn => {
+  document.querySelectorAll('.font-chip').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.font-opt').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.font-chip').forEach(b=>b.classList.remove('active'));
       btn.classList.add('active');
       selectedFont = btn.dataset.font;
     });
   });
 
   // Upload zone
-  const uploadZone = document.getElementById('upload-zone');
+  const uploadZone = document.getElementById('upload-box');
   const uploadInput = document.getElementById('custom-upload-input');
   const uploadPreview = document.getElementById('upload-preview');
 
@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function handleUpload(file) {
     const reader = new FileReader();
     reader.onload = e => {
-      document.getElementById('upload-zone-content').style.display = 'none';
+      document.getElementById('upload-box-content').style.display = 'none';
       uploadPreview.src = e.target.result;
       uploadPreview.style.display = 'block';
     };
@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('cart-count').textContent = Cart.count(slug);
     document.getElementById('cart-total').textContent = `₦${Cart.total(slug).toLocaleString()}`;
     const body = document.getElementById('cart-body');
-    const footer = document.getElementById('cart-footer');
+    const footer = document.getElementById('cart-foot');
     if (!items.length) {
       body.innerHTML = `<div class="cart-empty"><div class="cart-empty-icon">🛒</div><p>Your cart is empty</p></div>`;
       footer.style.display = 'none'; return;
@@ -151,20 +151,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.cartRemove = (i) => { Cart.remove(slug,i); refreshCart(); };
 
   function openCart() {
-    document.getElementById('cart-drawer').classList.add('open');
-    document.getElementById('cart-overlay').classList.add('open');
+    document.getElementById('cart-panel').classList.add('open');
+    document.getElementById('cart-veil').classList.add('open');
     document.body.style.overflow = 'hidden';
   }
   function closeCart() {
-    document.getElementById('cart-drawer').classList.remove('open');
-    document.getElementById('cart-overlay').classList.remove('open');
+    document.getElementById('cart-panel').classList.remove('open');
+    document.getElementById('cart-veil').classList.remove('open');
     document.body.style.overflow = '';
   }
 
-  document.getElementById('cart-open-btn').addEventListener('click', openCart);
-  document.getElementById('cart-close-btn').addEventListener('click', closeCart);
-  document.getElementById('cart-overlay').addEventListener('click', closeCart);
-  document.getElementById('cart-continue-btn').addEventListener('click', closeCart);
+  document.getElementById('cart-open').addEventListener('click', openCart);
+  document.getElementById('cart-close').addEventListener('click', closeCart);
+  document.getElementById('cart-veil').addEventListener('click', closeCart);
+  document.getElementById('cart-continue').addEventListener('click', closeCart);
   refreshCart();
 
   function showError() {
