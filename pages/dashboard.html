@@ -17,26 +17,26 @@
 
 <!-- ── SIDEBAR ───────────────────────────────────────────────── -->
 <aside class="dash-sidebar" id="dash-sidebar">
-  <div class="dash-sidebar-logo">
+  <div class="dash-sidebar-head">
     <img src="../assets/logo-transparent.png" alt="Brandisby" style="height:26px;width:auto;"/>
   </div>
   <nav class="dash-nav">
     <button class="dash-nav-item active" data-tab="overview">
       <span class="dash-nav-icon">📊</span> Overview
     </button>
-    <button class="dash-nav-item" data-tab="products">
+    <button class="dash-nav-btn" data-tab="products">
       <span class="dash-nav-icon">🛍️</span> Products
     </button>
-    <button class="dash-nav-item" data-tab="orders">
+    <button class="dash-nav-btn" data-tab="orders">
       <span class="dash-nav-icon">📦</span> Orders
     </button>
     <div class="dash-nav-divider"></div>
-    <button class="dash-nav-item" data-tab="settings">
+    <button class="dash-nav-btn" data-tab="settings">
       <span class="dash-nav-icon">⚙️</span> Brand Settings
     </button>
   </nav>
   <div class="dash-sidebar-footer">
-    <div class="dash-user">
+    <div class="dash-user-row">
       <div class="dash-user-av" id="dash-avatar">?</div>
       <div>
         <div class="dash-user-name" id="dash-user-name">Loading…</div>
@@ -76,26 +76,26 @@
         <p style="color:var(--muted);font-size:0.9rem;margin-top:0.25rem;">Here's how your brand is performing.</p>
       </div>
 
-      <div class="stats-grid">
-        <div class="stat-card">
+      <div class="stats-row">
+        <div class="stat-tile">
           <div class="stat-icon">💰</div>
-          <div class="stat-value" id="stat-revenue">₦0</div>
-          <div class="stat-label">Total Revenue</div>
+          <div class="stat-tile-val" id="stat-revenue">₦0</div>
+          <div class="stat-tile-label">Total Revenue</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-tile">
           <div class="stat-icon">📦</div>
-          <div class="stat-value" id="stat-orders">0</div>
-          <div class="stat-label">Total Orders</div>
+          <div class="stat-tile-val" id="stat-orders">0</div>
+          <div class="stat-tile-label">Total Orders</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-tile">
           <div class="stat-icon">🛍️</div>
-          <div class="stat-value" id="stat-products">0</div>
-          <div class="stat-label">Products Listed</div>
+          <div class="stat-tile-val" id="stat-products">0</div>
+          <div class="stat-tile-label">Products Listed</div>
         </div>
-        <div class="stat-card">
+        <div class="stat-tile">
           <div class="stat-icon">🔗</div>
           <div class="stat-value stat-value-sm" id="stat-link">—</div>
-          <div class="stat-label">Your Brand Link</div>
+          <div class="stat-tile-label">Your Brand Link</div>
         </div>
       </div>
 
@@ -114,8 +114,8 @@
 
     <!-- ── TAB: PRODUCTS ─────────────────────────────────────── -->
     <div class="dash-tab" id="tab-products">
-      <div class="dash-tab-header">
-        <h2 class="dash-tab-heading">Products</h2>
+      <div class="tab-header">
+        <h2 class="tab-title">Products</h2>
         <button class="btn btn-primary" id="add-product-btn">+ Add Product</button>
       </div>
       <div class="table-card table-wrap">
@@ -132,8 +132,8 @@
 
     <!-- ── TAB: ORDERS ───────────────────────────────────────── -->
     <div class="dash-tab" id="tab-orders">
-      <div class="dash-tab-header">
-        <h2 class="dash-tab-heading">Orders</h2>
+      <div class="tab-header">
+        <h2 class="tab-title">Orders</h2>
         <select id="order-status-filter" class="input" style="width:auto;border-radius:var(--r-pill);padding:0.5rem 1rem;font-size:0.82rem;">
           <option value="">All Statuses</option>
           <option value="pending">Pending</option>
@@ -158,13 +158,13 @@
 
     <!-- ── TAB: SETTINGS ─────────────────────────────────────── -->
     <div class="dash-tab" id="tab-settings">
-      <div class="dash-tab-header">
-        <h2 class="dash-tab-heading">Brand Settings</h2>
+      <div class="tab-header">
+        <h2 class="tab-title">Brand Settings</h2>
       </div>
-      <div class="settings-grid">
+      <div class="settings-cols">
 
-        <div class="settings-card">
-          <div class="settings-card-title">Brand Profile</div>
+        <div class="settings-tile">
+          <div class="settings-tile-title">Brand Profile</div>
           <div class="form-group">
             <label class="label">Brand Name</label>
             <input type="text" class="input" id="set-name"/>
@@ -187,8 +187,8 @@
           <button class="btn btn-primary" id="save-profile-btn">Save Profile</button>
         </div>
 
-        <div class="settings-card">
-          <div class="settings-card-title">Logo &amp; Banner</div>
+        <div class="settings-tile">
+          <div class="settings-tile-title">Logo &amp; Banner</div>
           <div class="form-group">
             <label class="label">Logo</label>
             <div class="logo-upload-area" id="set-logo-area">
@@ -214,8 +214,8 @@
           <button class="btn btn-primary" id="save-media-btn">Upload Media</button>
         </div>
 
-        <div class="settings-card">
-          <div class="settings-card-title">Payment Settings</div>
+        <div class="settings-tile">
+          <div class="settings-tile-title">Payment Settings</div>
           <div class="form-group">
             <label class="label">Paystack Public Key</label>
             <input type="text" class="input" id="set-paystack" placeholder="pk_live_…"/>
@@ -234,11 +234,11 @@
 </main>
 
 <!-- ── ADD/EDIT PRODUCT MODAL ────────────────────────────────── -->
-<div class="modal-backdrop" id="product-modal-backdrop">
+<div class="modal-veil" id="product-modal-backdrop">
   <div class="modal-box">
     <div class="modal-head">
       <h3 class="modal-title" id="modal-title">Add Product</h3>
-      <button class="modal-close" id="modal-close">✕</button>
+      <button class="modal-x" id="modal-close">✕</button>
     </div>
     <div class="modal-body">
       <input type="hidden" id="edit-product-id"/>
