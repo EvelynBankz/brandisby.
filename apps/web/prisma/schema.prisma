@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Internal Brandisby identity. Every relationship elsewhere in the schema
+// references User.id / Business.id, never an auth provider's own ID, so the
+// auth provider (Clerk today) can be swapped without touching foreign keys.
+model User {
+  id                 String   @id @default(uuid())
+  authProvider       String
+  authProviderUserId String
+  email              String   @unique
+  name               String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  memberships BusinessMembership[]
+
+  @@unique([authProvider, authProviderUserId])
+}
+
+model Business {
+  id        String   @id @default(uuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships BusinessMembership[]
+}
+
+enum BusinessMembershipRole {
+  OWNER
+  STAFF
+}
+
+// Deliberately not a 1:1 user-business link: a user may belong to more than
+// one business (agencies, co-founders, multi-brand owners).
+model BusinessMembership {
+  id         String                 @id @default(uuid())
+  userId     String
+  businessId String
+  role       BusinessMembershipRole @default(OWNER)
+  createdAt  DateTime               @default(now())
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, businessId])
+}

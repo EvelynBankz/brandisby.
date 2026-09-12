@@ -14,14 +14,32 @@ on:
 
 env:
   NEXT_TELEMETRY_DISABLED: "1"
+  # CI-only database — never a real Neon/Supabase instance. See
+  # docs/roadmap.md's standing constraint: this workflow must never be given
+  # credentials for the existing Firebase project or its data.
+  DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/brandisby_ci?schema=public"
 
 jobs:
   checks:
-    name: typecheck, lint, build
+    name: typecheck, lint, test, build
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: apps/web
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: brandisby_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v4
 
@@ -33,8 +51,12 @@ jobs:
 
       - run: npm ci
 
+      - run: npm run db:migrate:deploy
+
       - run: npm run typecheck
 
       - run: npm run lint
+
+      - run: npm run test
 
       - run: npm run build

@@ -13,8 +13,8 @@ The repository root (`index.html`, `pages/`, `css/`, `js/`, `api/`, root `packag
 **M0.1 — Repo & tooling scaffold** ✅ scaffolded
 Next.js 16 (App Router) + TypeScript (strict) + Tailwind v4 app under `apps/web`, fully self-contained (own `package.json`/lockfile, no root workspace changes — see `docs/decisions/001-single-app-before-packages.md`). ESLint (flat config) + `typecheck`/`lint`/`build` scripts; a validated env module at `apps/web/src/config/env.ts` (Zod, fails fast, imported from the root layout so it runs on boot); semantic design tokens in `globals.css` (background/surface/foreground/primary/accent/border/status colours) using the brand palette, accent flagged as a placeholder pending approval; `.github/workflows/web-ci.yml` running typecheck/lint/build on PRs touching `apps/web/**`. `packages/*` workspaces deferred until a second app or real sharing need exists (see the ADR). Existing static site left completely untouched per the standing constraint above.
 
-**M0.2 — Database & Prisma**
-PostgreSQL instance (Neon or Supabase), `packages/database` with Prisma schema + first migration, repository-layer convention established (UI → service → repository → Prisma). No business tables yet beyond the skeleton needed for M0.3.
+**M0.2 — Database & Prisma** ✅ scaffolded (provider not yet provisioned)
+Prisma 7 (`apps/web/prisma/schema.prisma`, `prisma7.config.ts`) with the `User` / `Business` / `BusinessMembership` skeleton (internal UUIDs, `authProvider`/`authProviderUserId`, membership as a join table — never a 1-user-1-business assumption) and a first migration (`prisma/migrations/20260912163806_init`), generated and applied against a local throwaway Postgres and committed as portable SQL. Prisma 7 requires an explicit driver adapter for SQL connections — using `@prisma/adapter-pg` (the standard `pg` driver) rather than a Neon-specific adapter, since it works identically against local Postgres, Neon, or Supabase without code changes (the Neon-specific adapter speaks Neon's proprietary WebSocket protocol and won't run against a plain local Postgres). Repository-layer convention established with `businessRepository`/`businessService` (UI → service → repository → Prisma) and proven end-to-end by a Vitest integration test that runs against a real Postgres; CI now runs a `postgres:16` service container, `prisma migrate deploy`, and the test suite before build. **Still needed:** an actual Neon project — nobody has provisioned one yet, so there is no real `DATABASE_URL` outside of local dev and CI's throwaway container. `packages/database` deferred along with the rest of `packages/*` per ADR 001; the schema/client live under `apps/web` for now.
 
 **M0.3 — Internal identity & auth**
 Clerk integration behind an internal `User` (`authProvider`, `authProviderUserId`) + `Business` + `BusinessMembership` model. Signup creates a `User` row keyed by Clerk's ID but referenced everywhere else by Brandisby's internal UUID (closes audit §4/§14).
@@ -128,4 +128,5 @@ Verify against brief §87 end-to-end: create account → business → template �
 ## Status
 
 - M0.1: done (`apps/web` scaffold, env module, design tokens, CI).
-- M0.2 (database & Prisma) is next.
+- M0.2: schema/migration/repository-layer/tests done; a real Neon project still needs to be provisioned (nobody has an account/connection string yet — see "Next step" in the root README).
+- M0.3 (internal identity & Clerk auth) is next once a live database exists.

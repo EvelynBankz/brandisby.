@@ -22,11 +22,21 @@ at all.
 ```bash
 cd apps/web
 npm install
-npm run dev        # http://localhost:3000
+cp .env.example .env   # fill in DATABASE_URL — a local/throwaway Postgres for now
+npm run db:migrate:deploy
+npm run dev             # http://localhost:3000
 npm run typecheck
 npm run lint
+npm run test
 npm run build
 ```
+
+**Next step (blocking M0.3):** a real Neon Postgres project needs to be
+provisioned at https://neon.tech and its connection string set as
+`DATABASE_URL` (in `.env` locally, and in Vercel's project env vars once
+`apps/web` is deployed) — nobody has done this yet, so right now the app only
+runs against a local or CI throwaway database. Do not point `DATABASE_URL` at
+the existing Firebase project under any circumstances.
 
 See `docs/architecture-audit.md` for the audit of the legacy site below and
 `docs/roadmap.md` for the milestone-by-milestone rebuild plan.
