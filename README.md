@@ -4,20 +4,24 @@
 
 The root of this repo (everything below except `apps/`, `docs/`, `.github/`)
 is the **live, deployed code for two real merchant sites** (Sérac and Fleur
-de Vie), backed by the Firebase project `brandisby` in Firestore. Do not
-modify, move, or delete anything under `index.html`, `pages/`, `css/`, `js/`,
-`api/`, the root `package.json`, or `vercel.json` as part of the V1 rebuild
-below — see `docs/roadmap.md` ("Standing constraint") and
-`docs/decisions/001-single-app-before-packages.md` for why.
+de Vie), backed by the Firebase project `brandisby` (Firestore, Storage, and
+Authentication). Do not modify, move, or delete anything under `index.html`,
+`pages/`, `css/`, `js/`, `api/`, the root `package.json`, or `vercel.json` as
+part of the V1 rebuild below, and never read/write Firestore or Storage on
+that project from `apps/web` — see `docs/roadmap.md` ("Standing constraint"),
+`docs/decisions/001-single-app-before-packages.md`, and
+`docs/decisions/002-firebase-auth-instead-of-clerk.md` for why (the one
+deliberate exception is reusing that project's Authentication for sign-in).
 
 ## 🚀 V1 rebuild: `apps/web`
 
 The next-generation Brandisby platform (Next.js/TypeScript/Tailwind/Prisma/
 PostgreSQL, per `docs/architecture-audit.md` and `docs/roadmap.md`) is being
-built from scratch under `apps/web`, entirely separate from the legacy site
-below — its own `package.json`, its own database, its own provider
-credentials. It does not touch Firestore or the `brandisby` Firebase project
-at all.
+built from scratch under `apps/web` — its own `package.json`, its own
+database (Postgres, never Firestore). The one deliberate exception is
+Firebase **Authentication**: `apps/web` reuses the existing `brandisby`
+project for sign-in only (never Firestore/Storage) — see
+`docs/decisions/002-firebase-auth-instead-of-clerk.md`.
 
 ```bash
 cd apps/web
@@ -27,16 +31,23 @@ npm run db:migrate:deploy
 npm run dev             # http://localhost:3000
 npm run typecheck
 npm run lint
-npm run test
+npm run test             # runs against a local Firebase Auth emulator + Postgres, no real credentials needed
 npm run build
 ```
 
-**Next step (blocking M0.3):** a real Neon Postgres project needs to be
-provisioned at https://neon.tech and its connection string set as
-`DATABASE_URL` (in `.env` locally, and in Vercel's project env vars once
-`apps/web` is deployed) — nobody has done this yet, so right now the app only
-runs against a local or CI throwaway database. Do not point `DATABASE_URL` at
-the existing Firebase project under any circumstances.
+**Next steps (blocking further milestones):**
+1. A real Neon Postgres project needs to be provisioned at https://neon.tech
+   and its connection string set as `DATABASE_URL` (in `.env` locally, and in
+   Vercel's project env vars once `apps/web` is deployed) — nobody has done
+   this yet, so right now the app only runs against a local or CI throwaway
+   database. Do not point `DATABASE_URL` at the existing Firebase project
+   under any circumstances.
+2. A Firebase service account **scoped to Firebase Authentication Admin
+   only** (not the broader role the existing `api/*.js` functions' account
+   may have) needs to be created on the `brandisby` project, for
+   `FIREBASE_CLIENT_EMAIL`/`FIREBASE_PRIVATE_KEY`. Until then, `apps/web`
+   only runs against the local Auth emulator (`npm run test`/`npm run dev`
+   both work without it — real sign-in isn't wired into any page yet).
 
 See `docs/architecture-audit.md` for the audit of the legacy site below and
 `docs/roadmap.md` for the milestone-by-milestone rebuild plan.

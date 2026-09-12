@@ -1,17 +1,24 @@
 import { z } from "zod";
 
-// Extend this schema as each provider integration lands (Clerk keys in M0.3,
-// Paystack/R2/Resend keys in their own milestones). Keeping everything behind
-// this one module is what makes `process.env.X` sprinkled through the app
-// avoidable per the architecture brief's config-management rule.
+// Extend this schema as each provider integration lands (Paystack/R2/Resend
+// keys in their own milestones). Keeping everything behind this one module is
+// what makes `process.env.X` sprinkled through the app avoidable per the
+// architecture brief's config-management rule.
 //
 // DIRECT_DATABASE_URL (the unpooled connection Prisma Migrate needs) is read
 // directly by the Prisma CLI via prisma7.config.ts, not through this module —
 // the running app only ever queries through the pooled DATABASE_URL.
+//
+// FIREBASE_CLIENT_EMAIL/FIREBASE_PRIVATE_KEY are only required when talking
+// to a real Firebase project — the Auth emulator (dev/test, selected by
+// setting FIREBASE_AUTH_EMULATOR_HOST) needs only a project ID.
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   NEXT_PUBLIC_APP_URL: z.url().default("http://localhost:3000"),
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
+  FIREBASE_PROJECT_ID: z.string().min(1, "FIREBASE_PROJECT_ID is required"),
+  FIREBASE_CLIENT_EMAIL: z.string().min(1).optional(),
+  FIREBASE_PRIVATE_KEY: z.string().min(1).optional(),
 });
 
 function loadEnv() {

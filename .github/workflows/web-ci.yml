@@ -14,10 +14,12 @@ on:
 
 env:
   NEXT_TELEMETRY_DISABLED: "1"
-  # CI-only database — never a real Neon/Supabase instance. See
-  # docs/roadmap.md's standing constraint: this workflow must never be given
-  # credentials for the existing Firebase project or its data.
+  # CI-only database and demo Firebase project — never real Neon/Supabase or
+  # Firebase credentials. See docs/roadmap.md's standing constraint: this
+  # workflow must never be given credentials for the existing Firebase
+  # project or its data; auth tests run entirely against the local emulator.
   DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/brandisby_ci?schema=public"
+  FIREBASE_PROJECT_ID: "demo-brandisby"
 
 jobs:
   checks:
