@@ -4,10 +4,14 @@ Companion to `docs/architecture-audit.md`. This roadmap sequences the rebuild de
 
 Milestones are grouped into phases. Nothing here is final-priced or final-scoped — each milestone should still be expanded into the full Objective/Existing-Code-Impact/Database/Backend/Frontend/Security/Tests/Definition-of-Done format (brief §95) immediately before it's implemented, since real findings during earlier milestones may reorder later ones.
 
+## Standing constraint: the two live merchant sites are off-limits
+
+The repository root (`index.html`, `pages/`, `css/`, `js/`, `api/`, root `package.json`, `vercel.json`) currently serves two live merchant websites (Sérac and Fleur de Vie), both connected to the existing Firebase project `brandisby` in Firestore. **No milestone in this roadmap may modify, delete, or redeploy those files, or read/write that Firestore project**, until a deliberate, explicitly-approved migration/cutover decision is made — separate from and after this roadmap's launch checklist (M6.3). The new app is built entirely under `apps/web` with its own database (Postgres, from M0.2) and its own provider credentials, so this should never require touching the legacy paths; if any future milestone appears to need to, stop and flag it rather than proceeding.
+
 ## Phase 0 — Foundation (no product features yet)
 
-**M0.1 — Repo & tooling scaffold**
-Next.js (App Router) + TypeScript (strict) + Tailwind app under `apps/web`; ESLint/Prettier; `packages/config` with a validated env module (fails fast on missing required vars); GitHub Actions workflow running typecheck/lint/build on every PR. Existing static site (`index.html`, `pages/`, `css/`, `js/`, `api/`) left untouched and still deployable during the transition.
+**M0.1 — Repo & tooling scaffold** ✅ scaffolded
+Next.js 16 (App Router) + TypeScript (strict) + Tailwind v4 app under `apps/web`, fully self-contained (own `package.json`/lockfile, no root workspace changes — see `docs/decisions/001-single-app-before-packages.md`). ESLint (flat config) + `typecheck`/`lint`/`build` scripts; a validated env module at `apps/web/src/config/env.ts` (Zod, fails fast, imported from the root layout so it runs on boot); semantic design tokens in `globals.css` (background/surface/foreground/primary/accent/border/status colours) using the brand palette, accent flagged as a placeholder pending approval; `.github/workflows/web-ci.yml` running typecheck/lint/build on PRs touching `apps/web/**`. `packages/*` workspaces deferred until a second app or real sharing need exists (see the ADR). Existing static site left completely untouched per the standing constraint above.
 
 **M0.2 — Database & Prisma**
 PostgreSQL instance (Neon or Supabase), `packages/database` with Prisma schema + first migration, repository-layer convention established (UI → service → repository → Prisma). No business tables yet beyond the skeleton needed for M0.3.
@@ -24,7 +28,7 @@ Clerk integration behind an internal `User` (`authProvider`, `authProviderUserId
 Business-creation flow with real-time slug availability checking, reserved-word list, uniqueness constraint in Postgres — implements audit finding on per-merchant identity (brief §99). No custom domains yet, no `Domain` table — just `Business.slug`.
 
 **M1.2 — Tenant-aware subdomain routing**
-Next.js middleware resolving `{slug}.brandisby.com` → business, server-side, with a documented local-dev fallback (`{slug}.localhost:3000` or `/store/{slug}`). Directly replaces the client-side hostname-sniffing in the current `js/subdomain-router.js` (audit §13).
+Tenant resolution for `{slug}.brandisby.com` → business, server-side, with a documented local-dev fallback (`{slug}.localhost:3000` or `/store/{slug}`). Directly replaces the client-side hostname-sniffing in the current `js/subdomain-router.js` (audit §13). Note: this Next.js version renamed `middleware.ts`/`middleware()` to `proxy.ts`/`proxy()` (edge runtime not supported under the new name) — implement as `apps/web/src/proxy.ts`, not `middleware.ts`.
 
 **M1.3 — Website builder: sections v1**
 Section-based editor (Header, Hero, Featured Products, About, Footer to start) with content/image/color editing and show/hide/reorder — not freeform drag-and-drop. One starter template.
@@ -120,3 +124,8 @@ Verify against brief §87 end-to-end: create account → business → template �
 - Custom domains (brief §99, "Domain" entity, `Domain.type`/verification/primary) are intentionally deferred past M1.1 — the brief explicitly allows the Brandisby subdomain to ship first and custom domains to follow without blocking launch.
 - The old static site (`index.html`, `pages/`, `js/`, `css/`, `api/`) should stay deployed and untouched through Phase 0-4, and only be retired after M6.3 passes, per the audit's recommendation to treat it as a reference rather than a migration source.
 - Do not start Phase 1 implementation without confirming M0 scope first — this roadmap is the "roadmap complete" checkpoint called for by brief §96; the next step is to turn M0.1 into a full milestone spec (brief §95) and begin implementation.
+
+## Status
+
+- M0.1: done (`apps/web` scaffold, env module, design tokens, CI).
+- M0.2 (database & Prisma) is next.

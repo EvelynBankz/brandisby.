@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+:root {
+  --background: #fbf8f4; /* soft off-white — primary app working surface */
+  --surface: #ffffff;
+  --surface-muted: #f4ebdd; /* warm beige — brand moments, not every surface */
+  --foreground: #2b2118; /* deep brown — primary text/headings */
+  --foreground-muted: #a99584; /* taupe — secondary text, borders */
+  --primary: #2b2118;
+  --primary-foreground: #fbf8f4;
+  /* Accent is intentionally a placeholder (muted teal) pending brand approval
+     per the brand brief — swap this single value, not call sites, once final. */
+  --accent: #3d6b64;
+  --accent-foreground: #fbf8f4;
+  --border: #e4d9c8;
+  --success: #1e7f4d;
+  --warning: #b7791f;
+  --error: #c0392b;
+  --info: #2563eb;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-foreground: var(--foreground);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --color-info: var(--info);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}

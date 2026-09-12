@@ -1,6 +1,39 @@
 # BRANDISBY — Setup & Deployment Guide
 
-## 🗂 Project Structure
+## ⚠️ Two live sites run from this repository's root
+
+The root of this repo (everything below except `apps/`, `docs/`, `.github/`)
+is the **live, deployed code for two real merchant sites** (Sérac and Fleur
+de Vie), backed by the Firebase project `brandisby` in Firestore. Do not
+modify, move, or delete anything under `index.html`, `pages/`, `css/`, `js/`,
+`api/`, the root `package.json`, or `vercel.json` as part of the V1 rebuild
+below — see `docs/roadmap.md` ("Standing constraint") and
+`docs/decisions/001-single-app-before-packages.md` for why.
+
+## 🚀 V1 rebuild: `apps/web`
+
+The next-generation Brandisby platform (Next.js/TypeScript/Tailwind/Prisma/
+PostgreSQL, per `docs/architecture-audit.md` and `docs/roadmap.md`) is being
+built from scratch under `apps/web`, entirely separate from the legacy site
+below — its own `package.json`, its own database, its own provider
+credentials. It does not touch Firestore or the `brandisby` Firebase project
+at all.
+
+```bash
+cd apps/web
+npm install
+npm run dev        # http://localhost:3000
+npm run typecheck
+npm run lint
+npm run build
+```
+
+See `docs/architecture-audit.md` for the audit of the legacy site below and
+`docs/roadmap.md` for the milestone-by-milestone rebuild plan.
+
+---
+
+## 🗂 Legacy site — Project Structure
 
 ```
 brandisby/
