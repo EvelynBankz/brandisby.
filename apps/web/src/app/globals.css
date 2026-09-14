@@ -66,7 +66,7 @@
   --radius-lg: var(--radius-lg);
   --radius-full: var(--radius-full);
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-playfair);
 }
 
 body {

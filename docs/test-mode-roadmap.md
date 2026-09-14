@@ -1,5 +1,9 @@
 # Brandisby Test Mode — Roadmap
 
+**⚠️ SUPERSEDED.** Replaced by a completely different product direction — see `docs/decisions/003-discovery-platform-pivot.md` and the current plan at `docs/discovery-platform-roadmap.md`. Kept as a historical record of the commerce-platform work done through T1/T2 before the pivot.
+
+---
+
 A smaller, validation-scoped build, requested to test whether real businesses want (1) a simple website/storefront and (2) the Smart Product Builder, with 5–20 real merchants — not the full V1 platform in `docs/roadmap.md`. That larger roadmap is paused, not abandoned: per the Test Mode brief, "if businesses use it and want to continue paying for it, then move Brandisby into the next architecture phase" (i.e., resume `docs/roadmap.md` from wherever this leaves off).
 
 ## What Phase 0 already gave this build
