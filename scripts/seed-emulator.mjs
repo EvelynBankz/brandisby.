@@ -140,7 +140,7 @@ async function seed() {
 
   for (const brand of brands) {
     await db
-      .collection("brands")
+      .collection("discoveryBrands")
       .doc(brand.slug)
       .set({ ...brand, createdAt: Timestamp.now() });
   }

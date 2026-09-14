@@ -67,5 +67,8 @@ repo has gone through).
   repository.
 - The `brands` Firestore collection-name collision flagged in ADR 003 is
   **not resolved by this change** — it's about the real Firebase project's
-  data, not which repository contains frontend code. Still unconfirmed and
-  still blocking a connection to real Firebase credentials; see README.
+  data, not which repository contains frontend code. **Resolved separately
+  in ADR 005** (`docs/decisions/005-discoverybrands-collection-rename.md`),
+  which cloned both `EvelynBankz/serac` and `EvelynBankz/fleurdevie` to
+  confirm they do share the real `brandisby` project and do write live data
+  under `brands/{slug}`.
