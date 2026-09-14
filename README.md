@@ -4,32 +4,55 @@
 
 The root of this repo (everything below except `apps/`, `docs/`, `.github/`)
 is the **live, deployed code for two real merchant sites** (Sérac and Fleur
-de Vie), backed by the Firebase project `brandisby` in Firestore. Do not
-modify, move, or delete anything under `index.html`, `pages/`, `css/`, `js/`,
-`api/`, the root `package.json`, or `vercel.json` as part of the V1 rebuild
-below — see `docs/roadmap.md` ("Standing constraint") and
-`docs/decisions/001-single-app-before-packages.md` for why.
+de Vie), backed by the Firebase project `brandisby` (Firestore, Storage, and
+Authentication). Do not modify, move, or delete anything under `index.html`,
+`pages/`, `css/`, `js/`, `api/`, the root `package.json`, or `vercel.json`.
 
-## 🚀 V1 rebuild: `apps/web`
+**Collection-name collision risk (read before ever pointing `apps/web` at the
+real Firebase project):** the legacy site stores merchant data in a
+top-level `brands` Firestore collection (`brands/{slug}` with a `products`
+subcollection, ecommerce fields like `paystackKey`). The new discovery
+platform below (per its own brief) *also* uses a top-level `brands`
+collection, with a completely different schema (`tagline`, `story`,
+`founderIds`, etc.). **These must not be pointed at the same real project
+without first deciding how to reconcile that name collision** — this has
+only ever been tested against the local Firestore emulator, never the real
+project, specifically to avoid this risk. Decide and document a resolution
+(a distinct collection name, or a deliberate data-model merge) before
+connecting real Firebase credentials.
 
-The next-generation Brandisby platform (Next.js/TypeScript/Tailwind/Prisma/
-PostgreSQL, per `docs/architecture-audit.md` and `docs/roadmap.md`) is being
-built from scratch under `apps/web`, entirely separate from the legacy site
-below — its own `package.json`, its own database, its own provider
-credentials. It does not touch Firestore or the `brandisby` Firebase project
-at all.
+## 🧭 Brandisby: `apps/web`
+
+`apps/web` is Brandisby — a curated **discovery and editorial platform** for
+Nigerian brands, startups, founders, and creators (not ecommerce, no
+merchant dashboards, no checkout). See `docs/decisions/003-discovery-platform-pivot.md`
+for how this replaced an earlier commerce-platform direction, and
+`docs/discovery-platform-roadmap.md` for the current build plan.
+
+Stack: Next.js/TypeScript/Tailwind, **Firestore** as the database, Firebase
+Authentication for internal/admin login only (no public reader accounts),
+no file storage yet (image URLs only, structured so Storage can be added
+later without a rebuild).
 
 ```bash
 cd apps/web
 npm install
-npm run dev        # http://localhost:3000
+cp .env.example .env    # demo/emulator values work out of the box
+npx firebase emulators:start --only auth,firestore --project demo-brandisby   # separate terminal, needed for `dev`
+npm run seed:emulator   # sample brands/categories for local dev
+npm run dev              # http://localhost:3000
 npm run typecheck
 npm run lint
+npm run test              # wraps the Auth + Firestore emulators itself — no real credentials needed
 npm run build
 ```
 
-See `docs/architecture-audit.md` for the audit of the legacy site below and
-`docs/roadmap.md` for the milestone-by-milestone rebuild plan.
+**Next step (blocking a real deployment):** a Firebase service account
+scoped narrowly (Firestore + Firebase Authentication Admin — not a broad
+Owner/Editor role) needs to be created on the `brandisby` project, for
+`FIREBASE_CLIENT_EMAIL`/`FIREBASE_PRIVATE_KEY` — see `.env.example`. Until
+then, everything only runs against the local emulators. Resolve the
+`brands` collection-name collision (above) before this step.
 
 ---
 

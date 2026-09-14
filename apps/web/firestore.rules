@@ -1,0 +1,86 @@
+rules_version = '2';
+
+// Server code (Firebase Admin SDK, used by every service in src/services/)
+// bypasses these rules entirely — they only govern the Firebase client SDK,
+// i.e. what a signed-out or signed-in-but-non-admin browser can do directly.
+// Everything else goes through Server Actions instead.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null &&
+        exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid));
+    }
+
+    function isPublished() {
+      return resource.data.status == 'published';
+    }
+
+    match /brands/{id} {
+      allow read: if isPublished() || isAdmin();
+      allow write: if isAdmin();
+    }
+    match /startups/{id} {
+      allow read: if isPublished() || isAdmin();
+      allow write: if isAdmin();
+    }
+    match /founders/{id} {
+      allow read: if isPublished() || isAdmin();
+      allow write: if isAdmin();
+    }
+    match /creators/{id} {
+      allow read: if isPublished() || isAdmin();
+      allow write: if isAdmin();
+    }
+    match /articles/{id} {
+      allow read: if isPublished() || isAdmin();
+      allow write: if isAdmin();
+    }
+    match /categories/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /quotes/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Public can submit an application, never read/list them back — avoids
+    // leaking other applicants' contact details.
+    match /applications/{id} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Public can subscribe, never read the subscriber list.
+    match /newsletterSubscribers/{id} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // Never publicly readable — avoids exposing advertiser/budget data.
+    // Public ad rendering (if/when built) goes through a Server Action,
+    // not a direct client read.
+    match /ads/{id} {
+      allow read, write: if isAdmin();
+    }
+
+    // Counters are written server-side only (Admin SDK, via Server Actions),
+    // never directly by the client.
+    match /pageViews/{id} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+    match /linkClicks/{id} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // Managed out-of-band (console / a one-off admin script), not via the
+    // app's own client or server write paths.
+    match /adminUsers/{id} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+  }
+}
