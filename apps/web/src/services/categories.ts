@@ -20,4 +20,13 @@ export const categoriesService = {
     const snap = await getAdminFirestore().collection(COLLECTION).orderBy("name").get();
     return snap.docs.map(toCategory);
   },
+
+  async getBySlug(slug: string): Promise<Category | null> {
+    const snap = await getAdminFirestore()
+      .collection(COLLECTION)
+      .where("slug", "==", slug)
+      .limit(1)
+      .get();
+    return snap.empty ? null : toCategory(snap.docs[0]!);
+  },
 };

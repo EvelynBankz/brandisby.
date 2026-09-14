@@ -29,6 +29,16 @@ export interface Brand {
 
 const COLLECTION = "brands";
 
+// Case- and diacritic-insensitive comparison, so searching "serac" still
+// finds "Sérac".
+function normalizeForSearch(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase()
+    .trim();
+}
+
 function toBrand(doc: FirebaseFirestore.QueryDocumentSnapshot): Brand {
   const data = doc.data();
   const createdAt = data.createdAt as FirebaseFirestore.Timestamp | undefined;
@@ -101,4 +111,51 @@ export const brandsService = {
       .get();
     return snap.empty ? null : toBrand(snap.docs[0]!);
   },
+
+  // Backs the Discover page (brief §6: search, category, location, featured,
+  // newest — deliberately not overbuilt beyond that). Firestore has no
+  // full-text search, so `q`/`location` are filtered in memory over a
+  // Firestore-side page of published brands.
+  async search(params: BrandSearchParams = {}): Promise<Brand[]> {
+    let query: FirebaseFirestore.Query = getAdminFirestore()
+      .collection(COLLECTION)
+      .where("status", "==", "published");
+
+    if (params.categoryId) {
+      query = query.where("categoryIds", "array-contains", params.categoryId);
+    }
+    if (params.featured) {
+      query = query.where("featured", "==", true);
+    }
+    query = query.orderBy("createdAt", "desc").limit(params.max ?? 60);
+
+    const snap = await query.get();
+    let brands = snap.docs.map(toBrand);
+
+    if (params.q) {
+      const q = normalizeForSearch(params.q);
+      brands = brands.filter(
+        (b) =>
+          normalizeForSearch(b.name).includes(q) ||
+          (b.tagline && normalizeForSearch(b.tagline).includes(q)) ||
+          normalizeForSearch(b.description).includes(q),
+      );
+    }
+    if (params.location) {
+      const location = normalizeForSearch(params.location);
+      brands = brands.filter(
+        (b) => b.location && normalizeForSearch(b.location).includes(location),
+      );
+    }
+
+    return brands;
+  },
 };
+
+export interface BrandSearchParams {
+  q?: string;
+  categoryId?: string;
+  location?: string;
+  featured?: boolean;
+  max?: number;
+}

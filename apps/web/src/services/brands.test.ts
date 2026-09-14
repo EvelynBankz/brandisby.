@@ -84,4 +84,92 @@ describe("brandsService", () => {
     const featured = await brandsService.getFeatured(50);
     expect(featured.some((b) => b.slug === newestSlug)).toBe(false);
   });
+
+  describe("search", () => {
+    const categoryId = `test-category-${suffix}`;
+    const matchSlug = `test-search-match-${suffix}`;
+    const otherCategorySlug = `test-search-other-category-${suffix}`;
+    const draftSlug = `test-search-draft-${suffix}`;
+    const accentedSlug = `test-search-accented-${suffix}`;
+
+    afterAll(async () => {
+      const db = getAdminFirestore();
+      await Promise.all(
+        [matchSlug, otherCategorySlug, draftSlug, accentedSlug].map((slug) =>
+          db.collection("brands").doc(slug).delete(),
+        ),
+      );
+    });
+
+    it("filters by search text, category, location, and featured together", async () => {
+      const db = getAdminFirestore();
+      await db.collection("brands").doc(matchSlug).set({
+        name: "Amara Skincare",
+        slug: matchSlug,
+        tagline: "Glow from within",
+        description: "Botanical skincare for every skin tone.",
+        categoryIds: [categoryId],
+        location: "Lagos, Nigeria",
+        featured: true,
+        trending: false,
+        status: "published",
+        createdAt: new Date(),
+      });
+      await db.collection("brands").doc(otherCategorySlug).set({
+        name: "Different Category Co",
+        slug: otherCategorySlug,
+        description: "Not in the target category.",
+        categoryIds: ["some-other-category"],
+        location: "Lagos, Nigeria",
+        featured: true,
+        trending: false,
+        status: "published",
+        createdAt: new Date(),
+      });
+      await db.collection("brands").doc(draftSlug).set({
+        name: "Amara Drafts",
+        slug: draftSlug,
+        description: "Matches the search text but still a draft.",
+        categoryIds: [categoryId],
+        location: "Lagos, Nigeria",
+        featured: true,
+        trending: false,
+        status: "draft",
+        createdAt: new Date(),
+      });
+
+      const byText = await brandsService.search({ q: "amara" });
+      expect(byText.some((b) => b.slug === matchSlug)).toBe(true);
+      expect(byText.some((b) => b.slug === draftSlug)).toBe(false);
+
+      const byCategory = await brandsService.search({ categoryId });
+      expect(byCategory.some((b) => b.slug === matchSlug)).toBe(true);
+      expect(byCategory.some((b) => b.slug === otherCategorySlug)).toBe(false);
+
+      const byLocation = await brandsService.search({ location: "lagos" });
+      expect(byLocation.some((b) => b.slug === matchSlug)).toBe(true);
+
+      const byFeatured = await brandsService.search({
+        categoryId,
+        featured: true,
+      });
+      expect(byFeatured.some((b) => b.slug === matchSlug)).toBe(true);
+
+      await db.collection("brands").doc(accentedSlug).set({
+        name: "Sérac Test",
+        slug: accentedSlug,
+        description: "A brand with an accented name.",
+        categoryIds: [],
+        featured: false,
+        trending: false,
+        status: "published",
+        createdAt: new Date(),
+      });
+      const byUnaccentedQuery = await brandsService.search({ q: "serac" });
+      expect(byUnaccentedQuery.some((b) => b.slug === accentedSlug)).toBe(true);
+
+      const noMatch = await brandsService.search({ q: "nonexistent brand name" });
+      expect(noMatch.some((b) => b.slug === matchSlug)).toBe(false);
+    });
+  });
 });
