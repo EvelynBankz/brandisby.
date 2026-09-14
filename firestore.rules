@@ -16,7 +16,11 @@ service cloud.firestore {
       return resource.data.status == 'published';
     }
 
-    match /brands/{id} {
+    // Deliberately not "brands" — the real brandisby project's Sérac and
+    // Fleur De Vie live sites (separate repos) already write live
+    // order/quote data under brands/{slug}/{orders,quotes}. See
+    // docs/decisions/005-discoverybrands-collection-rename.md.
+    match /discoveryBrands/{id} {
       allow read: if isPublished() || isAdmin();
       allow write: if isAdmin();
     }

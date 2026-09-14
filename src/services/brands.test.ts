@@ -16,7 +16,7 @@ describe("brandsService", () => {
     const db = getAdminFirestore();
     await Promise.all(
       [featuredSlug, trendingSlug, newestSlug].map((slug) =>
-        db.collection("brands").doc(slug).delete(),
+        db.collection("discoveryBrands").doc(slug).delete(),
       ),
     );
   });
@@ -24,7 +24,7 @@ describe("brandsService", () => {
   it("writes and reads back a brand by slug", async () => {
     const db = getAdminFirestore();
     await db
-      .collection("brands")
+      .collection("discoveryBrands")
       .doc(featuredSlug)
       .set({
         name: "Test Featured Co",
@@ -49,7 +49,7 @@ describe("brandsService", () => {
   it("fetches published brands by ID and excludes drafts/missing IDs", async () => {
     const db = getAdminFirestore();
     const draftId = `test-getbyids-draft-${suffix}`;
-    await db.collection("brands").doc(draftId).set({
+    await db.collection("discoveryBrands").doc(draftId).set({
       name: "Test GetByIds Draft",
       slug: draftId,
       description: "Not published yet",
@@ -66,12 +66,12 @@ describe("brandsService", () => {
     expect(byIds).toHaveLength(1);
     expect(await brandsService.getByIds([])).toEqual([]);
 
-    await db.collection("brands").doc(draftId).delete();
+    await db.collection("discoveryBrands").doc(draftId).delete();
   });
 
   it("lists featured and trending brands separately", async () => {
     const db = getAdminFirestore();
-    await db.collection("brands").doc(trendingSlug).set({
+    await db.collection("discoveryBrands").doc(trendingSlug).set({
       name: "Test Trending Co",
       slug: trendingSlug,
       description: "A trending test brand",
@@ -93,7 +93,7 @@ describe("brandsService", () => {
 
   it("excludes draft brands from public reads", async () => {
     const db = getAdminFirestore();
-    await db.collection("brands").doc(newestSlug).set({
+    await db.collection("discoveryBrands").doc(newestSlug).set({
       name: "Test Draft Co",
       slug: newestSlug,
       description: "Not published yet",
@@ -119,14 +119,14 @@ describe("brandsService", () => {
       const db = getAdminFirestore();
       await Promise.all(
         [matchSlug, otherCategorySlug, draftSlug, accentedSlug].map((slug) =>
-          db.collection("brands").doc(slug).delete(),
+          db.collection("discoveryBrands").doc(slug).delete(),
         ),
       );
     });
 
     it("filters by search text, category, location, and featured together", async () => {
       const db = getAdminFirestore();
-      await db.collection("brands").doc(matchSlug).set({
+      await db.collection("discoveryBrands").doc(matchSlug).set({
         name: "Amara Skincare",
         slug: matchSlug,
         tagline: "Glow from within",
@@ -138,7 +138,7 @@ describe("brandsService", () => {
         status: "published",
         createdAt: new Date(),
       });
-      await db.collection("brands").doc(otherCategorySlug).set({
+      await db.collection("discoveryBrands").doc(otherCategorySlug).set({
         name: "Different Category Co",
         slug: otherCategorySlug,
         description: "Not in the target category.",
@@ -149,7 +149,7 @@ describe("brandsService", () => {
         status: "published",
         createdAt: new Date(),
       });
-      await db.collection("brands").doc(draftSlug).set({
+      await db.collection("discoveryBrands").doc(draftSlug).set({
         name: "Amara Drafts",
         slug: draftSlug,
         description: "Matches the search text but still a draft.",
@@ -178,7 +178,7 @@ describe("brandsService", () => {
       });
       expect(byFeatured.some((b) => b.slug === matchSlug)).toBe(true);
 
-      await db.collection("brands").doc(accentedSlug).set({
+      await db.collection("discoveryBrands").doc(accentedSlug).set({
         name: "Sérac Test",
         slug: accentedSlug,
         description: "A brand with an accented name.",

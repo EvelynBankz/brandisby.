@@ -27,7 +27,11 @@ export interface Brand {
   createdAt: string;
 }
 
-const COLLECTION = "brands";
+// Deliberately not "brands" — the real brandisby Firebase project's Sérac
+// and Fleur De Vie live sites (separate repos) already write live
+// order/quote data under brands/{slug}/{orders,quotes}. See
+// docs/decisions/005-discoverybrands-collection-rename.md.
+const COLLECTION = "discoveryBrands";
 
 // Case- and diacritic-insensitive comparison, so searching "serac" still
 // finds "Sérac".
