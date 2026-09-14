@@ -44,6 +44,13 @@ jobs:
           cache: npm
           cache-dependency-path: apps/web/package-lock.json
 
+      # The Firestore emulator (used by `npm run test` and the build step
+      # below) requires Java 21+; the runner's default JDK is older.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
       - run: npm ci
 
       - run: npm run typecheck
