@@ -46,11 +46,16 @@ npm run build
    only** (not the broader role the existing `api/*.js` functions' account
    may have) needs to be created on the `brandisby` project, for
    `FIREBASE_CLIENT_EMAIL`/`FIREBASE_PRIVATE_KEY`. Until then, `apps/web`
-   only runs against the local Auth emulator (`npm run test`/`npm run dev`
-   both work without it — real sign-in isn't wired into any page yet).
+   (including real signup/login at `/signup` and `/login`) only runs against
+   the local Auth Emulator — `npm run test` starts it automatically; for
+   `npm run dev`, start it yourself first: `npx firebase emulators:start
+   --only auth --project demo-brandisby`.
 
-See `docs/architecture-audit.md` for the audit of the legacy site below and
-`docs/roadmap.md` for the milestone-by-milestone rebuild plan.
+The active build plan is **`docs/test-mode-roadmap.md`** — a smaller,
+validation-scoped version of Brandisby, not the full platform. See
+`docs/architecture-audit.md` for the audit of the legacy site below and
+`docs/roadmap.md` for the full V1 plan that Test Mode is currently a
+scoped-down subset of.
 
 ---
 

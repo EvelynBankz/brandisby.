@@ -37,11 +37,28 @@ export class FirebaseAuthProvider implements AuthProvider {
 
   async verifyIdToken(idToken: string): Promise<AuthIdentity> {
     const decoded = await getAuth(getFirebaseAdminApp()).verifyIdToken(idToken);
-
-    return {
-      providerUserId: decoded.uid,
-      email: decoded.email ?? "",
-      name: typeof decoded.name === "string" ? decoded.name : undefined,
-    };
+    return toAuthIdentity(decoded);
   }
+
+  createSessionCookie(idToken: string, expiresInMs: number): Promise<string> {
+    return getAuth(getFirebaseAdminApp()).createSessionCookie(idToken, {
+      expiresIn: expiresInMs,
+    });
+  }
+
+  async verifySessionCookie(sessionCookie: string): Promise<AuthIdentity> {
+    const decoded = await getAuth(getFirebaseAdminApp()).verifySessionCookie(
+      sessionCookie,
+      true, // checkRevoked
+    );
+    return toAuthIdentity(decoded);
+  }
+}
+
+function toAuthIdentity(decoded: { uid: string; email?: string; name?: unknown }): AuthIdentity {
+  return {
+    providerUserId: decoded.uid,
+    email: decoded.email ?? "",
+    name: typeof decoded.name === "string" ? decoded.name : undefined,
+  };
 }

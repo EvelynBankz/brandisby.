@@ -1,5 +1,7 @@
 # Brandisby V1 Implementation Roadmap
 
+**Paused after Phase 0 in favor of `docs/test-mode-roadmap.md`** — a smaller, validation-scoped build (5–20 real merchants, testing demand before building the rest of this plan). Phase 0 below still applies as-is; Phase 1 onward resumes from wherever Test Mode leaves off once it validates demand, per that doc.
+
 Companion to `docs/architecture-audit.md`. This roadmap sequences the rebuild described there into small milestones, per the brief's engineering rules (§38, §94-95): one milestone at a time, smallest reasonable surface, tests and docs updated alongside code, no silently-created second architecture.
 
 Milestones are grouped into phases. Nothing here is final-priced or final-scoped — each milestone should still be expanded into the full Objective/Existing-Code-Impact/Database/Backend/Frontend/Security/Tests/Definition-of-Done format (brief §95) immediately before it's implemented, since real findings during earlier milestones may reorder later ones.

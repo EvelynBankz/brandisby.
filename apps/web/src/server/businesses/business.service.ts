@@ -1,4 +1,5 @@
 import { businessRepository } from "./business.repository";
+import { businessCreateSchema, normalizeSlug, slugSchema } from "./business.schema";
 
 export class SlugTakenError extends Error {
   constructor(slug: string) {
@@ -7,18 +8,65 @@ export class SlugTakenError extends Error {
   }
 }
 
-// Deliberately minimal for M0.2 — real handle normalization, the reserved-word
-// list, and availability-check UX land in M1.1. This exists to prove the
-// UI -> service -> repository -> Prisma layering end to end.
+export class InvalidBusinessInputError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "InvalidBusinessInputError";
+  }
+}
+
+export interface RegisterBusinessInput {
+  ownerId: string;
+  name: string;
+  slug: string;
+  brandColor?: string;
+  description?: string;
+}
+
+export interface SlugCheckResult {
+  normalized: string;
+  available: boolean;
+  error?: string;
+}
+
 export const businessService = {
   async isSlugAvailable(slug: string): Promise<boolean> {
     return (await businessRepository.findBySlug(slug)) === null;
   },
 
-  async registerBusiness(input: { name: string; slug: string }) {
-    if (!(await businessService.isSlugAvailable(input.slug))) {
-      throw new SlugTakenError(input.slug);
+  // Used for the real-time "is this handle available" check in the business
+  // setup form — normalizes first so what the merchant sees matches what
+  // would actually be saved.
+  async checkSlug(rawSlug: string): Promise<SlugCheckResult> {
+    const normalized = normalizeSlug(rawSlug);
+    const parsed = slugSchema.safeParse(normalized);
+    if (!parsed.success) {
+      return {
+        normalized,
+        available: false,
+        error: parsed.error.issues[0]?.message ?? "Invalid handle",
+      };
     }
-    return businessRepository.create(input);
+    return { normalized, available: await businessService.isSlugAvailable(normalized) };
+  },
+
+  async getBusinessForUser(userId: string) {
+    return businessRepository.findFirstForUser(userId);
+  },
+
+  async registerBusiness(input: RegisterBusinessInput) {
+    const normalizedSlug = normalizeSlug(input.slug);
+    const parsed = businessCreateSchema.safeParse({ ...input, slug: normalizedSlug });
+    if (!parsed.success) {
+      throw new InvalidBusinessInputError(
+        parsed.error.issues[0]?.message ?? "Invalid business details",
+      );
+    }
+
+    if (!(await businessService.isSlugAvailable(parsed.data.slug))) {
+      throw new SlugTakenError(parsed.data.slug);
+    }
+
+    return businessRepository.createWithOwner(input.ownerId, parsed.data);
   },
 };

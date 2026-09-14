@@ -9,7 +9,8 @@ datasource db {
 
 // Internal Brandisby identity. Every relationship elsewhere in the schema
 // references User.id / Business.id, never an auth provider's own ID, so the
-// auth provider (Clerk today) can be swapped without touching foreign keys.
+// auth provider (Firebase Authentication today) can be swapped without
+// touching foreign keys.
 model User {
   id                 String   @id @default(uuid())
   authProvider       String
@@ -25,11 +26,17 @@ model User {
 }
 
 model Business {
-  id        String   @id @default(uuid())
-  name      String
-  slug      String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  brandColor  String?
+  description String?
+  // Not wired to real storage yet (Cloudflare R2 lands in a later milestone)
+  // — column exists so the business-setup form has somewhere to eventually
+  // write a real URL to, without a schema change at that point.
+  logoUrl     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   memberships BusinessMembership[]
 }

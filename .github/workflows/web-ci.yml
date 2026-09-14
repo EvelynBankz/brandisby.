@@ -20,6 +20,11 @@ env:
   # project or its data; auth tests run entirely against the local emulator.
   DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/brandisby_ci?schema=public"
   FIREBASE_PROJECT_ID: "demo-brandisby"
+  NEXT_PUBLIC_FIREBASE_API_KEY: "demo-api-key"
+  NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: "demo-brandisby.firebaseapp.com"
+  NEXT_PUBLIC_FIREBASE_PROJECT_ID: "demo-brandisby"
+  NEXT_PUBLIC_FIREBASE_APP_ID: "demo-app-id"
+  NEXT_PUBLIC_FIREBASE_AUTH_EMULATOR_HOST: "127.0.0.1:9099"
 
 jobs:
   checks:
