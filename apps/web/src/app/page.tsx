@@ -1,11 +1,15 @@
 import Link from "next/link";
-import { ArrowRight, BookOpen, Sparkles, Rocket, Users } from "lucide-react";
+import { ArrowRight, BookOpen, Sparkles } from "lucide-react";
 import { brandsService } from "@/services/brands";
 import { categoriesService } from "@/services/categories";
+import { startupsService } from "@/services/startups";
+import { foundersService } from "@/services/founders";
+import { creatorsService } from "@/services/creators";
 import { SiteHeader } from "@/components/marketing/site-header";
 import { SiteFooter } from "@/components/marketing/site-footer";
 import { SectionHeading } from "@/components/marketing/section-heading";
 import { BrandCard } from "@/components/marketing/brand-card";
+import { EntityCard } from "@/components/marketing/entity-card";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
 
@@ -14,12 +18,16 @@ import { Button } from "@/components/ui/button";
 export const revalidate = 300;
 
 export default async function HomePage() {
-  const [featured, newest, trending, categories] = await Promise.all([
-    brandsService.getFeatured(),
-    brandsService.getNewest(),
-    brandsService.getTrending(),
-    categoriesService.list(),
-  ]);
+  const [featured, newest, trending, categories, startups, founders, creators] =
+    await Promise.all([
+      brandsService.getFeatured(),
+      brandsService.getNewest(),
+      brandsService.getTrending(),
+      categoriesService.list(),
+      startupsService.getFeatured(4),
+      foundersService.getFeatured(3),
+      creatorsService.getFeatured(4),
+    ]);
 
   return (
     <>
@@ -94,28 +102,69 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* Startup Spotlight — placeholder until the startups collection/service exists (M4) */}
+        {/* Startup Spotlight */}
         <section className="mx-auto w-full max-w-6xl px-6 py-16">
-          <SectionHeading kicker="Startups" title="Startup spotlight" />
+          <SectionHeading
+            kicker="Startups"
+            title="Startup spotlight"
+            action={
+              <Button asChild variant="ghost">
+                <Link href="/startups">
+                  View all <ArrowRight className="size-4" />
+                </Link>
+              </Button>
+            }
+          />
           <div className="mt-8">
-            <EmptyState
-              icon={<Rocket className="size-6" />}
-              title="Startup profiles are coming soon"
-              description="We're building out startup spotlights next."
-            />
+            {startups.length ? (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                {startups.map((startup) => (
+                  <EntityCard
+                    key={startup.id}
+                    href={`/startups/${startup.slug}`}
+                    imageUrl={startup.coverImageUrl}
+                    title={startup.name}
+                    subtitle={startup.tagline}
+                    meta={startup.location}
+                    ctaLabel="View startup"
+                  />
+                ))}
+              </div>
+            ) : (
+              <EmptyState
+                title="Startup profiles are coming soon"
+                description="We're building out startup spotlights next."
+              />
+            )}
           </div>
         </section>
 
-        {/* Founder Stories — placeholder until the founders collection/service exists (M4) */}
+        {/* Founder Stories */}
         <section className="border-t border-border bg-surface-muted/50">
           <div className="mx-auto w-full max-w-6xl px-6 py-16">
             <SectionHeading kicker="Founders" title="Founder stories" />
             <div className="mt-8">
-              <EmptyState
-                icon={<BookOpen className="size-6" />}
-                title="Founder stories are coming soon"
-                description="Real stories from the people building these brands."
-              />
+              {founders.length ? (
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {founders.map((founder) => (
+                    <EntityCard
+                      key={founder.id}
+                      href={`/founders/${founder.slug}`}
+                      imageUrl={founder.photoUrl}
+                      imageShape="circle"
+                      title={founder.name}
+                      subtitle={founder.role}
+                      meta={founder.location}
+                      ctaLabel="Read their story"
+                    />
+                  ))}
+                </div>
+              ) : (
+                <EmptyState
+                  title="Founder stories are coming soon"
+                  description="Real stories from the people building these brands."
+                />
+              )}
             </div>
           </div>
         </section>
@@ -188,11 +237,38 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* Creator Spotlight — placeholder until the creators collection/service exists (M4) */}
+        {/* Creator Spotlight */}
         <section className="mx-auto w-full max-w-6xl px-6 py-16">
-          <SectionHeading kicker="Creators" title="Creator spotlight" />
+          <SectionHeading
+            kicker="Creators"
+            title="Creator spotlight"
+            action={
+              <Button asChild variant="ghost">
+                <Link href="/creators">
+                  View all <ArrowRight className="size-4" />
+                </Link>
+              </Button>
+            }
+          />
           <div className="mt-8">
-            <EmptyState icon={<Users className="size-6" />} title="Creator profiles are coming soon" />
+            {creators.length ? (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                {creators.map((creator) => (
+                  <EntityCard
+                    key={creator.id}
+                    href={`/creators/${creator.slug}`}
+                    imageUrl={creator.photoUrl}
+                    imageShape="circle"
+                    title={creator.name}
+                    subtitle={creator.tagline}
+                    meta={creator.location}
+                    ctaLabel="View profile"
+                  />
+                ))}
+              </div>
+            ) : (
+              <EmptyState title="Creator profiles are coming soon" />
+            )}
           </div>
         </section>
 

@@ -112,6 +112,18 @@ export const brandsService = {
     return snap.empty ? null : toBrand(snap.docs[0]!);
   },
 
+  // Cross-links (e.g. a founder's associated brands) reference brand doc
+  // IDs, not slugs — fetch by ID directly rather than one query per ID.
+  async getByIds(ids: string[]): Promise<Brand[]> {
+    if (!ids.length) return [];
+    const db = getAdminFirestore();
+    const refs = ids.map((id) => db.collection(COLLECTION).doc(id));
+    const snaps = await db.getAll(...refs);
+    return snaps
+      .filter((snap) => snap.exists && snap.data()?.status === "published")
+      .map((snap) => toBrand(snap as FirebaseFirestore.QueryDocumentSnapshot));
+  },
+
   // Backs the Discover page (brief §6: search, category, location, featured,
   // newest — deliberately not overbuilt beyond that). Firestore has no
   // full-text search, so `q`/`location` are filtered in memory over a

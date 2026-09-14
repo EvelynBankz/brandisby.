@@ -61,6 +61,77 @@ const brands = [
   },
 ];
 
+const founders = [
+  {
+    name: "Amara Chukwu",
+    slug: "amara-chukwu",
+    role: "Founder, Fleur De Vie",
+    bio: "Amara started Fleur De Vie after years of formulating skincare for friends and family.",
+    brandIds: ["fleur-de-vie"],
+    location: "Lagos, Nigeria",
+    featured: true,
+    status: "published",
+  },
+  {
+    name: "Tomiwa Adeyemi",
+    slug: "tomiwa-adeyemi",
+    role: "Founder, Sérac",
+    bio: "Tomiwa built Sérac around a simple idea: wellness should fit into a real, busy life.",
+    brandIds: ["serac"],
+    location: "Lagos, Nigeria",
+    featured: true,
+    status: "published",
+  },
+];
+
+const startups = [
+  {
+    name: "PayLink",
+    slug: "paylink",
+    tagline: "Payments infrastructure for African merchants.",
+    description: "PayLink helps small businesses accept payments online and in person.",
+    categoryIds: ["technology"],
+    location: "Lagos, Nigeria",
+    founderIds: [],
+    featured: true,
+    status: "published",
+  },
+  {
+    name: "FarmTrack",
+    slug: "farmtrack",
+    tagline: "Supply chain visibility for smallholder farmers.",
+    description: "FarmTrack connects farmers directly with buyers and tracks produce from farm to market.",
+    categoryIds: ["technology", "lifestyle"],
+    location: "Ibadan, Nigeria",
+    founderIds: [],
+    featured: true,
+    status: "published",
+  },
+];
+
+const creators = [
+  {
+    name: "Chidinma Vibes",
+    slug: "chidinma-vibes",
+    tagline: "Style, culture, and everyday Lagos life.",
+    bio: "Chidinma covers style and culture across Lagos through video and photo essays.",
+    categoryIds: ["fashion", "lifestyle"],
+    location: "Lagos, Nigeria",
+    featured: true,
+    status: "published",
+  },
+  {
+    name: "Lagos Foodie",
+    slug: "lagos-foodie",
+    tagline: "Finding Nigeria's best food, one plate at a time.",
+    bio: "A running guide to the restaurants, street food, and home cooks worth knowing about.",
+    categoryIds: ["lifestyle"],
+    location: "Lagos, Nigeria",
+    featured: true,
+    status: "published",
+  },
+];
+
 async function seed() {
   for (const category of categories) {
     await db.collection("categories").doc(category.slug).set(category);
@@ -74,6 +145,30 @@ async function seed() {
       .set({ ...brand, createdAt: Timestamp.now() });
   }
   console.log(`Seeded ${brands.length} brands.`);
+
+  for (const founder of founders) {
+    await db
+      .collection("founders")
+      .doc(founder.slug)
+      .set({ ...founder, createdAt: Timestamp.now() });
+  }
+  console.log(`Seeded ${founders.length} founders.`);
+
+  for (const startup of startups) {
+    await db
+      .collection("startups")
+      .doc(startup.slug)
+      .set({ ...startup, createdAt: Timestamp.now() });
+  }
+  console.log(`Seeded ${startups.length} startups.`);
+
+  for (const creator of creators) {
+    await db
+      .collection("creators")
+      .doc(creator.slug)
+      .set({ ...creator, createdAt: Timestamp.now() });
+  }
+  console.log(`Seeded ${creators.length} creators.`);
 }
 
 seed()

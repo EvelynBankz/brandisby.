@@ -16,8 +16,8 @@ Current plan, per the "BRANDISBY — FIREBASE TEST-MODE BUILD BRIEF." Brandisby 
 
 One real bug found and fixed: the in-memory search/location filter in `brandsService.search()` was case-insensitive but not diacritic-insensitive, so searching "serac" didn't match "Sérac" — fixed by normalizing both sides through Unicode NFD decomposition + stripping combining marks before comparing (covered by a new test).
 
-**M4 — Founders + startups + creators**
-`src/services/founders.ts`, `startups.ts`, `creators.ts` + their profile pages (`/founders/[slug]`, `/startups/[slug]`, `/creators/[slug]`). Wires the homepage's Founder Stories / Startup Spotlight / Creator Spotlight sections to real data, replacing the M2 empty states.
+**M4 — Founders + startups + creators** ✅ done
+`src/services/founders.ts`, `startups.ts`, `creators.ts` (each with `list()`/`getFeatured()`/`getBySlug()`; `founders`/`brands` also get a `getByIds()` for cross-linking) + their profile pages (`/founders/[slug]`, `/startups/[slug]`, `/creators/[slug]`) and index pages (`/founders`, `/startups`, `/creators` — plain grids, no filters, closing out the nav 404s flagged since M2). Wires the homepage's Founder Stories / Startup Spotlight / Creator Spotlight sections to real data via a new shared `EntityCard` component, replacing the M2 empty states. A founder's page shows the brand(s) they founded (and vice versa on the startup page) via the new `getByIds()` lookups. `firestore.indexes.json` updated with the composite indexes `startups`/`founders`/`creators`' `list()` queries need; `firestore.rules` needed no changes (already had matching rules for these collections from M1). Seed script extended with 2 founders, 2 startups, and 2 creators.
 
 **M5 — Journal/blog**
 `src/services/articles.ts`, `/journal` index + `/journal/[slug]` article pages, rich-text article body, SEO fields (title/description/OG image), related brand/founder/creator links. Wires the homepage's Journal section to real data.

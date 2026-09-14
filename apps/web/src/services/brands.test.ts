@@ -46,6 +46,29 @@ describe("brandsService", () => {
     expect(await brandsService.getBySlug("does-not-exist")).toBeNull();
   });
 
+  it("fetches published brands by ID and excludes drafts/missing IDs", async () => {
+    const db = getAdminFirestore();
+    const draftId = `test-getbyids-draft-${suffix}`;
+    await db.collection("brands").doc(draftId).set({
+      name: "Test GetByIds Draft",
+      slug: draftId,
+      description: "Not published yet",
+      categoryIds: [],
+      featured: false,
+      trending: false,
+      status: "draft",
+      createdAt: new Date(),
+    });
+
+    const byIds = await brandsService.getByIds([featuredSlug, draftId, "does-not-exist"]);
+    expect(byIds.some((b) => b.slug === featuredSlug)).toBe(true);
+    expect(byIds.some((b) => b.slug === draftId)).toBe(false);
+    expect(byIds).toHaveLength(1);
+    expect(await brandsService.getByIds([])).toEqual([]);
+
+    await db.collection("brands").doc(draftId).delete();
+  });
+
   it("lists featured and trending brands separately", async () => {
     const db = getAdminFirestore();
     await db.collection("brands").doc(trendingSlug).set({
