@@ -1,5 +1,12 @@
 # Brandisby — Existing Codebase Audit
 
+**Historical record.** The legacy static site audited below (`index.html`,
+`pages/`, `css/`, `js/`, `api/`) was deleted from this repository in the
+restructure documented at `docs/decisions/004-repo-restructure.md` — Sérac
+and Fleur De Vie's actual live sites turned out to live in a separate
+repository, unaffected by this. This audit remains an accurate description
+of what that code was, for anyone who needs the history.
+
 Date: 2026-09-12
 Scope: audit of the repository as of commit `25a504e` (branch `main`), performed against the target architecture in the Brandisby engineering brief and product brief. This is the mandatory "audit before rebuilding" step — no large-scale implementation has started yet.
 

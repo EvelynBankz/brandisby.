@@ -2,22 +2,16 @@ name: web CI
 
 on:
   pull_request:
-    paths:
-      - "apps/web/**"
-      - ".github/workflows/web-ci.yml"
   push:
     branches:
       - main
-    paths:
-      - "apps/web/**"
-      - ".github/workflows/web-ci.yml"
 
 env:
   NEXT_TELEMETRY_DISABLED: "1"
   # Demo Firebase project — never real Firebase credentials or data. See
-  # docs/roadmap.md's standing constraint: this workflow must never be given
-  # credentials for the existing Firebase project; everything here runs
-  # against the local Auth/Firestore emulators.
+  # docs/discovery-platform-roadmap.md's standing rules: this workflow must
+  # never be given credentials for the real Firebase project; everything
+  # here runs against the local Auth/Firestore emulators.
   FIREBASE_PROJECT_ID: "demo-brandisby"
   FIREBASE_AUTH_EMULATOR_HOST: "127.0.0.1:9099"
   FIRESTORE_EMULATOR_HOST: "127.0.0.1:8080"
@@ -32,9 +26,6 @@ jobs:
   checks:
     name: typecheck, lint, test, build
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/web
     steps:
       - uses: actions/checkout@v4
 
@@ -42,7 +33,7 @@ jobs:
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: apps/web/package-lock.json
+          cache-dependency-path: package-lock.json
 
       # The Firestore emulator (used by `npm run test` and the build step
       # below) requires Java 21+; the runner's default JDK is older.
